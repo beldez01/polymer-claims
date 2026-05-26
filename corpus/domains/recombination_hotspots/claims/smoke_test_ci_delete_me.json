@@ -1,0 +1,205 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "smoke_test_ci_delete_me",
+  "exp_number": 17,
+  "title": "[SMOKE TEST] Pre-registration falsified: 1 Mb biophysics-vs-recombination is NOT just an isochore rediscovery — observed signals exceed all pre-registered null thresholds",
+  "posted_at": "2026-04-03",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-03",
+  "version": "1.0.0",
+  "domain": "other",
+  "subject": {
+    "kind": "literal",
+    "id": "literal:migration/1.0.0/17",
+    "display": "Pre-registration falsified: 1 Mb biophysics-vs-recombination is NOT just an isochore rediscovery — observed signals exceed all pre-registered null thresholds",
+    "prose": "Migrated from v1.1 as a literal subject because the claim was marked withdrawn/falsified at migration time. Re-author with a typed subject when resuming.",
+    "structured": {
+      "migration_source": "v1.1",
+      "note": "literal wrap chosen due to withdrawn/falsified status"
+    }
+  },
+  "context": {
+    "free_form": "migrated from v1.1 without domain-specific context"
+  },
+  "premises": [
+    {
+      "id": "p_pre_registered_thresholds",
+      "source": {
+        "layer": "exp17_pre_registration_thresholds",
+        "version": "exp17_design_v1_2026_04_02",
+        "provenance_state": "local_rds",
+        "note": "Pre-registered hypothesis-collapse thresholds from DESIGN.md /neg observation #1: the team expected 1 Mb to only confirm Bernardi isochores, with partial r < 0.05 for non-GC features and ΔAUROC < 0.05 for the RF model."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "registration_id",
+        "op": "=",
+        "rhs": "exp17_neg01_isochore_rediscovery"
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_observed_results",
+      "source": {
+        "layer": "exp17_executed_analyses_summary",
+        "version": "exp17_a1_through_a6_2026_04_03",
+        "provenance_state": "local_rds",
+        "note": "Headline statistics from RESULT.md A1, A2, A6 — the analyses that bear on the isochore-rediscovery prediction."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "analysis_id",
+        "op": "in",
+        "rhs": [
+          "a1",
+          "a2",
+          "a6"
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_filter_to_a1_max_partial",
+      "kind": "filter",
+      "inputs": [
+        "p_observed_results"
+      ],
+      "predicate": {
+        "kind": "cmp",
+        "col": "analysis_id",
+        "op": "=",
+        "rhs": "a1"
+      }
+    },
+    {
+      "id": "o_filter_to_a6_delta_auroc",
+      "kind": "filter",
+      "inputs": [
+        "p_observed_results"
+      ],
+      "predicate": {
+        "kind": "cmp",
+        "col": "analysis_id",
+        "op": "=",
+        "rhs": "a6"
+      }
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_a1_max_partial_r_observed",
+      "produced_by": "o_filter_to_a1_max_partial",
+      "name": "a1_max_abs_partial_r_after_gc_observed",
+      "value": 0.37,
+      "evidence_class": "S",
+      "note": "Maximum |partial r| across the 64 biophysical features after GC residualization (NCO x cpg_density). Pre-registered ceiling under isochore-rediscovery null was 0.05."
+    },
+    {
+      "id": "s_a1_pre_registered_ceiling",
+      "produced_by": "o_filter_to_a1_max_partial",
+      "name": "a1_pre_registered_max_partial_r_under_null",
+      "value": 0.05,
+      "evidence_class": "K",
+      "note": "From DESIGN.md H1: 'partial r < 0.05 — confirmatory of GC dominance at this scale.'"
+    },
+    {
+      "id": "s_a6_delta_auroc_observed",
+      "produced_by": "o_filter_to_a6_delta_auroc",
+      "name": "a6_delta_auroc_m2_minus_m0_observed",
+      "value": 0.128,
+      "evidence_class": "S",
+      "note": "From the canonical exp17 fixture: M2 (biophys-minus-GC) AUROC 0.827 vs M0 (GC-only) 0.700."
+    },
+    {
+      "id": "s_a6_pre_registered_ceiling",
+      "produced_by": "o_filter_to_a6_delta_auroc",
+      "name": "a6_pre_registered_max_delta_auroc_under_null",
+      "value": 0.05,
+      "evidence_class": "K",
+      "note": "From DESIGN.md Pass/Fail: 'STRONG positive: ΔAUROC > 0.05 OR translocation enrichment > 2x.' Below 0.05 was implicitly the null."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_a1_max_partial_r_observed"
+          },
+          "op": ">",
+          "rhs": {
+            "stat_id": "s_a1_pre_registered_ceiling"
+          }
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_a6_delta_auroc_observed"
+          },
+          "op": ">",
+          "rhs": {
+            "stat_id": "s_a6_pre_registered_ceiling"
+          }
+        }
+      ]
+    },
+    "justification": "Two conjuncts: observed values must exceed BOTH pre-registered ceilings — A1 partial r and A6 ΔAUROC. The conjunction structurally licenses the supersession of the isochore-rediscovery hypothesis. Note: the conclusion outcome is 'negative' because what is being negated is the pre-registered HYPOTHESIS, not the observed result. The observed result is itself strongly positive (and lives in the canonical exp17 fixture); this claim is the meta-observation that the 1 Mb isochore-rediscovery null was wrong.",
+    "failure_mode": "If either observed value fell at or below its pre-registered ceiling, the isochore-rediscovery null would have held and the canonical exp17 result would need a different framing."
+  },
+  "conclusion": {
+    "assertion": "The pre-registered hypothesis (DESIGN.md /neg #1: at 1 Mb resolution, biophysics-recombination is just isochore rediscovery; partial r < 0.05; ΔAUROC < 0.05) is FALSIFIED. Observed: max |partial r| = 0.37 (7.4-fold above ceiling), ΔAUROC(M2-M0) = +0.128 (2.6-fold above ceiling). The 1 Mb scale carries massive non-isochore signal; sub-1-Mb extensions are bonus, not required.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "exp17_pre_registration_thresholds",
+          "version": "exp17_design_v1_2026_04_02",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "exp17_executed_analyses_summary",
+          "version": "exp17_a1_through_a6_2026_04_03",
+          "provenance_state": "local_rds"
+        }
+      ],
+      "restrictions": {
+        "kind": "cmp",
+        "col": "registration_id",
+        "op": "=",
+        "rhs": "exp17_neg01_isochore_rediscovery"
+      },
+      "scale_note": "Meta-claim about a pre-registered null. The claim being falsified is an EXPECTATION; the observed result lives in the canonical exp17 fixture (depended on)."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Confidence reflects the magnitude of the observation-vs-pre-registration gap, not a statistical test."
+    },
+    "outcome": "negative"
+  },
+  "depends_on": [
+    "exp17_formal_claim"
+  ],
+  "external_assumptions": [
+    {
+      "statement": "The DESIGN.md pre-registration ceilings (partial r < 0.05, ΔAUROC < 0.05) are good-faith null expectations, not strawmen. /neg observation #1 documented them before the analyses were run.",
+      "kind": "design_choice",
+      "citation": "internal/InSilico/recombination hotspots/provenance/exp17_crossover_hotspot/DESIGN.md",
+      "confidence": 0.95
+    },
+    {
+      "statement": "This claim supersedes the pre-registered isochore-rediscovery hypothesis. v1.1 schema has no first-class supersedes/superseded_by field; the supersession relationship is documented in recombination hotspots/claims/README.md (claim 10) until v1.2.",
+      "kind": "design_choice",
+      "citation": "internal/InSilico/recombination hotspots/claims/README.md",
+      "confidence": 0.95
+    }
+  ],
+  "notebook": "internal/InSilico/recombination hotspots/provenance/exp17_crossover_hotspot/RESULT.md"
+}
