@@ -33,13 +33,14 @@ def main() -> int:
         )
         return 1
 
-    # MCP server scaffold. Implementation of tools lands when the evaluator
-    # submodule is synced into this package — see README "Sync from monorepo".
+    # MCP server scaffold — exposes no tools yet. The validate / evaluate /
+    # search-corpus tool surface advertised by the claim-harness plugin is not
+    # yet implemented here (tracked follow-up).
     server = Server("polymer-formalclaim")
 
     @server.list_tools()  # type: ignore[misc]
     async def _list_tools() -> list:
-        return []  # populated when evaluator is synced
+        return []  # no tools implemented yet
 
     import anyio  # mcp already depends on anyio
 

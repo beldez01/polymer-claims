@@ -33,8 +33,7 @@ What is NOT in the MVP
   a follow-up once we see which consumers actually want it.
 * Round-trip parsing (TriG → FormalClaim). One-way for now.
 
-A single fixture round-trips under ``nanopub check-signature`` locally
-during CI — see ``tests/test_formal_claims_nanopub.py``.
+Emission is deterministic: re-emitting the same claim yields byte-identical TriG.
 """
 
 from __future__ import annotations

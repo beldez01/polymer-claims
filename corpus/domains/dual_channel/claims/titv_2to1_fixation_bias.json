@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "$schema": "../../../schema/formal_claim_v1.2.schema.json",
   "schema_version": "v1.2",
   "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
   "title": "Descriptive: human fixed substitutions show ~2:1 transition/transversion ratio, ~3.4-fold enriched over the unselected germline mutational input",

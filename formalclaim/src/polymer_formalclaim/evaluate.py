@@ -10,33 +10,27 @@ Scope
 -----
 * **Inference-only evaluation** from ``Statistic.value`` pinned in the
   fixture. Full AND / OR / NOT / CMP semantics with three-valued logic
-  (true / false / null → PENDING), matching the viewer-side evaluator in
-  ``viewer/src/lib/formalClaimsHelpers.ts``. ``StatRef.transform`` (abs /
-  neg / log) on both sides of a cmp, and ``cmp.rhs`` as either a scalar
-  or a :class:`StatRef` (stat-vs-stat).
+  (true / false / null → PENDING). ``StatRef.transform`` (abs / neg /
+  log) on both sides of a cmp, and ``cmp.rhs`` as either a scalar or a
+  :class:`StatRef` (stat-vs-stat).
 * **Materialization mode (v0.2)** — when an ``api_client`` is supplied,
-  :func:`evaluate` delegates to
-  :mod:`polymer_genomics.formal_claims.materialize`, which gates on
-  premise provenance, dispatches each ``EstimatorOp.estimator.impl`` by
-  prefix through a registry, collects computed statistics, and emits a
-  :class:`StatDrift` record per materialized stat. The registry ships
-  with an in-process identity handler and recognized (but not yet
-  implemented) prefixes for ``scipy.stats.*``, ``python::sklearn.*``,
-  ``R::*``. Individual adapter handlers land incrementally without
-  touching the public API.
-* CLI: ``python -m polymer_genomics.formal_claims.evaluate`` walks every
-  fixture under ``internal/epistemic_os/fixtures/`` and
-  ``internal/InSilico/**/claims/``, writing one
-  ``<fixture>.evaluation.json`` sibling per claim.
+  :func:`evaluate` delegates to :mod:`polymer_formalclaim.materialize`,
+  which gates on premise provenance, dispatches each
+  ``EstimatorOp.estimator.impl`` by prefix through a registry, collects
+  computed statistics, and emits a :class:`StatDrift` record per
+  materialized stat. The registry ships with an in-process identity
+  handler and recognized (but not yet implemented) prefixes for
+  ``scipy.stats.*``, ``python::sklearn.*``, ``R::*``. Individual adapter
+  handlers land incrementally without touching the public API.
+
+Batch corpus evaluation is done by the corpus CI wrapper
+(``corpus/evaluator/run_evaluator.py``), not by this module.
 """
 
 from __future__ import annotations
 
-import json
 import math
-import sys
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
@@ -323,87 +317,3 @@ def evaluate(claim: FormalClaim, *, api_client: object | None = None) -> Evaluat
         api_version=claim.api_version,
         data_version=claim.data_version,
     )
-
-
-# Legacy stub removed: materialization is now implemented in
-# ``polymer_genomics.formal_claims.materialize`` and invoked by ``evaluate``
-# when ``api_client`` is provided.
-
-
-# ---------------------------------------------------------------------------
-# CLI — walk every fixture and write the sibling evaluation file
-# ---------------------------------------------------------------------------
-
-
-def _repo_root() -> Path:
-    # src/polymer_genomics/formal_claims/evaluate.py → up 3 gets the repo root
-    return Path(__file__).resolve().parents[3]
-
-
-def walk_fixtures(root: Path | None = None) -> list[Path]:
-    """Return every FormalClaim fixture on disk.
-
-    Mirrors the loader in ``viewer/src/app/dev/claim/[id]/page.tsx``:
-      1. ``internal/epistemic_os/fixtures/*.json`` (legacy)
-      2. any ``claims/*.json`` directory under ``internal/InSilico`` — the
-         viewer walker recurses until it finds a directory literally named
-         ``claims`` at any depth (RC experiments sit under
-         ``InSilico/RC/<experiment>/claims/``).
-    """
-    root = root or _repo_root()
-
-    def _not_evaluation(p: Path) -> bool:
-        return not p.name.endswith(".evaluation.json")
-
-    found: list[Path] = []
-    legacy = root / "internal" / "epistemic_os" / "fixtures"
-    if legacy.is_dir():
-        found.extend(sorted(p for p in legacy.glob("*.json") if _not_evaluation(p)))
-    insilico = root / "internal" / "InSilico"
-    if insilico.is_dir():
-        found.extend(
-            sorted(p for p in insilico.glob("**/claims/*.json") if _not_evaluation(p))
-        )
-    return found
-
-
-def _write_evaluation_sibling(fixture_path: Path, result: EvaluationResult) -> Path:
-    out_path = fixture_path.with_name(fixture_path.stem + ".evaluation.json")
-    out_path.write_text(result.model_dump_json(indent=2) + "\n")
-    return out_path
-
-
-def main(argv: list[str] | None = None) -> int:
-    argv = argv if argv is not None else sys.argv[1:]
-    root = Path(argv[0]) if argv else _repo_root()
-
-    fixtures = walk_fixtures(root)
-    if not fixtures:
-        print("No fixtures found under", root, file=sys.stderr)
-        return 1
-
-    counts = {"LICENSED": 0, "REJECTED": 0, "PENDING": 0}
-    skipped = 0
-    for fixture in fixtures:
-        try:
-            claim = FormalClaim.model_validate(json.loads(fixture.read_text()))
-        except Exception as exc:
-            skipped += 1
-            print(f"[SKIP] {fixture.relative_to(root)}: {type(exc).__name__}: {str(exc)[:200]}")
-            continue
-        result = evaluate(claim)
-        _write_evaluation_sibling(fixture, result)
-        counts[result.verdict] += 1
-        print(f"{result.verdict:9s}  {fixture.relative_to(root)}")
-
-    total = sum(counts.values())
-    print(
-        f"\n{counts['LICENSED']} LICENSED, {counts['REJECTED']} REJECTED, "
-        f"{counts['PENDING']} PENDING across {total} fixtures"
-        + (f" ({skipped} skipped)" if skipped else "")
-    )
-    return 0
-
-
-if __name__ == "__main__":  # pragma: no cover
-    sys.exit(main())

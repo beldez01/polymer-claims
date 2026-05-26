@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "$schema": "../../../schema/formal_claim_v1.2.schema.json",
   "schema_version": "v1.2",
   "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
   "title": "COSMIC v3.4 SBS signatures rank by mean thermodynamic perturbation; clinical signatures (SBS1 aging, SBS2/13 APOBEC, SBS4 smoking, SBS7 UV) span the loudness spectrum",

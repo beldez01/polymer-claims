@@ -46,7 +46,7 @@ the [`beldez01/polymer-claims`](https://github.com/beldez01/polymer-claims) mono
 PyPI from there:
 
 1. Push a `formalclaim-v<semver>` tag.
-2. `.github/workflows/publish-formalclaim.yml` fires (path-filtered to `formalclaim/**`).
+2. `.github/workflows/publish-formalclaim.yml` fires (triggered by the tag).
 3. `uv build` → wheel + sdist.
 4. `pypa/gh-action-pypi-publish` with PyPI **Trusted Publishing** (OIDC, no API token stored).
 

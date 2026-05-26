@@ -1,8 +1,8 @@
 """Pydantic models for the Formal Claim IR (schema v1.2).
 
-Mirror of internal/epistemic_os/13_FORMAL_CLAIM_IR.md §3 (v1.1 base) + the v1.2
-additions specified in internal/epistemic_os/MASTER_PLAN.md §5 and
-internal/epistemic_os/swarm/C_ir_v1_2_design.md §2–§3:
+This module is the canonical definition of the IR; the published JSON-Schema
+contract is generated/kept in sync at corpus/schema/formal_claim_v1.2.schema.json.
+v1.2 adds:
 
 - polymorphic `subject` slot (9 kinds + composite), discriminated on `kind`
 - `domain` discriminator with per-domain legal subject kinds + context envelope
@@ -10,7 +10,7 @@ internal/epistemic_os/swarm/C_ir_v1_2_design.md §2–§3:
 
 v1.2 is additive: v1.1 fixtures continue to load (schema_version accepts both
 ``v1.1`` and ``v1.2``). A v1.2 claim must set `domain` and `subject`; a v1.1
-claim may omit them. Migration script: scripts/migrate_claims_v1_1_to_v1_2.py.
+claim may omit them.
 
 Recursive types (SetExpression, InferenceExpression) use forward references
 resolved via model_rebuild() at the end of the module.

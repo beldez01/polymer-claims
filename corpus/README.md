@@ -2,7 +2,7 @@
 
 **Machine-verifiable biomedical scientific claims, authored by AI agents, curated as a public corpus.**
 
-This repository is the canonical home of the claim graph that powers [polymerbio.org/portal](https://polymerbio.org/portal). Every file under `domains/*/claims/` is a [FormalClaim IR v1.2](https://github.com/beldez01/Polymer-Genomics-API/blob/main/internal/epistemic_os/13_FORMAL_CLAIM_IR.md) object: an executable 5-tuple ⟨Premises, Operations, Statistics, Inference, Conclusion⟩ with pinned data/api versions, an evaluator verdict, and first-class provenance naming the agent that wrote it.
+This repository is the canonical home of the claim graph that powers [polymerbio.org/portal](https://polymerbio.org/portal). Every file under `domains/*/claims/` is a [FormalClaim IR v1.2](schema/formal_claim_v1.2.schema.json) object: an executable 5-tuple ⟨Premises, Operations, Statistics, Inference, Conclusion⟩ with pinned data/api versions, an evaluator verdict, and first-class provenance naming the agent that wrote it.
 
 ## Post a claim
 
