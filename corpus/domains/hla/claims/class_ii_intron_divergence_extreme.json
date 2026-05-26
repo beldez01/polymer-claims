@@ -1,0 +1,383 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 26,
+  "title": "Class II HLA loci accumulate non-coding substitutions at 9.8–17.9× the coding rate (DPB1 peak); DRB1 non-coding identity against reference is only 40.6%",
+  "posted_at": "2026-04-19",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-19",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/class_ii_intron_divergence_extreme",
+    "display": "Migration cohort for 'Class II HLA loci accumulate non-coding substitutions at 9.8–17.9× the coding ra'",
+    "definition": {
+      "source_dataset": {
+        "name": "IPD-IMGT/HLA",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "extra": {
+          "first_premise_layer": "hla_alleles_genomic_sequences"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/class_ii_intron_divergence_extreme",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_hla_4field_alleles_6loci",
+      "source": {
+        "layer": "hla_alleles_genomic_sequences",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "provenance_state": "fly_postgres",
+        "note": "4-field IPD-IMGT/HLA alleles for the three Class I (HLA-A/B/C) and three Class II (HLA-DRB1/DQB1/DPB1) loci. Coding vs non-coding regions are partitioned per the IPD-IMGT/HLA GFF3 annotations."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "locus",
+        "op": "in",
+        "rhs": [
+          "HLA-A",
+          "HLA-B",
+          "HLA-C",
+          "HLA-DRB1",
+          "HLA-DQB1",
+          "HLA-DPB1"
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_per_locus_reference_alleles",
+      "source": {
+        "layer": "hla_reference_alleles_01_01_01_01",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "provenance_state": "fly_postgres",
+        "note": "Per-locus *01:01:01:01 reference allele used as the divergence baseline. All other alleles are compared per-bp to this reference in both coding and non-coding regions."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "is_reference_01_01_01_01",
+        "op": "=",
+        "rhs": true
+      },
+      "cardinality": 6,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_per_allele_substitution_rates",
+      "kind": "estimator",
+      "inputs": [
+        "p_hla_4field_alleles_6loci",
+        "p_per_locus_reference_alleles"
+      ],
+      "estimator": {
+        "name": "per_bp_substitution_rate_vs_reference",
+        "impl": "python::polymer_genomics.stats.per_bp_substitution_rate",
+        "version": "polymer_genomics@0.3.x",
+        "features": {
+          "label": "coding_vs_noncoding_partition",
+          "select": [
+            "region_partition"
+          ]
+        },
+        "params": {
+          "partition": [
+            "coding",
+            "noncoding"
+          ],
+          "aggregate": "mean_across_alleles"
+        }
+      }
+    },
+    {
+      "id": "o_per_locus_nc_to_coding_ratio",
+      "kind": "aggregate",
+      "inputs": [
+        "o_per_allele_substitution_rates"
+      ],
+      "by": [
+        "locus"
+      ],
+      "agg": [
+        {
+          "col": "nc_over_coding_ratio",
+          "fn": "mean",
+          "na_rm": true
+        }
+      ],
+      "note": "NC/coding fold = (mean non-coding substitution %) / (mean coding substitution %) per locus."
+    },
+    {
+      "id": "o_drb1_nc_identity",
+      "kind": "filter",
+      "inputs": [
+        "o_per_allele_substitution_rates"
+      ],
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "=",
+            "rhs": "HLA-DRB1"
+          },
+          {
+            "kind": "cmp",
+            "col": "region_partition",
+            "op": "=",
+            "rhs": "noncoding"
+          }
+        ]
+      },
+      "note": "Isolate DRB1 non-coding identity against reference. 1 − 0.594 = 0.406 (40.6% identity)."
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_per_locus_nc_rate_pct",
+      "produced_by": "o_per_allele_substitution_rates",
+      "name": "per_locus_mean_noncoding_substitution_rate_pct",
+      "value": [
+        {
+          "label": "HLA-A_nc_rate_pct",
+          "value": 21.1
+        },
+        {
+          "label": "HLA-B_nc_rate_pct",
+          "value": 24.1
+        },
+        {
+          "label": "HLA-C_nc_rate_pct",
+          "value": 13.3
+        },
+        {
+          "label": "HLA-DRB1_nc_rate_pct",
+          "value": 59.4
+        },
+        {
+          "label": "HLA-DQB1_nc_rate_pct",
+          "value": 54.9
+        },
+        {
+          "label": "HLA-DPB1_nc_rate_pct",
+          "value": 40.5
+        }
+      ],
+      "n": 6,
+      "evidence_class": "S",
+      "note": "Per-bp non-coding substitution rate against *01:01:01:01 reference, averaged across alleles. Class I: 13.3–24.1%. Class II: 40.5–59.4%."
+    },
+    {
+      "id": "s_per_locus_coding_rate_pct",
+      "produced_by": "o_per_allele_substitution_rates",
+      "name": "per_locus_mean_coding_substitution_rate_pct",
+      "value": [
+        {
+          "label": "HLA-A_coding_rate_pct",
+          "value": 3.7
+        },
+        {
+          "label": "HLA-B_coding_rate_pct",
+          "value": 5.8
+        },
+        {
+          "label": "HLA-C_coding_rate_pct",
+          "value": 4.9
+        },
+        {
+          "label": "HLA-DRB1_coding_rate_pct",
+          "value": 5.1
+        },
+        {
+          "label": "HLA-DQB1_coding_rate_pct",
+          "value": 5.6
+        },
+        {
+          "label": "HLA-DPB1_coding_rate_pct",
+          "value": 2.3
+        }
+      ],
+      "n": 6,
+      "evidence_class": "S",
+      "note": "Per-bp coding substitution rate. Class II DPB1 is notably low at 2.3% — the class minimum."
+    },
+    {
+      "id": "s_per_locus_nc_over_coding_fold",
+      "produced_by": "o_per_locus_nc_to_coding_ratio",
+      "name": "per_locus_nc_over_coding_fold",
+      "value": [
+        {
+          "label": "HLA-A",
+          "value": 5.6
+        },
+        {
+          "label": "HLA-B",
+          "value": 4.1
+        },
+        {
+          "label": "HLA-C",
+          "value": 2.7
+        },
+        {
+          "label": "HLA-DRB1",
+          "value": 11.6
+        },
+        {
+          "label": "HLA-DQB1",
+          "value": 9.8
+        },
+        {
+          "label": "HLA-DPB1",
+          "value": 17.9
+        }
+      ],
+      "n": 6,
+      "evidence_class": "D",
+      "note": "NC/coding fold ratio. Class I range 2.7–5.6×. Class II range 9.8–17.9×. DPB1's 17.9× is the extremum and reflects the 2.3% coding / 40.5% non-coding combination."
+    },
+    {
+      "id": "s_class_i_min_fold",
+      "produced_by": "o_per_locus_nc_to_coding_ratio",
+      "name": "class_i_min_nc_over_coding_fold",
+      "value": 2.7,
+      "evidence_class": "D",
+      "note": "HLA-C is the Class I minimum."
+    },
+    {
+      "id": "s_class_ii_min_fold",
+      "produced_by": "o_per_locus_nc_to_coding_ratio",
+      "name": "class_ii_min_nc_over_coding_fold",
+      "value": 9.8,
+      "evidence_class": "D",
+      "note": "HLA-DQB1 is the Class II minimum — still 2× the Class I maximum (5.6)."
+    },
+    {
+      "id": "s_drb1_nc_identity_fraction",
+      "produced_by": "o_drb1_nc_identity",
+      "name": "drb1_nc_identity_vs_reference_fraction",
+      "value": 0.406,
+      "evidence_class": "D",
+      "note": "1 − 0.594 non-coding substitution rate = 0.406 identity. Alleles share barely half their DRB1 non-coding sequence (≈ 12.4 kb of intron)."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_class_ii_min_fold"
+          },
+          "op": ">",
+          "rhs": {
+            "stat_id": "s_class_i_min_fold"
+          }
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_class_ii_min_fold"
+          },
+          "op": ">",
+          "rhs": 8.0
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_drb1_nc_identity_fraction"
+          },
+          "op": "<",
+          "rhs": 0.5
+        }
+      ]
+    },
+    "justification": "Three conjuncts: (1) Class II minimum fold ratio (9.8×) exceeds Class I minimum (2.7×) — stat-vs-stat — establishes the Class I / Class II contrast; (2) Class II min > 8× ensures the gap is substantive rather than marginal (Class I max is 5.6×, so 8× is the conservative separator); (3) DRB1 non-coding identity < 0.5 — alleles share less than half their DRB1 non-coding sequence against the reference, which is the headline 'extreme intronic divergence' claim.",
+    "failure_mode": "If any Class II fold ratio fell into the Class I range (<6×), the 'Class II is extreme' claim softens to 'Class II is somewhat elevated'. If DRB1 non-coding identity rose above 0.5, the 'alleles share more than half their introns' framing would require rewriting."
+  },
+  "conclusion": {
+    "assertion": "Across the six HLA loci, Class I non-coding substitution rates are 2.7–5.6× the coding rate, while Class II loci show 9.8–17.9× — a qualitative break. HLA-DPB1 is the extremum at 17.9× (2.3% coding vs 40.5% non-coding). HLA-DRB1 alleles share only 40.6% non-coding identity against the *01:01:01:01 reference, meaning ~12.4 kb of intronic sequence differs across the allelic landscape. The disparity between coding and non-coding rates at Class II is incompatible with uniform neutral mutation and indicates either strong purifying selection on coding, active non-coding diversification under balancing selection, or both.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "hla_alleles_genomic_sequences",
+          "version": "ipd_imgt_hla_v3.56.0",
+          "provenance_state": "fly_postgres"
+        },
+        {
+          "layer": "hla_reference_alleles_01_01_01_01",
+          "version": "ipd_imgt_hla_v3.56.0",
+          "provenance_state": "fly_postgres"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "in",
+            "rhs": [
+              "HLA-A",
+              "HLA-B",
+              "HLA-C",
+              "HLA-DRB1",
+              "HLA-DQB1",
+              "HLA-DPB1"
+            ]
+          },
+          {
+            "kind": "cmp",
+            "col": "reference_allele_suffix",
+            "op": "=",
+            "rhs": "01:01:01:01"
+          }
+        ]
+      },
+      "scale_note": "Per-locus aggregate claim. Per-region (UTR / intron 1 / intron 2 / …) decomposition exists in the paper's Table 8 but is a separate child fixture."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Per-locus means over allele populations; no inferential p-value pinned — this is a descriptive substitution-rate claim."
+    },
+    "outcome": "positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "*01:01:01:01 is a valid divergence baseline at each locus; alternative references would produce similar fold ratios modulo mild shifts.",
+      "kind": "design_choice",
+      "citation": "Exp26 manuscript § 2.5",
+      "confidence": 0.85
+    },
+    {
+      "statement": "Coding / non-coding partitioning follows the IPD-IMGT/HLA GFF3 annotations; alternative partitions (e.g., excluding UTRs from non-coding) would shift the rates by at most a few percentage points.",
+      "kind": "design_choice",
+      "citation": "Exp26 § Methods",
+      "confidence": 0.9
+    },
+    {
+      "statement": "The observed NC/coding disparity at Class II reflects genuine evolutionary-rate heterogeneity across the locus, not a GC or repeat-density artifact — the same ratios hold after masking repeat-rich intronic regions in a sensitivity analysis (noted in the manuscript Methods).",
+      "kind": "mechanistic",
+      "citation": "Exp26 § 2.5 and Methods",
+      "confidence": 0.75
+    }
+  ],
+  "notebook": "internal/InSilico/HLA experiment/provenance/exp26_hla_allele_diversity/R/04_class_i_vs_ii_substitution_rates.R"
+}

@@ -1,0 +1,367 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 26,
+  "title": "Per-allele (coding, non-coding) substitution-count histograms at each Class I locus partition into 6 GMM components — three recurring archetypes (near-reference core, tight multi-serogroup lineages, null-enriched heterogeneous) recapitulate known serogroup structure",
+  "posted_at": "2026-04-19",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-19",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/histogram_modes_map_to_serological_groups",
+    "display": "Migration cohort for 'Per-allele (coding, non-coding) substitution-count histograms at each Class I lo'",
+    "definition": {
+      "source_dataset": {
+        "name": "IPD-IMGT/HLA",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "extra": {
+          "first_premise_layer": "hla_alleles_genomic_sequences"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/histogram_modes_map_to_serological_groups",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_hla_class_i_4field_alleles",
+      "source": {
+        "layer": "hla_alleles_genomic_sequences",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "provenance_state": "fly_postgres",
+        "note": "4-field Class I alleles with both coding and non-coding substitution counts against the *01:01:01:01 reference. HLA-A 5754, HLA-B 6937, HLA-C 6184 alleles."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "in",
+            "rhs": [
+              "HLA-A",
+              "HLA-B",
+              "HLA-C"
+            ]
+          },
+          {
+            "kind": "cmp",
+            "col": "field_resolution",
+            "op": ">=",
+            "rhs": 4
+          }
+        ]
+      },
+      "cardinality": 18875,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_serogroup_assignments",
+      "source": {
+        "layer": "hla_serogroup_assignments",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "provenance_state": "fly_postgres",
+        "note": "Per-allele WHO-HLA serogroup (1-field nomenclature group, e.g., A1, A2, B7, C1, C2)."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "has_serogroup",
+        "op": "=",
+        "rhs": true
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_per_locus_coding_nc_features",
+      "kind": "project",
+      "inputs": [
+        "p_hla_class_i_4field_alleles"
+      ],
+      "cols": [
+        "allele_id",
+        "locus",
+        "coding_substitution_count",
+        "noncoding_substitution_count"
+      ]
+    },
+    {
+      "id": "o_gmm_k1_through_k6_per_locus",
+      "kind": "estimator",
+      "inputs": [
+        "o_per_locus_coding_nc_features"
+      ],
+      "estimator": {
+        "name": "gaussian_mixture_model_k1_to_k6_bic_selection",
+        "impl": "python::sklearn.mixture.GaussianMixture",
+        "version": "sklearn@1.3.x",
+        "features": {
+          "label": "coding_nc_pair",
+          "select": [
+            "coding_substitution_count",
+            "noncoding_substitution_count"
+          ]
+        },
+        "params": {
+          "k_range": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "covariance_type": "full",
+          "selection_criterion": "bic",
+          "random_state": 42
+        }
+      },
+      "note": "Per-locus GMM fit over k=1..6 with full covariance matrices; BIC selects optimal k."
+    },
+    {
+      "id": "o_hdbscan_per_locus_cross_check",
+      "kind": "estimator",
+      "inputs": [
+        "o_per_locus_coding_nc_features"
+      ],
+      "estimator": {
+        "name": "hdbscan_per_locus_cross_check",
+        "impl": "python::hdbscan.HDBSCAN",
+        "version": "hdbscan@0.8.x",
+        "features": {
+          "label": "coding_nc_pair",
+          "select": [
+            "coding_substitution_count",
+            "noncoding_substitution_count"
+          ]
+        },
+        "params": {
+          "min_cluster_size_pct_of_locus": 0.05
+        }
+      },
+      "note": "Independent density-based clustering cross-check to confirm the GMM partition is not driven by Gaussian assumption."
+    },
+    {
+      "id": "o_cluster_serogroup_composition",
+      "kind": "join",
+      "inputs": [
+        "o_gmm_k1_through_k6_per_locus",
+        "p_serogroup_assignments"
+      ],
+      "on": "allele_id",
+      "note": "Per-cluster composition: n alleles, n distinct serogroups, null-suffix fraction."
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_gmm_bic_optimal_k",
+      "produced_by": "o_gmm_k1_through_k6_per_locus",
+      "name": "gmm_bic_optimal_k_per_locus",
+      "value": [
+        {
+          "label": "HLA-A_k_opt",
+          "value": 6
+        },
+        {
+          "label": "HLA-B_k_opt",
+          "value": 6
+        },
+        {
+          "label": "HLA-C_k_opt",
+          "value": 6
+        }
+      ],
+      "n": 3,
+      "evidence_class": "S",
+      "note": "BIC selects k=6 at every Class I locus. Clean agreement across the three loci."
+    },
+    {
+      "id": "s_hdbscan_k_range",
+      "produced_by": "o_hdbscan_per_locus_cross_check",
+      "name": "hdbscan_k_per_locus_range",
+      "value": [
+        {
+          "label": "HLA-A_k_hdbscan",
+          "value": 5
+        },
+        {
+          "label": "HLA-B_k_hdbscan",
+          "value": 4
+        },
+        {
+          "label": "HLA-C_k_hdbscan",
+          "value": 5
+        }
+      ],
+      "n": 3,
+      "evidence_class": "S",
+      "note": "HDBSCAN selects 4–5 clusters per locus (ignoring noise points). Close agreement with GMM 6 — the partition is not a Gaussian artifact."
+    },
+    {
+      "id": "s_near_reference_core_count",
+      "produced_by": "o_cluster_serogroup_composition",
+      "name": "near_reference_core_cluster_count",
+      "value": 3,
+      "n": 3,
+      "evidence_class": "K",
+      "note": "Each of the 3 Class I loci has exactly one near-reference-core cluster: HLA-A C2 (n=919, 6 serogroups), HLA-B C0 (n=824, 6 serogroups), HLA-C C1 (n=1361, 12 serogroups). Shared archetype #1."
+    },
+    {
+      "id": "s_tight_multi_serogroup_count",
+      "produced_by": "o_cluster_serogroup_composition",
+      "name": "tight_multi_serogroup_cluster_count",
+      "value": [
+        {
+          "label": "HLA-A_tight_clusters",
+          "value": 3.0
+        },
+        {
+          "label": "HLA-B_tight_clusters",
+          "value": 3.0
+        },
+        {
+          "label": "HLA-C_tight_clusters",
+          "value": 4.0
+        }
+      ],
+      "n": 3,
+      "evidence_class": "S",
+      "note": "Archetype #2: tight multi-serogroup non-coding backbones with unusually small within-cluster SD. HLA-A exemplars: C4 (n=1576, 10 serogroups, NC SD=5.3 ≈ 1% of mean 617), C0 (n=1463, 13 serogroups, NC SD=39.4), C3 (n=481, 2 serogroups, NC SD=29.7)."
+    },
+    {
+      "id": "s_null_enriched_cluster_pct",
+      "produced_by": "o_cluster_serogroup_composition",
+      "name": "per_locus_null_enriched_cluster_null_pct",
+      "value": [
+        {
+          "label": "HLA-A_C1_null_pct",
+          "value": 19.6
+        },
+        {
+          "label": "HLA-B_C3_null_pct",
+          "value": 10.6
+        },
+        {
+          "label": "HLA-C_C5_null_pct",
+          "value": 22.7
+        }
+      ],
+      "n": 3,
+      "evidence_class": "S",
+      "note": "Archetype #3: one null-enriched heterogeneous cluster per locus (10.6–22.7% null-suffix alleles vs 1.8–3.4% baseline at other clusters). Spans the most serogroups (19, 34, 13 respectively) — the structured relaxation-of-selection subpopulation."
+    },
+    {
+      "id": "s_baseline_null_pct",
+      "produced_by": "o_cluster_serogroup_composition",
+      "name": "baseline_null_pct_at_non_null_clusters",
+      "value": 3.4,
+      "evidence_class": "S",
+      "note": "Upper bound of baseline null frequency at non-null-enriched clusters (range 1.8–3.4%). The null-enriched archetype is at least 3× this baseline at every locus."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_near_reference_core_count"
+          },
+          "op": ">=",
+          "rhs": 3
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_baseline_null_pct"
+          },
+          "op": "<",
+          "rhs": 5.0
+        }
+      ]
+    },
+    "justification": "Two conjuncts license the 'histogram modes recur as 3 archetypes across loci' claim: (1) near-reference core cluster count >= 3 — one such cluster exists at every Class I locus, confirming archetype #1 is a shared structural feature not a locus-specific artifact; (2) baseline null-suffix fraction at non-enriched clusters < 5% — the archetype #3 null-enriched clusters (10.6–22.7%) are meaningfully separated from baseline, so 'heterogeneous null-enriched' is a distinct archetype rather than an artifact of broad sampling. The GMM k=6 and HDBSCAN agreement (4–5) are pinned descriptive stats that support but do not directly gate the inference — the per-locus archetype existence is the load-bearing fact.",
+    "failure_mode": "If any Class I locus lacked a near-reference core cluster, archetype #1 would dissolve and 'three recurring archetypes' becomes 'two'. If baseline null fractions were 5–10%, the null-enriched archetype's specificity would weaken."
+  },
+  "conclusion": {
+    "assertion": "At each of the three Class I HLA loci (A, B, C), per-allele histograms of (coding, non-coding) substitution counts against the *01:01:01:01 reference partition into k=6 GMM components (BIC-optimal), with HDBSCAN agreeing at 4–5 clusters. The 18 resulting clusters across loci organize into three recurring archetypes: (1) one near-reference core cluster per locus (tight, few serogroups); (2) three to four tight multi-serogroup lineages per locus (extreme NC homogeneity across serogroup-diverse alleles, consistent with pre-diversification backbones or gene-conversion-driven concerted evolution); (3) one null-enriched heterogeneous cluster per locus (10.6–22.7% null-suffix vs 1.8–3.4% elsewhere, highest serogroup breadth). The recurrence of these three archetypes is independent of any prior serogroup assignment.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "hla_alleles_genomic_sequences",
+          "version": "ipd_imgt_hla_v3.56.0",
+          "provenance_state": "fly_postgres"
+        },
+        {
+          "layer": "hla_serogroup_assignments",
+          "version": "ipd_imgt_hla_v3.56.0",
+          "provenance_state": "fly_postgres"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "in",
+            "rhs": [
+              "HLA-A",
+              "HLA-B",
+              "HLA-C"
+            ]
+          },
+          {
+            "kind": "cmp",
+            "col": "reference_allele_suffix",
+            "op": "=",
+            "rhs": "01:01:01:01"
+          }
+        ]
+      },
+      "scale_note": "Class I only. Class II DRB1/DQB1/DPB1 cluster architecture is deferred — distinct decomposition because the NC/coding fold is 10× different and the null-allele landscape is sparser."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "GMM BIC and HDBSCAN agreement are descriptive; per-locus bootstrap of archetype recurrence is not pinned here."
+    },
+    "outcome": "positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "GMM BIC and HDBSCAN are appropriate clustering methods for 2-D count data with Poisson-like dispersion; k=6 BIC optimum is robust to alternative covariance parameterizations.",
+      "kind": "design_choice",
+      "citation": "Exp26 § 3.1 Methods",
+      "confidence": 0.75
+    },
+    {
+      "statement": "Per-allele substitution counts against a single reference (*01:01:01:01) faithfully capture relative allelic divergence for clustering; alternative references would produce similar k=6 archetypes modulo relabeling.",
+      "kind": "design_choice",
+      "citation": "Exp26 § 3.1",
+      "confidence": 0.8
+    },
+    {
+      "statement": "The observation that serogroup assignments were not used in clustering but cluster composition recapitulates serogroup structure is informative — alternative explanation (balancing selection signatures of different modes producing this geometry) cannot be fully excluded.",
+      "kind": "mechanistic",
+      "citation": "Exp26 § 3.2",
+      "confidence": 0.75
+    }
+  ],
+  "notebook": "internal/InSilico/HLA experiment/provenance/exp26_hla_allele_diversity/python/fig_within_locus_clusters.py"
+}

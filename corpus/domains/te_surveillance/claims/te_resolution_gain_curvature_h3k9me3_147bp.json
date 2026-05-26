@@ -1,0 +1,299 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 3,
+  "title": "Resolution gain at 147bp: curvature -> H3K9me3 AUROC improves over 1kb with bootstrap CI excluding zero",
+  "posted_at": "2026-04-03",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-03",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/te_resolution_gain_curvature_h3k9me3_147bp",
+    "display": "Migration cohort for 'Resolution gain at 147bp: curvature -> H3K9me3 AUROC improves over 1kb with boot'",
+    "definition": {
+      "source_dataset": {
+        "name": "Polymer TE surveillance corpus",
+        "version": "pehrsson_2019_e003",
+        "extra": {
+          "first_premise_layer": "chromhmm_15state_roadmap"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/te_resolution_gain_curvature_h3k9me3_147bp",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_te_chromhmm_e003",
+      "source": {
+        "layer": "chromhmm_15state_roadmap",
+        "version": "pehrsson_2019_e003",
+        "provenance_state": "local_rds"
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "epigenome_id",
+        "op": "=",
+        "rhs": "E003"
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_curvature_1kb",
+      "source": {
+        "layer": "tracks_biophysics_1kb",
+        "version": "polymer_evolution_phase1-3.5",
+        "provenance_state": "local_rds"
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "track",
+        "op": "=",
+        "rhs": "curvature"
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_curvature_147bp",
+      "source": {
+        "layer": "tracks_biophysics_147bp",
+        "version": "polymer_evolution_phase1-3.5_nucleosome_resolution",
+        "provenance_state": "local_rds",
+        "note": "Curvature recomputed at 147 bp (single-nucleosome) resolution per Exp F infrastructure."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "track",
+        "op": "=",
+        "rhs": "curvature"
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_te_x_chromhmm",
+      "kind": "join",
+      "inputs": [
+        "p_te_chromhmm_e003",
+        "p_curvature_1kb"
+      ],
+      "on": "te_id_x_chromhmm_overlap_majority",
+      "note": "First level join; subsequent join below adds 147bp curvature."
+    },
+    {
+      "id": "o_te_x_147bp",
+      "kind": "join",
+      "inputs": [
+        "o_te_x_chromhmm",
+        "p_curvature_147bp"
+      ],
+      "on": "te_id_x_window_147bp_overlap"
+    },
+    {
+      "id": "o_cv_split",
+      "kind": "cv_split",
+      "inputs": [
+        "o_te_x_147bp"
+      ],
+      "scheme": {
+        "kind": "k_fold_by_chromosome",
+        "k": 5,
+        "seed": 42
+      }
+    },
+    {
+      "id": "o_curvature_1kb_predict_h3k9me3",
+      "kind": "estimator",
+      "inputs": [
+        "o_te_x_147bp",
+        "o_cv_split"
+      ],
+      "estimator": {
+        "name": "logistic_curvature_1kb_h3k9me3",
+        "impl": "python::sklearn.linear_model.LogisticRegression",
+        "version": "scikit-learn@1.5.x",
+        "response": "is_h3k9me3",
+        "features": {
+          "label": "curvature_1kb",
+          "select": [
+            "curvature_1kb"
+          ]
+        },
+        "params": {
+          "C": 1.0,
+          "max_iter": 1000,
+          "random_state": 42
+        }
+      }
+    },
+    {
+      "id": "o_curvature_147bp_predict_h3k9me3",
+      "kind": "estimator",
+      "inputs": [
+        "o_te_x_147bp",
+        "o_cv_split"
+      ],
+      "estimator": {
+        "name": "logistic_curvature_147bp_h3k9me3",
+        "impl": "python::sklearn.linear_model.LogisticRegression",
+        "version": "scikit-learn@1.5.x",
+        "response": "is_h3k9me3",
+        "features": {
+          "label": "curvature_147bp",
+          "select": [
+            "curvature_147bp"
+          ]
+        },
+        "params": {
+          "C": 1.0,
+          "max_iter": 1000,
+          "random_state": 42
+        }
+      }
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_auroc_1kb",
+      "produced_by": "o_curvature_1kb_predict_h3k9me3",
+      "name": "auroc_curvature_1kb_h3k9me3",
+      "value": 0.586,
+      "evidence_class": "S"
+    },
+    {
+      "id": "s_auroc_147bp",
+      "produced_by": "o_curvature_147bp_predict_h3k9me3",
+      "name": "auroc_curvature_147bp_h3k9me3",
+      "value": 0.654,
+      "evidence_class": "S"
+    },
+    {
+      "id": "s_delta_auroc_resolution_gain",
+      "produced_by": "o_curvature_147bp_predict_h3k9me3",
+      "name": "delta_auroc_147bp_minus_1kb",
+      "value": 0.068,
+      "evidence_class": "D"
+    },
+    {
+      "id": "s_bootstrap_ci_lo",
+      "produced_by": "o_curvature_147bp_predict_h3k9me3",
+      "name": "bootstrap_2_5_pct_ci_for_delta_auroc",
+      "value": 0.041,
+      "evidence_class": "S",
+      "note": "2.5th percentile of stratified-by-chromosome bootstrap (1000 reps) on the resolution-gain delta."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_delta_auroc_resolution_gain"
+          },
+          "op": ">",
+          "rhs": 0.02
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_bootstrap_ci_lo"
+          },
+          "op": ">",
+          "rhs": 0.0
+        }
+      ]
+    },
+    "justification": "Two conjuncts: (1) point-estimate ΔAUROC > 0.02 establishes a substantive resolution gain; (2) bootstrap 2.5-percentile lower bound > 0 establishes that the gain is unlikely under chance — the bootstrap CI excludes zero. The bootstrap-CI conjunct is the load-bearing one: without it, the point estimate could be a per-fold idiosyncrasy.",
+    "failure_mode": "If the bootstrap CI lower bound dropped below 0, the resolution gain would lose its sign-stability and the 'curvature is a structural feature visible only at nucleosome resolution' claim would weaken to a single-fold artifact."
+  },
+  "conclusion": {
+    "assertion": "Curvature at 147 bp (single-nucleosome) resolution predicts H3K9me3 chromatin state on transposable elements substantially better than curvature at 1 kb (AUROC 0.654 vs 0.586, delta = +0.068; bootstrap 2.5%ile = 0.041 > 0). The structural signal is averaged out at 1 kb but visible at the nucleosome scale. GC content shows no equivalent resolution gain (sibling claim, not encoded here).",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "chromhmm_15state_roadmap",
+          "version": "pehrsson_2019_e003",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "tracks_biophysics_1kb",
+          "version": "polymer_evolution_phase1-3.5",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "tracks_biophysics_147bp",
+          "version": "polymer_evolution_phase1-3.5_nucleosome_resolution",
+          "provenance_state": "local_rds"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "epigenome_id",
+            "op": "=",
+            "rhs": "E003"
+          },
+          {
+            "kind": "cmp",
+            "col": "track",
+            "op": "=",
+            "rhs": "curvature"
+          },
+          {
+            "kind": "cmp",
+            "col": "chromatin_state_5class",
+            "op": "=",
+            "rhs": "H3K9me3"
+          }
+        ]
+      },
+      "scale_note": "Per-feature resolution-gain claim (curvature). Generalization across the 15-track biophysics panel and across other chromatin states is in the parent panel of claims (mod02 output)."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null
+    },
+    "composite_confidence": {
+      "procedure": "bootstrap",
+      "impl": "R::boot::boot",
+      "n_resamples": 1000,
+      "seed": 42,
+      "interval": [
+        0.041,
+        0.094
+      ],
+      "prob_inference_holds": null,
+      "note": "Stratified-by-chromosome bootstrap of the (curvature_147bp - curvature_1kb) AUROC gap. CI excludes 0."
+    },
+    "outcome": "positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "147 bp is a defensible nucleosomal-scale window (single nucleosome footprint); resolution gain at this scale specifically supports the nucleosome-mechanical-feature interpretation.",
+      "kind": "mechanistic",
+      "citation": null,
+      "confidence": 0.85
+    }
+  ],
+  "notebook": "internal/InSilico/TE surveillance/manuscript/paper1_te_surveillance/R/mod02_resolution_panel.R"
+}

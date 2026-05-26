@@ -1,0 +1,85 @@
+name: corpus-rebuild
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'corpus/domains/**/claims/*.json'
+      - 'corpus/evaluator/**'
+
+permissions:
+  contents: write  # to create the release tag
+  id-token: write  # future: DOI minting via DataCite OIDC
+
+concurrency:
+  group: corpus-rebuild
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned evaluator
+        working-directory: corpus/evaluator
+        run: uv sync --frozen
+
+      - name: Re-evaluate every claim + write sibling files
+        run: |
+          uv --project corpus/evaluator run python - <<'PY'
+          import json
+          from pathlib import Path
+          from polymer_formalclaim import FormalClaim, evaluate
+
+          claim_files = sorted(Path('corpus/domains').rglob('claims/*.json'))
+          claim_files = [p for p in claim_files if not p.name.endswith('.evaluation.json')]
+
+          results = []
+          for path in claim_files:
+              claim = FormalClaim.model_validate(json.loads(path.read_text()))
+              result = evaluate(claim)
+              sibling = path.with_name(path.stem + '.evaluation.json')
+              sibling.write_text(result.model_dump_json(indent=2) + '\n')
+              results.append((str(path), result.verdict))
+              print(f"{result.verdict:9s}  {path}")
+
+          # Corpus bundle — single JSON the viewer build can consume.
+          bundle = {'corpus_revision': None, 'claims': []}
+          for path in claim_files:
+              bundle['claims'].append(json.loads(path.read_text()))
+          Path('corpus.json').write_text(json.dumps(bundle, indent=2) + '\n')
+          # Index for quick filtering in the viewer.
+          index = [{'slug': p.stem, 'verdict': v, 'path': p.as_posix()} for p, v in [(Path(p), v) for p, v in results]]
+          Path('corpus.index.json').write_text(json.dumps(index, indent=2) + '\n')
+
+          print(f"\nCorpus: {len(bundle['claims'])} claims, bundle at corpus.json")
+          PY
+
+      - name: Commit back the evaluation siblings
+        run: |
+          git config user.name "polymer-claims-bot"
+          git config user.email "bot@polymerbio.org"
+          git add corpus/domains/**/claims/*.evaluation.json
+          if ! git diff --cached --quiet; then
+            git commit -m "ci(corpus-rebuild): refresh evaluation siblings"
+            git push
+          fi
+
+      - name: Tag corpus release
+        id: tag
+        run: |
+          TAG="corpus-$(date -u +%Y%m%d-%H%M)"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Publish corpus bundle as a GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          files: |
+            corpus.json
+            corpus.index.json

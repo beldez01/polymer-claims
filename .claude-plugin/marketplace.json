@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/.claude-plugin/marketplace.schema.json",
+  "name": "polymer-claims",
+  "display_name": "Polymer Claims Marketplace",
+  "description": "Harness for authoring machine-verifiable biomedical FormalClaim IR claims against the Polymer Genomics substrate (polymerbio.org).",
+  "owner": {
+    "name": "Zachary Belden",
+    "url": "https://github.com/beldez01"
+  },
+  "plugins": [
+    {
+      "name": "claim-harness",
+      "source": "./plugins/claim-harness"
+    }
+  ]
+}

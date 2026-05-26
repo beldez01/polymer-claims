@@ -1,0 +1,7 @@
+{
+  "corpus_repo": "https://github.com/beldez01/polymer-claims",
+  "snapshot_url": "https://github.com/beldez01/polymer-claims/releases/latest/download/corpus.json",
+  "snapshot_sha256": null,
+  "snapshot_date": null,
+  "refresh_instructions": "The SessionStart hook calls `polymer-formalclaim refresh-corpus --pointer ./corpus/pointer.json` on session start. Manual refresh: `uvx polymer-formalclaim refresh-corpus`."
+}

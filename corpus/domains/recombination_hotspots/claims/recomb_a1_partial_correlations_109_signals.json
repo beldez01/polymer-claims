@@ -1,0 +1,304 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 17,
+  "title": "109 biophysics-recombination partial correlations exceed |r| > 0.08 after GC control — the genome-wide strong-signal census",
+  "posted_at": "2026-04-19",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-03",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/recomb_a1_partial_correlations_109_signals",
+    "display": "Migration cohort for '109 biophysics-recombination partial correlations exceed |r| > 0.08 after GC con'",
+    "definition": {
+      "source_dataset": {
+        "name": "Polymer recombination hotspots corpus",
+        "version": "palsson_2025",
+        "extra": {
+          "first_premise_layer": "recombination_maps_1mb"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/recomb_a1_partial_correlations_109_signals",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_palsson_maps_1mb",
+      "source": {
+        "layer": "recombination_maps_1mb",
+        "version": "palsson_2025",
+        "provenance_state": "local_rds",
+        "note": "Palsson 2025 1 Mb autosomal maps with CO, NCO, and DSB rates (3 outcomes)."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "chr",
+            "op": "in",
+            "rhs": [
+              "chr1",
+              "chr2",
+              "chr3",
+              "chr4",
+              "chr5",
+              "chr6",
+              "chr7",
+              "chr8",
+              "chr9",
+              "chr10",
+              "chr11",
+              "chr12",
+              "chr13",
+              "chr14",
+              "chr15",
+              "chr16",
+              "chr17",
+              "chr18",
+              "chr19",
+              "chr20",
+              "chr21",
+              "chr22"
+            ]
+          },
+          {
+            "kind": "cmp",
+            "col": "window_bp",
+            "op": "=",
+            "rhs": 1000000
+          }
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_biophys_all_tracks_1kb",
+      "source": {
+        "layer": "tracks_biophysics_1kb",
+        "version": "polymer_evolution_phase1-3.5",
+        "provenance_state": "local_rds",
+        "note": "All 64 biophysical tracks from Polymer_Evolution phases 1–3.5 at 1 kb, aggregated to 1 Mb means. gc_content reserved as the partial-correlation control."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "track_count",
+        "op": ">=",
+        "rhs": 64
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_aggregate_to_1mb",
+      "kind": "aggregate",
+      "inputs": [
+        "p_biophys_all_tracks_1kb"
+      ],
+      "by": [
+        "chr",
+        "window_1mb_start",
+        "track"
+      ],
+      "agg": [
+        {
+          "col": "value",
+          "fn": "mean",
+          "na_rm": true
+        }
+      ]
+    },
+    {
+      "id": "o_join_maps_biophys",
+      "kind": "join",
+      "inputs": [
+        "p_palsson_maps_1mb",
+        "o_aggregate_to_1mb"
+      ],
+      "on": "chr_window_1mb_start"
+    },
+    {
+      "id": "o_partial_corr_all_tracks_x_outcomes",
+      "kind": "estimator",
+      "inputs": [
+        "o_join_maps_biophys"
+      ],
+      "estimator": {
+        "name": "partial_spearman_64_tracks_by_3_outcomes_given_gc",
+        "impl": "R::ppcor::pcor.test",
+        "version": "ppcor@1.1",
+        "features": {
+          "label": "all_biophysics_minus_gc",
+          "parent": "biophysics_phase1-3.5",
+          "exclude": [
+            "gc_content"
+          ]
+        },
+        "params": {
+          "outcomes": [
+            "co_rate_avg",
+            "nco_rate_avg",
+            "dsb_rate"
+          ],
+          "controls": [
+            "gc_content"
+          ],
+          "method": "spearman",
+          "n_tests_total": 192
+        }
+      },
+      "note": "64 tracks × 3 outcomes = 192 partial-correlation tests. The LabeledValue[] statistic reports the signed top-3 per outcome (9 total) plus the total count > 0.08."
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_n_signals_above_threshold",
+      "produced_by": "o_partial_corr_all_tracks_x_outcomes",
+      "name": "count_partial_r_abs_gt_008",
+      "value": 109,
+      "n": 192,
+      "evidence_class": "S",
+      "note": "109 of 192 tests clear |partial r| > 0.08 after GC residualization."
+    },
+    {
+      "id": "s_top_signals_by_outcome",
+      "produced_by": "o_partial_corr_all_tracks_x_outcomes",
+      "name": "top_signals_signed_per_outcome",
+      "value": [
+        {
+          "label": "NCO_x_cpg_density",
+          "value": 0.37
+        },
+        {
+          "label": "NCO_x_meth_sensitivity",
+          "value": 0.34
+        },
+        {
+          "label": "NCO_x_quantization_map",
+          "value": 0.29
+        },
+        {
+          "label": "CO_x_curvature",
+          "value": -0.24
+        },
+        {
+          "label": "CO_x_periodicity_power",
+          "value": 0.22
+        },
+        {
+          "label": "CO_x_groove_width",
+          "value": 0.22
+        }
+      ],
+      "n": 192,
+      "evidence_class": "S",
+      "note": "Signed top-3 partial Spearman r per outcome (CO and NCO shown; DSB top-3 omitted pending RESULT.md expansion). LabeledValue[] vector — the per-window detail lives in results/a1_partial_correlations.csv."
+    },
+    {
+      "id": "s_max_abs_partial_r",
+      "produced_by": "o_partial_corr_all_tracks_x_outcomes",
+      "name": "max_abs_partial_spearman_across_192_tests",
+      "value": 0.37,
+      "n": 192,
+      "evidence_class": "D",
+      "note": "Derived: max(|partial r|) over the 192-test grid. Achieved by NCO × cpg_density."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_n_signals_above_threshold"
+          },
+          "op": ">=",
+          "rhs": 20
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_max_abs_partial_r"
+          },
+          "op": ">",
+          "rhs": 0.08
+        }
+      ]
+    },
+    "justification": "Two conjuncts license the census-level claim: (1) at least 20 tests clearing the |partial r| > 0.08 threshold rules out the chance-only hypothesis under 192 tests (naive Bonferroni-adjusted noise floor would expect <1 false positive above 0.08 at n ≈ 2600 windows); (2) the strongest signal (NCO × cpg_density = +0.37) is well above the 0.08 threshold and the isochore-only null (pre-registered < 0.05). The 20-test lower bound is deliberately well below the observed 109 so the claim is the 'strong-signal census is non-empty' version; the 109 value itself is the descriptive headline.",
+    "failure_mode": "If the count dropped below ~20, the isochore-only null would become compatible with the data (just noise above 0.08). If max(|partial r|) dropped below 0.08, the entire A1 analysis returns no signals."
+  },
+  "conclusion": {
+    "assertion": "Across 64 biophysical tracks × 3 meiotic outcomes at 1 Mb autosomal resolution, 109 partial Spearman correlations exceed |r| > 0.08 after GC residualization — a pervasive GC-independent biophysics–recombination signal. The strongest per-outcome partial correlations are NCO × cpg_density (+0.37), NCO × meth_sensitivity (+0.34), NCO × quantization_map (+0.29), CO × curvature (-0.24), CO × periodicity_power (+0.22), and CO × groove_width (+0.22).",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "recombination_maps_1mb",
+          "version": "palsson_2025",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "tracks_biophysics_1kb",
+          "version": "polymer_evolution_phase1-3.5",
+          "provenance_state": "local_rds"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "window_bp",
+            "op": "=",
+            "rhs": 1000000
+          },
+          {
+            "kind": "cmp",
+            "col": "analysis",
+            "op": "=",
+            "rhs": "partial_spearman_given_gc"
+          }
+        ]
+      },
+      "scale_note": "Census-level claim at 1 Mb. Per-track sign-flip claims (A2) are separate child fixtures. Sub-isochore resolution (A5, oNCO 1 kb) is a pending bolstering fixture, not covered here."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Family-wise significance reported per-test in results/a1_partial_correlations.csv."
+    },
+    "outcome": "strong_positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "|partial r| > 0.08 threshold is a conservative noise floor at ~2600 autosomal 1 Mb windows with Spearman ranks; pre-registered in DESIGN.md § A1 as the signal-vs-noise cutoff.",
+      "kind": "design_choice",
+      "citation": "DESIGN.md § A1",
+      "confidence": 0.85
+    },
+    {
+      "statement": "GC residualization (via partial correlation) is the canonical composition control; residual confounding from CpG / stacking is small per the GC-Arrangement decomposition (Exp 21).",
+      "kind": "mechanistic",
+      "citation": "CLAUDE.md § FOUNDATIONAL, Exp 21 LP proof",
+      "confidence": 0.85
+    }
+  ],
+  "notebook": "internal/InSilico/recombination hotspots/provenance/exp17_crossover_hotspot/R/02_partial_correlations_a1.R"
+}

@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "polymer-genomics": {
+      "description": "Polymer Genomics API — 70 tools, 48 layers, physics linter, methylation suite.",
+      "type": "http",
+      "url": "https://api.polymerbio.org/mcp"
+    },
+    "biocontext-kb": {
+      "description": "BioContextAI Knowledgebase — 14 APIs (UniProt, AlphaFold, STRING, Reactome, Open Targets, Ensembl, PanglaoDB, EuropePMC, …).",
+      "command": "uvx",
+      "args": ["biocontext_kb@latest"]
+    },
+    "bio-mcp-bedtools": {
+      "description": "bedtools CLI wrapper from the bio-mcp org.",
+      "command": "uvx",
+      "args": ["bio-mcp-bedtools@latest"]
+    },
+    "bio-mcp-seqkit": {
+      "description": "seqkit CLI wrapper from the bio-mcp org.",
+      "command": "uvx",
+      "args": ["bio-mcp-seqkit@latest"]
+    },
+    "claim-ir": {
+      "description": "FormalClaim IR — schema validation, local evaluation, corpus search (ships with polymer-formalclaim).",
+      "command": "uvx",
+      "args": ["--from", "polymer-formalclaim>=0.2.0", "polymer-formalclaim-mcp"]
+    }
+  }
+}

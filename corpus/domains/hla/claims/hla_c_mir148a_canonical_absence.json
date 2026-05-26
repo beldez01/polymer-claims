@@ -1,0 +1,255 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 24,
+  "title": "HLA-C miR-148a canonical 8-mer site is absent in 0/3,284 alleles, but the 7-mer seed is present in ~25% — partially dissolved by length audit",
+  "posted_at": "2026-04-13",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-13",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/hla_c_mir148a_canonical_absence",
+    "display": "Migration cohort for 'HLA-C miR-148a canonical 8-mer site is absent in 0/3,284 alleles, but the 7-mer '",
+    "definition": {
+      "source_dataset": {
+        "name": "IPD-IMGT/HLA",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "extra": {
+          "first_premise_layer": "hla_alleles_genomic_sequences"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/hla_c_mir148a_canonical_absence",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_hla_c_3utr_sequences",
+      "source": {
+        "layer": "hla_alleles_genomic_sequences",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "provenance_state": "fly_postgres",
+        "note": "HLA-C 3'UTR sequences across 4-field protein-distinct alleles."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "=",
+            "rhs": "HLA-C"
+          },
+          {
+            "kind": "cmp",
+            "col": "region",
+            "op": "=",
+            "rhs": "3UTR"
+          }
+        ]
+      },
+      "cardinality": 3284,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_canonical_8mer_present",
+      "kind": "filter",
+      "inputs": [
+        "p_hla_c_3utr_sequences"
+      ],
+      "predicate": {
+        "kind": "cmp",
+        "col": "contains_canonical_mir148a_site",
+        "op": "=",
+        "rhs": true
+      },
+      "note": "Canonical mir148a binding: the full 8-mer 'AGCACTGA' (seed + 1 anchor base). Pre-registered as the binding-competent motif."
+    },
+    {
+      "id": "o_canonical_8mer_absent",
+      "kind": "filter",
+      "inputs": [
+        "p_hla_c_3utr_sequences"
+      ],
+      "predicate": {
+        "kind": "not",
+        "term": {
+          "kind": "cmp",
+          "col": "contains_canonical_mir148a_site",
+          "op": "=",
+          "rhs": true
+        }
+      },
+      "note": "First NotExpr in the corpus: complement of the canonical-positive set."
+    },
+    {
+      "id": "o_seed_only_or_canonical",
+      "kind": "filter",
+      "inputs": [
+        "p_hla_c_3utr_sequences"
+      ],
+      "predicate": {
+        "kind": "or",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "contains_canonical_mir148a_site",
+            "op": "=",
+            "rhs": true
+          },
+          {
+            "kind": "cmp",
+            "col": "contains_mir148a_7mer_seed_only",
+            "op": "=",
+            "rhs": true
+          }
+        ]
+      },
+      "note": "First OrExpr in the corpus: the partition for the Phase 6C length-audit reframe — 'canonical OR seed-only'. The Phase 6C audit found that the 7-mer seed appears in ~25% of long-annotation alleles, partially dissolving the absence-of-canonical-binding framing."
+    },
+    {
+      "id": "o_count_canonical",
+      "kind": "aggregate",
+      "inputs": [
+        "o_canonical_8mer_present"
+      ],
+      "by": [],
+      "agg": [
+        {
+          "col": "allele_4digit",
+          "fn": "count"
+        }
+      ]
+    },
+    {
+      "id": "o_count_seed_or_canonical",
+      "kind": "aggregate",
+      "inputs": [
+        "o_seed_only_or_canonical"
+      ],
+      "by": [],
+      "agg": [
+        {
+          "col": "allele_4digit",
+          "fn": "count"
+        }
+      ]
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_n_canonical",
+      "produced_by": "o_count_canonical",
+      "name": "n_alleles_with_canonical_mir148a_site",
+      "value": 0,
+      "evidence_class": "S",
+      "note": "Zero of 3,284 HLA-C alleles carry the canonical 8-mer."
+    },
+    {
+      "id": "s_n_seed_or_canonical",
+      "produced_by": "o_count_seed_or_canonical",
+      "name": "n_alleles_with_seed_or_canonical_mir148a",
+      "value": 821,
+      "evidence_class": "S",
+      "note": "Approximately 25% of long-annotation alleles carry the 7-mer seed even though none carry the canonical 8-mer. Phase 6C finding."
+    },
+    {
+      "id": "s_seed_fraction",
+      "produced_by": "o_count_seed_or_canonical",
+      "name": "fraction_with_seed_or_canonical",
+      "value": 0.25,
+      "evidence_class": "D",
+      "note": "Derived: s_n_seed_or_canonical / 3284 ~ 0.25. The seed-only presence partially dissolves the original 'HLA-C escapes mir148a regulation' framing."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_n_canonical"
+          },
+          "op": "=",
+          "rhs": 0
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_seed_fraction"
+          },
+          "op": ">",
+          "rhs": 0.05
+        }
+      ]
+    },
+    "justification": "Two conjuncts encode the qualified-positive register: (1) the canonical 8-mer is strictly absent (n=0) — the original observation holds; (2) the 7-mer seed is present at non-trivial frequency (>5%) — the Phase 6C length audit dissolves the absolute 'no mir148a binding capacity' interpretation. Outcome qualified_positive: the absence of the canonical motif is real, but the broader 'HLA-C is mir148a-immune' framing is wrong because seed-only sites can still bind weakly.",
+    "failure_mode": "If s_n_canonical > 0, the absolute absence claim fails. If s_seed_fraction <= 0.05, the dissolution would not have triggered and the original framing would not need qualification."
+  },
+  "conclusion": {
+    "assertion": "Across 3,284 HLA-C 4-field alleles, zero carry the canonical mir-148a 8-mer binding site (AGCACTGA), but ~25% carry the 7-mer seed (AGCACTG) on long-annotation 3'UTR sequences. The original 'HLA-C escapes mir-148a regulation via canonical-site absence' framing is partially dissolved by the Phase 6C length audit: canonical-site absence is real, but seed-only sites can still confer weak binding and the broader regulatory-immunity interpretation is not licensed.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "hla_alleles_genomic_sequences",
+          "version": "ipd_imgt_hla_v3.56.0",
+          "provenance_state": "fly_postgres"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "=",
+            "rhs": "HLA-C"
+          },
+          {
+            "kind": "cmp",
+            "col": "region",
+            "op": "=",
+            "rhs": "3UTR"
+          }
+        ]
+      },
+      "scale_note": "HLA-C 3'UTR specifically; HLA-A and HLA-B 3'UTR mir148a status are sibling claims (HLA-A: known canonical binding; HLA-B: variable)."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Census-style claim; confidence reflects manifest completeness."
+    },
+    "outcome": "qualified_positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "miR-148a 7-mer seed binding is biologically meaningful even without the canonical 8-mer anchor base; seed-only matches typically confer weaker but non-zero regulation.",
+      "kind": "literature",
+      "citation": "Bartel 2018 mir-target rules",
+      "confidence": 0.75
+    },
+    {
+      "statement": "The Phase 6C length audit correctly identified that short 3'UTR annotations in IMGT could mask the seed-only motif; the seed-or-canonical count is computed only over long-annotation alleles.",
+      "kind": "design_choice",
+      "citation": null,
+      "confidence": 0.85
+    }
+  ],
+  "notebook": "internal/InSilico/HLA experiment/provenance/exp24_hla_expression_biophysics/phase6/test_c_mir148a_length_audit.R"
+}

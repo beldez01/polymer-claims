@@ -1,0 +1,32 @@
+# Tier auto-merge policies.
+# Consumed by .github/workflows/auto_merge.yml.
+
+tier_0:
+  auto_merge: false
+  max_open_prs: 3
+  max_merged_per_7d: 5
+
+tier_1:
+  auto_merge: true
+  requires_verdict: LICENSED
+  requires_non_contested: true
+  max_open_prs: 10
+  max_merged_per_7d: 25
+
+tier_2:
+  auto_merge: true
+  requires_verdict: LICENSED     # PENDING still requires manual sign-off
+  requires_non_contested: true
+  max_open_prs: null              # unbounded
+  max_merged_per_7d: 100
+  merge_scope: "own_domain_only"  # enforced by workflow via domain path match
+  cannot_self_merge: true         # even for LICENSED own submissions
+
+tier_3:
+  auto_merge: true
+  requires_verdict: LICENSED
+  requires_non_contested: true
+  max_open_prs: null
+  max_merged_per_7d: 100
+  merge_scope: "subspace"
+  cannot_self_merge: true

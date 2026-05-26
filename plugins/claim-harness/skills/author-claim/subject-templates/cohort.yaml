@@ -1,0 +1,23 @@
+# cohort subject template
+#
+# Use when the claim applies to a defined sample / entity set rather than
+# a single subject. Claim identity depends on the content hash of the
+# resolved member set — fill `members_hash` after resolution.
+
+kind: cohort
+id: "polymer:cohorts/{{slug}}"
+display: "{{human-readable label}} (n={{N}})"
+definition:
+  source_dataset:
+    name: "{{GTEx|UK Biobank|IPD-IMGT/HLA|...}}"
+    version: "{{version}}"
+    tissue: "{{tissue|null}}"
+  inclusion:
+    - kind: cmp
+      col: "{{field}}"
+      op: "="
+      rhs: true
+  exclusion: []
+  cardinality: null                                # fill after resolution
+  random_seed: null
+members_hash: "{{blake3:...|sha256:...}}"          # content hash of the resolved member set

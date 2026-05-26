@@ -1,0 +1,124 @@
+name: evaluator
+
+on:
+  pull_request:
+    paths:
+      - 'corpus/domains/**/claims/*.json'
+      - 'corpus/schema/*.json'
+      - 'corpus/evaluator/**'
+
+permissions:
+  contents: read
+  pull-requests: write   # to post the sticky comment
+  checks: write          # to set the required status check
+
+concurrency:
+  group: evaluator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      verdict: ${{ steps.parse.outputs.verdict }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+
+      - name: List changed claim files
+        id: changed
+        uses: tj-actions/changed-files@v44
+        with:
+          files: 'corpus/domains/**/claims/*.json'
+          files_ignore: 'corpus/domains/**/claims/*.evaluation.json'
+
+      - name: Early exit if no claim changes
+        if: steps.changed.outputs.any_changed != 'true'
+        run: echo "No claim files changed; skipping evaluator."
+
+      - uses: astral-sh/setup-uv@v3
+        if: steps.changed.outputs.any_changed == 'true'
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned evaluator
+        if: steps.changed.outputs.any_changed == 'true'
+        working-directory: corpus/evaluator
+        run: uv sync --frozen
+
+      - name: Run evaluator on changed files
+        if: steps.changed.outputs.any_changed == 'true'
+        env:
+          CLAIM_FILES: ${{ steps.changed.outputs.all_changed_files }}
+        run: |
+          uv --project corpus/evaluator run python corpus/evaluator/run_evaluator.py \
+            --files "$CLAIM_FILES" \
+            --schema corpus/schema/formal_claim_v1.2.schema.json \
+            --json-out /tmp/verdicts.json \
+            --timeout-per-claim 60
+
+      - name: Parse aggregate verdict
+        id: parse
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          VERDICT=$(jq -r .aggregate_verdict /tmp/verdicts.json)
+          echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
+
+      - name: Build PR comment
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          {
+            echo "### Evaluator verdict: **${{ steps.parse.outputs.verdict }}**"
+            echo ""
+            echo "<details><summary>per-claim breakdown</summary>"
+            echo ""
+            echo '```json'
+            cat /tmp/verdicts.json
+            echo '```'
+            echo ""
+            echo "</details>"
+            echo ""
+            echo "_Auto-generated. Re-run by pushing a new commit._"
+          } > /tmp/comment.md
+
+      - name: Upload evaluation artifacts
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluations
+          path: |
+            /tmp/verdicts.json
+            corpus/domains/**/claims/*.evaluation.json
+
+      - name: Post/update sticky PR comment
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: polymer-evaluator
+          path: /tmp/comment.md
+
+      - name: Set required status check
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: LouisBrunner/checks-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: evaluator/verdict
+          conclusion: >-
+            ${{ steps.parse.outputs.verdict == 'LICENSED' && 'success'
+              || steps.parse.outputs.verdict == 'PENDING' && 'neutral'
+              || 'failure' }}
+          output: |
+            { "summary": "${{ steps.parse.outputs.verdict }}" }
+
+  label:
+    needs: evaluate
+    if: always() && needs.evaluate.outputs.verdict != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            admin-review:${{ needs.evaluate.outputs.verdict == 'LICENSED' && 'licensed'
+                          || needs.evaluate.outputs.verdict == 'PENDING'  && 'pending'
+                          || 'rejected' }}

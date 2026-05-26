@@ -1,0 +1,311 @@
+{
+  "$schema": "../../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "title": "FALSIFIED: ELM reservoir at m=5000 does NOT match elastic-net age MAE on GSE40279 5-fold CV",
+  "posted_at": "2026-04-14",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-14",
+  "version": "1.0.0",
+  "domain": "other",
+  "subject": {
+    "kind": "literal",
+    "id": "literal:migration/1.0.0/na",
+    "display": "FALSIFIED: ELM reservoir at m=5000 does NOT match elastic-net age MAE on GSE40279 5-fold CV",
+    "prose": "Migrated from v1.1 as a literal subject because the claim was marked withdrawn/falsified at migration time. Re-author with a typed subject when resuming.",
+    "structured": {
+      "migration_source": "v1.1",
+      "note": "literal wrap chosen due to withdrawn/falsified status"
+    }
+  },
+  "context": {
+    "free_form": "migrated from v1.1 without domain-specific context"
+  },
+  "premises": [
+    {
+      "id": "p_gse40279_betas",
+      "source": {
+        "layer": "methylation_betas_gse40279",
+        "version": "hannum_2013_geo_series_matrix",
+        "provenance_state": "local_rds",
+        "note": "Hannum et al. 2013 whole-blood 450K methylation, n=656, ages 19-101. Streamed from GEO via rc05 scripts/07_stream_gse40279.py."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "platform",
+            "op": "=",
+            "rhs": "Illumina450K"
+          },
+          {
+            "kind": "cmp",
+            "col": "tissue",
+            "op": "=",
+            "rhs": "whole_blood"
+          }
+        ]
+      },
+      "cardinality": 656,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_clock_union_probes",
+      "source": {
+        "layer": "clock_probe_union_450k",
+        "version": "rc01_clock_probes_v1",
+        "provenance_state": "local_rds",
+        "note": "Union of probe coefficient vectors across 7 published methylation clocks (Horvath, Hannum, PhenoAge, GrimAge, DunedinPACE, Retro-Age v2, Retro-Age 450K), restricted to 450K-native probes. From rc01 results/clock_probes/."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "platform_native",
+        "op": "=",
+        "rhs": "450K"
+      },
+      "cardinality": 3221,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_chronological_age_labels",
+      "source": {
+        "layer": "gse40279_metadata",
+        "version": "hannum_2013_geo_series_matrix",
+        "provenance_state": "local_rds",
+        "note": "Per-sample chronological age in years parsed from !Sample_characteristics_ch1."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "age_years",
+            "op": ">=",
+            "rhs": 19.0
+          },
+          {
+            "kind": "cmp",
+            "col": "age_years",
+            "op": "<=",
+            "rhs": 101.0
+          }
+        ]
+      },
+      "cardinality": 656,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_filter_betas_to_clock_union",
+      "kind": "filter",
+      "inputs": [
+        "p_gse40279_betas"
+      ],
+      "predicate": {
+        "kind": "cmp",
+        "col": "probe_id",
+        "op": "in",
+        "rhs": [
+          "__resolved_at_evaluate_from_p_clock_union_probes__"
+        ]
+      },
+      "note": "Restrict 450K beta matrix to clock-union probes (n approx 3221). The 'in' RHS is a placeholder list resolved by evaluate.py from p_clock_union_probes."
+    },
+    {
+      "id": "o_join_betas_age",
+      "kind": "join",
+      "inputs": [
+        "o_filter_betas_to_clock_union",
+        "p_chronological_age_labels"
+      ],
+      "on": "sample_id"
+    },
+    {
+      "id": "o_cv_split_random_5fold",
+      "kind": "cv_split",
+      "inputs": [
+        "o_join_betas_age"
+      ],
+      "scheme": {
+        "kind": "k_fold_random",
+        "k": 5,
+        "seed": 42
+      }
+    },
+    {
+      "id": "o_elastic_net_age",
+      "kind": "estimator",
+      "inputs": [
+        "o_join_betas_age",
+        "o_cv_split_random_5fold"
+      ],
+      "estimator": {
+        "name": "elastic_net_age_mae_cv",
+        "impl": "python::sklearn.linear_model.ElasticNetCV",
+        "version": "scikit-learn@1.5.x",
+        "response": "age_years",
+        "features": {
+          "label": "clock_union_betas",
+          "parent": "p_clock_union_probes"
+        },
+        "params": {
+          "l1_ratio": [
+            0.1,
+            0.5,
+            0.9
+          ],
+          "n_alphas": 100,
+          "cv_inner": 10,
+          "max_iter": 5000,
+          "random_state": 42
+        }
+      }
+    },
+    {
+      "id": "o_elm_reservoir_m5000",
+      "kind": "estimator",
+      "inputs": [
+        "o_join_betas_age",
+        "o_cv_split_random_5fold"
+      ],
+      "estimator": {
+        "name": "elm_reservoir_age_mae_cv",
+        "impl": "python::polymer_genomics.rc.elm_core",
+        "version": "rc05@1.0.0",
+        "response": "age_years",
+        "features": {
+          "label": "clock_union_betas",
+          "parent": "p_clock_union_probes"
+        },
+        "params": {
+          "reservoir_width_m": 5000,
+          "activation": "tanh",
+          "input_scale": "1_over_p_gaussian",
+          "bias": "uniform_-1_1",
+          "ridge_lambda": 1.0,
+          "n_seeds": 3,
+          "ensemble": "median_prediction",
+          "random_state": 42
+        }
+      }
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_elastic_net_mae",
+      "produced_by": "o_elastic_net_age",
+      "name": "mae_years_5fold_cv",
+      "value": 4.7,
+      "evidence_class": "S",
+      "note": "Tuned ElasticNetCV MAE on GSE40279, 5-fold random CV. Pinned to STAGE2_FINDINGS.md headline number."
+    },
+    {
+      "id": "s_elm_mae_m5000",
+      "produced_by": "o_elm_reservoir_m5000",
+      "name": "mae_years_5fold_cv",
+      "value": 7.2,
+      "evidence_class": "S",
+      "note": "ELM at m=5000, median across 3 reservoir seeds, 5-fold random CV. Pinned to STAGE2_FINDINGS.md headline number; this is what falsifies P1."
+    },
+    {
+      "id": "s_delta_mae",
+      "produced_by": "o_elm_reservoir_m5000",
+      "name": "delta_mae_elm_minus_elastic_net",
+      "value": 2.5,
+      "evidence_class": "D",
+      "note": "Derived: s_elm_mae_m5000 - s_elastic_net_mae. Positive delta means ELM is WORSE; pre-registered P1 expected delta <= 0."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "cmp",
+      "lhs": {
+        "stat_id": "s_elm_mae_m5000"
+      },
+      "op": "<=",
+      "rhs": {
+        "stat_id": "s_elastic_net_mae"
+      }
+    },
+    "justification": "Pre-registered P1 (rc05 DESIGN.md): ELM at m >= 5000 achieves age MAE less-than-or-equal to elastic-net baseline on 5-fold CV. The single-conjunct test is exactly the 'reservoir reaches the predictor frontier' claim. If this fails, the random-projection reservoir is not rich enough on its own to displace tuned elastic net; learned encoders (Option C) would be needed.",
+    "failure_mode": "Falsified iff s_elm_mae_m5000 > s_elastic_net_mae. Observed: s_delta_mae = +2.5 yrs. Falsifier triggered. Recorded as the pivot that motivated the rc06 reframe (compute amortization, not accuracy parity, as the honest RC affordance)."
+  },
+  "conclusion": {
+    "assertion": "On GSE40279 (Hannum 2013) whole-blood 450K methylation, an untrained ELM reservoir at m=5000 with tanh activation and ridge readout produces 5-fold CV chronological-age MAE of approximately 7.2 years, materially worse than tuned elastic net (~4.7 years). The pre-registered claim that ELM matches or beats elastic net at this width is FALSIFIED.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "methylation_betas_gse40279",
+          "version": "hannum_2013_geo_series_matrix",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "clock_probe_union_450k",
+          "version": "rc01_clock_probes_v1",
+          "provenance_state": "local_rds"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "platform",
+            "op": "=",
+            "rhs": "Illumina450K"
+          },
+          {
+            "kind": "cmp",
+            "col": "tissue",
+            "op": "=",
+            "rhs": "whole_blood"
+          },
+          {
+            "kind": "cmp",
+            "col": "probe_set",
+            "op": "=",
+            "rhs": "clock_union"
+          },
+          {
+            "kind": "cmp",
+            "col": "reservoir_width_m",
+            "op": "=",
+            "rhs": 5000
+          }
+        ]
+      },
+      "scale_note": "Falsification is at m=5000 specifically. Larger m (50K+) was tested in Stage 2 and did not close the gap; the falsification is robust across the swept m range. Other architectures (learned encoder, multi-output amortization) are out of scope for this claim object — they live as separate RC06 Aim 3 claims."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Per-fold MAE SDs reported in STAGE2_FINDINGS.md; not pinned in this fixture pending evaluate.py."
+    },
+    "outcome": "negative"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "GSE40279 is the canonical methylation-age benchmark; an architecture that fails to match elastic net here will not generalize to other cohorts as a competitor predictor.",
+      "kind": "literature",
+      "citation": "Hannum et al. Mol Cell 2013",
+      "confidence": 0.85
+    },
+    {
+      "statement": "Clock-union probe restriction (~3221 probes) is the same feature space the elastic net baseline uses; the comparison is fair.",
+      "kind": "design_choice",
+      "citation": null,
+      "confidence": 0.95
+    },
+    {
+      "statement": "An untrained random projection at m=5000 with the chosen ELM defaults (tanh, Gaussian W_in, uniform bias) is a defensible 'standard ELM' configuration; pathological tuning could improve numbers but would not change the qualitative gap.",
+      "kind": "design_choice",
+      "citation": null,
+      "confidence": 0.8
+    }
+  ],
+  "notebook": "internal/InSilico/RC/01_methylome_capacity/rc05_elm_reservoir/scripts/10_elm_sweep_gse40279.py"
+}

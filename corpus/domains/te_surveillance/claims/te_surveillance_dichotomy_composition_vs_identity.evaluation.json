@@ -1,0 +1,75 @@
+{
+  "claim_id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "schema_version": "v1.1",
+  "verdict": "LICENSED",
+  "conjuncts": [
+    {
+      "lhs_stat_id": "s_auroc_gc_h3k27me3",
+      "lhs_transform": null,
+      "lhs_value": 0.678,
+      "op": ">",
+      "rhs_stat_id": "s_auroc_age_h3k27me3",
+      "rhs_transform": null,
+      "rhs_value": 0.557,
+      "result": true
+    },
+    {
+      "lhs_stat_id": "s_auroc_age_h3k9me3",
+      "lhs_transform": null,
+      "lhs_value": 0.633,
+      "op": ">",
+      "rhs_stat_id": "s_auroc_gc_h3k9me3",
+      "rhs_transform": null,
+      "rhs_value": 0.505,
+      "result": true
+    },
+    {
+      "lhs_stat_id": "s_auroc_gc_h3k27me3",
+      "lhs_transform": null,
+      "lhs_value": 0.678,
+      "op": ">",
+      "rhs_stat_id": null,
+      "rhs_transform": null,
+      "rhs_value": 0.6,
+      "result": true
+    },
+    {
+      "lhs_stat_id": "s_auroc_age_h3k9me3",
+      "lhs_transform": null,
+      "lhs_value": 0.633,
+      "op": ">",
+      "rhs_stat_id": null,
+      "rhs_transform": null,
+      "rhs_value": 0.6,
+      "result": true
+    },
+    {
+      "lhs_stat_id": "s_auroc_gc_h3k9me3",
+      "lhs_transform": null,
+      "lhs_value": 0.505,
+      "op": "<",
+      "rhs_stat_id": null,
+      "rhs_transform": null,
+      "rhs_value": 0.55,
+      "result": true
+    },
+    {
+      "lhs_stat_id": "s_permutation_p",
+      "lhs_transform": null,
+      "lhs_value": 0.001,
+      "op": "<",
+      "rhs_stat_id": null,
+      "rhs_transform": null,
+      "rhs_value": 0.01,
+      "result": true
+    }
+  ],
+  "materialized": null,
+  "drift": null,
+  "materialization_status": "skipped_pinned_only",
+  "materialization_error": null,
+  "evaluated_at": "2026-04-22T13:02:21+00:00",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-08",
+  "evaluator_version": "0.2.0"
+}

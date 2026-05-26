@@ -1,0 +1,27 @@
+{
+  "PreToolUse": [
+    {
+      "tool_name": "submit_claim",
+      "description": "Block submit_claim if the local evaluator has not validated the draft as LICENSED.",
+      "command": [
+        "uvx", "--from", "polymer-formalclaim>=0.2.0",
+        "polymer-formalclaim", "validate",
+        "--fail-on-pending",
+        "--fail-on-rejected",
+        "${TOOL_INPUT.path}"
+      ]
+    }
+  ],
+  "SessionStart": [
+    {
+      "description": "Refresh the bundled corpus snapshot pointer on session start.",
+      "command": [
+        "uvx", "--from", "polymer-formalclaim>=0.2.0",
+        "polymer-formalclaim", "refresh-corpus",
+        "--pointer", ".claude/corpus/pointer.json"
+      ],
+      "timeout_seconds": 5,
+      "non_blocking": true
+    }
+  ]
+}

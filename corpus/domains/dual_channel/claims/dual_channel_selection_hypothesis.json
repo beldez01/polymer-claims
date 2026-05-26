@@ -1,0 +1,212 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "title": "HYPOTHESIZED (post-MOD-1 reframe): symbolic-channel selection on codon identity opposes material-channel perturbation on the same mutations",
+  "posted_at": "2026-04-02",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-02",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/dual_channel_selection_hypothesis",
+    "display": "Migration cohort for 'HYPOTHESIZED (post-MOD-1 reframe): symbolic-channel selection on codon identity '",
+    "definition": {
+      "source_dataset": {
+        "name": "Polymer dual-channel corpus",
+        "version": "ensembl_human_ancestral_v109",
+        "extra": {
+          "first_premise_layer": "human_fixed_substitutions_titv"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/dual_channel_selection_hypothesis",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_titv_fixation_human",
+      "source": {
+        "layer": "human_fixed_substitutions_titv",
+        "version": "ensembl_human_ancestral_v109",
+        "provenance_state": "local_rds",
+        "note": "Genome-wide Ti/Tv ratio of fixed substitutions on the human lineage relative to the inferred ancestral sequence (Ensembl)."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "lineage",
+        "op": "=",
+        "rhs": "human"
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_unselected_titv_input",
+      "source": {
+        "layer": "germline_mutational_input_titv",
+        "version": "kong_2012_decode_germline",
+        "provenance_state": "local_rds",
+        "note": "Estimated transition/transversion ratio in the unselected germline mutational input (Kong et al. 2012 deCODE family trios), prior to selection."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "lineage",
+        "op": "=",
+        "rhs": "human_germline_input"
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_titv_fixed_human",
+      "kind": "estimator",
+      "inputs": [
+        "p_titv_fixation_human"
+      ],
+      "estimator": {
+        "name": "titv_ratio",
+        "impl": "python::polymer_genomics.stats.titv_ratio",
+        "version": "polymer_genomics@0.3.x",
+        "response": "n_substitutions_by_class",
+        "params": {
+          "class_field": "ti_or_tv"
+        }
+      }
+    },
+    {
+      "id": "o_titv_germline_input",
+      "kind": "estimator",
+      "inputs": [
+        "p_unselected_titv_input"
+      ],
+      "estimator": {
+        "name": "titv_ratio",
+        "impl": "python::polymer_genomics.stats.titv_ratio",
+        "version": "polymer_genomics@0.3.x",
+        "response": "n_substitutions_by_class",
+        "params": {
+          "class_field": "ti_or_tv"
+        }
+      }
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_titv_fixed",
+      "produced_by": "o_titv_fixed_human",
+      "name": "titv_fixed_human_lineage",
+      "value": 2.05,
+      "evidence_class": "S"
+    },
+    {
+      "id": "s_titv_germline_input",
+      "produced_by": "o_titv_germline_input",
+      "name": "titv_unselected_germline_input",
+      "value": 0.6,
+      "evidence_class": "S",
+      "note": "Pre-selection germline mutational input Ti/Tv estimate from Kong 2012; reported in MOD-3 context."
+    },
+    {
+      "id": "s_titv_enrichment_ratio",
+      "produced_by": "o_titv_fixed_human",
+      "name": "titv_enrichment_fixed_over_input",
+      "value": 3.4,
+      "evidence_class": "D",
+      "note": "Derived: s_titv_fixed / s_titv_germline_input. Selection enriches transitions ~3.4-fold over the unselected expectation."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_titv_fixed"
+          },
+          "op": ">",
+          "rhs": 1.5
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_titv_enrichment_ratio"
+          },
+          "op": ">",
+          "rhs": 2.0
+        }
+      ]
+    },
+    "justification": "Two conjuncts establish the empirical premise on which the hypothesis stands: (1) the human fixed Ti/Tv must be substantively above 1.0 (transition-biased fixation); (2) the enrichment over the unselected germline input must be substantial (>2x), establishing that selection — not mutational input — produces the bias. Note: licensing the inference licenses the empirical premise that 'fixation is transition-biased and selection-driven.' The dual-channel SELECTION mechanism is HYPOTHESIZED on top of this; the statistics here do NOT directly demonstrate symbolic-channel-overriding-material-channel at the per-mutation level. That would require a per-mutation comparison of thermodynamic perturbation (loud) vs codon impact (silent transitions in 4-fold-degenerate sites are over-represented), which is queued as a separate sibling claim that this claim depends on.",
+    "failure_mode": "If s_titv_fixed fell to ~ 0.6 (matching the input), the empirical anchor for the dual-channel hypothesis would dissolve — there would be no fixation bias for selection to explain. Note: even if the inference is licensed, the conclusion is registered as qualified_positive (HYPOTHESIZED), reflecting MOD-1's downgrade of the original 'demonstrates dual selection' framing."
+  },
+  "conclusion": {
+    "assertion": "Human fixed substitutions show a Ti/Tv ratio of approximately 2.05, ~3.4-fold enriched over the unselected germline mutational input. This is empirically consistent with — but does not demonstrate — a dual-channel framework in which symbolic-channel selection (codon identity, biased toward synonymous transitions in 4-fold-degenerate sites) opposes material-channel perturbation (transitions disrupt stacking thermodynamics more severely than transversions on average). The hypothesis is registered as qualified_positive pending per-mutation verification.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "human_fixed_substitutions_titv",
+          "version": "ensembl_human_ancestral_v109",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "germline_mutational_input_titv",
+          "version": "kong_2012_decode_germline",
+          "provenance_state": "local_rds"
+        }
+      ],
+      "restrictions": {
+        "kind": "cmp",
+        "col": "lineage",
+        "op": "in",
+        "rhs": [
+          "human",
+          "human_germline_input"
+        ]
+      },
+      "scale_note": "Genome-wide Ti/Tv comparison. Per-codon and per-position decompositions live as sibling claims; the cost-expression gradient (cost_expression_gradient_human) is the partner claim that this hypothesis depends on for its symbolic-channel motivation."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Hypothesis register: confidence reflects the pattern of evidence, not a single-test p-value."
+    },
+    "outcome": "qualified_positive"
+  },
+  "depends_on": [
+    "cost_expression_gradient_human"
+  ],
+  "external_assumptions": [
+    {
+      "statement": "The MOD-1 reframe from 'demonstrates dual selection' to 'is consistent with' / 'hypothesized' is the correct epistemic register; the two correlations in the paper (cost-expression and Ti/Tv) jointly suggest but do not prove opposing selective regimes on the same mutations.",
+      "kind": "design_choice",
+      "citation": "internal/InSilico/dual_channel/manuscript/paper2_dual_channel/R/mod01_reframe_claims.R",
+      "confidence": 0.95
+    },
+    {
+      "statement": "Kong et al. 2012 deCODE family-trio mutational input estimate is a defensible upper bound for the unselected human germline Ti/Tv; alternative estimates (1KG de novo, gnomAD low-frequency) would shift the enrichment ratio modestly but not its sign.",
+      "kind": "literature",
+      "citation": "Kong et al. Nature 2012",
+      "confidence": 0.85
+    },
+    {
+      "statement": "This claim supersedes the paper2 v1 draft framings 'reflects symbolic-channel selection' and 'demonstrates dual selection' (both downgraded by MOD-1). v1.1 schema does not yet have first-class supersedes/superseded_by fields; the supersession is documented in dual_channel/claims/README.md (claim 7) until v1.2.",
+      "kind": "design_choice",
+      "citation": "internal/InSilico/dual_channel/claims/README.md",
+      "confidence": 0.95
+    }
+  ],
+  "notebook": "internal/InSilico/dual_channel/manuscript/paper2_dual_channel/R/mod01_reframe_claims.R"
+}

@@ -1,0 +1,298 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 24,
+  "title": "HLA-A 5'UTR/promoter is dramatically cell-type-specific — monocyte β=0.083 (open) vs T-naive β=0.593 (closed), a Δβ=0.510 inversion that explains the Phase 4c paradox",
+  "posted_at": "2026-04-19",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-06",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/hla_t_naive_promoter_methylation_bimodal",
+    "display": "Migration cohort for 'HLA-A 5'UTR/promoter is dramatically cell-type-specific — monocyte β=0.083 (open'",
+    "definition": {
+      "source_dataset": {
+        "name": "IPD-IMGT/HLA",
+        "version": "loyfer_2023_v1",
+        "extra": {
+          "first_premise_layer": "loyfer_wgbs_methylation_atlas"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/hla_t_naive_promoter_methylation_bimodal",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_loyfer_wgbs_8_celltypes",
+      "source": {
+        "layer": "loyfer_wgbs_methylation_atlas",
+        "version": "loyfer_2023_v1",
+        "provenance_state": "local_rds",
+        "note": "Loyfer et al. 2023 WGBS methylation atlas at 1 kb resolution, 8+ hematopoietic cell types including monocyte, B naive, B memory, T naive, T memory, NK, erythroid, HSC, CMP, GMP, neutrophil, eosinophil."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "celltype",
+        "op": "in",
+        "rhs": [
+          "monocyte",
+          "neutrophil",
+          "b_naive",
+          "b_memory",
+          "t_naive",
+          "t_memory",
+          "nk",
+          "erythroid",
+          "hsc",
+          "cmp",
+          "gmp",
+          "eosinophil"
+        ]
+      },
+      "cardinality": 12,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_hla_a_5utr_promoter_window",
+      "source": {
+        "layer": "hla_a_reference_windows",
+        "version": "grch38_reference",
+        "provenance_state": "fly_postgres",
+        "note": "HLA-A reference-genome 1 kb window coordinates from chr6:29,941,000–29,942,000 spanning the 5'UTR and proximal promoter. Contains 25 CpGs."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "chr",
+            "op": "=",
+            "rhs": "chr6"
+          },
+          {
+            "kind": "cmp",
+            "col": "window_start",
+            "op": "=",
+            "rhs": 29941000
+          },
+          {
+            "kind": "cmp",
+            "col": "window_end",
+            "op": "=",
+            "rhs": 29942000
+          },
+          {
+            "kind": "cmp",
+            "col": "region_annotation",
+            "op": "=",
+            "rhs": "5utr_promoter"
+          }
+        ]
+      },
+      "cardinality": 1,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_per_celltype_mean_beta",
+      "kind": "aggregate",
+      "inputs": [
+        "p_loyfer_wgbs_8_celltypes"
+      ],
+      "by": [
+        "celltype"
+      ],
+      "agg": [
+        {
+          "col": "beta",
+          "fn": "mean",
+          "na_rm": true
+        }
+      ],
+      "note": "Per-cell-type mean β across the 25 CpGs in the 5'UTR/promoter window."
+    },
+    {
+      "id": "o_extract_monocyte_vs_tnaive",
+      "kind": "project",
+      "inputs": [
+        "o_per_celltype_mean_beta"
+      ],
+      "cols": [
+        "celltype",
+        "mean_beta"
+      ],
+      "note": "Pull the monocyte and T-naive means for the cross-cell-type comparison."
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_monocyte_beta",
+      "produced_by": "o_per_celltype_mean_beta",
+      "name": "hla_a_5utr_promoter_mean_beta_monocyte",
+      "value": 0.083,
+      "n": 25,
+      "evidence_class": "S",
+      "note": "Monocyte HLA-A 5'UTR/promoter β = 0.083 — open (unmethylated). HLA-A is transcribed in monocytes, consistent with antigen-presentation function."
+    },
+    {
+      "id": "s_t_naive_beta",
+      "produced_by": "o_per_celltype_mean_beta",
+      "name": "hla_a_5utr_promoter_mean_beta_t_naive",
+      "value": 0.593,
+      "n": 25,
+      "evidence_class": "S",
+      "note": "T-naive HLA-A 5'UTR/promoter β = 0.593 — intermediate/closed. Naive T cells transcribe HLA-A less than effector populations; the promoter is partially methylated."
+    },
+    {
+      "id": "s_delta_beta_tnaive_monocyte",
+      "produced_by": "o_per_celltype_mean_beta",
+      "name": "t_naive_minus_monocyte_beta",
+      "value": 0.51,
+      "evidence_class": "D",
+      "note": "Derived: s_t_naive_beta − s_monocyte_beta = 0.593 − 0.083 = 0.510. An exceptionally large cross-cell-type Δβ at a single 1 kb promoter window — far exceeds typical tissue-of-the-same-lineage comparisons."
+    },
+    {
+      "id": "s_mean_beta_across_celltypes",
+      "produced_by": "o_per_celltype_mean_beta",
+      "name": "hla_a_5utr_promoter_mean_beta_average",
+      "value": 0.295,
+      "n": 25,
+      "evidence_class": "S",
+      "note": "Average across all 12 cell types. The mean is near 0.3 because the two extremes (monocyte 0.08, T-naive 0.59) balance; the distribution itself is bimodal."
+    },
+    {
+      "id": "s_exon_1_2_cgi_beta",
+      "produced_by": "o_per_celltype_mean_beta",
+      "name": "hla_a_exon_1_2_cgi_mean_beta_average",
+      "value": 0.031,
+      "n": 10,
+      "evidence_class": "S",
+      "note": "The adjacent exon 1–2 CpG island (10 CpGs, 29,942–29,943k) is uniformly unmethylated (mean β = 0.031) across ALL cell types. This is the internal positive control: promoter-proximal CpG islands at active genes should be constitutively unmethylated. Its flatness highlights that the 5'UTR/promoter variability is genuine and not a measurement artifact."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_monocyte_beta"
+          },
+          "op": "<",
+          "rhs": 0.2
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_t_naive_beta"
+          },
+          "op": ">",
+          "rhs": 0.5
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_delta_beta_tnaive_monocyte"
+          },
+          "op": ">",
+          "rhs": 0.3
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_exon_1_2_cgi_beta"
+          },
+          "op": "<",
+          "rhs": {
+            "stat_id": "s_monocyte_beta"
+          }
+        }
+      ]
+    },
+    "justification": "Four conjuncts license the bimodal cell-type-specific methylation claim: (1) monocyte β < 0.2 — the 'open' end is substantively unmethylated; (2) T-naive β > 0.5 — the 'closed' end is substantively methylated; (3) Δβ > 0.3 — the inter-celltype swing is large, consistent with an actively regulated locus (typical between-tissue Δβ at housekeeping promoters is < 0.1); (4) exon 1-2 CGI β < monocyte β — stat-vs-stat internal control: the adjacent constitutive CpG island is even less methylated than monocytes, so the 5'UTR/promoter variability is a local feature of THIS window, not a global measurement artifact.",
+    "failure_mode": "If Δβ < 0.3, the 'dramatic cell-type specificity' framing weakens to 'typical tissue variation'. If the exon 1-2 CGI were heterogeneously methylated, the result at the 5'UTR could be confounded with technical variance. The CGI's flatness is the silent pinned anchor."
+  },
+  "conclusion": {
+    "assertion": "HLA-A's 5'UTR/promoter (1 kb window containing 25 CpGs at chr6:29,941,000–29,942,000) is dramatically cell-type specific in its methylation state: monocyte mean β = 0.083 (open) vs T-naive mean β = 0.593 (closed), a Δβ of 0.510. The adjacent exon 1-2 CpG island is uniformly unmethylated (β = 0.031) across all cell types, serving as an internal control that validates the promoter-region variability. This cell-type-specific pattern is where the Ramsuran 2015 allele-specific methylation operates and explains the Phase 4c paradox in exp24 — HLA-A expression differences by allele are modulated by a background of strong cell-type methylation asymmetry.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "loyfer_wgbs_methylation_atlas",
+          "version": "loyfer_2023_v1",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "hla_a_reference_windows",
+          "version": "grch38_reference",
+          "provenance_state": "fly_postgres"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "=",
+            "rhs": "HLA-A"
+          },
+          {
+            "kind": "cmp",
+            "col": "window_bp",
+            "op": "=",
+            "rhs": 1000
+          },
+          {
+            "kind": "cmp",
+            "col": "region_annotation",
+            "op": "=",
+            "rhs": "5utr_promoter"
+          }
+        ]
+      },
+      "scale_note": "Reference-genome WGBS, NOT allele-resolved. The Ramsuran 2015 allele-specific component (A*24:02 vs A*01:01 methylation in monocytes) is a separate child claim because it requires allele-assigned reads that Loyfer does not provide."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Per-celltype n=25 CpGs; no formal inferential test — this is a descriptive per-window comparison. Per-CpG permutation null staged but not pinned."
+    },
+    "outcome": "positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "Loyfer 2023 WGBS β values at 1 kb resolution are faithful representations of methylation state in the named cell types; reference-genome alignment is appropriate for a species-conserved locus like HLA-A.",
+      "kind": "literature",
+      "citation": "Loyfer et al. 2023",
+      "confidence": 0.9
+    },
+    {
+      "statement": "Reference-only methylation is a limitation — per-allele methylation differences are superimposed on the cross-celltype pattern reported here. The cross-celltype Δβ should be interpreted as the population-average modulation within which allele-specific patterns operate.",
+      "kind": "design_choice",
+      "citation": "ANALYSIS_LOG.md § WGBS Methylation Landscape",
+      "confidence": 0.85
+    },
+    {
+      "statement": "The 1 kb window at chr6:29,941,000–29,942,000 faithfully captures the HLA-A 5'UTR and proximal promoter region; annotation is consistent with RefSeq and GENCODE.",
+      "kind": "design_choice",
+      "citation": "GRCh38",
+      "confidence": 0.9
+    }
+  ],
+  "notebook": "internal/InSilico/HLA experiment/provenance/exp24_hla_expression_biophysics/phase4c_wgbs_methylation_landscape.py"
+}

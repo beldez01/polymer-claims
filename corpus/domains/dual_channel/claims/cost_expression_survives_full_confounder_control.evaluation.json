@@ -1,0 +1,35 @@
+{
+  "claim_id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "schema_version": "v1.2",
+  "verdict": "LICENSED",
+  "conjuncts": [
+    {
+      "lhs_stat_id": "s_partial_full",
+      "lhs_transform": "abs",
+      "lhs_value": 0.05,
+      "op": ">",
+      "rhs_stat_id": null,
+      "rhs_transform": null,
+      "rhs_value": 0.03,
+      "result": true
+    },
+    {
+      "lhs_stat_id": "s_partial_full",
+      "lhs_transform": null,
+      "lhs_value": -0.05,
+      "op": "<",
+      "rhs_stat_id": null,
+      "rhs_transform": null,
+      "rhs_value": 0.0,
+      "result": true
+    }
+  ],
+  "materialized": null,
+  "drift": null,
+  "materialization_status": "skipped_pinned_only",
+  "materialization_error": null,
+  "evaluated_at": "2026-04-22T13:02:21+00:00",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-02",
+  "evaluator_version": "0.2.0"
+}

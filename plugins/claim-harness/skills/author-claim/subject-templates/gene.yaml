@@ -1,0 +1,14 @@
+# gene-or-protein subject template
+#
+# Use when the claim targets a named gene, protein, transcript, or isoform.
+
+kind: gene_or_protein
+id: "{{canonical-curie}}"                                   # prefer HGNC:{n} for human genes
+display: "{{symbol}}"
+identifiers:
+  hgnc: "HGNC:{{n}}"                                        # canonical for human genes
+  ensembl_gene: "ENSG{{…}}"                                 # one of the three required
+  uniprot: "{{P_…}}"                                        # one of the three required
+  symbol: "{{symbol}}"                                      # optional convenience
+entity_type: "{{gene|protein|transcript|isoform}}"
+assembly_context: "{{GRCh38.p14 | null}}"

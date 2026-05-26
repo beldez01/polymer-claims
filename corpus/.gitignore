@@ -1,0 +1,7 @@
+*.pyc
+__pycache__/
+.venv/
+.DS_Store
+evaluator/uv.lock
+corpus.json
+corpus.index.json

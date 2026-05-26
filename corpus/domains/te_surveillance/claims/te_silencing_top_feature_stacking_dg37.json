@@ -1,0 +1,261 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 3,
+  "title": "Stacking ΔG₃₇ is the #1 feature for TE silencing prediction across 4 of 5 tissues; evolutionary age ranks 10th–14th",
+  "posted_at": "2026-04-19",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-03",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/te_silencing_top_feature_stacking_dg37",
+    "display": "Migration cohort for 'Stacking ΔG₃₇ is the #1 feature for TE silencing prediction across 4 of 5 tissue'",
+    "definition": {
+      "source_dataset": {
+        "name": "Polymer TE surveillance corpus",
+        "version": "exp03_phase1_v2",
+        "extra": {
+          "first_premise_layer": "exp03_rf_feature_importance_by_tissue"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/te_silencing_top_feature_stacking_dg37",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_te_silencing_feature_importance_grid",
+      "source": {
+        "layer": "exp03_rf_feature_importance_by_tissue",
+        "version": "exp03_phase1_v2",
+        "provenance_state": "local_rds",
+        "note": "Per-tissue random-forest permutation-importance tables from exp03, one RF per tissue × silencing-state target. Staged from results/rf_importance_by_tissue.csv."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "tissue",
+            "op": "in",
+            "rhs": [
+              "H1_hESC",
+              "IMR90",
+              "K562",
+              "HepG2",
+              "GM12878"
+            ]
+          },
+          {
+            "kind": "cmp",
+            "col": "silencing_state",
+            "op": "in",
+            "rhs": [
+              "H3K27me3",
+              "H3K9me3",
+              "active",
+              "quiescent",
+              "bivalent"
+            ]
+          }
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_top_feature_per_tissue",
+      "kind": "aggregate",
+      "inputs": [
+        "p_te_silencing_feature_importance_grid"
+      ],
+      "by": [
+        "tissue"
+      ],
+      "agg": [
+        {
+          "col": "importance",
+          "fn": "max",
+          "na_rm": true
+        }
+      ],
+      "note": "Per-tissue argmax over the 64-feature importance column, returning the top-ranked feature name and its permutation-importance score."
+    },
+    {
+      "id": "o_divergence_rank_per_tissue",
+      "kind": "project",
+      "inputs": [
+        "p_te_silencing_feature_importance_grid"
+      ],
+      "cols": [
+        "tissue",
+        "divergence_rank"
+      ],
+      "note": "Pull the rank of the evolutionary-age (divergence) feature per tissue from the full 64-feature importance order."
+    },
+    {
+      "id": "o_count_tissues_stacking_top",
+      "kind": "aggregate",
+      "inputs": [
+        "o_top_feature_per_tissue"
+      ],
+      "by": [],
+      "agg": [
+        {
+          "col": "top_feature_is_stacking_dg37",
+          "fn": "sum",
+          "na_rm": true
+        }
+      ],
+      "note": "Indicator sum: number of tissues where stacking_dg37 is the top-ranked feature."
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_top_feature_mode",
+      "produced_by": "o_top_feature_per_tissue",
+      "name": "modal_top_feature_across_tissues",
+      "value": "stacking_dg37",
+      "n": 5,
+      "evidence_class": "S",
+      "note": "Categorical top-feature summary. Mode is stacking_dg37, with 4 of 5 tissues selecting it; the exception is H3K9me3-ESC where KRAB-ZnF motif recognition dominates over bulk physics."
+    },
+    {
+      "id": "s_n_tissues_top_stacking",
+      "produced_by": "o_count_tissues_stacking_top",
+      "name": "n_tissues_where_stacking_dg37_is_top_feature",
+      "value": 4,
+      "n": 5,
+      "evidence_class": "S"
+    },
+    {
+      "id": "s_divergence_rank_min",
+      "produced_by": "o_divergence_rank_per_tissue",
+      "name": "min_rank_of_divergence_across_tissues",
+      "value": 10,
+      "n": 5,
+      "evidence_class": "S",
+      "note": "Lowest (best) rank of divergence across tissues. Full range across tissues is 10th–14th; pinning the best case here as the load-bearing conservative bound."
+    },
+    {
+      "id": "s_top_features_per_tissue",
+      "produced_by": "o_top_feature_per_tissue",
+      "name": "top_feature_by_tissue_labeled",
+      "value": [
+        {
+          "label": "H1_hESC_H3K9me3_top_is_sequence_motif_class",
+          "value": 0.0
+        },
+        {
+          "label": "IMR90_top_is_stacking_dg37",
+          "value": 1.0
+        },
+        {
+          "label": "K562_top_is_stacking_dg37",
+          "value": 1.0
+        },
+        {
+          "label": "HepG2_top_is_stacking_dg37",
+          "value": 1.0
+        },
+        {
+          "label": "GM12878_top_is_stacking_dg37",
+          "value": 1.0
+        }
+      ],
+      "n": 5,
+      "evidence_class": "K",
+      "note": "LabeledValue[] encoding of the per-tissue modal feature as a binary indicator (1 = stacking_dg37, 0 = other). The H1_hESC exception is the H3K9me3 designed negative control."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_n_tissues_top_stacking"
+          },
+          "op": ">=",
+          "rhs": 4
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_divergence_rank_min"
+          },
+          "op": ">",
+          "rhs": 5
+        }
+      ]
+    },
+    "justification": "Two conjuncts license the claim: (1) at least 4 of 5 tissues select stacking_dg37 as #1 confirms the biophysical-over-sequence-composition ranking is robust across tissues rather than idiosyncratic; (2) evolutionary age (divergence) ranks below the top-5 in every tissue, demonstrating that the material channel carries more silencing information than age does — the central claim against the naive CpG/age-driven expectation.",
+    "failure_mode": "If fewer than 4 tissues selected stacking_dg37, the modal-feature claim collapses to tissue-specific noise. If divergence ranked in the top 5 in any tissue, the biophysics-beats-age framing would need qualification to that specific tissue."
+  },
+  "conclusion": {
+    "assertion": "Across 5 Roadmap tissues × 5 silencing-state targets, stacking ΔG₃₇ (thermodynamic stability) is the top-ranked permutation-importance feature in 4 of 5 tissues, with evolutionary-age (divergence) never ranking higher than 10th. DNA thermodynamic stability carries more TE-silencing information than age or sequence-composition features — a ranking that contradicts the naive CpG-density expectation and identifies the material channel as the dominant predictor.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "exp03_rf_feature_importance_by_tissue",
+          "version": "exp03_phase1_v2",
+          "provenance_state": "local_rds"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "n_tissues",
+            "op": "=",
+            "rhs": 5
+          },
+          {
+            "kind": "cmp",
+            "col": "model",
+            "op": "=",
+            "rhs": "random_forest_silencing"
+          }
+        ]
+      },
+      "scale_note": "Feature-ranking claim at the tissue-aggregate level. Per-TE importance contributions (SHAP) are a separate deferred fixture."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "No significance test on the ranking — this is a descriptive ordering. A resampling bootstrap of top-feature identity is staged in RESULT.md § Caveats."
+    },
+    "outcome": "positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "Permutation importance (ranger's `permutation` method) is a faithful ranking even in the presence of correlated features (stacking_dg37 correlates r=0.997 with gc_content genome-wide per Exp 01).",
+      "kind": "design_choice",
+      "citation": "RESULT.md § Caveats",
+      "confidence": 0.7
+    },
+    {
+      "statement": "The 5-tissue panel is representative of the 15-Roadmap-epigenome universe for the purpose of this ranking claim.",
+      "kind": "design_choice",
+      "citation": "RESULT.md § Caveats",
+      "confidence": 0.75
+    }
+  ],
+  "notebook": "internal/InSilico/TE surveillance/provenance/exp03_silencing_prediction/R/05_phase1_v2.R"
+}

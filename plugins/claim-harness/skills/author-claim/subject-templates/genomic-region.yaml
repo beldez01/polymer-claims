@@ -1,0 +1,16 @@
+# genomic-region subject template
+#
+# Use for claims about a specific genomic locus, chromosomal window,
+# or spatial region (hg38 / hg37 / T2T-CHM13v2.0).
+
+kind: genomic_region
+id: "{{assembly}}:{{chrom}}:{{start}}-{{end}}:{{strand}}"   # canonicalized
+display: "{{human-readable label}}"                         # e.g. "HLA-A promoter (hg38 chr6:29,941,000-29,942,000)"
+assembly: "{{assembly}}"                                    # GRCh38.p14 / GRCh37.p13 / T2T-CHM13v2.0
+chrom: "{{chrom}}"
+start: "{{1-based-closed-start}}"
+end: "{{1-based-closed-end}}"
+strand: "{{+|-|.}}"                                         # . if unstranded / does not apply
+
+# domain: this subject is legal under domain == "genomic".
+# context required key: assembly.

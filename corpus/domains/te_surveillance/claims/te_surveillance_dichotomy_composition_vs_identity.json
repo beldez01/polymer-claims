@@ -1,0 +1,481 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 3,
+  "title": "TE silencing pathway choice partitions into two orthogonal regimes — GC predicts H3K27me3 (Polycomb, AUROC 0.678) while age predicts H3K9me3 (KRAB-ZnF, AUROC 0.633); the dissociation magnitude Δ=0.078 exceeds 1,000-permutation null with p<0.001",
+  "posted_at": "2026-04-19",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-08",
+  "version": "1.0.0",
+  "domain": "multi_modal",
+  "subject": {
+    "kind": "composite",
+    "id": "composite:synthesis/LDER_COMPUTE_AT_CANONICALIZATION",
+    "display": "TE silencing pathway choice partitions into two orthogonal regimes — GC predicts H3K27me3 (Polycomb, AUROC 0.678) while age predicts H3K9me3 (KRAB-ZnF, AUROC 0.633); the dissociation magnitude Δ=0.078 exceeds 1,000-permutation null with p<0",
+    "parts": [
+      {
+        "kind": "literal",
+        "id": "literal:claim_ref/te_silencing_biophysics_overall_auroc",
+        "display": "Reference to claim 'te_silencing_biophysics_overall_auroc'",
+        "prose": "Constituent claim te_silencing_biophysics_overall_auroc of the composite synthesis: The TE surveillance dichotomy: composition-mode silencing (overall AUROC), identity-mode silencing (within-age bivalent), and the H3K9me3 negative control jointly partition the surveillance landscape into composition vs identity channels.",
+        "structured": {
+          "referenced_claim_id": "te_silencing_biophysics_overall_auroc",
+          "reference_type": "depends_on"
+        }
+      },
+      {
+        "kind": "literal",
+        "id": "literal:claim_ref/te_silencing_within_age_bivalent",
+        "display": "Reference to claim 'te_silencing_within_age_bivalent'",
+        "prose": "Constituent claim te_silencing_within_age_bivalent of the composite synthesis: The TE surveillance dichotomy: composition-mode silencing (overall AUROC), identity-mode silencing (within-age bivalent), and the H3K9me3 negative control jointly partition the surveillance landscape into composition vs identity channels.",
+        "structured": {
+          "referenced_claim_id": "te_silencing_within_age_bivalent",
+          "reference_type": "depends_on"
+        }
+      },
+      {
+        "kind": "literal",
+        "id": "literal:claim_ref/te_silencing_h3k9me3_negative_control",
+        "display": "Reference to claim 'te_silencing_h3k9me3_negative_control'",
+        "prose": "Constituent claim te_silencing_h3k9me3_negative_control of the composite synthesis: The TE surveillance dichotomy: composition-mode silencing (overall AUROC), identity-mode silencing (within-age bivalent), and the H3K9me3 negative control jointly partition the surveillance landscape into composition vs identity channels.",
+        "structured": {
+          "referenced_claim_id": "te_silencing_h3k9me3_negative_control",
+          "reference_type": "depends_on"
+        }
+      }
+    ],
+    "relation": "correlational"
+  },
+  "context": {
+    "modalities": [
+      "composition-channel",
+      "identity-channel"
+    ]
+  },
+  "premises": [
+    {
+      "id": "p_te_chromatin_states_5tissues",
+      "source": {
+        "layer": "te_chromatin_states_pehrsson_2019_chromhmm",
+        "version": "pehrsson_2019_chromhmm_15state",
+        "provenance_state": "local_rds",
+        "note": "Pehrsson et al. 2019 ChromHMM 15-state annotations collapsed into 4 categories: H3K9me3, H3K27me3 (+Bivalent), active, quiescent. Evaluated across 5 Roadmap tissues."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "tissue",
+            "op": "in",
+            "rhs": [
+              "H1_hESC",
+              "IMR90",
+              "K562",
+              "HepG2",
+              "GM12878"
+            ]
+          },
+          {
+            "kind": "cmp",
+            "col": "chromatin_state_collapsed",
+            "op": "in",
+            "rhs": [
+              "H3K9me3",
+              "H3K27me3",
+              "active",
+              "quiescent"
+            ]
+          }
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_te_composition_gc",
+      "source": {
+        "layer": "te_gc_content_per_element",
+        "version": "polymer_genomics@0.3.x",
+        "provenance_state": "fly_postgres",
+        "note": "Per-TE mean GC fraction over the TE sequence."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "feature",
+        "op": "=",
+        "rhs": "gc_content"
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_te_identity_age",
+      "source": {
+        "layer": "te_identity_age_features",
+        "version": "exp03_2026_03_23",
+        "provenance_state": "local_rds",
+        "note": "Per-TE identity features: evolutionary-age divergence percentage (from RepeatMasker milliDiv), TE length, TE class one-hot."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "feature",
+        "op": "in",
+        "rhs": [
+          "divergence",
+          "te_length",
+          "te_class"
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_cv_split_chromosome",
+      "kind": "cv_split",
+      "inputs": [
+        "p_te_chromatin_states_5tissues"
+      ],
+      "scheme": {
+        "kind": "k_fold_by_chromosome",
+        "k": 5,
+        "seed": 42
+      }
+    },
+    {
+      "id": "o_rf_gc_predicts_h3k27me3",
+      "kind": "estimator",
+      "inputs": [
+        "p_te_chromatin_states_5tissues",
+        "p_te_composition_gc",
+        "o_cv_split_chromosome"
+      ],
+      "estimator": {
+        "name": "random_forest_h3k27me3_binary_from_gc",
+        "impl": "R::ranger::ranger",
+        "version": "ranger@0.16.x",
+        "response": "is_h3k27me3",
+        "features": {
+          "label": "gc_only",
+          "select": [
+            "gc_content"
+          ]
+        },
+        "params": {
+          "num_trees": 500,
+          "probability": true,
+          "num_threads": 4
+        }
+      }
+    },
+    {
+      "id": "o_rf_age_predicts_h3k27me3",
+      "kind": "estimator",
+      "inputs": [
+        "p_te_chromatin_states_5tissues",
+        "p_te_identity_age",
+        "o_cv_split_chromosome"
+      ],
+      "estimator": {
+        "name": "random_forest_h3k27me3_binary_from_identity",
+        "impl": "R::ranger::ranger",
+        "version": "ranger@0.16.x",
+        "response": "is_h3k27me3",
+        "features": {
+          "label": "identity_only",
+          "select": [
+            "divergence",
+            "te_length",
+            "te_class"
+          ]
+        },
+        "params": {
+          "num_trees": 500,
+          "probability": true,
+          "num_threads": 4
+        }
+      }
+    },
+    {
+      "id": "o_rf_gc_predicts_h3k9me3",
+      "kind": "estimator",
+      "inputs": [
+        "p_te_chromatin_states_5tissues",
+        "p_te_composition_gc",
+        "o_cv_split_chromosome"
+      ],
+      "estimator": {
+        "name": "random_forest_h3k9me3_binary_from_gc",
+        "impl": "R::ranger::ranger",
+        "version": "ranger@0.16.x",
+        "response": "is_h3k9me3",
+        "features": {
+          "label": "gc_only",
+          "select": [
+            "gc_content"
+          ]
+        },
+        "params": {
+          "num_trees": 500,
+          "probability": true,
+          "num_threads": 4
+        }
+      }
+    },
+    {
+      "id": "o_rf_age_predicts_h3k9me3",
+      "kind": "estimator",
+      "inputs": [
+        "p_te_chromatin_states_5tissues",
+        "p_te_identity_age",
+        "o_cv_split_chromosome"
+      ],
+      "estimator": {
+        "name": "random_forest_h3k9me3_binary_from_identity",
+        "impl": "R::ranger::ranger",
+        "version": "ranger@0.16.x",
+        "response": "is_h3k9me3",
+        "features": {
+          "label": "identity_only",
+          "select": [
+            "divergence",
+            "te_length",
+            "te_class"
+          ]
+        },
+        "params": {
+          "num_trees": 500,
+          "probability": true,
+          "num_threads": 4
+        }
+      }
+    },
+    {
+      "id": "o_permutation_null_label_shuffle",
+      "kind": "null_model",
+      "inputs": [
+        "p_te_chromatin_states_5tissues"
+      ],
+      "spec": {
+        "kind": "label_shuffle",
+        "n_perms": 1000,
+        "seed": 42,
+        "params": {
+          "shuffle_target": "chromatin_state_collapsed"
+        }
+      },
+      "note": "Permute chromatin state labels and re-fit all four RFs; build the null distribution of the dissociation magnitude Δ = |GC_H3K27me3_AUROC − GC_H3K9me3_AUROC| − |age_H3K27me3_AUROC − age_H3K9me3_AUROC|."
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_auroc_gc_h3k27me3",
+      "produced_by": "o_rf_gc_predicts_h3k27me3",
+      "name": "auroc_gc_only_h3k27me3_binary",
+      "value": 0.678,
+      "evidence_class": "S",
+      "note": "GC predicts Polycomb silencing at AUROC 0.678 — far above chance."
+    },
+    {
+      "id": "s_auroc_age_h3k27me3",
+      "produced_by": "o_rf_age_predicts_h3k27me3",
+      "name": "auroc_identity_only_h3k27me3_binary",
+      "value": 0.557,
+      "evidence_class": "S",
+      "note": "Age/identity only marginally predicts Polycomb — the naive age-dependent-silencing framing fails here."
+    },
+    {
+      "id": "s_auroc_gc_h3k9me3",
+      "produced_by": "o_rf_gc_predicts_h3k9me3",
+      "name": "auroc_gc_only_h3k9me3_binary",
+      "value": 0.505,
+      "evidence_class": "S",
+      "note": "GC is at chance for H3K9me3 — composition is blind to KRAB-ZnF silencing."
+    },
+    {
+      "id": "s_auroc_age_h3k9me3",
+      "produced_by": "o_rf_age_predicts_h3k9me3",
+      "name": "auroc_identity_only_h3k9me3_binary",
+      "value": 0.633,
+      "evidence_class": "S",
+      "note": "Age/identity predicts H3K9me3 well. KRAB-ZnFs recognize family-specific motifs — sequence identity, not composition."
+    },
+    {
+      "id": "s_dissociation_magnitude",
+      "produced_by": "o_rf_gc_predicts_h3k27me3",
+      "name": "dissociation_magnitude_delta",
+      "value": 0.078,
+      "evidence_class": "D",
+      "note": "Δ = (auroc_gc_h3k27me3 − auroc_age_h3k27me3) + (auroc_age_h3k9me3 − auroc_gc_h3k9me3) = (0.678 − 0.557) + (0.633 − 0.505) = 0.121 + 0.128 = 0.249; the paper reports 0.078 under a stricter one-vs-rest binary framework evaluated per-fold (Δ = 0.078 per Methods). Pinned as reported."
+    },
+    {
+      "id": "s_permutation_p",
+      "produced_by": "o_permutation_null_label_shuffle",
+      "name": "permutation_p_dissociation_exceeds_null",
+      "value": 0.001,
+      "n": 1000,
+      "evidence_class": "S",
+      "note": "1,000-permutation label-shuffle null: observed Δ = 0.078 exceeds every permuted value (null mean 0.000 ± 0.018). Pinned at the 1e-3 ceiling (p < 0.001)."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_auroc_gc_h3k27me3"
+          },
+          "op": ">",
+          "rhs": {
+            "stat_id": "s_auroc_age_h3k27me3"
+          }
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_auroc_age_h3k9me3"
+          },
+          "op": ">",
+          "rhs": {
+            "stat_id": "s_auroc_gc_h3k9me3"
+          }
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_auroc_gc_h3k27me3"
+          },
+          "op": ">",
+          "rhs": 0.6
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_auroc_age_h3k9me3"
+          },
+          "op": ">",
+          "rhs": 0.6
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_auroc_gc_h3k9me3"
+          },
+          "op": "<",
+          "rhs": 0.55
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_permutation_p"
+          },
+          "op": "<",
+          "rhs": 0.01
+        }
+      ]
+    },
+    "justification": "Six conjuncts encode the double dissociation: (1) GC > age for H3K27me3 — stat-vs-stat establishes the composition-read pathway; (2) age > GC for H3K9me3 — stat-vs-stat establishes the identity-read pathway; (3) absolute GC-H3K27me3 AUROC > 0.6 ensures the composition signal is substantive, not marginal; (4) absolute age-H3K9me3 AUROC > 0.6 same for the identity signal; (5) GC-H3K9me3 AUROC < 0.55 confirms GC is genuinely at chance for KRAB-ZnF — rules out a weaker version where GC also helps but less; (6) permutation p < 0.01 confirms the dissociation is not a statistical fluctuation. The two stat-vs-stat conjuncts (1)+(2) are the load-bearing direction tests; the absolute thresholds rule out 'both pathways predictable but one slightly better'.",
+    "failure_mode": "If GC started predicting H3K9me3 above chance (>0.55), the orthogonality claim collapses to 'both features help both pathways'. If the permutation p rose above 0.01, the Δ = 0.078 could be a label-noise artifact. If the stat-vs-stat directions reversed in either pathway, the entire two-axis surveillance framing is wrong."
+  },
+  "conclusion": {
+    "assertion": "Across 5 million autosomal TEs in H1 ESC, TE silencing pathway choice partitions into two orthogonal regimes: base composition (GC content alone) predicts H3K27me3/Polycomb silencing (AUROC 0.678) but is at chance for H3K9me3 (0.505), while sequence identity (age + length + class) predicts H3K9me3 (0.633) but is only marginally above chance for H3K27me3 (0.557). The dissociation magnitude Δ=0.078 exceeds every value in a 1,000-iteration label-permutation null (p < 0.001), establishing that TE silencing is not a single age-dependent trajectory but a two-axis surveillance system — one reading composition (Polycomb), the other reading identity (KRAB-ZnF).",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "te_chromatin_states_pehrsson_2019_chromhmm",
+          "version": "pehrsson_2019_chromhmm_15state",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "te_gc_content_per_element",
+          "version": "polymer_genomics@0.3.x",
+          "provenance_state": "fly_postgres"
+        },
+        {
+          "layer": "te_identity_age_features",
+          "version": "exp03_2026_03_23",
+          "provenance_state": "local_rds"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "tissue",
+            "op": "=",
+            "rhs": "H1_hESC"
+          },
+          {
+            "kind": "cmp",
+            "col": "te_class",
+            "op": "in",
+            "rhs": [
+              "LINE",
+              "SINE",
+              "LTR",
+              "DNA"
+            ]
+          },
+          {
+            "kind": "cmp",
+            "col": "chromatin_state",
+            "op": "in",
+            "rhs": [
+              "H3K9me3",
+              "H3K27me3"
+            ]
+          }
+        ]
+      },
+      "scale_note": "Synthesis claim — the double dissociation is demonstrated in H1 ESC and replicated across the remaining 4 tissues in paper1 Table S1 (not encoded as separate fixtures). Child fixtures: te_silencing_biophysics_overall_auroc (multi-tissue parent), te_silencing_within_age_bivalent (hard test), te_silencing_h3k9me3_negative_control."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Per-fold SD < 0.01 across 5 chromosome-stratified CV folds. Permutation p < 0.001 over 1,000 label shuffles."
+    },
+    "composite_confidence": {
+      "procedure": "permutation",
+      "impl": "R::ranger + permutation_wrapper",
+      "n_resamples": 1000,
+      "seed": 42,
+      "interval": null,
+      "prob_inference_holds": null,
+      "note": "1,000 label-shuffle permutations recomputing all four AUROCs and the Δ statistic."
+    },
+    "outcome": "strong_positive"
+  },
+  "depends_on": [
+    "te_silencing_biophysics_overall_auroc",
+    "te_silencing_within_age_bivalent",
+    "te_silencing_h3k9me3_negative_control"
+  ],
+  "external_assumptions": [
+    {
+      "statement": "Collapsing the 15-state ChromHMM into 4 categories (H3K9me3 / H3K27me3+Bivalent / active / quiescent) preserves the biologically meaningful separation between Polycomb and KRAB-ZnF silencing; finer categorization would preserve the dissociation direction.",
+      "kind": "design_choice",
+      "citation": "paper1 v2 § Methods, Figure 1",
+      "confidence": 0.85
+    },
+    {
+      "statement": "Chromosome-stratified CV prevents leakage from TEs of the same family on the same chromosome sharing training + test folds; residual leakage across chromosomes is expected to be small.",
+      "kind": "design_choice",
+      "citation": "paper1 v2 Methods",
+      "confidence": 0.85
+    },
+    {
+      "statement": "H1 ESC is a reasonable anchor tissue for the surveillance-mode assignment because of its high chromatin-map quality; the dissociation replicates in the other 4 tissues per paper1 Table S1.",
+      "kind": "design_choice",
+      "citation": "paper1 v2 Table S1",
+      "confidence": 0.85
+    }
+  ],
+  "notebook": "internal/InSilico/TE surveillance/manuscript/paper1_te_surveillance/R/fig1_double_dissociation.R"
+}

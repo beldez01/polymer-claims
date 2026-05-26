@@ -1,0 +1,393 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 26,
+  "title": "Within-protein (2-field-invisible) non-coding biophysical variance is substantial at Class I HLA loci (29–69% at HLA-A; Z-penalty 68.9%) and corresponds to expression-variant alleles at d up to 2.49",
+  "posted_at": "2026-04-19",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-19",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/within_protein_biophysical_variance_invisible_to_matching",
+    "display": "Migration cohort for 'Within-protein (2-field-invisible) non-coding biophysical variance is substantia'",
+    "definition": {
+      "source_dataset": {
+        "name": "IPD-IMGT/HLA",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "extra": {
+          "first_premise_layer": "hla_alleles_genomic_sequences"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/within_protein_biophysical_variance_invisible_to_matching",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_hla_4field_alleles_grouped_by_protein",
+      "source": {
+        "layer": "hla_alleles_genomic_sequences",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "provenance_state": "fly_postgres",
+        "note": "4-field IPD-IMGT/HLA alleles grouped by 2-field protein (first two numeric fields). Exp26 variance decomposition restricts to protein groups with >=2 four-field alleles: HLA-A 162 groups / 2604 alleles, HLA-B 255/3307, HLA-C 178/3078, HLA-DRB1 69/515."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "in",
+            "rhs": [
+              "HLA-A",
+              "HLA-B",
+              "HLA-C",
+              "HLA-DRB1"
+            ]
+          },
+          {
+            "kind": "cmp",
+            "col": "field_resolution",
+            "op": ">=",
+            "rhs": 4
+          }
+        ]
+      },
+      "cardinality": 9504,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE",
+      "note": "9504 = sum of per-locus allele counts above."
+    },
+    {
+      "id": "p_imgt_expression_suffixes",
+      "source": {
+        "layer": "imgt_expression_suffix_annotations",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "provenance_state": "local_rds",
+        "note": "IMGT suffix annotations: normal, L (low), Q (questionable), S (secreted). N (null) excluded from the within-protein expression-variant test because null is a coding-level disruption, not a biophysical effect."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "suffix",
+        "op": "in",
+        "rhs": [
+          "normal",
+          "L",
+          "Q",
+          "S"
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_per_allele_biophysics",
+      "source": {
+        "layer": "biophysics_per_hla_allele",
+        "version": "polymer_genomics@compute_region_biophysics",
+        "provenance_state": "fly_postgres",
+        "note": "Per-allele whole-allele biophysical metrics including CpG density, NC stacking ΔG₃₇, GC, total Z-form penalty, CpG island count."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "metric",
+        "op": "in",
+        "rhs": [
+          "cpg_density_nc",
+          "stacking_dg37_nc",
+          "gc_content",
+          "z_penalty_total",
+          "cpg_island_count"
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_hierarchical_variance_partition",
+      "kind": "estimator",
+      "inputs": [
+        "p_hla_4field_alleles_grouped_by_protein",
+        "p_per_allele_biophysics"
+      ],
+      "estimator": {
+        "name": "hierarchical_between_within_protein_variance",
+        "impl": "R::lme4::lmer",
+        "version": "lme4@1.1.x",
+        "response": "metric_value",
+        "features": {
+          "label": "protein_group_random_intercept",
+          "select": [
+            "protein_group_2field"
+          ]
+        },
+        "params": {
+          "formula": "metric_value ~ 1 + (1 | protein_group_2field)",
+          "output": "percent_between_within"
+        }
+      },
+      "note": "Random-intercept model per locus × metric. Output: (% between-protein variance, % within-protein variance). The within-protein component is invisible to 2-field matching."
+    },
+    {
+      "id": "o_within_protein_expression_suffix_dtest",
+      "kind": "estimator",
+      "inputs": [
+        "p_hla_4field_alleles_grouped_by_protein",
+        "p_imgt_expression_suffixes",
+        "p_per_allele_biophysics"
+      ],
+      "estimator": {
+        "name": "within_protein_cohens_d_normal_vs_variant",
+        "impl": "python::polymer_genomics.stats.within_group_cohens_d",
+        "version": "polymer_genomics@0.3.x",
+        "features": {
+          "label": "cpg_density_nc",
+          "select": [
+            "cpg_density_nc",
+            "z_penalty_total"
+          ]
+        },
+        "response": "is_expression_variant",
+        "params": {
+          "min_alleles_per_group": 3,
+          "require_at_least_one_normal_and_one_variant": true
+        }
+      },
+      "note": "Cohen's d within each qualifying protein group between normal and expression-variant alleles. 56 of 11,879 protein groups qualify across 6 loci. Reports per-locus max |d| and mean |d|."
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_hla_a_within_protein_variance_range",
+      "produced_by": "o_hierarchical_variance_partition",
+      "name": "hla_a_within_protein_variance_percent_range",
+      "value": [
+        {
+          "label": "hla_a_cpg_density_within_pct",
+          "value": 29.0
+        },
+        {
+          "label": "hla_a_stacking_dg37_within_pct",
+          "value": 35.8
+        },
+        {
+          "label": "hla_a_gc_content_within_pct",
+          "value": 52.3
+        },
+        {
+          "label": "hla_a_z_penalty_within_pct",
+          "value": 68.9
+        },
+        {
+          "label": "hla_a_cpg_island_count_within_pct",
+          "value": 28.2
+        }
+      ],
+      "n": 5,
+      "evidence_class": "S",
+      "note": "HLA-A whole-allele variance partition (Table 5). Range 28.2–68.9% within-protein."
+    },
+    {
+      "id": "s_hla_a_within_max_pct",
+      "produced_by": "o_hierarchical_variance_partition",
+      "name": "hla_a_max_within_protein_variance_pct",
+      "value": 68.9,
+      "evidence_class": "D",
+      "note": "Max over HLA-A metrics is Z-form penalty at 68.9%."
+    },
+    {
+      "id": "s_hla_a_within_min_pct",
+      "produced_by": "o_hierarchical_variance_partition",
+      "name": "hla_a_min_within_protein_variance_pct",
+      "value": 29.0,
+      "evidence_class": "D",
+      "note": "Min over HLA-A metrics is CpG density at 29.0%."
+    },
+    {
+      "id": "s_hla_a_top_cohens_d",
+      "produced_by": "o_within_protein_expression_suffix_dtest",
+      "name": "hla_a_top_within_protein_cohens_d",
+      "value": 2.49,
+      "n": 12,
+      "evidence_class": "S",
+      "note": "Max |Cohen's d| across 12 qualifying HLA-A protein groups. Achieved by A*01:01 on CpG density (228 normal alleles vs 1 L-expression variant). The load-bearing 'non-coding biophysics differs substantially within protein-identical alleles' stat."
+    },
+    {
+      "id": "s_hla_a_mean_cohens_d",
+      "produced_by": "o_within_protein_expression_suffix_dtest",
+      "name": "hla_a_mean_within_protein_cohens_d",
+      "value": 1.05,
+      "n": 12,
+      "evidence_class": "S",
+      "note": "Mean |d| across 12 qualifying HLA-A protein groups. Directional consistency: 67% of groups show variant > normal CpG density."
+    },
+    {
+      "id": "s_drb1_within_protein_variance_range",
+      "produced_by": "o_hierarchical_variance_partition",
+      "name": "drb1_within_protein_variance_percent_range",
+      "value": [
+        {
+          "label": "drb1_cpg_count_within_pct",
+          "value": 2.8
+        },
+        {
+          "label": "drb1_gc_content_within_pct",
+          "value": 0.5
+        },
+        {
+          "label": "drb1_stacking_dg37_within_pct",
+          "value": 0.6
+        },
+        {
+          "label": "drb1_cpg_island_count_within_pct",
+          "value": 9.6
+        }
+      ],
+      "n": 4,
+      "evidence_class": "S",
+      "note": "HLA-DRB1 whole-allele variance partition — Class II contrast. Within-protein variance <10% across metrics, meaning DRB1 non-coding divergence tracks coding lineage tightly (opposite of Class I)."
+    },
+    {
+      "id": "s_drb1_within_max_pct",
+      "produced_by": "o_hierarchical_variance_partition",
+      "name": "drb1_max_within_protein_variance_pct",
+      "value": 9.6,
+      "evidence_class": "D",
+      "note": "Max over DRB1 metrics is CpG island count at 9.6% — still below Class I minima."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_hla_a_within_min_pct"
+          },
+          "op": ">",
+          "rhs": 20.0
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_hla_a_within_max_pct"
+          },
+          "op": ">",
+          "rhs": 50.0
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_hla_a_top_cohens_d"
+          },
+          "op": ">",
+          "rhs": 2.0
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_drb1_within_max_pct"
+          },
+          "op": "<",
+          "rhs": {
+            "stat_id": "s_hla_a_within_min_pct"
+          }
+        }
+      ]
+    },
+    "justification": "Four conjuncts license the 'within-protein biophysical layer is real and matching-invisible' claim: (1) HLA-A minimum within-protein variance > 20% establishes that even the most between-protein-dominated metric still has substantial within-protein signal; (2) HLA-A max > 50% establishes that some metrics (Z-penalty) are majority within-protein — those features are essentially invisible to 2-field matching; (3) top Cohen's d > 2.0 confirms the within-protein biophysical variation corresponds to actual expression-variant phenotypes, not just structural noise; (4) DRB1 max < HLA-A min (stat-vs-stat) establishes the Class I / Class II contrast — DRB1's tight coupling of coding and non-coding divergence is a meaningful internal control that makes the Class I story structural rather than generic.",
+    "failure_mode": "If HLA-A within-protein variance fell below 20% universally, the 'hidden layer' framing collapses to edge-case noise. If d_top dropped below 1.0, the within-protein variation would be biologically silent — an interesting structural decomposition with no functional consequence. If DRB1 also showed 29–69% within-protein variance, the Class I specificity would dissolve into a locus-invariant pattern and we couldn't separate signal from pipeline artifact."
+  },
+  "conclusion": {
+    "assertion": "At Class I HLA loci, 29–69% of non-coding biophysical variance resides within 2-field protein groups (HLA-A Z-form penalty: 68.9%), and the within-protein variation corresponds to actual expression-variant alleles with Cohen's d up to 2.49 (A*01:01 CpG density, 228 normal vs 1 low-expression allele). The pattern is Class I specific: HLA-DRB1 shows <10% within-protein variance across all metrics, indicating non-coding divergence at Class II loci is structured by protein lineage rather than accumulating independently. Current 2-field transplant matching is therefore blind to substantial, expression-relevant non-coding biophysical variation at Class I.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "hla_alleles_genomic_sequences",
+          "version": "ipd_imgt_hla_v3.56.0",
+          "provenance_state": "fly_postgres"
+        },
+        {
+          "layer": "imgt_expression_suffix_annotations",
+          "version": "ipd_imgt_hla_v3.56.0",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "biophysics_per_hla_allele",
+          "version": "polymer_genomics@compute_region_biophysics",
+          "provenance_state": "fly_postgres"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "field_resolution",
+            "op": ">=",
+            "rhs": 4
+          },
+          {
+            "kind": "cmp",
+            "col": "protein_group_min_allele_count",
+            "op": ">=",
+            "rhs": 2
+          },
+          {
+            "kind": "cmp",
+            "col": "expression_suffix",
+            "op": "in",
+            "rhs": [
+              "normal",
+              "L",
+              "Q",
+              "S"
+            ]
+          }
+        ]
+      },
+      "scale_note": "Whole-allele scope at 4-field resolution. The DPB1*11:01 d=25.44 outlier on Z-penalty is noted in the manuscript but deliberately excluded from the load-bearing inference conjuncts (single-allele observation)."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Per-metric within-protein percentages from random-intercept lme4 fit; Cohen's d from within-group t-test. Bootstrap CIs staged but not pinned here."
+    },
+    "outcome": "positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "Hierarchical variance partitioning with protein-group random intercepts faithfully separates between-protein and within-protein components when at least 2 alleles per protein group are available.",
+      "kind": "design_choice",
+      "citation": "Exp26 manuscript § 2.4",
+      "confidence": 0.9
+    },
+    {
+      "statement": "IMGT expression-suffix annotations (normal / L / Q / S) are a valid (if coarse) proxy for within-protein expression-variant phenotype; null-suffix alleles are excluded because null is a coding-level effect.",
+      "kind": "design_choice",
+      "citation": "Exp26 manuscript § 2.6",
+      "confidence": 0.8
+    },
+    {
+      "statement": "The Class I / Class II contrast (within-protein variance substantial at Class I, <10% at DRB1) is a genuine biological pattern, not a pipeline artifact of sample-size differences across loci.",
+      "kind": "mechanistic",
+      "citation": "Exp26 manuscript § 2.5",
+      "confidence": 0.8
+    }
+  ],
+  "notebook": "internal/InSilico/HLA experiment/provenance/exp26_hla_allele_diversity/R/05_variance_decomposition.R"
+}

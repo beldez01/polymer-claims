@@ -1,0 +1,284 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 24,
+  "title": "Five FDR-significant HLA-B 5'UTR polymorphic CpGs cluster within named CRC modules (4 of 5)",
+  "posted_at": "2026-04-13",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-13",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/hla_b_crc_polymorphic_cpg_cluster",
+    "display": "Migration cohort for 'Five FDR-significant HLA-B 5'UTR polymorphic CpGs cluster within named CRC modul'",
+    "definition": {
+      "source_dataset": {
+        "name": "IPD-IMGT/HLA",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "extra": {
+          "first_premise_layer": "hla_b_5utr_per_position_polymorphism"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/hla_b_crc_polymorphic_cpg_cluster",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_hla_b_5utr_polymorphic_cpgs",
+      "source": {
+        "layer": "hla_b_5utr_per_position_polymorphism",
+        "version": "ipd_imgt_hla_v3.56.0",
+        "provenance_state": "local_rds",
+        "note": "Per-position polymorphism (Ti/Tv-decomposed) within the HLA-B 5'UTR across 4-field protein-distinct alleles."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "=",
+            "rhs": "HLA-B"
+          },
+          {
+            "kind": "cmp",
+            "col": "region",
+            "op": "=",
+            "rhs": "5UTR"
+          },
+          {
+            "kind": "cmp",
+            "col": "is_cpg_position",
+            "op": "=",
+            "rhs": true
+          }
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_crc_module_annotation",
+      "source": {
+        "layer": "creg_module_definitions",
+        "version": "creg_v2",
+        "provenance_state": "local_rds",
+        "note": "Cross-reactive epitope group (CREG) module definitions over HLA serogroups; pinned to the curated CRC variant used in the manuscript."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "scheme",
+        "op": "=",
+        "rhs": "CRC_named_modules"
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_per_cpg_polymorphism_test",
+      "kind": "estimator",
+      "inputs": [
+        "p_hla_b_5utr_polymorphic_cpgs"
+      ],
+      "estimator": {
+        "name": "per_cpg_polymorphism_significance_test",
+        "impl": "python::polymer_genomics.stats.per_position_chi2_vs_uniform",
+        "version": "polymer_genomics@0.3.x",
+        "response": "n_minor_allele_substitutions",
+        "params": {
+          "null": "uniform_within_5utr"
+        }
+      }
+    },
+    {
+      "id": "o_fdr_correct",
+      "kind": "correct",
+      "inputs": [
+        "o_per_cpg_polymorphism_test"
+      ],
+      "method": "bh",
+      "note": "Benjamini-Hochberg FDR correction across all CpG positions in HLA-B 5'UTR."
+    },
+    {
+      "id": "o_filter_fdr_sig",
+      "kind": "filter",
+      "inputs": [
+        "o_fdr_correct"
+      ],
+      "predicate": {
+        "kind": "cmp",
+        "col": "fdr_q",
+        "op": "<",
+        "rhs": 0.05
+      }
+    },
+    {
+      "id": "o_polymorphism_null_position_shuffle",
+      "kind": "null_model",
+      "inputs": [
+        "p_hla_b_5utr_polymorphic_cpgs"
+      ],
+      "spec": {
+        "kind": "label_shuffle",
+        "n_perms": 10000,
+        "seed": 42,
+        "params": {
+          "shuffle_target": "cpg_polymorphism_label_within_5utr"
+        }
+      },
+      "note": "Permute polymorphism status across CpG positions within the 5'UTR; recompute FDR-significant count per permutation."
+    },
+    {
+      "id": "o_join_sig_cpgs_with_crc_modules",
+      "kind": "join",
+      "inputs": [
+        "o_filter_fdr_sig",
+        "p_crc_module_annotation"
+      ],
+      "on": "5utr_position"
+    },
+    {
+      "id": "o_count_in_named_modules",
+      "kind": "aggregate",
+      "inputs": [
+        "o_join_sig_cpgs_with_crc_modules"
+      ],
+      "by": [],
+      "agg": [
+        {
+          "col": "in_named_crc_module",
+          "fn": "sum"
+        }
+      ]
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_n_fdr_sig_cpgs",
+      "produced_by": "o_filter_fdr_sig",
+      "name": "n_fdr_sig_polymorphic_cpgs",
+      "value": 5,
+      "evidence_class": "S",
+      "note": "Five FDR-significant polymorphic CpGs in the HLA-B 5'UTR after BH correction."
+    },
+    {
+      "id": "s_n_in_named_crc_module",
+      "produced_by": "o_count_in_named_modules",
+      "name": "n_fdr_sig_cpgs_in_named_crc_module",
+      "value": 4,
+      "evidence_class": "S",
+      "note": "4 of the 5 FDR-significant CpGs fall within named CRC modules."
+    },
+    {
+      "id": "s_perm_p_for_module_overlap",
+      "produced_by": "o_polymorphism_null_position_shuffle",
+      "name": "permutation_p_for_4_of_5_in_named_modules",
+      "value": 0.003,
+      "evidence_class": "S",
+      "note": "Empirical p from 10,000 position-shuffle permutations: probability of >= 4-of-5 random FDR-significant positions falling within named CRC modules."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_n_fdr_sig_cpgs"
+          },
+          "op": ">=",
+          "rhs": 5
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_n_in_named_crc_module"
+          },
+          "op": ">=",
+          "rhs": 4
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_perm_p_for_module_overlap"
+          },
+          "op": "<",
+          "rhs": 0.01
+        }
+      ]
+    },
+    "justification": "Three conjuncts: (1) at least 5 FDR-significant polymorphic CpGs (BH q < 0.05) in the HLA-B 5'UTR — establishes the cluster exists; (2) at least 4 of those 5 fall within named CRC modules — establishes the clustering is structured, not isotropic; (3) permutation p < 0.01 against position-shuffled null — establishes the structuring is unlikely under chance.",
+    "failure_mode": "If s_n_in_named_crc_module < 4 OR s_perm_p_for_module_overlap > 0.01, the CpG cluster could be ascribed to FDR multiplicity within an intrinsically polymorphic region rather than CRC-module-specific selection."
+  },
+  "conclusion": {
+    "assertion": "The HLA-B 5'UTR contains five FDR-significant polymorphic CpGs (BH q < 0.05); 4 of 5 fall within named CRC modules at empirical permutation p = 0.003. This suggests CRC-module-specific selection acts on cis-regulatory CpGs rather than uniformly across the 5'UTR.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "hla_b_5utr_per_position_polymorphism",
+          "version": "ipd_imgt_hla_v3.56.0",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "creg_module_definitions",
+          "version": "creg_v2",
+          "provenance_state": "local_rds"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "=",
+            "rhs": "HLA-B"
+          },
+          {
+            "kind": "cmp",
+            "col": "region",
+            "op": "=",
+            "rhs": "5UTR"
+          }
+        ]
+      },
+      "scale_note": "Per-CpG-position resolution within the HLA-B 5'UTR. Extension to other HLA loci and to non-CpG positions are sibling claims."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Permutation p = 0.003 over 10,000 position shuffles."
+    },
+    "outcome": "positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "CREG named modules are a defensible biological grouping; the named-module annotation is curated and not generated by the same pipeline that produced the polymorphism scores.",
+      "kind": "literature",
+      "citation": null,
+      "confidence": 0.8
+    },
+    {
+      "statement": "Position-shuffle within the 5'UTR is the appropriate null. A whole-locus shuffle (5'UTR + introns + 3'UTR) would be conservative; a base-composition-matched shuffle would be more so but was not performed for this fixture.",
+      "kind": "design_choice",
+      "citation": null,
+      "confidence": 0.7
+    }
+  ],
+  "notebook": "internal/InSilico/HLA experiment/manuscript/fig04_05_06_serogroup_anatomy.py"
+}

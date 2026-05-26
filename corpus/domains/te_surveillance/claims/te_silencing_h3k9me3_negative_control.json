@@ -1,0 +1,362 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 3,
+  "title": "Designed negative control: biophysics adds essentially nothing to baseline for H3K9me3 prediction (delta AUROC = +0.004 in H1 ESC)",
+  "posted_at": "2026-03-23",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-03-23",
+  "version": "1.0.0",
+  "domain": "genomic",
+  "subject": {
+    "kind": "cohort",
+    "id": "polymer:cohorts/migration/te_silencing_h3k9me3_negative_control",
+    "display": "Migration cohort for 'Designed negative control: biophysics adds essentially nothing to baseline for H'",
+    "definition": {
+      "source_dataset": {
+        "name": "Polymer TE surveillance corpus",
+        "version": "repeatmasker_hg38_v4.0.5",
+        "extra": {
+          "first_premise_layer": "repeats_repeatmasker"
+        }
+      },
+      "inclusion": [],
+      "exclusion": [],
+      "cardinality": null,
+      "random_seed": null
+    },
+    "members_hash": "migration:v1_1_to_v1_2/te_silencing_h3k9me3_negative_control",
+    "note": "Inclusion predicates intentionally empty at migration time; the implicit member set is defined by the v1.1 premises. Re-author with explicit inclusion predicates to tighten the subject."
+  },
+  "context": {
+    "assembly": "GRCh38.p14"
+  },
+  "premises": [
+    {
+      "id": "p_te_full",
+      "source": {
+        "layer": "repeats_repeatmasker",
+        "version": "repeatmasker_hg38_v4.0.5",
+        "provenance_state": "fly_postgres",
+        "note": "Same 5,006,091-TE substrate as the bivalent claim."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "chr",
+            "op": "in",
+            "rhs": [
+              "chr1",
+              "chr2",
+              "chr3",
+              "chr4",
+              "chr5",
+              "chr6",
+              "chr7",
+              "chr8",
+              "chr9",
+              "chr10",
+              "chr11",
+              "chr12",
+              "chr13",
+              "chr14",
+              "chr15",
+              "chr16",
+              "chr17",
+              "chr18",
+              "chr19",
+              "chr20",
+              "chr21",
+              "chr22"
+            ]
+          },
+          {
+            "kind": "cmp",
+            "col": "te_class",
+            "op": "in",
+            "rhs": [
+              "LINE",
+              "SINE",
+              "LTR",
+              "DNA"
+            ]
+          }
+        ]
+      },
+      "cardinality": 5006091,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_chromhmm_e003_h1_esc",
+      "source": {
+        "layer": "chromhmm_15state_roadmap",
+        "version": "pehrsson_2019_e003",
+        "provenance_state": "local_rds",
+        "note": "Roadmap E003 H1 ESC — single clonal cell type, eliminates cell-composition concerns."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "epigenome_id",
+        "op": "=",
+        "rhs": "E003"
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_biophysics_15tracks_1kb",
+      "source": {
+        "layer": "tracks_biophysics_1kb",
+        "version": "polymer_evolution_phase1-3.5",
+        "provenance_state": "local_rds",
+        "note": "Same 15-feature biophysics block as the bivalent claim."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "track",
+        "op": "in",
+        "rhs": [
+          "stacking_dg37",
+          "deformability",
+          "curvature",
+          "persistence_length",
+          "delta_lp",
+          "cpg_obs_exp",
+          "methylation_sensitivity",
+          "wrapping_energy",
+          "predicted_occupancy",
+          "ndr_score",
+          "correlation_length",
+          "integrated_response",
+          "periodicity_power",
+          "melting_temp",
+          "groove_width"
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_join_te_chromatin",
+      "kind": "join",
+      "inputs": [
+        "p_te_full",
+        "p_chromhmm_e003_h1_esc"
+      ],
+      "on": "te_id_x_chromhmm_overlap_majority"
+    },
+    {
+      "id": "o_join_biophys",
+      "kind": "join",
+      "inputs": [
+        "o_join_te_chromatin",
+        "p_biophysics_15tracks_1kb"
+      ],
+      "on": "chr_window_1kb_overlap"
+    },
+    {
+      "id": "o_cv_split",
+      "kind": "cv_split",
+      "inputs": [
+        "o_join_biophys"
+      ],
+      "scheme": {
+        "kind": "k_fold_by_chromosome",
+        "k": 5,
+        "seed": 42
+      }
+    },
+    {
+      "id": "o_rf_m0_baseline_h3k9me3",
+      "kind": "estimator",
+      "inputs": [
+        "o_join_biophys",
+        "o_cv_split"
+      ],
+      "estimator": {
+        "name": "random_forest_auroc_cv_h3k9me3",
+        "impl": "R::randomForest::randomForest",
+        "version": "randomForest@4.7.x",
+        "response": "is_h3k9me3",
+        "features": {
+          "label": "m0_age_length_class",
+          "select": [
+            "divergence_pct",
+            "te_length",
+            "te_class"
+          ]
+        },
+        "params": {
+          "ntree": 500,
+          "mtry": 2,
+          "nodesize": 50,
+          "sampsize": 50000,
+          "seed": 42
+        }
+      }
+    },
+    {
+      "id": "o_rf_m1_biophys_h3k9me3",
+      "kind": "estimator",
+      "inputs": [
+        "o_join_biophys",
+        "o_cv_split"
+      ],
+      "estimator": {
+        "name": "random_forest_auroc_cv_h3k9me3",
+        "impl": "R::randomForest::randomForest",
+        "version": "randomForest@4.7.x",
+        "response": "is_h3k9me3",
+        "features": {
+          "label": "m1_baseline_plus_biophysics",
+          "parent": "m0_age_length_class",
+          "select": [
+            "divergence_pct",
+            "te_length",
+            "te_class",
+            "stacking_dg37",
+            "deformability",
+            "curvature",
+            "persistence_length",
+            "delta_lp",
+            "cpg_obs_exp",
+            "methylation_sensitivity",
+            "wrapping_energy",
+            "predicted_occupancy",
+            "ndr_score",
+            "correlation_length",
+            "integrated_response",
+            "periodicity_power",
+            "melting_temp",
+            "groove_width"
+          ]
+        },
+        "params": {
+          "ntree": 500,
+          "mtry": 4,
+          "nodesize": 50,
+          "sampsize": 50000,
+          "seed": 42
+        }
+      }
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_auroc_m0_h3k9me3",
+      "produced_by": "o_rf_m0_baseline_h3k9me3",
+      "name": "auroc_mean_cv_h3k9me3",
+      "value": 0.637,
+      "evidence_class": "S"
+    },
+    {
+      "id": "s_auroc_m1_h3k9me3",
+      "produced_by": "o_rf_m1_biophys_h3k9me3",
+      "name": "auroc_mean_cv_h3k9me3",
+      "value": 0.641,
+      "evidence_class": "S"
+    },
+    {
+      "id": "s_delta_auroc_h3k9me3",
+      "produced_by": "o_rf_m1_biophys_h3k9me3",
+      "name": "delta_auroc_h3k9me3_m1_minus_m0",
+      "value": 0.004,
+      "evidence_class": "D",
+      "note": "Effectively zero. Compare to bivalent delta = +0.428 within-age, or H3K27me3 delta = +0.163 in H1 ESC. The negative-control prediction is confirmed."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "and",
+      "terms": [
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_delta_auroc_h3k9me3",
+            "transform": "abs"
+          },
+          "op": "<",
+          "rhs": 0.02
+        },
+        {
+          "kind": "cmp",
+          "lhs": {
+            "stat_id": "s_auroc_m0_h3k9me3"
+          },
+          "op": ">",
+          "rhs": 0.5
+        }
+      ]
+    },
+    "justification": "Two conjuncts: (1) |delta AUROC| < 0.02 means biophysics adds essentially nothing on top of the age+length+class baseline — the desired NULL behavior for the designed negative control; (2) baseline AUROC > 0.5 ensures the test is real (the baseline can predict H3K9me3 above chance) so the null delta is informative rather than a degenerate failure case. The conclusion licenses 'biophysics is NOT involved in H3K9me3 silencing recruitment in H1 ESC' as an outcome of POSITIVE register: the claim that the negative control behaves negatively is supported.",
+    "failure_mode": "If |delta AUROC| > 0.02, the negative control would be contaminated and the bivalent / H3K27me3 / quiescent positive results would lose the credibility lift this control provides. Observed delta = +0.004 is well within the null band."
+  },
+  "conclusion": {
+    "assertion": "In H1 embryonic stem cells (E003), DNA biophysical features add essentially nothing to baseline (age + length + class) for predicting H3K9me3 chromatin state on transposable elements (delta AUROC = +0.004). This is the designed negative control: H3K9me3 silencing is recruited by KRAB-ZnF sequence-motif recognition, not biophysical properties; the null delta confirms the experiment design is selective rather than measuring 'biophysics predicts everything.'",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "repeats_repeatmasker",
+          "version": "repeatmasker_hg38_v4.0.5",
+          "provenance_state": "fly_postgres"
+        },
+        {
+          "layer": "chromhmm_15state_roadmap",
+          "version": "pehrsson_2019_e003",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "tracks_biophysics_1kb",
+          "version": "polymer_evolution_phase1-3.5",
+          "provenance_state": "local_rds"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "epigenome_id",
+            "op": "=",
+            "rhs": "E003"
+          },
+          {
+            "kind": "cmp",
+            "col": "chromatin_state_5class",
+            "op": "=",
+            "rhs": "H3K9me3"
+          }
+        ]
+      },
+      "scale_note": "Negative-control claim at the H1 ESC / H3K9me3 / 1 kb biophysics intersection. Cross-tissue stability of this null is itself a sibling claim; some other tissues show small non-null deltas at H3K9me3 (e.g. ESC delta = +0.098 within age band) that are documented separately."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "5-fold chromosome-CV per-fold AUROC SDs in mod01_cv_details.R output."
+    },
+    "outcome": "positive"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "KRAB-ZnF / TRIM28 family recognition is sequence-motif-based and not predicted by 1 kb-resolution biophysical features. The H3K9me3 negative control is therefore mechanistically licensed.",
+      "kind": "literature",
+      "citation": "Rowe 2010; Ecco 2017; Imbeault 2017",
+      "confidence": 0.9
+    },
+    {
+      "statement": "delta AUROC threshold of 0.02 separates 'effectively null' from 'small but real' incremental gain. This threshold is the same used for STRONG positive in the partner claim; using it symmetrically here keeps the inference rules consistent across the exp03 corpus.",
+      "kind": "design_choice",
+      "citation": null,
+      "confidence": 0.9
+    }
+  ],
+  "notebook": "internal/InSilico/TE surveillance/provenance/exp03_silencing_prediction/R/02_predict_silencing.R"
+}

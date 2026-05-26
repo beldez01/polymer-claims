@@ -1,0 +1,266 @@
+{
+  "$schema": "../../../epistemic_os/13_FORMAL_CLAIM_IR.md#section-3",
+  "schema_version": "v1.2",
+  "id": "sha256-PLACEHOLDER_COMPUTE_AT_CANONICALIZATION",
+  "exp_number": 24,
+  "title": "FALSIFIED: HLA-A monocyte methylation does NOT track distance-to-nearest-ERV3-16A3_I-int beyond what a random reference point achieves",
+  "posted_at": "2026-04-13",
+  "api_version": "0.9.x",
+  "data_version": "polymer-db@2026-04-13",
+  "version": "1.0.0",
+  "domain": "other",
+  "subject": {
+    "kind": "literal",
+    "id": "literal:migration/1.0.0/24",
+    "display": "FALSIFIED: HLA-A monocyte methylation does NOT track distance-to-nearest-ERV3-16A3_I-int beyond what a random reference point achieves",
+    "prose": "Migrated from v1.1 as a literal subject because the claim was marked withdrawn/falsified at migration time. Re-author with a typed subject when resuming.",
+    "structured": {
+      "migration_source": "v1.1",
+      "note": "literal wrap chosen due to withdrawn/falsified status"
+    }
+  },
+  "context": {
+    "free_form": "migrated from v1.1 without domain-specific context"
+  },
+  "premises": [
+    {
+      "id": "p_hla_a_monocyte_methylation",
+      "source": {
+        "layer": "wgbs_blueprint_monocyte_hla_a_window",
+        "version": "blueprint_2026_04",
+        "provenance_state": "local_rds",
+        "note": "Monocyte WGBS methylation per CpG in the HLA-A coordinate window (chr6:29,941,000-29,946,000)."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "chr",
+            "op": "=",
+            "rhs": "chr6"
+          },
+          {
+            "kind": "cmp",
+            "col": "cell_type",
+            "op": "=",
+            "rhs": "monocyte"
+          }
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_erv3_16a3_start_coords",
+      "source": {
+        "layer": "transposome_per_locus_coordinates",
+        "version": "polymer_genomics@transposome_family",
+        "provenance_state": "fly_postgres",
+        "note": "Per-locus genomic coordinates of ERV3-16A3_I-int instances near HLA-A."
+      },
+      "predicate": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "family",
+            "op": "=",
+            "rhs": "ERV3-16A3_I-int"
+          },
+          {
+            "kind": "cmp",
+            "col": "chr",
+            "op": "=",
+            "rhs": "chr6"
+          }
+        ]
+      },
+      "cardinality": null,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    },
+    {
+      "id": "p_random_reference_point",
+      "source": {
+        "layer": "phase5_test3_random_reference_anchor",
+        "version": "phase5_v1",
+        "provenance_state": "local_rds",
+        "note": "Single random reference position at chr6:29,942,824 used as Phase 5 Test 3 negative control. Selected once, seeded; not cherry-picked."
+      },
+      "predicate": {
+        "kind": "cmp",
+        "col": "chr_pos",
+        "op": "=",
+        "rhs": "chr6:29942824"
+      },
+      "cardinality": 1,
+      "content_hash": "blake3-PLACEHOLDER_COMPUTE_ON_EVALUATE"
+    }
+  ],
+  "operations": [
+    {
+      "id": "o_dist_to_erv_start",
+      "kind": "join",
+      "inputs": [
+        "p_hla_a_monocyte_methylation",
+        "p_erv3_16a3_start_coords"
+      ],
+      "on": "nearest_distance_bp"
+    },
+    {
+      "id": "o_dist_to_random_ref",
+      "kind": "join",
+      "inputs": [
+        "p_hla_a_monocyte_methylation",
+        "p_random_reference_point"
+      ],
+      "on": "nearest_distance_bp"
+    },
+    {
+      "id": "o_spearman_meth_vs_dist_erv",
+      "kind": "estimator",
+      "inputs": [
+        "o_dist_to_erv_start"
+      ],
+      "estimator": {
+        "name": "spearman_meth_vs_distance",
+        "impl": "scipy.stats.spearmanr",
+        "version": "scipy@1.13.x",
+        "response": "methylation_beta",
+        "features": {
+          "label": "dist_to_erv_start",
+          "select": [
+            "nearest_distance_bp"
+          ]
+        },
+        "params": {
+          "alternative": "two-sided"
+        }
+      }
+    },
+    {
+      "id": "o_spearman_meth_vs_dist_random",
+      "kind": "estimator",
+      "inputs": [
+        "o_dist_to_random_ref"
+      ],
+      "estimator": {
+        "name": "spearman_meth_vs_distance",
+        "impl": "scipy.stats.spearmanr",
+        "version": "scipy@1.13.x",
+        "response": "methylation_beta",
+        "features": {
+          "label": "dist_to_random_ref",
+          "select": [
+            "nearest_distance_bp"
+          ]
+        },
+        "params": {
+          "alternative": "two-sided"
+        }
+      }
+    }
+  ],
+  "statistics": [
+    {
+      "id": "s_rho_erv",
+      "produced_by": "o_spearman_meth_vs_dist_erv",
+      "name": "abs_spearman_rho_erv_anchor",
+      "value": 0.68,
+      "evidence_class": "S",
+      "note": "Distance-to-nearest-ERV3-16A3_I-int anchor; was the original Phase 2 finding."
+    },
+    {
+      "id": "s_rho_random",
+      "produced_by": "o_spearman_meth_vs_dist_random",
+      "name": "abs_spearman_rho_random_anchor",
+      "value": 0.95,
+      "evidence_class": "S",
+      "note": "Single random reference anchor at chr6:29,942,824. Phase 5 Test 3 finding: random anchor outperforms ERV anchor on the same window."
+    }
+  ],
+  "inference": {
+    "expression": {
+      "kind": "cmp",
+      "lhs": {
+        "stat_id": "s_rho_erv"
+      },
+      "op": ">",
+      "rhs": {
+        "stat_id": "s_rho_random"
+      }
+    },
+    "justification": "Original (Phase 2) hypothesis: HLA-A methylation tracks ERV-start distance because HERV silencing 'shadows' nearby HLA. Phase 5 Test 3 falsifier: if a single random reference anchor in the same window produces a stronger |rho| than the ERV anchor, the spatial autocorrelation in the methylation track explains the apparent ERV-anchor signal. The inference licenses the original framing only if rho_erv > rho_random.",
+    "failure_mode": "Falsified iff rho_erv <= rho_random. Observed: 0.68 vs 0.95 — random outperforms ERV. The Phase 5 Test 3 falsifier triggered. The HLA-A ERV-methylation-shadow framing is revoked."
+  },
+  "conclusion": {
+    "assertion": "The Phase 2 finding that HLA-A monocyte methylation correlates with distance to ERV3-16A3_I-int does NOT survive the Phase 5 Test 3 negative control: a single random reference point in the same window produces a stronger absolute Spearman rho (0.95) than the ERV anchor (0.68). The 'ERV methylation shadow' mechanism is FALSIFIED at this scale; the Phase 2 signal is attributable to spatial autocorrelation in the methylation track, not ERV proximity per se.",
+    "formal": null,
+    "scope": {
+      "layers": [
+        {
+          "layer": "wgbs_blueprint_monocyte_hla_a_window",
+          "version": "blueprint_2026_04",
+          "provenance_state": "local_rds"
+        },
+        {
+          "layer": "transposome_per_locus_coordinates",
+          "version": "polymer_genomics@transposome_family",
+          "provenance_state": "fly_postgres"
+        }
+      ],
+      "restrictions": {
+        "kind": "and",
+        "terms": [
+          {
+            "kind": "cmp",
+            "col": "chr",
+            "op": "=",
+            "rhs": "chr6"
+          },
+          {
+            "kind": "cmp",
+            "col": "cell_type",
+            "op": "=",
+            "rhs": "monocyte"
+          },
+          {
+            "kind": "cmp",
+            "col": "locus",
+            "op": "=",
+            "rhs": "HLA-A"
+          }
+        ]
+      },
+      "scale_note": "Falsifier is at the single-anchor / single-cell-type scale tested in Phase 5. Other ERV families and other cell types may yield different verdicts; this claim object retires the specific HLA-A x ERV3-16A3_I-int x monocyte mechanism only."
+    },
+    "confidence": {
+      "type": "frequentist",
+      "value": null,
+      "note": "Single-anchor comparison; multi-anchor / permutation-based formalization is queued as a sibling claim."
+    },
+    "outcome": "negative"
+  },
+  "depends_on": [],
+  "external_assumptions": [
+    {
+      "statement": "A single random reference point is a fair negative control for spatial-autocorrelation contamination of distance-based correlations within a small genomic window.",
+      "kind": "design_choice",
+      "citation": null,
+      "confidence": 0.85
+    },
+    {
+      "statement": "The HLA-A monocyte WGBS data quality is sufficient that a 0.27-magnitude gap in |rho| (0.95 vs 0.68) is well outside measurement noise.",
+      "kind": "design_choice",
+      "citation": null,
+      "confidence": 0.85
+    },
+    {
+      "statement": "This claim supersedes the Phase 2 'ERV methylation shadow' framing previously circulated internally. The supersession edge is recorded in HLA experiment/claims/README.md (claim 5) and in HLA experiment/README.md § Supersession is load-bearing; in v1.1 the schema does not yet have first-class supersedes/superseded_by fields, so this assumption documents the relationship until v1.2.",
+      "kind": "design_choice",
+      "citation": "internal/InSilico/HLA experiment/claims/README.md",
+      "confidence": 0.95
+    }
+  ],
+  "notebook": "internal/InSilico/HLA experiment/provenance/exp24_hla_expression_biophysics/phase5/test3_random_reference.R"
+}
