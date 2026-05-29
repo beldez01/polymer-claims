@@ -319,6 +319,11 @@ thresholds: { TAU: 0.1, ALPHA: 0.001 }
   `ontology_class` strings; a real ontology-resolution service is downstream.
 - **Not** removing the existing `evaluate()` semantics. Patterns *generate*
   inference expressions that feed the same evaluator.
+- **Not** building a first-class paper/Bundle object. "The paper" stays an
+  emergent grouping over `provenance.source` + relation edges (§12.4); a container
+  is deferred until an ingest-a-paper UX forces it.
+- **Not** building the interactive questionnaire front-end. This spec defines the
+  *schema projection* that drives it (§11); the UI is a downstream deliverable.
 
 ---
 
@@ -346,7 +351,8 @@ thresholds: { TAU: 0.1, ALPHA: 0.001 }
 1. Author the ClaimPattern document format + the `partial_correlation_with_control`
    pattern as the reference example.
 2. Add `pattern` / `roles` / `thresholds` / `profile` fields to the IR (v1.3,
-   additive) + `provenance.program`.
+   additive) + `provenance.program` + `provenance.source` (DOI/title) + the typed
+   `relations` edge list (§12).
 3. Re-express the two proof claims as conformant v1.3 fixtures; show they pass a
    `claim ⊨ pattern` structural check and produce the same `evaluate()` outcome as
    their v1.2 originals.
@@ -354,3 +360,105 @@ thresholds: { TAU: 0.1, ALPHA: 0.001 }
    evaluator.
 5. Draft `genomic_biophysics.v0.1` profile (the legality table the proof claims
    need).
+6. Specify the questionnaire schema-projection (§11): a function from
+   `(pattern, profile)` to the ordered question set + per-question MECE answer
+   range, including the tracked `other → curation` bucket. (Spec only here; the
+   interactive front-end is a downstream deliverable.)
+
+---
+
+## 11. The IR as a MECE questionnaire
+
+The authoring surface — the crown-jewel object an API user fills in to submit a
+claim — is a **dynamic, branching electronic questionnaire**. Every IR field is a
+*question*; every answer range is a *MECE ontology*. The agent or user is never
+asked to write free JSON; they choose from a constrained, ontology-backed answer
+set. Violating the schema becomes structurally impossible, because there is no
+free-text path to violate it through.
+
+**The pattern is question #1, and it branches.** Choosing the pattern unfolds the
+rest of the form:
+
+```
+Q1  What relationship are you asserting?        → [pattern catalog, MECE]
+      └─ choosing `partial_correlation_with_control` unfolds:
+Q2    Predictor?                                 → [legal ontology classes for this role × profile]
+Q3    Outcome?                                   → [legal ontology classes …]
+Q4    Confounder(s)?                             → [legal ontology classes …]
+Q5    Effect statistic (partial_correlation)?    → [bind to a produced statistic]
+Q6    Significance statistic (p_value)?          → [bind …]
+Q7    Thresholds (TAU, ALPHA)?                   → [profile defaults, overridable]
+```
+
+So the **pattern catalog is the questionnaire's branch logic** and each
+**role/context field is a constrained question**. This is the same three-layer
+model (§3) viewed from the authoring side rather than the storage side.
+
+### 11.1 MECE in practice — the curation bucket
+
+"Collectively exhaustive" over real biology is unachievable without an escape, and
+an *unprincipled* escape is precisely the failure already in the corpus
+(`domain:"other"` / `free_form`). Therefore every answer set carries an explicit,
+**first-class `other → flagged-for-curation` option** — a tracked answer, not a
+silent free-text dump. When that bucket fires frequently for a given question, it
+is the signal to extend the ontology. The escape hatch becomes the ontology's
+**growth mechanism** instead of its leak. A claim resting on a curation-bucket
+answer is valid but carries a visible "provisional ontology binding" flag until
+curated.
+
+---
+
+## 12. Claim granularity and interrelation
+
+### 12.1 A claim is one atomic, verifiable assertion
+
+A claim is **narrower than a paper**. A 10-claim Nature paper is 10 claim objects
+plus a relation graph — not one object. This is forced, not stylistic:
+
+1. **Evaluability.** `evaluate()` returns true/false/unknown for an *assertion*. A
+   paper has no single truth value; only its constituent claims do. Materialization,
+   challenge, and three-valued inference all operate at the assertion level.
+2. **The corpus already does this.** `recomb_a2_..._curvature` is a single-track
+   claim that explicitly notes its "parent corpus-wide sign-flip claim (12 of 22
+   tracks) is a separate synthesis claim." Claim-nesting was discovered empirically;
+   `depends_on` already exists in the IR.
+3. **Comparability requires atoms.** The pattern payoff — two claims comparable by
+   pattern — only holds if claims are atomic. You compare assertions, not papers.
+
+### 12.2 Two kinds of edge — author one, derive the other
+
+| Edge kind | Examples | Source |
+|---|---|---|
+| **Evidential (authored)** | `depends_on`, `refines`, `contradicts`, `companion` (e.g. the LTR/SINE pair) | The paper's argument DAG — cannot be inferred. |
+| **Comparability (derived)** | `same_pattern`, `shares_subject`, `shares_confounder` | Falls out of pattern + ontology IDs — never authored. |
+
+**Do not author what you can compute.** The evidential edge-type vocabulary is
+itself a small MECE answer set, so drawing an edge is another constrained question
+("this edge is exactly one of {depends_on, refines, contradicts, companion,
+synthesizes}").
+
+### 12.3 Synthesis is not a new mechanism — it is a meta-claim
+
+An aggregate finding ("12 of 22 tracks sign-flip") is *itself a claim* whose
+**subject is a set of other claims**, evaluated by an ordinary pattern
+(`count_or_threshold` over a claim-set). Meta-claims are claims one level up:
+
+- **Atomic claim** — subject is biology; roles filled by ontology terms.
+- **Synthesis claim** — subject is a set of claim IDs; same patterns, same evaluator.
+
+This needs almost no new machinery: `depends_on` + a "claim-set" subject kind +
+the typed `relations` edge list cover the whole interrelation surface.
+
+### 12.4 "The paper" — edges + provenance, no container (decided)
+
+There is **no first-class paper object**. A paper is an *emergent grouping*:
+
+- Each claim carries `provenance.source` (DOI / title / authors).
+- Inter-claim relations live as the typed `relations` edge list on each claim.
+- The per-paper view is a **query** ("all claims with this DOI"), not a stored
+  container — exactly like `provenance.program`.
+
+This keeps relations where they are used, removes a container to keep in sync, and
+matches the "compute, don't author" principle. A heavier Bundle/Dossier object is
+explicitly deferred until an ingest-a-whole-paper UX or citation need forces it
+(see §8 — not in scope now).
