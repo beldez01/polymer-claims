@@ -2,9 +2,7 @@
 
 Date: 2026-05-31
 Status: Foundations spec for review
-Supersedes: `2026-05-29-claim-pattern-architecture-design.md` (the pattern reframe is
-retained and absorbed here as one element of a deeper target).
-Source research (read for full justification + citations):
+Supersedes: `2026-05-29-claim-pattern-architecture-design.md` (the pattern reframe is retained and absorbed here as one element of a deeper target).Source research (read for full justification + citations):
 - `~/Desktop/Research/topics/epistemic-claim-foundations/_FINAL_ideal_claim_grammar.md`
 - `~/Desktop/Research/topics/epistemic-claim-foundations/generative-protocol/_FINAL_knowledge_generation_protocol.md`
 
@@ -12,9 +10,7 @@ Source research (read for full justification + citations):
 
 ## 0. What this is
 
-Polymer Claims is, ultimately, **a protocol for the systematic generation of scientific
-knowledge**. The claim schema (IR) is not the product — it is the *read/write format*
-of that protocol. Two artifacts define the system:
+Polymer Claims is, ultimately, **a protocol for the systematic generation of scientific knowledge**. The claim schema (IR) is not the product — it is the *read/write format* of that protocol. Two artifacts define the system:
 
 - **The Grammar** — what a claim *is*: well-formed, interpreted, licensable. (The IR + type system.)
 - **The Protocol** — how a corpus of claims *grows toward truth*: generate → pursue → assess → integrate. (The runtime.)
@@ -23,9 +19,7 @@ of that protocol. Two artifacts define the system:
 > protocol guarantees the corpus grows toward truth rather than toward confident,
 > well-typed garbage. **The IR is the contract between them.**
 
-This spec defines the **v1.3 target** for the grammar (the buildable schema delta) and
-the protocol stages it must support, derived from two adversarially-stress-tested
-research swarms (27 + 23 agents; all critiques integrated).
+This spec defines the **v1.3 target** for the grammar (the buildable schema delta) and the protocol stages it must support, derived from two adversarially-stress-tested research swarms (27 + 23 agents; all critiques integrated).
 
 ---
 
@@ -38,10 +32,7 @@ Every design decision below is judged against one test:
 | **Sensitivity** | Capture the *fullest* semantic + syntactic richness of real scientific knowledge — lose nothing real. | Sum-typed leaf (qualitative/mechanistic/existence claims get a real home); Toulmin-warrant propositions; mechanism/causal pattern; EXPLORATORY status; oracle-construction as a first-class target. |
 | **Specificity** | Admit nothing false; never force or distort science into a shape it isn't. | MECE only over statistical-form axes (never biology); `strength-incomparable` instead of a false scalar; Duhem–Quine blame *sets* not laundered verdicts; `rival_set_closure` instead of LICENSED-simpliciter; provisional-ontology fences instead of forced terms. |
 
-The failure mode we are designing against is the "**toy questionnaire**": a schema that
-*sounds* rigorous but silently loses (low sensitivity) or distorts (low specificity)
-the science. Both research keystones are, in effect, long arguments that the naive
-version fails this test and how to fix it.
+The failure mode we are designing against is the "**toy questionnaire**": a schema that *sounds* rigorous but silently loses (low sensitivity) or distorts (low specificity) the science. Both research keystones are, in effect, long arguments that the naive version fails this test and how to fix it.
 
 ---
 
@@ -55,8 +46,7 @@ version fails this test and how to fix it.
 3. **Form is computed disjointly from truth — as a *default discipline*, not a firewall.**
    Grammaticality is decided before truth, but that assignment is itself attackable
    (the `reclassify` edge) so we don't re-erect the analytic/synthetic line locally.
-4. **No primitive without a justification.** Each primitive below cites the epistemic/
-   ontological constraint that forces it (full citations in the research keystones).
+4. **No primitive without a justification.** Each primitive below cites the epistemic/ontological constraint that forces it (full citations in the research keystones).
 5. **Honest residuals over false closure.** Where exhaustiveness is impossible
    (rival-set closure, ontology coverage, corpus PPV), the residual is *surfaced and
    tracked*, never hidden.
@@ -75,20 +65,16 @@ version fails this test and how to fix it.
 
 ### 3.1 SYNTAX (rational pole)
 - **Pattern registry** — an *open*, axis-derived registry (estimand × adjustment-role ×
-  null-model × scale), each pattern a typed signature + estimand + invariance group +
-  intended/**excluded** applications. MECE holds *over these statistical-form axes only*.
+  null-model × scale), each pattern a typed signature + estimand + invariance group + intended/**excluded** applications. MECE holds *over these statistical-form axes only*.
   Merge `partial_correlation_with_control` + `model_delta_over_baseline` → **`adjusted_effect`**.
   Report a `coverage` metric, never closure. *(Replaces the 45/47 tautology.)*
-- **Mechanism / causal pattern** — *outside* the associational catalog; conclusion is a
-  causal edge/path; associational claims attach as `evidence_for` edges. *(Sensitivity.)*
+- **Mechanism / causal pattern** — *outside* the associational catalog; conclusion is a causal edge/path; associational claims attach as `evidence_for` edges. *(Sensitivity.)*
 - **Typed role slots, fixed arity** — `predictor | outcome | confounder | mediator |
   collider | instrument`; adjustment set *derived*, not authored (Pearl; Table-2 fallacy).
-- **Units-of-measure type system** — dimensions as an abelian group; unit mismatch is a
-  decidable type error (Kennedy 1997; Buckingham Π for free).
+- **Units-of-measure type system** — dimensions as an abelian group; unit mismatch is a decidable type error (Kennedy 1997; Buckingham Π for free).
 
 ### 3.2 SEMANTICS (empirical pole)
-- **L1 molecular Proposition** — typed conclusion content + a version-pinned *inferential
-  neighborhood* (material-incompatibility/consequence edges). **Replaces hash-identity**
+- **L1 molecular Proposition** — typed conclusion content + a version-pinned *inferential neighborhood* (material-incompatibility/consequence edges). **Replaces hash-identity**
   (Halvorson 2012); byte-hash demoted to dedup caching.
 - **Equivalence is an asserted, defeasible claim** — "same claim?" = "is there an IN
   `equivalence` edge?", severity-graded, first-class.
@@ -122,33 +108,20 @@ a grammar of science — the single biggest sensitivity move.)*
   σ; no verdict renders LICENSED-simpliciter. *(Specificity: no smuggled verificationism.)*
 
 ### 3.5 STRENGTH, DEFEAT, REVISION
-- **Strength = a 6-axis Pareto vector** ⟨magnitude, uncertainty, evidence-against-null,
-  severity, world-contact, explanatory-virtue⟩. AND = componentwise meet, OR = join.
-  Many claims are **`strength-incomparable`** (an explicit value). Total ranking only as a
-  logged, named-dictatorship policy. *(Kills the hidden `min` / Arrow impossibility.)*
+- **Strength = a 6-axis Pareto vector** ⟨magnitude, uncertainty, evidence-against-null, severity, world-contact, explanatory-virtue⟩. AND = componentwise meet, OR = join. Many claims are **`strength-incomparable`** (an explicit value). Total ranking only as a logged, named-dictatorship policy. *(Kills the hidden `min` / Arrow impossibility.)*
 - **Defeat is a Value-Based Argumentation Framework** (Bench-Capon 2003): edges
-  `undermine | undercut | rebut | reclassify | reinterpret`; inherit VAF tractability
-  (grounded = PTIME).
+  `undermine | undercut | rebut | reclassify | reinterpret`; inherit VAF tractability (grounded = PTIME).
 - **Duhem–Quine blame surfaced** — contradiction emits the *set* of minimal blame-
   assignments; corpus status = intersection (robustly-IN) / union (possibly-IN) /
   difference → PENDING `duhem_underdetermined`.
-- **L4 = AGM/TMS revision** (Alchourrón–Gärdenfors–Makinson 1985; Doyle 1979) with an
-  entrenchment ordering keyed to evidence_class + severity. Status recompute under a
-  *fixed* graph is PTIME-monotone (bounded defeat in-degree, enforced at write-time);
-  graph *edits* are non-monotonic AGM ops. *(Corrects the false "monotone fixpoint" claim.)*
-- **Status lifecycle**: `CONJECTURED → {EXPLORATORY | PENDING} → {LICENSED | REJECTED}`,
-  where PENDING is a *typed enum the strength fold can see* {untested, underpowered,
-  exploratory_by_design, contested, duhem_underdetermined, definitional_commitment_contested,
-  ontology_term_obsolete, strength_incomparable, **unreproducible_by_governance**}.
+- **L4 = AGM/TMS revision** (Alchourrón–Gärdenfors–Makinson 1985; Doyle 1979) with an entrenchment ordering keyed to evidence_class + severity. Status recompute under a *fixed* graph is PTIME-monotone (bounded defeat in-degree, enforced at write-time); graph *edits* are non-monotonic AGM ops. *(Corrects the false "monotone fixpoint" claim.)*
+- **Status lifecycle**: `CONJECTURED → {EXPLORATORY | PENDING} → {LICENSED | REJECTED}`, where PENDING is a *typed enum the strength fold can see* {untested, underpowered, exploratory_by_design, contested, duhem_underdetermined, definitional_commitment_contested, ontology_term_obsolete, strength_incomparable, **unreproducible_by_governance**}.
 
 ---
 
 ## 4. The Protocol — the runtime that reads/writes the grammar
 
-Eight stages + three daemons, each a total function `corpus_IR → corpus_IR`. Honestly a
-**pursuit-and-verification protocol with an *open generation port*** — generation is not
-claimed to be rule-governed; the rule-governed machinery is select → execute → verify →
-integrate. Full detail in the protocol keystone; the spine:
+Eight stages + three daemons, each a total function `corpus_IR → corpus_IR`. Honestly a **pursuit-and-verification protocol with an *open generation port*** — generation is not claimed to be rule-governed; the rule-governed machinery is select → execute → verify → integrate. Full detail in the protocol keystone; the spine:
 
 ```
 (0) REPRESENT → (1) GENERATE → (1.5) SAFETY-GATE → (2) CANONICALIZE → (3) SELECT
@@ -156,17 +129,9 @@ integrate. Full detail in the protocol keystone; the spine:
 daemons: D1 DRIFT · D2 ORACLE-VALIDATION · D3 REPRESENTATION RED-TEAM
 ```
 
-Keystone closure (the flywheel): **INTEGRATE emits the unresolved-attack frontier, which
-is identically GENERATE/SELECT's highest-value target — open problems literally are the
-next experiments.**
+Keystone closure (the flywheel): **INTEGRATE emits the unresolved-attack frontier, which is identically GENERATE/SELECT's highest-value target — open problems literally are the next experiments.**
 
-Load-bearing guarantees (each a falsifiable invariant): no self-licensing (air-gapped,
-two-implementation verifier); no LLM-paraphrased statistics (byte-faithful); no HARKing
-on the primary test (hash-lock) with the implicit search *priced* (selection-aware
-correction); no confirmation-seeking (direction-blind EIG) and no surprise-Goodharting;
-no corpus-level Type-I blowup (online-FDR + per-pattern empirical null + PPV floor); no
-model collapse (exogenous-variance + tail-coverage throttle); no unvalidated oracle
-certifying truth (D2); no silent Kuhn-loss (anomaly importation + heterodox lane).
+Load-bearing guarantees (each a falsifiable invariant): no self-licensing (air-gapped, two-implementation verifier); no LLM-paraphrased statistics (byte-faithful); no HARKing on the primary test (hash-lock) with the implicit search *priced* (selection-aware correction); no confirmation-seeking (direction-blind EIG) and no surprise-Goodharting; no corpus-level Type-I blowup (online-FDR + per-pattern empirical null + PPV floor); no model collapse (exogenous-variance + tail-coverage throttle); no unvalidated oracle certifying truth (D2); no silent Kuhn-loss (anomaly importation + heterodox lane).
 
 **Human judgment re-enters at four audited ports by design**: significance/stakes
 weighting (SELECT), novelty-to-field adjudication (VERIFY), high-stakes/contested
@@ -178,16 +143,12 @@ escalation (VERIFY→INTEGRATE), biosafety dual-use gate (SAFETY-GATE).
 
 These are *additions to the v1.3 grammar target* without which the protocol cannot run:
 
-1. **`generated_by` + `search_cardinality`** provenance — or selection-aware significance
-   correction is unrepresentable.
-2. **Oracle credibility-qualification object** (validation tier + applicability domain +
-   propagated uncertainty) bound to `operations`; strength capped by oracle tier.
-3. **`hazard_class` + governance/access-scope dimension** on data dependencies; enables
-   SAFETY-GATE and `unreproducible_by_governance`. *(Load-bearing for the TET2/TCGA surface.)*
+1. **`generated_by` + `search_cardinality`** provenance — or selection-aware significance correction is unrepresentable.
+2. **Oracle credibility-qualification object** (validation tier + applicability domain + propagated uncertainty) bound to `operations`; strength capped by oracle tier.
+3. **`hazard_class` + governance/access-scope dimension** on data dependencies; enables SAFETY-GATE and `unreproducible_by_governance`. *(Load-bearing for the TET2/TCGA surface.)*
 4. **Corpus-level online-FDR / error-budget object** as a first-class IR entity (not
    runtime memory).
-5. **`representation_revision` meta-tier** — claims *about the IR itself* (new patterns,
-   ontology terms, relaxed constraints), gated more conservatively.
+5. **`representation_revision` meta-tier** — claims *about the IR itself* (new patterns, ontology terms, relaxed constraints), gated more conservatively.
 6. **`reinterpret` edge** (meaning moved, statistics unchanged), distinct from `undercut`.
 
 ---
@@ -234,28 +195,28 @@ fullest richness of scientific knowledge.
 
 ---
 
-## 8. Deferred phase — the 3D latent-space claim viewer
+## 8. The claim viewer — already live; topology-as-subject is the deferred extension
 
-**Not in the v1.3 build; gated on scale.** The eventual interface: a navigable 3D latent
-space where a user *or agent* can:
-- see **clusters and chains** of claims as a topology (the corpus as a network object);
-- **fly through / move around** the space and inspect regions;
-- **click a claim** to open its full DAG + grammar panels (the existing FormalClaim viewer);
-- **click-drag to lasso** a cluster, so the **topology of the latent-space network itself
-  becomes a subject of investigation** (which regions are dense/sparse, which chains are
-  load-bearing, where contradictions concentrate, where the frontier is).
+**The claims viewer is already built and live on polymerbio.org.** It renders each claim
+as its full DAG + grammar panels (`FormalClaim/` suite), and the 3D latent-space universe
+exists (`FormalClaimUniverse`, `ClaimUniverse`, `/portal/latent3d`, the `viz` projection
+of the 10 in-silico experiments). So the viewing surface is **not** a greenfield build —
+it ships today.
 
-Substrate that already exists: `PolymerGenomicsAPI/viewer` — `FormalClaimUniverse`,
-`ClaimUniverse`, `/portal/latent3d`, and the `viz` projection of the 10 in-silico
-experiments. So this is an *extension of existing code*, not a greenfield build.
+**What is deferred (gated on scale) is the *topology-as-subject* mode** — the interactions
+that make the latent-space network *itself* the object of investigation:
+- **click-drag to lasso** a cluster and operate on it as a set;
+- surface **which regions are dense/sparse, which chains are load-bearing, where
+  contradictions concentrate, where the frontier is**;
+- any **scaling-law structure** of the corpus.
 
-**Why deferred:** this is only meaningful with **scale** — the topology, clusters, and
-any scaling-law structure of the latent space only emerge with *many, many* more claims
-(likely thousands+). Until the protocol (the corpus-growth engine) is producing claims at
-volume, the 3D view has too little to show. Build the generator first; the observatory
-becomes interesting once it has a sky to look at. The viewer also doubles as a protocol
-instrument later: REPRESENT (Stage 0) and the REPRESENTATION RED-TEAM daemon (D3) both
-operate on exactly this latent space.
+**Why that part is deferred:** these only become meaningful with **scale** — topology,
+clusters, and scaling-law structure only emerge with *many, many* more claims (thousands+).
+Until the protocol (the corpus-growth engine) is producing claims at volume, the existing
+3D view has too little to show for lasso/topology analysis to pay off. Build the generator
+first; the observatory already exists, but it needs a fuller sky. The viewer also doubles
+as a protocol instrument: REPRESENT (Stage 0) and the REPRESENTATION RED-TEAM daemon (D3)
+both operate on exactly this latent space.
 
 ---
 
