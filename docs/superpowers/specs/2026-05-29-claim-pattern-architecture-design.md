@@ -1,7 +1,11 @@
 # Claim-Pattern Architecture — Design Spec
 
+> **SUPERSEDED 2026-05-31** by `2026-05-31-unified-claim-foundations-spec.md`. The claim-
+> pattern reframe below is retained and absorbed there as §3.1 (one element of a deeper,
+> research-grounded v1.3 target). Read the unified spec for the current foundations.
+
 Date: 2026-05-29
-Status: Draft for review
+Status: Superseded (pattern reframe absorbed into the unified foundations spec)
 Scope: Conceptual redesign of the FormalClaim "domain" axis, plus a worked
 cross-program proof. No code yet — this spec feeds `writing-plans`.
 
