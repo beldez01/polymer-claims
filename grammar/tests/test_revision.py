@@ -4,7 +4,7 @@ from polymer_grammar.pattern import PatternRef
 from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from polymer_grammar.status import PendingReason, Status
 from polymer_grammar.strength import StrengthVector
-from polymer_grammar.revision import Entrench, compare_entrenchment
+from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails
 
 
 # ---- shared test helpers (reused by all later tasks in this file) ----
@@ -70,3 +70,30 @@ def test_equal_entrenchment():
     c = _claim("c", strength=None)
     d = _claim("d", strength=None)
     assert compare_entrenchment(c, d) == Entrench.EQUAL
+
+
+def test_entails_closure_transitive():
+    pc = _prop("C")
+    pb = _prop("B", entails=(pc.content_hash,))
+    pa = _prop("A", entails=(pb.content_hash,))
+    claims = [_claim("a", pa), _claim("b", pb), _claim("c", pc)]
+    closure = entails_closure({pa.content_hash}, claims)
+    assert pb.content_hash in closure and pc.content_hash in closure
+
+
+def test_corpus_entails_and_no_spurious_reach():
+    pc = _prop("C")
+    pa = _prop("A", entails=(pc.content_hash,))
+    pz = _prop("Z")  # unrelated
+    claims = [_claim("a", pa), _claim("c", pc), _claim("z", pz)]
+    assert corpus_entails(claims, pc.content_hash) is True
+    assert corpus_entails(claims, pz.content_hash) is True       # asserted directly
+    pq = _prop("Q")
+    assert corpus_entails(claims, pq.content_hash) is False      # not in corpus
+
+
+def test_conclusion_none_claims_are_inert():
+    pa = _prop("A")
+    claims = [_claim("a", pa), _claim("n", None)]
+    # the None-conclusion claim contributes no edges and no seed hash
+    assert corpus_entails(claims, pa.content_hash) is True

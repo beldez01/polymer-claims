@@ -9,9 +9,12 @@ recompute reuses defeat.grounded_extension. Imports nothing from polymer_formalc
 """
 from __future__ import annotations
 
+from collections import defaultdict, deque
+from collections.abc import Iterable
 from enum import Enum
 
 from .claim import Claim
+from .proposition import NeighborEdgeKind
 from .status import Status
 
 
@@ -58,3 +61,35 @@ def compare_entrenchment(a: Claim, b: Claim) -> Entrench:
     if le:
         return Entrench.LESS
     return Entrench.INCOMPARABLE
+
+
+def entails_closure(seed_hashes: Iterable[str], claims: Iterable[Claim]) -> frozenset[str]:
+    """Transitive closure over L1 ENTAILS edges, starting from `seed_hashes`.
+
+    Builds a content_hash -> {entailed content_hashes} graph from every claim's
+    conclusion neighborhood, then BFS. Returns the reachable set (incl. the seeds).
+    """
+    graph: dict[str, set[str]] = defaultdict(set)
+    for c in claims:
+        if c.conclusion is None:
+            continue
+        src = c.conclusion.content_hash
+        for e in c.conclusion.neighborhood:
+            if e.kind == NeighborEdgeKind.ENTAILS:
+                graph[src].add(e.target)
+    seen = set(seed_hashes)
+    queue = deque(seen)
+    while queue:
+        node = queue.popleft()
+        for tgt in graph.get(node, ()):
+            if tgt not in seen:
+                seen.add(tgt)
+                queue.append(tgt)
+    return frozenset(seen)
+
+
+def corpus_entails(claims: Iterable[Claim], prop_hash: str) -> bool:
+    """True iff the corpus's conclusions entail `prop_hash` (reachable via ENTAILS)."""
+    claims = tuple(claims)
+    seeds = {c.conclusion.content_hash for c in claims if c.conclusion is not None}
+    return prop_hash in entails_closure(seeds, claims)
