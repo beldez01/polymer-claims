@@ -9,7 +9,9 @@ from polymer_grammar.defeat import (
     derived_rebut_edges,
     effective_defeats,
     grounded_extension,
+    undermine_edges_from_failed_satisfactions,
 )
+from polymer_grammar.licensing import MaterializationContext, Satisfaction, SatisfactionVerdict
 from polymer_grammar.leaf import MeasurementBasis, QuantityLeaf
 from polymer_grammar.pattern import PatternRef
 from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
@@ -206,3 +208,27 @@ def test_claim_without_conclusion_is_excluded():
     )
     # none_claim contributes nothing; still exactly the 2 mutual a<->b edges
     assert len(derived_rebut_edges([a, b, none_claim])) == 2
+
+
+def _sat(mid, verdict):
+    return Satisfaction(
+        verdict=verdict,
+        materialization=MaterializationContext(id=mid, api_version="0.9", data_version="db@x"),
+    )
+
+
+def test_refuted_and_undetermined_become_undermine_edges():
+    sats = [
+        _sat("m1", SatisfactionVerdict.REFUTED),
+        _sat("m2", SatisfactionVerdict.UNDETERMINED),
+        _sat("m3", SatisfactionVerdict.SATISFIED),
+    ]
+    edges = undermine_edges_from_failed_satisfactions("claimX", sats)
+    assert len(edges) == 2
+    assert all(e.kind == DefeatEdgeKind.UNDERMINE and e.target == "claimX" for e in edges)
+    assert {e.source for e in edges} == {"refutation:m1", "refutation:m2"}
+
+
+def test_all_satisfied_yields_no_edges():
+    sats = [_sat("m1", SatisfactionVerdict.SATISFIED)]
+    assert undermine_edges_from_failed_satisfactions("claimX", sats) == ()

@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 from pydantic import model_validator
 
 from .base import _Model
+from .licensing import Satisfaction, SatisfactionVerdict
 from .proposition import NeighborEdgeKind
 from .status import Status
 from .strength import StrengthVector
@@ -149,4 +150,26 @@ def derived_rebut_edges(claims: "Iterable[Claim]") -> tuple[DefeatEdge, ...]:
                                 note="derived from incompatible_with",
                             )
                         )
+    return tuple(edges)
+
+
+def undermine_edges_from_failed_satisfactions(
+    claim_id: str, satisfactions: Iterable[Satisfaction]
+) -> tuple[DefeatEdge, ...]:
+    """Failed licensing attempts (L2) become first-class `undermine` edges instead of
+    being silently dropped. Each refuted/undetermined Satisfaction yields an edge from
+    a synthetic `refutation:{materialization.id}` node attacking the claim's basis.
+    """
+    failed = {SatisfactionVerdict.REFUTED, SatisfactionVerdict.UNDETERMINED}
+    edges: list[DefeatEdge] = []
+    for s in satisfactions:
+        if s.verdict in failed:
+            edges.append(
+                DefeatEdge(
+                    source=f"refutation:{s.materialization.id}",
+                    target=claim_id,
+                    kind=DefeatEdgeKind.UNDERMINE,
+                    note=f"{s.verdict.value} in {s.materialization.id}",
+                )
+            )
     return tuple(edges)
