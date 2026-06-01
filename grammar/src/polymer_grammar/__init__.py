@@ -44,6 +44,19 @@ from .blame import (
     aggregate_blame,
     duhem_status,
 )
+from .revision import (
+    Entrench,
+    RetractionVerdict,
+    RevisionResult,
+    compare_entrenchment,
+    contract,
+    corpus_entails,
+    entails_closure,
+    expand,
+    is_consistent,
+    restore_consistency,
+    revise,
+)
 
 __all__ = [
     "AXES",
@@ -94,4 +107,15 @@ __all__ = [
     "BlameVerdict",
     "aggregate_blame",
     "duhem_status",
+    "Entrench",
+    "RetractionVerdict",
+    "RevisionResult",
+    "compare_entrenchment",
+    "contract",
+    "corpus_entails",
+    "entails_closure",
+    "expand",
+    "is_consistent",
+    "restore_consistency",
+    "revise",
 ]
