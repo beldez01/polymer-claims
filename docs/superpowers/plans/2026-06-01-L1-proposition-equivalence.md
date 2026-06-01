@@ -16,7 +16,7 @@
 
 _(Append a dated entry per completed task: commit SHA + outcome + any deviation. Per working-preference: update this after every task.)_
 
-- Not started.
+- 2026-06-01 — Task 1 ✅ Proposition module, commit 2cd2a14, 5 tests (39 total).
 
 ---
 
