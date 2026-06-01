@@ -16,7 +16,7 @@
 
 _(Append a dated entry per completed task: commit SHA + outcome. Update after every task.)_
 
-- Not started.
+- 2026-06-01 — Task 1 ✅ satisfaction primitives, commit 7ddd839, 4 tests (58 total).
 
 ---
 
