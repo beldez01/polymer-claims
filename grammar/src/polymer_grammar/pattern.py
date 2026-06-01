@@ -26,13 +26,13 @@ class Pattern(_Model):
     null_model: str
     scale: str
     invariance_group: str
-    intended_applications: list[str]
-    excluded_applications: list[str]
-    merged_from: list[str] = []
+    intended_applications: tuple[str, ...]
+    excluded_applications: tuple[str, ...]
+    merged_from: tuple[str, ...] = ()
 
     @field_validator("excluded_applications")
     @classmethod
-    def _at_least_one_exclusion(cls, v: list[str]) -> list[str]:
+    def _at_least_one_exclusion(cls, v: tuple[str, ...]) -> tuple[str, ...]:
         if not v:
             raise ValueError(
                 "a pattern must declare >=1 excluded_application to pin its relation"

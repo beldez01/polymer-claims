@@ -12,6 +12,37 @@
 
 ---
 
+## Progress Log
+
+**Status: Phase 1 COMPLETE + merged to `main` (merge commit `8f18666`, 2026-05-31). Tuple-immutability hardening done (this section's F1).**
+
+Executed subagent-driven (fresh implementer + spec review + code-quality review per task; final whole-package review on Opus). All 7 tasks delivered; 29 tests at merge.
+
+| Task | Status | Commit | Notes |
+|---|---|---|---|
+| 1 — Scaffold isolated package | ✅ | `01f217e` | uv pkg `polymer_grammar`, `_Model`, import test |
+| 2 — Status + PendingReason enums | ✅ | `009a2d2` | 5 + 9 values |
+| 3 — L0 sum-typed Leaf | ✅ | `236b147` → `a3670a3` | review drove **`frozen=True`** on `_Model` + parametrized non-fundamental unit-rejection test + docstring fix |
+| 4 — StrengthVector (6-axis Pareto) | ✅ | `652bc1e` | meet/join/dominance/incomparability, `licensed` gate, no hidden scalar |
+| 5 — Pattern registry | ✅ | `aff294a` | open axis-derived, seeded `adjusted_effect`; review flagged shallow-frozen lists (→ F1) |
+| 6 — Claim skeleton | ✅ | `94181b8` | lifecycle invariants verified across all 6 status×reason cases |
+| 7 — Isolation guard | ✅ | `7690ad5` | naive substring → anchored import regex (avoids docstring false-positive); 17 edge cases verified |
+
+**Decisions made during execution:** (a) `_Model` is `frozen=True` (deviation from v1.2's mutable convention — justified: claims are immutable facts, prevents validator bypass, enables hashing). (b) Isolation guard uses an import-anchored regex, not substring.
+
+### Follow-up F1 — tuple-immutability hardening ✅ (commit pending this section; branch `feat/grammar-tuple-immutability`)
+The final review flagged that `frozen=True` is a *shallow* freeze: `list` fields stayed mutable in place and made `Claim`/`Pattern` unhashable (breaking the content-addressing rationale). Fixed: converted `Claim.leaves` and `Pattern.{intended_applications,excluded_applications,merged_from}` from `list[...]` → `tuple[...,...]` (pydantic coerces input lists automatically — no caller changes). Added `tests/test_immutability.py` (5 tests: tuple-coercion, in-place-mutation rejection, hashability of Claim + Pattern, equal-claims-hash-equal). Full suite now **34 passed**, ruff clean. `Claim`/`Pattern` are now genuinely deep-immutable and hashable for content-addressing.
+
+### Remaining follow-ups (not yet done)
+- Add `.pytest_cache/` + `.ruff_cache/` to root `.gitignore` (defensive; not tracked today).
+- Document the extended `MeasurementBasis` (Conventional/Ordinal/Nominal beyond spec's Fundamental/Derived).
+- `Pattern.adjustment_role` is a placeholder `str` → typed role slots (`predictor|outcome|confounder|...`) in a later phase.
+
+### Next phases (each its own plan against the unified spec)
+L1 molecular Proposition + asserted equivalence · licensing bridge ((σ,M) + dual route + `rival_set_closure`) · typed role slots + units-of-measure type system · L3 VAF defeat edges + Duhem blame-sets · L4 AGM/TMS revision · the 6 protocol-imposed fields · the evaluator.
+
+---
+
 ## File Structure
 
 New package, fully contained under `grammar/`:

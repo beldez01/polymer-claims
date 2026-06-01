@@ -23,7 +23,7 @@ class Claim(_Model):
     id: str
     title: str
     pattern: PatternRef
-    leaves: list[Leaf] = Field(min_length=1)
+    leaves: tuple[Leaf, ...] = Field(min_length=1)
     status: Status
     pending_reason: PendingReason | None = None
     strength: StrengthVector | None = None
