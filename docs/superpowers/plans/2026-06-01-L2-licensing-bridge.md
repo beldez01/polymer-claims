@@ -17,6 +17,7 @@
 _(Append a dated entry per completed task: commit SHA + outcome. Update after every task.)_
 
 - 2026-06-01 — Task 1 ✅ satisfaction primitives, commit 7ddd839, 4 tests (58 total).
+- 2026-06-01 — Task 2 ✅ Licensing record, commit 68a76d8, 6 tests (64 total).
 
 ---
 
