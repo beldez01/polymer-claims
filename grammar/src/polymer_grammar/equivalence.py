@@ -47,13 +47,25 @@ class EquivalenceClaim(_Model):
 
 
 def equivalence_class(
-    handle: str, equivalences: Iterable[EquivalenceClaim]
+    handle: str,
+    equivalences: Iterable[EquivalenceClaim],
+    *,
+    grounded_in: frozenset[str] | None = None,
 ) -> frozenset[str]:
-    """Connected component of `handle` over LICENSED, symmetric equivalence edges
-    (transitive closure). The component IS the equivalence_class_id material."""
+    """Connected component of `handle` over symmetric equivalence edges.
+
+    An edge counts as "IN" when, if `grounded_in` is supplied, its claim id is a member
+    of that grounded extension (the real L3 membership); otherwise (back-compat) when its
+    status is LICENSED.
+    """
     adj: dict[str, set[str]] = defaultdict(set)
     for eq in equivalences:
-        if eq.status == Status.LICENSED:
+        counts = (
+            eq.id in grounded_in
+            if grounded_in is not None
+            else eq.status == Status.LICENSED
+        )
+        if counts:
             adj[eq.left].add(eq.right)
             adj[eq.right].add(eq.left)
     seen = {handle}
@@ -68,7 +80,11 @@ def equivalence_class(
 
 
 def are_equivalent(
-    a: str, b: str, equivalences: Iterable[EquivalenceClaim]
+    a: str,
+    b: str,
+    equivalences: Iterable[EquivalenceClaim],
+    *,
+    grounded_in: frozenset[str] | None = None,
 ) -> bool:
-    """Reflexive / symmetric / transitive over LICENSED equivalence edges."""
-    return b in equivalence_class(a, equivalences)
+    """Reflexive / symmetric / transitive over IN equivalence edges (see equivalence_class)."""
+    return b in equivalence_class(a, equivalences, grounded_in=grounded_in)
