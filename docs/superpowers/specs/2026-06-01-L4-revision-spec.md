@@ -62,7 +62,7 @@ Each is a pure function over a corpus view `(claims: tuple[Claim, ...], edges: t
 ```
 RevisionResult(_Model):
     claims: tuple[Claim, ...]              # the new base (after retractions / additions)
-    edges: tuple[DefeatEdge, ...]          # carried-through / updated authored defeat edges
+    edges: tuple[DefeatEdge, ...]          # surviving authored edges — any edge incident to a RETRACTED claim is dropped
     retraction: RetractionVerdict | None   # present for revise/contract; None for clean expand
     in_set: frozenset[str]                 # grounded_extension(new base) — the monotone recompute
     flipped_in: frozenset[str]             # newly IN vs the prior in_set
@@ -75,6 +75,10 @@ RevisionResult(_Model):
 - **`restore_consistency(claims, edges, *, prior_in=None) -> RevisionResult`** — Hansson **consolidation**: take a possibly-inconsistent base with **no privileged claim** and make it consistent by entrenchment-guided incision of each conflict (§4). **This is the locus of the partial-entrenchment ambiguity:** when a conflict's two members are entrenchment-`EQUAL`/`INCOMPARABLE`, both land in `underdetermined`; clear least-entrenched culprits land in `robustly_retracted`. The returned `RevisionResult.claims` is the guaranteed `consistent_core`; `retraction` carries the full `RetractionVerdict` spread.
 
 `prior_in` (the previous grounded extension) lets the caller get accurate `flipped_in/out`; when omitted, it's computed from the input base so flips are relative to the pre-edit state.
+
+**Edge hygiene (every retracting op).** A retracted claim's authored defeat edges are dropped before the `grounded_extension` recompute. This is load-bearing: `grounded_extension` injects *any* edge endpoint as a node, so a stale edge from a removed claim would "zombie-attack" a survivor and wrongly flip it OUT. Dropping edges incident to any retracted id prevents this (synthetic non-claim endpoints like `refutation:*` are unaffected unless their target was retracted).
+
+**`revise` precondition.** Classical AGM revision presupposes the input base is consistent. `revise` restores consistency only with respect to `new_claim` (it retracts `p`'s conflictors); it does **not** consolidate pre-existing conflicts unrelated to `p`. To clean those up, call `restore_consistency`. The consistency-postulate test therefore uses a base that is consistent apart from the introduced conflict.
 
 ## 6. AGM postulate conformance (verified in tests)
 
@@ -90,7 +94,7 @@ Under partial entrenchment, success/inclusion/consistency still hold; the *choic
 
 ## 7. Module boundaries
 
-- `revision.py` — `Entrench` enum + `compare_entrenchment`; `entails_closure` / `corpus_entails` / `is_consistent`; `RetractionVerdict` + `restore_consistency` (the entrenchment-guided consolidation engine); `RevisionResult` + the three AGM ops `expand` / `contract` / `revise`. Pure functions + frozen models; reuses `defeat.grounded_extension`, `defeat.derived_rebut_edges`, and the `proposition` neighborhood. Mutates nothing.
+- `revision.py` — `Entrench` enum + `compare_entrenchment`; `entails_closure` / `corpus_entails` / `is_consistent`; `RetractionVerdict` + `restore_consistency` (the entrenchment-guided consolidation engine); `RevisionResult` + the three AGM ops `expand` / `contract` / `revise`; private helpers `_strength_map` / `_in_set` / `_result` / `_drop_edges_incident_to` (edge hygiene on retraction). Pure functions + frozen models; reuses `defeat.grounded_extension`, `defeat.derived_rebut_edges`, and the `proposition` neighborhood. Mutates nothing.
 - No changes to `Claim`. `status.py` already has every reason-code needed (no new PENDING reason — retraction is removal, not a status).
 - If `revision.py` grows past ~200 lines, the entrenchment comparator may split into `entrenchment.py`; decide during implementation, not preemptively.
 
@@ -99,7 +103,7 @@ Under partial entrenchment, success/inclusion/consistency still hold; the *choic
 - `compare_entrenchment`: status-tier ordering; same-tier strength dominance; INCOMPARABLE on cross-axis trade-off; strength-present beats strength-absent; EQUAL.
 - `entails_closure` / `corpus_entails`: transitive reach; no spurious reach; conclusion-None claims inert.
 - `is_consistent`: clean set True; an `incompatible_with` pair within the set False.
-- `restore_consistency`: clear least-entrenched culprit → `robustly_retracted`; incomparable culprits → `underdetermined`; multi-conflict aggregation; consistent input → empty verdict.
+- `restore_consistency`: clear least-entrenched culprit → `robustly_retracted`; incomparable culprits → `underdetermined`; multi-conflict aggregation; consistent input → empty verdict; **a retracted claim's authored edge is dropped (no zombie-attack on a survivor).**
 - `expand` / `contract` / `revise`: success/inclusion/vacuity/consistency postulates; Levi-identity revise drops the least-entrenched conflictor; documented non-recovery; `flipped_in/out` correct against `prior_in`.
 - Isolation guard green; all new models frozen + hashable.
 
