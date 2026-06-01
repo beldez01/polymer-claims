@@ -229,3 +229,34 @@ def expand(claims, edges, new_claim, *, prior_in: frozenset[str] | None = None) 
     if prior_in is None:
         prior_in = _in_set(claims, edges)
     return _result(claims + (new_claim,), edges, None, prior_in)
+
+
+def contract(claims, edges, target_id, *, prior_in: frozenset[str] | None = None) -> RevisionResult:
+    """AGM contraction: remove `target` and every claim whose conclusion entails target's
+    conclusion (single-premise entailment ⇒ all entailers must go — deterministic).
+    """
+    claims = tuple(claims)
+    edges = tuple(edges)
+    if prior_in is None:
+        prior_in = _in_set(claims, edges)
+    target = next((c for c in claims if c.id == target_id), None)
+    if target is None or target.conclusion is None:
+        verdict = RetractionVerdict(
+            robustly_retracted=frozenset(), possibly_retracted=frozenset(),
+            underdetermined=frozenset(), consistent_core=frozenset(c.id for c in claims),
+        )
+        return _result(claims, edges, verdict, prior_in)
+    target_hash = target.conclusion.content_hash
+    retract = {
+        c.id
+        for c in claims
+        if c.conclusion is not None
+        and target_hash in entails_closure({c.conclusion.content_hash}, claims)
+    }
+    new_claims = tuple(c for c in claims if c.id not in retract)
+    verdict = RetractionVerdict(
+        robustly_retracted=frozenset(retract), possibly_retracted=frozenset(retract),
+        underdetermined=frozenset(), consistent_core=frozenset(c.id for c in new_claims),
+    )
+    kept_edges = _drop_edges_incident_to(edges, frozenset(retract))
+    return _result(new_claims, kept_edges, verdict, prior_in)

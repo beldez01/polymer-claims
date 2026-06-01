@@ -7,7 +7,7 @@ from polymer_grammar.pattern import PatternRef
 from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from polymer_grammar.status import PendingReason, Status
 from polymer_grammar.strength import StrengthVector
-from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent, RevisionResult, restore_consistency, expand
+from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent, RevisionResult, restore_consistency, expand, contract
 from polymer_grammar.defeat import DefeatEdge, DefeatEdgeKind
 
 
@@ -215,3 +215,23 @@ def test_expand_can_introduce_a_defeat_that_flips_a_claim_out():
     # derived mutual rebut, no strength -> attacks stand -> grounded extension empty
     assert res.in_set == frozenset()
     assert "a" in res.flipped_out
+
+
+def test_contract_removes_target_and_its_entailers():
+    pc = _prop("C")
+    pa = _prop("A", entails=(pc.content_hash,))   # a entails c
+    a = _claim("a", pa)
+    c = _claim("c", pc)
+    res = contract([a, c], [], "c")
+    # to stop holding c's content, remove c AND a (a entails c). Both robustly retracted.
+    assert res.retraction.robustly_retracted == frozenset({"a", "c"})
+    assert res.retraction.underdetermined == frozenset()
+    assert {cl.id for cl in res.claims} == frozenset()
+    assert not corpus_entails(res.claims, pc.content_hash)
+
+
+def test_contract_unknown_target_is_noop():
+    a = _claim("a", _prop("A"))
+    res = contract([a], [], "missing")
+    assert res.retraction.robustly_retracted == frozenset()
+    assert {c.id for c in res.claims} == {"a"}
