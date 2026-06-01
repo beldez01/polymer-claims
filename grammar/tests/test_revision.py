@@ -308,3 +308,14 @@ def test_base_contraction_does_not_recover():
     recovered = expand(list(contracted.claims), [], c)  # add c back only
     # `a` (and its entailment of c) is NOT recovered:
     assert "a" not in {cl.id for cl in recovered.claims}
+
+
+def test_public_api_exports():
+    import polymer_grammar as pg
+
+    for name in [
+        "Entrench", "compare_entrenchment", "entails_closure", "corpus_entails",
+        "is_consistent", "RetractionVerdict", "RevisionResult", "restore_consistency",
+        "expand", "contract", "revise",
+    ]:
+        assert hasattr(pg, name), f"{name} not exported from polymer_grammar"
