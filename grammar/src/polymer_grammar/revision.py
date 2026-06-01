@@ -13,9 +13,12 @@ from collections import defaultdict, deque
 from collections.abc import Iterable
 from enum import Enum
 
+from .base import _Model
 from .claim import Claim
+from .defeat import DefeatEdge, derived_rebut_edges, grounded_extension
 from .proposition import NeighborEdgeKind
 from .status import Status
+from .strength import StrengthVector
 
 
 class Entrench(str, Enum):
@@ -128,3 +131,90 @@ def _conflicts(claims: tuple[Claim, ...]) -> list[tuple[Claim, Claim]]:
 def is_consistent(claims: Iterable[Claim]) -> bool:
     """True iff no INCOMPATIBLE_WITH edge resolves within the claim set."""
     return not _conflicts(tuple(claims))
+
+
+class RetractionVerdict(_Model):
+    robustly_retracted: frozenset[str]   # retracted under EVERY admissible incision
+    possibly_retracted: frozenset[str]   # robustly ∪ underdetermined
+    underdetermined: frozenset[str]      # incomparable/equal culprits — choice left open
+    consistent_core: frozenset[str]      # guaranteed-kept under any admissible choice
+
+
+class RevisionResult(_Model):
+    claims: tuple[Claim, ...]                # the new base (the guaranteed consistent core)
+    edges: tuple[DefeatEdge, ...]            # surviving authored edges (those incident to a retracted claim are dropped)
+    retraction: RetractionVerdict | None     # present for contract/revise/restore; None for clean expand
+    in_set: frozenset[str]                   # grounded_extension over the new base
+    flipped_in: frozenset[str]               # newly IN vs prior in_set
+    flipped_out: frozenset[str]              # newly OUT vs prior in_set
+
+
+def _strength_map(claims: tuple[Claim, ...]) -> dict[str, StrengthVector | None]:
+    return {c.id: c.strength for c in claims}
+
+
+def _in_set(claims: tuple[Claim, ...], edges: tuple[DefeatEdge, ...]) -> frozenset[str]:
+    """Grounded extension over the base, merging authored edges with derived rebut edges."""
+    all_edges = tuple(edges) + derived_rebut_edges(claims)
+    return grounded_extension([c.id for c in claims], all_edges, _strength_map(claims))
+
+
+def _drop_edges_incident_to(
+    edges: tuple[DefeatEdge, ...], dropped_ids: frozenset[str]
+) -> tuple[DefeatEdge, ...]:
+    """Drop authored defeat edges touching a retracted claim. A removed claim must stop
+    attacking survivors — otherwise grounded_extension (which injects ANY edge endpoint as
+    a node) would let a retracted claim zombie-attack the corpus and wrongly flip a
+    survivor OUT. (Synthetic non-claim endpoints like `refutation:*` are unaffected unless
+    their target claim was retracted.)"""
+    return tuple(
+        e for e in edges if e.source not in dropped_ids and e.target not in dropped_ids
+    )
+
+
+def _result(
+    new_claims: tuple[Claim, ...],
+    edges: tuple[DefeatEdge, ...],
+    retraction: RetractionVerdict | None,
+    prior_in: frozenset[str],
+) -> RevisionResult:
+    in_set = _in_set(new_claims, edges)
+    return RevisionResult(
+        claims=new_claims, edges=tuple(edges), retraction=retraction, in_set=in_set,
+        flipped_in=in_set - prior_in, flipped_out=prior_in - in_set,
+    )
+
+
+def restore_consistency(
+    claims, edges, *, prior_in: frozenset[str] | None = None
+) -> RevisionResult:
+    """Hansson consolidation: make a (possibly inconsistent) base consistent by incising
+    the least-entrenched member of each conflict. No claim is privileged. When a conflict's
+    members are entrenchment-EQUAL/INCOMPARABLE, both are underdetermined.
+    """
+    claims = tuple(claims)
+    edges = tuple(edges)
+    if prior_in is None:
+        prior_in = _in_set(claims, edges)
+    definite: set[str] = set()
+    ambiguous: set[str] = set()
+    for a, b in _conflicts(claims):
+        cmp = compare_entrenchment(a, b)
+        if cmp == Entrench.GREATER:
+            definite.add(b.id)
+        elif cmp == Entrench.LESS:
+            definite.add(a.id)
+        else:  # EQUAL or INCOMPARABLE -> either could go
+            ambiguous.add(a.id)
+            ambiguous.add(b.id)
+    robustly = frozenset(definite)
+    underdetermined = frozenset(ambiguous - definite)
+    possibly = robustly | underdetermined
+    core_ids = frozenset(c.id for c in claims) - possibly
+    verdict = RetractionVerdict(
+        robustly_retracted=robustly, possibly_retracted=possibly,
+        underdetermined=underdetermined, consistent_core=core_ids,
+    )
+    new_claims = tuple(c for c in claims if c.id in core_ids)
+    kept_edges = _drop_edges_incident_to(edges, possibly)
+    return _result(new_claims, kept_edges, verdict, prior_in)

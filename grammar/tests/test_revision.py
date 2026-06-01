@@ -1,10 +1,14 @@
+import pytest
+from pydantic import ValidationError
+
 from polymer_grammar.claim import Claim
 from polymer_grammar.leaf import MeasurementBasis, QuantityLeaf
 from polymer_grammar.pattern import PatternRef
 from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from polymer_grammar.status import PendingReason, Status
 from polymer_grammar.strength import StrengthVector
-from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent
+from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent, RevisionResult, restore_consistency
+from polymer_grammar.defeat import DefeatEdge, DefeatEdgeKind
 
 
 # ---- shared test helpers (reused by all later tasks in this file) ----
@@ -117,3 +121,59 @@ def test_incompatibility_to_absent_target_is_consistent():
     pa = _prop("A", incompat=(pb.content_hash,))
     # only `a` is present; nothing for it to conflict with
     assert is_consistent([_claim("a", pa)]) is True
+
+
+def test_restore_consistency_retracts_least_entrenched():
+    # a (strong) vs b (weak), incompatible -> b robustly retracted, a kept
+    pb = _prop("B", direction=Direction.NEGATIVE)
+    pa = _prop("A", incompat=(pb.content_hash,))
+    a = _claim("a", pa, strength=_sv(0.9, 0.9))
+    b = _claim("b", pb, strength=_sv(0.1, 0.1))
+    res = restore_consistency([a, b], [])
+    assert res.retraction.robustly_retracted == frozenset({"b"})
+    assert res.retraction.underdetermined == frozenset()
+    assert res.retraction.consistent_core == frozenset({"a"})
+    assert {c.id for c in res.claims} == {"a"}
+
+
+def test_restore_consistency_surfaces_underdetermined_on_incomparable():
+    pb = _prop("B", direction=Direction.NEGATIVE)
+    pa = _prop("A", incompat=(pb.content_hash,))
+    a = _claim("a", pa, strength=_sv(0.9, 0.1))   # incomparable to b
+    b = _claim("b", pb, strength=_sv(0.1, 0.9))
+    res = restore_consistency([a, b], [])
+    assert res.retraction.robustly_retracted == frozenset()
+    assert res.retraction.underdetermined == frozenset({"a", "b"})
+    assert res.retraction.consistent_core == frozenset()   # neither guaranteed kept
+
+
+def test_restore_consistency_noop_when_already_consistent():
+    a = _claim("a", _prop("A"))
+    b = _claim("b", _prop("B"))
+    res = restore_consistency([a, b], [])
+    assert res.retraction.possibly_retracted == frozenset()
+    assert {c.id for c in res.claims} == {"a", "b"}
+    assert res.in_set == frozenset({"a", "b"})   # unattacked -> both IN
+
+
+def test_revision_result_is_frozen():
+    a = _claim("a", _prop("A"))
+    restore_consistency([a], [])
+    with pytest.raises(ValidationError):
+        RevisionResult(claims=(), edges=(), retraction=None, in_set=frozenset(),
+                       flipped_in=frozenset(), flipped_out=frozenset(), bogus=1)
+
+
+def test_restore_consistency_drops_retracted_claims_authored_edges():
+    # b is the weak loser of the a/b conflict; an authored edge b->c must NOT keep c OUT
+    # after b is retracted (a removed claim's edges die with it — no zombie attack).
+    pb = _prop("B", direction=Direction.NEGATIVE)
+    pa = _prop("A", incompat=(pb.content_hash,))
+    a = _claim("a", pa, strength=_sv(0.9, 0.9))
+    b = _claim("b", pb, strength=_sv(0.1, 0.1))
+    c = _claim("c", _prop("C"))
+    zombie = DefeatEdge(source="b", target="c", kind=DefeatEdgeKind.UNDERMINE)
+    res = restore_consistency([a, b, c], [zombie])
+    assert "b" in res.retraction.robustly_retracted
+    assert res.in_set == frozenset({"a", "c"})                 # c IN: b's edge died with b
+    assert all(e.source != "b" and e.target != "b" for e in res.edges)
