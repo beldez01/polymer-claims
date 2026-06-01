@@ -56,7 +56,7 @@ union=possibly-IN / difference→PENDING `duhem_underdetermined`). See unified s
 - Optional `min_length=1` guards on role variable names + dimension base names.
 - `.pytest_cache`/`.ruff_cache` → root `.gitignore`; document extended `MeasurementBasis`.
 - **Ontology (carry-forward, user-flagged important for v1.3):** the small-IR + versioned ontology-bound *domain profile* idea (v1.2 note now at `v1.2/docs/FormalClaim_Domain_Ontology_Note.md`) is load-bearing for v1.3 — absorbed into the unified spec §3.1 (profiles = ontology slot-legality) + §7 (functorial ontology migration). Keep it live when patterns/profiles get built; don't treat it as frozen with v1.2.
-- **v1.2 ingestion test (user: "a must"):** ingest the frozen v1.2 corpus (`v1.2/corpus/domains/**/claims/*.json`) into the v1.3 grammar as a preliminary *sensitivity* test — what maps, what the grammar can't yet represent. Likely the next concrete task before/alongside Phase 5.
+- **v1.2 ingestion test (user: "a must") — DONE 2026-06-01.** Probe `grammar/scripts/probe_v12_ingest.py`; findings `docs/superpowers/specs/2026-06-01-v12-ingestion-findings.md`. 47/47 claims build a Claim *skeleton* but only via a PropositionLeaf fallback + fabricated pattern. **Confirmed Phase 5 is well-motivated** (all 47 carry external_assumptions + depends_on). **Two OFF-ROADMAP gaps surfaced:** (1) no `Claim.subject` slot (biggest fidelity hole), (2) vector-valued statistics have no single-`Leaf` home (~29 in corpus). Pattern-inference (raw claim → registry pattern) unsolved. Decide sequencing of these vs Phase 5 next.
 
 ## Remaining phases after L3
 
