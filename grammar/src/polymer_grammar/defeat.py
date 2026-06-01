@@ -9,11 +9,13 @@ polymer_formalclaim (isolation guard).
 """
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from enum import Enum
 
 from pydantic import model_validator
 
 from .base import _Model
+from .strength import StrengthVector
 
 
 class DefeatEdgeKind(str, Enum):
@@ -49,3 +51,25 @@ class DefeatEdge(_Model):
                 "a DefeatEdge must relate two DISTINCT claims (no self-defeat/self-support)"
             )
         return self
+
+
+def effective_defeats(
+    edges: Iterable[DefeatEdge],
+    strength: Mapping[str, StrengthVector | None],
+) -> frozenset[tuple[str, str]]:
+    """(source, target) attack pairs that survive the VAF value filter.
+
+    An attack defeats UNLESS the target strength-dominates the source (Pareto). When
+    either strength is absent or the two are incomparable, the attack stands — absence
+    of proven superiority is not superiority. `evidence_for` is never a defeat.
+    """
+    out: set[tuple[str, str]] = set()
+    for e in edges:
+        if e.kind not in ATTACK_KINDS:
+            continue
+        s_src = strength.get(e.source)
+        s_tgt = strength.get(e.target)
+        if s_src is not None and s_tgt is not None and s_tgt.dominates(s_src):
+            continue  # target proven stronger -> attack filtered out
+        out.add((e.source, e.target))
+    return frozenset(out)
