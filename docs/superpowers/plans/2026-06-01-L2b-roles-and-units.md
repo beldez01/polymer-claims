@@ -1,5 +1,7 @@
 # Typed Causal Roles + Units-of-Measure Algebra — Implementation Plan (Phase 4)
 
+> **Status: ✅ COMPLETE — merged to `main` (Phase 4, 2026-06-01). 87 tests. See Progress Log.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development task-by-task. Steps use checkbox (`- [ ]`).
 
 **Goal:** Add typed causal role slots (with a *derived* adjustment set that forecloses the Table-2 fallacy) and a `Dimension` abelian-group units algebra (with an optional `dimension` on the quantity leaf).

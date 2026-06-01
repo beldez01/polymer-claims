@@ -1,5 +1,7 @@
 # L1 — Molecular Proposition + Equivalence — Implementation Plan (Phase 2)
 
+> **Status: ✅ COMPLETE — merged to `main` (Phase 2, 2026-06-01). 54 tests. See Progress Log.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Give the claim conclusion a *molecular* identity — typed `Proposition` content + a version-pinned inferential neighborhood — and make "same claim?" an asserted, defeasible question via a lightweight `EquivalenceClaim` + transitive equivalence resolution.

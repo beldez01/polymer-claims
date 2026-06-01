@@ -1,5 +1,7 @@
 # L2 — Licensing Bridge — Implementation Plan (Phase 3)
 
+> **Status: ✅ COMPLETE — merged to `main` (Phase 3, 2026-06-01). 68 tests. See Progress Log.**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement task-by-task. Steps use checkbox (`- [ ]`).
 
 **Goal:** Let a claim *earn* LICENSED — model `(σ,M)` satisfaction, the dual route (severe_test | replication), and a required `rival_set_closure` — wired as an optional `Claim.licensing`.
