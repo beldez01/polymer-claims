@@ -16,7 +16,7 @@
 
 _(Append a dated entry per completed task: commit SHA + outcome. Update after every task.)_
 
-- Not started.
+- 2026-06-01 — Task 1 ✅ causal roles, commit 55afdff, 6 tests (74 total).
 
 ---
 
