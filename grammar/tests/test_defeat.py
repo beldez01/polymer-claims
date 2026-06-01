@@ -238,7 +238,7 @@ def test_public_api_exports():
     import polymer_grammar as pg
 
     for name in [
-        "DefeatEdge", "DefeatEdgeKind", "effective_defeats", "grounded_extension",
+        "DefeatEdge", "DefeatEdgeKind", "ATTACK_KINDS", "effective_defeats", "grounded_extension",
         "derived_rebut_edges", "undermine_edges_from_failed_satisfactions",
         "BlameAssignment", "BlameSet", "BlameVerdict", "aggregate_blame", "duhem_status",
     ]:
