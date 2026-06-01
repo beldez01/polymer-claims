@@ -26,6 +26,7 @@ from .licensing import (
     Satisfaction,
     SatisfactionVerdict,
 )
+from .roles import CausalRoles, Role
 
 __all__ = [
     "AXES",
@@ -59,4 +60,6 @@ __all__ = [
     "RivalSetClosure",
     "Satisfaction",
     "SatisfactionVerdict",
+    "CausalRoles",
+    "Role",
 ]
