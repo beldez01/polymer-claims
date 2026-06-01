@@ -7,22 +7,24 @@
 ## Current state (as of 2026-06-01)
 
 Building the **v1.3 grammar** in `grammar/` (package `polymer_grammar`), kept isolated from
-the live v1.2 IR in `formalclaim/`. **4 of 8 grammar phases merged to `main`. 87 tests, green.**
+the frozen v1.2 IR in `v1.2/formalclaim/`. **5 of 8 grammar phases merged to `main`. 117 tests, green.**
 
 - ✅ Phase 1 — foundation: L0 sum-typed leaf, status lifecycle, 6-axis Pareto strength, pattern registry, claim skeleton + deep immutability
 - ✅ Phase 2 — L1: molecular Proposition + defeasible Equivalence (identity = licensed equivalence, never a hash)
 - ✅ Phase 3 — L2: licensing bridge ((σ,M) satisfaction, severe-test|replication route, required rival_set_closure)
 - ✅ Phase 4 — typed causal roles (derived/un-authorable adjustment set; Table-2 guard) + Dimension units algebra
+- ✅ Phase 5 — L3: VAF defeat graph (`defeat.py`) + Duhem blame-sets (`blame.py`). Strength-mediated effective defeat (attack defeats unless target `≥`-dominates source); PTIME grounded extension over the SINGLE effective-defeat relation; opt-in `derived_rebut_edges` from L1 `incompatible_with`; L2 failed-satisfaction → `undermine` adapter; additive `equivalence.grounded_in` path replacing the LICENSED-only "IN" stub; `aggregate_blame` set algebra (intersection→robustly-blamed / difference→PENDING `duhem_underdetermined`). Merge `1cb0b88`. Spec `specs/2026-06-01-L3-defeat-and-blame-spec.md`, plan `plans/2026-06-01-L3-defeat-and-blame.md`.
 
-## ▶ NEXT: Phase 5 — L3 VAF defeat graph + Duhem blame-sets
+## ▶ NEXT: Phase 6 — L4 AGM/TMS belief revision
 
-Value-Based Argumentation Framework over claims: typed defeat edges
-(`undermine`/`undercut`/`rebut`/`reclassify`/`reinterpret` + `evidence_for`), grounded-extension
-membership (which replaces the L1 `status==LICENSED` stand-in for equivalence "IN"-ness), and
-Duhem–Quine blame surfaced as a *set* of minimal blame-assignments (intersection=robustly-IN /
-union=possibly-IN / difference→PENDING `duhem_underdetermined`). See unified spec §3.5.
-**Also resolve the carried-forward question:** where *failed* licensing attempts
-(refuted/undetermined satisfactions) live — flagged from L2.
+AGM (Alchourrón–Gärdenfors–Makinson 1985) + TMS (Doyle 1979) revision over the corpus with an
+entrenchment ordering keyed to evidence_class + severity. Status recompute under a *fixed* defeat
+graph is PTIME-monotone (the Phase-5 grounded extension); graph *edits* (add/retract claims & edges)
+are the non-monotonic AGM ops to model here. See unified spec §3.5 + §3 (L4 row). Follow the same
+rhythm (brainstorm forks → phase spec → plan → subagent-driven). Phase-5 follow-ups to fold in when
+relevant: auxiliary assumptions as first-class blame/undercut nodes (the ingestion probe showed all 47
+claims carry `external_assumptions`); bounded defeat in-degree write-time cap; named-audience VAF
+value-orderings beyond the single Pareto order.
 
 ## How to resume (the established rhythm)
 

@@ -969,12 +969,12 @@ git branch -d phase5-l3-defeat-blame
 
 _(Update after every completed task: check the box, note the commit SHA + any decisions.)_
 
-- [ ] Task 1 — DefeatEdge type + edge kinds
-- [ ] Task 2 — effective_defeats (Pareto value filter)
-- [ ] Task 3 — grounded_extension (PTIME least fixpoint)
-- [ ] Task 4 — derived_rebut_edges (opt-in, L1 incompatible_with)
-- [ ] Task 5 — failed-satisfaction → undermine adapter
-- [ ] Task 6 — equivalence grounded_in rerouting
-- [ ] Task 7 — blame.py (BlameSet + aggregate_blame + duhem_status)
-- [ ] Task 8 — exports + whole-package verify
-- [ ] Final — merge to main, docs + memory updated
+- [x] Task 1 — DefeatEdge type + edge kinds — `d30aafb`
+- [x] Task 2 — effective_defeats (Pareto value filter) — `ac1e838` + fix `059402f` (top-level test imports, equal-strength test)
+- [x] Task 3 — grounded_extension (PTIME least fixpoint) — `b274b88` + fix `8d19c1a` (review caught a forked 2nd defeat predicate → corrected to single effective-defeat relation; tests use standing attacks + value-filter case)
+- [x] Task 4 — derived_rebut_edges (opt-in, L1 incompatible_with) — `0cf57eb` + fix `6b0a87b` (unmatched-target + no-conclusion branch tests)
+- [x] Task 5 — failed-satisfaction → undermine adapter — `7a6ae6e`
+- [x] Task 6 — equivalence grounded_in rerouting — `143fbeb` + fix `1de6d55` (stale module docstring + status-override test)
+- [x] Task 7 — blame.py (BlameSet + aggregate_blame + duhem_status) — `cb4f147`
+- [x] Task 8 — exports + whole-package verify — `8aca3bd` + `ff29036` (guard ATTACK_KINDS)
+- [x] Final — merged `--no-ff` to main (`1cb0b88`), 117 tests green + ruff clean on merged result, branch deleted; opus final review = READY TO MERGE (no critical/important issues). Docs + memory updated.

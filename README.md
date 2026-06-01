@@ -40,7 +40,7 @@ Full derivation (two adversarially-stress-tested research swarms) lives in
 
 ```
   L4  REVISION    AGM/TMS belief revision + entrenchment over the corpus   (temporal change)   [planned]
-  L3  CORPUS      value-based defeat graph (VAF) → grounded extensions      (composition)        [planned]
+  L3  CORPUS      value-based defeat graph (VAF) → grounded extensions      (composition)        [done]
   L2  CLAIM       pattern-typed DAG → 3-valued satisfaction + strength       (licensing bridge)   [partial]
   L1  PROPOSITION molecular content + asserted, defeasible identity          (semantics)          [done]
   L0  LEAF        sum-typed empirical anchor (Quantity/Categorical/…)         (empirical)          [done]
@@ -53,7 +53,11 @@ Proposition** whose identity is an *asserted, licensed equivalence* — never a 
 incomparability); an **open axis-derived pattern registry**; a **licensing bridge**
 ((σ,M) satisfaction, severe-test-or-replication routes, required rival-set-closure — *no
 LICENSED-simpliciter*); and **typed causal roles** whose adjustment set is *derived, never
-authored* (a Table-2-fallacy guard) plus a **units-of-measure `Dimension`** algebra.
+authored* (a Table-2-fallacy guard) plus a **units-of-measure `Dimension`** algebra; and (L3) a **value-based defeat graph** whose
+grounded extension is computed over a single *strength-mediated* effective-defeat relation (an
+attack defeats only if the target does not Pareto-dominate the attacker), plus **Duhem–Quine
+blame-sets** that surface under-determined contradictions (`duhem_underdetermined`) instead of
+laundering them into one verdict.
 
 ### Phase status (grammar)
 
@@ -63,12 +67,12 @@ authored* (a Table-2-fallacy guard) plus a **units-of-measure `Dimension`** alge
 | 2 | L1: molecular Proposition + Equivalence | ✅ merged |
 | 3 | L2: licensing bridge ((σ,M), dual route, rival_set_closure) | ✅ merged |
 | 4 | typed causal roles + units-of-measure algebra | ✅ merged |
-| 5 | L3: VAF defeat graph + Duhem blame-sets | ⬜ next |
-| 6 | L4: AGM/TMS revision | ⬜ |
+| 5 | L3: VAF defeat graph + Duhem blame-sets | ✅ merged |
+| 6 | L4: AGM/TMS revision | ⬜ next |
 | 7 | protocol-imposed fields (generated_by, oracle credibility, hazard/governance, online-FDR, …) | ⬜ |
 | 8 | the evaluator (runs the grammar) | ⬜ |
 
-87 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
+117 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
 by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is built and validated.
 
 ### Where the design lives
