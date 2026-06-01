@@ -93,3 +93,36 @@ def corpus_entails(claims: Iterable[Claim], prop_hash: str) -> bool:
     claims = tuple(claims)
     seeds = {c.conclusion.content_hash for c in claims if c.conclusion is not None}
     return prop_hash in entails_closure(seeds, claims)
+
+
+def _conflicts(claims: tuple[Claim, ...]) -> list[tuple[Claim, Claim]]:
+    """Unordered claim pairs that are mutually incompatible WITHIN the set.
+
+    A conflict exists when one claim's conclusion has an INCOMPATIBLE_WITH edge whose
+    target is another present claim's conclusion content_hash.
+    """
+    by_hash: dict[str, list[Claim]] = defaultdict(list)
+    for c in claims:
+        if c.conclusion is not None:
+            by_hash[c.conclusion.content_hash].append(c)
+    pairs: list[tuple[Claim, Claim]] = []
+    seen: set[tuple[str, str]] = set()
+    for c in claims:
+        if c.conclusion is None:
+            continue
+        for e in c.conclusion.neighborhood:
+            if e.kind != NeighborEdgeKind.INCOMPATIBLE_WITH:
+                continue
+            for other in by_hash.get(e.target, ()):
+                if other.id == c.id:
+                    continue
+                key = tuple(sorted((c.id, other.id)))
+                if key not in seen:
+                    seen.add(key)
+                    pairs.append((c, other))
+    return pairs
+
+
+def is_consistent(claims: Iterable[Claim]) -> bool:
+    """True iff no INCOMPATIBLE_WITH edge resolves within the claim set."""
+    return not _conflicts(tuple(claims))

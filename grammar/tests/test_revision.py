@@ -4,7 +4,7 @@ from polymer_grammar.pattern import PatternRef
 from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from polymer_grammar.status import PendingReason, Status
 from polymer_grammar.strength import StrengthVector
-from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails
+from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent
 
 
 # ---- shared test helpers (reused by all later tasks in this file) ----
@@ -98,3 +98,22 @@ def test_conclusion_none_claims_are_inert():
     claims = [_claim("a", pa), _claim("n", None)]
     # the None-conclusion claim contributes no edges and no seed hash
     assert corpus_entails(claims, pa.content_hash) is True
+
+
+def test_consistent_when_no_incompatibility_resolves():
+    pa = _prop("A")
+    pb = _prop("B")
+    assert is_consistent([_claim("a", pa), _claim("b", pb)]) is True
+
+
+def test_inconsistent_when_incompatible_pair_present():
+    pb = _prop("B", direction=Direction.NEGATIVE)
+    pa = _prop("A", incompat=(pb.content_hash,))
+    assert is_consistent([_claim("a", pa), _claim("b", pb)]) is False
+
+
+def test_incompatibility_to_absent_target_is_consistent():
+    pb = _prop("B", direction=Direction.NEGATIVE)
+    pa = _prop("A", incompat=(pb.content_hash,))
+    # only `a` is present; nothing for it to conflict with
+    assert is_consistent([_claim("a", pa)]) is True
