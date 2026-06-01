@@ -232,3 +232,14 @@ def test_refuted_and_undetermined_become_undermine_edges():
 def test_all_satisfied_yields_no_edges():
     sats = [_sat("m1", SatisfactionVerdict.SATISFIED)]
     assert undermine_edges_from_failed_satisfactions("claimX", sats) == ()
+
+
+def test_public_api_exports():
+    import polymer_grammar as pg
+
+    for name in [
+        "DefeatEdge", "DefeatEdgeKind", "effective_defeats", "grounded_extension",
+        "derived_rebut_edges", "undermine_edges_from_failed_satisfactions",
+        "BlameAssignment", "BlameSet", "BlameVerdict", "aggregate_blame", "duhem_status",
+    ]:
+        assert hasattr(pg, name), f"{name} not exported from polymer_grammar"

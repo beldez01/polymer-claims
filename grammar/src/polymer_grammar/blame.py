@@ -61,6 +61,7 @@ def duhem_status(
 ) -> tuple[Status, PendingReason | None] | None:
     """The (status, reason) the corpus fold should set for `claim_id`, or None if the
     claim is not implicated. Underdetermined -> PENDING duhem; robustly blamed -> REJECTED."""
+    # from aggregate_blame these sets are disjoint; checking underdetermined first is conservative for hand-built verdicts
     if claim_id in verdict.underdetermined:
         return (Status.PENDING, PendingReason.DUHEM_UNDERDETERMINED)
     if claim_id in verdict.robustly_blamed:

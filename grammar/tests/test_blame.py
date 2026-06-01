@@ -45,6 +45,7 @@ def test_disjoint_assignments_all_underdetermined():
     v = aggregate_blame(bs)
     assert v.robustly_blamed == frozenset()
     assert v.underdetermined == frozenset({"c1", "c2"})
+    assert v.possibly_blamed == frozenset({"c1", "c2"})
 
 
 def test_duhem_status_maps_underdetermined_and_robust():
