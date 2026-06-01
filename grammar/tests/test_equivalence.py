@@ -76,3 +76,10 @@ def test_non_licensed_edges_do_not_merge_classes():
                                 status=Status.REJECTED)
     assert equivalence_class("A", [pending, rejected]) == frozenset({"A"})
     assert not are_equivalent("A", "B", [pending, rejected])
+
+
+def test_disconnected_components_stay_separate():
+    eqs = [_licensed("e1", "A", "B"), _licensed("e2", "C", "D")]
+    assert equivalence_class("A", eqs) == frozenset({"A", "B"})
+    assert not are_equivalent("A", "C", eqs)
+    assert not are_equivalent("A", "D", eqs)

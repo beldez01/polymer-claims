@@ -31,8 +31,21 @@ def test_content_hash_is_stable_and_independent_of_neighborhood():
     assert _prop().content_hash == _prop().content_hash
 
 
-def test_content_hash_changes_with_content():
-    assert _prop().content_hash != _prop(direction=Direction.POSITIVE).content_hash
+def test_content_hash_changes_with_each_content_field():
+    base = _prop()
+    assert base.content_hash != _prop(direction=Direction.POSITIVE).content_hash
+    assert base.content_hash != _prop(estimand="other_estimand").content_hash
+    assert base.content_hash != _prop(descriptor="a different conclusion").content_hash
+
+
+def test_neighborhood_hash_is_sensitive_to_label():
+    labeled = _prop(neighborhood=(
+        NeighborEdge(kind=NeighborEdgeKind.ENTAILS, target="t", label="foo"),
+    ))
+    unlabeled = _prop(neighborhood=(
+        NeighborEdge(kind=NeighborEdgeKind.ENTAILS, target="t"),
+    ))
+    assert labeled.neighborhood_hash != unlabeled.neighborhood_hash
 
 
 def test_neighborhood_hash_is_order_independent_and_sensitive_to_edges():
