@@ -27,6 +27,7 @@ from .licensing import (
     SatisfactionVerdict,
 )
 from .roles import CausalRoles, Role
+from .units import DIMENSIONLESS, Dimension, compatible
 
 __all__ = [
     "AXES",
@@ -62,4 +63,7 @@ __all__ = [
     "SatisfactionVerdict",
     "CausalRoles",
     "Role",
+    "DIMENSIONLESS",
+    "Dimension",
+    "compatible",
 ]
