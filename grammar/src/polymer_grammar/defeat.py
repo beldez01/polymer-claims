@@ -70,6 +70,6 @@ def effective_defeats(
         s_src = strength.get(e.source)
         s_tgt = strength.get(e.target)
         if s_src is not None and s_tgt is not None and s_tgt.dominates(s_src):
-            continue  # target proven stronger -> attack filtered out
+            continue  # target at-least-as-strong on every axis (>=, standard VAF preference) -> attack filtered out
         out.add((e.source, e.target))
     return frozenset(out)
