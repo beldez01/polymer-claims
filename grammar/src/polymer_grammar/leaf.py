@@ -16,6 +16,7 @@ from typing import Annotated, Literal, Union
 from pydantic import Field, model_validator
 
 from .base import _Model
+from .units import Dimension
 
 
 class MeasurementBasis(str, Enum):
@@ -33,6 +34,7 @@ class QuantityLeaf(_Model):
     uncertainty: float | None = None
     measurement_basis: MeasurementBasis
     formula: str | None = None
+    dimension: Dimension | None = None
 
     @model_validator(mode="after")
     def _basis_discipline(self) -> "QuantityLeaf":

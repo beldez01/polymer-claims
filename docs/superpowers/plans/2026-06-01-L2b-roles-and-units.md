@@ -16,7 +16,11 @@
 
 _(Append a dated entry per completed task: commit SHA + outcome. Update after every task.)_
 
-- Not started.
+- 2026-06-01 — Task 1 ✅ causal roles, commit 55afdff, 6 tests (74 total).
+- 2026-06-01 — Task 2 ✅ Claim.roles wired, commit 1ff4106, 3 tests (77 total).
+- 2026-06-01 — Task 3 ✅ Dimension algebra, commit 9be1186, 7 tests (84 total).
+- 2026-06-01 — Task 4 ✅ QuantityLeaf.dimension wired, commit d801b21, 3 tests (87 total).
+- 2026-06-01 — Task 5 ✅ full gate (87 green, ruff clean, isolation guard pass). **Phase 4 COMPLETE.** (Controller ran the gate directly.)
 
 ---
 
