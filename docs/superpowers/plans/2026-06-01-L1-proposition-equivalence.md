@@ -20,6 +20,7 @@ _(Append a dated entry per completed task: commit SHA + outcome + any deviation.
 - 2026-06-01 — Task 2 ✅ EquivalenceClaim model + resolution fns, commit 42bb1f8, 6 tests (45 total).
 - 2026-06-01 — Task 3 ✅ equivalence resolution locked, commit eca1912, 4 tests (49 total).
 - 2026-06-01 — Task 4 ✅ Claim.conclusion wired (additive), commit aca8f54, 3 tests (52 total).
+- 2026-06-01 — Task 5 ✅ closed review test-gaps (content-field + label + disconnected-component), commit a9eefd7. Full gate: **54 passed**, ruff clean, isolation guard passes. **Phase 2 (L1) COMPLETE.** (Task-5 implementer dropped on a connection error after committing the tests; controller ran the gate + this entry.)
 
 ---
 
