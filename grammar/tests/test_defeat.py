@@ -6,6 +6,7 @@ from polymer_grammar.defeat import (
     DefeatEdge,
     DefeatEdgeKind,
     effective_defeats,
+    grounded_extension,
 )
 from polymer_grammar.strength import StrengthVector
 
@@ -84,3 +85,36 @@ def test_attack_stands_when_strength_missing():
 def test_evidence_for_is_never_a_defeat():
     edges = [DefeatEdge(source="x", target="y", kind=DefeatEdgeKind.EVIDENCE_FOR)]
     assert effective_defeats(edges, {"x": _sv(0.1), "y": _sv(0.9)}) == frozenset()
+
+
+def test_unattacked_claims_are_in():
+    assert grounded_extension(["a", "b"], [], {}) == frozenset({"a", "b"})
+
+
+def test_mutual_attack_no_dominance_yields_neither():
+    # a <-> b mutual effective defeat, equal strength (no dominance) -> grounded is empty
+    edges = [
+        DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),
+    ]
+    strength = {"a": _sv(0.5), "b": _sv(0.5)}
+    assert grounded_extension(["a", "b"], edges, strength) == frozenset()
+
+
+def test_reinstatement():
+    # c -> a -> b, c unattacked. grounded = {c, b}: a is OUT, so b is reinstated.
+    edges = [
+        DefeatEdge(source="c", target="a", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT),
+    ]
+    strength = {"a": _sv(0.5), "b": _sv(0.5), "c": _sv(0.5)}
+    assert grounded_extension(["a", "b", "c"], edges, strength) == frozenset({"c", "b"})
+
+
+def test_edge_endpoints_not_in_claim_ids_still_participate():
+    # synthetic attacker 'r' (not in claim_ids) is unattacked -> IN, and defeats 'a'
+    edges = [DefeatEdge(source="r", target="a", kind=DefeatEdgeKind.UNDERMINE)]
+    strength = {"a": _sv(0.5)}
+    ext = grounded_extension(["a"], edges, strength)
+    assert "a" not in ext
+    assert "r" in ext
