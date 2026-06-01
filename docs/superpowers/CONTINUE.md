@@ -55,6 +55,8 @@ union=possibly-IN / difference→PENDING `duhem_underdetermined`). See unified s
 - UCUM↔Dimension parsing + evaluator dimensional enforcement (Phase 8).
 - Optional `min_length=1` guards on role variable names + dimension base names.
 - `.pytest_cache`/`.ruff_cache` → root `.gitignore`; document extended `MeasurementBasis`.
+- **Ontology (carry-forward, user-flagged important for v1.3):** the small-IR + versioned ontology-bound *domain profile* idea (v1.2 note now at `v1.2/docs/FormalClaim_Domain_Ontology_Note.md`) is load-bearing for v1.3 — absorbed into the unified spec §3.1 (profiles = ontology slot-legality) + §7 (functorial ontology migration). Keep it live when patterns/profiles get built; don't treat it as frozen with v1.2.
+- **v1.2 ingestion test (user: "a must"):** ingest the frozen v1.2 corpus (`v1.2/corpus/domains/**/claims/*.json`) into the v1.3 grammar as a preliminary *sensitivity* test — what maps, what the grammar can't yet represent. Likely the next concrete task before/alongside Phase 5.
 
 ## Remaining phases after L3
 

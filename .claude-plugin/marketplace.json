@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "claim-harness",
-      "source": "./plugins/claim-harness"
+      "source": "./v1.2/plugins/claim-harness"
     }
   ]
 }

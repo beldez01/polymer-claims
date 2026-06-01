@@ -5,10 +5,9 @@ of scientific claims, and the beginnings of a protocol for generating new ones.
 
 | Subdir | What it is | Status / Distribution |
 |---|---|---|
-| `formalclaim/` | **The FormalClaim IR v1.2** — pydantic models, three-valued inference evaluator, materialization dispatcher, Nanopublications projection, CLI + MCP server. The **live, canonical** IR (what powers polymerbio.org today). | PyPI: `polymer-formalclaim` (tag `formalclaim-vX.Y.Z`) |
-| `grammar/` | **The v1.3 grammar** (`polymer_grammar`) — the next-generation claim schema, built in isolation from v1.2. A five-layer grammar derived from first principles (see Direction below). | In progress — 4 of 8 grammar phases merged |
-| `corpus/` | The public claims corpus: domains, tiers, contributors, governance, JSON Schema contract, and the CI evaluator. PR-as-submission target. | GitHub PRs to `corpus/domains/**/claims/*.json` |
-| `plugins/claim-harness/` | The Claude Code plugin: MCP bundle, claim-authoring skills, submission pipeline. | `/plugin marketplace add beldez01/polymer-claims` |
+| `grammar/` | **The v1.3 grammar** (`polymer_grammar`) — the active, next-generation claim schema, built in isolation from v1.2. A five-layer grammar derived from first principles (see Direction below). | **Active** — 4 of 8 grammar phases merged |
+| `docs/superpowers/` | Foundations spec, per-phase specs + plans (with Progress Logs), and `CONTINUE.md` resume primer for the v1.3 build. | Active |
+| `v1.2/` | **Frozen v1.2 ecosystem, kept as a fallback** in case the v1.3 rebuild fails — the FormalClaim IR package (`v1.2/formalclaim/`), the 47-claim corpus (`v1.2/corpus/`), the Claude Code authoring plugin (`v1.2/plugins/claim-harness/`), schema-sync script, archived workflows, and v1.2-era design docs. See `v1.2/README.md`. | Frozen (not deleted) |
 
 ---
 
@@ -69,47 +68,46 @@ authored* (a Table-2-fallacy guard) plus a **units-of-measure `Dimension`** alge
 | 7 | protocol-imposed fields (generated_by, oracle credibility, hazard/governance, online-FDR, …) | ⬜ |
 | 8 | the evaluator (runs the grammar) | ⬜ |
 
-87 tests, all green, ruff clean. `grammar/` imports nothing from `formalclaim/` (enforced by
-an isolation guard test) — v1.2 stays live and canonical while v1.3 is built and validated.
+87 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
+by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is built and validated.
 
 ### Where the design lives
 
 - **Foundations spec (canonical):** `docs/superpowers/specs/2026-05-31-unified-claim-foundations-spec.md`
 - **Schema overview (HTML):** `docs/superpowers/specs/2026-05-31-claim-schema-overview.html`
-- **Spatial architecture map (HTML):** `docs/superpowers/specs/2026-05-29-claim-architecture-map.html`
 - **Per-phase specs + plans (with Progress Logs):** `docs/superpowers/specs/` and `docs/superpowers/plans/`
+- **Resume primer (kept current):** `docs/superpowers/CONTINUE.md`
+- **Superseded v1.2-era design docs** (claim-PATTERN spec + spatial map, ontology note): `v1.2/docs/` — the ontology idea, in particular, still informs v1.3 (see the unified spec §3.1, §7).
 
 ---
 
-## Source of truth (v1.2, current production)
+## The v1.2 fallback (`v1.2/`, frozen)
 
-- **Python IR:** `formalclaim/src/polymer_formalclaim/` — everything else imports it. The corpus
-  evaluator consumes it via a uv path source (`corpus/evaluator/pyproject.toml`); no PyPI needed
-  for local CI.
-- **JSON Schema:** `corpus/schema/formal_claim_v1.2.schema.json` is canonical; `scripts/sync_schema.sh`
-  copies it into the plugin and `scripts/sync_schema.sh --check` guards against drift.
+v1.2 is **frozen, not deleted** — retained as a working fallback in case the v1.3 rebuild
+proves a dead end. Everything under `v1.2/` still wires up internally:
 
-> Note: `formalclaim/` (v1.2) is the live schema; `grammar/` (v1.3) is the next-generation
-> grammar under construction. When v1.3 lands, a deliberate, separately-reviewed migration —
-> never an implicit import — will bridge the two.
+- **Python IR:** `v1.2/formalclaim/src/polymer_formalclaim/`. The corpus evaluator consumes it
+  via a uv path source (`v1.2/corpus/evaluator/pyproject.toml`); no PyPI needed for local CI.
+- **JSON Schema:** `v1.2/corpus/schema/formal_claim_v1.2.schema.json` is canonical for v1.2;
+  `v1.2/scripts/sync_schema.sh --check` guards plugin drift.
+- **Archived workflows:** `v1.2/legacy-workflows/` (moved out of `.github/workflows/` so they no
+  longer auto-register; GitHub Actions are account-flagged and never ran anyway).
+
+> A first validation of v1.3 is to **ingest the v1.2 corpus into the v1.3 grammar** — a
+> sensitivity test of whether the new schema can represent the claims the old one held.
+> Any bridge between the two will be a deliberate, separately-reviewed migration, never an implicit import.
 
 ## History
 
 Consolidated 2026-05-26 from three now-archived repos: `beldez01/claims`,
 `beldez01/polymer-formalclaim`, `beldez01/polymer-claim-marketplace`. The v1.3 grammar effort
-began 2026-05-31 from the foundations research.
+began 2026-05-31 from the foundations research. On 2026-06-01 the v1.2 surface was consolidated
+under `v1.2/` and frozen as a fallback while v1.3 is built and validated.
 
 ## Deferred
 
-- The flagship `PolymerGenomicsAPI` still vendors its own copy of the v1.2 IR
-  (`src/polymer_genomics/formal_claims/`). Once `polymer-formalclaim` is published to PyPI, the API
-  will depend on the package and drop its vendored `schema/evaluate/materialize/nanopub`, keeping
-  only its API-specific `projection.py` + `feature_extractor.py`.
 - A navigable **3D latent-space claim-topology viewer** (lasso clusters; network-as-subject) —
   gated on corpus scale; extends the existing `PolymerGenomicsAPI/viewer` universe.
-
-## PyPI publishing
-
-`polymer-formalclaim` is not yet on PyPI. To publish: configure the PyPI pending Trusted Publisher
-(Project `polymer-formalclaim`, Owner `beldez01`, Repository `polymer-claims`, Workflow
-`publish-formalclaim.yml`), then push a `formalclaim-vX.Y.Z` tag.
+- **v1.2 PyPI publish** (`polymer-formalclaim`) and the API IR-dedup are deferred indefinitely in
+  favor of the v1.3 rebuild. Revival instructions live in `v1.2/README.md` if v1.2 is ever
+  reactivated.
