@@ -15,9 +15,11 @@ from .leaf import (
 from .status import PendingReason, Status
 from .strength import AXES, StrengthVector, licensed
 from .pattern import Pattern, PatternRef, get_pattern, registry
+from .claim import Claim
 
 __all__ = [
     "AXES",
+    "Claim",
     "_Model",
     "CategoricalLeaf",
     "ExistenceLeaf",
