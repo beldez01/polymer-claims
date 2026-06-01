@@ -156,7 +156,7 @@ def test_restore_consistency_noop_when_already_consistent():
     assert res.in_set == frozenset({"a", "b"})   # unattacked -> both IN
 
 
-def test_revision_result_is_frozen():
+def test_revision_result_forbids_extra_fields():
     a = _claim("a", _prop("A"))
     restore_consistency([a], [])
     with pytest.raises(ValidationError):
@@ -177,3 +177,19 @@ def test_restore_consistency_drops_retracted_claims_authored_edges():
     assert "b" in res.retraction.robustly_retracted
     assert res.in_set == frozenset({"a", "c"})                 # c IN: b's edge died with b
     assert all(e.source != "b" and e.target != "b" for e in res.edges)
+
+
+def test_restore_consistency_multi_conflict_aggregation():
+    # a is the weak loser of (a,b) [definite]; (c,d) are incomparable [ambiguous].
+    pb = _prop("B", direction=Direction.NEGATIVE)
+    pa = _prop("A", incompat=(pb.content_hash,))
+    pd = _prop("D", direction=Direction.NEGATIVE)
+    pc = _prop("C", incompat=(pd.content_hash,))
+    a = _claim("a", pa, strength=_sv(0.1, 0.1))   # weak -> loses to b
+    b = _claim("b", pb, strength=_sv(0.9, 0.9))
+    c = _claim("c", pc, strength=_sv(0.9, 0.1))   # incomparable to d
+    d = _claim("d", pd, strength=_sv(0.1, 0.9))
+    res = restore_consistency([a, b, c, d], [])
+    assert res.retraction.robustly_retracted == frozenset({"a"})
+    assert res.retraction.underdetermined == frozenset({"c", "d"})
+    assert res.retraction.consistent_core == frozenset({"b"})

@@ -186,7 +186,7 @@ def _result(
 
 
 def restore_consistency(
-    claims, edges, *, prior_in: frozenset[str] | None = None
+    claims: Iterable[Claim], edges: Iterable[DefeatEdge], *, prior_in: frozenset[str] | None = None
 ) -> RevisionResult:
     """Hansson consolidation: make a (possibly inconsistent) base consistent by incising
     the least-entrenched member of each conflict. No claim is privileged. When a conflict's
