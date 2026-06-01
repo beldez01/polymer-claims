@@ -1,13 +1,19 @@
 import pytest
 from pydantic import ValidationError
 
+from polymer_grammar.claim import Claim
 from polymer_grammar.defeat import (
     ATTACK_KINDS,
     DefeatEdge,
     DefeatEdgeKind,
+    derived_rebut_edges,
     effective_defeats,
     grounded_extension,
 )
+from polymer_grammar.leaf import MeasurementBasis, QuantityLeaf
+from polymer_grammar.pattern import PatternRef
+from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
+from polymer_grammar.status import Status
 from polymer_grammar.strength import StrengthVector
 
 
@@ -127,3 +133,49 @@ def test_edge_endpoints_not_in_claim_ids_still_participate():
     ext = grounded_extension(["a"], edges, {})
     assert "a" not in ext
     assert "r" in ext
+
+
+def _leaf():
+    return QuantityLeaf(value=1.0, measurement_basis=MeasurementBasis.DERIVED, formula="f")
+
+
+def _claim(cid, prop, status=Status.LICENSED):
+    return Claim(
+        id=cid, title=cid, pattern=PatternRef(id="p", version="v1"),
+        leaves=(_leaf(),), status=status, conclusion=prop,
+    )
+
+
+def test_derived_rebut_between_incompatible_licensed_claims():
+    # prop_b is what prop_a is incompatible_with (by content_hash)
+    prop_b = Proposition(direction=Direction.NEGATIVE, estimand="e", descriptor="d-neg")
+    prop_a = Proposition(
+        direction=Direction.POSITIVE, estimand="e", descriptor="d-pos",
+        neighborhood=(NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH,
+                                   target=prop_b.content_hash),),
+    )
+    a = _claim("a", prop_a)
+    b = _claim("b", prop_b)
+    edges = derived_rebut_edges([a, b])
+    pairs = {(e.source, e.target, e.kind) for e in edges}
+    assert ("a", "b", DefeatEdgeKind.REBUT) in pairs
+    assert ("b", "a", DefeatEdgeKind.REBUT) in pairs
+
+
+def test_no_derived_rebut_for_non_licensed_or_unmatched():
+    from polymer_grammar.status import PendingReason
+
+    prop_b = Proposition(direction=Direction.NEGATIVE, estimand="e", descriptor="d-neg")
+    prop_a = Proposition(
+        direction=Direction.POSITIVE, estimand="e", descriptor="d-pos",
+        neighborhood=(NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH,
+                                   target=prop_b.content_hash),),
+    )
+    # `a` is PENDING (not LICENSED) -> excluded from derived rebut; needs a pending_reason
+    a = Claim(
+        id="a", title="a", pattern=PatternRef(id="p", version="v1"),
+        leaves=(_leaf(),), status=Status.PENDING,
+        pending_reason=PendingReason.UNTESTED, conclusion=prop_a,
+    )
+    b = _claim("b", prop_b)
+    assert derived_rebut_edges([a, b]) == ()

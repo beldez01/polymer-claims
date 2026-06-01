@@ -12,11 +12,17 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterable, Mapping
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from pydantic import model_validator
 
 from .base import _Model
+from .proposition import NeighborEdgeKind
+from .status import Status
 from .strength import StrengthVector
+
+if TYPE_CHECKING:
+    from .claim import Claim
 
 
 class DefeatEdgeKind(str, Enum):
@@ -110,3 +116,37 @@ def grounded_extension(
                 accepted.add(a)
                 changed = True
     return frozenset(accepted)
+
+
+def derived_rebut_edges(claims: "Iterable[Claim]") -> tuple[DefeatEdge, ...]:
+    """Mutual `rebut` edges between LICENSED claims whose conclusions are materially
+    incompatible (an L1 `incompatible_with` NeighborEdge resolving between their
+    Proposition content_hashes). Opt-in: the caller merges these with authored edges
+    before grounded_extension. Reads L1 neighborhoods; mutates nothing.
+    """
+    licensed = [
+        c for c in claims if c.status == Status.LICENSED and c.conclusion is not None
+    ]
+    by_hash: dict[str, list[str]] = defaultdict(list)
+    for c in licensed:
+        by_hash[c.conclusion.content_hash].append(c.id)
+
+    edges: list[DefeatEdge] = []
+    seen: set[tuple[str, str]] = set()
+    for c in licensed:
+        for edge in c.conclusion.neighborhood:
+            if edge.kind != NeighborEdgeKind.INCOMPATIBLE_WITH:
+                continue
+            for other_id in by_hash.get(edge.target, ()):
+                if other_id == c.id:
+                    continue
+                for s, t in ((c.id, other_id), (other_id, c.id)):
+                    if (s, t) not in seen:
+                        seen.add((s, t))
+                        edges.append(
+                            DefeatEdge(
+                                source=s, target=t, kind=DefeatEdgeKind.REBUT,
+                                note="derived from incompatible_with",
+                            )
+                        )
+    return tuple(edges)
