@@ -17,6 +17,7 @@
 _(Append a dated entry per completed task: commit SHA + outcome + any deviation. Per working-preference: update this after every task.)_
 
 - 2026-06-01 — Task 1 ✅ Proposition module, commit 2cd2a14, 5 tests (39 total).
+- 2026-06-01 — Task 2 ✅ EquivalenceClaim model + resolution fns, commit 42bb1f8, 6 tests (45 total).
 
 ---
 
