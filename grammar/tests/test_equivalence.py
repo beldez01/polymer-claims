@@ -91,8 +91,8 @@ def test_disconnected_components_stay_separate():
 # uses a different name (_make_eq) to avoid collision.
 # ---------------------------------------------------------------------------
 
-def _make_eq(eid, left, right, status=Status.LICENSED):
-    return EquivalenceClaim(id=eid, left=left, right=right, severity=0.5, status=status)
+def _make_eq(id_, left, right, status=Status.LICENSED):
+    return EquivalenceClaim(id=id_, left=left, right=right, severity=0.5, status=status)
 
 
 def test_grounded_in_overrides_licensed_only_stub():
@@ -108,3 +108,10 @@ def test_grounded_in_class_membership():
     eqs = [_make_eq("e1", "a", "b"), _make_eq("e2", "b", "c")]
     # only e1 is IN -> class of a is {a, b}, c excluded
     assert equivalence_class("a", eqs, grounded_in=frozenset({"e1"})) == frozenset({"a", "b"})
+
+
+def test_grounded_in_overrides_status_entirely():
+    # a REJECTED edge whose id is IN the grounded extension still links
+    # (grounded_in replaces the status check, not ANDed with it)
+    eqs = [_make_eq("e1", "a", "b", status=Status.REJECTED)]
+    assert are_equivalent("a", "b", eqs, grounded_in=frozenset({"e1"}))

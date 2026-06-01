@@ -3,8 +3,9 @@
 "Same claim?" is answered by whether a LICENSED EquivalenceClaim relates two
 propositions (by content_hash) — never by structural/hash equality (Halvorson 2012).
 Lightweight first-class type now; promotable to a full meta-claim once
-'subject = set of claims' exists. Only LICENSED edges count as "IN" (a stand-in for
-L3 grounded-extension membership until the VAF layer lands).
+'subject = set of claims' exists. When `grounded_in` is supplied, an edge counts as "IN" iff its id is a member of
+that frozenset (real L3 grounded-extension membership). Legacy callers that omit
+the kwarg fall back to LICENSED-only gating.
 """
 from __future__ import annotations
 
