@@ -7,7 +7,7 @@ from polymer_grammar.pattern import PatternRef
 from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from polymer_grammar.status import PendingReason, Status
 from polymer_grammar.strength import StrengthVector
-from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent, RevisionResult, restore_consistency
+from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent, RevisionResult, restore_consistency, expand
 from polymer_grammar.defeat import DefeatEdge, DefeatEdgeKind
 
 
@@ -193,3 +193,25 @@ def test_restore_consistency_multi_conflict_aggregation():
     assert res.retraction.robustly_retracted == frozenset({"a"})
     assert res.retraction.underdetermined == frozenset({"c", "d"})
     assert res.retraction.consistent_core == frozenset({"b"})
+
+
+def test_expand_adds_claim_and_recomputes_in_set():
+    a = _claim("a", _prop("A"))
+    res = expand([a], [], _claim("b", _prop("B")))
+    assert {c.id for c in res.claims} == {"a", "b"}
+    assert res.retraction is None
+    assert res.in_set == frozenset({"a", "b"})        # both unattacked -> IN
+    assert res.flipped_in == frozenset({"b"})         # b is newly IN vs prior {a}
+    assert res.flipped_out == frozenset()
+
+
+def test_expand_can_introduce_a_defeat_that_flips_a_claim_out():
+    # b rebuts a (mutual incompatibility, equal strength so attacks stand both ways)
+    pa = _prop("A")
+    pb = _prop("B", direction=Direction.NEGATIVE, incompat=(pa.content_hash,))
+    pa2 = _prop("A", incompat=(pb.content_hash,))   # same content as pa, with back-edge
+    a = _claim("a", pa2)
+    res = expand([a], [], _claim("b", pb))
+    # derived mutual rebut, no strength -> attacks stand -> grounded extension empty
+    assert res.in_set == frozenset()
+    assert "a" in res.flipped_out

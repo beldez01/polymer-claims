@@ -218,3 +218,14 @@ def restore_consistency(
     new_claims = tuple(c for c in claims if c.id in core_ids)
     kept_edges = _drop_edges_incident_to(edges, possibly)
     return _result(new_claims, kept_edges, verdict, prior_in)
+
+
+def expand(claims, edges, new_claim, *, prior_in: frozenset[str] | None = None) -> RevisionResult:
+    """AGM expansion: add `new_claim` and recompute. Does NOT restore consistency
+    (expansion may yield an inconsistent set — use revise/restore_consistency for that).
+    """
+    claims = tuple(claims)
+    edges = tuple(edges)
+    if prior_in is None:
+        prior_in = _in_set(claims, edges)
+    return _result(claims + (new_claim,), edges, None, prior_in)
