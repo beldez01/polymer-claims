@@ -13,8 +13,10 @@ from .leaf import (
     QuantityLeaf,
 )
 from .status import PendingReason, Status
+from .strength import AXES, StrengthVector, licensed
 
 __all__ = [
+    "AXES",
     "_Model",
     "CategoricalLeaf",
     "ExistenceLeaf",
@@ -24,5 +26,7 @@ __all__ = [
     "PropositionLeaf",
     "QuantityLeaf",
     "Status",
+    "StrengthVector",
     "__version__",
+    "licensed",
 ]
