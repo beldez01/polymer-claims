@@ -154,7 +154,12 @@ def _strength_map(claims: tuple[Claim, ...]) -> dict[str, StrengthVector | None]
 
 
 def _in_set(claims: tuple[Claim, ...], edges: tuple[DefeatEdge, ...]) -> frozenset[str]:
-    """Grounded extension over the base, merging authored edges with derived rebut edges."""
+    """Grounded extension over the base, merging authored edges with derived rebut edges.
+
+    Note: derived_rebut_edges is LICENSED-only while _conflicts (used by restore_consistency)
+    is status-agnostic — this asymmetry is intentional: a non-LICENSED conflict is still
+    resolved by retraction, and only LICENSED claims contribute material-incompatibility
+    rebut edges to the grounded recompute. Don't "fix" it into one rule."""
     all_edges = tuple(edges) + derived_rebut_edges(claims)
     return grounded_extension([c.id for c in claims], all_edges, _strength_map(claims))
 
@@ -220,7 +225,7 @@ def restore_consistency(
     return _result(new_claims, kept_edges, verdict, prior_in)
 
 
-def expand(claims, edges, new_claim, *, prior_in: frozenset[str] | None = None) -> RevisionResult:
+def expand(claims: Iterable[Claim], edges: Iterable[DefeatEdge], new_claim: Claim, *, prior_in: frozenset[str] | None = None) -> RevisionResult:
     """AGM expansion: add `new_claim` and recompute. Does NOT restore consistency
     (expansion may yield an inconsistent set — use revise/restore_consistency for that).
     """
@@ -231,7 +236,7 @@ def expand(claims, edges, new_claim, *, prior_in: frozenset[str] | None = None) 
     return _result(claims + (new_claim,), edges, None, prior_in)
 
 
-def contract(claims, edges, target_id, *, prior_in: frozenset[str] | None = None) -> RevisionResult:
+def contract(claims: Iterable[Claim], edges: Iterable[DefeatEdge], target_id: str, *, prior_in: frozenset[str] | None = None) -> RevisionResult:
     """AGM contraction: remove `target` and every claim whose conclusion entails target's
     conclusion (single-premise entailment ⇒ all entailers must go — deterministic).
     """
@@ -262,7 +267,7 @@ def contract(claims, edges, target_id, *, prior_in: frozenset[str] | None = None
     return _result(new_claims, kept_edges, verdict, prior_in)
 
 
-def revise(claims, edges, new_claim, *, prior_in: frozenset[str] | None = None) -> RevisionResult:
+def revise(claims: Iterable[Claim], edges: Iterable[DefeatEdge], new_claim: Claim, *, prior_in: frozenset[str] | None = None) -> RevisionResult:
     """AGM revision via the Levi identity K * p = (K − ¬p) + p, with `new_claim` PRIVILEGED
     (success). Every existing claim incompatible with `new_claim` is retracted (each
     independently conflicts with p, so all must go — deterministic; entrenchment is not
