@@ -14,6 +14,8 @@ from __future__ import annotations
 
 from enum import Enum
 
+from pydantic import model_validator
+
 from .base import _Model
 
 
@@ -33,3 +35,55 @@ class MaterializationContext(_Model):
 class Satisfaction(_Model):
     verdict: SatisfactionVerdict
     materialization: MaterializationContext
+
+
+class LicenseRoute(str, Enum):
+    SEVERE_TEST = "severe_test"
+    REPLICATION = "replication"
+
+
+class RivalSetClosure(str, Enum):
+    ENUMERATED = "enumerated"
+    ONTOLOGY_BOUNDED = "ontology_bounded"
+    OPEN_ACKNOWLEDGED = "open_acknowledged"
+
+
+class Licensing(_Model):
+    route: LicenseRoute
+    satisfactions: tuple[Satisfaction, ...]
+    rival_set_closure: RivalSetClosure
+    rivals_considered: tuple[str, ...] = ()
+    note: str | None = None
+
+    @model_validator(mode="after")
+    def _all_satisfied(self) -> "Licensing":
+        if not self.satisfactions:
+            raise ValueError("a Licensing record requires >=1 satisfaction")
+        if any(s.verdict != SatisfactionVerdict.SATISFIED for s in self.satisfactions):
+            raise ValueError(
+                "a Licensing record represents successful licensing; every "
+                "satisfaction must be SATISFIED (refuted/undetermined => not licensed)"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _replication_needs_two_distinct_materializations(self) -> "Licensing":
+        if self.route == LicenseRoute.REPLICATION:
+            ids = {s.materialization.id for s in self.satisfactions}
+            if len(ids) < 2:
+                raise ValueError(
+                    "route=replication requires >=2 satisfactions across DISTINCT "
+                    "materializations (M1 and M2)"
+                )
+        return self
+
+    @model_validator(mode="after")
+    def _enumerated_closure_names_rivals(self) -> "Licensing":
+        if (
+            self.rival_set_closure == RivalSetClosure.ENUMERATED
+            and not self.rivals_considered
+        ):
+            raise ValueError(
+                "rival_set_closure=enumerated requires a non-empty rivals_considered"
+            )
+        return self

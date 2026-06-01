@@ -18,7 +18,14 @@ from .pattern import Pattern, PatternRef, get_pattern, registry
 from .claim import Claim
 from .proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from .equivalence import EquivalenceClaim, are_equivalent, equivalence_class
-from .licensing import MaterializationContext, Satisfaction, SatisfactionVerdict
+from .licensing import (
+    LicenseRoute,
+    Licensing,
+    MaterializationContext,
+    RivalSetClosure,
+    Satisfaction,
+    SatisfactionVerdict,
+)
 
 __all__ = [
     "AXES",
@@ -45,8 +52,11 @@ __all__ = [
     "equivalence_class",
     "get_pattern",
     "licensed",
+    "LicenseRoute",
+    "Licensing",
     "MaterializationContext",
     "registry",
+    "RivalSetClosure",
     "Satisfaction",
     "SatisfactionVerdict",
 ]
