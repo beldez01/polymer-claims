@@ -257,3 +257,54 @@ def test_revise_with_no_conflict_is_expansion():
     res = revise([a], [], p)
     assert {c.id for c in res.claims} == {"a", "p"}
     assert res.retraction.robustly_retracted == frozenset()   # vacuity: nothing retracted
+
+
+# ---- Task 8: AGM postulate conformance tests ----
+
+def test_postulate_success_contract_removes_entailment():
+    pa = _prop("A")
+    res = contract([_claim("a", pa)], [], "a")
+    assert not corpus_entails(res.claims, pa.content_hash)
+
+
+def test_postulate_inclusion_revise_subset_of_union():
+    pb = _prop("B", direction=Direction.NEGATIVE)
+    pa = _prop("A", incompat=(pb.content_hash,))
+    old, p = _claim("old", pb), _claim("p", pa)
+    res = revise([old], [], p)
+    assert {c.id for c in res.claims} <= {"old", "p"}
+
+
+def test_postulate_vacuity_revise_equals_expand_when_consistent():
+    a, p = _claim("a", _prop("A")), _claim("p", _prop("P"))
+    rev = revise([a], [], p)
+    exp = expand([a], [], p)
+    assert {c.id for c in rev.claims} == {c.id for c in exp.claims}
+    assert rev.retraction.robustly_retracted == frozenset()
+
+
+def test_postulate_consistency_revise_yields_consistent_base():
+    pb = _prop("B", direction=Direction.NEGATIVE)
+    pa = _prop("A", incompat=(pb.content_hash,))
+    res = revise([_claim("old", pb)], [], _claim("p", pa))
+    assert is_consistent(res.claims)
+
+
+def test_postulate_extensionality_equal_content_treated_alike():
+    # two claims with identical conclusion content_hash entail the same things
+    pa1 = _prop("A")
+    pa2 = _prop("A")
+    assert pa1.content_hash == pa2.content_hash
+    assert corpus_entails([_claim("x", pa1)], pa2.content_hash)
+
+
+def test_base_contraction_does_not_recover():
+    # KNOWN base-AGM result: contracting then re-expanding does NOT restore entailments
+    # lost via removed entailers. Documented, not a bug.
+    pc = _prop("C")
+    pa = _prop("A", entails=(pc.content_hash,))
+    a, c = _claim("a", pa), _claim("c", pc)
+    contracted = contract([a, c], [], "c")           # removes a and c
+    recovered = expand(list(contracted.claims), [], c)  # add c back only
+    # `a` (and its entailment of c) is NOT recovered:
+    assert "a" not in {cl.id for cl in recovered.claims}
