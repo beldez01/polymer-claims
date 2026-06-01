@@ -14,6 +14,7 @@ from .leaf import (
 )
 from .status import PendingReason, Status
 from .strength import AXES, StrengthVector, licensed
+from .pattern import Pattern, PatternRef, get_pattern, registry
 
 __all__ = [
     "AXES",
@@ -22,11 +23,15 @@ __all__ = [
     "ExistenceLeaf",
     "Leaf",
     "MeasurementBasis",
+    "Pattern",
+    "PatternRef",
     "PendingReason",
     "PropositionLeaf",
     "QuantityLeaf",
     "Status",
     "StrengthVector",
     "__version__",
+    "get_pattern",
     "licensed",
+    "registry",
 ]
