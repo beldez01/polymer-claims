@@ -7,24 +7,18 @@
 ## Current state (as of 2026-06-01)
 
 Building the **v1.3 grammar** in `grammar/` (package `polymer_grammar`), kept isolated from
-the frozen v1.2 IR in `v1.2/formalclaim/`. **5 of 8 grammar phases merged to `main`. 117 tests, green.**
+the frozen v1.2 IR in `v1.2/formalclaim/`. **6 of 8 grammar phases merged to `main`. 147 tests, green.**
 
 - ✅ Phase 1 — foundation: L0 sum-typed leaf, status lifecycle, 6-axis Pareto strength, pattern registry, claim skeleton + deep immutability
 - ✅ Phase 2 — L1: molecular Proposition + defeasible Equivalence (identity = licensed equivalence, never a hash)
 - ✅ Phase 3 — L2: licensing bridge ((σ,M) satisfaction, severe-test|replication route, required rival_set_closure)
 - ✅ Phase 4 — typed causal roles (derived/un-authorable adjustment set; Table-2 guard) + Dimension units algebra
 - ✅ Phase 5 — L3: VAF defeat graph (`defeat.py`) + Duhem blame-sets (`blame.py`). Strength-mediated effective defeat (attack defeats unless target `≥`-dominates source); PTIME grounded extension over the SINGLE effective-defeat relation; opt-in `derived_rebut_edges` from L1 `incompatible_with`; L2 failed-satisfaction → `undermine` adapter; additive `equivalence.grounded_in` path replacing the LICENSED-only "IN" stub; `aggregate_blame` set algebra (intersection→robustly-blamed / difference→PENDING `duhem_underdetermined`). Merge `1cb0b88`. Spec `specs/2026-06-01-L3-defeat-and-blame-spec.md`, plan `plans/2026-06-01-L3-defeat-and-blame.md`.
+- ✅ Phase 6 — L4: AGM/TMS belief revision (`revision.py`). Belief-BASE AGM with `Cn` = L1 `entails`-neighborhood closure, inconsistency = `incompatible_with`. **Partial** entrenchment from StrengthVector (severity, evidence_against_null) + Status tier (`INCOMPARABLE` first-class). `restore_consistency` = Hansson consolidation: entrenchment-guided incision, robust/underdetermined spread + conservative consistent core (the locus of partial-entrenchment ambiguity). `expand`/`contract`/`revise` (Levi identity, success-privileged). **Edge hygiene**: every retracting op drops authored defeat edges incident to a retracted claim (no zombie-attack via grounded_extension's endpoint injection). Status recompute reuses Phase-5 `grounded_extension`. AGM postulates (success/inclusion/vacuity/consistency/extensionality) tested; base-contraction non-recovery documented, not faked. Merge `55096fd`. Spec `specs/2026-06-01-L4-revision-spec.md`, plan `plans/2026-06-01-L4-revision.md`.
 
-## ▶ NEXT: Phase 6 — L4 AGM/TMS belief revision
+## ▶ NEXT: Phase 7 — protocol-imposed grammar fields
 
-AGM (Alchourrón–Gärdenfors–Makinson 1985) + TMS (Doyle 1979) revision over the corpus with an
-entrenchment ordering keyed to evidence_class + severity. Status recompute under a *fixed* defeat
-graph is PTIME-monotone (the Phase-5 grounded extension); graph *edits* (add/retract claims & edges)
-are the non-monotonic AGM ops to model here. See unified spec §3.5 + §3 (L4 row). Follow the same
-rhythm (brainstorm forks → phase spec → plan → subagent-driven). Phase-5 follow-ups to fold in when
-relevant: auxiliary assumptions as first-class blame/undercut nodes (the ingestion probe showed all 47
-claims carry `external_assumptions`); bounded defeat in-degree write-time cap; named-audience VAF
-value-orderings beyond the single Pareto order.
+The 6 requirements the protocol pushes back on the grammar (unified spec §5): (1) `generated_by` + `search_cardinality` provenance; (2) oracle credibility-qualification object (validation tier + applicability domain + propagated uncertainty) bound to operations, strength capped by oracle tier; (3) `hazard_class` + governance/access-scope dimension on data dependencies (enables SAFETY-GATE + `unreproducible_by_governance`); (4) corpus-level online-FDR / error-budget object as a first-class IR entity; (5) `representation_revision` meta-tier (claims about the IR itself, gated conservatively); (6) `reinterpret` edge (already in L3 — verify coverage). These are additive (no foundational change); pick a coherent subset for one phase or split. Follow the same rhythm (brainstorm forks → phase spec → plan → subagent-driven). **Carry-forward follow-ups still open:** auxiliary assumptions as first-class blame/undercut/retraction nodes (ingestion probe: all 47 v1.2 claims carry `external_assumptions`); the two ingestion off-roadmap gaps — no `Claim.subject` slot + no vector-valued `Leaf`; n-ary `incompatible_with` + conjunctive `entails` (would make L4 contraction's entrenchment choice bite, not just revision); bounded defeat in-degree cap; named-audience VAF value-orderings. After Phase 8 (the evaluator) comes the **protocol runtime** (8-stage flywheel + 3 daemons) and the deferred 3D topology viewer — and the [[platform vision]] (users deploy agents on their own compute to elaborate the claims universe).
 
 ## How to resume (the established rhythm)
 

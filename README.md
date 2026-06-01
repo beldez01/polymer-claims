@@ -39,7 +39,7 @@ Full derivation (two adversarially-stress-tested research swarms) lives in
 ### The v1.3 grammar — five dependency-ordered layers
 
 ```
-  L4  REVISION    AGM/TMS belief revision + entrenchment over the corpus   (temporal change)   [planned]
+  L4  REVISION    AGM/TMS belief revision + entrenchment over the corpus   (temporal change)   [done]
   L3  CORPUS      value-based defeat graph (VAF) → grounded extensions      (composition)        [done]
   L2  CLAIM       pattern-typed DAG → 3-valued satisfaction + strength       (licensing bridge)   [partial]
   L1  PROPOSITION molecular content + asserted, defeasible identity          (semantics)          [done]
@@ -57,7 +57,10 @@ authored* (a Table-2-fallacy guard) plus a **units-of-measure `Dimension`** alge
 grounded extension is computed over a single *strength-mediated* effective-defeat relation (an
 attack defeats only if the target does not Pareto-dominate the attacker), plus **Duhem–Quine
 blame-sets** that surface under-determined contradictions (`duhem_underdetermined`) instead of
-laundering them into one verdict.
+laundering them into one verdict; and (L4) **belief-base AGM revision** (`expand`/`contract`/`revise`)
+over a *partial* entrenchment order, where `restore_consistency` makes an inconsistent corpus
+consistent by incising the least-entrenched claims and **surfaces the ambiguity** (robust vs
+underdetermined) when entrenchment can't decide — rather than silently picking a winner.
 
 ### Phase status (grammar)
 
@@ -68,11 +71,11 @@ laundering them into one verdict.
 | 3 | L2: licensing bridge ((σ,M), dual route, rival_set_closure) | ✅ merged |
 | 4 | typed causal roles + units-of-measure algebra | ✅ merged |
 | 5 | L3: VAF defeat graph + Duhem blame-sets | ✅ merged |
-| 6 | L4: AGM/TMS revision | ⬜ next |
-| 7 | protocol-imposed fields (generated_by, oracle credibility, hazard/governance, online-FDR, …) | ⬜ |
+| 6 | L4: AGM/TMS revision | ✅ merged |
+| 7 | protocol-imposed fields (generated_by, oracle credibility, hazard/governance, online-FDR, …) | ⬜ next |
 | 8 | the evaluator (runs the grammar) | ⬜ |
 
-117 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
+147 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
 by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is built and validated.
 
 ### Where the design lives
