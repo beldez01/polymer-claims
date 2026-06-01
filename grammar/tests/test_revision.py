@@ -78,6 +78,7 @@ def test_entails_closure_transitive():
     pa = _prop("A", entails=(pb.content_hash,))
     claims = [_claim("a", pa), _claim("b", pb), _claim("c", pc)]
     closure = entails_closure({pa.content_hash}, claims)
+    assert pa.content_hash in closure  # seeds-included invariant
     assert pb.content_hash in closure and pc.content_hash in closure
 
 
