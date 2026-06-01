@@ -58,8 +58,9 @@ strength-dominate the source, using the Phase-4 `StrengthVector.dominates` parti
 attack A → B is an EFFECTIVE DEFEAT  ⇔  NOT ( strength(B) dominates strength(A) )
 ```
 
-- target strictly stronger on all axes (`strength(B).dominates(strength(A))`) → attack **fails**
-  (the better-supported claim resists the weaker attacker).
+- target **at least as strong** on every axis (`strength(B).dominates(strength(A))`, i.e. `≥` —
+  the standard VAF preference, *not* strict `>`) → attack **fails** (the equally-or-better-supported
+  claim resists the attacker; equal vectors therefore filter the attack).
 - source dominates target, **or strengths are incomparable, or either claim has no strength
   vector** → attack **stands** (incomparability/absence is not a proof of the target's
   superiority, so the attack is not filtered out). This is the conservative, no-hidden-scalar
