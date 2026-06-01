@@ -1,0 +1,74 @@
+"""L1 — equivalence as an asserted, defeasible claim (spec §1.2-1.3).
+
+"Same claim?" is answered by whether a LICENSED EquivalenceClaim relates two
+propositions (by content_hash) — never by structural/hash equality (Halvorson 2012).
+Lightweight first-class type now; promotable to a full meta-claim once
+'subject = set of claims' exists. Only LICENSED edges count as "IN" (a stand-in for
+L3 grounded-extension membership until the VAF layer lands).
+"""
+from __future__ import annotations
+
+from collections import defaultdict, deque
+from typing import Iterable
+
+from pydantic import Field, model_validator
+
+from .base import _Model
+from .status import PendingReason, Status
+
+
+class EquivalenceClaim(_Model):
+    id: str
+    left: str
+    right: str
+    severity: float = Field(ge=0.0, le=1.0)
+    status: Status
+    pending_reason: PendingReason | None = None
+    note: str | None = None
+
+    @model_validator(mode="after")
+    def _distinct_endpoints(self) -> "EquivalenceClaim":
+        if self.left == self.right:
+            raise ValueError(
+                "an EquivalenceClaim must relate two DISTINCT propositions"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _pending_reason_iff_pending(self) -> "EquivalenceClaim":
+        if self.status == Status.PENDING and self.pending_reason is None:
+            raise ValueError("status=PENDING requires a `pending_reason`")
+        if self.status != Status.PENDING and self.pending_reason is not None:
+            raise ValueError(
+                f"`pending_reason` is only valid when status=PENDING; "
+                f"got status={self.status.value}"
+            )
+        return self
+
+
+def equivalence_class(
+    handle: str, equivalences: Iterable[EquivalenceClaim]
+) -> frozenset[str]:
+    """Connected component of `handle` over LICENSED, symmetric equivalence edges
+    (transitive closure). The component IS the equivalence_class_id material."""
+    adj: dict[str, set[str]] = defaultdict(set)
+    for eq in equivalences:
+        if eq.status == Status.LICENSED:
+            adj[eq.left].add(eq.right)
+            adj[eq.right].add(eq.left)
+    seen = {handle}
+    queue: deque[str] = deque([handle])
+    while queue:
+        node = queue.popleft()
+        for nbr in adj[node]:
+            if nbr not in seen:
+                seen.add(nbr)
+                queue.append(nbr)
+    return frozenset(seen)
+
+
+def are_equivalent(
+    a: str, b: str, equivalences: Iterable[EquivalenceClaim]
+) -> bool:
+    """Reflexive / symmetric / transitive over LICENSED equivalence edges."""
+    return b in equivalence_class(a, equivalences)

@@ -17,11 +17,13 @@ from .strength import AXES, StrengthVector, licensed
 from .pattern import Pattern, PatternRef, get_pattern, registry
 from .claim import Claim
 from .proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
+from .equivalence import EquivalenceClaim, are_equivalent, equivalence_class
 
 __all__ = [
     "AXES",
     "Claim",
     "Direction",
+    "EquivalenceClaim",
     "_Model",
     "CategoricalLeaf",
     "ExistenceLeaf",
@@ -38,6 +40,8 @@ __all__ = [
     "Status",
     "StrengthVector",
     "__version__",
+    "are_equivalent",
+    "equivalence_class",
     "get_pattern",
     "licensed",
     "registry",
