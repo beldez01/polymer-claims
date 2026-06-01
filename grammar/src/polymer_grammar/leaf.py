@@ -3,8 +3,10 @@
 Only a Fundamental quantity (one backed by a representation theorem) may assert a
 UCUM unit + meaningfulness class. Derived statistics carry their generating formula,
 never a false unit. Categorical leaves carry an ontology term instead of a unit;
-Existence leaves distinguish genuine absence from untested absence; Proposition
-leaves give qualitative/mechanistic claims a Toulmin-warrant home.
+Existence leaves distinguish a genuine measured absence (not_detected, below
+detection_limit) from a positive observation; untestedness is represented at the
+status layer, not here. Proposition leaves give qualitative/mechanistic claims a
+Toulmin-warrant home.
 """
 from __future__ import annotations
 

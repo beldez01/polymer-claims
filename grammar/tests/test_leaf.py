@@ -60,3 +60,13 @@ def test_proposition_leaf_is_a_toulmin_warrant():
 def test_discriminated_union_dispatches_on_kind():
     leaf = ADAPTER.validate_python({"kind": "existence", "state": "observed"})
     assert isinstance(leaf, ExistenceLeaf)
+
+
+@pytest.mark.parametrize("basis", [
+    MeasurementBasis.CONVENTIONAL,
+    MeasurementBasis.ORDINAL,
+    MeasurementBasis.NOMINAL,
+])
+def test_non_fundamental_bases_forbid_unit(basis):
+    with pytest.raises(ValidationError, match="unit is only meaningful for FUNDAMENTAL"):
+        QuantityLeaf(value=1.0, unit="kg", measurement_basis=basis)
