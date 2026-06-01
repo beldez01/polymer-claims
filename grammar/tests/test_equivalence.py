@@ -83,3 +83,35 @@ def test_disconnected_components_stay_separate():
     assert equivalence_class("A", eqs) == frozenset({"A", "B"})
     assert not are_equivalent("A", "C", eqs)
     assert not are_equivalent("A", "D", eqs)
+
+
+# ---------------------------------------------------------------------------
+# Task 6: grounded_in rerouting
+# NOTE: a local `_eq` already exists above with a **kw signature; this helper
+# uses a different name (_make_eq) to avoid collision.
+# ---------------------------------------------------------------------------
+
+def _make_eq(id_, left, right, status=Status.LICENSED):
+    return EquivalenceClaim(id=id_, left=left, right=right, severity=0.5, status=status)
+
+
+def test_grounded_in_overrides_licensed_only_stub():
+    # edge is LICENSED, so default path links a~b...
+    eqs = [_make_eq("e1", "a", "b")]
+    assert are_equivalent("a", "b", eqs)  # default (LICENSED) path
+    # ...but if the equivalence claim e1 is OUT of the grounded extension, it must NOT link
+    assert not are_equivalent("a", "b", eqs, grounded_in=frozenset())
+    assert are_equivalent("a", "b", eqs, grounded_in=frozenset({"e1"}))
+
+
+def test_grounded_in_class_membership():
+    eqs = [_make_eq("e1", "a", "b"), _make_eq("e2", "b", "c")]
+    # only e1 is IN -> class of a is {a, b}, c excluded
+    assert equivalence_class("a", eqs, grounded_in=frozenset({"e1"})) == frozenset({"a", "b"})
+
+
+def test_grounded_in_overrides_status_entirely():
+    # a REJECTED edge whose id is IN the grounded extension still links
+    # (grounded_in replaces the status check, not ANDed with it)
+    eqs = [_make_eq("e1", "a", "b", status=Status.REJECTED)]
+    assert are_equivalent("a", "b", eqs, grounded_in=frozenset({"e1"}))

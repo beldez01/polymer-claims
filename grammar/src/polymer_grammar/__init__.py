@@ -28,6 +28,22 @@ from .licensing import (
 )
 from .roles import CausalRoles, Role
 from .units import DIMENSIONLESS, Dimension, compatible
+from .defeat import (
+    ATTACK_KINDS,
+    DefeatEdge,
+    DefeatEdgeKind,
+    derived_rebut_edges,
+    effective_defeats,
+    grounded_extension,
+    undermine_edges_from_failed_satisfactions,
+)
+from .blame import (
+    BlameAssignment,
+    BlameSet,
+    BlameVerdict,
+    aggregate_blame,
+    duhem_status,
+)
 
 __all__ = [
     "AXES",
@@ -66,4 +82,16 @@ __all__ = [
     "DIMENSIONLESS",
     "Dimension",
     "compatible",
+    "ATTACK_KINDS",
+    "DefeatEdge",
+    "DefeatEdgeKind",
+    "derived_rebut_edges",
+    "effective_defeats",
+    "grounded_extension",
+    "undermine_edges_from_failed_satisfactions",
+    "BlameAssignment",
+    "BlameSet",
+    "BlameVerdict",
+    "aggregate_blame",
+    "duhem_status",
 ]
