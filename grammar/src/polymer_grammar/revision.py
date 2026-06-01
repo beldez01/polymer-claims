@@ -116,6 +116,8 @@ def _conflicts(claims: tuple[Claim, ...]) -> list[tuple[Claim, Claim]]:
             for other in by_hash.get(e.target, ()):
                 if other.id == c.id:
                     continue
+                # sorted key: a conflict is unordered — (a, b) and (b, a) are the same
+                # pair, so a both-sided incompatibility declaration collapses to one entry.
                 key = tuple(sorted((c.id, other.id)))
                 if key not in seen:
                     seen.add(key)
