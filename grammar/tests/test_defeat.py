@@ -91,30 +91,39 @@ def test_unattacked_claims_are_in():
     assert grounded_extension(["a", "b"], [], {}) == frozenset({"a", "b"})
 
 
-def test_mutual_attack_no_dominance_yields_neither():
-    # a <-> b mutual effective defeat, equal strength (no dominance) -> grounded is empty
+def test_mutual_attack_both_out_when_attacks_stand():
+    # a <-> b mutual attack; no strength -> no value filter, both attacks stand
+    # -> classic Dung mutual attack: grounded extension is empty.
     edges = [
         DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT),
         DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),
     ]
-    strength = {"a": _sv(0.5), "b": _sv(0.5)}
-    assert grounded_extension(["a", "b"], edges, strength) == frozenset()
+    assert grounded_extension(["a", "b"], edges, {}) == frozenset()
 
 
 def test_reinstatement():
-    # c -> a -> b, c unattacked. grounded = {c, b}: a is OUT, so b is reinstated.
+    # c -> a -> b, all attacks stand. grounded = {c, b}: a is OUT, so b is reinstated.
     edges = [
         DefeatEdge(source="c", target="a", kind=DefeatEdgeKind.REBUT),
         DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT),
     ]
-    strength = {"a": _sv(0.5), "b": _sv(0.5), "c": _sv(0.5)}
-    assert grounded_extension(["a", "b", "c"], edges, strength) == frozenset({"c", "b"})
+    assert grounded_extension(["a", "b", "c"], edges, {}) == frozenset({"c", "b"})
+
+
+def test_value_filter_breaks_symmetry():
+    # mutual attack, but 'strong' dominates 'weak': weak's attack on strong is filtered,
+    # strong's attack on weak stands -> grounded = {strong}.
+    edges = [
+        DefeatEdge(source="weak", target="strong", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="strong", target="weak", kind=DefeatEdgeKind.REBUT),
+    ]
+    strength = {"weak": _sv(0.2), "strong": _sv(0.9)}
+    assert grounded_extension(["weak", "strong"], edges, strength) == frozenset({"strong"})
 
 
 def test_edge_endpoints_not_in_claim_ids_still_participate():
-    # synthetic attacker 'r' (not in claim_ids) is unattacked -> IN, and defeats 'a'
+    # synthetic attacker 'r' (not in claim_ids), no strength -> unattacked, IN, defeats 'a'
     edges = [DefeatEdge(source="r", target="a", kind=DefeatEdgeKind.UNDERMINE)]
-    strength = {"a": _sv(0.5)}
-    ext = grounded_extension(["a"], edges, strength)
+    ext = grounded_extension(["a"], edges, {})
     assert "a" not in ext
     assert "r" in ext
