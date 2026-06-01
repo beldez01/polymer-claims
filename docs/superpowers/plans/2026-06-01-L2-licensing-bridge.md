@@ -16,7 +16,10 @@
 
 _(Append a dated entry per completed task: commit SHA + outcome. Update after every task.)_
 
-- Not started.
+- 2026-06-01 — Task 1 ✅ satisfaction primitives, commit 7ddd839, 4 tests (58 total).
+- 2026-06-01 — Task 2 ✅ Licensing record, commit 68a76d8, 6 tests (64 total).
+- 2026-06-01 — Task 3 ✅ Claim.licensing wired, commit 97c05d6, 4 tests (68 total).
+- 2026-06-01 — Task 4 ✅ full gate (68 green, ruff clean, isolation guard pass). **Phase 3 (L2) COMPLETE.** (Controller ran the gate directly.)
 
 ---
 

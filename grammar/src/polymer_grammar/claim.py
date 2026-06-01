@@ -13,6 +13,7 @@ from pydantic import Field, model_validator
 
 from .base import _Model
 from .leaf import Leaf
+from .licensing import Licensing
 from .pattern import PatternRef
 from .proposition import Proposition
 from .status import PendingReason, Status
@@ -29,6 +30,7 @@ class Claim(_Model):
     pending_reason: PendingReason | None = None
     strength: StrengthVector | None = None
     conclusion: Proposition | None = None
+    licensing: Licensing | None = None
 
     @model_validator(mode="after")
     def _pending_reason_iff_pending(self) -> "Claim":
@@ -37,6 +39,15 @@ class Claim(_Model):
         if self.status != Status.PENDING and self.pending_reason is not None:
             raise ValueError(
                 f"`pending_reason` is only valid when status=PENDING; "
+                f"got status={self.status.value}"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _licensing_only_when_licensed(self) -> "Claim":
+        if self.licensing is not None and self.status != Status.LICENSED:
+            raise ValueError(
+                f"`licensing` is only valid when status=LICENSED; "
                 f"got status={self.status.value}"
             )
         return self
