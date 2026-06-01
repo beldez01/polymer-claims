@@ -13,7 +13,7 @@ from polymer_grammar.defeat import (
 from polymer_grammar.leaf import MeasurementBasis, QuantityLeaf
 from polymer_grammar.pattern import PatternRef
 from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
-from polymer_grammar.status import Status
+from polymer_grammar.status import PendingReason, Status
 from polymer_grammar.strength import StrengthVector
 
 
@@ -163,8 +163,6 @@ def test_derived_rebut_between_incompatible_licensed_claims():
 
 
 def test_no_derived_rebut_for_non_licensed_or_unmatched():
-    from polymer_grammar.status import PendingReason
-
     prop_b = Proposition(direction=Direction.NEGATIVE, estimand="e", descriptor="d-neg")
     prop_a = Proposition(
         direction=Direction.POSITIVE, estimand="e", descriptor="d-pos",
@@ -179,3 +177,32 @@ def test_no_derived_rebut_for_non_licensed_or_unmatched():
     )
     b = _claim("b", prop_b)
     assert derived_rebut_edges([a, b]) == ()
+
+
+def test_no_derived_rebut_when_incompatible_target_has_no_matching_claim():
+    # LICENSED claim declares incompatible_with, but no other claim holds that conclusion.
+    prop_b = Proposition(direction=Direction.NEGATIVE, estimand="e", descriptor="absent")
+    prop_a = Proposition(
+        direction=Direction.POSITIVE, estimand="e", descriptor="d-pos",
+        neighborhood=(NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH,
+                                   target=prop_b.content_hash),),
+    )
+    a = _claim("a", prop_a)  # the prop_b-holder is absent from the corpus
+    assert derived_rebut_edges([a]) == ()
+
+
+def test_claim_without_conclusion_is_excluded():
+    prop_b = Proposition(direction=Direction.NEGATIVE, estimand="e", descriptor="d-neg")
+    prop_a = Proposition(
+        direction=Direction.POSITIVE, estimand="e", descriptor="d-pos",
+        neighborhood=(NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH,
+                                   target=prop_b.content_hash),),
+    )
+    a = _claim("a", prop_a)
+    b = _claim("b", prop_b)
+    none_claim = Claim(
+        id="c", title="c", pattern=PatternRef(id="p", version="v1"),
+        leaves=(_leaf(),), status=Status.LICENSED, conclusion=None,
+    )
+    # none_claim contributes nothing; still exactly the 2 mutual a<->b edges
+    assert len(derived_rebut_edges([a, b, none_claim])) == 2
