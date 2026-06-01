@@ -260,3 +260,43 @@ def contract(claims, edges, target_id, *, prior_in: frozenset[str] | None = None
     )
     kept_edges = _drop_edges_incident_to(edges, frozenset(retract))
     return _result(new_claims, kept_edges, verdict, prior_in)
+
+
+def revise(claims, edges, new_claim, *, prior_in: frozenset[str] | None = None) -> RevisionResult:
+    """AGM revision via the Levi identity K * p = (K − ¬p) + p, with `new_claim` PRIVILEGED
+    (success). Every existing claim incompatible with `new_claim` is retracted (each
+    independently conflicts with p, so all must go — deterministic; entrenchment is not
+    consulted, and `new_claim` is never a retraction target).
+    """
+    claims = tuple(claims)
+    edges = tuple(edges)
+    if prior_in is None:
+        prior_in = _in_set(claims, edges)
+    np_hash = new_claim.conclusion.content_hash if new_claim.conclusion is not None else None
+    incompatible_targets = set()
+    if new_claim.conclusion is not None:
+        for e in new_claim.conclusion.neighborhood:
+            if e.kind == NeighborEdgeKind.INCOMPATIBLE_WITH:
+                incompatible_targets.add(e.target)
+
+    def _conflicts_with_new(c: Claim) -> bool:
+        if c.conclusion is None:
+            return False
+        if c.conclusion.content_hash in incompatible_targets:
+            return True
+        if np_hash is not None:
+            return any(
+                e.kind == NeighborEdgeKind.INCOMPATIBLE_WITH and e.target == np_hash
+                for e in c.conclusion.neighborhood
+            )
+        return False
+
+    retract = {c.id for c in claims if _conflicts_with_new(c)}
+    kept = tuple(c for c in claims if c.id not in retract)
+    new_claims = kept + (new_claim,)
+    verdict = RetractionVerdict(
+        robustly_retracted=frozenset(retract), possibly_retracted=frozenset(retract),
+        underdetermined=frozenset(), consistent_core=frozenset(c.id for c in new_claims),
+    )
+    kept_edges = _drop_edges_incident_to(edges, frozenset(retract))
+    return _result(new_claims, kept_edges, verdict, prior_in)

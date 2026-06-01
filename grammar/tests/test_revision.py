@@ -7,7 +7,7 @@ from polymer_grammar.pattern import PatternRef
 from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from polymer_grammar.status import PendingReason, Status
 from polymer_grammar.strength import StrengthVector
-from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent, RevisionResult, restore_consistency, expand, contract
+from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent, RevisionResult, restore_consistency, expand, contract, revise
 from polymer_grammar.defeat import DefeatEdge, DefeatEdgeKind
 
 
@@ -235,3 +235,25 @@ def test_contract_unknown_target_is_noop():
     res = contract([a], [], "missing")
     assert res.retraction.robustly_retracted == frozenset()
     assert {c.id for c in res.claims} == {"a"}
+
+
+def test_revise_drops_conflictors_and_keeps_new_claim():
+    # existing `old` asserts B; new claim `p` asserts A incompatible with B -> old retracted
+    pb = _prop("B", direction=Direction.NEGATIVE)
+    pa = _prop("A", incompat=(pb.content_hash,))
+    old = _claim("old", pb, strength=_sv(0.9, 0.9))   # even though `old` is strong, p wins (success)
+    p = _claim("p", pa, strength=_sv(0.1, 0.1))
+    res = revise([old], [], p)
+    assert "p" in {c.id for c in res.claims}                  # success: p is in
+    assert "old" not in {c.id for c in res.claims}            # conflictor retracted
+    assert res.retraction.robustly_retracted == frozenset({"old"})
+    assert res.retraction.underdetermined == frozenset()      # p privileged -> deterministic
+    assert is_consistent(res.claims)
+
+
+def test_revise_with_no_conflict_is_expansion():
+    a = _claim("a", _prop("A"))
+    p = _claim("p", _prop("P"))
+    res = revise([a], [], p)
+    assert {c.id for c in res.claims} == {"a", "p"}
+    assert res.retraction.robustly_retracted == frozenset()   # vacuity: nothing retracted
