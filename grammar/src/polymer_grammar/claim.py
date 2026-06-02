@@ -12,10 +12,12 @@ from typing import Literal
 from pydantic import Field, model_validator
 
 from .base import _Model
+from .governance import Governance
 from .leaf import Leaf
 from .licensing import Licensing
 from .pattern import PatternRef
 from .proposition import Proposition
+from .provenance import Provenance
 from .roles import CausalRoles
 from .status import PendingReason, Status
 from .subject import Subject
@@ -35,6 +37,8 @@ class Claim(_Model):
     licensing: Licensing | None = None
     roles: CausalRoles | None = None
     subject: Subject | None = None
+    provenance: Provenance | None = None
+    governance: Governance | None = None
 
     @model_validator(mode="after")
     def _pending_reason_iff_pending(self) -> "Claim":
