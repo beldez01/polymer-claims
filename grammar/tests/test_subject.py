@@ -6,6 +6,10 @@ from polymer_grammar.subject import (
     GeneOrProtein,
     GeneOrProteinIdentifiers,
     OntologyTerm,
+    PathwayMembers,
+    PathwayRef,
+    PhenopacketRef,
+    PhenopacketRetrieval,
     S4ObjectRef,
     VariantVRS,
 )
@@ -60,3 +64,32 @@ def test_s4_object_ref_dims_is_tuple():
                     dims=(200, 50))
     assert s.kind == "s4_object"
     assert s.dims == (200, 50)
+
+
+def test_phenopacket_reference_mode_requires_uri():
+    p = PhenopacketRef(
+        id="pp1", display="Patient A", phenopacket_version="2.0",
+        retrieval=PhenopacketRetrieval(mode="reference", uri="s3://b/pp1.json"),
+    )
+    assert p.kind == "phenopacket"
+    with pytest.raises(ValidationError):
+        PhenopacketRef(id="pp", display="bad", phenopacket_version="2.0",
+                       retrieval=PhenopacketRetrieval(mode="reference"))   # no uri
+
+
+def test_phenopacket_inline_mode_requires_inline_json():
+    p = PhenopacketRef(
+        id="pp2", display="inline", phenopacket_version="2.0",
+        retrieval=PhenopacketRetrieval(mode="inline"), inline_json='{"id":"pp2"}',
+    )
+    assert p.inline_json == '{"id":"pp2"}'
+    with pytest.raises(ValidationError):
+        PhenopacketRef(id="pp", display="bad", phenopacket_version="2.0",
+                       retrieval=PhenopacketRetrieval(mode="inline"))      # no inline_json
+
+
+def test_pathway_ref_members_inline_is_tuple():
+    pw = PathwayRef(id="R-HSA-1", display="Apoptosis", source="Reactome", source_version="88",
+                    members=PathwayMembers(retrieval="inline", inline=("TP53", "BAX")))
+    assert pw.kind == "pathway"
+    assert pw.members.inline == ("TP53", "BAX")

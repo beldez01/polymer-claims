@@ -99,3 +99,38 @@ class GeneOrProtein(_SubjectBase):
                 "GeneOrProtein.identifiers requires at least one of hgnc, ensembl_gene, uniprot"
             )
         return self
+
+
+class PhenopacketRetrieval(_Model):
+    mode: Literal["reference", "inline"]
+    uri: str | None = None
+    hash: str | None = None
+
+
+class PhenopacketRef(_SubjectBase):
+    kind: Literal["phenopacket"] = "phenopacket"
+    phenopacket_version: str
+    retrieval: PhenopacketRetrieval
+    inline_json: str | None = None   # v1.2 inline:dict -> canonical JSON string (hashable)
+
+    @model_validator(mode="after")
+    def _retrieval_consistent(self) -> "PhenopacketRef":
+        if self.retrieval.mode == "reference" and not self.retrieval.uri:
+            raise ValueError("PhenopacketRef.retrieval.mode='reference' requires retrieval.uri")
+        if self.retrieval.mode == "inline" and self.inline_json is None:
+            raise ValueError("PhenopacketRef.retrieval.mode='inline' requires inline_json")
+        return self
+
+
+class PathwayMembers(_Model):
+    retrieval: Literal["reference", "inline"] = "reference"
+    uri: str | None = None
+    count_hint: int | None = None
+    inline: tuple[str, ...] | None = None   # v1.2 list -> tuple
+
+
+class PathwayRef(_SubjectBase):
+    kind: Literal["pathway"] = "pathway"
+    source: Literal["Reactome", "KEGG", "WikiPathways", "MSigDB", "other"]
+    source_version: str
+    members: PathwayMembers | None = None
