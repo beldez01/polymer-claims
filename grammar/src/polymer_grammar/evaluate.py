@@ -345,3 +345,67 @@ def evaluate(
         adapter_identity=adapter.identity,
         status=status,
     )
+
+
+def _check_agreement(
+    results: tuple[EvaluationResult, ...], abs_tol: float, rel_tol: float
+) -> tuple[bool, str | None]:
+    verdicts = {r.verdict for r in results}
+    if len(verdicts) > 1:
+        return False, f"verdict disagreement: {sorted(v.value for v in verdicts)}"
+    vals = [r.terminal.value for r in results]
+    numeric = [v for v in vals if isinstance(v, (int, float))]
+    if len(numeric) == len(vals) and numeric:
+        lo, hi = min(numeric), max(numeric)
+        ad = abs(hi - lo)
+        denom = max(abs(hi), abs(lo), 1.0)  # 1.0 floor avoids div-by-zero and over-tight relative checks near zero
+        if ad > abs_tol and ad / denom > rel_tol:
+            return False, f"terminal value disagreement: {vals}"
+        return True, None
+    if len(set(vals)) > 1:
+        return False, f"terminal value disagreement: {vals}"
+    # equal non-numeric values agree (incl. both-None); minting is still gated on SATISFIED in verify()
+    return True, None
+
+
+def verify(
+    plan: EvaluationPlan,
+    ctx: MaterializationContext,
+    adapters: tuple[Adapter, ...],
+    *,
+    claim_leaves: tuple[Leaf, ...] = (),
+    agreement_abs_tol: float = _ABS_TOL,
+    agreement_rel_tol: float = _REL_TOL,
+) -> VerifiedEvaluation:
+    """Run `plan` under >=2 distinct-identity adapters; mint a Satisfaction ONLY on
+    agreement + SATISFIED. The structural 'no self-licensing' air-gap: the writer of a
+    claim must not also be its verifier, so >=2 DISTINCT adapter identities are required.
+
+    Identity-string uniqueness is necessary but not sufficient: ensuring that distinct
+    identities map to genuinely independent implementations (so a single actor cannot
+    supply two cosmetically-different adapters) is the responsibility of the adapter
+    registry / protocol layer, not this function.
+    """
+    if len(adapters) < 2:
+        raise SelfLicensingError("verify requires >= 2 adapters (writer != verifier)")
+    identities = {a.identity for a in adapters}
+    if len(identities) < 2:
+        raise SelfLicensingError(
+            "verify requires >= 2 DISTINCT adapter identities (air-gap: writer != "
+            f"verifier); got {sorted(identities)}"
+        )
+    results = tuple(
+        evaluate(plan, ctx, a, claim_leaves=claim_leaves) for a in adapters
+    )
+    agreement, detail = _check_agreement(results, agreement_abs_tol, agreement_rel_tol)
+    satisfaction: Satisfaction | None = None
+    if agreement and results[0].verdict == SatisfactionVerdict.SATISFIED:
+        satisfaction = Satisfaction(
+            verdict=SatisfactionVerdict.SATISFIED, materialization=ctx
+        )
+    return VerifiedEvaluation(
+        results=results,
+        agreement=agreement,
+        satisfaction=satisfaction,
+        disagreement=detail,
+    )

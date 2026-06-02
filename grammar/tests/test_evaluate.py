@@ -1,9 +1,12 @@
+import pytest
+
 from polymer_grammar.evaluate import (
     ExecValue,
     IdentityAdapter,
     ReferenceAdapter,
     SelfLicensingError,
     evaluate,
+    verify,
 )
 from polymer_grammar.leaf import CategoricalLeaf, MeasurementBasis, QuantityLeaf
 from polymer_grammar.licensing import MaterializationContext, SatisfactionVerdict
@@ -237,3 +240,57 @@ def test_evaluate_string_equality_satisfied_via_reference_leaf():
     ref = CategoricalLeaf(ontology_term="HGNC:11998")
     res = evaluate(plan, _ctx(), StrAdapter(), claim_leaves=(ref,))
     assert res.verdict == SatisfactionVerdict.SATISFIED
+
+
+def test_verify_mints_satisfaction_on_agreement():
+    ve = verify(_plan(), _ctx(), (IdentityAdapter(), ReferenceAdapter()))
+    assert ve.agreement is True
+    assert ve.satisfaction is not None
+    assert ve.satisfaction.verdict == SatisfactionVerdict.SATISFIED
+    assert ve.satisfaction.materialization.id == "m1"
+
+
+def test_verify_rejects_single_adapter():
+    with pytest.raises(SelfLicensingError):
+        verify(_plan(), _ctx(), (IdentityAdapter(),))
+
+
+def test_verify_rejects_same_identity_pair():
+    with pytest.raises(SelfLicensingError):
+        verify(_plan(), _ctx(), (IdentityAdapter(), IdentityAdapter()))
+
+
+def test_verify_no_satisfaction_on_value_disagreement():
+    ve = verify(_plan(), _ctx(), (IdentityAdapter(), ReferenceAdapter(perturb=1.0)))
+    assert ve.agreement is False
+    assert ve.satisfaction is None
+    assert ve.disagreement is not None
+
+
+def test_verify_no_satisfaction_when_agreed_but_refuted():
+    ve = verify(
+        _plan(params=(("value", "0.9"),)),
+        _ctx(),
+        (IdentityAdapter(), ReferenceAdapter()),
+    )
+    assert ve.agreement is True
+    assert ve.satisfaction is None  # agreed verdict is REFUTED, not SATISFIED
+
+
+def test_evaluate_public_api_is_exported():
+    import polymer_grammar as pg
+
+    for name in (
+        "evaluate", "verify", "Adapter", "ExecValue", "EvaluationResult",
+        "VerifiedEvaluation", "NodeEvaluation", "Drift", "IdentityAdapter",
+        "ReferenceAdapter", "SelfLicensingError",
+    ):
+        assert hasattr(pg, name), name
+
+
+def test_verify_agreement_on_undetermined_does_not_mint():
+    # Both adapters fail the same node -> both UNDETERMINED -> they "agree" but nothing mints.
+    ve = verify(_plan(impl="builtin::nope"), _ctx(), (IdentityAdapter(), ReferenceAdapter()))
+    assert ve.results[0].verdict == SatisfactionVerdict.UNDETERMINED
+    assert ve.agreement is True
+    assert ve.satisfaction is None

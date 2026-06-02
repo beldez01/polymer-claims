@@ -101,6 +101,19 @@ from .operations import (
     ProducedLeafSpec,
     SatisfactionCriterion,
 )
+from .evaluate import (
+    Adapter,
+    Drift,
+    EvaluationResult,
+    ExecValue,
+    IdentityAdapter,
+    NodeEvaluation,
+    ReferenceAdapter,
+    SelfLicensingError,
+    VerifiedEvaluation,
+    evaluate,
+    verify,
+)
 
 __all__ = [
     "AXES",
@@ -199,4 +212,15 @@ __all__ = [
     "OpInput",
     "ProducedLeafSpec",
     "SatisfactionCriterion",
+    "Adapter",
+    "Drift",
+    "EvaluationResult",
+    "ExecValue",
+    "IdentityAdapter",
+    "NodeEvaluation",
+    "ReferenceAdapter",
+    "SelfLicensingError",
+    "VerifiedEvaluation",
+    "evaluate",
+    "verify",
 ]
