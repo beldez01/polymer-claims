@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from enum import Enum
 from typing import Annotated, Literal, Union
 
 from pydantic import Field, model_validator
@@ -157,3 +158,47 @@ class ComputeGraph(_Model):
             key=lambda d: d["id"],
         )
         return _sha({"terminal": self.terminal, "nodes": node_dicts})
+
+
+class Comparator(str, Enum):
+    LT = "lt"
+    LE = "le"
+    EQ = "eq"
+    NE = "ne"
+    GE = "ge"
+    GT = "gt"
+    WITHIN_TOL = "within_tol"
+
+
+class SatisfactionCriterion(_Model):
+    comparator: Comparator
+    threshold: float | None = None
+    reference_leaf_index: int | None = Field(default=None, ge=0)
+    tolerance: float | None = None
+
+    @model_validator(mode="after")
+    def _exactly_one_target(self) -> "SatisfactionCriterion":
+        has_thr = self.threshold is not None
+        has_ref = self.reference_leaf_index is not None
+        if has_thr == has_ref:  # both set (True==True) or neither (False==False)
+            raise ValueError(
+                "SatisfactionCriterion requires exactly one of `threshold` or "
+                "`reference_leaf_index`"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _tolerance_iff_within_tol(self) -> "SatisfactionCriterion":
+        if self.comparator == Comparator.WITHIN_TOL and self.tolerance is None:
+            raise ValueError("comparator=within_tol requires a `tolerance`")
+        if self.comparator != Comparator.WITHIN_TOL and self.tolerance is not None:
+            raise ValueError(
+                f"`tolerance` is only valid with comparator=within_tol; "
+                f"got comparator={self.comparator.value}"
+            )
+        return self
+
+
+class EvaluationPlan(_Model):
+    graph: ComputeGraph
+    criterion: SatisfactionCriterion

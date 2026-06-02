@@ -3,11 +3,14 @@ from pydantic import ValidationError
 
 from polymer_grammar.leaf import MeasurementBasis
 from polymer_grammar.operations import (
+    Comparator,
     ComputeGraph,
     DataHandle,
+    EvaluationPlan,
     NodeRef,
     OperationNode,
     ProducedLeafSpec,
+    SatisfactionCriterion,
 )
 from polymer_grammar.units import Dimension
 
@@ -152,3 +155,49 @@ def test_topological_order_diamond_breaks_ties_by_declaration_order():
         terminal="d",
     )
     assert g.topological_order == ("a", "b", "c", "d")
+
+
+def test_criterion_threshold_route_builds():
+    c = SatisfactionCriterion(comparator=Comparator.LT, threshold=0.05)
+    assert c.comparator == Comparator.LT
+
+
+def test_criterion_reference_route_builds():
+    c = SatisfactionCriterion(comparator=Comparator.GE, reference_leaf_index=0)
+    assert c.reference_leaf_index == 0
+
+
+def test_criterion_requires_exactly_one_target():
+    with pytest.raises(ValidationError):  # neither
+        SatisfactionCriterion(comparator=Comparator.LT)
+    with pytest.raises(ValidationError):  # both
+        SatisfactionCriterion(
+            comparator=Comparator.LT, threshold=0.05, reference_leaf_index=0
+        )
+
+
+def test_within_tol_requires_tolerance():
+    SatisfactionCriterion(
+        comparator=Comparator.WITHIN_TOL, threshold=1.0, tolerance=0.01
+    )
+    with pytest.raises(ValidationError):
+        SatisfactionCriterion(comparator=Comparator.WITHIN_TOL, threshold=1.0)
+
+
+def test_negative_reference_index_rejected():
+    with pytest.raises(ValidationError):
+        SatisfactionCriterion(comparator=Comparator.LT, reference_leaf_index=-1)
+
+
+def test_evaluation_plan_bundles_graph_and_criterion():
+    g = ComputeGraph(nodes=(_node("a"),), terminal="a")
+    plan = EvaluationPlan(
+        graph=g, criterion=SatisfactionCriterion(comparator=Comparator.LT, threshold=1.0)
+    )
+    assert plan.graph.terminal == "a"
+    assert isinstance(hash(plan), int)
+
+
+def test_tolerance_rejected_on_non_within_tol_comparator():
+    with pytest.raises(ValidationError):
+        SatisfactionCriterion(comparator=Comparator.LT, threshold=0.05, tolerance=0.01)
