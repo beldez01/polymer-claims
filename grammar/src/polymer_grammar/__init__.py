@@ -90,6 +90,17 @@ from .governance import (
     blocks_reproduction,
     requires_safety_review,
 )
+from .operations import (
+    Comparator,
+    ComputeGraph,
+    DataHandle,
+    EvaluationPlan,
+    NodeRef,
+    OperationNode,
+    OpInput,
+    ProducedLeafSpec,
+    SatisfactionCriterion,
+)
 
 __all__ = [
     "AXES",
@@ -179,4 +190,13 @@ __all__ = [
     "HazardClass",
     "blocks_reproduction",
     "requires_safety_review",
+    "Comparator",
+    "ComputeGraph",
+    "DataHandle",
+    "EvaluationPlan",
+    "NodeRef",
+    "OperationNode",
+    "OpInput",
+    "ProducedLeafSpec",
+    "SatisfactionCriterion",
 ]
