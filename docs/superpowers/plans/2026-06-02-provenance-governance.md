@@ -420,8 +420,8 @@ git branch -d phase7-provenance-governance
 
 _(Update after every completed task: check the box, note the commit SHA + any decisions.)_
 
-- [ ] Task 1 — provenance.py (GenerationMode + Provenance + agent-id validator)
-- [ ] Task 2 — governance.py (enums + Governance + 2 helpers)
-- [ ] Task 3 — wire Claim.provenance + Claim.governance (additive)
-- [ ] Task 4 — exports + whole-package verify
-- [ ] Final — merge to main, docs + memory updated
+- [x] Task 1 — provenance.py (GenerationMode + Provenance + agent-id validator) — `13801c5`
+- [x] Task 2 — governance.py (enums + Governance + 2 helpers) — `3aa3a0f`
+- [x] Task 3 — wire Claim.provenance + Claim.governance (additive) — `ea56110`
+- [x] Task 4 — exports + whole-package verify — `a7ffad2`
+- [x] Final — merged `--no-ff` to main (`738acfc`), 189 tests green + ruff clean on merged result, branch deleted. Opus final review = READY TO MERGE (validator both-branches, search_cardinality bounds, both helpers over all enum values, hashability, back-compat + JSON round-trip, isolation all independently verified). Docs + memory updated. Advances Phase 7: §5 #1 + #3 done (with #4 + #6 + subject already done); only #2 (blocked → Phase 8) and #5 (meta-tier) remain.
