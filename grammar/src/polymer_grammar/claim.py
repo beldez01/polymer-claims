@@ -18,6 +18,7 @@ from .pattern import PatternRef
 from .proposition import Proposition
 from .roles import CausalRoles
 from .status import PendingReason, Status
+from .subject import Subject
 from .strength import StrengthVector
 
 
@@ -33,6 +34,7 @@ class Claim(_Model):
     conclusion: Proposition | None = None
     licensing: Licensing | None = None
     roles: CausalRoles | None = None
+    subject: Subject | None = None
 
     @model_validator(mode="after")
     def _pending_reason_iff_pending(self) -> "Claim":
