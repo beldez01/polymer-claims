@@ -72,10 +72,10 @@ underdetermined) when entrenchment can't decide — rather than silently picking
 | 4 | typed causal roles + units-of-measure algebra | ✅ merged |
 | 5 | L3: VAF defeat graph + Duhem blame-sets | ✅ merged |
 | 6 | L4: AGM/TMS revision | ✅ merged |
-| 7 | protocol-imposed fields (generated_by, oracle credibility, hazard/governance, online-FDR, …) | ⬜ next |
+| 7 | protocol-imposed fields (generated_by, oracle credibility, hazard/governance, online-FDR, …) | ◐ in progress — online-FDR ledger ✅ (`fdr.py`); `reinterpret` ✅ (in L3) |
 | 8 | the evaluator (runs the grammar) | ⬜ |
 
-147 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
+160 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
 by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is built and validated.
 
 ### Where the design lives

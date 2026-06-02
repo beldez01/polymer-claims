@@ -401,9 +401,9 @@ git branch -d phase7-fdr-ledger
 
 _(Update after every completed task: check the box, note the commit SHA + any decisions.)_
 
-- [ ] Task 1 — LOND discount sequence `_gamma`
-- [ ] Task 2 — FDRTest + FDRLedger models
-- [ ] Task 3 — process_test (LOND step)
-- [ ] Task 4 — process_stream + is_discovery
-- [ ] Task 5 — exports + whole-package verify
-- [ ] Final — merge to main, docs + memory updated
+- [x] Task 1 — LOND discount sequence `_gamma` — `4120b9c`
+- [x] Task 2 — FDRTest + FDRLedger models — `85510e5`
+- [x] Task 3 — process_test (LOND step) — `2ce31fd`
+- [x] Task 4 — process_stream + is_discovery — `67edc0d`
+- [x] Task 5 — exports + whole-package verify — `590e454`
+- [x] Final — merged `--no-ff` to main (`f41375b`), 160 tests green + ruff clean on merged result, branch deleted. Opus final review = READY TO MERGE (LOND recurrence hand-verified; immutability + edge cases + isolation confirmed). Docs + memory updated. Completes unified-spec §5 #4 (#6 done in L3); #1/#2/#3/#5 remain.
