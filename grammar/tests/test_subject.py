@@ -158,3 +158,15 @@ def test_subjects_are_hashable():
                             parts=(gene, gene))
     assert isinstance(hash(gene), int)
     assert isinstance(hash(comp), int)
+
+
+def test_public_api_exports():
+    import polymer_grammar as pg
+
+    for name in [
+        "Subject", "GenomicRegion", "VariantVRS", "S4ObjectRef", "PhenopacketRef",
+        "OntologyTerm", "GeneOrProtein", "PathwayRef", "Cohort", "LiteralSubject",
+        "CompositeSubject", "GeneOrProteinIdentifiers", "CohortDefinition",
+        "CohortSourceDataset", "PhenopacketRetrieval", "PathwayMembers",
+    ]:
+        assert hasattr(pg, name), f"{name} not exported from polymer_grammar"
