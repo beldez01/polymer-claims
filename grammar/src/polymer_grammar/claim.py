@@ -15,6 +15,7 @@ from .base import _Model
 from .governance import Governance
 from .leaf import Leaf
 from .licensing import Licensing
+from .operations import EvaluationPlan
 from .pattern import PatternRef
 from .proposition import Proposition
 from .provenance import Provenance
@@ -39,6 +40,7 @@ class Claim(_Model):
     subject: Subject | None = None
     provenance: Provenance | None = None
     governance: Governance | None = None
+    evaluation_plan: EvaluationPlan | None = None
 
     @model_validator(mode="after")
     def _pending_reason_iff_pending(self) -> "Claim":

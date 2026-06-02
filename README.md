@@ -72,10 +72,10 @@ underdetermined) when entrenchment can't decide — rather than silently picking
 | 4 | typed causal roles + units-of-measure algebra | ✅ merged |
 | 5 | L3: VAF defeat graph + Duhem blame-sets | ✅ merged |
 | 6 | L4: AGM/TMS revision | ✅ merged |
-| 7 | protocol-imposed fields + polymorphic subject | ◐ nearly done — provenance ✅ (`provenance.py`), governance ✅ (`governance.py`), online-FDR ✅ (`fdr.py`), `reinterpret` ✅ (L3), `Claim.subject` ✅ (`subject.py`); only oracle (#2, → Phase 8) + `representation_revision` (#5) remain |
-| 8 | the evaluator (runs the grammar) | ⬜ |
+| 7 | protocol-imposed fields + polymorphic subject | ◐ provenance ✅ (`provenance.py`), governance ✅ (`governance.py`), online-FDR ✅ (`fdr.py`), `reinterpret` ✅ (L3), `Claim.subject` ✅ (`subject.py`); oracle (#2) now unblocked by Phase 8; only `representation_revision` (#5) remains |
+| 8 | the evaluator (runs the grammar) | ✅ merged — typed compute-graph IR (`operations.py`) + air-gapped runtime (`evaluate.py`): `evaluate()` + the two-implementation `verify()` gate that mints an L2 `Satisfaction` only on cross-adapter agreement (no self-licensing) |
 
-189 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
+240 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
 by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is built and validated.
 
 ### Where the design lives
