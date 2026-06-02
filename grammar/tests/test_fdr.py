@@ -7,6 +7,8 @@ from polymer_grammar.fdr import (
     FDRLedger,
     FDRTest,
     _gamma,
+    is_discovery,
+    process_stream,
     process_test,
 )
 
@@ -81,3 +83,20 @@ def test_budget_grows_with_discoveries():
     # (α_2 = 0.5·γ_2·1 ≈ 0.076) FAILS.
     b = process_test(process_test(FDRLedger(target_fdr=0.5), "x1", 0.50), "c2", 0.10)
     assert b.discoveries == frozenset()
+
+
+def test_process_stream_equals_iterated_process_test():
+    items = [("a", 0.01), ("b", 0.40), ("c", 0.02)]
+    streamed = process_stream(FDRLedger(target_fdr=0.1), items)
+    manual = FDRLedger(target_fdr=0.1)
+    for cid, p in items:
+        manual = process_test(manual, cid, p)
+    assert streamed.tests == manual.tests
+
+
+def test_is_discovery_query():
+    led = process_test(FDRLedger(target_fdr=0.5), "c1", 0.30)   # discovery
+    led = process_test(led, "c2", 0.99)                         # not a discovery
+    assert is_discovery(led, "c1") is True
+    assert is_discovery(led, "c2") is False
+    assert is_discovery(led, "absent") is False

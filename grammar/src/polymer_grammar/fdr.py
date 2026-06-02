@@ -10,6 +10,7 @@ Claim coupling; imports nothing from polymer_formalclaim.
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
 from typing import Literal
 
 from pydantic import Field
@@ -60,3 +61,19 @@ def process_test(ledger: FDRLedger, claim_id: str, p_value: float) -> FDRLedger:
         alpha_allocated=alpha, discovery=p_value <= alpha,
     )
     return ledger.model_copy(update={"tests": ledger.tests + (entry,)})
+
+
+def process_stream(
+    ledger: FDRLedger, items: Iterable[tuple[str, float]]
+) -> FDRLedger:
+    """Fold process_test over (claim_id, p_value) pairs in order. Each step sees the
+    discoveries of the prior steps (so the result equals iterated process_test)."""
+    for claim_id, p_value in items:
+        ledger = process_test(ledger, claim_id, p_value)
+    return ledger
+
+
+def is_discovery(ledger: FDRLedger, claim_id: str) -> bool:
+    """True iff some recorded test for `claim_id` was a discovery. The protocol uses this
+    to gate licensing; keeps the ledger decoupled from Claim."""
+    return claim_id in ledger.discoveries
