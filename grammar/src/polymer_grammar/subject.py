@@ -134,3 +134,30 @@ class PathwayRef(_SubjectBase):
     source: Literal["Reactome", "KEGG", "WikiPathways", "MSigDB", "other"]
     source_version: str
     members: PathwayMembers | None = None
+
+
+class CohortSourceDataset(_Model):
+    name: str
+    version: str | None = None
+    tissue: str | None = None
+    # v1.2's `extra: dict` escape hatch dropped (unhashable)
+
+
+class CohortDefinition(_Model):
+    source_dataset: CohortSourceDataset | None = None
+    inclusion: tuple[str, ...] = ()   # v1.2 SetExpression predicate algebra -> prose strings for now
+    exclusion: tuple[str, ...] = ()
+    cardinality: int | None = None
+    random_seed: int | None = None
+
+
+class Cohort(_SubjectBase):
+    kind: Literal["cohort"] = "cohort"
+    definition: CohortDefinition
+    members_hash: str
+
+
+class LiteralSubject(_SubjectBase):
+    kind: Literal["literal"] = "literal"
+    prose: str
+    structured: tuple[tuple[str, str], ...] = ()   # v1.2 extra="allow" dict -> explicit pairs

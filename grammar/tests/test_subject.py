@@ -2,9 +2,13 @@ import pytest
 from pydantic import ValidationError
 
 from polymer_grammar.subject import (
+    Cohort,
+    CohortDefinition,
+    CohortSourceDataset,
     GenomicRegion,
     GeneOrProtein,
     GeneOrProteinIdentifiers,
+    LiteralSubject,
     OntologyTerm,
     PathwayMembers,
     PathwayRef,
@@ -93,3 +97,26 @@ def test_pathway_ref_members_inline_is_tuple():
                     members=PathwayMembers(retrieval="inline", inline=("TP53", "BAX")))
     assert pw.kind == "pathway"
     assert pw.members.inline == ("TP53", "BAX")
+
+
+def test_cohort_constructs_with_tuple_predicates():
+    c = Cohort(
+        id="coh1", display="TET2 cohort", members_hash="blake3-xyz",
+        definition=CohortDefinition(
+            source_dataset=CohortSourceDataset(name="IDAT", version="v2", tissue="blood"),
+            inclusion=("age >= 18", "tissue == blood"),
+            cardinality=132,
+        ),
+    )
+    assert c.kind == "cohort"
+    assert c.definition.inclusion == ("age >= 18", "tissue == blood")
+    assert c.definition.exclusion == ()        # default empty tuple
+
+
+def test_literal_subject_structured_is_tuple_of_pairs():
+    lit = LiteralSubject(id="l1", display="ad hoc", prose="the 2026 winter cohort",
+                         structured=(("season", "winter"), ("year", "2026")))
+    assert lit.kind == "literal"
+    assert lit.structured == (("season", "winter"), ("year", "2026"))
+    bare = LiteralSubject(id="l2", display="prose only", prose="something untyped")
+    assert bare.structured == ()               # default
