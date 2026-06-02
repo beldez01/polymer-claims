@@ -47,3 +47,55 @@ class OntologyTerm(_SubjectBase):
     propagation: Literal[
         "self_only", "self_or_descendant", "self_or_ancestor", "exact_match"
     ] = "self_only"
+
+
+class VariantVRS(_SubjectBase):
+    kind: Literal["variant_vrs"] = "variant_vrs"
+    vrs_version: str
+    assembly: str | None = None
+    hgvs: str | None = None
+
+    @model_validator(mode="after")
+    def _id_has_vrs_prefix(self) -> "VariantVRS":
+        if not (self.id.startswith("ga4gh:VA.") or self.id.startswith("ga4gh:VCL.")):
+            raise ValueError(
+                f"VariantVRS.id must start with 'ga4gh:VA.' or 'ga4gh:VCL.', got {self.id!r}"
+            )
+        return self
+
+
+class S4ObjectRef(_SubjectBase):
+    kind: Literal["s4_object"] = "s4_object"
+    bioc_class: str
+    bioc_version: str
+    blob_uri: str
+    blob_hash: str
+    projection: str | None = None
+    dims: tuple[int, ...] | None = None
+
+
+class GeneOrProteinIdentifiers(_Model):
+    hgnc: str | None = None
+    ensembl_gene: str | None = None
+    ensembl_transcript: str | None = None
+    ensembl_protein: str | None = None
+    ncbi_gene: int | None = None
+    uniprot: str | None = None
+    refseq: str | None = None
+    symbol: str | None = None
+
+
+class GeneOrProtein(_SubjectBase):
+    kind: Literal["gene_or_protein"] = "gene_or_protein"
+    identifiers: GeneOrProteinIdentifiers
+    entity_type: Literal["gene", "protein", "transcript", "isoform"]
+    assembly_context: str | None = None
+
+    @model_validator(mode="after")
+    def _at_least_one_canonical_id(self) -> "GeneOrProtein":
+        ids = self.identifiers
+        if not (ids.hgnc or ids.ensembl_gene or ids.uniprot):
+            raise ValueError(
+                "GeneOrProtein.identifiers requires at least one of hgnc, ensembl_gene, uniprot"
+            )
+        return self
