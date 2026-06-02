@@ -3,11 +3,12 @@
 The "runtime" half of the compiler/runtime split: executes a claim's EvaluationPlan
 (operations.py) against a MaterializationContext and PRODUCES the L2 Satisfaction that the
 static Licensing record consumes — but only through an air-gapped, two-implementation
-agreement gate (`verify`, a later task), so a claim can never license itself. Pure +
-adapter-injected; imports NO infra (no network/R/scipy). Real adapters live OUTSIDE this
-package; the reference adapters here are deterministic and exist to exercise the plumbing +
-the air-gap. This task ships the result models, the Adapter Protocol, and reference adapters;
-`evaluate()` / `verify()` land in later tasks.
+agreement gate (`verify`), so a claim can never license itself. Pure + adapter-injected;
+imports NO infra (no network/R/scipy). Real adapters live OUTSIDE this package; the reference
+adapters here are deterministic and exist to exercise the plumbing + the air-gap.
+
+This module ships: the result models, the `Adapter` Protocol, two reference adapters, the
+single-implementation `evaluate()`, and the air-gapped two-implementation `verify()` gate.
 """
 from __future__ import annotations
 

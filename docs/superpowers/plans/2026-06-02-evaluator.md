@@ -1427,3 +1427,18 @@ git commit -m "docs: Phase 8 evaluator complete — update CONTINUE + plan progr
 **Type consistency:** `ExecValue.value: float | str | None`, `Adapter.execute(node, upstream, ctx)`, and `evaluate(..., claim_leaves=())` signatures match across Tasks 5–7. `verify` returns `VerifiedEvaluation` with the `satisfaction`/`agreement`/`disagreement` fields the Task-7 tests assert. `_params` is defined in Task 5 and reused in Task 6. The `expected` drift param and the `builtin::*` impl names are consistent between adapter handlers (Task 5) and the evaluate tests (Task 6). ✓
 
 **One implementation-note for the executing engineer:** the `evaluate()` step adds several imports to `evaluate.py`'s existing import block — merge them with the imports written in Task 5 rather than duplicating the `from .leaf import ...` / `from .operations import ...` lines (ruff will flag a redefinition otherwise).
+
+---
+
+## Progress Log
+
+Executed subagent-driven (fresh implementer + spec-compliance review + code-quality review per task; final whole-package Opus review). All on branch `phase8-evaluator`, merged no-ff to `main`. Final state: **240 tests green, ruff clean, isolation holds.**
+
+- **Task 1 — operations IR primitives** (`0ce7d69`). DataHandle/NodeRef/OpInput/ProducedLeafSpec/OperationNode. Review fixes: `_sha` scaffolding comment; strengthened NodeRef test.
+- **Task 2 — ComputeGraph** (`b84352f`). Validators (unique/acyclic/resolvable) + topo + content_hash. Review fixes: `content_hash` uses `model_dump(mode="json")` (future-field-proof); pinned-hash + diamond-topo tests added.
+- **Task 3 — SatisfactionCriterion + EvaluationPlan** (`8a1faa5`). Review tightening: reject `tolerance` on non-WITHIN_TOL comparators (stricter than spec; with test); clarifying comment on the exactly-one idiom.
+- **Task 4 — Claim.evaluation_plan + exports** (`c628f84`). Additive-optional field + 9 operations symbols exported. Review fix: added `OpInput` to the export-completeness test.
+- **Task 5 — evaluate.py models + adapters** (`2f13968`). Result models, Adapter Protocol, two reference adapters. Review fixes: ReferenceAdapter propagates dimension on `builtin::identity`; fmean/sum precision comment; adapter error-contract docstring; `builtin::identity` tests; strengthened the existence-error test.
+- **Task 6 — evaluate() runtime** (`cefc482`). **CRITICAL fix in review:** `_wrap_leaf` was outside the try/except → an adapter returning a non-numeric value for a quantity node crashed `evaluate()`, violating "never raises"; now guarded + node degrades to error. **IMPORTANT fix:** mixed str/numeric comparison returned wrong verdicts → now UNDETERMINED. Plus strict existence wrapping + partial-status / multi-node-chain / drift-out-of-tolerance / string-comparison tests. Re-reviewed and confirmed.
+- **Task 7 — verify() air-gap gate + exports** (`3755960`). ≥2-distinct-identity gate → mint Satisfaction only on agreement + SATISFIED. Review fixes: documented identity-string distinctness as necessary-not-sufficient (registry's job); UNDETERMINED-agreement test; agreement-semantics comments.
+- **Task 8 — finalize** (this commit). Full suite + ruff + isolation green; final Opus whole-package review = READY TO MERGE; stale module docstring cleaned; CONTINUE + this log updated.
