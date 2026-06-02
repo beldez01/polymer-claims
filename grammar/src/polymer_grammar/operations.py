@@ -1,0 +1,83 @@
+"""operations.py — the v1.3 operations IR (Phase 8; spec 2026-06-02-evaluator-spec.md §3).
+
+A typed compute DAG: the declarative ("compiler-side") half of the compiler/runtime split —
+HOW a claim is checked against data, expressed as DATA, not code. Each OperationNode names a
+versioned `impl` dispatch key plus typed inputs (DataHandles into a materialization, or
+NodeRefs to upstream outputs) and declares the TYPE of L0 Leaf it produces. The graph
+terminates in a SatisfactionCriterion (later task) that turns the terminal output into a
+3-valued verdict. The runtime that EXECUTES this lives in evaluate.py; this module ships only
+the frozen, content-addressed type. Imports nothing from polymer_formalclaim and no infra.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+from typing import Annotated, Literal, Union
+
+from pydantic import Field, model_validator
+
+from .base import _Model
+from .leaf import MeasurementBasis
+from .units import Dimension
+
+
+# content-addressing helper; consumed by ComputeGraph.content_hash (next task)
+def _sha(obj: object) -> str:
+    return hashlib.sha256(
+        json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+class DataHandle(_Model):
+    """A REFERENCE to materializable data — never the data itself (air-gap)."""
+
+    kind: Literal["data_handle"] = "data_handle"
+    ref: str = Field(min_length=1)
+    expected_dimension: Dimension | None = None
+
+
+class NodeRef(_Model):
+    """An edge to an upstream node's output."""
+
+    kind: Literal["node_ref"] = "node_ref"
+    node_id: str = Field(min_length=1)
+
+
+OpInput = Annotated[Union[DataHandle, NodeRef], Field(discriminator="kind")]
+
+
+class ProducedLeafSpec(_Model):
+    """Declares the TYPE of L0 Leaf a node yields (not its value)."""
+
+    leaf_kind: Literal["quantity", "categorical", "existence", "proposition"]
+    measurement_basis: MeasurementBasis | None = None
+    unit: str | None = None
+    dimension: Dimension | None = None
+
+    @model_validator(mode="after")
+    def _basis_discipline(self) -> "ProducedLeafSpec":
+        if self.leaf_kind != "quantity":
+            if self.unit is not None or self.measurement_basis is not None:
+                raise ValueError(
+                    "unit/measurement_basis are only meaningful for quantity outputs; "
+                    f"got leaf_kind={self.leaf_kind!r}"
+                )
+            return self
+        if (
+            self.unit is not None
+            and self.measurement_basis != MeasurementBasis.FUNDAMENTAL
+        ):
+            raise ValueError(
+                "unit is only meaningful for FUNDAMENTAL quantity outputs; "
+                f"got unit={self.unit!r} with basis={self.measurement_basis}"
+            )
+        return self
+
+
+class OperationNode(_Model):
+    id: str = Field(min_length=1)
+    impl: str = Field(min_length=1)
+    inputs: tuple[OpInput, ...] = ()
+    params: tuple[tuple[str, str], ...] = ()
+    produces: ProducedLeafSpec
+    oracle_ref: str | None = None  # declared-but-unbound slot for requirement #2
