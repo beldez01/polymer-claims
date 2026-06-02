@@ -81,3 +81,79 @@ class OperationNode(_Model):
     params: tuple[tuple[str, str], ...] = ()
     produces: ProducedLeafSpec
     oracle_ref: str | None = None  # declared-but-unbound slot for requirement #2
+
+
+class ComputeGraph(_Model):
+    nodes: tuple[OperationNode, ...] = Field(min_length=1)
+    terminal: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _unique_ids(self) -> "ComputeGraph":
+        ids = [n.id for n in self.nodes]
+        if len(ids) != len(set(ids)):
+            dupes = sorted({i for i in ids if ids.count(i) > 1})
+            raise ValueError(f"OperationNode ids must be unique; duplicates: {dupes}")
+        return self
+
+    @model_validator(mode="after")
+    def _refs_resolve(self) -> "ComputeGraph":
+        ids = {n.id for n in self.nodes}
+        for n in self.nodes:
+            for inp in n.inputs:
+                if isinstance(inp, NodeRef) and inp.node_id not in ids:
+                    raise ValueError(
+                        f"node {n.id!r} references unknown node {inp.node_id!r}"
+                    )
+        if self.terminal not in ids:
+            raise ValueError(f"terminal {self.terminal!r} is not a node id")
+        return self
+
+    @model_validator(mode="after")
+    def _acyclic(self) -> "ComputeGraph":
+        remaining = {n.id: self._deps(n) for n in self.nodes}
+        seen: set[str] = set()
+        progress = True
+        while progress:
+            progress = False
+            for nid, d in list(remaining.items()):
+                if d <= seen:
+                    seen.add(nid)
+                    del remaining[nid]
+                    progress = True
+        if remaining:
+            raise ValueError(
+                "ComputeGraph must be acyclic (NodeRef edges form a cycle): "
+                f"{sorted(remaining)}"
+            )
+        return self
+
+    @staticmethod
+    def _deps(node: OperationNode) -> set[str]:
+        return {inp.node_id for inp in node.inputs if isinstance(inp, NodeRef)}
+
+    @property
+    def topological_order(self) -> tuple[str, ...]:
+        """Deterministic topo sort; ties broken by declaration order (reproducible)."""
+        order_index = {n.id: i for i, n in enumerate(self.nodes)}
+        remaining = {n.id: self._deps(n) for n in self.nodes}
+        out: list[str] = []
+        placed: set[str] = set()
+        while remaining:
+            ready = sorted(
+                (nid for nid, d in remaining.items() if d <= placed),
+                key=lambda nid: order_index[nid],
+            )
+            nxt = ready[0]
+            out.append(nxt)
+            placed.add(nxt)
+            del remaining[nxt]
+        return tuple(out)
+
+    @property
+    def content_hash(self) -> str:
+        """SHA-256 over canonical node content; node-declaration-order insensitive."""
+        node_dicts = sorted(
+            (n.model_dump(mode="json") for n in self.nodes),
+            key=lambda d: d["id"],
+        )
+        return _sha({"terminal": self.terminal, "nodes": node_dicts})
