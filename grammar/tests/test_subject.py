@@ -1,10 +1,11 @@
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 from polymer_grammar.subject import (
     Cohort,
     CohortDefinition,
     CohortSourceDataset,
+    CompositeSubject,
     GenomicRegion,
     GeneOrProtein,
     GeneOrProteinIdentifiers,
@@ -15,6 +16,7 @@ from polymer_grammar.subject import (
     PhenopacketRef,
     PhenopacketRetrieval,
     S4ObjectRef,
+    Subject,
     VariantVRS,
 )
 
@@ -120,3 +122,39 @@ def test_literal_subject_structured_is_tuple_of_pairs():
     assert lit.structured == (("season", "winter"), ("year", "2026"))
     bare = LiteralSubject(id="l2", display="prose only", prose="something untyped")
     assert bare.structured == ()               # default
+
+
+def test_composite_nests_two_subjects():
+    gene = GeneOrProtein(id="HGNC:11998", display="TP53",
+                         identifiers=GeneOrProteinIdentifiers(hgnc="HGNC:11998"), entity_type="gene")
+    coh = Cohort(id="coh1", display="cohort", members_hash="h",
+                 definition=CohortDefinition())
+    comp = CompositeSubject(id="cmp1", display="TP53 in cohort", relation="conditional",
+                            parts=(gene, coh))
+    assert comp.kind == "composite"
+    assert len(comp.parts) == 2
+
+
+def test_composite_requires_at_least_two_parts():
+    gene = GeneOrProtein(id="g", display="g",
+                         identifiers=GeneOrProteinIdentifiers(hgnc="HGNC:1"), entity_type="gene")
+    with pytest.raises(ValidationError):
+        CompositeSubject(id="c", display="bad", relation="conditional", parts=(gene,))
+
+
+def test_subject_union_dispatches_on_kind():
+    adapter = TypeAdapter(Subject)
+    obj = adapter.validate_python(
+        {"kind": "ontology_term", "id": "GO:0006915", "display": "apoptosis",
+         "ontology": "GO", "ontology_release": "2026-01-01", "uri": "http://x/GO_0006915"}
+    )
+    assert isinstance(obj, OntologyTerm)
+
+
+def test_subjects_are_hashable():
+    gene = GeneOrProtein(id="g", display="g",
+                         identifiers=GeneOrProteinIdentifiers(hgnc="HGNC:1"), entity_type="gene")
+    comp = CompositeSubject(id="c", display="c", relation="correlational",
+                            parts=(gene, gene))
+    assert isinstance(hash(gene), int)
+    assert isinstance(hash(comp), int)

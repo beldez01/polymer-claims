@@ -7,9 +7,9 @@ the whole Subject tree is hashable for content-addressing. Imports nothing from 
 """
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal, Union
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 
 from .base import _Model
 
@@ -161,3 +161,32 @@ class LiteralSubject(_SubjectBase):
     kind: Literal["literal"] = "literal"
     prose: str
     structured: tuple[tuple[str, str], ...] = ()   # v1.2 extra="allow" dict -> explicit pairs
+
+
+class CompositeSubject(_SubjectBase):
+    kind: Literal["composite"] = "composite"
+    parts: tuple["Subject", ...] = Field(min_length=2)
+    relation: Literal[
+        "co_occurrence", "conditional", "causal_hypothesis",
+        "temporal_sequence", "correlational",
+    ]
+
+
+Subject = Annotated[
+    Union[
+        GenomicRegion,
+        VariantVRS,
+        S4ObjectRef,
+        PhenopacketRef,
+        OntologyTerm,
+        GeneOrProtein,
+        PathwayRef,
+        Cohort,
+        LiteralSubject,
+        CompositeSubject,
+    ],
+    Field(discriminator="kind"),
+]
+
+# CompositeSubject.parts references the Subject union defined above; resolve the forward ref.
+CompositeSubject.model_rebuild()
