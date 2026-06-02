@@ -698,11 +698,11 @@ git branch -d phase7-subject-slot
 
 _(Update after every completed task: check the box, note the commit SHA + any decisions.)_
 
-- [ ] Task 1 — scaffold + GenomicRegion + OntologyTerm
-- [ ] Task 2 — VariantVRS + GeneOrProtein + S4ObjectRef
-- [ ] Task 3 — PhenopacketRef + PathwayRef
-- [ ] Task 4 — Cohort + LiteralSubject
-- [ ] Task 5 — CompositeSubject + Subject union
-- [ ] Task 6 — wire Claim.subject (additive)
-- [ ] Task 7 — exports + whole-package verify
-- [ ] Final — merge to main, docs + memory updated
+- [x] Task 1 — scaffold + GenomicRegion + OntologyTerm — `cc57e78`
+- [x] Task 2 — VariantVRS + GeneOrProtein + S4ObjectRef — `28b9ec5`
+- [x] Task 3 — PhenopacketRef + PathwayRef — `ad82c46`
+- [x] Task 4 — Cohort + LiteralSubject — `2d140c6`
+- [x] Task 5 — CompositeSubject + Subject union (recursive, model_rebuild) — `47ad12f`
+- [x] Task 6 — wire Claim.subject (additive) — `dd8426c`
+- [x] Task 7 — exports + whole-package verify — `0265e4d`
+- [x] Final — merged `--no-ff` to main (`eecf318`), 178 tests green + ruff clean on merged result, branch deleted. Opus final review = READY TO MERGE (hashability of all 10 variants + nested composite, TypeAdapter dispatch, every validator, and a full Claim-with-composite JSON round-trip independently verified). Docs + memory updated. Closes the biggest ingestion-fidelity gap (no Claim.subject); vector-`Leaf` gap + a faithful subject-carrying re-ingest remain.
