@@ -100,3 +100,10 @@ def test_is_discovery_query():
     assert is_discovery(led, "c1") is True
     assert is_discovery(led, "c2") is False
     assert is_discovery(led, "absent") is False
+
+
+def test_public_api_exports():
+    import polymer_grammar as pg
+
+    for name in ["FDRTest", "FDRLedger", "process_test", "process_stream", "is_discovery"]:
+        assert hasattr(pg, name), f"{name} not exported from polymer_grammar"

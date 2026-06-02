@@ -57,6 +57,13 @@ from .revision import (
     restore_consistency,
     revise,
 )
+from .fdr import (
+    FDRLedger,
+    FDRTest,
+    is_discovery,
+    process_stream,
+    process_test,
+)
 
 __all__ = [
     "AXES",
@@ -118,4 +125,9 @@ __all__ = [
     "is_consistent",
     "restore_consistency",
     "revise",
+    "FDRLedger",
+    "FDRTest",
+    "is_discovery",
+    "process_stream",
+    "process_test",
 ]
