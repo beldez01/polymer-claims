@@ -7,6 +7,7 @@ from polymer_grammar.fdr import (
     FDRLedger,
     FDRTest,
     _gamma,
+    process_test,
 )
 
 
@@ -55,3 +56,28 @@ def test_models_frozen_and_hashable():
     assert isinstance(hash(t), int)
     with pytest.raises(ValidationError):
         FDRLedger(target_fdr=0.05, bogus=1)
+
+
+def test_process_first_test_discovery():
+    led = process_test(FDRLedger(target_fdr=0.5), "c1", 0.30)
+    assert led.n_tests == 1
+    t = led.tests[0]
+    assert t.index == 1
+    assert t.alpha_allocated == pytest.approx(0.5 * (6 / math.pi**2))   # target·γ_1·1 ≈ 0.304
+    assert t.discovery is True                                          # 0.30 <= ~0.304
+
+
+def test_process_first_test_non_discovery():
+    led = process_test(FDRLedger(target_fdr=0.5), "c1", 0.50)
+    assert led.tests[0].discovery is False                             # 0.50 > ~0.304
+
+
+def test_budget_grows_with_discoveries():
+    # Stream A: test 1 is a discovery -> D=1 raises the budget, so a borderline p=0.10
+    # at test 2 (α_2 = 0.5·γ_2·2 ≈ 0.152) PASSES.
+    a = process_test(process_test(FDRLedger(target_fdr=0.5), "c1", 0.30), "c2", 0.10)
+    assert a.discoveries == frozenset({"c1", "c2"})
+    # Stream B: test 1 fails (0.50 > ~0.304) -> D stays 0, so the SAME p=0.10 at test 2
+    # (α_2 = 0.5·γ_2·1 ≈ 0.076) FAILS.
+    b = process_test(process_test(FDRLedger(target_fdr=0.5), "x1", 0.50), "c2", 0.10)
+    assert b.discoveries == frozenset()

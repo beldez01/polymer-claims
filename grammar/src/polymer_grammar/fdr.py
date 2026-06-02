@@ -46,3 +46,17 @@ class FDRLedger(_Model):
     @property
     def discoveries(self) -> frozenset[str]:
         return frozenset(t.claim_id for t in self.tests if t.discovery)
+
+
+def process_test(ledger: FDRLedger, claim_id: str, p_value: float) -> FDRLedger:
+    """One LOND step. The new test gets level α_t = target_fdr · γ_t · (D_{t-1}+1) where
+    t is its 1-based position and D_{t-1} is the discoveries recorded in `ledger` so far.
+    It's a discovery iff p_value <= α_t. Returns a NEW ledger with the test appended
+    (append-only, immutable)."""
+    t = ledger.n_tests + 1
+    alpha = ledger.target_fdr * _gamma(t) * (ledger.n_discoveries + 1)
+    entry = FDRTest(
+        index=t, claim_id=claim_id, p_value=p_value,
+        alpha_allocated=alpha, discovery=p_value <= alpha,
+    )
+    return ledger.model_copy(update={"tests": ledger.tests + (entry,)})
