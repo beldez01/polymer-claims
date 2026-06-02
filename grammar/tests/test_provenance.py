@@ -32,3 +32,13 @@ def test_provenance_carries_optional_prereg_hash_and_is_hashable():
     assert isinstance(hash(p), int)
     with pytest.raises(ValidationError):
         Provenance(generated_by=GenerationMode.HUMAN_AUTHORED, search_cardinality=1, bogus=1)
+
+
+def test_public_api_exports():
+    import polymer_grammar as pg
+
+    for name in [
+        "GenerationMode", "Provenance", "HazardClass", "AccessScope", "Governance",
+        "blocks_reproduction", "requires_safety_review",
+    ]:
+        assert hasattr(pg, name), f"{name} not exported from polymer_grammar"

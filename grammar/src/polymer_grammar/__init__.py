@@ -82,6 +82,14 @@ from .subject import (
     Subject,
     VariantVRS,
 )
+from .provenance import GenerationMode, Provenance
+from .governance import (
+    AccessScope,
+    Governance,
+    HazardClass,
+    blocks_reproduction,
+    requires_safety_review,
+)
 
 __all__ = [
     "AXES",
@@ -164,4 +172,11 @@ __all__ = [
     "S4ObjectRef",
     "Subject",
     "VariantVRS",
+    "GenerationMode",
+    "Provenance",
+    "AccessScope",
+    "Governance",
+    "HazardClass",
+    "blocks_reproduction",
+    "requires_safety_review",
 ]
