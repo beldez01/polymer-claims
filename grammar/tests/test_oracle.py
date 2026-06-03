@@ -1,11 +1,25 @@
+import pytest
 from polymer_grammar import (
     AXES,
+    ApplicabilityDomain,
+    Comparator,
+    ComputeGraph,
+    EvaluationPlan,
+    GenomicRegion,
+    MeasurementBasis,
+    OperationNode,
+    OracleDossier,
+    ProducedLeafSpec,
+    SatisfactionCriterion,
     StrengthVector,
     ValidationTier,
     cap_strength,
+    in_domain,
+    referenced_oracle_ids,
     tier_ceiling,
     weakest_tier,
 )
+from pydantic import ValidationError
 
 
 def test_weakest_tier_picks_lowest_rank():
@@ -105,3 +119,67 @@ def test_cap_strength_mid_tier_anchored():
     capped = cap_strength(s, ValidationTier.ANCHORED)
     assert capped.magnitude == 0.85          # empirical axis capped at the ANCHORED ceiling
     assert capped.severity == 0.95           # theory axis untouched
+
+
+def _region():
+    return GenomicRegion(
+        id="r1", display="chr1:1-100", assembly="GRCh38", chrom="chr1", start=1, end=100
+    )
+
+
+def test_dossier_requires_nonempty_oracle_id():
+    with pytest.raises(ValidationError):
+        OracleDossier(oracle_id="", validation_tier=ValidationTier.GOLD)
+
+
+def test_dossier_defaults_unbounded_domain():
+    d = OracleDossier(oracle_id="o1", validation_tier=ValidationTier.GOLD)
+    assert d.applicability_domain.subject_kinds == ()
+    assert d.relative_uncertainty is None
+
+
+def test_in_domain_unbounded_accepts_anything_including_none():
+    dom = ApplicabilityDomain()  # no subject_kinds -> unbounded
+    assert in_domain(dom, _region()) is True
+    assert in_domain(dom, None) is True
+
+
+def test_in_domain_bounded_matches_kind():
+    dom = ApplicabilityDomain(subject_kinds=("genomic_region",))
+    assert in_domain(dom, _region()) is True
+
+
+def test_in_domain_bounded_rejects_other_kind_and_none():
+    dom = ApplicabilityDomain(subject_kinds=("variant_vrs",))
+    assert in_domain(dom, _region()) is False   # genomic_region not listed
+    assert in_domain(dom, None) is False         # bounded + no subject -> conservative
+
+
+def _plan_with_refs(*refs):
+    nodes = tuple(
+        OperationNode(
+            id=f"n{i}", impl="builtin::const", params=(("value", "0.0"),),
+            produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
+            oracle_ref=r,
+        )
+        for i, r in enumerate(refs)
+    )
+    return EvaluationPlan(
+        graph=ComputeGraph(nodes=nodes, terminal="n0"),
+        criterion=SatisfactionCriterion(comparator=Comparator.LT, threshold=0.05),
+    )
+
+
+def test_referenced_oracle_ids_collects_non_none():
+    plan = _plan_with_refs("api-A", None, "r-engine")
+    assert referenced_oracle_ids(plan) == frozenset({"api-A", "r-engine"})
+
+
+def test_referenced_oracle_ids_empty_when_all_none():
+    plan = _plan_with_refs(None, None)
+    assert referenced_oracle_ids(plan) == frozenset()
+
+
+def test_referenced_oracle_ids_dedups_shared_ref():
+    plan = _plan_with_refs("o1", "o1", "o2")
+    assert referenced_oracle_ids(plan) == frozenset({"o1", "o2"})

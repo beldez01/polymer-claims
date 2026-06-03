@@ -11,6 +11,11 @@ from __future__ import annotations
 from collections.abc import Iterable
 from enum import Enum
 
+from pydantic import Field
+
+from .base import _Model
+from .operations import EvaluationPlan
+from .subject import Subject
 from .strength import AXES, StrengthVector
 
 
@@ -72,3 +77,42 @@ def cap_strength(
     if strength is None:
         return None
     return strength.meet(tier_ceiling(tier))
+
+
+class ApplicabilityDomain(_Model):
+    """The bounded domain an oracle is qualified for. `subject_kinds` lists the Subject
+    discriminator kinds it covers (empty = unbounded); `predicates` are prose qualifications
+    for human audit (not machine-checked in the spine)."""
+
+    # v1: subject_kinds are free strings, not validated against the Subject discriminator set
+    # — a typo silently never matches (conservative out-of-domain).
+    subject_kinds: tuple[str, ...] = ()
+    predicates: tuple[str, ...] = ()
+
+
+class OracleDossier(_Model):
+    """An oracle's credibility-qualification record. `oracle_id` matches an
+    `OperationNode.oracle_ref`. `relative_uncertainty` is representable now; its propagation
+    into executed leaves is deferred (spec §8)."""
+
+    oracle_id: str = Field(min_length=1)
+    validation_tier: ValidationTier
+    applicability_domain: ApplicabilityDomain = Field(default_factory=ApplicabilityDomain)
+    anchor: str | None = None
+    relative_uncertainty: float | None = Field(default=None, ge=0.0)
+
+
+def in_domain(domain: ApplicabilityDomain, subject: Subject | None) -> bool:
+    """Is `subject` within the oracle's qualified domain? Unbounded domain (no subject_kinds)
+    -> always True. A bounded domain qualifies only its listed Subject kinds; a claim with no
+    subject can't be confirmed in a bounded domain -> False (conservative)."""
+    if not domain.subject_kinds:
+        return True
+    if subject is None:
+        return False
+    return subject.kind in domain.subject_kinds
+
+
+def referenced_oracle_ids(plan: EvaluationPlan) -> frozenset[str]:
+    """The set of oracle_refs the plan's operation nodes name (None refs excluded)."""
+    return frozenset(n.oracle_ref for n in plan.graph.nodes if n.oracle_ref is not None)
