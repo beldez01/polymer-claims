@@ -12,11 +12,13 @@ from polymer_grammar import Adapter, MaterializationContext, Status
 from .canonicalize import canonicalize
 from .commit import commit
 from .corpus import Corpus, CycleResult, StageAudit
+from .cost import CostModel, CostWeights
 from .execute import execute_ground
 from .integrate import integrate
 from .oracle import OracleRegistry
 from .represent import represent
 from .safety import safety_gate
+from .select import ValueWeights, select_stage
 from .verify import verify_stage
 
 
@@ -32,6 +34,11 @@ def run_cycle(
     adapters: tuple[Adapter, ...],
     ctx: MaterializationContext,
     oracles: OracleRegistry | None = None,
+    *,
+    cost_model: CostModel | None = None,
+    budget: float | None = None,
+    value_weights: ValueWeights = ValueWeights(),
+    cost_weights: CostWeights = CostWeights(),
 ) -> CycleResult:
     audit: list[StageAudit] = []
 
@@ -57,8 +64,17 @@ def run_cycle(
     corpus, gated = safety_gate(corpus)
     audit.append(StageAudit(stage="safety_gate", note=f"{len(gated)} gated", count=len(gated)))
 
+    corpus, selection = select_stage(
+        corpus, cost_model=cost_model or CostModel(), budget=budget,
+        value_weights=value_weights, cost_weights=cost_weights,
+    )
+    n_selected = sum(1 for d in selection.decisions if d.selected)
+    audit.append(StageAudit(stage="select_stage",
+        note=f"{n_selected}/{selection.cardinality} selected", count=n_selected))
+
+    selected_ids = frozenset(d.claim_id for d in selection.decisions if d.selected)
     locked_before = _locked_ids(corpus)
-    corpus = commit(corpus)
+    corpus = commit(corpus, only=selected_ids)
     n_committed = len(_locked_ids(corpus) - locked_before)
     audit.append(StageAudit(stage="commit", note=f"{n_committed} claim(s) committed", count=n_committed))
 
@@ -92,4 +108,5 @@ def run_cycle(
         frontier=frontier,
         gated_lane=gated_lane,
         audit=tuple(audit),
+        selection=selection,
     )
