@@ -6,12 +6,12 @@
 
 ## Current state (as of 2026-06-02)
 
-Building the **v1.3 grammar** in `grammar/` (package `polymer_grammar`), kept isolated from
-the frozen v1.2 IR in `v1.2/formalclaim/`. **Phase 8 (the evaluator) is DONE — all 8 layer
-phases now complete.** Phase 7 (protocol-imposed fields) had #1 (provenance), #3 (governance),
+**Grammar** (`grammar/`, `polymer_grammar`) is complete through all 8 phases. **Protocol runtime sub-project #1 (Corpus + assessment spine) is DONE** — new sibling package `polymer_protocol` (`protocol/`), one-way dep on `polymer_grammar` (isolation-tested), builds the frozen `Corpus` + seven pure stages (`represent / canonicalize / safety_gate / commit / execute_ground / verify_stage / integrate`) wired into a deterministic `run_cycle`; EXECUTE reuses the Phase-8 air-gapped `verify()`; GENERATE/SELECT stubbed as open ports. **48 protocol tests green; ruff clean; isolation holds.** Spec `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`, plan `docs/superpowers/plans/2026-06-02-protocol-spine.md`. Merge commit: `<fill at merge>`.
+
+Phase 7 (protocol-imposed fields) had #1 (provenance), #3 (governance),
 #4 (online-FDR), #6 (reinterpret) + the `Claim.subject` slot done; #2 (oracle) is now UNBLOCKED
 by Phase 8 (the `OperationNode.oracle_ref` slot exists), and only #5 (representation_revision
-meta-tier) remains. **240 tests, green; ruff clean; isolation holds.**
+meta-tier) remains. **240 grammar tests, green; ruff clean; isolation holds.**
 
 - ✅ Phase 1 — foundation: L0 sum-typed leaf, status lifecycle, 6-axis Pareto strength, pattern registry, claim skeleton + deep immutability
 - ✅ Phase 2 — L1: molecular Proposition + defeasible Equivalence (identity = licensed equivalence, never a hash)
@@ -24,16 +24,18 @@ meta-tier) remains. **240 tests, green; ruff clean; isolation holds.**
 - ✅ Phase 8 — **the evaluator** (`operations.py` IR + `evaluate.py` runtime). The compiler/runtime split made real: a typed compute-graph IR (`DataHandle`/`NodeRef`/`OperationNode` w/ unbound `oracle_ref` slot → `ComputeGraph` acyclic/unique/resolvable + topo + content_hash → `SatisfactionCriterion` → `EvaluationPlan`), wired as additive-optional `Claim.evaluation_plan`. Runtime: pure adapter-injected `evaluate()` (topo exec, typed-leaf wrap, 3-valued criterion, drift, dimension-equality check; NEVER raises on a node/wrap error) + the **air-gapped `verify()` gate** (≥2 DISTINCT adapter identities or `SelfLicensingError`; mints an L2 `Satisfaction` ONLY on cross-adapter agreement [value-within-tol + verdict] AND SATISFIED — closes the L2 loop, no self-licensing; never assembles Licensing/Status). Two deterministic reference adapters (`IdentityAdapter` sum/len vs `ReferenceAdapter` `statistics.fmean`) give a genuine two-implementation check. Scope fence held: NO real network/R/scipy adapters, NO oracle dossier (slot only), NO full UCUM (equality only), NO Licensing/Status assembly. Merge `<fill>`. Spec `specs/2026-06-02-evaluator-spec.md`, plan `plans/2026-06-02-evaluator.md`. **Open follow-up:** `_check_agreement` compares value+verdict, not `terminal.dimension` (safe today since dimension is driven by the shared `produces` spec — revisit when real adapters land).
 - ✅ Phase 6 — L4: AGM/TMS belief revision (`revision.py`). Belief-BASE AGM with `Cn` = L1 `entails`-neighborhood closure, inconsistency = `incompatible_with`. **Partial** entrenchment from StrengthVector (severity, evidence_against_null) + Status tier (`INCOMPARABLE` first-class). `restore_consistency` = Hansson consolidation: entrenchment-guided incision, robust/underdetermined spread + conservative consistent core (the locus of partial-entrenchment ambiguity). `expand`/`contract`/`revise` (Levi identity, success-privileged). **Edge hygiene**: every retracting op drops authored defeat edges incident to a retracted claim (no zombie-attack via grounded_extension's endpoint injection). Status recompute reuses Phase-5 `grounded_extension`. AGM postulates (success/inclusion/vacuity/consistency/extensionality) tested; base-contraction non-recovery documented, not faked. Merge `55096fd`. Spec `specs/2026-06-01-L4-revision-spec.md`, plan `plans/2026-06-01-L4-revision.md`.
 
-## ▶ NEXT: write the implementation plan for protocol-runtime sub-project #1 (Corpus + assessment spine)
+## ▶ NEXT: protocol sub-project #2 — the Oracle dossier
 
-**The protocol runtime arc has STARTED.** It was decomposed into 5 sub-projects (each its own spec→plan→build):
-1. **Corpus + the assessment spine** ← IN PROGRESS. **Spec APPROVED by the user + committed (`f65a6b1`): `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`.** **IMMEDIATE NEXT ACTION = invoke the `superpowers:writing-plans` skill to turn that spec into a task-by-task plan (`docs/superpowers/plans/2026-06-02-protocol-spine.md`), then execute subagent-driven (same rhythm as Phase 8: fresh implementer + spec + code-quality review per task; opus final review; merge no-ff to main; delete branch).**
-2. Oracle dossier (unified spec §5 #2; binds to the `OperationNode.oracle_ref` slot Phase 8 left).
+**The protocol runtime arc has STARTED.** Sub-project #1 is DONE (see Current state). The 5-sub-project decomposition:
+1. **Corpus + the assessment spine** ✅ DONE (this branch; merge commit `<fill at merge>`).
+2. **Oracle dossier** ← NEXT (unified spec §5 #2; binds to the `OperationNode.oracle_ref` slot Phase 8 left; same rhythm: brainstorm forks → spec → plan → subagent-driven).
 3. SELECT — the pursuit/value engine (two-axis posterior, EIG, three-axis Pareto, cost model, quality-diversity portfolio + firewalls).
 4. GENERATE — the proposer bus (5 operators + representation-revision lane; the open generation port).
 5. The 3 daemons (DRIFT, ORACLE-VALIDATION, REPRESENTATION RED-TEAM) + loop-economics.
 
 **Sub-project #1 design (approved, in the spec):** new sibling uv pkg `protocol/` → import pkg `polymer_protocol`, one-way dep on `polymer_grammar` (isolation-tested); **writes ONLY grammar IR** (no new grammar fields, no per-claim wrapper — stage outputs map onto existing fields: equivalence_class→`equivalences` tuple, hazard gate→`governance` predicate, hash-lock→`provenance.preregistration_hash`, status/license→`Claim.status`/`Licensing`, FDR→`fdr_ledger`). `Corpus` = (claims, defeat_edges, equivalences, fdr_ledger), frozen. 7 pure stages `represent/canonicalize/safety_gate/commit/execute_ground/verify_stage/integrate` + `run_cycle`; EXECUTE reuses Phase-8 `verify()` (air-gap); GENERATE+SELECT are stubbed open ports (claims injected exogenously, execute-all-committed). End goal: `pip install polymer-claims` (grammar+protocol+CLI bundled later) → local node → federated claims universe ([[platform vision]]). Deep design source: `~/Desktop/Research/topics/epistemic-claim-foundations/generative-protocol/_FINAL_knowledge_generation_protocol.md`.
+
+- Protocol frontier test: add an integration-depth test where INTEGRATE changes the defeat graph (derived rebut edges / retraction) so the post-INTEGRATE frontier genuinely differs from the head scaffolding — pins that run_cycle emits the tail represent() frontier, not the head. (Needs a conclusion-bearing multi-claim fixture; plan-deferred to integration tests.)
 
 Phase-8 carry-forwards (none blocking): real network/R/scipy adapters outside the package; full UCUM dimensional algebra (only equality now); `_check_agreement` dimension-awareness; vector-valued `ExecValue`/`Leaf`; then the deferred 3D topology viewer.
 

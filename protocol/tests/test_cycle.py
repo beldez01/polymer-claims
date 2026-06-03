@@ -30,3 +30,30 @@ def test_cycle_reports_gated_lane(empty_ledger, ctx, adapters):
     # gated claim was NOT executed -> still PENDING, no FDR test
     assert result.corpus.by_id()["h"].status == Status.PENDING
     assert result.corpus.fdr_ledger.n_tests == 0
+
+
+def test_cycle_is_deterministic(empty_ledger, ctx, adapters):
+    def build():
+        return Corpus(
+            claims=(
+                make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05)),
+                make_claim("b", status=Status.PENDING, plan=make_plan(0.99, 0.05)),
+            ),
+            fdr_ledger=empty_ledger,
+        )
+
+    first = run_cycle(build(), adapters, ctx)
+    second = run_cycle(build(), adapters, ctx)
+    assert first == second  # same (corpus, adapters, ctx) -> identical CycleResult
+
+
+def test_frontier_is_emitted_for_an_unresolved_attack(empty_ledger, ctx, adapters):
+    from polymer_grammar import DefeatEdge, DefeatEdgeKind
+
+    # b (CONJECTURED, no plan) attacks a; nothing defends a -> a is on the frontier.
+    a = make_claim("a")
+    b = make_claim("b")
+    edge = DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT)
+    corpus = Corpus(claims=(a, b), defeat_edges=(edge,), fdr_ledger=empty_ledger)
+    result = run_cycle(corpus, adapters, ctx)
+    assert result.frontier == ("a",)

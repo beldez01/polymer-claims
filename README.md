@@ -88,6 +88,30 @@ by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is bu
 
 ---
 
+## Protocol runtime (`polymer_protocol`)
+
+The `protocol/` package (`polymer_protocol`) is the **runtime half of the compiler/runtime split** — it reads and writes the `polymer_grammar` IR and depends on it one-way (isolation-tested; `protocol/` never imports `v1.2/formalclaim/`).
+
+State is a frozen `Corpus` = (claims, defeat_edges, equivalences, fdr_ledger). `run_cycle(corpus, adapters, ctx)` chains seven pure assessment stages:
+
+```
+represent → canonicalize → safety_gate → commit → execute_ground → verify_stage → integrate
+```
+
+returning a new `Corpus` plus the unresolved-attack `frontier`, the `gated_lane` (claims blocked by governance), and a per-stage `audit`.
+
+EXECUTE reuses the Phase-8 air-gapped `verify()` — two-implementation agreement, no self-licensing — to mint an L2 `Satisfaction`. GENERATE and SELECT are stubbed open ports: claims enter exogenously and every committed, non-gated PENDING claim is executed. The pursuit/value engine (SELECT), the proposer bus (GENERATE), the oracle dossier, and the daemons are later sub-projects.
+
+- **Design spec:** `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`
+- **Tests:** `cd protocol && uv run pytest -q`
+
+| Subdir | Package | Status |
+|---|---|---|
+| `grammar/` | `polymer_grammar` | ✅ 8 phases complete — 240 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-project #1 (assessment spine) — 48 tests |
+
+---
+
 ## The v1.2 fallback (`v1.2/`, frozen)
 
 v1.2 is **frozen, not deleted** — retained as a working fallback in case the v1.3 rebuild

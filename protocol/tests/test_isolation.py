@@ -30,3 +30,19 @@ def test_protocol_can_import_grammar():
     import polymer_grammar  # one-way dependency is allowed
 
     assert polymer_grammar.__version__
+
+
+_FORMALCLAIM_RE = re.compile(
+    r"^\s*(import\s+polymer_formalclaim|from\s+polymer_formalclaim"
+    r"|import\s+formalclaim\b|from\s+formalclaim\s+import)",
+    re.MULTILINE,
+)
+
+
+def test_protocol_does_not_import_formalclaim():
+    src = pathlib.Path(__file__).resolve().parent.parent / "src" / "polymer_protocol"
+    offenders = [
+        py.name for py in src.rglob("*.py")
+        if _FORMALCLAIM_RE.search(py.read_text(encoding="utf-8"))
+    ]
+    assert offenders == [], f"protocol must not import the v1.2 formalclaim IR; offenders: {offenders}"
