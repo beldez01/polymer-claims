@@ -1,8 +1,17 @@
-from polymer_grammar import LicenseRoute, SatisfactionVerdict, Status
+from polymer_grammar import (
+    FDRLedger,
+    LicenseRoute,
+    SatisfactionVerdict,
+    Status,
+    StrengthVector,
+)
 
 from polymer_protocol.commit import commit
 from polymer_protocol.corpus import Corpus, CycleScaffolding
+from polymer_protocol.cost import CostModel, CostWeights
 from polymer_protocol.execute import execute_ground
+from polymer_protocol.represent import represent
+from polymer_protocol.select import ValueWeights, select_stage
 from polymer_protocol.verify import verify_stage
 from tests.conftest import make_claim, make_plan
 
@@ -191,3 +200,53 @@ def test_out_of_domain_oracle_caps_through_verify_stage(empty_ledger, ctx, adapt
     out = verify_stage(corpus, scaffolding, records, reg)
     assert out.by_id()["a"].strength.magnitude == 0.0   # out-of-domain -> capped
     assert out.by_id()["a"].strength.severity == 0.9    # theory axis untouched
+
+
+def _sv_bar(ean):
+    return StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=ean,
+                          severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
+
+
+def _verify_through_select(claims, adapters, ctx):
+    corp = Corpus(claims=tuple(claims), fdr_ledger=FDRLedger(target_fdr=0.05))
+    scaffolding = represent(corp)
+    corp, rec = select_stage(corp, budget=None, cost_model=CostModel(),
+                             value_weights=ValueWeights(), cost_weights=CostWeights())
+    corp = commit(corp, only=frozenset(d.claim_id for d in rec.decisions if d.selected))
+    corp, records = execute_ground(corp, adapters, ctx)
+    return verify_stage(corp, scaffolding, records)
+
+
+def test_bar_is_identity_at_cardinality_one(ctx, adapters):
+    # single strong claim, M=1 -> licenses regardless of evidence value
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=_sv_bar(0.2))
+    out = _verify_through_select([c], adapters, ctx)
+    assert out.by_id()["a"].status == Status.LICENSED
+
+
+def test_none_strength_claim_is_exempt_in_a_pool(ctx, adapters):
+    # two None-strength satisfied claims, M=2 -> both still license (exempt)
+    a = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    b = make_claim("b", status=Status.PENDING, plan=make_plan(0.02, 0.05))
+    out = _verify_through_select([a, b], adapters, ctx)
+    assert out.by_id()["a"].status == Status.LICENSED
+    assert out.by_id()["b"].status == Status.LICENSED
+
+
+def test_weak_evidence_claim_fails_bar_in_a_large_pool(ctx, adapters):
+    # weak claim competes in a pool of 5 -> BH bar rejects it.
+    # p_weak = 1 - 0.10 = 0.90; BH crit (1/5)*0.10 = 0.02; 0.90 > 0.02 -> fail.
+    weak = make_claim("weak", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=_sv_bar(0.10))
+    others = [make_claim(f"o{i}", status=Status.PENDING, plan=make_plan(0.01 + i * 0.001, 0.5))
+              for i in range(4)]
+    out = _verify_through_select([weak, *others], adapters, ctx)
+    assert out.by_id()["weak"].status == Status.PENDING  # non-exempt, fails bar -> stays PENDING
+
+
+def test_strong_evidence_claim_passes_bar_in_a_pool(ctx, adapters):
+    # strong claim in a pool of 2 -> p = 0.05; BH crit (1/2)*0.10 = 0.05; passes.
+    strong = make_claim("s", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=_sv_bar(0.95))
+    other = make_claim("o", status=Status.PENDING, plan=make_plan(0.02, 0.05))
+    out = _verify_through_select([strong, other], adapters, ctx)
+    assert out.by_id()["s"].status == Status.LICENSED
+    assert out.by_id()["o"].status == Status.LICENSED
