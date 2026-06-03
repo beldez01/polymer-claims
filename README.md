@@ -109,8 +109,8 @@ An optional oracle registry (`run_cycle(..., oracles=...)`) caps a licensed clai
 
 | Subdir | Package | Status |
 |---|---|---|
-| `grammar/` | `polymer_grammar` | ✅ 8 phases complete — 240 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 (assessment spine + oracle dossier) — 66 tests |
+| `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier — 261 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 (assessment spine + oracle dossier) — 67 tests |
 
 ---
 
