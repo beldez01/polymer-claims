@@ -88,3 +88,12 @@ def test_select_is_deterministic():
     r1 = _run(build())
     r2 = _run(build())
     assert r1 == r2
+
+
+def test_public_exports():
+    import polymer_protocol as p
+    for name in ["select_stage", "ValueVector", "ValueWeights", "SelectionRecord",
+                 "SelectionDecision", "Beta", "prior_belief", "expected_information_gain",
+                 "stakes", "dependency_cone", "CostVector", "CostModel", "CostWeights",
+                 "aggregate_cost"]:
+        assert hasattr(p, name), name

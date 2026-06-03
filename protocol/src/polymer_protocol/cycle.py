@@ -1,9 +1,11 @@
 """run_cycle: chain the deterministic assessment stages into one total Corpus transform.
 
 Threads the ephemeral scaffolding/records; emits the post-INTEGRATE unresolved-attack
-frontier as the cycle's primary output (the keystone closure — the next cycle's
-GENERATE/SELECT target). GENERATE and SELECT are not in this sub-project: claims enter
-exogenously and every committed, non-gated PENDING claim is executed. Spec §6.8.
+frontier as the cycle's primary output (the keystone closure). SELECT (the value/pursuit
+stage) is now wired in: it ranks eligible PENDING claims on value under a structured cost
+and a budget, and only the selected subset is committed and executed; the selection record
+travels on the CycleResult. GENERATE remains out of this sub-project — claims still enter
+exogenously. Spec §6.8 + SELECT #3a.
 """
 from __future__ import annotations
 
