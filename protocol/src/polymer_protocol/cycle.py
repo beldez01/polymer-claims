@@ -14,6 +14,7 @@ from .commit import commit
 from .corpus import Corpus, CycleResult, StageAudit
 from .execute import execute_ground
 from .integrate import integrate
+from .oracle import OracleRegistry
 from .represent import represent
 from .safety import safety_gate
 from .verify import verify_stage
@@ -30,6 +31,7 @@ def run_cycle(
     corpus: Corpus,
     adapters: tuple[Adapter, ...],
     ctx: MaterializationContext,
+    oracles: OracleRegistry | None = None,
 ) -> CycleResult:
     audit: list[StageAudit] = []
 
@@ -66,7 +68,7 @@ def run_cycle(
     # scaffolding is still valid here: canonicalize/safety/commit/execute change neither
     # defeat_edges nor claim ids, so grounded_extension is unchanged since represent().
     executed_ids = {r.claim_id for r in records}
-    corpus = verify_stage(corpus, scaffolding, records)
+    corpus = verify_stage(corpus, scaffolding, records, oracles)
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
     audit.append(StageAudit(stage="verify_stage", note=f"{n_licensed} licensed", count=n_licensed))
 
