@@ -7,7 +7,13 @@ from polymer_grammar import (
 )
 from pydantic import ValidationError
 
-from polymer_protocol.corpus import Corpus
+from polymer_protocol.corpus import (
+    Corpus,
+    CycleResult,
+    SelectionDecision,
+    SelectionRecord,
+    ValueVector,
+)
 from tests.conftest import make_claim
 
 
@@ -45,3 +51,20 @@ def test_corpus_is_frozen(empty_ledger):
     corpus = Corpus(claims=(make_claim("a"),), fdr_ledger=empty_ledger)
     with pytest.raises(ValidationError):
         corpus.claims = ()
+
+
+def test_cycle_result_defaults_empty_selection():
+    from polymer_grammar import FDRLedger
+    from polymer_protocol.corpus import Corpus
+    r = CycleResult(corpus=Corpus(fdr_ledger=FDRLedger(target_fdr=0.05)))
+    assert r.selection == SelectionRecord()
+    assert r.selection.cardinality == 0
+    assert r.selection.decisions == ()
+
+
+def test_selection_record_holds_decisions():
+    d = SelectionDecision(claim_id="a", selected=True, value=ValueVector(eig=0.5, stakes=2.0),
+                          cost=1.0, rank=0)
+    rec = SelectionRecord(decisions=(d,), cardinality=1)
+    assert rec.decisions[0].claim_id == "a"
+    assert rec.decisions[0].value.eig == 0.5

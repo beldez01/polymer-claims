@@ -1,9 +1,11 @@
 """run_cycle: chain the deterministic assessment stages into one total Corpus transform.
 
 Threads the ephemeral scaffolding/records; emits the post-INTEGRATE unresolved-attack
-frontier as the cycle's primary output (the keystone closure — the next cycle's
-GENERATE/SELECT target). GENERATE and SELECT are not in this sub-project: claims enter
-exogenously and every committed, non-gated PENDING claim is executed. Spec §6.8.
+frontier as the cycle's primary output (the keystone closure). SELECT (the value/pursuit
+stage) is now wired in: it ranks eligible PENDING claims on value under a structured cost
+and a budget, and only the selected subset is committed and executed; the selection record
+travels on the CycleResult. GENERATE remains out of this sub-project — claims still enter
+exogenously. Spec §6.8 + SELECT #3a.
 """
 from __future__ import annotations
 
@@ -12,11 +14,13 @@ from polymer_grammar import Adapter, MaterializationContext, Status
 from .canonicalize import canonicalize
 from .commit import commit
 from .corpus import Corpus, CycleResult, StageAudit
+from .cost import CostModel, CostWeights
 from .execute import execute_ground
 from .integrate import integrate
 from .oracle import OracleRegistry
 from .represent import represent
 from .safety import safety_gate
+from .select import ValueWeights, select_stage
 from .verify import verify_stage
 
 
@@ -32,6 +36,11 @@ def run_cycle(
     adapters: tuple[Adapter, ...],
     ctx: MaterializationContext,
     oracles: OracleRegistry | None = None,
+    *,
+    cost_model: CostModel | None = None,
+    budget: float | None = None,
+    value_weights: ValueWeights = ValueWeights(),
+    cost_weights: CostWeights = CostWeights(),
 ) -> CycleResult:
     audit: list[StageAudit] = []
 
@@ -57,8 +66,17 @@ def run_cycle(
     corpus, gated = safety_gate(corpus)
     audit.append(StageAudit(stage="safety_gate", note=f"{len(gated)} gated", count=len(gated)))
 
+    corpus, selection = select_stage(
+        corpus, cost_model=cost_model or CostModel(), budget=budget,
+        value_weights=value_weights, cost_weights=cost_weights,
+    )
+    n_selected = sum(1 for d in selection.decisions if d.selected)
+    audit.append(StageAudit(stage="select_stage",
+        note=f"{n_selected}/{selection.cardinality} selected", count=n_selected))
+
+    selected_ids = frozenset(d.claim_id for d in selection.decisions if d.selected)
     locked_before = _locked_ids(corpus)
-    corpus = commit(corpus)
+    corpus = commit(corpus, only=selected_ids)
     n_committed = len(_locked_ids(corpus) - locked_before)
     audit.append(StageAudit(stage="commit", note=f"{n_committed} claim(s) committed", count=n_committed))
 
@@ -92,4 +110,5 @@ def run_cycle(
         frontier=frontier,
         gated_lane=gated_lane,
         audit=tuple(audit),
+        selection=selection,
     )

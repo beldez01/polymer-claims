@@ -24,10 +24,13 @@ def _is_locked(claim: Claim) -> bool:
     return claim.provenance is not None and claim.provenance.preregistration_hash is not None
 
 
-def commit(corpus: Corpus) -> Corpus:
+def commit(corpus: Corpus, only: frozenset[str] | None = None) -> Corpus:
     new_claims = []
     changed = False
     for c in corpus.claims:
+        if only is not None and c.id not in only:
+            new_claims.append(c)
+            continue
         if c.status != Status.PENDING or c.evaluation_plan is None or _is_locked(c):
             new_claims.append(c)
             continue

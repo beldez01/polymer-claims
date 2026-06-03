@@ -1,6 +1,7 @@
 from polymer_grammar import Status
 
 from polymer_protocol.corpus import Corpus
+from polymer_protocol.cost import CostModel, CostVector, CostWeights
 from polymer_protocol.cycle import run_cycle
 from tests.conftest import make_claim, make_plan
 
@@ -13,7 +14,7 @@ def test_cycle_licenses_a_satisfied_claim(empty_ledger, ctx, adapters):
     assert result.gated_lane == ()
     # audit records one line per stage
     assert {a.stage for a in result.audit} == {
-        "represent", "canonicalize", "safety_gate", "commit",
+        "represent", "canonicalize", "safety_gate", "select_stage", "commit",
         "execute_ground", "verify_stage", "integrate",
     }
 
@@ -86,3 +87,46 @@ def test_run_cycle_caps_oracle_claim_without_registry(empty_ledger, ctx, adapter
     assert graded.status == Status.LICENSED
     assert graded.strength.magnitude == 0.0   # unresolved oracle -> capped, even with no registry
     assert graded.strength.severity == 0.9    # theory axis untouched
+
+
+def test_budget_limits_what_executes(empty_ledger, ctx, adapters):
+    from polymer_grammar import StrengthVector
+    sv = StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=0.95,
+                        severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
+    # distinct plan values so canonicalize does not collapse them
+    cheap = make_claim("cheap", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv)
+    pricey = make_claim("pricey", status=Status.PENDING, plan=make_plan(0.02, 0.05), strength=sv)
+    cost_model = CostModel(costs=(
+        ("cheap", CostVector(wall_latency=1.0)),
+        ("pricey", CostVector(wall_latency=100.0)),
+    ))
+    corpus = Corpus(claims=(cheap, pricey), fdr_ledger=empty_ledger)
+    result = run_cycle(corpus, adapters, ctx, cost_model=cost_model,
+                       budget=1.0, cost_weights=CostWeights())
+    assert result.corpus.by_id()["cheap"].status == Status.LICENSED
+    assert result.corpus.by_id()["pricey"].status == Status.PENDING
+    assert result.selection.cardinality == 2
+    assert {d.claim_id for d in result.selection.decisions if d.selected} == {"cheap"}
+
+
+def test_unselected_claim_reappears_next_cycle(empty_ledger, ctx, adapters):
+    from polymer_grammar import StrengthVector
+    sv = StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=0.9,
+                        severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
+    cheap = make_claim("cheap", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv)
+    pricey = make_claim("pricey", status=Status.PENDING, plan=make_plan(0.02, 0.05), strength=sv)
+    cost_model = CostModel(costs=(
+        ("cheap", CostVector(wall_latency=1.0)),
+        ("pricey", CostVector(wall_latency=100.0)),
+    ))
+    c1 = run_cycle(Corpus(claims=(cheap, pricey), fdr_ledger=empty_ledger), adapters, ctx,
+                   cost_model=cost_model, budget=1.0)
+    # second cycle with a big budget: pricey (still PENDING) now executes
+    c2 = run_cycle(c1.corpus, adapters, ctx, budget=None)
+    assert c2.corpus.by_id()["pricey"].status == Status.LICENSED
+
+
+def test_audit_includes_select_stage(empty_ledger, ctx, adapters):
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
+    assert "select_stage" in {a.stage for a in result.audit}

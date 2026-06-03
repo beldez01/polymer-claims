@@ -19,6 +19,38 @@ from polymer_grammar import (
 from .corpus import Corpus, CycleScaffolding, ExecRecord
 from .oracle import OracleRegistry, oracle_cap
 
+BH_Q = 0.10
+_BH_EPS = 1e-9
+
+
+def _permitted_by_bar(corpus: Corpus, exec_records: tuple[ExecRecord, ...]) -> set[str]:
+    """Ids of executed claims permitted to license under the cardinality-scaled BH bar.
+    M<=1 -> all permitted (identity). strength=None -> exempt (always permitted)."""
+    by_id = corpus.by_id()
+    executed = [by_id[r.claim_id] for r in exec_records if r.claim_id in by_id]
+    if not executed:
+        return set()
+    m = max(
+        (c.provenance.search_cardinality for c in executed if c.provenance is not None),
+        default=1,
+    )
+    if m <= 1:
+        return {c.id for c in executed}
+    permitted = {c.id for c in executed if c.strength is None}  # exempt
+    scored = [
+        (1.0 - c.strength.evidence_against_null, c.id)
+        for c in executed
+        if c.strength is not None
+    ]
+    scored.sort()  # ascending pseudo-p, ties by id
+    k_max = 0
+    for k, (p, _) in enumerate(scored, start=1):
+        # inclusive boundary: tolerate float error so p exactly on the BH line passes
+        if p <= (k / m) * BH_Q + _BH_EPS:
+            k_max = k
+    permitted.update(cid for _, cid in scored[:k_max])
+    return permitted
+
 
 def _with_status(claim: Claim, **update) -> Claim:
     """Apply a status/licensing/pending_reason update AND re-run Claim validators
@@ -35,6 +67,7 @@ def verify_stage(
     registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
     rec_by_id = {r.claim_id: r for r in exec_records}
+    permitted = _permitted_by_bar(corpus, exec_records)
     new_claims = []
     for c in corpus.claims:
         rec = rec_by_id.get(c.id)
@@ -51,7 +84,8 @@ def verify_stage(
         )
         # provenance is non-None for anything that passed execute_ground (_is_executable
         # requires the lock); the guard is defensive for direct callers.
-        if ev.satisfaction is not None and c.id in in_ext and c.provenance is not None:
+        if (ev.satisfaction is not None and c.id in in_ext
+                and c.provenance is not None and c.id in permitted):
             licensing = Licensing(
                 route=LicenseRoute.SEVERE_TEST,
                 satisfactions=(ev.satisfaction,),

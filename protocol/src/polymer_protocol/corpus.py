@@ -78,8 +78,34 @@ class StageAudit(_Model):
     count: int = Field(default=0, ge=0)
 
 
+class ValueVector(_Model):
+    """Two-axis pursuit value (spec §3.5). Pareto, not a scalar."""
+
+    eig: float = Field(default=0.0, ge=0.0)
+    stakes: float = Field(default=0.0, ge=0.0)
+
+    def dominates(self, other: "ValueVector") -> bool:
+        ge = self.eig >= other.eig and self.stakes >= other.stakes
+        gt = self.eig > other.eig or self.stakes > other.stakes
+        return ge and gt
+
+
+class SelectionDecision(_Model):
+    claim_id: str
+    selected: bool
+    value: ValueVector
+    cost: float
+    rank: int = Field(default=0, ge=0)
+
+
+class SelectionRecord(_Model):
+    decisions: tuple[SelectionDecision, ...] = ()
+    cardinality: int = Field(default=0, ge=0)
+
+
 class CycleResult(_Model):
     corpus: Corpus
     frontier: tuple[str, ...] = ()    # next cycle's GENERATE/SELECT target (keystone closure)
     gated_lane: tuple[str, ...] = ()  # claim ids barred from autonomous execution (SAFETY)
     audit: tuple[StageAudit, ...] = ()
+    selection: SelectionRecord = SelectionRecord()

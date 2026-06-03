@@ -100,9 +100,20 @@ represent → canonicalize → safety_gate → commit → execute_ground → ver
 
 returning a new `Corpus` plus the unresolved-attack `frontier`, the `gated_lane` (claims blocked by governance), and a per-stage `audit`.
 
-EXECUTE reuses the Phase-8 air-gapped `verify()` — two-implementation agreement, no self-licensing — to mint an L2 `Satisfaction`. GENERATE and SELECT are stubbed open ports: claims enter exogenously and every committed, non-gated PENDING claim is executed. The pursuit/value engine (SELECT), the proposer bus (GENERATE), and the daemons are later sub-projects.
+EXECUTE reuses the Phase-8 air-gapped `verify()` — two-implementation agreement, no self-licensing — to mint an L2 `Satisfaction`. GENERATE is a stubbed open port: claims enter exogenously. The proposer bus (GENERATE) and the daemons are later sub-projects.
 
 An optional oracle registry (`run_cycle(..., oracles=...)`) caps a licensed claim's **empirical** strength axes (magnitude / uncertainty / evidence-against-null / world-contact) by the validation tier of the weakest oracle its plan references. Unresolved or out-of-domain oracles count as `UNVALIDATED` (zero empirical strength) — the guarantee is always-on, not disableable by omitting the registry. Builtin-only claims (no `oracle_ref`) are unaffected.
+
+`run_cycle` no longer executes every committed claim. The **SELECT** stage ranks eligible
+PENDING claims on a two-axis value `(expected-information-gain, stakes)` under a structured,
+passed-in cost and a budget (`run_cycle(..., cost_model=, budget=)`), executing only the
+selected subset; the rest stay PENDING for a later cycle. EIG comes from a minimal
+Beta–Bernoulli posterior derived from each claim's `StrengthVector` (deterministic, no
+embeddings); stakes is the size of its forward dependency cone. The search cardinality of each
+selection is recorded and **tightens VERIFY's significance bar** — a cardinality-scaled
+Benjamini–Hochberg selective-inference correction — as the competed pool grows (identity at
+cardinality 1). Quality-diversity portfolios, a heterodox reserve lane, and cross-cycle
+accumulating belief are the deferred **#3b** slice.
 
 - **Design spec:** `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`
 - **Tests:** `cd protocol && uv run pytest -q`
@@ -110,7 +121,7 @@ An optional oracle registry (`run_cycle(..., oracles=...)`) caps a licensed clai
 | Subdir | Package | Status |
 |---|---|---|
 | `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier — 261 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 (assessment spine + oracle dossier) — 67 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a (assessment spine + oracle dossier + SELECT pursuit engine) — 101 tests |
 
 ---
 
