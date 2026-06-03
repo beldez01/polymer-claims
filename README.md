@@ -108,7 +108,7 @@ EXECUTE reuses the Phase-8 air-gapped `verify()` — two-implementation agreemen
 | Subdir | Package | Status |
 |---|---|---|
 | `grammar/` | `polymer_grammar` | ✅ 8 phases complete — 240 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-project #1 (assessment spine) — 48 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-project #1 (assessment spine) — 49 tests |
 
 ---
 
