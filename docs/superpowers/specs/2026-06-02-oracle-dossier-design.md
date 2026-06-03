@@ -237,7 +237,12 @@ def verify_stage(corpus, scaffolding, exec_records, oracles=None) -> Corpus:
 ```
 
 `run_cycle(corpus, adapters, ctx, oracles=None)` threads `oracles` straight to `verify_stage`;
-no other stage needs it. Default `None` ⇒ empty registry ⇒ fully back-compatible.
+no other stage needs it. Default `None` normalizes to an **empty** registry — so the guarantee
+is **always-on**: a claim that references an oracle (`oracle_ref` set) with no resolvable
+dossier is `UNVALIDATED` (empirical strength capped to 0) **whether or not a registry was
+passed**. Back-compat holds for **builtin-only** claims (no `oracle_ref` — the entire existing
+suite): they reference no oracle, so `oracle_cap` returns their strength unchanged regardless of
+the registry. The guarantee cannot be silently disabled by omitting the argument.
 
 Exports added to `protocol/__init__.py`: `OracleRegistry`, `oracle_cap`, plus re-exports of the
 grammar oracle types (`OracleDossier`, `ValidationTier`, `ApplicabilityDomain`) for caller

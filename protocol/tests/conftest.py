@@ -51,13 +51,19 @@ def make_claim(
     )
 
 
-def make_plan(value: float, threshold: float, comparator: Comparator = Comparator.LT) -> EvaluationPlan:
-    """A one-node plan: a constant `value`, tested against `threshold`."""
+def make_plan(
+    value: float, threshold: float, comparator: Comparator = Comparator.LT,
+    *, oracle_ref: str | None = None,
+) -> EvaluationPlan:
+    """A one-node plan: a constant `value`, tested against `threshold`. `oracle_ref` lets a
+    test attach an oracle to the node (still impl=builtin::const, so the reference adapters
+    execute it)."""
     node = OperationNode(
         id="n0",
         impl="builtin::const",
         params=(("value", str(value)),),
         produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
+        oracle_ref=oracle_ref,
     )
     return EvaluationPlan(
         graph=ComputeGraph(nodes=(node,), terminal="n0"),

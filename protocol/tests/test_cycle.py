@@ -57,3 +57,32 @@ def test_frontier_is_emitted_for_an_unresolved_attack(empty_ledger, ctx, adapter
     corpus = Corpus(claims=(a, b), defeat_edges=(edge,), fdr_ledger=empty_ledger)
     result = run_cycle(corpus, adapters, ctx)
     assert result.frontier == ("a",)
+
+
+def test_run_cycle_caps_strength_with_registry(empty_ledger, ctx, adapters):
+    from polymer_grammar import OracleDossier, StrengthVector, ValidationTier
+    from polymer_protocol import OracleRegistry
+
+    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+                        severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
+    reg = OracleRegistry(dossiers=(OracleDossier(oracle_id="api", validation_tier=ValidationTier.BENCHMARKED),))
+    result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx, oracles=reg)
+    graded = result.corpus.by_id()["a"]
+    assert graded.status == Status.LICENSED
+    assert graded.strength.magnitude == 0.6           # BENCHMARKED ceiling
+    assert graded.strength.explanatory_virtue == 0.9  # theory axis untouched
+
+
+def test_run_cycle_caps_oracle_claim_without_registry(empty_ledger, ctx, adapters):
+    # Always-on guarantee at the run_cycle layer: an oracle_ref with no registry -> UNVALIDATED.
+    from polymer_grammar import StrengthVector
+
+    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+                        severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
+    result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)  # no oracles
+    graded = result.corpus.by_id()["a"]
+    assert graded.status == Status.LICENSED
+    assert graded.strength.magnitude == 0.0   # unresolved oracle -> capped, even with no registry
+    assert graded.strength.severity == 0.9    # theory axis untouched

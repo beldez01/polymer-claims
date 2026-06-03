@@ -17,6 +17,7 @@ from polymer_grammar import (
 )
 
 from .corpus import Corpus, CycleScaffolding, ExecRecord
+from .oracle import OracleRegistry, oracle_cap
 
 
 def _with_status(claim: Claim, **update) -> Claim:
@@ -29,7 +30,9 @@ def verify_stage(
     corpus: Corpus,
     scaffolding: CycleScaffolding,
     exec_records: tuple[ExecRecord, ...],
+    oracles: OracleRegistry | None = None,
 ) -> Corpus:
+    registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
     rec_by_id = {r.claim_id: r for r in exec_records}
     new_claims = []
@@ -60,6 +63,7 @@ def verify_stage(
                     status=Status.LICENSED,
                     licensing=licensing,
                     pending_reason=None,
+                    strength=oracle_cap(c, registry),  # None oracles arg -> empty registry -> unresolved refs are UNVALIDATED
                 )
             )
         elif agreed_refuted or c.id not in in_ext:

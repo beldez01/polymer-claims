@@ -103,3 +103,91 @@ def test_agreed_undetermined_in_ext_stays_pending(empty_ledger, ctx):
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     out = verify_stage(corpus, scaffolding, (ExecRecord(claim_id="a", evaluation=ev),))
     assert out.by_id()["a"].status == Status.PENDING
+
+
+def test_oracle_grounded_license_caps_strength(empty_ledger, ctx, adapters):
+    from polymer_grammar import OracleDossier, StrengthVector, ValidationTier
+    from polymer_protocol import OracleRegistry
+
+    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+                        severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
+    corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
+    corpus, records = execute_ground(corpus, adapters, ctx)
+    scaffolding = CycleScaffolding(grounded_extension=("a",))
+    reg = OracleRegistry(dossiers=(OracleDossier(oracle_id="api", validation_tier=ValidationTier.INDIRECT),))
+    out = verify_stage(corpus, scaffolding, records, reg)
+    graded = out.by_id()["a"]
+    assert graded.status == Status.LICENSED
+    assert graded.strength.magnitude == 0.4         # capped by INDIRECT
+    assert graded.strength.severity == 0.9          # theory axis untouched
+
+
+def test_builtin_only_claim_uncapped_without_registry(empty_ledger, ctx, adapters):
+    # No oracle_ref -> no oracle dependency -> strength untouched even with no registry (real back-compat).
+    from polymer_grammar import StrengthVector
+    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+                        severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv)  # no oracle_ref
+    corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
+    corpus, records = execute_ground(corpus, adapters, ctx)
+    scaffolding = CycleScaffolding(grounded_extension=("a",))
+    out = verify_stage(corpus, scaffolding, records)  # no oracles arg
+    assert out.by_id()["a"].strength == sv  # unchanged — no oracle dependency
+
+
+def test_oracle_grounded_claim_capped_without_registry(empty_ledger, ctx, adapters):
+    # An oracle_ref with no dossier (no registry) is UNVALIDATED -> empirical strength caps to 0.
+    # The guarantee holds whether or not a registry was passed.
+    from polymer_grammar import StrengthVector
+    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+                        severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
+    corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
+    corpus, records = execute_ground(corpus, adapters, ctx)
+    scaffolding = CycleScaffolding(grounded_extension=("a",))
+    out = verify_stage(corpus, scaffolding, records)  # no oracles -> empty -> unresolved -> UNVALIDATED
+    graded = out.by_id()["a"]
+    assert graded.status == Status.LICENSED
+    assert graded.strength.magnitude == 0.0   # capped: unvalidated oracle
+    assert graded.strength.severity == 0.9    # theory axis untouched
+
+
+def test_gold_oracle_with_registry_leaves_strength_unchanged(empty_ledger, ctx, adapters):
+    from polymer_grammar import OracleDossier, StrengthVector, ValidationTier
+    from polymer_protocol import OracleRegistry
+
+    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+                        severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
+    corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
+    corpus, records = execute_ground(corpus, adapters, ctx)
+    scaffolding = CycleScaffolding(grounded_extension=("a",))
+    reg = OracleRegistry(dossiers=(OracleDossier(oracle_id="api", validation_tier=ValidationTier.GOLD),))
+    out = verify_stage(corpus, scaffolding, records, reg)
+    assert out.by_id()["a"].status == Status.LICENSED
+    assert out.by_id()["a"].strength == sv  # GOLD ceiling is all-1.0 -> no cap, vector survives round-trip
+
+
+def test_out_of_domain_oracle_caps_through_verify_stage(empty_ledger, ctx, adapters):
+    from polymer_grammar import (
+        ApplicabilityDomain, GenomicRegion, OracleDossier, StrengthVector, ValidationTier,
+    )
+    from polymer_protocol import OracleRegistry
+
+    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+                        severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
+    region = GenomicRegion(id="r1", display="d", assembly="GRCh38", chrom="chr1", start=1, end=9)
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"),
+                   strength=sv, subject=region)
+    corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
+    corpus, records = execute_ground(corpus, adapters, ctx)
+    scaffolding = CycleScaffolding(grounded_extension=("a",))
+    # oracle qualified only for variant_vrs; our subject is genomic_region -> out of domain -> UNVALIDATED
+    reg = OracleRegistry(dossiers=(OracleDossier(
+        oracle_id="api", validation_tier=ValidationTier.GOLD,
+        applicability_domain=ApplicabilityDomain(subject_kinds=("variant_vrs",)),
+    ),))
+    out = verify_stage(corpus, scaffolding, records, reg)
+    assert out.by_id()["a"].strength.magnitude == 0.0   # out-of-domain -> capped
+    assert out.by_id()["a"].strength.severity == 0.9    # theory axis untouched

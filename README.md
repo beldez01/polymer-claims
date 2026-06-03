@@ -100,15 +100,17 @@ represent → canonicalize → safety_gate → commit → execute_ground → ver
 
 returning a new `Corpus` plus the unresolved-attack `frontier`, the `gated_lane` (claims blocked by governance), and a per-stage `audit`.
 
-EXECUTE reuses the Phase-8 air-gapped `verify()` — two-implementation agreement, no self-licensing — to mint an L2 `Satisfaction`. GENERATE and SELECT are stubbed open ports: claims enter exogenously and every committed, non-gated PENDING claim is executed. The pursuit/value engine (SELECT), the proposer bus (GENERATE), the oracle dossier, and the daemons are later sub-projects.
+EXECUTE reuses the Phase-8 air-gapped `verify()` — two-implementation agreement, no self-licensing — to mint an L2 `Satisfaction`. GENERATE and SELECT are stubbed open ports: claims enter exogenously and every committed, non-gated PENDING claim is executed. The pursuit/value engine (SELECT), the proposer bus (GENERATE), and the daemons are later sub-projects.
+
+An optional oracle registry (`run_cycle(..., oracles=...)`) caps a licensed claim's **empirical** strength axes (magnitude / uncertainty / evidence-against-null / world-contact) by the validation tier of the weakest oracle its plan references. Unresolved or out-of-domain oracles count as `UNVALIDATED` (zero empirical strength) — the guarantee is always-on, not disableable by omitting the registry. Builtin-only claims (no `oracle_ref`) are unaffected.
 
 - **Design spec:** `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`
 - **Tests:** `cd protocol && uv run pytest -q`
 
 | Subdir | Package | Status |
 |---|---|---|
-| `grammar/` | `polymer_grammar` | ✅ 8 phases complete — 240 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-project #1 (assessment spine) — 49 tests |
+| `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier — 261 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 (assessment spine + oracle dossier) — 67 tests |
 
 ---
 
