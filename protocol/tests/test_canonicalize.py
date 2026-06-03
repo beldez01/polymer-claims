@@ -39,6 +39,30 @@ def test_three_way_bucket_all_in_one_class(empty_ledger):
     assert are_equivalent("b", "c", out.equivalences)  # transitive via a
 
 
+def test_bare_claims_do_not_collapse(empty_ledger):
+    # Two CONJECTURED skeletons with the same pattern but NO subject/conclusion/plan have
+    # an all-absent discriminating key. Under-specification is NOT identity — collapsing
+    # them would declare every bare same-pattern claim "the same claim" (and could even
+    # equate two claims in a defeat relationship). They must NOT collapse.
+    a = make_claim("a")  # CONJECTURED, no subject/conclusion/plan
+    b = make_claim("b")
+    out = canonicalize(Corpus(claims=(a, b), fdr_ledger=empty_ledger))
+    assert out.equivalences == ()
+
+
+def test_claims_with_only_a_conclusion_still_collapse(empty_ledger):
+    # The guard is minimal: a single discriminating field (here, a conclusion) is enough
+    # structural content to assert identity. Two claims sharing it still collapse.
+    from polymer_grammar import Direction, Proposition
+
+    p = Proposition(direction=Direction.POSITIVE, estimand="effect", descriptor="X up")
+    a = make_claim("a", conclusion=p)
+    b = make_claim("b", conclusion=p)
+    out = canonicalize(Corpus(claims=(a, b), fdr_ledger=empty_ledger))
+    assert len(out.equivalences) == 1
+    assert are_equivalent("a", "b", out.equivalences)
+
+
 def test_canonicalize_is_idempotent(empty_ledger):
     plan = make_plan(0.01, 0.05)
     corpus = Corpus(
