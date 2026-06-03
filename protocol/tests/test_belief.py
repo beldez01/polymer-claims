@@ -1,6 +1,6 @@
 from polymer_grammar import StrengthVector
 
-from polymer_protocol.belief import Beta, prior_belief
+from polymer_protocol.belief import Beta, expected_information_gain, prior_belief
 from tests.conftest import make_claim
 
 
@@ -40,3 +40,23 @@ def test_beta_is_frozen_and_proper():
                         severity=0.0, world_contact=0.0, explanatory_virtue=0.0)
     pb = prior_belief(make_claim("a", strength=sv))
     assert pb.alpha > 0.0 and pb.beta > 0.0  # beta floored above 0 despite mean=1.0
+
+
+def test_eig_of_uniform_is_maximal():
+    eig_uniform = expected_information_gain(Beta(alpha=1.0, beta=1.0))
+    eig_concentrated = expected_information_gain(Beta(alpha=50.0, beta=50.0))
+    eig_certain = expected_information_gain(Beta(alpha=100.0, beta=1.0))
+    assert eig_uniform > eig_concentrated > eig_certain
+    assert eig_uniform > 0.0
+
+
+def test_eig_is_bounded_and_nonnegative():
+    for b in [Beta(alpha=1.0, beta=1.0), Beta(alpha=2.0, beta=8.0),
+              Beta(alpha=0.5, beta=0.5), Beta(alpha=30.0, beta=30.0)]:
+        eig = expected_information_gain(b)
+        assert 0.0 <= eig <= 1.0 + 1e-9
+
+
+def test_eig_is_deterministic():
+    b = Beta(alpha=3.0, beta=7.0)
+    assert expected_information_gain(b) == expected_information_gain(b)
