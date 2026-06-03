@@ -118,8 +118,8 @@ accumulating belief are the deferred **#3b** slice.
 > `run_cycle` no longer requires claims to be pre-loaded. The **GENERATE** stage (right after
 > REPRESENT) runs a bus of passed-in proposers plus an exogenous injection port
 > (`run_cycle(..., proposers=, injected=)`) through `compile_to_IR`, folding new CONJECTURED claims
-> into the corpus. Two pure operators ship: *rival-generation* (direction-flipped rivals marked
-> `incompatible_with` the source — the rival pool `rival_set_closure` needs) and *frontier-attack*
+> into the corpus. Two pure operators ship: *rival-generation* (direction-flipped alternative-hypothesis rivals
+> (isolated CONJECTURED candidates — the rivalry linkage is deferred to #4b)) and *frontier-attack*
 > (a CONJECTURED defense seed at each unresolved-frontier node). Both are strictly **belief-neutral** —
 > they add only CONJECTURED claims, no defeat edges, so the grounded extension is unchanged
 > (generation proposes; only EXECUTE/VERIFY decides; the defeat a frontier seed implies is derived

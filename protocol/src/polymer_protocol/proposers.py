@@ -12,8 +12,6 @@ from polymer_grammar import (
     Claim,
     Direction,
     GenerationMode,
-    NeighborEdge,
-    NeighborEdgeKind,
     Provenance,
     Status,
 )
@@ -50,10 +48,7 @@ def rival_generation(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposa
         for d in Direction:
             if d == c.conclusion.direction:
                 continue
-            ne = NeighborEdge(
-                kind=NeighborEdgeKind.INCOMPATIBLE_WITH, target=c.conclusion.content_hash
-            )
-            rival_concl = c.conclusion.model_copy(update={"direction": d, "neighborhood": (ne,)})
+            rival_concl = c.conclusion.model_copy(update={"direction": d, "neighborhood": ()})
             rival = Claim(
                 id=_gen_id("rival", c.id, d.value),
                 title=f"rival({d.value}) of {c.id}",

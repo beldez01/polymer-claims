@@ -1,9 +1,10 @@
 from polymer_grammar import (
-    DefeatEdge, DefeatEdgeKind, Direction, FDRLedger, NeighborEdgeKind, Proposition, Status,
+    DefeatEdge, DefeatEdgeKind, Direction, FDRLedger, Proposition, Status,
     grounded_extension,
 )
 
 from polymer_protocol.corpus import Corpus
+from polymer_protocol.cycle import run_cycle
 from polymer_protocol.proposers import frontier_attack, rival_generation
 from tests.conftest import make_claim
 
@@ -24,14 +25,19 @@ def test_rival_emits_other_two_directions():
     assert all(p.claim.status == Status.CONJECTURED for p in props)
 
 
-def test_rival_marks_incompatible_with_source():
+def test_rival_has_empty_neighborhood():
     c = make_claim("c", conclusion=_concl(Direction.POSITIVE))
     props = rival_generation(_corpus([c]), ())
     for p in props:
-        ne = p.claim.conclusion.neighborhood
-        assert len(ne) == 1
-        assert ne[0].kind == NeighborEdgeKind.INCOMPATIBLE_WITH
-        assert ne[0].target == c.conclusion.content_hash
+        assert p.claim.conclusion.neighborhood == ()  # isolated — no incompatible_with edge
+
+
+def test_rival_generation_is_belief_neutral_through_run_cycle(ctx, adapters):
+    # rival_generation through a full run_cycle must NOT retract the pre-existing claim
+    c = make_claim("c", conclusion=Proposition(direction=Direction.POSITIVE, estimand="b", descriptor="d"))
+    corp = Corpus(claims=(c,), fdr_ledger=FDRLedger(target_fdr=0.05))
+    result = run_cycle(corp, adapters, ctx, proposers=(rival_generation,))
+    assert "c" in result.corpus.by_id()  # pre-existing claim SURVIVES (not retracted)
 
 
 def test_rival_skips_claims_without_conclusion():
