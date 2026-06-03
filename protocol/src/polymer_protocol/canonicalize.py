@@ -15,12 +15,29 @@ from .base import stable_sha
 from .corpus import Corpus
 
 
+def _has_discriminating_content(c: Claim) -> bool:
+    """A claim is collapsible only if it asserts SOME structural content beyond its
+    pattern — a subject, a conclusion, or an evaluation plan.
+
+    All-absent (a bare same-pattern skeleton) is UNDER-SPECIFICATION, not identity:
+    collapsing such claims would declare every bare same-pattern claim "the same claim"
+    (and could even equate two claims that are in a defeat relationship). Identity is
+    earned from asserted content, never from the shared absence of it.
+    """
+    return (
+        c.subject is not None
+        or c.conclusion is not None
+        or c.evaluation_plan is not None
+    )
+
+
 def _structural_key(c: Claim) -> str:
     """Stable key over a claim's STRUCTURE: pattern, subject, conclusion, and plan.
 
     `leaves` are intentionally excluded — they are L0 output slots populated at
     evaluation time; two claims sharing the same pattern/subject/conclusion/plan are
-    structurally equivalent regardless of leaf instantiation.
+    structurally equivalent regardless of leaf instantiation. Only called for claims
+    that pass `_has_discriminating_content` (an all-absent key is never collapsed).
     """
     return stable_sha(
         [
@@ -36,6 +53,10 @@ def _structural_key(c: Claim) -> str:
 def canonicalize(corpus: Corpus) -> Corpus:
     buckets: dict[str, list[str]] = defaultdict(list)
     for c in corpus.claims:
+        # under-specified skeletons (no subject/conclusion/plan) are not collapsible —
+        # absence of discriminating content is not evidence of identity.
+        if not _has_discriminating_content(c):
+            continue
         buckets[_structural_key(c)].append(c.id)
 
     existing_pairs = {frozenset((eq.left, eq.right)) for eq in corpus.equivalences}
