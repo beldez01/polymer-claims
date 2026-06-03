@@ -3,6 +3,7 @@ from polymer_grammar import Status
 from polymer_protocol.corpus import Corpus
 from polymer_protocol.cost import CostModel, CostVector, CostWeights
 from polymer_protocol.cycle import run_cycle
+from polymer_protocol.proposers import frontier_attack, rival_generation
 from tests.conftest import make_claim, make_plan
 
 
@@ -14,8 +15,8 @@ def test_cycle_licenses_a_satisfied_claim(empty_ledger, ctx, adapters):
     assert result.gated_lane == ()
     # audit records one line per stage
     assert {a.stage for a in result.audit} == {
-        "represent", "canonicalize", "safety_gate", "select_stage", "commit",
-        "execute_ground", "verify_stage", "integrate",
+        "represent", "generate_stage", "canonicalize", "safety_gate", "select_stage",
+        "commit", "execute_ground", "verify_stage", "integrate",
     }
 
 
@@ -130,3 +131,48 @@ def test_audit_includes_select_stage(empty_ledger, ctx, adapters):
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
     result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
     assert "select_stage" in {a.stage for a in result.audit}
+
+
+def test_audit_includes_generate_stage(empty_ledger, ctx, adapters):
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
+    assert "generate_stage" in {a.stage for a in result.audit}
+
+
+def test_injected_claim_flows_through_and_licenses(empty_ledger, ctx, adapters):
+    # an exogenous PENDING-with-plan claim enters via the port and licenses this cycle
+    injected = make_claim("inj", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    result = run_cycle(Corpus(fdr_ledger=empty_ledger), adapters, ctx, injected=(injected,))
+    assert result.corpus.by_id()["inj"].status == Status.LICENSED
+    assert result.generation.proposed == 1
+    assert result.generation.admitted == ("inj",)
+
+
+def test_frontier_attack_plants_a_seed(empty_ledger, ctx, adapters):
+    from polymer_grammar import DefeatEdge, DefeatEdgeKind
+    # b (CONJECTURED, no plan) attacks a -> a on frontier -> frontier_attack plants a seed D
+    a, b = make_claim("a"), make_claim("b")
+    edge = DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT)
+    corpus = Corpus(claims=(a, b), defeat_edges=(edge,), fdr_ledger=empty_ledger)
+    result = run_cycle(corpus, adapters, ctx, proposers=(frontier_attack,))
+    # a new gen-fa-* CONJECTURED seed claim appears; NO new defeat edge was added (belief-neutral)
+    assert any(cid.startswith("gen-fa-") for cid in result.corpus.by_id())
+    assert len(result.corpus.defeat_edges) == 1  # still just the original b->a edge
+
+
+def test_generation_converges(empty_ledger, ctx, adapters):
+    from polymer_grammar import Direction, Proposition
+    c = make_claim("c", conclusion=Proposition(direction=Direction.POSITIVE, estimand="b", descriptor="d"))
+    corpus = Corpus(claims=(c,), fdr_ledger=empty_ledger)
+    c1 = run_cycle(corpus, adapters, ctx, proposers=(rival_generation,))
+    n1 = len(c1.corpus.claims)
+    c2 = run_cycle(c1.corpus, adapters, ctx, proposers=(rival_generation,))
+    assert len(c2.corpus.claims) == n1  # second cycle adds nothing — convergent
+    assert c2.generation.admitted == ()
+
+
+def test_default_generation_is_noop(empty_ledger, ctx, adapters):
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
+    assert result.generation.proposed == 0
+    assert result.corpus.by_id()["a"].status == Status.LICENSED  # #3a path unaffected
