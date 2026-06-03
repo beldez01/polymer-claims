@@ -7,7 +7,10 @@ skip their own prior outputs so the corpus converges. Spec §3.2/§3.6.
 from __future__ import annotations
 
 from polymer_grammar import (
+    CategoricalLeaf,
     Claim,
+    DefeatEdge,
+    DefeatEdgeKind,
     Direction,
     GenerationMode,
     NeighborEdge,
@@ -63,4 +66,30 @@ def rival_generation(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposa
                 provenance=_generated_by(corpus, RIVAL_OP),
             )
             proposals.append(Proposal(operator_id=RIVAL_OP, claim=rival))
+    return tuple(proposals)
+
+
+def frontier_attack(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
+    by_id = corpus.by_id()
+    attackers_of: dict[str, list[str]] = {}
+    for e in corpus.defeat_edges:
+        if ":" in e.source:
+            continue  # skip synthetic sources (e.g. refutation:<id>) — not claim-rebuttable
+        attackers_of.setdefault(e.target, []).append(e.source)
+    proposals: list[Proposal] = []
+    for f in frontier:
+        for b in attackers_of.get(f, []):
+            if b not in by_id:
+                continue
+            did = _gen_id("fa", f, b)
+            d_claim = Claim(
+                id=did,
+                title=f"challenge to {b}",
+                pattern=by_id[b].pattern,
+                leaves=(CategoricalLeaf(ontology_term=f"frontier-attack-{b}"),),
+                status=Status.CONJECTURED,
+                provenance=_generated_by(corpus, FRONTIER_OP),
+            )
+            edge = DefeatEdge(source=did, target=b, kind=DefeatEdgeKind.REBUT)
+            proposals.append(Proposal(operator_id=FRONTIER_OP, claim=d_claim, edges=(edge,)))
     return tuple(proposals)
