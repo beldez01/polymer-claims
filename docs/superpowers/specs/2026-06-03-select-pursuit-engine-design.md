@@ -136,6 +136,13 @@ queue pressure; for #3a it is just another cost component the caller sets.
 
 ### 3.5 Selection under cost (`select.py`)
 
+**Candidate eligibility.** SELECT ranks exactly the claims that the dumb driver would have
+executed: `status == PENDING`, carries an `evaluation_plan`, and is **not** safety-gated
+(`governance is None or not requires_safety_review(governance)`). This is the same predicate
+`execute_ground._is_executable` uses (minus the post-COMMIT lock check, since SELECT runs before
+COMMIT). The candidate pool's size is `M` — stamped as `search_cardinality` on every selected
+claim (§4). Non-candidate claims (CONJECTURED, planless, or gated) are untouched.
+
 `ValueVector(eig, stakes)` is a genuine Pareto vector — reuse the `dominates` pattern
 (componentwise ≥ with at least one strict). Selection:
 
@@ -194,9 +201,20 @@ selective-inference analogue:
 - A claim may license **only if** it passes both the existing air-gapped two-adapter agreement
   **and** this bar.
 
-**Load-bearing invariant: at `M = 1` the bar is the identity** — a single-candidate cycle gets
-`p ≤ (1/1)·Q = Q`, which must reproduce the pre-#3 licensing behavior for every existing
-single-claim test. The bar only *tightens* as `M` grows.
+**Two exemptions make the bar provably additive over pre-#3 behavior:**
+
+1. **`M = 1` is an explicit identity gate.** A search cardinality of 1 means no implicit sweep,
+   hence no multiple-comparison problem — the bar is skipped entirely, reproducing pre-#3
+   licensing byte-for-byte. The bar only engages, and only *tightens*, as `M` grows beyond 1.
+2. **`strength is None` ⇒ exempt.** A claim that asserts no `evidence_against_null` axis makes
+   no statistical-significance claim, so there is no pseudo-p to correct; it licenses on
+   two-adapter agreement exactly as before, at any `M`. (When `strength` is present, all six
+   axes are present — `evidence_against_null` is a required `StrengthVector` field — so the
+   pseudo-p is always well-defined for non-exempt claims.)
+
+Together these guarantee every existing single-claim and `strength=None` test stays green; the
+bar constrains only the genuinely new case — a claim carrying an evidence axis, executed inside
+a competed pool of `M > 1`.
 
 **Fallback rule** (if BH proves awkward to thread): a monotone per-claim threshold on the
 pseudo-p-value `p ≤ Q / M` (Bonferroni — also identity at `M = 1`). Spec BH; keep Bonferroni as
@@ -218,8 +236,9 @@ All protocol-side; **no grammar changes**.
 | `protocol/src/polymer_protocol/stakes.py` | `dependency_cone(corpus, claim_id)`, `stakes(corpus, claim_id)` |
 | `protocol/src/polymer_protocol/cost.py` | `CostVector`, `CostModel`, `CostWeights`, `aggregate_cost` |
 | `protocol/src/polymer_protocol/select.py` | `ValueVector`, `ValueWeights`, Pareto front + budget knapsack, `select_stage`, `SelectionRecord`, `SelectionDecision` |
+| `protocol/src/polymer_protocol/commit.py` (modify) | add `only: frozenset[str] \| None = None` — when given, lock **only** claims whose id is in the set (the selected set), so unselected PENDING claims stay unlocked and are not executed. `None` ⇒ lock all eligible (pre-#3 behavior) |
 | `protocol/src/polymer_protocol/verify.py` (modify) | cardinality-scaled BH bar (consumes `provenance.search_cardinality`) |
-| `protocol/src/polymer_protocol/cycle.py` (modify) | insert `select_stage` before `commit`; thread `cost_model` / `budget` / `value_weights` / `cost_weights`; execute only the selected set; return `SelectionRecord` in the cycle result |
+| `protocol/src/polymer_protocol/cycle.py` (modify) | insert `select_stage` before `commit`; pass the selected id set to `commit(only=...)`; thread `cost_model` / `budget` / `value_weights` / `cost_weights`; return `SelectionRecord` in the cycle result |
 | `protocol/src/polymer_protocol/__init__.py` (modify) | export the new public symbols |
 
 ## 7. `run_cycle` signature
