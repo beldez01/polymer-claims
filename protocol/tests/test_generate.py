@@ -99,3 +99,10 @@ def test_generation_cap_truncates():
     out, rec = generate_stage(corp, frontier=(), proposers=(prop,), cap=1)
     assert len(rec.admitted) == 1
     assert any(d.reason == "cap" for d in rec.discarded)
+
+
+def test_public_exports():
+    import polymer_protocol as p
+    for name in ["generate_stage", "compile_to_IR", "Proposal", "GenerationRecord",
+                 "DiscardEntry", "rival_generation", "frontier_attack"]:
+        assert hasattr(p, name), name
