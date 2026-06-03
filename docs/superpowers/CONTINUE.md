@@ -6,7 +6,7 @@
 
 ## Current state (as of 2026-06-02)
 
-**Grammar** (`grammar/`, `polymer_grammar`) is complete through all 8 phases. **Protocol runtime sub-project #1 (Corpus + assessment spine) is DONE** — new sibling package `polymer_protocol` (`protocol/`), one-way dep on `polymer_grammar` (isolation-tested), builds the frozen `Corpus` + seven pure stages (`represent / canonicalize / safety_gate / commit / execute_ground / verify_stage / integrate`) wired into a deterministic `run_cycle`; EXECUTE reuses the Phase-8 air-gapped `verify()`; GENERATE/SELECT stubbed as open ports. **49 protocol tests green; ruff clean; isolation holds.** Spec `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`, plan `docs/superpowers/plans/2026-06-02-protocol-spine.md`. Merge commit: `<fill at merge>`.
+**Grammar** (`grammar/`, `polymer_grammar`) is complete through all 8 phases. **Protocol runtime sub-project #1 (Corpus + assessment spine) is DONE** — new sibling package `polymer_protocol` (`protocol/`), one-way dep on `polymer_grammar` (isolation-tested), builds the frozen `Corpus` + seven pure stages (`represent / canonicalize / safety_gate / commit / execute_ground / verify_stage / integrate`) wired into a deterministic `run_cycle`; EXECUTE reuses the Phase-8 air-gapped `verify()`; GENERATE/SELECT stubbed as open ports. **49 protocol tests green; ruff clean; isolation holds.** Spec `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`, plan `docs/superpowers/plans/2026-06-02-protocol-spine.md`. Merge commit: `c8b7279` (no-ff to main).
 
 Phase 7 (protocol-imposed fields) had #1 (provenance), #3 (governance),
 #4 (online-FDR), #6 (reinterpret) + the `Claim.subject` slot done; #2 (oracle) is now UNBLOCKED
@@ -27,7 +27,7 @@ meta-tier) remains. **240 grammar tests, green; ruff clean; isolation holds.**
 ## ▶ NEXT: protocol sub-project #2 — the Oracle dossier
 
 **The protocol runtime arc has STARTED.** Sub-project #1 is DONE (see Current state). The 5-sub-project decomposition:
-1. **Corpus + the assessment spine** ✅ DONE (this branch; merge commit `<fill at merge>`).
+1. **Corpus + the assessment spine** ✅ DONE (merged no-ff to main, commit `c8b7279`).
 2. **Oracle dossier** ← NEXT (unified spec §5 #2; binds to the `OperationNode.oracle_ref` slot Phase 8 left; same rhythm: brainstorm forks → spec → plan → subagent-driven).
 3. SELECT — the pursuit/value engine (two-axis posterior, EIG, three-axis Pareto, cost model, quality-diversity portfolio + firewalls).
 4. GENERATE — the proposer bus (5 operators + representation-revision lane; the open generation port).
