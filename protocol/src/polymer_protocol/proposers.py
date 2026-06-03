@@ -1,7 +1,8 @@
 """Pure endogenous proposers for the GENERATE bus (spec §3.2).
 
-rival_generation enriches the rival pool L2 rival_set_closure needs; frontier_attack (next
-task) plants inert candidate defenses at unresolved-frontier nodes. Both deterministic, both
+rival_generation enriches the rival pool L2 rival_set_closure needs; frontier_attack plants
+belief-neutral candidate-defense SEED claims (no defeat edge) at unresolved-frontier nodes —
+the D ⊣ B defeat is derived later, once D is executed and LICENSED. Both deterministic, both
 skip their own prior outputs so the corpus converges. Spec §3.2/§3.6.
 """
 from __future__ import annotations
@@ -9,8 +10,6 @@ from __future__ import annotations
 from polymer_grammar import (
     CategoricalLeaf,
     Claim,
-    DefeatEdge,
-    DefeatEdgeKind,
     Direction,
     GenerationMode,
     NeighborEdge,
@@ -81,15 +80,13 @@ def frontier_attack(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal
         for b in attackers_of.get(f, []):
             if b not in by_id:
                 continue
-            did = _gen_id("fa", f, b)
             d_claim = Claim(
-                id=did,
+                id=_gen_id("fa", f, b),
                 title=f"challenge to {b}",
                 pattern=by_id[b].pattern,
                 leaves=(CategoricalLeaf(ontology_term=f"frontier-attack-{b}"),),
                 status=Status.CONJECTURED,
                 provenance=_generated_by(corpus, FRONTIER_OP),
             )
-            edge = DefeatEdge(source=did, target=b, kind=DefeatEdgeKind.REBUT)
-            proposals.append(Proposal(operator_id=FRONTIER_OP, claim=d_claim, edges=(edge,)))
+            proposals.append(Proposal(operator_id=FRONTIER_OP, claim=d_claim))  # NO edge
     return tuple(proposals)

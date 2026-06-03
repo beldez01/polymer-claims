@@ -39,11 +39,16 @@ represent → generate → canonicalize → safety_gate → select → commit �
 the exogenous injection, validates each proposal through `compile_to_IR`, and returns a new corpus
 (new claims, plus any defeat edges a proposal carries) and an ephemeral `GenerationRecord`.
 
-**New claims are `CONJECTURED` / no-plan**, so they are **inert this cycle** — not SELECT candidates
-(SELECT requires `PENDING` + `evaluation_plan`), not executed — and first act in the *next* cycle's
-`represent`. This is why inserting after `represent` (whose scaffolding is already computed) creates
-no stale-scaffolding problem: the cycle's grounded extension / frontier are about the pre-generation
-claims, and the generated claims are correctly deferred to next cycle.
+**New claims are `CONJECTURED` / no-plan, and the pure operators add no defeat edges**, so they are
+**belief-neutral this cycle** — not SELECT candidates (SELECT requires `PENDING` + `evaluation_plan`),
+not executed, and a fresh CONJECTURED node defeats nothing, so the **grounded extension of the
+existing claims is unchanged**. This is why inserting after `represent` (whose scaffolding is already
+computed) creates no stale-scaffolding problem: the scaffolding's grounded extension / frontier
+describe the pre-generation claims, the executed claims this cycle are among them, and the generated
+claims first act in the *next* cycle's `represent`. (An *exogenous* proposal that carries a
+belief-changing defeat edge is the caller's responsibility — such a claim is normally a `PENDING`
+hypothesis assessed on its own merits, not a graph rewrite; the pure endogenous operators never add
+edges.)
 
 ## 3. The generation core
 
@@ -95,18 +100,29 @@ This concretely populates the rival pool that L2 `rival_set_closure` needs.
 **`frontier_attack`** — for each frontier node `F` (an unresolved-attack claim id), find its
 **claim-sourced attackers** `B` (defeat edges with `target == F` whose `source` is a real claim id —
 skip synthetic `:`-containing sources like `refutation:<id>`). For each `(F, B)`, emit a `CONJECTURED`
-"defense" claim `D` plus a defeat edge `D --rebut--> B`. `D` is minimal-valid (title naming the
-challenge, `B`'s `pattern`, a single `CategoricalLeaf(ontology_term="frontier-attack-<B>")`, no
-conclusion, no plan, generated provenance). Because `D` is strengthless, the edge `D → B` is
-**inert under `effective_defeats`** (an attack defeats only if the target does not dominate the
-source; a strengthless `D` does not defeat a strength-bearing `B`) — so a conjectured challenge
-cannot overturn anything until it is executed and licensed. This is the keystone closure made
-mechanical (the emitted frontier becomes next cycle's targets), kept honest.
+"defense" seed claim `D` — minimal-valid (title naming the challenge, `B`'s `pattern`, a single
+`CategoricalLeaf(ontology_term="frontier-attack-<B>")`, no conclusion, no plan, generated
+provenance) — and **no defeat edge**. This is the keystone closure made mechanical: the frontier the
+cycle emits becomes a tagged generation target next cycle.
+
+> **Why no edge — the belief-neutrality invariant (load-bearing).** In this spine an explicit defeat
+> edge is *always* effective: `effective_defeats` filters an attack only when the target *strictly
+> dominates* the source, so a **strengthless** `D`'s attack on `B` is **not** filtered — adding
+> `D → B` would immediately defeat `B` and silently reinstate `F`, changing the grounded extension
+> off an unvalidated conjecture. (The existing spine semantics, established and tested in #1, are
+> that conjectured claims *do* attack and create frontiers — so there is no "inert explicit edge.")
+> The only belief-neutral move is to add **no edge**: a fresh CONJECTURED node changes no other
+> node's grounded-membership, so GENERATE stays a pure proposer. The actual `D ⊣ B` defeat is
+> **derived later** — once `D` is executed and LICENSED, INTEGRATE's LICENSED-gated
+> `derived_rebut_edges` (and a future provisional-edge mechanism) can wire it. **Generation
+> proposes; only EXECUTE/VERIFY decides.**
 
 > **Honest limitation (documented, not hidden):** pure operators enrich *structure* — a rival pool,
-> an inert candidate defense + edge. They do not author *content* or executable `evaluation_plan`s
-> (that needs domain knowledge). Executable novelty enters through the exogenous port (§3.5) and,
-> later, the embedding/LLM operators (§9). #4a proves the bus + closes the loop structurally.
+> a tagged frontier-defense seed. They do not author *content*, the defense's contradicting
+> proposition, or an executable `evaluation_plan` (that needs domain knowledge), and they do not
+> wire defeats (that is earned by validation). Executable novelty + content enter through the
+> exogenous port (§3.5) and, later, the embedding/LLM operators (§9). #4a proves the bus + closes
+> the loop structurally while staying strictly belief-neutral.
 
 ### 3.3 `compile_to_IR` — pressure-sensor, not just guillotine
 
@@ -217,9 +233,12 @@ All protocol-side; **no grammar changes**.
 
 **`proposers.py`** — `rival_generation` emits the correct other-direction rivals for a POSITIVE /
 NEGATIVE / NULL conclusion, each marked `incompatible_with` the source; skips claims without a
-conclusion; skips its own prior outputs. `frontier_attack` emits a `D + (D→B rebut)` for a
-claim-sourced attacker of a frontier node; skips synthetic (`:`-source) attackers; `D` is
-strengthless ⇒ the edge is inert under `effective_defeats`.
+conclusion; skips its own prior outputs. `frontier_attack` emits a `CONJECTURED` defense seed `D`
+(no conclusion, **no defeat edge**) for each claim-sourced attacker of a frontier node; skips
+synthetic (`:`-source) attackers; deterministic ids. **Belief-neutrality:** running a proposer over a
+corpus must leave `grounded_extension` of the pre-existing claims unchanged (a `frontier_attack`
+proposal adds an isolated CONJECTURED node and no edge — assert the grounded extension before/after
+is identical).
 
 **`generate.py`** — `compile_to_IR` discards a duplicate-id proposal (`reason="duplicate"`), an
 unresolved-edge proposal (`reason="unresolved-edge"`); admits a valid one. `generate_stage` is a
