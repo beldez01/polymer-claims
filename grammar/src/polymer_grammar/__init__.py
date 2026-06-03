@@ -90,6 +90,7 @@ from .governance import (
     blocks_reproduction,
     requires_safety_review,
 )
+from .oracle import ValidationTier, cap_strength, tier_ceiling, weakest_tier
 from .operations import (
     Comparator,
     ComputeGraph,
@@ -203,6 +204,10 @@ __all__ = [
     "HazardClass",
     "blocks_reproduction",
     "requires_safety_review",
+    "ValidationTier",
+    "cap_strength",
+    "tier_ceiling",
+    "weakest_tier",
     "Comparator",
     "ComputeGraph",
     "DataHandle",
