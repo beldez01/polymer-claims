@@ -1,0 +1,47 @@
+"""polymer_protocol — the protocol runtime (assessment spine) over polymer_grammar."""
+from __future__ import annotations
+
+__version__ = "0.1.0"
+
+from .base import _Model, stable_sha
+
+# grammar types that appear in run_cycle's public contract — re-exported for caller convenience
+from polymer_grammar import Adapter, MaterializationContext, SelfLicensingError
+
+from .canonicalize import canonicalize
+from .commit import commit
+from .corpus import (
+    Corpus,
+    CycleResult,
+    CycleScaffolding,
+    ExecRecord,
+    StageAudit,
+)
+from .cycle import run_cycle
+from .execute import execute_ground
+from .integrate import integrate
+from .represent import represent
+from .safety import safety_gate
+from .verify import verify_stage
+
+__all__ = [
+    "_Model",
+    "stable_sha",
+    "__version__",
+    "Corpus",
+    "CycleResult",
+    "CycleScaffolding",
+    "ExecRecord",
+    "StageAudit",
+    "represent",
+    "canonicalize",
+    "safety_gate",
+    "commit",
+    "execute_ground",
+    "verify_stage",
+    "integrate",
+    "run_cycle",
+    "Adapter",
+    "MaterializationContext",
+    "SelfLicensingError",
+]
