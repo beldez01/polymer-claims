@@ -1,4 +1,4 @@
-from polymer_grammar import GenerationMode, Provenance, Status
+from polymer_grammar import FDRLedger, GenerationMode, Provenance, Status
 
 from polymer_protocol.commit import commit
 from polymer_protocol.corpus import Corpus
@@ -57,3 +57,23 @@ def test_commit_skips_non_pending_claim_with_plan(empty_ledger):
     c = make_claim("a", status=Status.CONJECTURED, plan=make_plan(0.01, 0.05))
     out = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
     assert out.by_id()["a"].provenance is None
+
+
+def test_commit_only_locks_listed_claims():
+    a = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    b = make_claim("b", status=Status.PENDING, plan=make_plan(0.02, 0.05))
+    corp = Corpus(claims=(a, b), fdr_ledger=FDRLedger(target_fdr=0.05))
+    out = commit(corp, only=frozenset({"a"}))
+    locked = {c.id for c in out.claims
+              if c.provenance is not None and c.provenance.preregistration_hash is not None}
+    assert locked == {"a"}
+
+
+def test_commit_none_locks_all_eligible():
+    a = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    b = make_claim("b", status=Status.PENDING, plan=make_plan(0.02, 0.05))
+    corp = Corpus(claims=(a, b), fdr_ledger=FDRLedger(target_fdr=0.05))
+    out = commit(corp)  # only=None -> pre-#3 behavior
+    locked = {c.id for c in out.claims
+              if c.provenance is not None and c.provenance.preregistration_hash is not None}
+    assert locked == {"a", "b"}
