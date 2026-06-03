@@ -89,13 +89,26 @@ conclusion, and skip claims this operator generated), emit a `CONJECTURED` rival
 `Direction` value other than `C`'s own** (`Direction` ∈ {POSITIVE, NEGATIVE, NULL}; a POSITIVE claim
 yields NEGATIVE and NULL rivals — the complete rival set). Each rival:
 - same `subject`, `pattern`, `leaves` as `C`; `status = CONJECTURED`; `evaluation_plan = None`;
-- `conclusion` = `C.conclusion` with `direction` swapped and a `NeighborEdge(kind=INCOMPATIBLE_WITH,
-  target=C.conclusion.content_hash)` added to its neighborhood (records the rivalry; once both
-  license, the grammar's `derived_rebut_edges` can wire mutual rebut — full mutual wiring needs the
-  source to also declare incompatibility, a #4b/exogenous concern, noted);
+- `conclusion` = `C.conclusion` with `direction` swapped and an **empty neighborhood** (no
+  `incompatible_with` edge — see the belief-neutrality note below);
 - `provenance` = generated (§3.4); deterministic id (§3.6).
 
-This concretely populates the rival pool that L2 `rival_set_closure` needs.
+This seeds the corpus with the direction-flipped alternative-hypothesis candidates (the "what if the
+opposite/null holds?" claims) at every concluded claim — a generation pressure that populates the
+rival *pool*. The *linkage* that marks them as rivals of `C` is deferred (next note).
+
+> **Why no `incompatible_with` edge — the same belief-neutrality wall as `frontier_attack`.** It is
+> tempting to mark the rival `incompatible_with` `C`. But INTEGRATE's `restore_consistency` detects
+> conflicts via `_conflicts`, which reads `INCOMPATIBLE_WITH` neighborhoods **status-blind** (NOT
+> LICENSED-gated — `revision.py` documents this explicitly, in contrast to `derived_rebut_edges`).
+> So a fresh `CONJECTURED` rival carrying that edge **immediately conflicts** with `C` in the
+> entrenchment contest; two strengthless claims are entrenchment-equal ⇒ underdetermined ⇒ **both
+> retracted**, emptying the corpus. The general rule (the deep lesson of #4a): **in this spine a
+> `CONJECTURED` claim cannot encode *any* incompatibility — neither a defeat edge (consumed by
+> `effective_defeats`) nor an `incompatible_with` neighbor (consumed by `_conflicts`) — without
+> changing beliefs.** The only belief-neutral move is an **isolated** node. The rivalry linkage (and
+> the frontier-defense defeat) must be **derived after the claim licenses**, via a future
+> provisional/activate-on-license mechanism (#4b). #4a ships the candidates, not the links.
 
 **`frontier_attack`** — for each frontier node `F` (an unresolved-attack claim id), find its
 **claim-sourced attackers** `B` (defeat edges with `target == F` whose `source` is a real claim id —
@@ -232,13 +245,19 @@ All protocol-side; **no grammar changes**.
 ## 7. Testing
 
 **`proposers.py`** — `rival_generation` emits the correct other-direction rivals for a POSITIVE /
-NEGATIVE / NULL conclusion, each marked `incompatible_with` the source; skips claims without a
-conclusion; skips its own prior outputs. `frontier_attack` emits a `CONJECTURED` defense seed `D`
-(no conclusion, **no defeat edge**) for each claim-sourced attacker of a frontier node; skips
-synthetic (`:`-source) attackers; deterministic ids. **Belief-neutrality:** running a proposer over a
-corpus must leave `grounded_extension` of the pre-existing claims unchanged (a `frontier_attack`
-proposal adds an isolated CONJECTURED node and no edge — assert the grounded extension before/after
-is identical).
+NEGATIVE / NULL conclusion, each with an **empty neighborhood** (no `incompatible_with` edge); skips
+claims without a conclusion; skips its own prior outputs. `frontier_attack` emits a `CONJECTURED`
+defense seed `D` (no conclusion, **no defeat edge**) for each claim-sourced attacker of a frontier
+node; skips synthetic (`:`-source) attackers; deterministic ids.
+
+**Belief-neutrality (spine-level — both operators, the load-bearing property).** Running a proposer
+**through `run_cycle`** must leave the corpus's pre-existing claims intact and their grounded
+membership unchanged — *not just* at the operator level. Two tests are required, one per operator:
+run `run_cycle(corpus, proposers=(op,))` over a corpus with a concluded/attacked claim and assert
+the pre-existing claim **survives** (is still present) and its grounded membership is unchanged. This
+must exercise the full cycle including INTEGRATE's `restore_consistency` — the operator-level
+`grounded_extension`-before/after check is necessary but **not sufficient** (it misses the
+status-blind `_conflicts` retraction path that the `incompatible_with` edge tripped).
 
 **`generate.py`** — `compile_to_IR` discards a duplicate-id proposal (`reason="duplicate"`), an
 unresolved-edge proposal (`reason="unresolved-edge"`); admits a valid one. `generate_stage` is a
