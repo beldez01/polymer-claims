@@ -7,9 +7,12 @@ from polymer_grammar import (
 )
 from pydantic import ValidationError
 
+from polymer_grammar import FDRLedger
 from polymer_protocol.corpus import (
     Corpus,
     CycleResult,
+    GenerationRecord,
+    Proposal,
     SelectionDecision,
     SelectionRecord,
     ValueVector,
@@ -68,3 +71,30 @@ def test_selection_record_holds_decisions():
     rec = SelectionRecord(decisions=(d,), cardinality=1)
     assert rec.decisions[0].claim_id == "a"
     assert rec.decisions[0].value.eig == 0.5
+
+
+def test_proposal_holds_claim_and_edges():
+    from polymer_grammar import DefeatEdge, DefeatEdgeKind
+    c = make_claim("x")
+    e = DefeatEdge(source="x", target="y", kind=DefeatEdgeKind.REBUT)
+    p = Proposal(operator_id="op", claim=c, edges=(e,))
+    assert p.operator_id == "op"
+    assert p.claim.id == "x"
+    assert p.edges[0].target == "y"
+
+
+def test_proposal_defaults_no_edges():
+    p = Proposal(operator_id="op", claim=make_claim("x"))
+    assert p.edges == ()
+
+
+def test_generation_record_defaults_empty():
+    r = GenerationRecord()
+    assert r.proposed == 0
+    assert r.admitted == ()
+    assert r.discarded == ()
+
+
+def test_cycle_result_defaults_empty_generation():
+    res = CycleResult(corpus=Corpus(fdr_ledger=FDRLedger(target_fdr=0.05)))
+    assert res.generation == GenerationRecord()
