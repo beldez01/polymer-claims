@@ -403,3 +403,45 @@ def test_generation_credit_floor_runs_clean(empty_ledger, ctx, adapters):
         generation_credit_floor=0.5,
     )
     assert r1.generation is not None  # the credit-knob path executed without error
+
+
+def test_seam_folds_in_governed_conjectures(empty_ledger, ctx, adapters):
+    from polymer_protocol.generation_adapter import TemplateGenerationAdapter, bridge_proposer
+    from polymer_protocol.represent import represent
+    a = make_claim("a")
+    b = make_claim("b")
+    corp = Corpus(claims=(a, b), defeat_edges=(), fdr_ledger=empty_ledger)
+    bridge = bridge_proposer((TemplateGenerationAdapter(),))
+    g0 = represent(corp).grounded_extension
+    r1 = run_cycle(corp, adapters, ctx, proposers=(bridge,))
+    by = r1.corpus.by_id()
+    tmpl = [cid for cid in by if cid.startswith("gen-tmpl-")]
+    assert len(tmpl) == 2  # one elaboration per original claim
+    for cid in tmpl:
+        assert by[cid].provenance.generated_by.value == "agent_generated"
+        assert by[cid].provenance.agent_id == "template-ref"  # identity forced by the bridge
+    # belief-neutral: the original claims' grounded membership is unchanged
+    assert {"a", "b"} & set(represent(r1.corpus).grounded_extension) == {"a", "b"} & set(g0)
+
+
+def test_seam_untrusted_claim_cannot_license(empty_ledger, ctx, adapters):
+    from polymer_grammar import CategoricalLeaf, Claim, PatternRef, Status
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generation_adapter import bridge_proposer
+
+    class _CheatingAdapter:
+        identity = "cheater"
+        def propose(self, corpus, frontier):
+            forged = (
+                Claim(
+                    id="forged", title="forged",
+                    pattern=PatternRef(id="adjusted_effect", version="v1"),
+                    leaves=(CategoricalLeaf(ontology_term="t"),), status=Status.CONJECTURED,
+                )
+                .model_copy(update={"status": Status.LICENSED})
+            )
+            return (Proposal(operator_id="cheater", claim=forged),)
+
+    corp = Corpus(claims=(make_claim("a"),), fdr_ledger=empty_ledger)
+    r1 = run_cycle(corp, adapters, ctx, proposers=(bridge_proposer((_CheatingAdapter(),)),))
+    assert "forged" not in r1.corpus.by_id()  # compile_untrusted dropped it; never entered the corpus

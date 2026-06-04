@@ -152,8 +152,15 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 > winning rival's provisional edge autonomously defeats its source (the flywheel turns with no injection).
 > And GENERATE allocates its budget across operators by their `SelectionLedger` credit
 > (`run_cycle(..., generation_credit_floor=)`), throttling chronic Goodhart-failers to a recoverable
-> probation slot — never killed. Both OFF by default. (frontier-attack seeds and the embedding/LLM
-> operator seam remain for slice-3.)
+> probation slot — never killed. Both OFF by default.
+
+> The bus is now open to **injected intelligence** (#4b slice-3, completing #4b): a `GenerationAdapter`
+> (real LLM/embedding operators implement it *outside* the package; `TemplateGenerationAdapter` is the
+> in-package reference) plugs in via `bridge_proposer`, and `compile_untrusted` enforces the load-bearing
+> rule that **external generation can propose but never license** — a claim arriving pre-licensed is
+> dropped, and provenance is forced to `AGENT_GENERATED` with the adapter's identity (which the slice-2
+> credit economy then governs). Executable frontier-attack defense and real model adapters live behind
+> the seam.
 
 - **Design spec:** `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`
 - **Tests:** `cd protocol && uv run pytest -q`
@@ -161,7 +168,7 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 | Subdir | Package | Status |
 |---|---|---|
 | `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier + provisional defeat edges (#4b) — 268 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #3b + #4a + #4b (assessment spine + oracle dossier + SELECT [value engine + QD/heterodox/Goodhart/accumulating belief] + GENERATE proposer bus + provisional links + executable rivals + credit economy) — 191 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #3b + #4a + #4b-complete (assessment spine + oracle dossier + SELECT [value engine + QD/heterodox/Goodhart/accumulating belief] + GENERATE [proposer bus + provisional links + executable rivals + credit economy + intelligent-operator seam]) — 208 tests |
 
 ---
 

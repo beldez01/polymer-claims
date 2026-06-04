@@ -32,6 +32,12 @@ from .cost import CostModel, CostVector, CostWeights, aggregate_cost
 from .cycle import run_cycle
 from .execute import execute_ground
 from .generate import Proposer, compile_to_IR, generate_stage
+from .generation_adapter import (
+    GenerationAdapter,
+    TemplateGenerationAdapter,
+    bridge_proposer,
+    compile_untrusted,
+)
 from .integrate import integrate
 from .ledger import (
     ClaimOutcome,
@@ -96,6 +102,10 @@ __all__ = [
     "Proposal",
     "GenerationRecord",
     "DiscardEntry",
+    "GenerationAdapter",
+    "TemplateGenerationAdapter",
+    "bridge_proposer",
+    "compile_untrusted",
     "rival_generation",
     "frontier_attack",
     "mirror_criterion",
