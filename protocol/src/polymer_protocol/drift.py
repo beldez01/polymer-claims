@@ -8,7 +8,7 @@ separate opt-in `reopen_drifted` action. Daemon state lives in the record, never
 """
 from __future__ import annotations
 
-from polymer_grammar import Claim, MaterializationContext, Status
+from polymer_grammar import Claim, MaterializationContext, PendingReason, Status
 
 from .base import _Model
 from .corpus import Corpus
@@ -68,3 +68,30 @@ def drift_pass(
         )
     findings.sort(key=lambda f: f.claim_id)
     return corpus, DriftRecord(current=current, examined=examined, drifted=tuple(findings))
+
+
+def reopen_drifted(
+    corpus: Corpus, record: DriftRecord, *, require_plan: bool = True
+) -> Corpus:
+    """Re-open the drifted claims named in `record` to PENDING (the opt-in action `drift_pass`
+    never performs itself). With `require_plan=True` (default) only re-executable findings are
+    re-opened — a planless claim re-opened to PENDING could never self-relicense, so it would
+    strand. Pure: returns a new Corpus; findings for absent claim ids are silently skipped."""
+    targets = {f.claim_id for f in record.drifted if (f.re_executable or not require_plan)}
+    if not targets:
+        return corpus
+    new_claims = tuple(
+        c.model_copy(
+            update={
+                "status": Status.PENDING,
+                "licensing": None,
+                "pending_reason": PendingReason.MATERIALIZATION_DRIFTED,
+            }
+        )
+        if c.id in targets
+        else c
+        for c in corpus.claims
+    )
+    if new_claims == corpus.claims:
+        return corpus
+    return corpus.model_copy(update={"claims": new_claims})
