@@ -11,7 +11,7 @@ from polymer_grammar import Adapter, MaterializationContext, SelfLicensingError
 # grammar oracle types a run_cycle caller builds to populate the registry
 from polymer_grammar import ApplicabilityDomain, OracleDossier, ValidationTier
 
-from .belief import Beta, expected_information_gain, prior_belief
+from .belief import Beta, accumulated_belief, expected_information_gain, prior_belief
 from .canonicalize import canonicalize
 from .commit import commit
 from .corpus import (
@@ -32,11 +32,20 @@ from .cycle import run_cycle
 from .execute import execute_ground
 from .generate import compile_to_IR, generate_stage
 from .integrate import integrate
+from .ledger import (
+    ClaimOutcome,
+    ExecutedOutcome,
+    OperatorCredit,
+    SelectionLedger,
+    credit_factor,
+    operator_of,
+    update_ledger,
+)
 from .oracle import OracleRegistry, oracle_cap
 from .proposers import frontier_attack, rival_generation
 from .represent import represent
 from .safety import safety_gate
-from .select import ValueWeights, select_stage
+from .select import ValueWeights, cell_of, select_stage
 from .stakes import dependency_cone, stakes
 from .verify import verify_stage
 
@@ -86,4 +95,13 @@ __all__ = [
     "DiscardEntry",
     "rival_generation",
     "frontier_attack",
+    "SelectionLedger",
+    "ClaimOutcome",
+    "OperatorCredit",
+    "ExecutedOutcome",
+    "operator_of",
+    "credit_factor",
+    "update_ledger",
+    "accumulated_belief",
+    "cell_of",
 ]

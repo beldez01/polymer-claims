@@ -91,3 +91,10 @@ def test_update_ledger_deterministic():
     out = (ExecutedOutcome(claim_id="b", operator_id="op", eig=0.9, licensed=True, rejected=False),
            ExecutedOutcome(claim_id="a", operator_id="op2", eig=0.9, licensed=True, rejected=False))
     assert update_ledger(SelectionLedger(), out) == update_ledger(SelectionLedger(), out)
+
+
+def test_public_exports():
+    import polymer_protocol as p
+    for name in ["SelectionLedger", "ClaimOutcome", "OperatorCredit", "ExecutedOutcome",
+                 "operator_of", "credit_factor", "update_ledger", "accumulated_belief", "cell_of"]:
+        assert hasattr(p, name), name
