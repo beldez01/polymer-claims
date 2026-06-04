@@ -176,3 +176,35 @@ def test_default_generation_is_noop(empty_ledger, ctx, adapters):
     result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
     assert result.generation.proposed == 0
     assert result.corpus.by_id()["a"].status == Status.LICENSED  # #3a path unaffected
+
+
+def test_ledger_threads_and_accumulates(empty_ledger, ctx, adapters):
+    # a satisfied claim licenses -> its ClaimOutcome accrues a success in the returned ledger
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
+    o = result.ledger.outcome("a")
+    assert o is not None and o.successes == 1
+
+
+def test_ledger_default_is_backcompat(empty_ledger, ctx, adapters):
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
+    # default reserve/cell-cap OFF -> claim still licenses exactly as #3a
+    assert result.corpus.by_id()["a"].status == Status.LICENSED
+
+
+def test_rejected_claim_records_failure(empty_ledger, ctx, adapters):
+    # value 0.99 vs threshold 0.05 (LT) -> NOT satisfied -> REFUTED -> REJECTED -> a failure outcome
+    c = make_claim("miss", status=Status.PENDING, plan=make_plan(0.99, 0.05))
+    result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
+    o = result.ledger.outcome("miss")
+    assert o is not None and o.failures == 1
+
+
+def test_ledger_threads_across_two_cycles(empty_ledger, ctx, adapters):
+    # the returned ledger can be fed into the next run_cycle
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    r1 = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
+    r2 = run_cycle(r1.corpus, adapters, ctx, ledger=r1.ledger)
+    # a once-licensed claim is terminal (not re-executed) -> its success count is unchanged at 1
+    assert r2.ledger.outcome("a").successes == 1

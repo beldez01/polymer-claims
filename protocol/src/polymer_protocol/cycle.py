@@ -20,6 +20,7 @@ from .cost import CostModel, CostWeights
 from .execute import execute_ground
 from .generate import Proposer, generate_stage
 from .integrate import integrate
+from .ledger import ExecutedOutcome, SelectionLedger, operator_of, update_ledger
 from .oracle import OracleRegistry
 from .represent import represent
 from .safety import safety_gate
@@ -47,8 +48,12 @@ def run_cycle(
     proposers: tuple[Proposer, ...] = (),
     injected: tuple[Claim, ...] = (),
     generation_cap: int | None = None,
+    ledger: SelectionLedger | None = None,
+    reserve_fraction: float = 0.0,
+    cell_cap_fraction: float = 1.0,
 ) -> CycleResult:
     audit: list[StageAudit] = []
+    led = ledger if ledger is not None else SelectionLedger()
 
     scaffolding = represent(corpus)
     audit.append(
@@ -89,6 +94,7 @@ def run_cycle(
     corpus, selection = select_stage(
         corpus, cost_model=cost_model or CostModel(), budget=budget,
         value_weights=value_weights, cost_weights=cost_weights,
+        ledger=led, reserve_fraction=reserve_fraction, cell_cap_fraction=cell_cap_fraction,
     )
     n_selected = sum(1 for d in selection.decisions if d.selected)
     audit.append(StageAudit(stage="select_stage",
@@ -112,6 +118,20 @@ def run_cycle(
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
     audit.append(StageAudit(stage="verify_stage", note=f"{n_licensed} licensed", count=n_licensed))
 
+    after = corpus.by_id()
+    eig_by_id = {d.claim_id: d.value.eig for d in selection.decisions}
+    outcomes = tuple(
+        ExecutedOutcome(
+            claim_id=cid,
+            operator_id=operator_of(after[cid]),
+            eig=eig_by_id.get(cid, 0.0),
+            licensed=after[cid].status == Status.LICENSED,
+            rejected=after[cid].status == Status.REJECTED,
+        )
+        for cid in sorted(executed_ids) if cid in after
+    )
+    led = update_ledger(led, outcomes)
+
     corpus, skipped = integrate(corpus, scaffolding, records)
     n_added = len(records) - len(skipped)
     audit.append(
@@ -134,4 +154,5 @@ def run_cycle(
         audit=tuple(audit),
         selection=selection,
         generation=generation,
+        ledger=led,
     )
