@@ -11,6 +11,7 @@ from polymer_grammar import Adapter, MaterializationContext, SelfLicensingError
 # grammar oracle types a run_cycle caller builds to populate the registry
 from polymer_grammar import ApplicabilityDomain, OracleDossier, ValidationTier
 
+from .allocate import CREDIT_FLOOR_DEFAULT, allocate_subcaps
 from .belief import Beta, accumulated_belief, expected_information_gain, prior_belief
 from .canonicalize import canonicalize
 from .commit import commit
@@ -42,6 +43,7 @@ from .ledger import (
     update_ledger,
 )
 from .oracle import OracleRegistry, oracle_cap
+from .plan_synthesis import mirror_criterion, transplant_plan
 from .proposers import frontier_attack, rival_generation
 from .represent import represent
 from .safety import safety_gate
@@ -96,6 +98,10 @@ __all__ = [
     "DiscardEntry",
     "rival_generation",
     "frontier_attack",
+    "mirror_criterion",
+    "transplant_plan",
+    "allocate_subcaps",
+    "CREDIT_FLOOR_DEFAULT",
     "SelectionLedger",
     "ClaimOutcome",
     "OperatorCredit",

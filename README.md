@@ -146,13 +146,22 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 > is retracted while still conjectured. (The pure operators' no-plan seeds stay dormant until they gain a
 > plan; executable-generation is deferred.)
 
+> GENERATE is now **self-driving** (#4b slice-2): a rival of a *planned* claim transplants the source's
+> compute graph with a direction-**mirrored** criterion (`mirror_criterion`/`transplant_plan`), so the
+> rival is a real SELECT candidate — running it adjudicates source-vs-rival on the same data, and a
+> winning rival's provisional edge autonomously defeats its source (the flywheel turns with no injection).
+> And GENERATE allocates its budget across operators by their `SelectionLedger` credit
+> (`run_cycle(..., generation_credit_floor=)`), throttling chronic Goodhart-failers to a recoverable
+> probation slot — never killed. Both OFF by default. (frontier-attack seeds and the embedding/LLM
+> operator seam remain for slice-3.)
+
 - **Design spec:** `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`
 - **Tests:** `cd protocol && uv run pytest -q`
 
 | Subdir | Package | Status |
 |---|---|---|
 | `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier + provisional defeat edges (#4b) — 268 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #3b + #4a + #4b (assessment spine + oracle dossier + SELECT [value engine + QD/heterodox/Goodhart/accumulating belief] + GENERATE proposer bus + provisional links) — 169 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #3b + #4a + #4b (assessment spine + oracle dossier + SELECT [value engine + QD/heterodox/Goodhart/accumulating belief] + GENERATE proposer bus + provisional links + executable rivals + credit economy) — 191 tests |
 
 ---
 
