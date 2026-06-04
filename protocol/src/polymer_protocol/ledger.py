@@ -14,7 +14,7 @@ from polymer_grammar import Claim, GenerationMode
 from .base import _Model
 
 CREDIT_A0 = 1.0
-HIGH_EIG = 0.5
+HIGH_EIG = 0.2  # calibrated to the EIG scale (max ~0.278 at the uniform Beta(1,1) prior)
 
 
 class ClaimOutcome(_Model):

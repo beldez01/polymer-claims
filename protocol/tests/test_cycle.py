@@ -1,8 +1,9 @@
-from polymer_grammar import Status
+from polymer_grammar import GenerationMode, Provenance, Status
 
 from polymer_protocol.corpus import Corpus
 from polymer_protocol.cost import CostModel, CostVector, CostWeights
 from polymer_protocol.cycle import run_cycle
+from polymer_protocol.ledger import credit_factor
 from polymer_protocol.proposers import frontier_attack, rival_generation
 from tests.conftest import make_claim, make_plan
 
@@ -208,3 +209,17 @@ def test_ledger_threads_across_two_cycles(empty_ledger, ctx, adapters):
     r2 = run_cycle(r1.corpus, adapters, ctx, ledger=r1.ledger)
     # a once-licensed claim is terminal (not re-executed) -> its success count is unchanged at 1
     assert r2.ledger.outcome("a").successes == 1
+
+
+def test_surprise_goodhart_accrues_through_run_cycle(empty_ledger, ctx, adapters):
+    # A high-EIG (strength-None -> max-uncertainty -> EIG ~0.278) claim from operator "bad"
+    # that gets REJECTED must accrue a high-EIG miss against "bad" in the returned ledger,
+    # dropping its credit_factor below 1.0 next cycle. (Before the HIGH_EIG recalibration this
+    # was impossible because eig could never reach the 0.5 threshold.)
+    bad_prov = Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id="bad", search_cardinality=1)
+    # plan value 0.99 vs threshold 0.05 (LT) -> NOT satisfied -> REFUTED -> REJECTED; strength None -> high EIG
+    miss = make_claim("m", status=Status.PENDING, plan=make_plan(0.99, 0.05), provenance=bad_prov)
+    result = run_cycle(Corpus(claims=(miss,), fdr_ledger=empty_ledger), adapters, ctx)
+    cr = result.ledger.credit("bad")
+    assert cr is not None and cr.n_high_eig == 1 and cr.n_grounded == 0  # accrued a high-EIG miss
+    assert credit_factor(result.ledger, "bad") == 0.5  # (0+1)/(1+1) -> discounted next cycle
