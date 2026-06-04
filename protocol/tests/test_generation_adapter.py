@@ -97,3 +97,58 @@ def test_governance_is_preserved():
     raw = _claim("x", governance=gov)
     clean, reason = compile_untrusted(raw, "llm-7", fingerprint="fp")
     assert reason is None and clean.governance == gov
+
+
+def _corpus(claims=()):
+    from polymer_grammar import FDRLedger
+    from polymer_protocol.corpus import Corpus
+    return Corpus(claims=tuple(claims), fdr_ledger=FDRLedger(target_fdr=0.05))
+
+
+class _StubAdapter:
+    def __init__(self, identity, proposals):
+        self.identity = identity
+        self._proposals = proposals
+
+    def propose(self, corpus, frontier):
+        return tuple(self._proposals)
+
+
+def test_bridge_forces_operator_id_to_adapter_identity():
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generation_adapter import bridge_proposer
+    raw = Proposal(operator_id="IMPERSONATING-rival-generation", claim=_claim("x"))
+    proposer = bridge_proposer((_StubAdapter("llm-7", [raw]),))
+    out = proposer(_corpus(), ())
+    assert len(out) == 1 and out[0].operator_id == "llm-7"
+    assert out[0].claim.provenance.agent_id == "llm-7"
+
+
+def test_bridge_drops_rejected_keeps_valid():
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generation_adapter import bridge_proposer
+    good = Proposal(operator_id="x", claim=_claim("good"))
+    bad = Proposal(operator_id="x", claim=_claim("bad", status=Status.REJECTED))
+    proposer = bridge_proposer((_StubAdapter("llm-7", [good, bad]),))
+    out = proposer(_corpus(), ())
+    assert [p.claim.id for p in out] == ["good"]
+
+
+def test_bridge_tags_each_adapter_distinctly():
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generation_adapter import bridge_proposer
+    a = _StubAdapter("emb-A", [Proposal(operator_id="z", claim=_claim("a1"))])
+    b = _StubAdapter("llm-B", [Proposal(operator_id="z", claim=_claim("b1"))])
+    out = bridge_proposer((a, b))(_corpus(), ())
+    tagged = {p.claim.id: p.operator_id for p in out}
+    assert tagged == {"a1": "emb-A", "b1": "llm-B"}
+
+
+def test_bridge_result_is_a_usable_proposer():
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generate import generate_stage
+    from polymer_protocol.generation_adapter import bridge_proposer
+    proposer = bridge_proposer((_StubAdapter("llm-7", [Proposal(operator_id="x", claim=_claim("x"))]),))
+    corp, rec = generate_stage(_corpus(), (), proposers=(proposer,))
+    assert "x" in [c.id for c in corp.claims]
+    assert "x" in rec.admitted

@@ -12,6 +12,7 @@ from typing import Protocol
 from polymer_grammar import Claim, GenerationMode, Provenance, Status
 
 from .corpus import Corpus, Proposal
+from .generate import Proposer, _corpus_fingerprint
 
 _ALLOWED = (Status.CONJECTURED, Status.PENDING)
 
@@ -50,3 +51,22 @@ def compile_untrusted(
         search_cardinality=max(1, declared),
     )
     return claim.model_copy(update={"provenance": forced}), None
+
+
+def bridge_proposer(adapters: tuple[GenerationAdapter, ...]) -> Proposer:
+    """Wrap injected generation adapters onto the bus as one Proposer: force operator_id to
+    each adapter's identity, run compile_untrusted, drop rejected. Plugs into
+    run_cycle(proposers=...). Bridge-internal rejections are dropped (not in GenerationRecord;
+    compile_untrusted is independently unit-tested)."""
+    def _proposer(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
+        fp = _corpus_fingerprint(corpus)
+        out: list[Proposal] = []
+        for a in adapters:
+            for p in a.propose(corpus, frontier):
+                clean, _reason = compile_untrusted(p.claim, a.identity, fingerprint=fp)
+                if clean is None:
+                    continue
+                out.append(Proposal(operator_id=a.identity, claim=clean, edges=p.edges))
+        return tuple(out)
+
+    return _proposer
