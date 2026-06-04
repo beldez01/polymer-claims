@@ -11,10 +11,12 @@ import math
 from polymer_grammar import Claim
 
 from .base import _Model
+from .ledger import SelectionLedger
 
 KAPPA_MIN = 2.0
 KAPPA_MAX = 20.0
 EPS = 1e-6
+SETTLED_CONCENTRATION = 200.0
 
 
 class Beta(_Model):
@@ -54,6 +56,10 @@ def expected_information_gain(belief: Beta) -> float:
     uncertainty reduction. Deterministic fixed-node midpoint quadrature for the
     expectation (spec §3.2)."""
     a, b = belief.alpha, belief.beta
+    if a + b >= SETTLED_CONCENTRATION:
+        # a settled (sharply peaked) belief yields negligible expected information; return 0
+        # analytically AND sidestep the fixed-node quadrature's high-concentration degradation.
+        return 0.0
     mu = a / (a + b)
     # E_theta[H_b(theta)] via midpoint rule on (0,1); endpoints excluded (H_b=0 there
     # and the Beta log-pdf diverges for alpha/beta < 1).
@@ -65,3 +71,13 @@ def expected_information_gain(belief: Beta) -> float:
         expected_cond_entropy += _binary_entropy_bits(t) * math.exp(_beta_log_pdf(t, a, b)) * h
     eig = _binary_entropy_bits(mu) - expected_cond_entropy
     return max(0.0, min(1.0, eig))
+
+
+def accumulated_belief(claim: Claim, ledger: SelectionLedger) -> Beta:
+    """The #3a prior updated by the claim's accumulated execution outcomes (spec §3).
+    Fresh claim (no ledger entry) -> the #3a prior unchanged."""
+    prior = prior_belief(claim)
+    o = ledger.outcome(claim.id)
+    if o is None:
+        return prior
+    return Beta(alpha=prior.alpha + o.successes, beta=prior.beta + o.failures)
