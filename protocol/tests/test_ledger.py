@@ -93,6 +93,11 @@ def test_update_ledger_deterministic():
     assert update_ledger(SelectionLedger(), out) == update_ledger(SelectionLedger(), out)
 
 
+def test_operator_credit_rejects_grounded_exceeding_high_eig():
+    with pytest.raises(Exception):
+        OperatorCredit(operator_id="x", n_high_eig=2, n_grounded=10)
+
+
 def test_public_exports():
     import polymer_protocol as p
     for name in ["SelectionLedger", "ClaimOutcome", "OperatorCredit", "ExecutedOutcome",

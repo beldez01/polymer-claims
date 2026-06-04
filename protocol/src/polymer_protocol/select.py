@@ -31,10 +31,6 @@ class ValueWeights(_Model):
     stakes: float = 1.0
 
 
-RESERVE_FRACTION = 0.2
-CELL_CAP_FRACTION = 0.5
-
-
 def cell_of(claim: Claim) -> str:
     """A structural QD niche key: (pattern id, subject kind). No embeddings (spec §5)."""
     kind = claim.subject.kind if claim.subject is not None else "none"
