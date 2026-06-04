@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from polymer_grammar import Claim, GenerationMode, Provenance, Status
+from polymer_grammar import CategoricalLeaf, Claim, GenerationMode, Provenance, Status
 
 from .corpus import Corpus, Proposal
-from .generate import Proposer, _corpus_fingerprint
+from .generate import Proposer, _corpus_fingerprint, _gen_id
 
 _ALLOWED = (Status.CONJECTURED, Status.PENDING)
 
@@ -70,3 +70,28 @@ def bridge_proposer(adapters: tuple[GenerationAdapter, ...]) -> Proposer:
         return tuple(out)
 
     return _proposer
+
+
+class TemplateGenerationAdapter:
+    """Deterministic reference GenerationAdapter (the IdentityAdapter analog for generation):
+    one CONJECTURED 'elaboration' conjecture per corpus claim (sorted by id, content-addressed).
+    Emits no provenance and a placeholder operator_id so the bridge's forcing path is exercised;
+    skips its own gen-tmpl-* outputs so the corpus converges. Ships no intelligence."""
+
+    identity = "template-ref"
+
+    def propose(self, corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
+        props: list[Proposal] = []
+        for c in sorted(corpus.claims, key=lambda c: c.id):
+            if c.id.startswith("gen-tmpl-"):
+                continue  # convergence guard: don't re-elaborate own outputs
+            cid = _gen_id("tmpl", c.id)
+            claim = Claim(
+                id=cid,
+                title=f"elaboration of {c.id}",
+                pattern=c.pattern,
+                leaves=(CategoricalLeaf(ontology_term=f"template-elaboration-{c.id}"),),
+                status=Status.CONJECTURED,
+            )
+            props.append(Proposal(operator_id="UNSET", claim=claim))
+        return tuple(props)

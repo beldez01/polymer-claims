@@ -152,3 +152,37 @@ def test_bridge_result_is_a_usable_proposer():
     corp, rec = generate_stage(_corpus(), (), proposers=(proposer,))
     assert "x" in [c.id for c in corp.claims]
     assert "x" in rec.admitted
+
+
+def test_template_adapter_proposes_one_conjecture_per_claim():
+    from polymer_protocol.generation_adapter import TemplateGenerationAdapter
+    corp = _corpus([_claim("a"), _claim("b")])
+    props = TemplateGenerationAdapter().propose(corp, ())
+    assert len(props) == 2
+    for p in props:
+        assert p.claim.status == Status.CONJECTURED
+        assert p.claim.id.startswith("gen-tmpl-")
+        assert p.claim.conclusion is None and p.edges == ()
+
+
+def test_template_adapter_is_deterministic():
+    from polymer_protocol.generation_adapter import TemplateGenerationAdapter
+    corp = _corpus([_claim("b"), _claim("a")])
+    a1 = TemplateGenerationAdapter().propose(corp, ())
+    a2 = TemplateGenerationAdapter().propose(corp, ())
+    assert [p.claim.id for p in a1] == [p.claim.id for p in a2]
+
+
+def test_template_adapter_skips_its_own_outputs():
+    from polymer_protocol.generation_adapter import TemplateGenerationAdapter
+    adapter = TemplateGenerationAdapter()
+    corp = _corpus([_claim("a")])
+    first = adapter.propose(corp, ())
+    grown = _corpus([_claim("a"), first[0].claim])
+    second = adapter.propose(grown, ())
+    assert [p.claim.id for p in second] == [p.claim.id for p in first]  # only "a" elaborated, converges
+
+
+def test_template_adapter_identity():
+    from polymer_protocol.generation_adapter import TemplateGenerationAdapter
+    assert TemplateGenerationAdapter().identity == "template-ref"
