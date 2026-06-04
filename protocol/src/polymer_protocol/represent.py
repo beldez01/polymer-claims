@@ -7,7 +7,7 @@ deferred (spec §6.1) — SELECT (#3) and the daemons (#5).
 """
 from __future__ import annotations
 
-from polymer_grammar import effective_defeats, grounded_extension
+from polymer_grammar import Status, effective_defeats, grounded_extension
 
 from .corpus import Corpus, CycleScaffolding
 
@@ -16,8 +16,9 @@ def represent(corpus: Corpus) -> CycleScaffolding:
     claim_ids = [c.id for c in corpus.claims]
     id_set = set(claim_ids)
     strength = {c.id: c.strength for c in corpus.claims}
-    grounded = grounded_extension(claim_ids, corpus.defeat_edges, strength)
-    defeats = effective_defeats(corpus.defeat_edges, strength)
+    licensed_ids = frozenset(c.id for c in corpus.claims if c.status == Status.LICENSED)
+    grounded = grounded_extension(claim_ids, corpus.defeat_edges, strength, licensed_ids)
+    defeats = effective_defeats(corpus.defeat_edges, strength, licensed_ids)
     frontier = {
         tgt for _src, tgt in defeats if tgt in id_set and tgt not in grounded
     }

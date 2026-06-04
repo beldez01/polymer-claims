@@ -1,4 +1,4 @@
-from polymer_grammar import DefeatEdge, DefeatEdgeKind, StrengthVector
+from polymer_grammar import DefeatEdge, DefeatEdgeKind, FDRLedger, Status, StrengthVector
 
 from polymer_protocol.corpus import Corpus
 from polymer_protocol.represent import represent
@@ -57,3 +57,30 @@ def test_synthetic_source_does_not_appear_in_outputs(empty_ledger):
     assert "refutation:M1" not in scaffolding.frontier
     # a is attacked by a synthetic source with no defender -> a is OUT and on the frontier
     assert scaffolding.frontier == ("a",)
+
+
+def test_represent_activates_provisional_edge_from_licensed_source():
+    d = make_claim("d", status=Status.LICENSED)
+    a = make_claim("a")  # CONJECTURED
+    b = make_claim("b")  # CONJECTURED
+    edges = (
+        DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT, provisional=True),
+    )
+    corp = Corpus(claims=(a, b, d), defeat_edges=edges, fdr_ledger=FDRLedger(target_fdr=0.05))
+    scaf = represent(corp)
+    assert "a" in scaf.grounded_extension and "b" not in scaf.grounded_extension
+
+
+def test_represent_provisional_inert_when_source_conjectured():
+    d = make_claim("d")  # CONJECTURED -> provisional inert
+    a = make_claim("a")
+    b = make_claim("b")
+    edges = (
+        DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT, provisional=True),
+    )
+    corp = Corpus(claims=(a, b, d), defeat_edges=edges, fdr_ledger=FDRLedger(target_fdr=0.05))
+    scaf = represent(corp)
+    assert "a" not in scaf.grounded_extension  # b defeats a (provisional d->b inert)
+    assert "a" in scaf.frontier

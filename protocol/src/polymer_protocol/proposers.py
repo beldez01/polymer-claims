@@ -1,15 +1,18 @@
 """Pure endogenous proposers for the GENERATE bus (spec §3.2).
 
 rival_generation enriches the rival pool L2 rival_set_closure needs; frontier_attack plants
-belief-neutral candidate-defense SEED claims (no defeat edge) at unresolved-frontier nodes —
-the D ⊣ B defeat is derived later, once D is executed and LICENSED. Both deterministic, both
-skip their own prior outputs so the corpus converges. Spec §3.2/§3.6.
+belief-neutral candidate-defense SEED claims at unresolved-frontier nodes. Both operators now
+emit a provisional rebut DefeatEdge alongside each generated claim. The edge is inert (activate-
+on-license) while the source claim is CONJECTURED, so belief-neutrality and corpus convergence
+are preserved. Both deterministic, both skip their own prior outputs. Spec §3.2/§3.6.
 """
 from __future__ import annotations
 
 from polymer_grammar import (
     CategoricalLeaf,
     Claim,
+    DefeatEdge,
+    DefeatEdgeKind,
     Direction,
     GenerationMode,
     Provenance,
@@ -49,8 +52,9 @@ def rival_generation(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposa
             if d == c.conclusion.direction:
                 continue
             rival_concl = c.conclusion.model_copy(update={"direction": d, "neighborhood": ()})
+            rid = _gen_id("rival", c.id, d.value)
             rival = Claim(
-                id=_gen_id("rival", c.id, d.value),
+                id=rid,
                 title=f"rival({d.value}) of {c.id}",
                 pattern=c.pattern,
                 leaves=c.leaves,
@@ -59,7 +63,8 @@ def rival_generation(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposa
                 conclusion=rival_concl,
                 provenance=_generated_by(corpus, RIVAL_OP),
             )
-            proposals.append(Proposal(operator_id=RIVAL_OP, claim=rival))
+            edge = DefeatEdge(source=rid, target=c.id, kind=DefeatEdgeKind.REBUT, provisional=True)
+            proposals.append(Proposal(operator_id=RIVAL_OP, claim=rival, edges=(edge,)))
     return tuple(proposals)
 
 
@@ -75,13 +80,15 @@ def frontier_attack(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal
         for b in attackers_of.get(f, []):
             if b not in by_id:
                 continue
+            did = _gen_id("fa", f, b)
             d_claim = Claim(
-                id=_gen_id("fa", f, b),
+                id=did,
                 title=f"challenge to {b}",
                 pattern=by_id[b].pattern,
                 leaves=(CategoricalLeaf(ontology_term=f"frontier-attack-{b}"),),
                 status=Status.CONJECTURED,
                 provenance=_generated_by(corpus, FRONTIER_OP),
             )
-            proposals.append(Proposal(operator_id=FRONTIER_OP, claim=d_claim))  # NO edge
+            edge = DefeatEdge(source=did, target=b, kind=DefeatEdgeKind.REBUT, provisional=True)
+            proposals.append(Proposal(operator_id=FRONTIER_OP, claim=d_claim, edges=(edge,)))
     return tuple(proposals)

@@ -161,7 +161,8 @@ def _in_set(claims: tuple[Claim, ...], edges: tuple[DefeatEdge, ...]) -> frozens
     resolved by retraction, and only LICENSED claims contribute material-incompatibility
     rebut edges to the grounded recompute. Don't "fix" it into one rule."""
     all_edges = tuple(edges) + derived_rebut_edges(claims)
-    return grounded_extension([c.id for c in claims], all_edges, _strength_map(claims))
+    licensed = frozenset(c.id for c in claims if c.status == Status.LICENSED)
+    return grounded_extension([c.id for c in claims], all_edges, _strength_map(claims), licensed)
 
 
 def _drop_edges_incident_to(

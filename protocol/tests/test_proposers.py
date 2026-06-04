@@ -66,15 +66,18 @@ def _corpus_e(claims, edges):
                   fdr_ledger=FDRLedger(target_fdr=0.05))
 
 
-def test_frontier_attack_emits_seed_without_edge():
+def test_frontier_attack_emits_provisional_rebut_edge():
+    from polymer_grammar import DefeatEdgeKind
     a, b = make_claim("a"), make_claim("b")
     edges = (DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),)
     props = frontier_attack(_corpus_e([a, b], edges), frontier=("a",))
     assert len(props) == 1
     p = props[0]
-    assert p.claim.status == Status.CONJECTURED
-    assert p.claim.conclusion is None
-    assert p.edges == ()                      # NO edge — belief-neutral
+    assert p.claim.status == Status.CONJECTURED and p.claim.conclusion is None
+    assert len(p.edges) == 1
+    e = p.edges[0]
+    assert e.source == p.claim.id and e.target == "b"
+    assert e.kind == DefeatEdgeKind.REBUT and e.provisional is True
 
 
 def test_frontier_attack_is_belief_neutral():
@@ -104,3 +107,15 @@ def test_frontier_attack_deterministic_ids():
     edges = (DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),)
     corp = _corpus_e([a, b], edges)
     assert frontier_attack(corp, ("a",))[0].claim.id == frontier_attack(corp, ("a",))[0].claim.id
+
+
+def test_rival_emits_provisional_rebut_edge_to_source():
+    from polymer_grammar import DefeatEdgeKind
+    c = make_claim("c", conclusion=_concl(Direction.POSITIVE))
+    props = rival_generation(_corpus([c]), ())
+    for p in props:
+        assert p.claim.conclusion.neighborhood == ()       # still no incompatible_with
+        assert len(p.edges) == 1
+        e = p.edges[0]
+        assert e.source == p.claim.id and e.target == "c"
+        assert e.kind == DefeatEdgeKind.REBUT and e.provisional is True

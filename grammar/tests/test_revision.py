@@ -7,7 +7,7 @@ from polymer_grammar.pattern import PatternRef
 from polymer_grammar.proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from polymer_grammar.status import PendingReason, Status
 from polymer_grammar.strength import StrengthVector
-from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent, RevisionResult, restore_consistency, expand, contract, revise
+from polymer_grammar.revision import Entrench, compare_entrenchment, entails_closure, corpus_entails, is_consistent, RevisionResult, restore_consistency, expand, contract, revise, _in_set
 from polymer_grammar.defeat import DefeatEdge, DefeatEdgeKind
 
 
@@ -319,3 +319,27 @@ def test_public_api_exports():
         "expand", "contract", "revise",
     ]:
         assert hasattr(pg, name), f"{name} not exported from polymer_grammar"
+
+
+def test_in_set_provisional_inert_when_source_not_licensed():
+    a = _claim("a", status=Status.CONJECTURED)
+    b = _claim("b", status=Status.CONJECTURED)
+    d = _claim("d", status=Status.CONJECTURED)  # NOT licensed
+    edges = (
+        DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT, provisional=True),
+    )
+    in_set = _in_set((a, b, d), edges)
+    assert "a" not in in_set and "b" in in_set  # provisional inert -> b defeats a
+
+
+def test_in_set_honors_provisional_from_licensed_source():
+    a = _claim("a", status=Status.CONJECTURED)
+    b = _claim("b", status=Status.CONJECTURED)
+    d = _claim("d", status=Status.LICENSED)  # licensed source -> provisional active
+    edges = (
+        DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT, provisional=True),
+    )
+    in_set = _in_set((a, b, d), edges)
+    assert "a" in in_set and "b" not in in_set and "d" in in_set
