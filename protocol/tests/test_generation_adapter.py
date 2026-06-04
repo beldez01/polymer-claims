@@ -92,6 +92,22 @@ def test_pending_without_plan_is_rejected():
     assert clean is None and reason == "untrusted-status"
 
 
+def test_pending_with_plan_is_accepted():
+    # the load-bearing positive branch: an untrusted adapter MAY propose an executable
+    # candidate (it still must clear the air-gapped verify to license).
+    from tests.conftest import make_plan
+    raw = _claim(
+        "x", status=Status.PENDING, pending_reason=PendingReason.UNTESTED,
+        evaluation_plan=make_plan(0.01, 0.05),
+    )
+    clean, reason = compile_untrusted(raw, "llm-7", fingerprint="fp")
+    assert reason is None and clean is not None
+    assert clean.status == Status.PENDING
+    assert clean.evaluation_plan is not None
+    assert clean.provenance.generated_by == GenerationMode.AGENT_GENERATED
+    assert clean.provenance.agent_id == "llm-7"
+
+
 def test_governance_is_preserved():
     gov = Governance(hazard_class=HazardClass.DUAL_USE)
     raw = _claim("x", governance=gov)
