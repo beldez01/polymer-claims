@@ -1,12 +1,25 @@
 from polymer_grammar import (
-    DefeatEdge, DefeatEdgeKind, Direction, FDRLedger, Proposition, Status,
+    Comparator,
+    ComputeGraph,
+    DefeatEdge,
+    DefeatEdgeKind,
+    Direction,
+    EvaluationPlan,
+    FDRLedger,
+    MeasurementBasis,
+    OperationNode,
+    PendingReason,
+    ProducedLeafSpec,
+    Proposition,
+    SatisfactionCriterion,
+    Status,
     grounded_extension,
 )
 
 from polymer_protocol.corpus import Corpus
 from polymer_protocol.cycle import run_cycle
 from polymer_protocol.proposers import frontier_attack, rival_generation
-from tests.conftest import make_claim
+from tests.conftest import make_claim, make_plan
 
 
 def _corpus(claims):
@@ -119,3 +132,38 @@ def test_rival_emits_provisional_rebut_edge_to_source():
         e = p.edges[0]
         assert e.source == p.claim.id and e.target == "c"
         assert e.kind == DefeatEdgeKind.REBUT and e.provisional is True
+
+
+def test_rival_of_planned_source_is_executable():
+    plan = make_plan(0.09, 0.05, Comparator.LT)  # source criterion: value < threshold
+    c = make_claim("c", conclusion=_concl(Direction.POSITIVE), plan=plan)
+    props = rival_generation(_corpus([c]), ())
+    assert props  # two rivals (negative, null)
+    for p in props:
+        assert p.claim.status == Status.PENDING
+        assert p.claim.pending_reason == PendingReason.UNTESTED
+        assert p.claim.evaluation_plan is not None
+        assert p.claim.evaluation_plan.graph.content_hash == plan.graph.content_hash  # graph reused verbatim
+        assert p.claim.evaluation_plan.criterion.comparator == Comparator.GE          # LT mirrored -> GE
+        assert len(p.edges) == 1 and p.edges[0].target == "c"
+        assert p.edges[0].provisional is True
+
+
+def test_rival_of_within_tol_source_stays_conjectured():
+    node = OperationNode(
+        id="n0",
+        impl="builtin::const",
+        params=(("value", "0.09"),),
+        produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
+    )
+    plan = EvaluationPlan(
+        graph=ComputeGraph(nodes=(node,), terminal="n0"),
+        criterion=SatisfactionCriterion(comparator=Comparator.WITHIN_TOL, threshold=0.05, tolerance=0.1),
+    )
+    c = make_claim("c", conclusion=_concl(Direction.POSITIVE), plan=plan)
+    props = rival_generation(_corpus([c]), ())
+    assert props
+    for p in props:
+        assert p.claim.status == Status.CONJECTURED
+        assert p.claim.evaluation_plan is None
+        assert len(p.edges) == 1 and p.edges[0].provisional is True

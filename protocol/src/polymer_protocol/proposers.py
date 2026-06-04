@@ -1,10 +1,14 @@
 """Pure endogenous proposers for the GENERATE bus (spec §3.2).
 
-rival_generation enriches the rival pool L2 rival_set_closure needs; frontier_attack plants
-belief-neutral candidate-defense SEED claims at unresolved-frontier nodes. Both operators now
-emit a provisional rebut DefeatEdge alongside each generated claim. The edge is inert (activate-
-on-license) while the source claim is CONJECTURED, so belief-neutrality and corpus convergence
-are preserved. Both deterministic, both skip their own prior outputs. Spec §3.2/§3.6.
+rival_generation enriches the rival pool L2 rival_set_closure needs. When the source claim
+carries a transplantable evaluation_plan, the rival is emitted as PENDING/UNTESTED carrying a
+direction-mirrored (transplanted) plan — making it a real SELECT candidate. Planless sources and
+WITHIN_TOL plans (no mirrorable criterion) fall back to CONJECTURED rivals without a plan.
+frontier_attack plants belief-neutral candidate-defense SEED claims at unresolved-frontier nodes.
+Both operators emit a provisional rebut DefeatEdge alongside each generated claim. The edge is
+inert (activate-on-license) while the source claim is CONJECTURED, so belief-neutrality and
+corpus convergence are preserved. Both deterministic, both skip their own prior outputs. Spec
+§3.2/§3.6.
 """
 from __future__ import annotations
 
@@ -15,12 +19,14 @@ from polymer_grammar import (
     DefeatEdgeKind,
     Direction,
     GenerationMode,
+    PendingReason,
     Provenance,
     Status,
 )
 
 from .corpus import Corpus, Proposal
 from .generate import _corpus_fingerprint, _gen_id
+from .plan_synthesis import transplant_plan
 
 RIVAL_OP = "rival-generation"
 FRONTIER_OP = "frontier-attack"
@@ -53,16 +59,33 @@ def rival_generation(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposa
                 continue
             rival_concl = c.conclusion.model_copy(update={"direction": d, "neighborhood": ()})
             rid = _gen_id("rival", c.id, d.value)
-            rival = Claim(
-                id=rid,
-                title=f"rival({d.value}) of {c.id}",
-                pattern=c.pattern,
-                leaves=c.leaves,
-                status=Status.CONJECTURED,
-                subject=c.subject,
-                conclusion=rival_concl,
-                provenance=_generated_by(corpus, RIVAL_OP),
+            transplanted = (
+                transplant_plan(c.evaluation_plan) if c.evaluation_plan is not None else None
             )
+            if transplanted is not None:
+                rival = Claim(
+                    id=rid,
+                    title=f"rival({d.value}) of {c.id}",
+                    pattern=c.pattern,
+                    leaves=c.leaves,
+                    status=Status.PENDING,
+                    pending_reason=PendingReason.UNTESTED,
+                    subject=c.subject,
+                    conclusion=rival_concl,
+                    evaluation_plan=transplanted,
+                    provenance=_generated_by(corpus, RIVAL_OP),
+                )
+            else:
+                rival = Claim(
+                    id=rid,
+                    title=f"rival({d.value}) of {c.id}",
+                    pattern=c.pattern,
+                    leaves=c.leaves,
+                    status=Status.CONJECTURED,
+                    subject=c.subject,
+                    conclusion=rival_concl,
+                    provenance=_generated_by(corpus, RIVAL_OP),
+                )
             edge = DefeatEdge(source=rid, target=c.id, kind=DefeatEdgeKind.REBUT, provisional=True)
             proposals.append(Proposal(operator_id=RIVAL_OP, claim=rival, edges=(edge,)))
     return tuple(proposals)
