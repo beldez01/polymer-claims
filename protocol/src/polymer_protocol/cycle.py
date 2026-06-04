@@ -55,6 +55,7 @@ def run_cycle(
     ledger: SelectionLedger | None = None,
     reserve_fraction: float = 0.0,
     cell_cap_fraction: float = 1.0,
+    generation_credit_floor: float | None = None,
 ) -> CycleResult:
     audit: list[StageAudit] = []
     led = ledger if ledger is not None else SelectionLedger()
@@ -71,6 +72,7 @@ def run_cycle(
     corpus, generation = generate_stage(
         corpus, scaffolding.frontier,
         proposers=proposers, injected=injected, cap=generation_cap,
+        ledger=led, credit_floor=generation_credit_floor,
     )
     audit.append(StageAudit(stage="generate_stage",
         note=f"{len(generation.admitted)} admitted, {len(generation.discarded)} discarded",

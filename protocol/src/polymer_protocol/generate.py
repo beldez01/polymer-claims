@@ -4,6 +4,12 @@ Runs passed-in proposers (caller order) + exogenous injections through compile_t
 folds survivors into the corpus. Pure Corpus -> (Corpus, GenerationRecord). Proposers are
 the seam where external/LLM proposers plug in later (like the Adapter Protocol). Generated
 claims are CONJECTURED/no-plan -> inert this cycle, first act next cycle. Spec §3.
+
+Credit economy (active when ledger + credit_floor + cap all supplied): calls allocate_subcaps
+to split the global cap across endogenous operators by prior-cycle SelectionLedger credit.
+A proposal whose operator's sub-cap is exhausted is discarded with reason "operator-cap".
+Exogenous/injected proposals are EXEMPT — bound only by the global cap. When any of
+ledger/credit_floor/cap is None the behavior is byte-identical to the flat-cap mode.
 """
 from __future__ import annotations
 
@@ -11,8 +17,10 @@ from collections.abc import Callable
 
 from polymer_grammar import Claim, GenerationMode, Provenance
 
+from .allocate import allocate_subcaps
 from .base import stable_sha
 from .corpus import Corpus, DiscardEntry, GenerationRecord, Proposal
+from .ledger import SelectionLedger
 
 GEN_ID_PREFIX = "gen"
 _ID_HASH_LEN = 16
@@ -62,12 +70,25 @@ def generate_stage(
     proposers: tuple[Proposer, ...] = (),
     injected: tuple[Claim, ...] = (),
     cap: int | None = None,
+    ledger: SelectionLedger | None = None,
+    credit_floor: float | None = None,
 ) -> tuple[Corpus, GenerationRecord]:
     proposals: list[Proposal] = []
     for prop in proposers:
         proposals.extend(prop(corpus, frontier))
     for claim in injected:
         proposals.append(Proposal(operator_id="exogenous", claim=_ensure_provenance(claim)))
+
+    # Credit economy: active only when ledger + credit_floor + cap are all supplied.
+    economy_on = ledger is not None and credit_floor is not None and cap is not None
+    subcaps: dict[str, int] = {}
+    if economy_on:
+        endo_ops: list[str] = []
+        for p in proposals:
+            if p.operator_id != "exogenous" and p.operator_id not in endo_ops:
+                endo_ops.append(p.operator_id)
+        subcaps = allocate_subcaps(tuple(endo_ops), cap, ledger, floor=credit_floor)  # type: ignore[arg-type]
+    op_admitted: dict[str, int] = {}
 
     present_ids = set(corpus.by_id())
     new_claims = list(corpus.claims)
@@ -76,6 +97,14 @@ def generate_stage(
     discarded: list[DiscardEntry] = []
 
     for p in proposals:
+        # Per-operator sub-cap gate (economy mode): reject throttled-operator proposals early
+        # so they do not consume global cap slots. Exogenous proposals are EXEMPT.
+        if economy_on and p.operator_id != "exogenous":
+            if op_admitted.get(p.operator_id, 0) >= subcaps.get(p.operator_id, 0):
+                discarded.append(
+                    DiscardEntry(operator_id=p.operator_id, claim_id=p.claim.id, reason="operator-cap")
+                )
+                continue
         if cap is not None and len(admitted) >= cap:
             discarded.append(DiscardEntry(operator_id=p.operator_id, claim_id=p.claim.id, reason="cap"))
             continue
@@ -87,6 +116,8 @@ def generate_stage(
         new_edges.extend(p.edges)
         present_ids.add(p.claim.id)
         admitted.append(p.claim.id)
+        if p.operator_id != "exogenous":
+            op_admitted[p.operator_id] = op_admitted.get(p.operator_id, 0) + 1
 
     record = GenerationRecord(
         proposed=len(proposals),
