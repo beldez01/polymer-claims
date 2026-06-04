@@ -278,6 +278,14 @@ embeddings). Grammar still imports nothing from protocol; protocol→grammar one
 **This slice (2a + 2b):** executable rivals (plan transplant + mirrored criterion) + the credit
 economy (proportional + floor + probation allocation) wired through `run_cycle`.
 
+**Known coarseness (accepted, not a bug):** `Direction` has three values (`positive/negative/null`), so
+a `positive` source yields a `negative` and a `null` rival — and the transplant gives **both** the same
+mirrored criterion (the mirror is the single logical complement of C's criterion, i.e. "not C", which
+both flipped rivals assert). On execution they reach the same verdict on the same data, so they
+license/refute together; either's provisional edge defeats `C`. A finer per-direction criterion would
+need richer synthesis than a binary-comparator flip — deferred. (Cost: a planned source spends two
+candidate slots on its rivals; harmless, and the credit economy/budget bound it.)
+
 **Deferred (slice-3 / later):** the **intelligent-operator seam** — embedding/LLM proposers as injected
 adapters behind the bus (the only purity-boundary piece); making **frontier_attack seeds** executable
 (needs hypothesis synthesis, not a transplant); overturning an already-LICENSED claim with *new* data
