@@ -97,7 +97,7 @@ untouched. **An empty ledger ⇒ credit 1.0 for all ⇒ density identical to #3a
 - For each executed claim: bump its `ClaimOutcome` (`successes += licensed`, `failures += not
   licensed`).
 - For each executed claim that was **high-EIG** when selected (`decision.value.eig ≥ HIGH_EIG`, v1 =
-  `0.5` — `decision.value.eig` is the *raw* belief-EIG, since the discount is on density not the axis):
+  `0.2` — `decision.value.eig` is the *raw* belief-EIG, since the discount is on density not the axis):
   bump its operator's `OperatorCredit` (`n_high_eig += 1`, `n_grounded += licensed`).
 - Pure `(ledger, …) → ledger`; merges into existing entries by id; deterministic ordering (sorted).
 
@@ -210,7 +210,9 @@ populated and threadable.
 ## 11. Constants (v1 defaults, all named)
 
 `SETTLED_CONCENTRATION = 200.0`, `CREDIT_A0 = 1.0` (optimistic smoothing — untracked operator credit
-= 1.0), `HIGH_EIG = 0.5`, `RESERVE_FRACTION = 0.2`, `CELL_CAP_FRACTION = 0.5`. All module-level named
+= 1.0), `HIGH_EIG = 0.2` (calibrated to the EIG scale — expected_information_gain maxes at ~0.278 at
+the uniform prior, so 0.5 was unreachable and left the accrual loop dead; 0.2 captures the genuinely
+high-uncertainty proposals), `RESERVE_FRACTION = 0.2`, `CELL_CAP_FRACTION = 0.5`. All module-level named
 constants — no magic literals in function bodies. Note `RESERVE_FRACTION`/`CELL_CAP_FRACTION` are the
 **recommended** values (what #3b tests + deployments pass explicitly); the `run_cycle` *defaults* are
 features-off (`0.0` / `1.0`, §7) for exact #3a back-compat.

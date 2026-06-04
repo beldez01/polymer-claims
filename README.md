@@ -113,7 +113,18 @@ embeddings); stakes is the size of its forward dependency cone. The search cardi
 selection is recorded and **tightens VERIFY's significance bar** — a cardinality-scaled
 Benjamini–Hochberg selective-inference correction — as the competed pool grows (identity at
 cardinality 1). Quality-diversity portfolios, a heterodox reserve lane, and cross-cycle
-accumulating belief are the deferred **#3b** slice.
+accumulating belief land in **#3b** (below).
+
+**SELECT #3b** hardens the valve against monoculture and reward-hacking on a threaded
+`SelectionLedger` (`run_cycle(..., ledger=)` in/out — `Corpus` stays grammar-IR-only). Belief now
+*accumulates* per claim across cycles from realized outcomes (with a settled-concentration EIG
+guard); a per-operator **surprise-Goodhart** credit discounts the fill-order priority of proposers
+whose high-EIG claims fail to ground (the Pareto front + belief stay undistorted); a
+**quality-diversity** portfolio spreads the budget across structural cells `(pattern, subject-kind)`
+with per-cell caps; and a **heterodox reserve lane** pursues dominated/contrarian candidates the
+main lane would never pick. The hardening is OFF by default (`reserve_fraction=0.0`,
+`cell_cap_fraction=1.0` → exact #3a back-compat); a deployment turns it on with the recommended
+`0.2`/`0.5`.
 
 > `run_cycle` no longer requires claims to be pre-loaded. The **GENERATE** stage (right after
 > REPRESENT) runs a bus of passed-in proposers plus an exogenous injection port
@@ -134,7 +145,7 @@ accumulating belief are the deferred **#3b** slice.
 | Subdir | Package | Status |
 |---|---|---|
 | `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier — 261 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #4a (assessment spine + oracle dossier + SELECT + GENERATE proposer bus) — 128 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #3b + #4a (assessment spine + oracle dossier + SELECT [value engine + QD/heterodox/Goodhart/accumulating belief] + GENERATE proposer bus) — 156 tests |
 
 ---
 

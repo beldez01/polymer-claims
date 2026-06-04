@@ -1,6 +1,12 @@
 from polymer_grammar import StrengthVector
 
-from polymer_protocol.belief import Beta, expected_information_gain, prior_belief
+from polymer_protocol.belief import (
+    Beta,
+    accumulated_belief,
+    expected_information_gain,
+    prior_belief,
+)
+from polymer_protocol.ledger import ClaimOutcome, SelectionLedger
 from tests.conftest import make_claim
 
 
@@ -60,3 +66,20 @@ def test_eig_is_bounded_and_nonnegative():
 def test_eig_is_deterministic():
     b = Beta(alpha=3.0, beta=7.0)
     assert expected_information_gain(b) == expected_information_gain(b)
+
+
+def test_accumulated_belief_is_prior_for_fresh_claim():
+    c = make_claim("a")  # strength None -> prior Beta(1,1)
+    assert accumulated_belief(c, SelectionLedger()) == Beta(alpha=1.0, beta=1.0)
+
+
+def test_accumulated_belief_adds_outcomes():
+    c = make_claim("a")  # prior Beta(1,1)
+    led = SelectionLedger(outcomes=(ClaimOutcome(claim_id="a", successes=3, failures=2),))
+    b = accumulated_belief(c, led)
+    assert b.alpha == 4.0 and b.beta == 3.0  # 1+3, 1+2
+
+
+def test_eig_settled_concentration_returns_zero():
+    assert expected_information_gain(Beta(alpha=150.0, beta=150.0)) == 0.0  # alpha+beta=300 >= 200
+    assert expected_information_gain(Beta(alpha=50.0, beta=50.0)) >= 0.0    # alpha+beta=100 < 200, still computed
