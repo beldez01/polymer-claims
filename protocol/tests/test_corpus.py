@@ -17,6 +17,7 @@ from polymer_protocol.corpus import (
     SelectionRecord,
     ValueVector,
 )
+from polymer_protocol.ledger import SelectionLedger
 from tests.conftest import make_claim
 
 
@@ -98,3 +99,22 @@ def test_generation_record_defaults_empty():
 def test_cycle_result_defaults_empty_generation():
     res = CycleResult(corpus=Corpus(fdr_ledger=FDRLedger(target_fdr=0.05)))
     assert res.generation == GenerationRecord()
+
+
+def test_selection_decision_has_cell_and_lane():
+    d = SelectionDecision(claim_id="a", selected=True, value=ValueVector(eig=0.5, stakes=1.0),
+                          cost=1.0, rank=0, cell="pat|none", lane="reserve")
+    assert d.cell == "pat|none"
+    assert d.lane == "reserve"
+
+
+def test_selection_decision_lane_defaults_main():
+    d = SelectionDecision(claim_id="a", selected=False, value=ValueVector(), cost=1.0, rank=0)
+    assert d.cell == "" and d.lane == "main"
+
+
+def test_cycle_result_defaults_empty_ledger():
+    from polymer_grammar import FDRLedger
+    from polymer_protocol.corpus import Corpus, CycleResult
+    r = CycleResult(corpus=Corpus(fdr_ledger=FDRLedger(target_fdr=0.05)))
+    assert r.ledger == SelectionLedger()

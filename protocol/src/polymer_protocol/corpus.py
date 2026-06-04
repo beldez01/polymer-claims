@@ -18,6 +18,7 @@ from polymer_grammar import (
 )
 
 from .base import _Model
+from .ledger import SelectionLedger
 
 
 class Corpus(_Model):
@@ -96,6 +97,8 @@ class SelectionDecision(_Model):
     value: ValueVector
     cost: float
     rank: int = Field(default=0, ge=0)
+    cell: str = ""
+    lane: str = "main"
 
 
 class SelectionRecord(_Model):
@@ -130,3 +133,4 @@ class CycleResult(_Model):
     audit: tuple[StageAudit, ...] = ()
     selection: SelectionRecord = SelectionRecord()
     generation: GenerationRecord = GenerationRecord()
+    ledger: SelectionLedger = SelectionLedger()
