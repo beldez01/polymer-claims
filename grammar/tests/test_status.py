@@ -23,4 +23,20 @@ def test_pending_reasons_include_governance_and_incomparable():
     assert "unreproducible_by_governance" in vals
     assert "strength_incomparable" in vals
     assert "duhem_underdetermined" in vals
-    assert len(vals) == 9
+    assert "materialization_drifted" in vals
+    assert len(vals) == 10
+
+
+def test_materialization_drifted_reason_carried_on_a_pending_claim():
+    from polymer_grammar import CategoricalLeaf, Claim, PatternRef
+
+    claim = Claim(
+        id="c",
+        title="c",
+        pattern=PatternRef(id="adjusted_effect", version="v1"),
+        leaves=(CategoricalLeaf(ontology_term="t"),),
+        status=Status.PENDING,
+        pending_reason=PendingReason.MATERIALIZATION_DRIFTED,
+    )
+    assert claim.pending_reason is PendingReason.MATERIALIZATION_DRIFTED
+    assert claim.pending_reason.value == "materialization_drifted"

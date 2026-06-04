@@ -22,3 +22,4 @@ class PendingReason(str, Enum):
     ONTOLOGY_TERM_OBSOLETE = "ontology_term_obsolete"
     STRENGTH_INCOMPARABLE = "strength_incomparable"
     UNREPRODUCIBLE_BY_GOVERNANCE = "unreproducible_by_governance"
+    MATERIALIZATION_DRIFTED = "materialization_drifted"
