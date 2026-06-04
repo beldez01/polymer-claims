@@ -106,7 +106,7 @@ def run_cycle(
     n_committed = len(_locked_ids(corpus) - locked_before)
     audit.append(StageAudit(stage="commit", note=f"{n_committed} claim(s) committed", count=n_committed))
 
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records = execute_ground(corpus, adapters, ctx, only=selected_ids)
     audit.append(StageAudit(stage="execute_ground", note=f"{len(records)} executed", count=len(records)))
 
     # scaffolding stays valid: canonicalize/safety/commit/execute change neither defeat_edges

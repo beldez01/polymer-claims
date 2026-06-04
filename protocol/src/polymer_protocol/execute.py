@@ -35,9 +35,18 @@ def execute_ground(
     corpus: Corpus,
     adapters: tuple[Adapter, ...],
     ctx: MaterializationContext,
+    only: frozenset[str] | None = None,
 ) -> tuple[Corpus, tuple[ExecRecord, ...]]:
+    """Run verify() over executable claims, optionally gated to this cycle's selection.
+
+    When ``only`` is provided, a claim additionally must be in that set to execute: the
+    permanent preregistration lock alone is no longer sufficient (it stays for anti-HARKing,
+    but execution is gated to the selected set). ``only=None`` runs all executable claims.
+    """
     records = []
     for c in corpus.claims:
+        if only is not None and c.id not in only:
+            continue
         if not _is_executable(c):
             continue
         evaluation = verify(c.evaluation_plan, ctx, adapters, claim_leaves=c.leaves)

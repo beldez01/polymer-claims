@@ -223,3 +223,23 @@ def test_surprise_goodhart_accrues_through_run_cycle(empty_ledger, ctx, adapters
     cr = result.ledger.credit("bad")
     assert cr is not None and cr.n_high_eig == 1 and cr.n_grounded == 0  # accrued a high-EIG miss
     assert credit_factor(result.ledger, "bad") == 0.5  # (0+1)/(1+1) -> discounted next cycle
+
+
+def test_unselected_locked_claim_does_not_reexecute(empty_ledger, ctx, adapters):
+    # A claim that stays PENDING after execution (fails the cardinality-BH bar in a pool) is
+    # locked. Next cycle, if SELECT does not select it (budget=0), it must NOT re-execute.
+    # Regression for F1: execute_ground must be gated by this cycle's selection, not the
+    # permanent preregistration lock.
+    from polymer_grammar import StrengthVector
+    sv = StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=0.5,
+                        severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
+    a = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv)
+    b = make_claim("b", status=Status.PENDING, plan=make_plan(0.02, 0.05), strength=sv)
+    r1 = run_cycle(Corpus(claims=(a, b), fdr_ledger=empty_ledger), adapters, ctx)
+    # both fail the BH bar (pseudo-p 0.5 vs crit (k/2)*0.10) -> stay PENDING, locked
+    assert r1.corpus.by_id()["a"].status == Status.PENDING
+    assert r1.corpus.by_id()["b"].status == Status.PENDING
+    # cycle 2, budget 0 -> SELECT picks nothing -> NOTHING re-executes
+    r2 = run_cycle(r1.corpus, adapters, ctx, budget=0.0)
+    n_executed = next(x.count for x in r2.audit if x.stage == "execute_ground")
+    assert n_executed == 0  # F1: was 2 before the fix (locked claims bypassed selection)
