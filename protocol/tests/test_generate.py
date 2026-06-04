@@ -1,8 +1,8 @@
-from polymer_grammar import DefeatEdge, DefeatEdgeKind, FDRLedger, Status
+from polymer_grammar import CategoricalLeaf, Claim, DefeatEdge, DefeatEdgeKind, FDRLedger, GenerationMode, Provenance, Status
 
 from polymer_protocol.corpus import Corpus, Proposal
 from polymer_protocol.generate import generate_stage
-from tests.conftest import make_claim, make_plan
+from tests.conftest import _PATTERN, make_claim, make_plan
 
 
 def _corpus(claims, edges=()):
@@ -106,3 +106,63 @@ def test_public_exports():
     for name in ["generate_stage", "compile_to_IR", "Proposal", "GenerationRecord",
                  "DiscardEntry", "rival_generation", "frontier_attack"]:
         assert hasattr(p, name), name
+
+
+def _const_proposers(n_rival, n_frontier):
+    # two toy proposers that emit n isolated CONJECTURED claims each (no edges), distinct ids
+    def _mk(op, i):
+        return Claim(
+            id=f"{op}-{i}",
+            title=f"{op}-{i}",
+            pattern=_PATTERN,
+            leaves=(CategoricalLeaf(ontology_term=f"t-{op}-{i}"),),
+            status=Status.CONJECTURED,
+            provenance=Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id=op,
+                                  method=f"{op}@x", search_cardinality=1),
+        )
+
+    def rival(corpus, frontier):
+        return tuple(Proposal(operator_id="rival-generation", claim=_mk("rival-generation", i))
+                     for i in range(n_rival))
+
+    def frontier_op(corpus, frontier):
+        return tuple(Proposal(operator_id="frontier-attack", claim=_mk("frontier-attack", i))
+                     for i in range(n_frontier))
+
+    return (rival, frontier_op)
+
+
+def test_economy_off_is_flat_cap(empty_corpus):
+    props = _const_proposers(5, 5)
+    corp_a, rec_a = generate_stage(empty_corpus, (), proposers=props, cap=4)
+    corp_b, rec_b = generate_stage(empty_corpus, (), proposers=props, cap=4, credit_floor=0.5)  # ledger=None
+    assert rec_a.admitted == rec_b.admitted
+    assert len(rec_a.admitted) == 4
+
+
+def test_economy_throttles_low_credit_operator(empty_corpus):
+    from polymer_protocol.ledger import OperatorCredit, SelectionLedger
+    led = SelectionLedger(credits=(OperatorCredit(operator_id="frontier-attack", n_grounded=0, n_high_eig=4),))
+    props = _const_proposers(5, 5)
+    corp, rec = generate_stage(empty_corpus, (), proposers=props, cap=6, ledger=led, credit_floor=0.5)
+    admitted_ops = [cid.rsplit("-", 1)[0] for cid in rec.admitted]
+    assert admitted_ops.count("rival-generation") == 5
+    assert admitted_ops.count("frontier-attack") == 1
+    op_cap_discards = [d for d in rec.discarded if d.reason == "operator-cap"]
+    assert len(op_cap_discards) == 4 and all(d.operator_id == "frontier-attack" for d in op_cap_discards)
+
+
+def test_exogenous_is_exempt_from_operator_cap(empty_corpus):
+    from polymer_protocol.ledger import OperatorCredit, SelectionLedger
+    led = SelectionLedger(credits=(OperatorCredit(operator_id="frontier-attack", n_grounded=0, n_high_eig=4),))
+    inj = tuple(
+        Claim(id=f"inj-{i}", title=f"inj-{i}", pattern=_PATTERN,
+              leaves=(CategoricalLeaf(ontology_term=f"t-inj-{i}"),), status=Status.CONJECTURED)
+        for i in range(3)
+    )
+    # Both proposers active so rival-generation (healthy) appears in endo_ops, pushing
+    # frontier-attack (below-floor) to its single probation slot. Cap=9 seats all of them.
+    corp, rec = generate_stage(empty_corpus, (), proposers=_const_proposers(5, 5), injected=inj,
+                               cap=9, ledger=led, credit_floor=0.5)
+    assert sum(cid.startswith("inj-") for cid in rec.admitted) == 3
+    assert sum(cid.startswith("frontier-attack") for cid in rec.admitted) == 1
