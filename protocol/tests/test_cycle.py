@@ -1,9 +1,13 @@
 from polymer_grammar import GenerationMode, Provenance, Status
 
-from polymer_protocol.corpus import Corpus
+from polymer_protocol.corpus import Corpus, Proposal
 from polymer_protocol.cost import CostModel, CostVector, CostWeights
 from polymer_protocol.cycle import run_cycle
-from polymer_protocol.ledger import credit_factor
+from polymer_protocol.ledger import (
+    OperatorCredit,
+    SelectionLedger,
+    credit_factor,
+)
 from polymer_protocol.proposers import frontier_attack, rival_generation
 from tests.conftest import make_claim, make_plan
 
@@ -243,3 +247,68 @@ def test_unselected_locked_claim_does_not_reexecute(empty_ledger, ctx, adapters)
     r2 = run_cycle(r1.corpus, adapters, ctx, budget=0.0)
     n_executed = next(x.count for x in r2.audit if x.stage == "execute_ground")
     assert n_executed == 0  # F1: was 2 before the fix (locked claims bypassed selection)
+
+
+def test_goodhart_credit_flips_selection_next_cycle(empty_ledger, ctx, adapters):
+    bad_prov = Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id="bad", search_cardinality=1)
+    good_prov = Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id="good", search_cardinality=1)
+    # Cycle 1: a high-EIG (strength None -> EIG ~0.278) claim from "bad" that gets REJECTED
+    # (plan 0.99 vs threshold 0.05, LT -> not satisfied -> refuted) -> accrues a high-EIG miss.
+    m1 = make_claim("m1", status=Status.PENDING, plan=make_plan(0.99, 0.05), provenance=bad_prov)
+    r1 = run_cycle(Corpus(claims=(m1,), fdr_ledger=empty_ledger), adapters, ctx)
+    assert r1.ledger.credit("bad").n_high_eig == 1 and r1.ledger.credit("bad").n_grounded == 0
+    # Cycle 2: fresh pool, thread r1.ledger. Two equal-value strength-None claims, one per operator,
+    # budget fits only one. The discounted "bad" operator's claim must LOSE to the clean "good" one.
+    g2 = make_claim("g2", status=Status.PENDING, plan=make_plan(0.01, 0.05), provenance=good_prov)
+    b2 = make_claim("b2", status=Status.PENDING, plan=make_plan(0.02, 0.05), provenance=bad_prov)
+    cm = CostModel(default=CostVector(wall_latency=1.0))
+    r2 = run_cycle(Corpus(claims=(g2, b2), fdr_ledger=empty_ledger), adapters, ctx,
+                   ledger=r1.ledger, budget=1.0, cost_model=cm)
+    selected = {d.claim_id for d in r2.selection.decisions if d.selected}
+    assert selected == {"g2"}  # the bad operator's claim is deprioritized end-to-end
+
+
+def test_generate_to_select_to_ledger_flywheel(empty_ledger, ctx, adapters):
+    prov = Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id="op", search_cardinality=1)
+    def proposer(corpus, frontier):
+        c = make_claim("gen1", status=Status.PENDING, plan=make_plan(0.01, 0.05), provenance=prov)
+        return (Proposal(operator_id="op", claim=c),)
+    result = run_cycle(Corpus(fdr_ledger=empty_ledger), adapters, ctx, proposers=(proposer,))
+    # the proposer-emitted executable claim flowed gen->select->execute->verify->ledger
+    assert result.corpus.by_id()["gen1"].status == Status.LICENSED
+    assert result.ledger.outcome("gen1").successes == 1
+    assert result.ledger.credit("op").n_grounded == 1  # operator_of read the agent_id, credit accrued
+
+
+def test_full_path_determinism(empty_ledger, ctx, adapters):
+    led = SelectionLedger(credits=(OperatorCredit(operator_id="x", n_high_eig=3, n_grounded=1),))
+    cm = CostModel(default=CostVector(wall_latency=1.0))
+    def build():
+        return Corpus(
+            claims=(
+                make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05)),
+                make_claim("b", status=Status.PENDING, plan=make_plan(0.02, 0.05)),
+            ),
+            fdr_ledger=empty_ledger,
+        )
+    kw = dict(proposers=(rival_generation,), ledger=led, budget=5.0, cost_model=cm,
+              reserve_fraction=0.2, cell_cap_fraction=0.5)
+    r1 = run_cycle(build(), adapters, ctx, **kw)
+    r2 = run_cycle(build(), adapters, ctx, **kw)
+    assert r1 == r2  # identical CycleResult incl. .ledger, .selection, .generation, .corpus
+
+
+def test_run_cycle_empty_corpus(empty_ledger, ctx, adapters):
+    r = run_cycle(Corpus(fdr_ledger=empty_ledger), adapters, ctx)
+    assert r.corpus.claims == ()
+    assert r.selection.cardinality == 0
+    assert r.ledger == SelectionLedger()
+    assert r.frontier == ()
+
+
+def test_run_cycle_budget_zero_executes_nothing(empty_ledger, ctx, adapters):
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    r = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx, budget=0.0)
+    assert r.corpus.by_id()["a"].status == Status.PENDING  # not selected -> not executed
+    n_exec = next(x.count for x in r.audit if x.stage == "execute_ground")
+    assert n_exec == 0
