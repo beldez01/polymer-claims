@@ -129,23 +129,30 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 > `run_cycle` no longer requires claims to be pre-loaded. The **GENERATE** stage (right after
 > REPRESENT) runs a bus of passed-in proposers plus an exogenous injection port
 > (`run_cycle(..., proposers=, injected=)`) through `compile_to_IR`, folding new CONJECTURED claims
-> into the corpus. Two pure operators ship: *rival-generation* (direction-flipped alternative-hypothesis rivals
-> (isolated CONJECTURED candidates — the rivalry linkage is deferred to #4b)) and *frontier-attack*
-> (a CONJECTURED defense seed at each unresolved-frontier node). Both are strictly **belief-neutral** —
-> they add only CONJECTURED claims, no defeat edges, so the grounded extension is unchanged
-> (generation proposes; only EXECUTE/VERIFY decides; the defeat a frontier seed implies is derived
-> later, once it licenses). Content-addressed ids + a skip-own-output guard keep the corpus
+> into the corpus. Two pure operators ship: *rival-generation* (direction-flipped alternative-hypothesis rivals)
+> and *frontier-attack* (a CONJECTURED defense seed at each unresolved-frontier node). Both are strictly
+> **belief-neutral** — the grounded extension is unchanged when they fire (generation proposes; only
+> EXECUTE/VERIFY decides). Content-addressed ids + a skip-own-output guard keep the corpus
 > convergent. Injected executable claims license the same cycle; pure proposals first act next.
 > Embedding/LLM operators plug in behind the bus seam; operator-5's representation-revision lane is
 > deferred (it needs the grammar's `representation_revision` meta-tier).
+
+> A `DefeatEdge` can be **provisional** (#4b) — inert until its source claim is LICENSED, then effective
+> (`effective_defeats`/`grounded_extension` take a `licensed_ids` set; `represent` and the AGM recompute
+> `_in_set` supply it). GENERATE's `frontier_attack` and `rival_generation` now plant a provisional rebut
+> edge instead of an isolated node: belief-neutral while the seed/rival is a conjecture (the edge is inert),
+> it wires a real defeat the moment the claim is validated — closing the #4a limitation. A **rebut** edge
+> (never an `incompatible_with` neighbor) keeps `restore_consistency._conflicts` out of the loop, so nothing
+> is retracted while still conjectured. (The pure operators' no-plan seeds stay dormant until they gain a
+> plan; executable-generation is deferred.)
 
 - **Design spec:** `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`
 - **Tests:** `cd protocol && uv run pytest -q`
 
 | Subdir | Package | Status |
 |---|---|---|
-| `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier — 261 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #3b + #4a (assessment spine + oracle dossier + SELECT [value engine + QD/heterodox/Goodhart/accumulating belief] + GENERATE proposer bus) — 156 tests |
+| `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier + provisional defeat edges (#4b) — 268 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #3b + #4a + #4b (assessment spine + oracle dossier + SELECT [value engine + QD/heterodox/Goodhart/accumulating belief] + GENERATE proposer bus + provisional links) — 169 tests |
 
 ---
 
