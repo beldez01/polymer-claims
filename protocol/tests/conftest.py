@@ -34,6 +34,7 @@ def make_claim(
     plan: EvaluationPlan | None = None,
     pending_reason: PendingReason | None = None,
     strength: StrengthVector | None = None,
+    pattern: PatternRef | None = None,
     **extra,
 ) -> Claim:
     if status == Status.PENDING and pending_reason is None:
@@ -41,7 +42,7 @@ def make_claim(
     return Claim(
         id=cid,
         title=f"claim {cid}",
-        pattern=_PATTERN,
+        pattern=pattern or _PATTERN,
         leaves=(CategoricalLeaf(ontology_term=f"term-{cid}"),),
         status=status,
         pending_reason=pending_reason,
