@@ -140,17 +140,22 @@ run_cycle(
     cost_model=None, budget=None, value_weights=..., cost_weights=...,   # #3a
     proposers=(), injected=(), generation_cap=None,                       # #4a
     ledger: SelectionLedger | None = None,                                # #3b cross-cycle state
-    reserve_fraction: float = 0.2,
-    cell_cap_fraction: float = 0.5,
+    reserve_fraction: float = 0.0,    # features OFF by default (back-compat); recommended 0.2
+    cell_cap_fraction: float = 1.0,   # features OFF by default (back-compat); recommended 0.5
 ) -> CycleResult   # now also carries `ledger: SelectionLedger`
 ```
 
-`ledger=None` ⇒ a fresh empty `SelectionLedger()`. With an empty ledger + default fractions, SELECT
-reproduces #3a behavior **exactly**: `accumulated_belief` = the #3a prior (no outcomes), and
-`credit_factor` = **1.0** for every operator (optimistic untracked default), so the fill-order density
-equals #3a's `(w_e·eig + w_s·stakes)/cost` unchanged. QD cell-caps and the reserve lane only *bind*
-under budget pressure with multiple cells / dominated candidates; with `budget=None` or a single cell
-they are no-ops. The existing #1/#2/#3a/#4a suite must stay green (verified in testing).
+**Defaults are features-OFF for exact back-compat.** A library must not silently change selection for
+existing budget-set callers, and `reserve_fraction > 0` *does* re-split the budget (main lane gets
+`budget × (1 − reserve_fraction)`). So the `run_cycle` **defaults** are `reserve_fraction = 0.0`
+(no reserve lane → main lane gets the full budget) and `cell_cap_fraction = 1.0` (cap = full budget →
+never binds). Combined with `ledger = None` (empty ledger ⇒ `accumulated_belief` = the #3a prior,
+`credit_factor` = 1.0 for all), this makes SELECT reproduce #3a **exactly** — the existing
+#1/#2/#3a/#4a suite stays green, byte-identical. The **recommended** production values are
+`RESERVE_FRACTION = 0.2` / `CELL_CAP_FRACTION = 0.5` (the named constants, §11); #3b's own feature
+tests pass them explicitly, and a real deployment (the future daemon driver) sets them to turn the
+hardening on. QD cell-caps and the reserve lane only *bind* under budget pressure with multiple
+cells / dominated candidates.
 
 **Wiring:** SELECT reads `ledger`; after `verify_stage`, `run_cycle` computes the per-claim
 `executed` outcomes and calls `update_ledger`; the updated ledger rides out on `CycleResult`.
@@ -206,7 +211,9 @@ populated and threadable.
 
 `SETTLED_CONCENTRATION = 200.0`, `CREDIT_A0 = 1.0` (optimistic smoothing — untracked operator credit
 = 1.0), `HIGH_EIG = 0.5`, `RESERVE_FRACTION = 0.2`, `CELL_CAP_FRACTION = 0.5`. All module-level named
-constants — no magic literals in function bodies.
+constants — no magic literals in function bodies. Note `RESERVE_FRACTION`/`CELL_CAP_FRACTION` are the
+**recommended** values (what #3b tests + deployments pass explicitly); the `run_cycle` *defaults* are
+features-off (`0.0` / `1.0`, §7) for exact #3a back-compat.
 
 ## 12. Scope boundary
 
