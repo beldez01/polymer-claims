@@ -160,9 +160,12 @@ def test_frontier_attack_plants_a_seed(empty_ledger, ctx, adapters):
     edge = DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT)
     corpus = Corpus(claims=(a, b), defeat_edges=(edge,), fdr_ledger=empty_ledger)
     result = run_cycle(corpus, adapters, ctx, proposers=(frontier_attack,))
-    # a new gen-fa-* CONJECTURED seed claim appears; NO new defeat edge was added (belief-neutral)
+    # a new gen-fa-* CONJECTURED seed claim appears
     assert any(cid.startswith("gen-fa-") for cid in result.corpus.by_id())
-    assert len(result.corpus.defeat_edges) == 1  # still just the original b->a edge
+    # a provisional rebut edge into b was added (inert while the seed is CONJECTURED)
+    assert len(result.corpus.defeat_edges) == 2
+    new_edge = next(e for e in result.corpus.defeat_edges if e.source.startswith("gen-fa-"))
+    assert new_edge.target == "b" and new_edge.provisional is True
 
 
 def test_generation_converges(empty_ledger, ctx, adapters):
