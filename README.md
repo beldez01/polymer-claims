@@ -100,7 +100,7 @@ represent → canonicalize → safety_gate → commit → execute_ground → ver
 
 returning a new `Corpus` plus the unresolved-attack `frontier`, the `gated_lane` (claims blocked by governance), and a per-stage `audit`.
 
-EXECUTE reuses the Phase-8 air-gapped `verify()` — two-implementation agreement, no self-licensing — to mint an L2 `Satisfaction`. GENERATE is a stubbed open port: claims enter exogenously. The proposer bus (GENERATE) and the daemons are later sub-projects.
+EXECUTE reuses the Phase-8 air-gapped `verify()` — two-implementation agreement, no self-licensing — to mint an L2 `Satisfaction`. GENERATE (the proposer bus, see below) is now live; the daemons are a later sub-project.
 
 An optional oracle registry (`run_cycle(..., oracles=...)`) caps a licensed claim's **empirical** strength axes (magnitude / uncertainty / evidence-against-null / world-contact) by the validation tier of the weakest oracle its plan references. Unresolved or out-of-domain oracles count as `UNVALIDATED` (zero empirical strength) — the guarantee is always-on, not disableable by omitting the registry. Builtin-only claims (no `oracle_ref`) are unaffected.
 
@@ -115,13 +115,26 @@ Benjamini–Hochberg selective-inference correction — as the competed pool gro
 cardinality 1). Quality-diversity portfolios, a heterodox reserve lane, and cross-cycle
 accumulating belief are the deferred **#3b** slice.
 
+> `run_cycle` no longer requires claims to be pre-loaded. The **GENERATE** stage (right after
+> REPRESENT) runs a bus of passed-in proposers plus an exogenous injection port
+> (`run_cycle(..., proposers=, injected=)`) through `compile_to_IR`, folding new CONJECTURED claims
+> into the corpus. Two pure operators ship: *rival-generation* (direction-flipped alternative-hypothesis rivals
+> (isolated CONJECTURED candidates — the rivalry linkage is deferred to #4b)) and *frontier-attack*
+> (a CONJECTURED defense seed at each unresolved-frontier node). Both are strictly **belief-neutral** —
+> they add only CONJECTURED claims, no defeat edges, so the grounded extension is unchanged
+> (generation proposes; only EXECUTE/VERIFY decides; the defeat a frontier seed implies is derived
+> later, once it licenses). Content-addressed ids + a skip-own-output guard keep the corpus
+> convergent. Injected executable claims license the same cycle; pure proposals first act next.
+> Embedding/LLM operators plug in behind the bus seam; operator-5's representation-revision lane is
+> deferred (it needs the grammar's `representation_revision` meta-tier).
+
 - **Design spec:** `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`
 - **Tests:** `cd protocol && uv run pytest -q`
 
 | Subdir | Package | Status |
 |---|---|---|
 | `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier — 261 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a (assessment spine + oracle dossier + SELECT pursuit engine) — 101 tests |
+| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #4a (assessment spine + oracle dossier + SELECT + GENERATE proposer bus) — 128 tests |
 
 ---
 

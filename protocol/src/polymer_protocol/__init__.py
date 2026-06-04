@@ -18,7 +18,10 @@ from .corpus import (
     Corpus,
     CycleResult,
     CycleScaffolding,
+    DiscardEntry,
     ExecRecord,
+    GenerationRecord,
+    Proposal,
     SelectionDecision,
     SelectionRecord,
     StageAudit,
@@ -27,8 +30,10 @@ from .corpus import (
 from .cost import CostModel, CostVector, CostWeights, aggregate_cost
 from .cycle import run_cycle
 from .execute import execute_ground
+from .generate import compile_to_IR, generate_stage
 from .integrate import integrate
 from .oracle import OracleRegistry, oracle_cap
+from .proposers import frontier_attack, rival_generation
 from .represent import represent
 from .safety import safety_gate
 from .select import ValueWeights, select_stage
@@ -74,4 +79,11 @@ __all__ = [
     "ValueWeights",
     "SelectionRecord",
     "SelectionDecision",
+    "generate_stage",
+    "compile_to_IR",
+    "Proposal",
+    "GenerationRecord",
+    "DiscardEntry",
+    "rival_generation",
+    "frontier_attack",
 ]

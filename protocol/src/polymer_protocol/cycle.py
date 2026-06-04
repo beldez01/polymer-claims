@@ -4,18 +4,21 @@ Threads the ephemeral scaffolding/records; emits the post-INTEGRATE unresolved-a
 frontier as the cycle's primary output (the keystone closure). SELECT (the value/pursuit
 stage) is now wired in: it ranks eligible PENDING claims on value under a structured cost
 and a budget, and only the selected subset is committed and executed; the selection record
-travels on the CycleResult. GENERATE remains out of this sub-project — claims still enter
-exogenously. Spec §6.8 + SELECT #3a.
+travels on the CycleResult. GENERATE (the proposer bus) is now wired in right after REPRESENT:
+it runs passed-in proposers + the exogenous injection port through compile_to_IR and folds new
+CONJECTURED claims into the corpus (belief-neutral — no defeat edges; inert this cycle, first
+act next). Spec §6.8 + SELECT #3a + GENERATE #4a.
 """
 from __future__ import annotations
 
-from polymer_grammar import Adapter, MaterializationContext, Status
+from polymer_grammar import Adapter, Claim, MaterializationContext, Status
 
 from .canonicalize import canonicalize
 from .commit import commit
 from .corpus import Corpus, CycleResult, StageAudit
 from .cost import CostModel, CostWeights
 from .execute import execute_ground
+from .generate import Proposer, generate_stage
 from .integrate import integrate
 from .oracle import OracleRegistry
 from .represent import represent
@@ -41,6 +44,9 @@ def run_cycle(
     budget: float | None = None,
     value_weights: ValueWeights = ValueWeights(),
     cost_weights: CostWeights = CostWeights(),
+    proposers: tuple[Proposer, ...] = (),
+    injected: tuple[Claim, ...] = (),
+    generation_cap: int | None = None,
 ) -> CycleResult:
     audit: list[StageAudit] = []
 
@@ -52,6 +58,20 @@ def run_cycle(
             count=len(scaffolding.frontier),
         )
     )
+
+    corpus, generation = generate_stage(
+        corpus, scaffolding.frontier,
+        proposers=proposers, injected=injected, cap=generation_cap,
+    )
+    audit.append(StageAudit(stage="generate_stage",
+        note=f"{len(generation.admitted)} admitted, {len(generation.discarded)} discarded",
+        count=len(generation.admitted)))
+    if generation.admitted:
+        # belief-neutral: the admitted claims carry no defeat edges, so recomputing only
+        # EXTENDS the grounded extension with them (frontier + the pre-existing grounded set
+        # are unchanged). verify_stage needs them in-extension to be able to license this
+        # cycle (e.g. an exogenous PENDING-with-plan injection).
+        scaffolding = represent(corpus)
 
     before_eq = len(corpus.equivalences)
     corpus = canonicalize(corpus)
@@ -83,8 +103,10 @@ def run_cycle(
     corpus, records = execute_ground(corpus, adapters, ctx)
     audit.append(StageAudit(stage="execute_ground", note=f"{len(records)} executed", count=len(records)))
 
-    # scaffolding is still valid here: canonicalize/safety/commit/execute change neither
-    # defeat_edges nor claim ids, so grounded_extension is unchanged since represent().
+    # scaffolding stays valid: canonicalize/safety/commit/execute change neither defeat_edges
+    # nor claim ids, and generate only ADDS CONJECTURED claims with no defeat edges (the pure
+    # operators are belief-neutral), so the grounded_extension of the executed claims is
+    # unchanged since represent().
     executed_ids = {r.claim_id for r in records}
     corpus = verify_stage(corpus, scaffolding, records, oracles)
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
@@ -111,4 +133,5 @@ def run_cycle(
         gated_lane=gated_lane,
         audit=tuple(audit),
         selection=selection,
+        generation=generation,
     )

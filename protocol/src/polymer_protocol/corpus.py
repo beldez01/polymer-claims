@@ -103,9 +103,30 @@ class SelectionRecord(_Model):
     cardinality: int = Field(default=0, ge=0)
 
 
+class Proposal(_Model):
+    """A candidate from a proposer: a generated claim + any defeat edges it implies."""
+
+    operator_id: str
+    claim: Claim
+    edges: tuple[DefeatEdge, ...] = ()
+
+
+class DiscardEntry(_Model):
+    operator_id: str
+    claim_id: str
+    reason: str
+
+
+class GenerationRecord(_Model):
+    proposed: int = Field(default=0, ge=0)
+    admitted: tuple[str, ...] = ()
+    discarded: tuple[DiscardEntry, ...] = ()
+
+
 class CycleResult(_Model):
     corpus: Corpus
     frontier: tuple[str, ...] = ()    # next cycle's GENERATE/SELECT target (keystone closure)
     gated_lane: tuple[str, ...] = ()  # claim ids barred from autonomous execution (SAFETY)
     audit: tuple[StageAudit, ...] = ()
     selection: SelectionRecord = SelectionRecord()
+    generation: GenerationRecord = GenerationRecord()
