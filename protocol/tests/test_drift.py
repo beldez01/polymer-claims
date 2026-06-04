@@ -217,6 +217,23 @@ def test_reopen_is_pure(empty_ledger):
     assert corpus.by_id()["c"].status is Status.LICENSED  # input corpus unchanged
 
 
+def test_reopen_skips_target_no_longer_licensed(empty_ledger):
+    # A stale record names claim "x" as drifted, but "x" is now CONJECTURED (re-opened by some
+    # other path since the record was minted). reopen_drifted must not touch a non-LICENSED claim.
+    from polymer_protocol.drift import DriftFinding, DriftRecord, reopen_drifted
+
+    x = make_claim("x", Status.CONJECTURED)
+    corpus = _corpus(empty_ledger, x)
+    stale = DriftRecord(
+        current=_CURRENT,
+        examined=0,
+        drifted=(DriftFinding(claim_id="x", re_executable=True, licensed_versions=(("v0", "d0"),)),),
+    )
+    out = reopen_drifted(corpus, stale)
+    assert out is corpus  # nothing changed -> identical object
+    assert out.by_id()["x"].status is Status.CONJECTURED
+
+
 def test_drift_symbols_are_exported_from_package():
     import polymer_protocol as pp
 

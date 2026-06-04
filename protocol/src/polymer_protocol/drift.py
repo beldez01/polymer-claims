@@ -76,7 +76,8 @@ def reopen_drifted(
     """Re-open the drifted claims named in `record` to PENDING (the opt-in action `drift_pass`
     never performs itself). With `require_plan=True` (default) only re-executable findings are
     re-opened — a planless claim re-opened to PENDING could never self-relicense, so it would
-    strand. Pure: returns a new Corpus; findings for absent claim ids are silently skipped."""
+    strand. Pure: returns a new Corpus; findings for absent claim ids — and any target whose
+    current status is no longer LICENSED (a stale record) — are silently skipped."""
     targets = {f.claim_id for f in record.drifted if (f.re_executable or not require_plan)}
     if not targets:
         return corpus
@@ -88,7 +89,7 @@ def reopen_drifted(
                 "pending_reason": PendingReason.MATERIALIZATION_DRIFTED,
             }
         )
-        if c.id in targets
+        if c.id in targets and c.status == Status.LICENSED
         else c
         for c in corpus.claims
     )
