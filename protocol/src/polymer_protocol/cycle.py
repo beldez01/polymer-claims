@@ -7,7 +7,11 @@ and a budget, and only the selected subset is committed and executed; the select
 travels on the CycleResult. GENERATE (the proposer bus) is now wired in right after REPRESENT:
 it runs passed-in proposers + the exogenous injection port through compile_to_IR and folds new
 CONJECTURED claims into the corpus (belief-neutral — no defeat edges; inert this cycle, first
-act next). Spec §6.8 + SELECT #3a + GENERATE #4a.
+act next). A threaded SelectionLedger (passed in via `ledger=` and returned on CycleResult) carries
+cross-cycle accumulating belief + per-operator surprise-Goodhart credit; an optional
+OracleRegistry caps a licensed claim's empirical strength at VERIFY; SELECT also supports a
+quality-diversity portfolio (cell caps) and a heterodox reserve lane (both off by default).
+Spec §6.8 + SELECT #3a/#3b + GENERATE #4a + oracle dossier #2.
 """
 from __future__ import annotations
 
@@ -106,7 +110,7 @@ def run_cycle(
     n_committed = len(_locked_ids(corpus) - locked_before)
     audit.append(StageAudit(stage="commit", note=f"{n_committed} claim(s) committed", count=n_committed))
 
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records = execute_ground(corpus, adapters, ctx, only=selected_ids)
     audit.append(StageAudit(stage="execute_ground", note=f"{len(records)} executed", count=len(records)))
 
     # scaffolding stays valid: canonicalize/safety/commit/execute change neither defeat_edges

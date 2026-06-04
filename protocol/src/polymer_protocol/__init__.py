@@ -30,7 +30,7 @@ from .corpus import (
 from .cost import CostModel, CostVector, CostWeights, aggregate_cost
 from .cycle import run_cycle
 from .execute import execute_ground
-from .generate import compile_to_IR, generate_stage
+from .generate import Proposer, compile_to_IR, generate_stage
 from .integrate import integrate
 from .ledger import (
     ClaimOutcome,
@@ -90,6 +90,7 @@ __all__ = [
     "SelectionDecision",
     "generate_stage",
     "compile_to_IR",
+    "Proposer",
     "Proposal",
     "GenerationRecord",
     "DiscardEntry",

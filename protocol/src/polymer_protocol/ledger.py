@@ -14,7 +14,7 @@ from polymer_grammar import Claim, GenerationMode
 from .base import _Model
 
 CREDIT_A0 = 1.0
-HIGH_EIG = 0.2  # calibrated to the EIG scale (max ~0.278 at the uniform Beta(1,1) prior)
+HIGH_EIG = 0.2  # calibrated to the in-engine EIG scale — expected_information_gain maxes ~0.278 for Betas reachable via prior_belief/accumulated_belief (kappa>=2); 0.5 was unreachable, leaving the accrual loop dead
 
 
 class ClaimOutcome(_Model):
@@ -27,6 +27,12 @@ class OperatorCredit(_Model):
     operator_id: str
     n_high_eig: int = Field(default=0, ge=0)
     n_grounded: int = Field(default=0, ge=0)
+
+    @model_validator(mode="after")
+    def _grounded_within_high_eig(self) -> "OperatorCredit":
+        if self.n_grounded > self.n_high_eig:
+            raise ValueError("OperatorCredit.n_grounded must not exceed n_high_eig")
+        return self
 
 
 class SelectionLedger(_Model):
