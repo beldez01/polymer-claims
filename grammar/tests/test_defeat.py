@@ -243,3 +243,38 @@ def test_public_api_exports():
         "BlameAssignment", "BlameSet", "BlameVerdict", "aggregate_blame", "duhem_status",
     ]:
         assert hasattr(pg, name), f"{name} not exported from polymer_grammar"
+
+
+def test_defeat_edge_provisional_defaults_false():
+    assert DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT).provisional is False
+
+
+def test_provisional_edge_inert_without_licensed_source():
+    e = DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT, provisional=True)
+    strength = {"d": None, "b": None}
+    assert effective_defeats((e,), strength) == frozenset()                          # default empty
+    assert effective_defeats((e,), strength, licensed_ids=frozenset()) == frozenset()
+
+
+def test_provisional_edge_effective_when_source_licensed():
+    e = DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT, provisional=True)
+    strength = {"d": None, "b": None}
+    assert effective_defeats((e,), strength, licensed_ids=frozenset({"d"})) == frozenset({("d", "b")})
+
+
+def test_nonprovisional_edge_still_effective_from_conjectured_source():
+    # LOAD-BEARING: a NORMAL edge from a strengthless source is STILL effective (#1 frontier semantics)
+    e = DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT)  # provisional=False
+    strength = {"d": None, "b": None}
+    assert effective_defeats((e,), strength) == frozenset({("d", "b")})
+
+
+def test_grounded_extension_honors_provisional_activation():
+    e_ba = DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT)
+    e_db = DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT, provisional=True)
+    strength = {"a": None, "b": None, "d": None}
+    ids = ["a", "b", "d"]
+    g0 = grounded_extension(ids, (e_ba, e_db), strength)                       # d not licensed -> inert
+    assert "a" not in g0 and "b" in g0 and "d" in g0
+    g1 = grounded_extension(ids, (e_ba, e_db), strength, licensed_ids=frozenset({"d"}))
+    assert "a" in g1 and "b" not in g1 and "d" in g1                           # d licensed -> d defeats b -> a reinstated

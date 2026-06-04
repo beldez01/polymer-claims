@@ -51,6 +51,7 @@ class DefeatEdge(_Model):
     target: str
     kind: DefeatEdgeKind
     note: str | None = None
+    provisional: bool = False
 
     @model_validator(mode="after")
     def _no_self_loop(self) -> "DefeatEdge":
@@ -64,17 +65,21 @@ class DefeatEdge(_Model):
 def effective_defeats(
     edges: Iterable[DefeatEdge],
     strength: Mapping[str, StrengthVector | None],
+    licensed_ids: frozenset[str] = frozenset(),
 ) -> frozenset[tuple[str, str]]:
     """(source, target) attack pairs that survive the VAF value filter.
 
     An attack defeats UNLESS the target strength-dominates the source (Pareto). When
     either strength is absent or the two are incomparable, the attack stands — absence
     of proven superiority is not superiority. `evidence_for` is never a defeat.
+    Provisional edges are inert until their source claim appears in `licensed_ids`.
     """
     out: set[tuple[str, str]] = set()
     for e in edges:
         if e.kind not in ATTACK_KINDS:
             continue
+        if e.provisional and e.source not in licensed_ids:
+            continue  # provisional: inert until its source claim is LICENSED
         s_src = strength.get(e.source)
         s_tgt = strength.get(e.target)
         if s_src is not None and s_tgt is not None and s_tgt.dominates(s_src):
@@ -87,6 +92,7 @@ def grounded_extension(
     claim_ids: Iterable[str],
     edges: Iterable[DefeatEdge],
     strength: Mapping[str, StrengthVector | None],
+    licensed_ids: frozenset[str] = frozenset(),
 ) -> frozenset[str]:
     """The IN set under grounded semantics over effective defeats (PTIME least fixpoint).
 
@@ -95,7 +101,7 @@ def grounded_extension(
     monotone F + add-only => the unique grounded extension. Edge endpoints not in
     claim_ids (e.g. synthetic refutation nodes) participate as nodes.
     """
-    defeats = effective_defeats(edges, strength)
+    defeats = effective_defeats(edges, strength, licensed_ids)
     nodes: set[str] = set(claim_ids)
     attackers: dict[str, set[str]] = defaultdict(set)
     for src, tgt in defeats:
