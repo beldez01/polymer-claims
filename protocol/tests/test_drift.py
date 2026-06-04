@@ -215,3 +215,12 @@ def test_reopen_is_pure(empty_ledger):
     out2 = reopen_drifted(corpus, rec)
     assert out1 == out2
     assert corpus.by_id()["c"].status is Status.LICENSED  # input corpus unchanged
+
+
+def test_drift_symbols_are_exported_from_package():
+    import polymer_protocol as pp
+
+    assert hasattr(pp, "drift_pass")
+    assert hasattr(pp, "reopen_drifted")
+    assert hasattr(pp, "DriftRecord")
+    assert hasattr(pp, "DriftFinding")

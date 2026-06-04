@@ -48,6 +48,7 @@ from .ledger import (
     operator_of,
     update_ledger,
 )
+from .drift import DriftFinding, DriftRecord, drift_pass, reopen_drifted
 from .oracle import OracleRegistry, oracle_cap
 from .plan_synthesis import mirror_criterion, transplant_plan
 from .proposers import frontier_attack, rival_generation
@@ -121,4 +122,8 @@ __all__ = [
     "update_ledger",
     "accumulated_belief",
     "cell_of",
+    "DriftFinding",
+    "DriftRecord",
+    "drift_pass",
+    "reopen_drifted",
 ]
