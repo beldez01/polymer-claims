@@ -352,3 +352,54 @@ def test_provisional_edge_inert_while_source_pending(empty_ledger, ctx, adapters
     # before d licenses: the provisional edge is inert -> b defeats a -> a on the frontier
     scaf = represent(corp)
     assert "a" not in scaf.grounded_extension and "a" in scaf.frontier
+
+
+def test_generated_rival_adjudicates_and_defeats_source(empty_ledger, ctx, adapters):
+    from polymer_grammar import Comparator, Direction, Proposition
+    from polymer_protocol.proposers import rival_generation
+    from polymer_protocol.represent import represent
+    from tests.conftest import make_plan
+    # C: POSITIVE conclusion, plan criterion REFUTED by the data (0.09 < 0.05 is False).
+    # Mirrored rival criterion (>= 0.05) is SATISFIED by 0.09 -> the rival licenses.
+    concl = Proposition(direction=Direction.POSITIVE, estimand="beta", descriptor="X on Y")
+    c = make_claim("c", status=Status.PENDING, conclusion=concl, plan=make_plan(0.09, 0.05, Comparator.LT))
+    corp = Corpus(claims=(c,), fdr_ledger=empty_ledger)
+    r1 = run_cycle(corp, adapters, ctx, proposers=(rival_generation,))
+    by = r1.corpus.by_id()
+    rival_ids = [cid for cid in by if cid.startswith("gen-rival-")]
+    assert rival_ids, "rival_generation should have planted at least one rival"
+    licensed_rivals = [rid for rid in rival_ids if by[rid].status == Status.LICENSED]
+    assert licensed_rivals, "a mirrored rival should license on the refuting data"
+    scaf = represent(r1.corpus)
+    assert "c" not in scaf.grounded_extension
+
+
+def test_planned_rival_is_belief_neutral_without_budget(empty_ledger, ctx, adapters):
+    from polymer_grammar import Comparator, Direction, Proposition
+    from polymer_protocol.proposers import rival_generation
+    from polymer_protocol.represent import represent
+    from tests.conftest import make_plan
+    concl = Proposition(direction=Direction.POSITIVE, estimand="beta", descriptor="X on Y")
+    c = make_claim("c", status=Status.PENDING, conclusion=concl, plan=make_plan(0.09, 0.05, Comparator.LT))
+    corp = Corpus(claims=(c,), fdr_ledger=empty_ledger)
+    r1 = run_cycle(corp, adapters, ctx, proposers=(rival_generation,), budget=0)
+    scaf = represent(r1.corpus)
+    assert "c" in scaf.grounded_extension  # rival edge inert while PENDING (not selected/executed)
+
+
+def test_generation_credit_floor_runs_clean(empty_ledger, ctx, adapters):
+    from polymer_grammar import Direction, Proposition
+    from polymer_protocol.ledger import OperatorCredit, SelectionLedger
+    from polymer_protocol.proposers import frontier_attack, rival_generation
+    led = SelectionLedger(credits=(OperatorCredit(operator_id="frontier-attack", n_grounded=0, n_high_eig=4),))
+    concl = Proposition(direction=Direction.POSITIVE, estimand="beta", descriptor="X on Y")
+    src = make_claim("c", conclusion=concl)  # planless -> CONJECTURED rivals (cheap, no execution)
+    corp = Corpus(claims=(src,), fdr_ledger=empty_ledger)
+    r1 = run_cycle(
+        corp, adapters, ctx,
+        proposers=(rival_generation, frontier_attack),
+        ledger=led,
+        generation_cap=3,
+        generation_credit_floor=0.5,
+    )
+    assert r1.generation is not None  # the credit-knob path executed without error
