@@ -315,3 +315,40 @@ def test_run_cycle_budget_zero_executes_nothing(empty_ledger, ctx, adapters):
     assert r.corpus.by_id()["a"].status == Status.PENDING  # not selected -> not executed
     n_exec = next(x.count for x in r.audit if x.stage == "execute_ground")
     assert n_exec == 0
+
+
+def test_provisional_edge_activates_when_source_licenses(empty_ledger, ctx, adapters):
+    from polymer_grammar import DefeatEdge, DefeatEdgeKind
+    from polymer_protocol.represent import represent
+    # b attacks a (normal). d (PENDING, with a satisfiable plan) provisionally attacks b.
+    a = make_claim("a")  # CONJECTURED
+    b = make_claim("b")  # CONJECTURED
+    d = make_claim("d", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    edges = (
+        DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT, provisional=True),
+    )
+    corp = Corpus(claims=(a, b, d), defeat_edges=edges, fdr_ledger=empty_ledger)
+    r1 = run_cycle(corp, adapters, ctx)
+    # d is the only candidate (a,b are CONJECTURED/no-plan); it executes (0.01<0.05) and licenses
+    assert r1.corpus.by_id()["d"].status == Status.LICENSED
+    # now d is LICENSED -> the provisional d->b is active -> b OUT of the grounded extension -> a reinstated
+    scaf = represent(r1.corpus)
+    assert "a" in scaf.grounded_extension and "b" not in scaf.grounded_extension
+    assert "a" not in scaf.frontier  # a is no longer an unresolved-attack target
+
+
+def test_provisional_edge_inert_while_source_pending(empty_ledger, ctx, adapters):
+    from polymer_grammar import DefeatEdge, DefeatEdgeKind
+    from polymer_protocol.represent import represent
+    a = make_claim("a")
+    b = make_claim("b")
+    d = make_claim("d", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    edges = (
+        DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="d", target="b", kind=DefeatEdgeKind.REBUT, provisional=True),
+    )
+    corp = Corpus(claims=(a, b, d), defeat_edges=edges, fdr_ledger=empty_ledger)
+    # before d licenses: the provisional edge is inert -> b defeats a -> a on the frontier
+    scaf = represent(corp)
+    assert "a" not in scaf.grounded_extension and "a" in scaf.frontier
