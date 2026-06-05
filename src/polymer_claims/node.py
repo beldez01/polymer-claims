@@ -45,7 +45,7 @@ class NodeRunner:
         adapters=_ADAPTERS,
         ctx: MaterializationContext = _CTX,
         config: SchedulerConfig | None = None,
-        budget: float = 1e9,
+        scheduler_budget: float = 1e9,
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -53,14 +53,11 @@ class NodeRunner:
         self.adapters = adapters
         self.ctx = ctx
         self.config = config if config is not None else SchedulerConfig()
-        # `budget` names the scheduler budget threaded into `next_action`. A
-        # `budget` inside `run_cycle_kwargs` names run_cycle's own SELECT budget;
-        # it stays in the kwargs dict and also seeds the scheduler budget so the
-        # two stay coherent when only the run_cycle budget is supplied.
-        if "budget" in run_cycle_kwargs:
-            self.budget = run_cycle_kwargs["budget"]
-        else:
-            self.budget = budget
+        # `scheduler_budget` gates whether RUN_CYCLE fires (threaded into
+        # `next_action`). A `budget` inside `run_cycle_kwargs` is a DIFFERENT
+        # quantity — run_cycle's own SELECT budget — and flows straight through
+        # to `run_cycle`, where it spreads licensing progressively across cycles.
+        self.scheduler_budget = scheduler_budget
         self.run_cycle_kwargs = run_cycle_kwargs
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
@@ -89,7 +86,7 @@ class NodeRunner:
         adapters=_ADAPTERS,
         ctx: MaterializationContext = _CTX,
         config: SchedulerConfig | None = None,
-        budget: float = 1e9,
+        scheduler_budget: float = 1e9,
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
@@ -97,7 +94,7 @@ class NodeRunner:
             adapters=adapters,
             ctx=ctx,
             config=config,
-            budget=budget,
+            scheduler_budget=scheduler_budget,
             **run_cycle_kwargs,
         )
 
@@ -108,7 +105,7 @@ class NodeRunner:
             ledger=self.ledger,
             proposers_available=self._proposers_available,
         )
-        action = next_action(state, budget=self.budget, config=self.config)
+        action = next_action(state, budget=self.scheduler_budget, config=self.config)
 
         if action is not None and action.kind == ActionKind.RUN_CYCLE:
             result = run_cycle(

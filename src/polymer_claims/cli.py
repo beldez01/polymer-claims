@@ -169,14 +169,14 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         return 1
     if args.seed_corpus:
         corpus = load_corpus(args.seed_corpus)
-        runner = NodeRunner.from_seed(corpus, budget=args.budget)
+        runner = NodeRunner.from_seed(corpus, scheduler_budget=args.budget)
     else:
         from .seed import default_seed_corpus
         corpus, kwargs = default_seed_corpus()
-        # The evolving seed carries its own per-cycle budget in `kwargs["budget"]`,
-        # which also seeds the scheduler budget; passing `args.budget` too would
-        # collide on the keyword, so let the seed's budget govern.
-        runner = NodeRunner.from_seed(corpus, **kwargs)
+        # `args.budget` is the SCHEDULER budget (gates RUN_CYCLE); the evolving
+        # seed's `kwargs["budget"]` is run_cycle's SELECT budget and flows
+        # through `**kwargs` to spread licensing progressively across frames.
+        runner = NodeRunner.from_seed(corpus, scheduler_budget=args.budget, **kwargs)
     app = create_app(runner, interval=args.interval, origins=args.origins or None)
     uvicorn.run(app, host=args.host, port=args.port)
     return 0

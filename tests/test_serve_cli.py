@@ -44,11 +44,16 @@ def test_default_seed_evolves():
     corpus, kwargs = default_seed_corpus()
     assert "proposers" in kwargs
     r = NodeRunner.from_seed(corpus, **kwargs)
-    for _ in range(8):
+    for _ in range(10):
         r.tick()
     tl = r.snapshot()
-    # the universe grows and licenses over time
+    # the universe grows over time
     assert tl.frames[-1].stats.n_nodes >= tl.frames[0].stats.n_nodes
-    assert tl.frames[-1].stats.n_licensed >= 1
+    # licensing spreads PROGRESSIVELY: run_cycle's budget=2.5 licenses a couple
+    # per cycle rather than all at once — the gradual evolution the viewer shows.
+    lic = [f.stats.n_licensed for f in tl.frames]
+    assert all(b >= a for a, b in zip(lic, lic[1:]))          # non-decreasing
+    assert max(b - a for a, b in zip(lic, lic[1:])) <= 3       # no big single-cycle jump
+    assert lic[-1] >= 5                                        # reaches a healthy total
     # at least one representation-revision (octahedron) node appears by the end
     assert any(n.is_representation_revision for n in tl.frames[-1].topology.nodes)
