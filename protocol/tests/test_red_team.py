@@ -112,3 +112,18 @@ def test_red_team_symbol_is_exported_from_package():
     import polymer_protocol as pp
 
     assert hasattr(pp, "RepresentationRedTeamAdapter")
+
+
+def test_forged_licensing_drop_reason_is_untrusted_licensing(empty_ledger):
+    # pin WHICH guardrail fires: a revision claim smuggling a licensing block is rejected by
+    # compile_untrusted with the licensing-specific reason (not merely "dropped somehow").
+    from polymer_protocol.generation_adapter import compile_untrusted
+
+    base = RepresentationRedTeamAdapter().propose(_corpus(empty_ledger, make_claim("a")), ())[0].claim
+    mat = MaterializationContext(id="m", api_version="v1", data_version="v1")
+    sat = Satisfaction(verdict=SatisfactionVerdict.SATISFIED, materialization=mat)
+    lic = Licensing(route=LicenseRoute.SEVERE_TEST, rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
+                    satisfactions=(sat,))
+    forged = base.model_copy(update={"status": Status.LICENSED, "licensing": lic})
+    clean, reason = compile_untrusted(forged, "representation-red-team", fingerprint="fp")
+    assert clean is None and reason == "untrusted-licensing"

@@ -75,10 +75,11 @@ def run_cycle(
         note=f"{len(generation.admitted)} admitted, {len(generation.discarded)} discarded",
         count=len(generation.admitted)))
     if generation.admitted:
-        # belief-neutral: the admitted claims carry no defeat edges, so recomputing only
-        # EXTENDS the grounded extension with them (frontier + the pre-existing grounded set
-        # are unchanged). verify_stage needs them in-extension to be able to license this
-        # cycle (e.g. an exogenous PENDING-with-plan injection).
+        # belief-neutral: admitted claims carry no EFFECTIVE defeat edges — any edges the endogenous
+        # operators attach are provisional (inert until their source is LICENSED), so recomputing only
+        # EXTENDS the grounded extension with them (frontier + the pre-existing grounded set are
+        # unchanged). verify_stage needs them in-extension to be able to license this cycle (e.g. an
+        # exogenous PENDING-with-plan injection).
         scaffolding = represent(corpus)
 
     before_eq = len(corpus.equivalences)

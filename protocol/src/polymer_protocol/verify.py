@@ -32,18 +32,22 @@ def _permitted_by_bar(corpus: Corpus, exec_records: tuple[ExecRecord, ...]) -> s
     executed = [by_id[r.claim_id] for r in exec_records if r.claim_id in by_id]
     if not executed:
         return set()
-    m = max(
-        (c.provenance.search_cardinality for c in executed if c.provenance is not None),
-        default=1,
-    )
-    if m <= 1:
-        return {c.id for c in executed}
     permitted = {c.id for c in executed if c.strength is None}  # exempt
     scored = [
         (1.0 - c.strength.evidence_against_null, c.id)
         for c in executed
         if c.strength is not None
     ]
+    m = max(
+        (c.provenance.search_cardinality for c in executed if c.provenance is not None),
+        default=1,
+    )
+    # defense-in-depth: the BH denominator must cover EVERY scored claim, else a too-small hand-stamped
+    # search_cardinality would let claims ranked beyond M pass on a >1 bar (FDR inversion). In the live
+    # pipeline m already = the candidate-pool size >= len(scored), so this is a no-op there.
+    m = max(m, len(scored))
+    if m <= 1:
+        return {c.id for c in executed}
     scored.sort()  # ascending pseudo-p, ties by id
     k_max = 0
     for k, (p, _) in enumerate(scored, start=1):
