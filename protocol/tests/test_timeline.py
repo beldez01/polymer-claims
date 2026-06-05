@@ -85,3 +85,14 @@ def test_timeline_public_surface():
     for name in ("export_timeline", "TopologyTimeline", "TimelineFrame", "FrameStats"):
         assert hasattr(pp, name), name
         assert name in pp.__all__, name
+
+
+def test_public_frame_stat_helpers_exported():
+    from polymer_protocol import frame_stats, n_licensed
+    # they are the same callables the timeline module uses internally
+    from polymer_protocol import timeline as _tl
+    assert _tl.frame_stats is frame_stats
+    assert _tl.n_licensed is n_licensed
+    # back-compat private aliases still resolve to the same objects
+    assert _tl._frame_stats is frame_stats
+    assert _tl._n_licensed is n_licensed

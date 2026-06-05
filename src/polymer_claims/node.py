@@ -8,7 +8,7 @@ This module is the ONLY impure piece: it owns the mutable live state
 (`corpus`, `ledger`, accumulated frames, prior node positions). Every value it
 derives comes from a PURE engine call (`run_cycle`, `next_action`,
 `export_topology`) — the grammar and protocol packages stay untouched. It
-reuses the protocol's own private `_frame_stats`/`_n_licensed` helpers so the
+reuses the protocol's public `frame_stats`/`n_licensed` helpers so the
 runner's per-frame stats are byte-identical to `export_timeline`'s.
 
 No web/HTTP here — a streaming server is a later task.
@@ -26,10 +26,11 @@ from polymer_protocol import (
     TimelineFrame,
     TopologyTimeline,
     export_topology,
+    frame_stats,
+    n_licensed,
     next_action,
     run_cycle,
 )
-from polymer_protocol.timeline import _frame_stats, _n_licensed
 
 _ADAPTERS = (IdentityAdapter(), ReferenceAdapter(identity="reference"))
 _CTX = MaterializationContext(id="M1", api_version="v1", data_version="d1")
@@ -77,7 +78,7 @@ class NodeRunner:
 
         # Frame 0 — the seed snapshot (no warm-start positions yet).
         topo = export_topology(corpus, layout=Layout.FORCE_DIRECTED)
-        stats = _frame_stats(
+        stats = frame_stats(
             corpus,
             topo,
             cycle_index=0,
@@ -89,7 +90,7 @@ class NodeRunner:
         if self.max_frames is not None and len(self.frames) > self.max_frames:
             self.frames = self.frames[-self.max_frames:]
         self.prev_positions = {n.id: n.position for n in topo.nodes}
-        self._licensed_prev = _n_licensed(corpus)
+        self._licensed_prev = n_licensed(corpus)
 
     @classmethod
     def from_seed(
@@ -147,11 +148,11 @@ class NodeRunner:
             layout=Layout.FORCE_DIRECTED,
             seed_positions=self.prev_positions,
         )
-        licensed_now = _n_licensed(self.corpus)
+        licensed_now = n_licensed(self.corpus)
         n_newly_licensed = max(0, licensed_now - self._licensed_prev)
         self._licensed_prev = licensed_now
 
-        stats = _frame_stats(
+        stats = frame_stats(
             self.corpus,
             topo,
             cycle_index=self.frame_index,

@@ -79,6 +79,8 @@ from .timeline import (
     TimelineFrame,
     TopologyTimeline,
     export_timeline,
+    frame_stats,
+    n_licensed,
 )
 from .verify import verify_stage
 
@@ -171,4 +173,6 @@ __all__ = [
     "TopologyTimeline",
     "TimelineFrame",
     "FrameStats",
+    "frame_stats",
+    "n_licensed",
 ]
