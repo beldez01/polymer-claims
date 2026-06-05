@@ -13,7 +13,7 @@ from enum import Enum
 
 from pydantic import Field
 
-from polymer_grammar import MaterializationContext, Status
+from polymer_grammar import MaterializationContext, Status, is_representation_revision
 
 from .base import _Model
 from .belief import accumulated_belief, expected_information_gain
@@ -78,7 +78,7 @@ def _selectable(corpus: Corpus):
 def _red_teamable(corpus: Corpus):
     ids = {c.id for c in corpus.claims}
     return [c for c in corpus.claims
-            if c.representation_revision is None
+            if not is_representation_revision(c)
             and not c.id.startswith("gen-rt-")
             and _gen_id("rt", c.id) not in ids]
 
