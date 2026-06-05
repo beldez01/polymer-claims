@@ -40,6 +40,7 @@ from polymer_protocol import (
 
 from . import __version__ as _claims_version
 from .io import dump_corpus, load_corpus
+from .node import NodeRunner
 
 # Default reference adapters + materialization context (deterministic, in-package).
 _ADAPTERS = (IdentityAdapter(), ReferenceAdapter(identity="reference"))
@@ -148,6 +149,39 @@ def _cmd_export_timeline(args: argparse.Namespace) -> int:
     return 0
 
 
+def _import_server():
+    """Import the optional serve deps; raises ImportError if the [serve] extra isn't installed."""
+    import uvicorn
+
+    from .server import create_app
+    return uvicorn, create_app
+
+
+def _cmd_serve(args: argparse.Namespace) -> int:
+    try:
+        uvicorn, create_app = _import_server()
+    except ImportError:
+        print(
+            "the 'serve' command needs the optional extra: "
+            "pip install 'polymer-claims[serve]'",
+            file=sys.stderr,
+        )
+        return 1
+    if args.seed_corpus:
+        corpus = load_corpus(args.seed_corpus)
+        runner = NodeRunner.from_seed(corpus, budget=args.budget)
+    else:
+        from .seed import default_seed_corpus
+        corpus, kwargs = default_seed_corpus()
+        # The evolving seed carries its own per-cycle budget in `kwargs["budget"]`,
+        # which also seeds the scheduler budget; passing `args.budget` too would
+        # collide on the keyword, so let the seed's budget govern.
+        runner = NodeRunner.from_seed(corpus, **kwargs)
+    app = create_app(runner, interval=args.interval, origins=args.origins or None)
+    uvicorn.run(app, host=args.host, port=args.port)
+    return 0
+
+
 # ---------------------------------------------------------------------------
 # parser
 # ---------------------------------------------------------------------------
@@ -188,6 +222,27 @@ def _build_parser() -> argparse.ArgumentParser:
     p_tl.add_argument("--cycles", type=int, required=True, help="number of run_cycle iterations")
     p_tl.add_argument("--out", default=None, help="write TopologyTimeline JSON here")
     p_tl.set_defaults(func=_cmd_export_timeline)
+
+    p_serve = sub.add_parser(
+        "serve", help="run the live node server (SSE) — needs the [serve] extra"
+    )
+    p_serve.add_argument(
+        "--seed-corpus",
+        default=None,
+        help="path to a seed corpus JSON (default: built-in evolving seed)",
+    )
+    p_serve.add_argument("--host", default="127.0.0.1", help="bind host")
+    p_serve.add_argument("--port", type=int, default=8000, help="bind port")
+    p_serve.add_argument(
+        "--interval", type=float, default=1.5, help="seconds between auto-ticks"
+    )
+    p_serve.add_argument(
+        "--budget", type=float, default=1e9, help="scheduler budget per tick"
+    )
+    p_serve.add_argument(
+        "--origins", nargs="*", default=None, help="extra CORS origins"
+    )
+    p_serve.set_defaults(func=_cmd_serve)
 
     return parser
 

@@ -46,13 +46,23 @@ class NodeRunner:
         ctx: MaterializationContext = _CTX,
         config: SchedulerConfig | None = None,
         budget: float = 1e9,
+        **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
         self.ledger = SelectionLedger()
         self.adapters = adapters
         self.ctx = ctx
         self.config = config if config is not None else SchedulerConfig()
-        self.budget = budget
+        # `budget` names the scheduler budget threaded into `next_action`. A
+        # `budget` inside `run_cycle_kwargs` names run_cycle's own SELECT budget;
+        # it stays in the kwargs dict and also seeds the scheduler budget so the
+        # two stay coherent when only the run_cycle budget is supplied.
+        if "budget" in run_cycle_kwargs:
+            self.budget = run_cycle_kwargs["budget"]
+        else:
+            self.budget = budget
+        self.run_cycle_kwargs = run_cycle_kwargs
+        self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
         self.prev_positions: dict[str, tuple] = {}
         self.running = True
@@ -80,19 +90,33 @@ class NodeRunner:
         ctx: MaterializationContext = _CTX,
         config: SchedulerConfig | None = None,
         budget: float = 1e9,
+        **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
-            corpus, adapters=adapters, ctx=ctx, config=config, budget=budget
+            corpus,
+            adapters=adapters,
+            ctx=ctx,
+            config=config,
+            budget=budget,
+            **run_cycle_kwargs,
         )
 
     def tick(self) -> TimelineFrame:
         """Advance one scheduler-driven step; emit and accumulate a frame."""
-        state = SchedulerState(corpus=self.corpus, ledger=self.ledger)
+        state = SchedulerState(
+            corpus=self.corpus,
+            ledger=self.ledger,
+            proposers_available=self._proposers_available,
+        )
         action = next_action(state, budget=self.budget, config=self.config)
 
         if action is not None and action.kind == ActionKind.RUN_CYCLE:
             result = run_cycle(
-                self.corpus, self.adapters, self.ctx, ledger=self.ledger
+                self.corpus,
+                self.adapters,
+                self.ctx,
+                ledger=self.ledger,
+                **self.run_cycle_kwargs,
             )
             self.corpus = result.corpus
             self.ledger = result.ledger
