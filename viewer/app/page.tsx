@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { COLOR, FONT_FAMILY_MONO } from '@/config/theme';
 import Header from '@/components/chrome/Header';
+import LiveControl from '@/components/chrome/LiveControl';
 import LegendRail from '@/components/chrome/LegendRail';
 import InspectorPanel from '@/components/chrome/InspectorPanel';
 import ReadoutOverlay from '@/components/chrome/ReadoutOverlay';
@@ -48,6 +49,7 @@ export default function Home() {
     >
       <ClaimUniverse />
       <Header />
+      <LiveControl />
       <LegendRail />
       <ReadoutOverlay />
       <InspectorPanel />
