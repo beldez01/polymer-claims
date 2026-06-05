@@ -36,7 +36,16 @@ _CTX = MaterializationContext(id="M1", api_version="v1", data_version="d1")
 
 
 class NodeRunner:
-    """Stateful driver that warm-starts a live claims-universe timeline."""
+    """Stateful driver that warm-starts a live claims-universe timeline.
+
+    `max_frames` caps retained `frames` to a newest-N ring window (oldest
+    frames are trimmed once the cap is exceeded) so a long-running node does
+    not leak memory; `None` disables the cap (unbounded, the historical
+    behavior). The cap touches ONLY the retained frame window: `frame_index`
+    stays the monotonic TRUE total of ticks (and `snapshot().n_cycles`), while
+    `frames` is just the newest-N slice of that history. Warm-start
+    (`prev_positions`) is unaffected — it always derives from the latest frame.
+    """
 
     def __init__(
         self,
@@ -46,6 +55,7 @@ class NodeRunner:
         ctx: MaterializationContext = _CTX,
         config: SchedulerConfig | None = None,
         scheduler_budget: float = 1e9,
+        max_frames: int | None = 10000,
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -58,6 +68,7 @@ class NodeRunner:
         # quantity — run_cycle's own SELECT budget — and flows straight through
         # to `run_cycle`, where it spreads licensing progressively across cycles.
         self.scheduler_budget = scheduler_budget
+        self.max_frames = max_frames
         self.run_cycle_kwargs = run_cycle_kwargs
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
@@ -75,6 +86,8 @@ class NodeRunner:
             n_newly_licensed=0,
         )
         self.frames: list[TimelineFrame] = [TimelineFrame(topology=topo, stats=stats)]
+        if self.max_frames is not None and len(self.frames) > self.max_frames:
+            self.frames = self.frames[-self.max_frames:]
         self.prev_positions = {n.id: n.position for n in topo.nodes}
         self._licensed_prev = _n_licensed(corpus)
 
@@ -87,6 +100,7 @@ class NodeRunner:
         ctx: MaterializationContext = _CTX,
         config: SchedulerConfig | None = None,
         scheduler_budget: float = 1e9,
+        max_frames: int | None = 10000,
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
@@ -95,6 +109,7 @@ class NodeRunner:
             ctx=ctx,
             config=config,
             scheduler_budget=scheduler_budget,
+            max_frames=max_frames,
             **run_cycle_kwargs,
         )
 
@@ -146,6 +161,8 @@ class NodeRunner:
         )
         frame = TimelineFrame(topology=topo, stats=stats)
         self.frames.append(frame)
+        if self.max_frames is not None and len(self.frames) > self.max_frames:
+            self.frames = self.frames[-self.max_frames:]
         self.prev_positions = {n.id: n.position for n in topo.nodes}
         return frame
 
