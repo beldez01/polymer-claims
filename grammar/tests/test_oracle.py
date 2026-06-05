@@ -40,11 +40,11 @@ def test_weakest_tier_empty_is_gold_identity():
 def test_tier_ceiling_caps_empirical_leaves_theory_at_one():
     c = tier_ceiling(ValidationTier.INDIRECT)
     assert c.magnitude == 0.4
-    assert c.uncertainty == 0.4
+    assert c.uncertainty == 1.0          # no longer a goodness cap; uncertainty is floored in cap_strength
     assert c.evidence_against_null == 0.4
     assert c.world_contact == 0.4
-    assert c.severity == 1.0            # theory axis uncapped
-    assert c.explanatory_virtue == 1.0  # theory axis uncapped
+    assert c.severity == 1.0
+    assert c.explanatory_virtue == 1.0
 
 
 def test_tier_ceiling_gold_is_all_one():
@@ -69,11 +69,11 @@ def test_cap_strength_caps_only_empirical():
                        severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     capped = cap_strength(s, ValidationTier.INDIRECT)
     assert capped.magnitude == 0.4
-    assert capped.uncertainty == 0.4
+    assert capped.uncertainty == 0.9          # reverse-polarity floor: max(0.9, 1-0.4=0.6) = 0.9
     assert capped.evidence_against_null == 0.4
     assert capped.world_contact == 0.4
-    assert capped.severity == 0.9            # untouched
-    assert capped.explanatory_virtue == 0.9  # untouched
+    assert capped.severity == 0.9
+    assert capped.explanatory_virtue == 0.9
 
 
 def test_cap_strength_by_gold_is_unchanged():
@@ -88,21 +88,33 @@ def test_cap_strength_by_unvalidated_zeroes_empirical():
     capped = cap_strength(s, ValidationTier.UNVALIDATED)
     assert capped.magnitude == 0.0
     assert capped.world_contact == 0.0
+    assert capped.uncertainty == 1.0          # reverse polarity: weak apparatus -> maximally uncertain
     assert capped.severity == 0.7            # untouched
     assert capped.explanatory_virtue == 0.7
+
+
+def test_cap_strength_weak_tier_raises_uncertainty_not_lowers_it():
+    # F2: a precise claim (low uncertainty) evaluated on a weak apparatus must become MORE uncertain.
+    precise = StrengthVector(magnitude=0.5, uncertainty=0.1, evidence_against_null=0.5,
+                             severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
+    capped = cap_strength(precise, ValidationTier.BENCHMARKED)  # c=0.6 -> floor 1-0.6=0.4
+    assert capped.uncertainty == 0.4           # raised from 0.1, NOT lowered
+    assert capped.magnitude == 0.5             # goodness axis below ceiling 0.6 -> unchanged
 
 
 def test_cap_strength_none_is_none():
     assert cap_strength(None, ValidationTier.GOLD) is None
 
 
-def test_tier_ceiling_monotone_on_all_empirical_axes():
+def test_tier_ceiling_monotone_on_goodness_axes():
     order = [ValidationTier.UNVALIDATED, ValidationTier.INDIRECT,
              ValidationTier.BENCHMARKED, ValidationTier.ANCHORED, ValidationTier.GOLD]
-    for ax in ("magnitude", "uncertainty", "evidence_against_null", "world_contact"):
+    for ax in ("magnitude", "evidence_against_null", "world_contact"):
         vals = [getattr(tier_ceiling(t), ax) for t in order]
         assert vals == sorted(vals)
         assert vals[0] == 0.0 and vals[-1] == 1.0
+    # uncertainty is constant 1.0 in tier_ceiling (capped as a floor in cap_strength, not here)
+    assert all(tier_ceiling(t).uncertainty == 1.0 for t in order)
 
 
 def test_cap_strength_never_raises_an_axis():
@@ -183,3 +195,48 @@ def test_referenced_oracle_ids_empty_when_all_none():
 def test_referenced_oracle_ids_dedups_shared_ref():
     plan = _plan_with_refs("o1", "o1", "o2")
     assert referenced_oracle_ids(plan) == frozenset({"o1", "o2"})
+
+
+def test_decay_tier_full_pass_is_unchanged():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.GOLD, 1.0) == ValidationTier.GOLD
+    assert decay_tier(ValidationTier.INDIRECT, 1.0) == ValidationTier.INDIRECT
+
+
+def test_decay_tier_zero_pass_is_unvalidated():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.GOLD, 0.0) == ValidationTier.UNVALIDATED
+
+
+def test_decay_tier_proportional_from_gold():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.GOLD, 0.9) == ValidationTier.ANCHORED      # floor(3.6)=3
+    assert decay_tier(ValidationTier.GOLD, 0.7) == ValidationTier.BENCHMARKED   # floor(2.8)=2
+    assert decay_tier(ValidationTier.GOLD, 0.5) == ValidationTier.BENCHMARKED   # floor(2.0)=2
+    assert decay_tier(ValidationTier.GOLD, 0.25) == ValidationTier.INDIRECT     # floor(1.0)=1
+
+
+def test_decay_tier_is_decay_only_never_promotes():
+    from polymer_grammar import decay_tier
+    # pass_rate that would "earn" GOLD cannot lift an INDIRECT oracle above INDIRECT.
+    assert decay_tier(ValidationTier.INDIRECT, 1.0) == ValidationTier.INDIRECT
+    assert decay_tier(ValidationTier.BENCHMARKED, 0.9) == ValidationTier.BENCHMARKED  # min(2, 3)=2
+
+
+def test_decay_tier_has_stable_fixed_point():
+    from polymer_grammar import decay_tier
+    once = decay_tier(ValidationTier.GOLD, 0.9)        # ANCHORED
+    twice = decay_tier(once, 0.9)                      # min(3, 3) -> ANCHORED
+    assert once == twice == ValidationTier.ANCHORED
+
+
+def test_decay_tier_clamps_out_of_range():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.GOLD, -0.5) == ValidationTier.UNVALIDATED
+    assert decay_tier(ValidationTier.GOLD, 1.7) == ValidationTier.GOLD
+
+
+def test_decay_tier_unvalidated_stays_unvalidated():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.UNVALIDATED, 1.0) == ValidationTier.UNVALIDATED
+    assert decay_tier(ValidationTier.UNVALIDATED, 0.0) == ValidationTier.UNVALIDATED

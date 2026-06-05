@@ -36,9 +36,10 @@ _TIER_RANK = {
     ValidationTier.GOLD: 4,
 }
 
-# Empirical (apparatus-bounded) axes the ceiling caps. severity + explanatory_virtue are
-# test-design / theory axes (set by argument, not apparatus) -> never capped.
-_EMPIRICAL_AXES = ("magnitude", "uncertainty", "evidence_against_null", "world_contact")
+# Goodness empirical axes the tier ceiling caps DOWN (higher = stronger). `uncertainty` is ALSO
+# apparatus-bounded but REVERSE-polarity (higher = weaker), so it is floored UP in cap_strength, not
+# capped here. severity + explanatory_virtue are theory axes (set by argument) -> never touched.
+_GOODNESS_EMPIRICAL_AXES = ("magnitude", "evidence_against_null", "world_contact")
 
 # v1 empirical-axis ceiling per tier (monotone; endpoints pinned at 0.0/1.0).
 # v1 ladder — tunable; calibrate against empirical oracle-validation sets later.
@@ -62,21 +63,39 @@ def weakest_tier(tiers: Iterable[ValidationTier]) -> ValidationTier:
     return min(ts, key=lambda t: _TIER_RANK[t])
 
 
+MAX_TIER_RANK = max(_TIER_RANK.values())  # 4
+_RANK_TO_TIER = {rank: tier for tier, rank in _TIER_RANK.items()}
+
+
+def decay_tier(tier: ValidationTier, pass_rate: float) -> ValidationTier:
+    """The tier a SPOT-probe `pass_rate` earns, capped by the current tier (DECAY-ONLY — never promotes).
+    target_rank = floor(clamp(pass_rate, 0, 1) * MAX_TIER_RANK); new_rank = min(current, target). Gives a
+    proportional decay with a stable fixed point (a 90%-passing oracle settles at ANCHORED and stays);
+    monotone non-increasing; parameter-free. int() truncates toward zero = floor for the non-negative arg."""
+    pr = 0.0 if pass_rate < 0.0 else (1.0 if pass_rate > 1.0 else pass_rate)
+    target_rank = int(pr * MAX_TIER_RANK)
+    new_rank = min(_TIER_RANK[tier], target_rank)
+    return _RANK_TO_TIER[new_rank]
+
+
 def tier_ceiling(tier: ValidationTier) -> StrengthVector:
-    """The per-axis strength ceiling a tier imposes: empirical axes carry the tier ceiling;
-    theory axes (severity, explanatory_virtue) stay at 1.0 (uncapped)."""
+    """Per-axis ceiling for the GOODNESS empirical axes (capped down to c). `uncertainty` and the theory
+    axes stay 1.0 here — uncertainty is reverse-polarity and is floored UP in cap_strength instead."""
     c = _TIER_CEILING[tier]
-    return StrengthVector(**{ax: (c if ax in _EMPIRICAL_AXES else 1.0) for ax in AXES})
+    return StrengthVector(**{ax: (c if ax in _GOODNESS_EMPIRICAL_AXES else 1.0) for ax in AXES})
 
 
 def cap_strength(
     strength: StrengthVector | None, tier: ValidationTier
 ) -> StrengthVector | None:
-    """`strength` meet the tier ceiling (componentwise min) — caps only the empirical axes
-    (theory-axis ceilings are 1.0). None in -> None out (nothing to cap)."""
+    """`strength` capped by the tier. Goodness empirical axes meet the ceiling (componentwise min);
+    the reverse-polarity `uncertainty` axis is floored UP to (1 - ceiling) — a weak apparatus makes a
+    claim MORE uncertain, not less (F2). Theory axes (severity, explanatory_virtue) uncapped. None -> None."""
     if strength is None:
         return None
-    return strength.meet(tier_ceiling(tier))
+    c = _TIER_CEILING[tier]
+    capped = strength.meet(tier_ceiling(tier))  # caps the 3 goodness axes; uncertainty/theory are no-ops
+    return capped.model_copy(update={"uncertainty": max(strength.uncertainty, 1.0 - c)})
 
 
 class ApplicabilityDomain(_Model):
