@@ -1,13 +1,61 @@
 # polymer-claims
 
-Home for the Polymer Claims agent-scientist ecosystem — a machine-readable representation
-of scientific claims, and the beginnings of a protocol for generating new ones.
+Home for the Polymer Claims agent-scientist ecosystem — a **compiler + runtime for science**:
+a machine-readable grammar for scientific claims, a protocol that grows a corpus of them
+toward truth, a local node that runs it, and a 3D viewer that renders the live universe.
+
+> **New here?** Read `ARCHITECTURE_CURRENT.md` (what's active vs frozen vs future, one page) and
+> `GLOSSARY.md` (reserved terms). `docs/superpowers/CONTINUE.md` is the detailed continuity log.
 
 | Subdir | What it is | Status / Distribution |
 |---|---|---|
-| `grammar/` | **The v1.3 grammar** (`polymer_grammar`) — the active, next-generation claim schema, built in isolation from v1.2. A five-layer grammar derived from first principles (see Direction below). | **Active** — 4 of 8 grammar phases merged |
-| `docs/superpowers/` | Foundations spec, per-phase specs + plans (with Progress Logs), and `CONTINUE.md` resume primer for the v1.3 build. | Active |
-| `v1.2/` | **Frozen v1.2 ecosystem, kept as a fallback** in case the v1.3 rebuild fails — the FormalClaim IR package (`v1.2/formalclaim/`), the 47-claim corpus (`v1.2/corpus/`), the Claude Code authoring plugin (`v1.2/plugins/claim-harness/`), schema-sync script, archived workflows, and v1.2-era design docs. See `v1.2/README.md`. | Frozen (not deleted) |
+| `grammar/` | **The v1.3 grammar** (`polymer_grammar`) — the active claim IR. A five-layer grammar derived from first principles (see Direction below). | **Active** — all 8 layer-phases merged |
+| `protocol/` | **The v1.3 protocol** (`polymer_protocol`) — the runtime over the grammar: the `run_cycle` flywheel + 3 daemons + the `next_action` scheduler + topology/timeline exports. | **Active** — all 5 sub-projects + daemons + scheduler merged |
+| `src/polymer_claims/` | **The umbrella distribution** (`polymer-claims`) — the CLI over the complete runtime + the live local node (`serve`, behind the optional `[serve]` extra). | **Active** — `pip install polymer-claims` → local node works |
+| `viewer/` | **The claims-universe 3D viewer** (Next 16 + React Three Fiber). Plays a sample timeline or streams a live node. | **Active** — `tsc`+`build` clean |
+| `docs/superpowers/` | Foundations spec, per-phase specs + plans (with Progress Logs), and `CONTINUE.md` resume primer. | Active |
+| `v1.2/` | **Frozen v1.2 ecosystem, kept as a fallback** — the FormalClaim IR package, the 47-claim corpus, the `claim-harness` plugin, schema, legacy workflows. Does **not** exercise the v1.3 runtime. See `v1.2/README.md`. | Frozen (not deleted) |
+
+---
+
+## Quickstart — run the live universe locally
+
+The most tangible experience is the **live node + viewer**: a local process runs the claims
+universe forward and streams each frame; the viewer renders it evolving in real time.
+
+```bash
+# Terminal 1 — the node (install the serve extra once):
+pip install -e '.[serve]'          # or: uv sync (the dev group includes serve deps)
+polymer-claims serve               # → http://localhost:8000  (ticks the universe, streams SSE)
+
+# Terminal 2 — the viewer:
+cd viewer && npm install && npm run dev   # → http://localhost:3000
+# In the viewer, click Connect (default http://localhost:8000) to enter LIVE mode.
+```
+
+**Sample mode vs live mode:** with no connection the viewer plays a precomputed
+`viewer/public/sample-timeline.json` (sample mode); clicking **Connect** switches to **live
+mode**, streaming frames from the running node as the corpus actually generates, licenses, and
+revises claims. The `serve` node binds loopback only; binding a non-loopback `--host` requires
+`--unsafe-remote-control` (the mutating routes are unauthenticated by design — local only).
+
+### Fresh-clone dev commands
+
+```bash
+# Python suites (each subpackage is its own uv project):
+uv run --project . pytest tests/ -q          # umbrella (node/cli/server)
+cd grammar  && uv run pytest -q              # the grammar
+cd protocol && uv run pytest -q              # the protocol runtime
+cd grammar  && uv run pytest tests/test_isolation.py -q   # the one-way-dependency invariant
+# Lint:        uv run ruff check src tests   (in each package dir)
+# Viewer:      cd viewer && npm run typecheck && npm run build
+
+# One command for everything (local CI substitute — GitHub Actions are unavailable):
+bash scripts/check-all.sh
+
+# Build all three wheels + smoke the installed console script:
+bash scripts/build_and_test_install.sh
+```
 
 ---
 
@@ -25,7 +73,7 @@ Two artifacts define the system, a **compiler/runtime pair over one IR**:
 
 - **The Grammar** — what a claim *is* (well-formed, interpreted, licensable). → `grammar/`
 - **The Protocol** — how a corpus of claims *grows toward truth* (generate → pursue →
-  assess → integrate). → future work, atop the grammar.
+  assess → integrate). → `protocol/` (the full flywheel + 3 daemons + scheduler, complete).
 
 Every design decision is judged against one test: **sensitivity** (capture the fullest
 semantic + syntactic richness of real science — lose nothing real) × **specificity** (admit
