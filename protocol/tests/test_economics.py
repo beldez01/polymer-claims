@@ -148,3 +148,11 @@ def test_loop_makes_progress_and_terminates(empty_ledger, ctx, adapters):
     licensed = [c for c in state.corpus.claims if c.status is Status.LICENSED]
     assert len(licensed) >= 1          # progress was made
     assert next_action(state, budget=remaining) is None  # terminates (no selectable left)
+
+
+def test_economics_symbols_exported_from_package():
+    import polymer_protocol as pp
+
+    for name in ("ActionKind", "ScheduledAction", "SchedulerState",
+                 "SchedulerWeights", "SchedulerConfig", "next_action"):
+        assert hasattr(pp, name), f"missing export: {name}"
