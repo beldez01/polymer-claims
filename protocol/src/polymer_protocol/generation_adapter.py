@@ -66,7 +66,11 @@ def bridge_proposer(adapters: tuple[GenerationAdapter, ...]) -> Proposer:
                 clean, _reason = compile_untrusted(p.claim, a.identity, fingerprint=fp)
                 if clean is None:
                     continue
-                out.append(Proposal(operator_id=a.identity, claim=clean, edges=p.edges))
+                # C1: coerce every untrusted edge to provisional. An untrusted claim's edge stays
+                # inert until the claim itself licenses through the air-gapped verify, so it cannot
+                # defeat an honest claim for free (effective_defeats skips unlicensed provisional).
+                safe_edges = tuple(e.model_copy(update={"provisional": True}) for e in p.edges)
+                out.append(Proposal(operator_id=a.identity, claim=clean, edges=safe_edges))
         return tuple(out)
 
     return _proposer
