@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────────────
+   D2 design tokens as CSS variables (IBM Carbon × Bloomberg Reference).
+   Light-gray canvas, electric blue, hairline rules. No glow, no shadow.
+   Mirrors PolymerGenomicsAPI/viewer/src/app/globals.css.
+   ────────────────────────────────────────────────────────────────── */
+:root {
+  --bg-primary:   #F4F4F5;
+  --bg-elevated:  #FAFAFA;
+  --bg-surface:   #FAFAFA;
+  --bg-deep:      #EBEBED;
+  --bg-white:     #FFFFFF;
+
+  --border-subtle:  #D4D4D8;
+  --border-default: #E4E4E7;
+  --border-strong:  #A1A1AA;
+
+  --text-primary:   #18181B;
+  --text-secondary: #3F3F46;
+  --text-tertiary:  #52525B;
+  --text-muted:     #71717A;
+  --text-faint:     #A1A1AA;
+
+  --accent-teal:   #08A097;
+  --accent-amber:  #B45309;
+  --accent-violet: #7C3AED;
+  --accent-rose:   #BE123C;
+
+  --primary:        #0F62FE;
+  --primary-hover:  #0043CE;
+  --primary-active: #002D9C;
+
+  --font-sans:
+    var(--font-inter), -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:
+    var(--font-jetbrains-mono), 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+}
+
+/* Tabular numerics — opt-in for data columns / coordinates / counts */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Mono register — opt-in for data, coordinates, section markers */
+.mono { font-family: var(--font-mono); }
+
+/* Section marker — §01 — CLAIM UNIVERSE */
+.section-marker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+html, body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Focus — 2px solid electric blue, no glow */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Scrollbars — hairline, neutral */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb  { background: var(--border-default); }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+::selection {
+  background-color: rgba(15, 98, 254, 0.18);
+  color: var(--text-primary);
+}

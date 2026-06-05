@@ -1,0 +1,636 @@
+{
+  "nodes": [
+    {
+      "id": "A01",
+      "status": "licensed",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.92,
+        0.88,
+        0.95,
+        0.8,
+        0.85,
+        0.78
+      ],
+      "is_representation_revision": false,
+      "position": [
+        2.448322,
+        1.730191,
+        -1.338979
+      ]
+    },
+    {
+      "id": "A02",
+      "status": "licensed",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.7,
+        0.82,
+        0.88,
+        0.66,
+        0.74,
+        0.71
+      ],
+      "is_representation_revision": false,
+      "position": [
+        2.250282,
+        1.82619,
+        -1.665537
+      ]
+    },
+    {
+      "id": "A03",
+      "status": "pending",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.55,
+        0.4,
+        0.5,
+        0.45,
+        0.5,
+        0.42
+      ],
+      "is_representation_revision": false,
+      "position": [
+        0.654299,
+        -1.424665,
+        -0.396983
+      ]
+    },
+    {
+      "id": "A04",
+      "status": "exploratory",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.4,
+        0.3,
+        0.35,
+        0.3,
+        0.55,
+        0.48
+      ],
+      "is_representation_revision": false,
+      "position": [
+        0.443797,
+        -2.751902,
+        0.14725
+      ]
+    },
+    {
+      "id": "A05",
+      "status": "conjectured",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        2.454071,
+        -0.445633,
+        2.142428
+      ]
+    },
+    {
+      "id": "A06",
+      "status": "conjectured",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.2,
+        0.15,
+        0.25,
+        0.18,
+        0.3,
+        0.22
+      ],
+      "is_representation_revision": false,
+      "position": [
+        0.400223,
+        -2.335978,
+        0.092838
+      ]
+    },
+    {
+      "id": "A07",
+      "status": "rejected",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.3,
+        0.2,
+        0.1,
+        0.25,
+        0.2,
+        0.15
+      ],
+      "is_representation_revision": false,
+      "position": [
+        0.395917,
+        -1.451958,
+        -0.063845
+      ]
+    },
+    {
+      "id": "A08",
+      "status": "pending",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.48,
+        0.52,
+        0.44,
+        0.4,
+        0.46,
+        0.5
+      ],
+      "is_representation_revision": false,
+      "position": [
+        0.287016,
+        3.083406,
+        -0.628502
+      ]
+    },
+    {
+      "id": "A09",
+      "status": "exploratory",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        0.0433,
+        2.976217,
+        -0.849476
+      ]
+    },
+    {
+      "id": "A10",
+      "status": "licensed",
+      "pattern_id": "adjusted_effect",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.66,
+        0.71,
+        0.69,
+        0.6,
+        0.64,
+        0.62
+      ],
+      "is_representation_revision": false,
+      "position": [
+        2.182418,
+        -0.612091,
+        2.008981
+      ]
+    },
+    {
+      "id": "B01",
+      "status": "licensed",
+      "pattern_id": "mediation",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.8,
+        0.78,
+        0.83,
+        0.7,
+        0.76,
+        0.74
+      ],
+      "is_representation_revision": false,
+      "position": [
+        1.81785,
+        1.638409,
+        -1.621307
+      ]
+    },
+    {
+      "id": "B02",
+      "status": "pending",
+      "pattern_id": "mediation",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.5,
+        0.45,
+        0.48,
+        0.42,
+        0.44,
+        0.4
+      ],
+      "is_representation_revision": false,
+      "position": [
+        1.239772,
+        -1.744667,
+        -1.074195
+      ]
+    },
+    {
+      "id": "B03",
+      "status": "exploratory",
+      "pattern_id": "mediation",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.38,
+        0.28,
+        0.33,
+        0.31,
+        0.52,
+        0.46
+      ],
+      "is_representation_revision": false,
+      "position": [
+        0.350575,
+        0.899127,
+        2.857845
+      ]
+    },
+    {
+      "id": "B04",
+      "status": "conjectured",
+      "pattern_id": "mediation",
+      "subject_kind": "ontology_term",
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -1.244824,
+        0.693926,
+        2.018448
+      ]
+    },
+    {
+      "id": "B05",
+      "status": "rejected",
+      "pattern_id": "mediation",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.25,
+        0.18,
+        0.12,
+        0.2,
+        0.22,
+        0.16
+      ],
+      "is_representation_revision": false,
+      "position": [
+        0.960882,
+        -1.534044,
+        -0.76349
+      ]
+    },
+    {
+      "id": "B06",
+      "status": "pending",
+      "pattern_id": "mediation",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.44,
+        0.4,
+        0.46,
+        0.38,
+        0.42,
+        0.45
+      ],
+      "is_representation_revision": false,
+      "position": [
+        -1.172924,
+        0.402662,
+        2.191414
+      ]
+    },
+    {
+      "id": "B07",
+      "status": "conjectured",
+      "pattern_id": "mediation",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.22,
+        0.16,
+        0.2,
+        0.18,
+        0.26,
+        0.24
+      ],
+      "is_representation_revision": false,
+      "position": [
+        0.529263,
+        1.127703,
+        2.669025
+      ]
+    },
+    {
+      "id": "B08",
+      "status": "exploratory",
+      "pattern_id": "mediation",
+      "subject_kind": "ontology_term",
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -1.389594,
+        3.091009,
+        0.350279
+      ]
+    },
+    {
+      "id": "B09",
+      "status": "licensed",
+      "pattern_id": "mediation",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.72,
+        0.69,
+        0.74,
+        0.62,
+        0.66,
+        0.64
+      ],
+      "is_representation_revision": false,
+      "position": [
+        -1.508518,
+        -0.816704,
+        -2.195328
+      ]
+    },
+    {
+      "id": "C01",
+      "status": "licensed",
+      "pattern_id": "dose_response",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.85,
+        0.8,
+        0.87,
+        0.72,
+        0.78,
+        0.76
+      ],
+      "is_representation_revision": false,
+      "position": [
+        -1.864377,
+        -0.646766,
+        -2.27774
+      ]
+    },
+    {
+      "id": "C02",
+      "status": "pending",
+      "pattern_id": "dose_response",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.52,
+        0.47,
+        0.5,
+        0.43,
+        0.45,
+        0.41
+      ],
+      "is_representation_revision": false,
+      "position": [
+        -2.977734,
+        0.369691,
+        0.487005
+      ]
+    },
+    {
+      "id": "C03",
+      "status": "exploratory",
+      "pattern_id": "dose_response",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.36,
+        0.27,
+        0.32,
+        0.29,
+        0.5,
+        0.44
+      ],
+      "is_representation_revision": false,
+      "position": [
+        -0.513296,
+        0.936482,
+        -2.654105
+      ]
+    },
+    {
+      "id": "C04",
+      "status": "conjectured",
+      "pattern_id": "dose_response",
+      "subject_kind": "ontology_term",
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -2.214096,
+        -0.469107,
+        -2.364627
+      ]
+    },
+    {
+      "id": "C05",
+      "status": "rejected",
+      "pattern_id": "dose_response",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.28,
+        0.19,
+        0.11,
+        0.22,
+        0.21,
+        0.17
+      ],
+      "is_representation_revision": false,
+      "position": [
+        -3.07264,
+        0.663044,
+        0.332477
+      ]
+    },
+    {
+      "id": "C06",
+      "status": "conjectured",
+      "pattern_id": "dose_response",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.21,
+        0.17,
+        0.23,
+        0.19,
+        0.28,
+        0.25
+      ],
+      "is_representation_revision": false,
+      "position": [
+        -0.25912,
+        0.752909,
+        -2.803918
+      ]
+    },
+    {
+      "id": "C07_REV",
+      "status": "licensed",
+      "pattern_id": "dose_response",
+      "subject_kind": "ontology_term",
+      "strength": [
+        0.78,
+        0.84,
+        0.8,
+        0.75,
+        0.7,
+        0.88
+      ],
+      "is_representation_revision": true,
+      "position": [
+        3.370169,
+        -0.577076,
+        -0.281602
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "A01",
+      "target": "A02",
+      "kind": "entails",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "A02",
+      "target": "B01",
+      "kind": "equivalence",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "A05",
+      "target": "A10",
+      "kind": "undermine",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "A06",
+      "target": "A04",
+      "kind": "undercut",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "A07",
+      "target": "A03",
+      "kind": "rebut",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "A09",
+      "target": "A08",
+      "kind": "rebut",
+      "effective": false,
+      "provisional": true
+    },
+    {
+      "source": "B04",
+      "target": "B06",
+      "kind": "undermine",
+      "effective": false,
+      "provisional": true
+    },
+    {
+      "source": "B05",
+      "target": "A03",
+      "kind": "reinterpret",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "B05",
+      "target": "B02",
+      "kind": "rebut",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "B07",
+      "target": "B03",
+      "kind": "undercut",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "B09",
+      "target": "C01",
+      "kind": "equivalence",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "C04",
+      "target": "C01",
+      "kind": "undermine",
+      "effective": false,
+      "provisional": true
+    },
+    {
+      "source": "C05",
+      "target": "C02",
+      "kind": "rebut",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "C06",
+      "target": "C03",
+      "kind": "reclassify",
+      "effective": false,
+      "provisional": false
+    }
+  ],
+  "clusters": [
+    {
+      "id": "pattern:adjusted_effect",
+      "label": "pattern:adjusted_effect",
+      "member_ids": [
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "A07",
+        "A08",
+        "A09",
+        "A10"
+      ]
+    },
+    {
+      "id": "pattern:dose_response",
+      "label": "pattern:dose_response",
+      "member_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07_REV"
+      ]
+    },
+    {
+      "id": "pattern:mediation",
+      "label": "pattern:mediation",
+      "member_ids": [
+        "B01",
+        "B02",
+        "B03",
+        "B04",
+        "B05",
+        "B06",
+        "B07",
+        "B08",
+        "B09"
+      ]
+    }
+  ],
+  "layout_id": "fruchterman-reingold:iters=50,seed=sha256"
+}
