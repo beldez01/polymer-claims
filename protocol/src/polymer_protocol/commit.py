@@ -10,7 +10,7 @@ from __future__ import annotations
 from polymer_grammar import Claim, GenerationMode, Provenance, Status
 
 from .base import stable_sha
-from .corpus import Corpus
+from .corpus import Corpus, is_locked
 
 
 def _lock(claim: Claim) -> str:
@@ -20,10 +20,6 @@ def _lock(claim: Claim) -> str:
     )
 
 
-def _is_locked(claim: Claim) -> bool:
-    return claim.provenance is not None and claim.provenance.preregistration_hash is not None
-
-
 def commit(corpus: Corpus, only: frozenset[str] | None = None) -> Corpus:
     new_claims = []
     changed = False
@@ -31,7 +27,7 @@ def commit(corpus: Corpus, only: frozenset[str] | None = None) -> Corpus:
         if only is not None and c.id not in only:
             new_claims.append(c)
             continue
-        if c.status != Status.PENDING or c.evaluation_plan is None or _is_locked(c):
+        if c.status != Status.PENDING or c.evaluation_plan is None or is_locked(c):
             new_claims.append(c)
             continue
         lock = _lock(c)

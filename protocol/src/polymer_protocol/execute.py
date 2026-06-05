@@ -16,14 +16,14 @@ from polymer_grammar import (
     verify,
 )
 
-from .corpus import Corpus, ExecRecord
+from .corpus import Corpus, ExecRecord, is_locked
 
 
 def _is_executable(claim: Claim) -> bool:
     if claim.status != Status.PENDING or claim.evaluation_plan is None:
         return False
     # committed: carries a preregistration lock (from COMMIT)
-    if claim.provenance is None or claim.provenance.preregistration_hash is None:
+    if not is_locked(claim):
         return False
     # not safety-gated (same predicate SAFETY uses)
     if claim.governance is not None and requires_safety_review(claim.governance):

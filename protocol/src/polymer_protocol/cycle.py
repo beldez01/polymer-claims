@@ -19,7 +19,7 @@ from polymer_grammar import Adapter, Claim, MaterializationContext, Status
 
 from .canonicalize import canonicalize
 from .commit import commit
-from .corpus import Corpus, CycleResult, StageAudit
+from .corpus import Corpus, CycleResult, StageAudit, is_locked
 from .cost import CostModel, CostWeights
 from .execute import execute_ground
 from .generate import Proposer, generate_stage
@@ -33,10 +33,7 @@ from .verify import verify_stage
 
 
 def _locked_ids(corpus: Corpus) -> set[str]:
-    return {
-        c.id for c in corpus.claims
-        if c.provenance is not None and c.provenance.preregistration_hash is not None
-    }
+    return {c.id for c in corpus.claims if is_locked(c)}
 
 
 def run_cycle(
