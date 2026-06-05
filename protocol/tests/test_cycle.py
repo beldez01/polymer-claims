@@ -424,6 +424,126 @@ def test_seam_folds_in_governed_conjectures(empty_ledger, ctx, adapters):
     assert {"a", "b"} & set(represent(r1.corpus).grounded_extension) == {"a", "b"} & set(g0)
 
 
+def test_daemons_do_not_move_ledger_credit(empty_ledger, ctx):
+    # Belief-neutrality: credit flows ONLY through run_cycle's survival-credit path. The standing
+    # daemons (drift / oracle-validation) have no ledger in their signatures, so a ledger that
+    # records success credit is unchanged by running them.
+    from polymer_grammar import (
+        LicenseRoute,
+        Licensing,
+        MaterializationContext,
+        OracleDossier,
+        RivalSetClosure,
+        Satisfaction,
+        SatisfactionVerdict,
+        Status,
+        ValidationTier,
+    )
+
+    from polymer_protocol.drift import drift_pass
+    from polymer_protocol.ledger import ClaimOutcome, SelectionLedger
+    from polymer_protocol.oracle import OracleRegistry
+    from polymer_protocol.oracle_validation import SpotProbe, oracle_validation_pass
+
+    led = SelectionLedger(outcomes=(ClaimOutcome(claim_id="c", successes=1, failures=0),))
+    before = led.outcome("c").successes
+
+    stale = MaterializationContext(id="M0", api_version="v0", data_version="d0")
+    lic = Licensing(
+        route=LicenseRoute.SEVERE_TEST,
+        rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
+        satisfactions=(Satisfaction(verdict=SatisfactionVerdict.SATISFIED, materialization=stale),),
+    )
+    c = make_claim("c", Status.LICENSED, licensing=lic)
+    drift_pass(Corpus(claims=(c,), fdr_ledger=empty_ledger), current=ctx)
+
+    reg = OracleRegistry(dossiers=(OracleDossier(oracle_id="o1", validation_tier=ValidationTier.GOLD),))
+    oracle_validation_pass(reg, probes=(SpotProbe(oracle_id="o1", passed=False),))
+
+    # the daemons touched neither the ledger nor its outcome counts
+    assert led.outcome("c").successes == before == 1
+
+
+def test_accumulated_belief_compounds_on_survival_credit(empty_ledger, ctx, adapters):
+    # A claim that licenses AND survives integrate (no rival) earns survival-credit; its
+    # accumulated_belief Beta shifts toward success, and the success count compounds across
+    # cycles when the ledger is threaded back in.
+    from polymer_protocol.belief import accumulated_belief, prior_belief
+
+    survivor = make_claim("survivor", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    corpus = Corpus(claims=(survivor,), fdr_ledger=empty_ledger)
+    r1 = run_cycle(corpus, adapters, ctx)
+    s1 = r1.corpus.by_id()["survivor"]
+    assert s1.status == Status.LICENSED
+    prior = prior_belief(s1)
+    acc1 = accumulated_belief(s1, r1.ledger)
+    assert acc1.alpha > prior.alpha            # one survival success shifts Beta toward success
+    o1 = r1.ledger.outcome("survivor")
+    assert o1 is not None and o1.successes == 1
+
+    # compounds across cycles: a LICENSED survivor is locked and not re-executed, so to
+    # demonstrate accumulation we re-PENDING the claim and thread r1's ledger forward —
+    # the threaded success count compounds (1 -> 2) and the Beta shifts further.
+    from polymer_grammar import FDRLedger
+    corpus2 = Corpus(
+        claims=(make_claim("survivor", status=Status.PENDING, plan=make_plan(0.01, 0.05)),),
+        fdr_ledger=FDRLedger(target_fdr=0.05),
+    )
+    r2 = run_cycle(corpus2, adapters, ctx, ledger=r1.ledger)
+    o2 = r2.ledger.outcome("survivor")
+    assert o2 is not None and o2.successes == 2   # success credit accumulated across cycles
+    acc2 = accumulated_belief(r2.corpus.by_id()["survivor"], r2.ledger)
+    assert acc2.alpha > acc1.alpha                 # belief compounds on accumulated survival
+
+
+def _strong_sv(mag, cert, ean, sev, wc, ev):
+    from polymer_grammar import StrengthVector
+    return StrengthVector(
+        magnitude=mag, certainty=cert, evidence_against_null=ean,
+        severity=sev, world_contact=wc, explanatory_virtue=ev,
+    )
+
+
+def test_retracted_claim_earns_no_success_credit(empty_ledger, ctx, adapters):
+    # keeper (strong, LICENSED, no plan) declares its conclusion INCOMPATIBLE_WITH victim's;
+    # victim (weaker) is PENDING+plan -> selected, executed, LICENSES at VERIFY. After VERIFY
+    # both are LICENSED and content-incompatible, so INTEGRATE's AGM contest retracts the
+    # less-entrenched victim. Credit allocated on SURVIVAL => victim earns NO success.
+    from polymer_grammar import (
+        Direction,
+        NeighborEdge,
+        NeighborEdgeKind,
+        Proposition,
+    )
+
+    victim_prop = Proposition(
+        direction=Direction.NEGATIVE, estimand="beta", descriptor="victim on Y",
+    )
+    keeper_prop = Proposition(
+        direction=Direction.POSITIVE, estimand="beta", descriptor="keeper on Y",
+        neighborhood=(
+            NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH, target=victim_prop.content_hash),
+        ),
+    )
+    # keeper DOMINATES victim on every strength axis (all >=, at least one >)
+    keeper = make_claim(
+        "keeper", status=Status.LICENSED, conclusion=keeper_prop,
+        strength=_strong_sv(0.9, 0.9, 0.9, 0.9, 0.9, 0.9),
+    )
+    victim = make_claim(
+        "victim", status=Status.PENDING, conclusion=victim_prop,
+        plan=make_plan(0.01, 0.05),
+        strength=_strong_sv(0.1, 0.1, 0.1, 0.1, 0.1, 0.1),
+    )
+    corpus = Corpus(claims=(keeper, victim), fdr_ledger=empty_ledger)
+    result = run_cycle(corpus, adapters, ctx)
+    after = result.corpus.by_id()
+    assert "victim" not in after          # integrate retracted it (fixture sanity)
+    assert "keeper" in after              # the entrenched rival survived
+    vo = result.ledger.outcome("victim")
+    assert vo is None or vo.successes == 0  # retracted => NO success credit
+
+
 def test_seam_untrusted_claim_cannot_license(empty_ledger, ctx, adapters):
     from polymer_grammar import CategoricalLeaf, Claim, PatternRef, Status
     from polymer_protocol.corpus import Proposal
