@@ -125,6 +125,11 @@ from .evaluate import (
     evaluate,
     verify,
 )
+from .description_length import (
+    Schema,
+    corpus_implied_schema,
+    description_length,
+)
 from .representation import (
     META_TIER_ALLOWED_CLOSURES,
     META_TIER_REQUIRED_ROUTE,
@@ -265,4 +270,7 @@ __all__ = [
     "RevisionTarget",
     "is_representation_revision",
     "meets_meta_tier_bar",
+    "Schema",
+    "corpus_implied_schema",
+    "description_length",
 ]
