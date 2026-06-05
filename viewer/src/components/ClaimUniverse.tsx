@@ -12,6 +12,7 @@ import {
 import ReferenceFrame from '@/components/scene/ReferenceFrame';
 import Nodes from '@/components/scene/Nodes';
 import Edges from '@/components/scene/Edges';
+import CameraBridge from '@/components/scene/CameraBridge';
 import { useViewer } from '@/store';
 
 function Scene({ data }: { data: TopologyExport }) {
@@ -35,6 +36,7 @@ function Scene({ data }: { data: TopologyExport }) {
       <ReferenceFrame extent={extent} layoutId={data.layout_id} />
       <Edges />
       <Nodes />
+      <CameraBridge />
 
       {/* ground grid at the floor plane (y = ymin) — hairline */}
       <Grid

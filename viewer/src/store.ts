@@ -39,11 +39,40 @@ interface ViewerState {
   toggleEdgeKind: (bucket: string) => void;
   setShowProvisional: (v: boolean) => void;
   setCamera: (c: CameraCoords) => void;
+}
 
-  // derived helpers
-  counts: () => Counts;
-  isNodeVisible: (node: TopologyNode) => boolean;
-  selectedNode: () => TopologyNode | null;
+/** Pure derived counts — call inside a component with useMemo over `data`. */
+export function computeCounts(data: TopologyExport | null): Counts {
+  const byStatus: Record<string, number> = {};
+  for (const st of STATUS_ORDER) byStatus[st] = 0;
+  let edgeEffective = 0;
+  let edgeProvisional = 0;
+  if (!data) {
+    return { total: 0, byStatus, edgeTotal: 0, edgeEffective: 0, edgeProvisional: 0 };
+  }
+  for (const n of data.nodes) {
+    byStatus[n.status] = (byStatus[n.status] ?? 0) + 1;
+  }
+  for (const e of data.edges) {
+    if (e.effective) edgeEffective++;
+    if (e.provisional) edgeProvisional++;
+  }
+  return {
+    total: data.nodes.length,
+    byStatus,
+    edgeTotal: data.edges.length,
+    edgeEffective,
+    edgeProvisional,
+  };
+}
+
+/** Pure selected-node lookup — call inside a component. */
+export function findNode(
+  data: TopologyExport | null,
+  id: string | null,
+): TopologyNode | null {
+  if (!data || !id) return null;
+  return data.nodes.find((n) => n.id === id) ?? null;
 }
 
 /** Map a raw edge kind to its filter bucket. */
@@ -55,7 +84,7 @@ export function edgeBucket(kind: string): 'defeat' | 'equivalence' | 'entails' {
 
 export const EDGE_BUCKETS = ['defeat', 'equivalence', 'entails'] as const;
 
-export const useViewer = create<ViewerState>((set, get) => ({
+export const useViewer = create<ViewerState>((set) => ({
   data: null,
   selectedId: null,
   hoveredId: null,
@@ -90,39 +119,4 @@ export const useViewer = create<ViewerState>((set, get) => ({
     set((s) => ({ filters: { ...s.filters, showProvisional: v } })),
 
   setCamera: (c) => set({ camera: c }),
-
-  counts: () => {
-    const data = get().data;
-    const byStatus: Record<string, number> = {};
-    for (const st of STATUS_ORDER) byStatus[st] = 0;
-    let edgeEffective = 0;
-    let edgeProvisional = 0;
-    if (!data) {
-      return { total: 0, byStatus, edgeTotal: 0, edgeEffective: 0, edgeProvisional: 0 };
-    }
-    for (const n of data.nodes) {
-      byStatus[n.status] = (byStatus[n.status] ?? 0) + 1;
-    }
-    for (const e of data.edges) {
-      if (e.effective) edgeEffective++;
-      if (e.provisional) edgeProvisional++;
-    }
-    return {
-      total: data.nodes.length,
-      byStatus,
-      edgeTotal: data.edges.length,
-      edgeEffective,
-      edgeProvisional,
-    };
-  },
-
-  isNodeVisible: (node) => {
-    return get().filters.statuses.has(node.status);
-  },
-
-  selectedNode: () => {
-    const { data, selectedId } = get();
-    if (!data || !selectedId) return null;
-    return data.nodes.find((n) => n.id === selectedId) ?? null;
-  },
 }));
