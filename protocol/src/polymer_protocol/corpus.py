@@ -7,6 +7,9 @@ returned in CycleResult, never stored — keeping each cycle reversible.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
+from types import MappingProxyType
+
 from pydantic import Field, model_validator
 
 from polymer_grammar import (
@@ -21,15 +24,21 @@ from .base import _Model
 from .ledger import SelectionLedger
 
 
+def is_locked(claim: Claim) -> bool:
+    """A claim is committed/locked iff it carries an anti-HARKing preregistration hash (set by COMMIT).
+    The single shared definition — execute/commit/cycle all use this instead of re-expressing it."""
+    return claim.provenance is not None and claim.provenance.preregistration_hash is not None
+
+
 class Corpus(_Model):
     claims: tuple[Claim, ...] = ()
     defeat_edges: tuple[DefeatEdge, ...] = ()
     equivalences: tuple[EquivalenceClaim, ...] = ()
     fdr_ledger: FDRLedger
 
-    def by_id(self) -> dict[str, Claim]:
-        """Derived id → claim index (not a stored field)."""
-        return {c.id: c for c in self.claims}
+    def by_id(self) -> Mapping[str, Claim]:
+        """Derived id → claim index (not a stored field). Read-only (matches the frozen discipline)."""
+        return MappingProxyType({c.id: c for c in self.claims})
 
     @model_validator(mode="after")
     def _unique_claim_ids(self) -> "Corpus":

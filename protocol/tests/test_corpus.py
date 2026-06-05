@@ -118,3 +118,25 @@ def test_cycle_result_defaults_empty_ledger():
     from polymer_protocol.corpus import Corpus, CycleResult
     r = CycleResult(corpus=Corpus(fdr_ledger=FDRLedger(target_fdr=0.05)))
     assert r.ledger == SelectionLedger()
+
+
+def test_is_locked_shared_helper():
+    from polymer_grammar import GenerationMode, Provenance
+    from polymer_protocol.corpus import is_locked
+    from tests.conftest import make_claim
+
+    unlocked = make_claim("a")
+    assert is_locked(unlocked) is False
+    locked = make_claim("b", provenance=Provenance(
+        generated_by=GenerationMode.IMPORTED, search_cardinality=1, preregistration_hash="h"))
+    assert is_locked(locked) is True
+
+
+def test_by_id_is_read_only():
+    from tests.conftest import make_claim
+
+    corpus = Corpus(claims=(make_claim("a"),), fdr_ledger=FDRLedger(target_fdr=0.05))
+    idx = corpus.by_id()
+    assert idx["a"].id == "a"            # read access works
+    with pytest.raises(TypeError):       # read-only mapping -> mutation rejected
+        idx["b"] = idx["a"]
