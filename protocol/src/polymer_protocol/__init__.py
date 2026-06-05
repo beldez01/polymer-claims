@@ -50,6 +50,7 @@ from .ledger import (
 )
 from .drift import DriftFinding, DriftRecord, drift_pass, reopen_drifted
 from .oracle import OracleRegistry, oracle_cap
+from .oracle_validation import OracleDecay, OracleValidationRecord, SpotProbe, oracle_validation_pass
 from .plan_synthesis import mirror_criterion, transplant_plan
 from .proposers import frontier_attack, rival_generation
 from .represent import represent
@@ -126,4 +127,8 @@ __all__ = [
     "DriftRecord",
     "drift_pass",
     "reopen_drifted",
+    "OracleDecay",
+    "OracleValidationRecord",
+    "SpotProbe",
+    "oracle_validation_pass",
 ]

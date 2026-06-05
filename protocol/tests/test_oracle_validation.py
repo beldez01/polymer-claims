@@ -88,3 +88,12 @@ def test_empty_probes_returns_same_registry():
     reg2, rec = oracle_validation_pass(reg, probes=())
     assert reg2 is reg
     assert rec == OracleValidationRecord()
+
+
+def test_oracle_validation_symbols_are_exported_from_package():
+    import polymer_protocol as pp
+
+    assert hasattr(pp, "oracle_validation_pass")
+    assert hasattr(pp, "SpotProbe")
+    assert hasattr(pp, "OracleDecay")
+    assert hasattr(pp, "OracleValidationRecord")
