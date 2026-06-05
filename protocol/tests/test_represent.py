@@ -27,9 +27,9 @@ def test_effective_attack_puts_target_on_frontier(empty_ledger):
 
 
 def test_target_dominates_source_attack_filtered_out(empty_ledger):
-    strong = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+    strong = StrengthVector(magnitude=0.9, certainty=0.9, evidence_against_null=0.9,
                             severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
-    weak = StrengthVector(magnitude=0.1, uncertainty=0.1, evidence_against_null=0.1,
+    weak = StrengthVector(magnitude=0.1, certainty=0.1, evidence_against_null=0.1,
                           severity=0.1, world_contact=0.1, explanatory_virtue=0.1)
     edge = DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT)
     corpus = Corpus(

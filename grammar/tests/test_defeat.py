@@ -42,7 +42,7 @@ def test_self_loop_rejected():
 def _sv(x: float) -> StrengthVector:
     # uniform vector at level x on all six axes
     return StrengthVector(
-        magnitude=x, uncertainty=x, evidence_against_null=x,
+        magnitude=x, certainty=x, evidence_against_null=x,
         severity=x, world_contact=x, explanatory_virtue=x,
     )
 
@@ -69,18 +69,18 @@ def test_attack_stands_when_source_dominates_target():
 
 def test_attack_stands_when_incomparable():
     # incomparable: a higher on some axis, b higher on another
-    a = StrengthVector(magnitude=0.9, uncertainty=0.1, evidence_against_null=0.5,
+    a = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.5,
                        severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
-    b = StrengthVector(magnitude=0.1, uncertainty=0.9, evidence_against_null=0.5,
+    b = StrengthVector(magnitude=0.1, certainty=0.9, evidence_against_null=0.5,
                        severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
     edges = [DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.UNDERCUT)]
     assert effective_defeats(edges, {"a": a, "b": b}) == frozenset({("a", "b")})
 
 
 def test_attack_stands_when_strength_missing():
-    a = StrengthVector(magnitude=0.9, uncertainty=0.1, evidence_against_null=0.5,
+    a = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.5,
                        severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
-    b = StrengthVector(magnitude=0.1, uncertainty=0.9, evidence_against_null=0.5,
+    b = StrengthVector(magnitude=0.1, certainty=0.9, evidence_against_null=0.5,
                        severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
     edges = [DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.UNDERCUT)]
     # missing strength (empty mapping) -> attack stands

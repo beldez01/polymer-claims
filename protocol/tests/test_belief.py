@@ -16,23 +16,23 @@ def test_prior_for_none_strength_is_uniform():
 
 
 def test_prior_mean_tracks_evidence_against_null():
-    # high evidence_against_null, low uncertainty -> mean high, concentrated
-    sv = StrengthVector(magnitude=0.5, uncertainty=0.0, evidence_against_null=0.8,
+    # high evidence_against_null, high certainty -> mean high, concentrated
+    sv = StrengthVector(magnitude=0.5, certainty=1.0, evidence_against_null=0.8,
                         severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
     c = make_claim("a", strength=sv)
     b = prior_belief(c)
-    # kappa = 2 + (20-2)*(1-0) = 20 ; alpha = 0.8*20 = 16 ; beta = 0.2*20 = 4
+    # kappa = 2 + (20-2)*1.0 = 20 ; alpha = 0.8*20 = 16 ; beta = 0.2*20 = 4
     assert b.alpha == 16.0
     assert b.beta == 4.0
     assert abs(b.alpha / (b.alpha + b.beta) - 0.8) < 1e-9
 
 
 def test_prior_concentration_drops_with_uncertainty():
-    sv = StrengthVector(magnitude=0.5, uncertainty=1.0, evidence_against_null=0.5,
+    sv = StrengthVector(magnitude=0.5, certainty=0.0, evidence_against_null=0.5,
                         severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
     c = make_claim("a", strength=sv)
     b = prior_belief(c)
-    # kappa = 2 + 18*(1-1) = 2 ; alpha = beta = 1.0
+    # kappa = 2 + 18*0.0 = 2 ; alpha = beta = 1.0
     assert b.alpha == 1.0 and b.beta == 1.0
 
 
@@ -42,7 +42,7 @@ def test_beta_is_frozen_and_proper():
     with pytest.raises(Exception):
         b.alpha = 5.0  # frozen
     # floor keeps it proper even for extreme strength
-    sv = StrengthVector(magnitude=0.0, uncertainty=0.0, evidence_against_null=1.0,
+    sv = StrengthVector(magnitude=0.0, certainty=1.0, evidence_against_null=1.0,
                         severity=0.0, world_contact=0.0, explanatory_virtue=0.0)
     pb = prior_belief(make_claim("a", strength=sv))
     assert pb.alpha > 0.0 and pb.beta > 0.0  # beta floored above 0 despite mean=1.0

@@ -70,7 +70,7 @@ def test_run_cycle_caps_strength_with_registry(empty_ledger, ctx, adapters):
     from polymer_grammar import OracleDossier, StrengthVector, ValidationTier
     from polymer_protocol import OracleRegistry
 
-    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+    sv = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.9,
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
     reg = OracleRegistry(dossiers=(OracleDossier(oracle_id="api", validation_tier=ValidationTier.BENCHMARKED),))
@@ -85,7 +85,7 @@ def test_run_cycle_caps_oracle_claim_without_registry(empty_ledger, ctx, adapter
     # Always-on guarantee at the run_cycle layer: an oracle_ref with no registry -> UNVALIDATED.
     from polymer_grammar import StrengthVector
 
-    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+    sv = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.9,
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
     result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)  # no oracles
@@ -97,7 +97,7 @@ def test_run_cycle_caps_oracle_claim_without_registry(empty_ledger, ctx, adapter
 
 def test_budget_limits_what_executes(empty_ledger, ctx, adapters):
     from polymer_grammar import StrengthVector
-    sv = StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=0.95,
+    sv = StrengthVector(magnitude=0.5, certainty=0.8, evidence_against_null=0.95,
                         severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
     # distinct plan values so canonicalize does not collapse them
     cheap = make_claim("cheap", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv)
@@ -117,7 +117,7 @@ def test_budget_limits_what_executes(empty_ledger, ctx, adapters):
 
 def test_unselected_claim_reappears_next_cycle(empty_ledger, ctx, adapters):
     from polymer_grammar import StrengthVector
-    sv = StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=0.9,
+    sv = StrengthVector(magnitude=0.5, certainty=0.8, evidence_against_null=0.9,
                         severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
     cheap = make_claim("cheap", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv)
     pricey = make_claim("pricey", status=Status.PENDING, plan=make_plan(0.02, 0.05), strength=sv)
@@ -238,7 +238,7 @@ def test_unselected_locked_claim_does_not_reexecute(empty_ledger, ctx, adapters)
     # Regression for F1: execute_ground must be gated by this cycle's selection, not the
     # permanent preregistration lock.
     from polymer_grammar import StrengthVector
-    sv = StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=0.5,
+    sv = StrengthVector(magnitude=0.5, certainty=0.8, evidence_against_null=0.5,
                         severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
     a = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv)
     b = make_claim("b", status=Status.PENDING, plan=make_plan(0.02, 0.05), strength=sv)

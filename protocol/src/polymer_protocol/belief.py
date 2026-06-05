@@ -29,7 +29,7 @@ def prior_belief(claim: Claim) -> Beta:
     if s is None:
         return Beta(alpha=1.0, beta=1.0)
     mu = min(1.0, max(0.0, s.evidence_against_null))
-    kappa = KAPPA_MIN + (KAPPA_MAX - KAPPA_MIN) * (1.0 - s.uncertainty)
+    kappa = KAPPA_MIN + (KAPPA_MAX - KAPPA_MIN) * s.certainty
     alpha = max(EPS, mu * kappa)
     beta = max(EPS, kappa - mu * kappa)
     return Beta(alpha=alpha, beta=beta)

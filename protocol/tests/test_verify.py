@@ -118,7 +118,7 @@ def test_oracle_grounded_license_caps_strength(empty_ledger, ctx, adapters):
     from polymer_grammar import OracleDossier, StrengthVector, ValidationTier
     from polymer_protocol import OracleRegistry
 
-    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+    sv = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.9,
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
@@ -135,7 +135,7 @@ def test_oracle_grounded_license_caps_strength(empty_ledger, ctx, adapters):
 def test_builtin_only_claim_uncapped_without_registry(empty_ledger, ctx, adapters):
     # No oracle_ref -> no oracle dependency -> strength untouched even with no registry (real back-compat).
     from polymer_grammar import StrengthVector
-    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+    sv = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.9,
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv)  # no oracle_ref
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
@@ -149,7 +149,7 @@ def test_oracle_grounded_claim_capped_without_registry(empty_ledger, ctx, adapte
     # An oracle_ref with no dossier (no registry) is UNVALIDATED -> empirical strength caps to 0.
     # The guarantee holds whether or not a registry was passed.
     from polymer_grammar import StrengthVector
-    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+    sv = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.9,
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
@@ -166,7 +166,7 @@ def test_gold_oracle_with_registry_leaves_strength_unchanged(empty_ledger, ctx, 
     from polymer_grammar import OracleDossier, StrengthVector, ValidationTier
     from polymer_protocol import OracleRegistry
 
-    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+    sv = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.9,
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
@@ -184,7 +184,7 @@ def test_out_of_domain_oracle_caps_through_verify_stage(empty_ledger, ctx, adapt
     )
     from polymer_protocol import OracleRegistry
 
-    sv = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+    sv = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.9,
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     region = GenomicRegion(id="r1", display="d", assembly="GRCh38", chrom="chr1", start=1, end=9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"),
@@ -203,7 +203,7 @@ def test_out_of_domain_oracle_caps_through_verify_stage(empty_ledger, ctx, adapt
 
 
 def _sv_bar(ean):
-    return StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=ean,
+    return StrengthVector(magnitude=0.5, certainty=0.8, evidence_against_null=ean,
                           severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
 
 

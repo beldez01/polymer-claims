@@ -36,10 +36,10 @@ _TIER_RANK = {
     ValidationTier.GOLD: 4,
 }
 
-# Goodness empirical axes the tier ceiling caps DOWN (higher = stronger). `uncertainty` is ALSO
-# apparatus-bounded but REVERSE-polarity (higher = weaker), so it is floored UP in cap_strength, not
-# capped here. severity + explanatory_virtue are theory axes (set by argument) -> never touched.
-_GOODNESS_EMPIRICAL_AXES = ("magnitude", "evidence_against_null", "world_contact")
+# Goodness empirical axes the tier ceiling caps DOWN (higher = stronger). All natural-polarity:
+# a weak apparatus lowers each (including `certainty`) via componentwise min. severity +
+# explanatory_virtue are theory axes (set by argument) -> never touched.
+_GOODNESS_EMPIRICAL_AXES = ("magnitude", "evidence_against_null", "world_contact", "certainty")
 
 # v1 empirical-axis ceiling per tier (monotone; endpoints pinned at 0.0/1.0).
 # v1 ladder — tunable; calibrate against empirical oracle-validation sets later.
@@ -79,8 +79,9 @@ def decay_tier(tier: ValidationTier, pass_rate: float) -> ValidationTier:
 
 
 def tier_ceiling(tier: ValidationTier) -> StrengthVector:
-    """Per-axis ceiling for the GOODNESS empirical axes (capped down to c). `uncertainty` and the theory
-    axes stay 1.0 here — uncertainty is reverse-polarity and is floored UP in cap_strength instead."""
+    """Per-axis ceiling: the GOODNESS empirical axes (magnitude, evidence_against_null,
+    world_contact, certainty) are capped down to c; only the two theory axes (severity,
+    explanatory_virtue) stay 1.0."""
     c = _TIER_CEILING[tier]
     return StrengthVector(**{ax: (c if ax in _GOODNESS_EMPIRICAL_AXES else 1.0) for ax in AXES})
 
@@ -88,14 +89,13 @@ def tier_ceiling(tier: ValidationTier) -> StrengthVector:
 def cap_strength(
     strength: StrengthVector | None, tier: ValidationTier
 ) -> StrengthVector | None:
-    """`strength` capped by the tier. Goodness empirical axes meet the ceiling (componentwise min);
-    the reverse-polarity `uncertainty` axis is floored UP to (1 - ceiling) — a weak apparatus makes a
-    claim MORE uncertain, not less (F2). Theory axes (severity, explanatory_virtue) uncapped. None -> None."""
+    """`strength` capped by the tier: goodness empirical axes (magnitude,
+    evidence_against_null, world_contact, certainty) meet the tier ceiling
+    (componentwise min) — a weak apparatus lowers certainty. Theory axes
+    (severity, explanatory_virtue) uncapped. None -> None."""
     if strength is None:
         return None
-    c = _TIER_CEILING[tier]
-    capped = strength.meet(tier_ceiling(tier))  # caps the 3 goodness axes; uncertainty/theory are no-ops
-    return capped.model_copy(update={"uncertainty": max(strength.uncertainty, 1.0 - c)})
+    return strength.meet(tier_ceiling(tier))
 
 
 class ApplicabilityDomain(_Model):

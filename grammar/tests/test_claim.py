@@ -17,7 +17,7 @@ def _leaf():
 
 def _strength(**kw):
     base = dict(
-        magnitude=0.7, uncertainty=0.7, evidence_against_null=0.7,
+        magnitude=0.7, certainty=0.3, evidence_against_null=0.7,
         severity=0.7, world_contact=0.7, explanatory_virtue=0.7,
     )
     base.update(kw)

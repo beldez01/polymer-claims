@@ -21,7 +21,7 @@ def _corpus(claims):
 
 
 def _sv(ean):
-    return StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=ean,
+    return StrengthVector(magnitude=0.5, certainty=0.8, evidence_against_null=ean,
                           severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
 
 
@@ -132,9 +132,9 @@ def test_defaults_reproduce_3a_selection():
 
 
 def test_reserve_lane_pursues_a_dominated_candidate():
-    sv_strong = StrengthVector(magnitude=0.9, uncertainty=0.1, evidence_against_null=0.9,
+    sv_strong = StrengthVector(magnitude=0.9, certainty=0.9, evidence_against_null=0.9,
                                severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
-    sv_weak = StrengthVector(magnitude=0.1, uncertainty=0.9, evidence_against_null=0.1,
+    sv_weak = StrengthVector(magnitude=0.1, certainty=0.1, evidence_against_null=0.1,
                              severity=0.1, world_contact=0.1, explanatory_virtue=0.1)
     strong = make_claim("strong", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv_strong)
     weak = make_claim("weak", status=Status.PENDING, plan=make_plan(0.02, 0.05), strength=sv_weak)
@@ -164,7 +164,7 @@ def test_cell_cap_spreads_budget_across_cells():
 
 
 def test_operator_discount_changes_fill_priority():
-    sv = StrengthVector(magnitude=0.5, uncertainty=0.2, evidence_against_null=0.5,
+    sv = StrengthVector(magnitude=0.5, certainty=0.8, evidence_against_null=0.5,
                         severity=0.5, world_contact=0.5, explanatory_virtue=0.5)
     good_prov = Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id="good", search_cardinality=1)
     bad_prov = Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id="bad", search_cardinality=1)
