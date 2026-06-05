@@ -14,6 +14,8 @@ from polymer_grammar import (
     RivalSetClosure,
     SatisfactionVerdict,
     Status,
+    is_representation_revision,
+    meets_meta_tier_bar,
 )
 
 from .corpus import Corpus, CycleScaffolding, ExecRecord
@@ -91,6 +93,11 @@ def verify_stage(
                 satisfactions=(ev.satisfaction,),
                 rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
             )
+            if is_representation_revision(c) and not meets_meta_tier_bar(licensing):
+                # meta-tier gate: a representation-revision is gated MORE conservatively — it cannot ride
+                # the ordinary single-severe-test path. Hold PENDING until replication-grade licensing.
+                new_claims.append(c)
+                continue
             new_claims.append(
                 _with_status(
                     c,
