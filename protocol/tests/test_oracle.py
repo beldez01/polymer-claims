@@ -18,7 +18,7 @@ from pydantic import ValidationError
 from polymer_protocol import OracleRegistry, oracle_cap
 from tests.conftest import make_claim, make_plan
 
-SV = StrengthVector(magnitude=0.9, uncertainty=0.9, evidence_against_null=0.9,
+SV = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.9,
                     severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
 
 

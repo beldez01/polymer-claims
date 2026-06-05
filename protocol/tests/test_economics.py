@@ -29,9 +29,9 @@ def _corpus(empty_ledger, *claims):
 
 
 _CTX = MaterializationContext(id="now", api_version="v1", data_version="d1")
-_SV = StrengthVector(magnitude=0.6, uncertainty=0.5, evidence_against_null=0.6,
+_SV = StrengthVector(magnitude=0.6, certainty=0.5, evidence_against_null=0.6,
                      severity=0.6, world_contact=0.6, explanatory_virtue=0.6)
-_STRONG = StrengthVector(magnitude=0.9, uncertainty=0.3, evidence_against_null=0.99,
+_STRONG = StrengthVector(magnitude=0.9, certainty=0.7, evidence_against_null=0.99,
                          severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
 
 

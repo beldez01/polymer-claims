@@ -71,7 +71,7 @@ def test_pass_is_deterministic_and_sorted():
 
 def test_decayed_registry_tightens_oracle_cap_end_to_end():
     # The headline property: a decayed registry makes oracle_cap bite harder through the #2 seam.
-    strong = StrengthVector(magnitude=0.9, uncertainty=0.2, evidence_against_null=0.9,
+    strong = StrengthVector(magnitude=0.9, certainty=0.8, evidence_against_null=0.9,
                             severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     claim = make_claim("c", plan=make_plan(0.01, 0.05, oracle_ref="o1"), strength=strong)
     reg = _registry(("o1", ValidationTier.GOLD))
@@ -80,7 +80,7 @@ def test_decayed_registry_tightens_oracle_cap_end_to_end():
     reg2, _ = oracle_validation_pass(reg, probes=(SpotProbe(oracle_id="o1", passed=False),))  # 0% -> UNVALIDATED
     after = oracle_cap(claim, reg2)
     assert after.magnitude < before.magnitude        # goodness axis capped down
-    assert after.uncertainty > before.uncertainty    # reverse-polarity floored up (F2)
+    assert after.certainty < before.certainty        # certainty (goodness axis) capped down (F2)
 
 
 def test_empty_probes_returns_same_registry():
