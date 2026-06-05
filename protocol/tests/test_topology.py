@@ -233,3 +233,21 @@ def test_json_round_trip(small_corpus):
 
     exp = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED)
     assert TE.model_validate_json(exp.model_dump_json()) == exp
+
+
+def test_warm_start_keeps_existing_nodes_near_seed(small_corpus):
+    base = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED)
+    seed = {n.id: n.position for n in base.nodes}
+    warm = export_topology(
+        small_corpus, layout=Layout.FORCE_DIRECTED, seed_positions=seed
+    )
+    for n in warm.nodes:
+        dx = sum((a - b) ** 2 for a, b in zip(n.position, seed[n.id])) ** 0.5
+        assert dx < 0.75  # bounded drift, not a re-shuffle
+    assert "seed=warm" in warm.layout_id
+
+
+def test_no_seed_is_unchanged(small_corpus):
+    a = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED)
+    b = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED, seed_positions=None)
+    assert a == b

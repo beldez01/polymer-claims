@@ -181,17 +181,28 @@ def _seed_position(node_id: str) -> tuple[float, float, float]:
 
 
 def _force_directed_layout(
-    node_ids: list[str], edges: tuple[TopologyEdge, ...]
+    node_ids: list[str],
+    edges: tuple[TopologyEdge, ...],
+    seed_positions: dict[str, tuple[float, float, float]] | None = None,
 ) -> tuple[dict[str, tuple[float, float, float]], str]:
     """Deterministic Fruchterman-Reingold in 3D over the UNDIRECTED adjacency
     (defeat ∪ entails ∪ equivalence). Pure `math`; seeds from id-hashes; fixed
-    iterations / ideal length / linear cooling. Positions rounded to 6 dp."""
-    layout_id = f"fruchterman-reingold:iters={_FR_ITERATIONS},seed=sha256"
+    iterations / ideal length / linear cooling. Positions rounded to 6 dp.
+
+    `seed_positions` warm-starts the layout: an existing node begins from its prior-frame
+    position (FR perturbs it locally); a brand-new node falls back to its id-hash seed. The
+    `layout_id` records `seed=warm` when any seed positions are supplied (so a frame is
+    self-describing); the no-seed path stays byte-identical (`seed=sha256`)."""
+    seed_suffix = "warm" if seed_positions else "sha256"
+    layout_id = f"fruchterman-reingold:iters={_FR_ITERATIONS},seed={seed_suffix}"
     n = len(node_ids)
     if n == 0:
         return {}, layout_id
 
-    pos = {nid: list(_seed_position(nid)) for nid in node_ids}
+    pos = {
+        nid: list((seed_positions or {}).get(nid) or _seed_position(nid))
+        for nid in node_ids
+    }
     if n == 1:
         only = node_ids[0]
         p = pos[only]
@@ -271,11 +282,21 @@ def _force_directed_layout(
     )
 
 
-def export_topology(corpus: Corpus, *, layout: Layout) -> TopologyExport:
+def export_topology(
+    corpus: Corpus,
+    *,
+    layout: Layout,
+    seed_positions: dict[str, tuple[float, float, float]] | None = None,
+) -> TopologyExport:
     """Pure, deterministic corpus → TopologyExport.
 
     Layout.NONE zeroes every position (deterministic-extraction tests); FORCE_DIRECTED runs
     the seeded Fruchterman-Reingold layout. Nodes/edges/clusters are sorted for byte-stable output.
+
+    `seed_positions` warm-starts FORCE_DIRECTED from a prior frame's positions (existing nodes
+    hold their place; new nodes settle in from their id-hash seed); the default-None path leaves
+    the no-seed output byte-identical. Determinism: identical `(corpus, seed_positions)` → identical
+    output. Ignored under Layout.NONE.
     """
     edges = _extract_edges(corpus)
     clusters = _extract_clusters(corpus)
@@ -285,7 +306,7 @@ def export_topology(corpus: Corpus, *, layout: Layout) -> TopologyExport:
         positions = {cid: (0.0, 0.0, 0.0) for cid in node_ids}
         layout_id = "none"
     else:
-        positions, layout_id = _force_directed_layout(node_ids, edges)
+        positions, layout_id = _force_directed_layout(node_ids, edges, seed_positions)
 
     nodes = _extract_nodes(corpus, positions)
     return TopologyExport(
