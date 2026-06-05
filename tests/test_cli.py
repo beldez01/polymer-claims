@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 
-from polymer_protocol import TopologyExport
+from polymer_protocol import TopologyExport, TopologyTimeline
 
 from polymer_claims.cli import main
 from tests.conftest import licensing_corpus, make_claim
@@ -84,3 +84,18 @@ def test_export_topology(tmp_path, capsys):
     exp = TopologyExport.model_validate_json(out.read_text())
     assert isinstance(json.loads(out.read_text()), dict)
     assert exp is not None
+
+
+# ---------------------------------------------------------------------------
+# export-timeline
+# ---------------------------------------------------------------------------
+def test_export_timeline(tmp_path, capsys):
+    path = tmp_path / "corpus.json"
+    path.write_text(licensing_corpus().model_dump_json())
+    out = tmp_path / "timeline.json"
+    rc = main(["export-timeline", str(path), "--cycles", "3", "--out", str(out)])
+    assert rc == 0
+    tl = TopologyTimeline.model_validate_json(out.read_text())
+    assert tl.n_cycles == 3
+    assert len(tl.frames) == 4  # n_cycles + 1
+    assert isinstance(json.loads(out.read_text()), dict)

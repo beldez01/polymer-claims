@@ -6,6 +6,7 @@ Commands:
   run-cycle FILE   run ONE run_cycle over a corpus with the reference adapters
   loop FILE        drive the #5d budget-governed scheduler until the budget exhausts
   export-topology  emit a TopologyExport for a corpus
+  export-timeline  emit a warm-started TopologyTimeline across N run_cycle iterations
 
 The CLI injects the two deterministic reference adapters by default; real
 adapters/oracles/red-teamers are a later `--plugin` surface (out of scope for v1).
@@ -31,6 +32,7 @@ from polymer_protocol import (
     Layout,
     SchedulerConfig,
     SchedulerState,
+    export_timeline,
     export_topology,
     next_action,
     run_cycle,
@@ -138,6 +140,14 @@ def _cmd_export_topology(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_export_timeline(args: argparse.Namespace) -> int:
+    corpus = load_corpus(args.corpus)
+    timeline = export_timeline(corpus, _ADAPTERS, _CTX, n_cycles=args.cycles)
+    print(f"frames: {len(timeline.frames)} (n_cycles={timeline.n_cycles})")
+    _write_or_print(timeline.model_dump_json(), args.out)
+    return 0
+
+
 # ---------------------------------------------------------------------------
 # parser
 # ---------------------------------------------------------------------------
@@ -170,6 +180,14 @@ def _build_parser() -> argparse.ArgumentParser:
     p_topo.add_argument("corpus", help="path to a corpus JSON file")
     p_topo.add_argument("--out", default=None, help="write TopologyExport JSON here")
     p_topo.set_defaults(func=_cmd_export_topology)
+
+    p_tl = sub.add_parser(
+        "export-timeline", help="emit a warm-started TopologyTimeline across N cycles"
+    )
+    p_tl.add_argument("corpus", help="path to a corpus JSON file")
+    p_tl.add_argument("--cycles", type=int, required=True, help="number of run_cycle iterations")
+    p_tl.add_argument("--out", default=None, help="write TopologyTimeline JSON here")
+    p_tl.set_defaults(func=_cmd_export_timeline)
 
     return parser
 

@@ -74,6 +74,12 @@ from .topology import (
     TopologyNode,
     export_topology,
 )
+from .timeline import (
+    FrameStats,
+    TimelineFrame,
+    TopologyTimeline,
+    export_timeline,
+)
 from .verify import verify_stage
 
 __all__ = [
@@ -161,4 +167,8 @@ __all__ = [
     "TopologyEdge",
     "TopologyCluster",
     "Layout",
+    "export_timeline",
+    "TopologyTimeline",
+    "TimelineFrame",
+    "FrameStats",
 ]
