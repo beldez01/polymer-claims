@@ -20,12 +20,20 @@ from __future__ import annotations
 import math
 from collections import Counter
 from collections.abc import Iterable
+from typing import Literal
 
 from pydantic import Field
 
 from .base import _Model
 from .claim import Claim
 from .leaf import CategoricalLeaf, PropositionLeaf, QuantityLeaf
+from .pattern import PatternRef
+from .representation import (
+    OntologyTermTarget,
+    PatternTarget,
+    RepresentationRevision,
+    RevisionOperation,
+)
 
 # --- tunable constants (module-level, documented) --------------------------------------------
 _PATTERN_BITS = 8.0   # flat per-pattern schema-table cost; a MERGE's saving is exactly this/pattern
@@ -153,3 +161,141 @@ def description_length(claims: Iterable[Claim], schema: Schema) -> float:
     if not claims:
         return 0.0
     return _schema_cost(schema) + _corpus_code_length(claims, schema)
+
+
+# --- transport: the structural rewrite (Left-Kan analog), per operation -----------------------
+
+def _merged_ref(member_ids: Iterable[str]) -> PatternRef:
+    """Deterministic unified ref id for a MERGE: sorted member ids joined under a `merged:` head."""
+    joined = "+".join(sorted(member_ids))
+    return PatternRef(id="merged:" + joined, version="v1")
+
+
+def _revalidate(claim: Claim, new_pattern: PatternRef) -> Claim:
+    """Repoint a claim's pattern, re-running validators (model_copy bypasses them)."""
+    return Claim.model_validate(
+        claim.model_copy(update={"pattern": new_pattern}).model_dump()
+    )
+
+
+def transport(
+    claims: Iterable[Claim], schema: Schema, revision: RepresentationRevision
+) -> tuple[tuple[Claim, ...], Schema]:
+    """Deterministically rewrite (claims, schema) under a revision (pure; the Left-Kan analog).
+
+    MERGE     — unify the >=2 member patterns into one `merged:` ref; repoint every claim on a
+                member to the unified ref; schema' = members removed + unified added.
+    ADD       — claims unchanged; schema' gains the declared pattern/term atom.
+    DEPRECATE — schema' drops the target atom; claims on a target pattern are repointed to the
+                synthetic generic `__generic__` ref (NOT a schema atom — priced via the inflated
+                `_GENERIC_FILL_BITS` in `_corpus_code_length`, so deprecating a load-bearing
+                specific pattern RAISES the corpus code).
+    RELAX     — MDL-deferred: returns (claims, schema) unchanged -> mdl_delta == 0.
+    """
+    claims = tuple(claims)
+    op = revision.operation
+    target = revision.target
+
+    if op == RevisionOperation.MERGE:
+        assert isinstance(target, PatternTarget)
+        members = {(p.id, p.version) for p in target.patterns}
+        unified = _merged_ref(p.id for p in target.patterns)
+        new_claims = tuple(
+            _revalidate(c, unified) if _pattern_key(c) in members else c for c in claims
+        )
+        new_patterns = (schema.patterns - members) | {(unified.id, unified.version)}
+        return new_claims, schema.model_copy(update={"patterns": new_patterns})
+
+    if op == RevisionOperation.ADD:
+        if isinstance(target, PatternTarget):
+            (ref,) = target.patterns
+            new_patterns = schema.patterns | {(ref.id, ref.version)}
+            return claims, schema.model_copy(update={"patterns": new_patterns})
+        assert isinstance(target, OntologyTermTarget)
+        new_terms = schema.terms | {target.term_id}
+        return claims, schema.model_copy(update={"terms": new_terms})
+
+    if op == RevisionOperation.DEPRECATE:
+        if isinstance(target, PatternTarget):
+            (ref,) = target.patterns
+            key = (ref.id, ref.version)
+            generic = PatternRef(id=_GENERIC_PATTERN_ID, version="v1")
+            new_claims = tuple(
+                _revalidate(c, generic) if _pattern_key(c) == key else c for c in claims
+            )
+            new_patterns = schema.patterns - {key}
+            return new_claims, schema.model_copy(update={"patterns": new_patterns})
+        assert isinstance(target, OntologyTermTarget)
+        new_terms = schema.terms - {target.term_id}
+        return claims, schema.model_copy(update={"terms": new_terms})
+
+    # RELAX (ConstraintTarget): MDL-deferred — no honest structural delta yet.
+    return claims, schema
+
+
+# --- the gate + the novelty classifier --------------------------------------------------------
+
+def mdl_delta(
+    claims: Iterable[Claim], schema: Schema, revision: RepresentationRevision
+) -> float:
+    """L(transport(...)) - L(claims, schema). < 0 == the revision pays for itself. Computed over
+    object claims only (the caller excludes meta-claims). Pure + deterministic."""
+    claims = tuple(claims)
+    new_claims, new_schema = transport(claims, schema, revision)
+    return description_length(new_claims, new_schema) - description_length(claims, schema)
+
+
+def _generator_reachable(atom: tuple[str, str], schema: Schema) -> bool:
+    """True iff a schema'-pattern atom is generator-reachable from the prior `schema` — i.e. it is
+    a rename or MERGE-quotient of an existing atom (so it introduces NO new structure).
+
+    Reachability test (explicit + documented): an already-present atom is trivially reachable; a
+    `merged:` atom IS a quotient of existing atoms -> reachable. Any other brand-new id is NOT
+    derivable from the prior schema -> not reachable (a genuine ADD of new structure).
+    """
+    if atom in schema.patterns:
+        return True
+    atom_id, _ = atom
+    if atom_id.startswith("merged:"):
+        return True
+    return False
+
+
+def novelty_residual(
+    claims: Iterable[Claim], schema: Schema, revision: RepresentationRevision
+) -> float:
+    """The W&B pointwise residual (structural form): sum `_PATTERN_BITS` over schema' pattern atoms
+    NOT generator-reachable from the prior schema. A MERGE's unified pattern is a quotient ->
+    residual 0 (consolidation); a brand-new ADD pattern is not derivable -> residual `_PATTERN_BITS`
+    (discovery, if it also compresses)."""
+    claims = tuple(claims)
+    _, new_schema = transport(claims, schema, revision)
+    return sum(
+        _PATTERN_BITS
+        for atom in new_schema.patterns
+        if not _generator_reachable(atom, schema)
+    )
+
+
+def clears_mdl_bar(mdl_delta_value: float, *, eps_bits: float = _MDL_EPS) -> bool:
+    """The MDL gate: True iff the revision compresses by at least `eps_bits` (guards numeric noise).
+    Compression alone is the gate; the residual classifies, it does not block (gate-policy beta)."""
+    return mdl_delta_value < -eps_bits
+
+
+def classify(
+    mdl_delta_value: float, residual: float, *, eps_bits: float = _MDL_EPS
+) -> Literal["discovery", "consolidation", "rejected"]:
+    """The (residual, mdl_delta) plane: compresses + novel -> discovery; compresses + not-novel ->
+    consolidation; otherwise rejected."""
+    if not clears_mdl_bar(mdl_delta_value, eps_bits=eps_bits):
+        return "rejected"
+    return "discovery" if residual > 0.0 else "consolidation"
+
+
+class RevisionDiscovery(_Model):
+    """A frozen audit record of an adjudicated representation revision (protocol attaches it)."""
+
+    mdl_delta: float
+    novelty_residual: float
+    classification: Literal["discovery", "consolidation", "rejected"]

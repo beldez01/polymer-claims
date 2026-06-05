@@ -126,9 +126,15 @@ from .evaluate import (
     verify,
 )
 from .description_length import (
+    RevisionDiscovery,
     Schema,
+    classify,
+    clears_mdl_bar,
     corpus_implied_schema,
     description_length,
+    mdl_delta,
+    novelty_residual,
+    transport,
 )
 from .representation import (
     META_TIER_ALLOWED_CLOSURES,
@@ -273,4 +279,10 @@ __all__ = [
     "Schema",
     "corpus_implied_schema",
     "description_length",
+    "transport",
+    "mdl_delta",
+    "novelty_residual",
+    "clears_mdl_bar",
+    "classify",
+    "RevisionDiscovery",
 ]

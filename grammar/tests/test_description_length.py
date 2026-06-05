@@ -105,3 +105,134 @@ def test_pattern_selector_is_frequency_weighted():
     assert _corpus_code_length(one, s1) < _corpus_code_length(split, s2) + EPSILON
     # strictly: the split corpus has nonzero pattern-selector entropy.
     assert _corpus_code_length(one, s1) < _corpus_code_length(split, s2)
+
+
+# --- Task 2: transport + mdl_delta + novelty_residual + clears_mdl_bar ------------------------
+
+from polymer_grammar.description_length import (  # noqa: E402
+    RevisionDiscovery,
+    _PATTERN_BITS,
+    classify,
+    clears_mdl_bar,
+    mdl_delta,
+    novelty_residual,
+    transport,
+)
+from polymer_grammar.representation import (  # noqa: E402
+    OntologyTermTarget,
+    PatternTarget,
+    RepresentationRevision,
+    RevisionOperation,
+)
+
+_refA = PatternRef(id="A", version="v1")
+_refB = PatternRef(id="B", version="v1")
+_refNew = PatternRef(id="brand_new", version="v1")
+
+
+def _dup_corpus():
+    # patterns A,B identical-signature, each used 5x.
+    return tuple(
+        _claim(f"a{i}", "A") for i in range(5)
+    ) + tuple(_claim(f"b{i}", "B") for i in range(5))
+
+
+def test_transport_merge_repoints_and_quotients_schema():
+    claims = _dup_corpus()
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.MERGE,
+        target=PatternTarget(patterns=(_refA, _refB)), rationale="dup",
+    )
+    c2, s2 = transport(claims, s, rev)
+    # every claim now points at the unified ref; members gone from schema.
+    unified_ids = {c.pattern.id for c in c2}
+    assert unified_ids == {"merged:A+B"}
+    assert ("A", "v1") not in s2.patterns and ("B", "v1") not in s2.patterns
+    assert ("merged:A+B", "v1") in s2.patterns
+
+
+def test_redundant_merge_compresses_and_is_consolidation():
+    claims = _dup_corpus()
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.MERGE,
+        target=PatternTarget(patterns=(_refA, _refB)), rationale="dup",
+    )
+    delta = mdl_delta(claims, s, rev)
+    assert delta < 0.0                                  # pays for itself
+    assert novelty_residual(claims, s, rev) < EPSILON   # generator-reachable -> consolidation
+    assert classify(delta, novelty_residual(claims, s, rev)) == "consolidation"
+
+
+def test_unused_add_costs_bits():
+    claims = _dup_corpus()
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.ADD,
+        target=PatternTarget(patterns=(_refNew,)), rationale="x",
+    )
+    delta = mdl_delta(claims, s, rev)
+    assert delta > 0.0                                  # pure schema cost, nothing uses it
+    # a brand-new ADD pattern is not generator-reachable -> full residual.
+    assert novelty_residual(claims, s, rev) == _PATTERN_BITS
+    assert classify(delta, novelty_residual(claims, s, rev)) == "rejected"
+
+
+def test_unused_add_ontology_term_costs_bits():
+    # The corpus already carries >=2 distinct terms (T>=2), so adding an unused term moves the
+    # log*(T) schema count out of its flat n<=1 region -> a strictly positive, unused cost.
+    claims = (
+        _claim("t1", "A", leaves=(_qleaf(), _cleaf("GO:0008150"))),
+        _claim("t2", "A", leaves=(_qleaf(), _cleaf("HP:0001250"))),
+    )
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.ADD,
+        target=OntologyTermTarget(term_id="HP:9999999"), rationale="x",
+    )
+    assert mdl_delta(claims, s, rev) > 0.0
+
+
+def test_loadbearing_deprecate_is_rejected():
+    claims = _dup_corpus()  # pattern A is load-bearing (5 claims)
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.DEPRECATE,
+        target=PatternTarget(patterns=(_refA,)), rationale="x",
+    )
+    assert mdl_delta(claims, s, rev) > 0.0              # generic re-encoding costs more
+
+
+def test_relax_is_mdl_deferred():
+    claims = _dup_corpus()
+    s = corpus_implied_schema(claims)
+    from polymer_grammar.representation import ConstraintTarget
+    rev = RepresentationRevision(
+        operation=RevisionOperation.RELAX,
+        target=ConstraintTarget(name="at_least_one_exclusion"), rationale="x",
+    )
+    c2, s2 = transport(claims, s, rev)
+    assert c2 == claims and s2 == s
+    assert mdl_delta(claims, s, rev) == 0.0
+
+
+def test_clears_mdl_bar_threshold():
+    assert clears_mdl_bar(-5.0) is True
+    assert clears_mdl_bar(-0.0001) is False             # below _MDL_EPS
+    assert clears_mdl_bar(0.0) is False
+
+
+def test_mdl_delta_is_deterministic():
+    claims = _dup_corpus()
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.MERGE,
+        target=PatternTarget(patterns=(_refA, _refB)), rationale="dup",
+    )
+    assert mdl_delta(claims, s, rev) == mdl_delta(claims, s, rev)
+
+
+def test_revision_discovery_record():
+    rec = RevisionDiscovery(mdl_delta=-3.0, novelty_residual=0.0, classification="consolidation")
+    assert rec.classification == "consolidation"
