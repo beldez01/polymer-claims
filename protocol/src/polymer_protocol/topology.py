@@ -166,6 +166,11 @@ def _extract_clusters(corpus: Corpus) -> tuple[TopologyCluster, ...]:
 
 _FR_ITERATIONS = 50
 _FR_EPSILON = 1e-9
+_FR_TEMP = 0.1  # from-scratch initial max displacement; linearly cooled to ~0
+# A warm-started frame perturbs only locally: existing nodes start at (near-)equilibrium, so a
+# cooler schedule keeps Δposition small (a disconnected node is purely repelled and otherwise
+# drifts by ~_FR_TEMP·iters per re-layout — the precision-instrument register, not a lava lamp).
+_FR_WARM_TEMP = 0.02
 
 
 def _seed_position(node_id: str) -> tuple[float, float, float]:
@@ -217,7 +222,8 @@ def _force_directed_layout(
 
     # FR ideal edge length over a unit-cube-ish area; constant for a given node count
     k = (1.0 / n) ** (1.0 / 3.0)
-    t = 0.1  # initial max displacement; linearly cooled to ~0
+    t_init = _FR_WARM_TEMP if seed_positions else _FR_TEMP
+    t = t_init  # initial max displacement; linearly cooled to ~0
 
     for step in range(_FR_ITERATIONS):
         disp = {nid: [0.0, 0.0, 0.0] for nid in node_ids}
@@ -274,7 +280,7 @@ def _force_directed_layout(
             p[0] += d[0] * scale
             p[1] += d[1] * scale
             p[2] += d[2] * scale
-        t = 0.1 * (1.0 - (step + 1) / _FR_ITERATIONS)
+        t = t_init * (1.0 - (step + 1) / _FR_ITERATIONS)
 
     return (
         {nid: (round(p[0], 6), round(p[1], 6), round(p[2], 6)) for nid, p in pos.items()},
