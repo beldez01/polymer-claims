@@ -39,6 +39,53 @@ def test_serve_builds_runner_and_runs(monkeypatch):
     assert isinstance(seen["runner"], NodeRunner)
 
 
+def test_serve_refuses_non_loopback_without_flag(monkeypatch, capsys):
+    # the guard must fire regardless of the serve extra; _import_server may be real or not
+    rc = main(["serve", "--host", "0.0.0.0"])
+    assert rc == 1
+    assert "unsafe-remote-control" in capsys.readouterr().err
+
+
+def test_serve_allows_non_loopback_with_flag(monkeypatch):
+    seen = {}
+
+    def fake_import():
+        def run(app, host=None, port=None):
+            seen["bind"] = (host, port)
+
+        def create_app(runner, *, interval, origins):
+            seen["runner"] = runner
+            return "APP"
+
+        import types as _t
+        return _t.SimpleNamespace(run=run), create_app
+
+    monkeypatch.setattr(cli, "_import_server", fake_import)
+    rc = main(["serve", "--host", "0.0.0.0", "--unsafe-remote-control", "--port", "9099"])
+    assert rc == 0
+    assert seen["bind"] == ("0.0.0.0", 9099)
+
+
+def test_serve_threads_max_frames(monkeypatch):
+    seen = {}
+
+    def fake_import():
+        def run(app, host=None, port=None):
+            pass
+
+        def create_app(runner, *, interval, origins):
+            seen["runner"] = runner
+            return "APP"
+
+        import types as _t
+        return _t.SimpleNamespace(run=run), create_app
+
+    monkeypatch.setattr(cli, "_import_server", fake_import)
+    rc = main(["serve", "--max-frames", "42"])
+    assert rc == 0
+    assert seen["runner"].max_frames == 42
+
+
 def test_default_seed_evolves():
     from polymer_claims.seed import default_seed_corpus
     corpus, kwargs = default_seed_corpus()

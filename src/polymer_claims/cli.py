@@ -94,8 +94,8 @@ def _cmd_run_cycle(args: argparse.Namespace) -> int:
     result = run_cycle(corpus, _ADAPTERS, _CTX)
     counts = _status_counts(result.corpus)
     summary = ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
-    print(f"status: {summary or '(none)'}")
-    print(f"frontier: {len(result.frontier)}")
+    print(f"status: {summary or '(none)'}", file=sys.stderr)
+    print(f"frontier: {len(result.frontier)}", file=sys.stderr)
     _write_or_print(dump_corpus(result.corpus), args.out)
     return 0
 
@@ -114,7 +114,10 @@ def _cmd_loop(args: argparse.Namespace) -> int:
         trace.append(f"{action.kind.value}: {action.rationale}")
         if action.kind is not ActionKind.RUN_CYCLE:
             # v1 loop only drives RUN_CYCLE; a daemon action means we stop and report.
-            print(f"non-RUN_CYCLE action recommended ({action.kind.value}); stopping.")
+            print(
+                f"non-RUN_CYCLE action recommended ({action.kind.value}); stopping.",
+                file=sys.stderr,
+            )
             break
         if action.estimated_cost > remaining:
             break
@@ -123,13 +126,13 @@ def _cmd_loop(args: argparse.Namespace) -> int:
         remaining -= action.estimated_cost
         state = SchedulerState(corpus=corpus, ledger=result.ledger)
 
-    print(f"steps: {len(trace)}")
+    print(f"steps: {len(trace)}", file=sys.stderr)
     for line in trace:
-        print(f"  {line}")
+        print(f"  {line}", file=sys.stderr)
     counts = _status_counts(corpus)
     summary = ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
-    print(f"final status: {summary or '(none)'}")
-    print(f"budget remaining: {remaining}")
+    print(f"final status: {summary or '(none)'}", file=sys.stderr)
+    print(f"budget remaining: {remaining}", file=sys.stderr)
     _write_or_print(dump_corpus(corpus), args.out)
     return 0
 
@@ -144,7 +147,10 @@ def _cmd_export_topology(args: argparse.Namespace) -> int:
 def _cmd_export_timeline(args: argparse.Namespace) -> int:
     corpus = load_corpus(args.corpus)
     timeline = export_timeline(corpus, _ADAPTERS, _CTX, n_cycles=args.cycles)
-    print(f"frames: {len(timeline.frames)} (n_cycles={timeline.n_cycles})")
+    print(
+        f"frames: {len(timeline.frames)} (n_cycles={timeline.n_cycles})",
+        file=sys.stderr,
+    )
     _write_or_print(timeline.model_dump_json(), args.out)
     return 0
 
@@ -157,6 +163,9 @@ def _import_server():
     return uvicorn, create_app
 
 
+_LOOPBACK = {"127.0.0.1", "localhost", "::1"}
+
+
 def _cmd_serve(args: argparse.Namespace) -> int:
     try:
         uvicorn, create_app = _import_server()
@@ -167,16 +176,28 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
+    if args.host not in _LOOPBACK and not args.unsafe_remote_control:
+        print(
+            f"refusing to bind a non-loopback host ({args.host!r}): the live node's "
+            "mutating routes (/step,/pause,/resume) are UNAUTHENTICATED. Re-run with "
+            "--unsafe-remote-control to override (you accept the exposure).",
+            file=sys.stderr,
+        )
+        return 1
     if args.seed_corpus:
         corpus = load_corpus(args.seed_corpus)
-        runner = NodeRunner.from_seed(corpus, scheduler_budget=args.budget)
+        runner = NodeRunner.from_seed(
+            corpus, scheduler_budget=args.budget, max_frames=args.max_frames
+        )
     else:
         from .seed import default_seed_corpus
         corpus, kwargs = default_seed_corpus()
         # `args.budget` is the SCHEDULER budget (gates RUN_CYCLE); the evolving
         # seed's `kwargs["budget"]` is run_cycle's SELECT budget and flows
         # through `**kwargs` to spread licensing progressively across frames.
-        runner = NodeRunner.from_seed(corpus, scheduler_budget=args.budget, **kwargs)
+        runner = NodeRunner.from_seed(
+            corpus, scheduler_budget=args.budget, max_frames=args.max_frames, **kwargs
+        )
     app = create_app(runner, interval=args.interval, origins=args.origins or None)
     uvicorn.run(app, host=args.host, port=args.port)
     return 0
@@ -233,6 +254,17 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_serve.add_argument("--host", default="127.0.0.1", help="bind host")
     p_serve.add_argument("--port", type=int, default=8000, help="bind port")
+    p_serve.add_argument(
+        "--unsafe-remote-control",
+        action="store_true",
+        help="allow binding a non-loopback host despite UNAUTHENTICATED mutating routes",
+    )
+    p_serve.add_argument(
+        "--max-frames",
+        type=int,
+        default=10000,
+        help="max retained frames in the live node (ring cap)",
+    )
     p_serve.add_argument(
         "--interval", type=float, default=1.5, help="seconds between auto-ticks"
     )

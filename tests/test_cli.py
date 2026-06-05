@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 
-from polymer_protocol import TopologyExport, TopologyTimeline
+from polymer_protocol import Corpus, TopologyExport, TopologyTimeline
 
 from polymer_claims.cli import main
 from tests.conftest import licensing_corpus, make_claim
@@ -50,8 +50,18 @@ def test_run_cycle_licenses(tmp_path, capsys):
     out = tmp_path / "out.json"
     rc = main(["run-cycle", str(path), "--out", str(out)])
     assert rc == 0
-    assert "licensed=1" in capsys.readouterr().out
+    assert "licensed=1" in capsys.readouterr().err
     assert out.exists()
+
+
+def test_run_cycle_stdout_is_clean_json(capsys, tmp_path):
+    p = tmp_path / "c.json"
+    p.write_text(licensing_corpus().model_dump_json())
+    rc = main(["run-cycle", str(p)])
+    out = capsys.readouterr()
+    assert rc == 0
+    Corpus.model_validate_json(out.out)          # stdout parses as a Corpus
+    assert "status:" in out.err                  # the human summary went to stderr
 
 
 # ---------------------------------------------------------------------------
@@ -62,7 +72,7 @@ def test_loop_runs_and_licenses(tmp_path, capsys):
     path.write_text(licensing_corpus().model_dump_json())
     out = tmp_path / "out.json"
     rc = main(["loop", str(path), "--budget", "100", "--out", str(out)])
-    captured = capsys.readouterr().out
+    captured = capsys.readouterr().err
     assert rc == 0
     # trace non-empty and at least one cycle ran
     assert "steps:" in captured
@@ -99,3 +109,13 @@ def test_export_timeline(tmp_path, capsys):
     assert tl.n_cycles == 3
     assert len(tl.frames) == 4  # n_cycles + 1
     assert isinstance(json.loads(out.read_text()), dict)
+
+
+def test_export_timeline_stdout_is_clean_json(capsys, tmp_path):
+    p = tmp_path / "c.json"
+    p.write_text(licensing_corpus().model_dump_json())
+    rc = main(["export-timeline", str(p), "--cycles", "2"])
+    out = capsys.readouterr()
+    assert rc == 0
+    TopologyTimeline.model_validate_json(out.out)
+    assert "frames:" in out.err
