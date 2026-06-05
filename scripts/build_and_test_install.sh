@@ -76,7 +76,9 @@ echo "==> smoke: validate (valid claim)"
 "${PCLAIMS}" validate "${VALID_CLAIM}"
 
 echo "==> smoke: loop --budget 100 (must license >=1 claim)"
-LOOP_OUT="$("${PCLAIMS}" loop "${SMALL_CORPUS}" --budget 100)"
+# stdout is now machine-clean JSON (the human `final status:` summary goes to
+# stderr) — capture BOTH so the grep still sees the `licensed=1` summary line.
+LOOP_OUT="$("${PCLAIMS}" loop "${SMALL_CORPUS}" --budget 100 2>&1)"
 echo "${LOOP_OUT}"
 if ! echo "${LOOP_OUT}" | grep -q "licensed=1"; then
   echo "ERROR: loop did not license >=1 claim" >&2
