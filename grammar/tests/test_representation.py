@@ -113,6 +113,23 @@ def test_meets_meta_tier_bar_false_cases():
     assert not meets_meta_tier_bar(_lic(LicenseRoute.REPLICATION, RivalSetClosure.OPEN_ACKNOWLEDGED, 2))
 
 
+def test_mdl_gate_route_meets_meta_tier_bar():
+    # an MDL_GATE-routed licensing clears the meta-tier bar (the compression evidence stands in
+    # for human replication); it does NOT need a REPLICATION route or a closed rival set.
+    lic = _lic(LicenseRoute.MDL_GATE, RivalSetClosure.OPEN_ACKNOWLEDGED, 1)
+    assert meets_meta_tier_bar(lic) is True
+
+
+def test_existing_qualitative_route_still_passes_alongside_mdl_gate():
+    assert meets_meta_tier_bar(_lic(LicenseRoute.REPLICATION, RivalSetClosure.ENUMERATED, 2, ("r1",)))
+
+
+def test_severe_test_open_still_fails_with_mdl_gate_added():
+    assert not meets_meta_tier_bar(
+        _lic(LicenseRoute.SEVERE_TEST, RivalSetClosure.OPEN_ACKNOWLEDGED, 1)
+    )
+
+
 def test_meta_tier_constants():
     assert META_TIER_REQUIRED_ROUTE == LicenseRoute.REPLICATION
     assert RivalSetClosure.ENUMERATED in META_TIER_ALLOWED_CLOSURES

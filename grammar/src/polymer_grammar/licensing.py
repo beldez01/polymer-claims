@@ -40,6 +40,7 @@ class Satisfaction(_Model):
 class LicenseRoute(str, Enum):
     SEVERE_TEST = "severe_test"
     REPLICATION = "replication"
+    MDL_GATE = "mdl_gate"  # a representation-revision earned its license from corpus compressibility
 
 
 class RivalSetClosure(str, Enum):
