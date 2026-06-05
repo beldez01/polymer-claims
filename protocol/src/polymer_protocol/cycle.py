@@ -122,6 +122,20 @@ def run_cycle(
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
     audit.append(StageAudit(stage="verify_stage", note=f"{n_licensed} licensed", count=n_licensed))
 
+    corpus, skipped = integrate(corpus, scaffolding, records)
+    n_added = len(records) - len(skipped)
+    audit.append(
+        StageAudit(
+            stage="integrate",
+            note=f"{n_added} FDR test(s) added ({corpus.fdr_ledger.n_tests} total); {len(skipped)} skipped",
+            count=n_added,
+        )
+    )
+
+    # Credit is allocated on SURVIVAL: the snapshot is taken POST-INTEGRATE so a claim that
+    # licenses at VERIFY but is RETRACTED by INTEGRATE's AGM consistency contest earns no
+    # success credit (it has vanished from `after`). executed_ids, eig_by_id, and operator_of
+    # are integrate-invariant, so only the survivor set differs from the pre-integrate corpus.
     after = corpus.by_id()
     eig_by_id = {d.claim_id: d.value.eig for d in selection.decisions}
     outcomes = tuple(
@@ -135,16 +149,6 @@ def run_cycle(
         for cid in sorted(executed_ids) if cid in after
     )
     led = update_ledger(led, outcomes)
-
-    corpus, skipped = integrate(corpus, scaffolding, records)
-    n_added = len(records) - len(skipped)
-    audit.append(
-        StageAudit(
-            stage="integrate",
-            note=f"{n_added} FDR test(s) added ({corpus.fdr_ledger.n_tests} total); {len(skipped)} skipped",
-            count=n_added,
-        )
-    )
 
     frontier = represent(corpus).frontier
     # a gated claim can be retracted by INTEGRATE's consistency contest; keep the lane

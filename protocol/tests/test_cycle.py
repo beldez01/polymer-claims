@@ -424,6 +424,54 @@ def test_seam_folds_in_governed_conjectures(empty_ledger, ctx, adapters):
     assert {"a", "b"} & set(represent(r1.corpus).grounded_extension) == {"a", "b"} & set(g0)
 
 
+def _strong_sv(mag, cert, ean, sev, wc, ev):
+    from polymer_grammar import StrengthVector
+    return StrengthVector(
+        magnitude=mag, certainty=cert, evidence_against_null=ean,
+        severity=sev, world_contact=wc, explanatory_virtue=ev,
+    )
+
+
+def test_retracted_claim_earns_no_success_credit(empty_ledger, ctx, adapters):
+    # keeper (strong, LICENSED, no plan) declares its conclusion INCOMPATIBLE_WITH victim's;
+    # victim (weaker) is PENDING+plan -> selected, executed, LICENSES at VERIFY. After VERIFY
+    # both are LICENSED and content-incompatible, so INTEGRATE's AGM contest retracts the
+    # less-entrenched victim. Credit allocated on SURVIVAL => victim earns NO success.
+    from polymer_grammar import (
+        Direction,
+        NeighborEdge,
+        NeighborEdgeKind,
+        Proposition,
+    )
+
+    victim_prop = Proposition(
+        direction=Direction.NEGATIVE, estimand="beta", descriptor="victim on Y",
+    )
+    keeper_prop = Proposition(
+        direction=Direction.POSITIVE, estimand="beta", descriptor="keeper on Y",
+        neighborhood=(
+            NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH, target=victim_prop.content_hash),
+        ),
+    )
+    # keeper DOMINATES victim on every strength axis (all >=, at least one >)
+    keeper = make_claim(
+        "keeper", status=Status.LICENSED, conclusion=keeper_prop,
+        strength=_strong_sv(0.9, 0.9, 0.9, 0.9, 0.9, 0.9),
+    )
+    victim = make_claim(
+        "victim", status=Status.PENDING, conclusion=victim_prop,
+        plan=make_plan(0.01, 0.05),
+        strength=_strong_sv(0.1, 0.1, 0.1, 0.1, 0.1, 0.1),
+    )
+    corpus = Corpus(claims=(keeper, victim), fdr_ledger=empty_ledger)
+    result = run_cycle(corpus, adapters, ctx)
+    after = result.corpus.by_id()
+    assert "victim" not in after          # integrate retracted it (fixture sanity)
+    assert "keeper" in after              # the entrenched rival survived
+    vo = result.ledger.outcome("victim")
+    assert vo is None or vo.successes == 0  # retracted => NO success credit
+
+
 def test_seam_untrusted_claim_cannot_license(empty_ledger, ctx, adapters):
     from polymer_grammar import CategoricalLeaf, Claim, PatternRef, Status
     from polymer_protocol.corpus import Proposal
