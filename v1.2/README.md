@@ -4,7 +4,15 @@ This directory holds the **complete v1.2 Polymer Claims ecosystem**, consolidate
 **frozen on 2026-06-01**. It is kept **as a fallback** in case the ground-up v1.3 grammar
 rebuild (`../grammar/`) proves a dead end. **Nothing here is deleted; it is paused.**
 
-The active work is the v1.3 grammar — see the repo-root `README.md` and `../docs/superpowers/CONTINUE.md`.
+> ⚠️ **Nothing in `v1.2/` exercises the active v1.3 grammar/protocol runtime.** The `claim-harness`
+> plugin is still installable (legacy-active) but authors v1.2 FormalClaim drafts only. The active
+> system is the v1.3 local node + viewer — see the repo-root `README.md` and `../ARCHITECTURE_CURRENT.md`.
+> **Known v1.2 limitations left under the freeze** (not fixed): the evaluator can treat pinned JSON
+> inference as license-grade; the corpus evaluator accepts a `--schema` arg it does not use; direct
+> test coverage is thin; the bundled MCP server's `list_tools()` is empty despite the docs. These
+> matter only if v1.2 is ever un-frozen.
+
+The active work is the v1.3 grammar/protocol — see the repo-root `README.md`, `../ARCHITECTURE_CURRENT.md`, and `../docs/superpowers/CONTINUE.md`.
 
 ## What's here
 

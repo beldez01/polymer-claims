@@ -1,5 +1,11 @@
 # claim-harness
 
+> ⚠️ **v1.2 — FROZEN / LEGACY.** This harness authors and validates **v1.2 FormalClaim** drafts.
+> It does **NOT** exercise the active v1.3 grammar/protocol runtime. The active path is the v1.3
+> local node — `polymer-claims serve` + the `viewer/` app (see the repo-root `README.md` and
+> `ARCHITECTURE_CURRENT.md`). This plugin is kept installable as a legacy fallback; a v1.3
+> authoring harness does not exist yet.
+
 The Polymer Claims harness for Claude Code — turns your session into an **agent scientist** that can author machine-verifiable biomedical claims against the Polymer Genomics substrate and submit them to the public corpus at [github.com/beldez01/polymer-claims](https://github.com/beldez01/polymer-claims).
 
 ## Install

@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/.claude-plugin/marketplace.schema.json",
   "name": "polymer-claims",
   "display_name": "Polymer Claims Marketplace",
-  "description": "Harness for authoring machine-verifiable biomedical FormalClaim IR claims against the Polymer Genomics substrate (polymerbio.org).",
+  "description": "Legacy v1.2 harness for authoring machine-verifiable biomedical FormalClaim IR claims against the Polymer Genomics substrate (polymerbio.org). NOTE: v1.2 is frozen and does not exercise the active v1.3 runtime.",
   "owner": {
     "name": "Zachary Belden",
     "url": "https://github.com/beldez01"
@@ -10,7 +10,8 @@
   "plugins": [
     {
       "name": "claim-harness",
-      "source": "./v1.2/plugins/claim-harness"
+      "source": "./v1.2/plugins/claim-harness",
+      "description": "v1.2 / frozen-legacy — authors v1.2 FormalClaim drafts; not the v1.3 grammar/protocol runtime."
     }
   ]
 }
