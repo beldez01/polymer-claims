@@ -565,3 +565,80 @@ def test_seam_untrusted_claim_cannot_license(empty_ledger, ctx, adapters):
     corp = Corpus(claims=(make_claim("a"),), fdr_ledger=empty_ledger)
     r1 = run_cycle(corp, adapters, ctx, proposers=(bridge_proposer((_CheatingAdapter(),)),))
     assert "forged" not in r1.corpus.by_id()  # compile_untrusted dropped it; never entered the corpus
+
+
+def _licensing():
+    from polymer_grammar import (
+        LicenseRoute,
+        Licensing,
+        MaterializationContext,
+        RivalSetClosure,
+        Satisfaction,
+        SatisfactionVerdict,
+    )
+    mat = MaterializationContext(id="m1", api_version="v1", data_version="v1")
+    sat = Satisfaction(verdict=SatisfactionVerdict.SATISFIED, materialization=mat)
+    return Licensing(
+        route=LicenseRoute.SEVERE_TEST,
+        rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
+        rivals_considered=(),
+        satisfactions=(sat,),
+    )
+
+
+def test_C1_untrusted_non_provisional_edge_cannot_defeat_honest(empty_ledger, ctx, adapters):
+    # A malicious adapter emits a CONJECTURED claim that carries a NON-provisional REBUT edge
+    # targeting a pre-existing LICENSED ("honest") claim. The bridge must coerce the edge to
+    # provisional, so it stays INERT (its source never licenses) and honest survives.
+    from polymer_grammar import (
+        CategoricalLeaf,
+        Claim,
+        DefeatEdge,
+        DefeatEdgeKind,
+        PatternRef,
+        Status,
+    )
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generation_adapter import bridge_proposer
+    from polymer_protocol.represent import represent
+
+    honest = make_claim("honest", status=Status.LICENSED, licensing=_licensing())
+
+    class _MaliciousAdapter:
+        identity = "malicious"
+        def propose(self, corpus, frontier):
+            evil = Claim(
+                id="evil", title="evil",
+                pattern=PatternRef(id="adjusted_effect", version="v1"),
+                leaves=(CategoricalLeaf(ontology_term="t"),), status=Status.CONJECTURED,
+            )
+            edge = DefeatEdge(source="evil", target="honest",
+                              kind=DefeatEdgeKind.REBUT, provisional=False)
+            return (Proposal(operator_id="malicious", claim=evil, edges=(edge,)),)
+
+    corp = Corpus(claims=(honest,), fdr_ledger=empty_ledger)
+    r1 = run_cycle(corp, adapters, ctx, proposers=(bridge_proposer((_MaliciousAdapter(),)),))
+    # honest must remain in the grounded extension — the coerced-provisional edge is inert
+    scaf = represent(r1.corpus)
+    assert "honest" in scaf.grounded_extension
+
+
+def test_C2_injected_licensed_claim_is_rejected(empty_ledger, ctx, adapters):
+    # A pre-LICENSED claim smuggled through the injected= port must be discarded, never folded.
+    smuggled = make_claim("smug", status=Status.CONJECTURED).model_copy(
+        update={"status": Status.LICENSED}
+    )
+    r1 = run_cycle(Corpus(fdr_ledger=empty_ledger), adapters, ctx, injected=(smuggled,))
+    assert "smug" not in r1.corpus.by_id()
+    reasons = {d.claim_id: d.reason for d in r1.generation.discarded}
+    assert reasons.get("smug") == "illicit-status"
+
+
+def test_C2_injected_licensing_block_is_rejected(empty_ledger, ctx, adapters):
+    # A valid LICENSED claim carrying a licensing block is rejected on the injected= port with
+    # reason "illicit-licensing" (the licensing check fires before the status check).
+    smuggled = make_claim("smug", status=Status.LICENSED, licensing=_licensing())
+    r1 = run_cycle(Corpus(fdr_ledger=empty_ledger), adapters, ctx, injected=(smuggled,))
+    assert "smug" not in r1.corpus.by_id()
+    reasons = {d.claim_id: d.reason for d in r1.generation.discarded}
+    assert reasons.get("smug") == "illicit-licensing"

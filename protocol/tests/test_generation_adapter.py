@@ -202,3 +202,55 @@ def test_template_adapter_skips_its_own_outputs():
 def test_template_adapter_identity():
     from polymer_protocol.generation_adapter import TemplateGenerationAdapter
     assert TemplateGenerationAdapter().identity == "template-ref"
+
+
+# --- C1: bridge coerces untrusted edges to provisional; compile_to_IR backstop ---
+
+
+def test_bridge_coerces_untrusted_edges_to_provisional():
+    from polymer_grammar import DefeatEdge, DefeatEdgeKind
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generation_adapter import bridge_proposer
+    edge = DefeatEdge(source="x", target="honest", kind=DefeatEdgeKind.REBUT, provisional=False)
+    raw = Proposal(operator_id="z", claim=_claim("x"), edges=(edge,))
+    proposer = bridge_proposer((_StubAdapter("llm-7", [raw]),))
+    out = proposer(_corpus(), ())
+    assert len(out) == 1
+    assert len(out[0].edges) == 1
+    assert out[0].edges[0].provisional is True  # coerced inert until the source licenses
+
+
+def test_compile_to_IR_rejects_non_provisional_self_sourced_edge():
+    from polymer_grammar import DefeatEdge, DefeatEdgeKind
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generate import compile_to_IR
+    claim = _claim("x")
+    bad = DefeatEdge(source="x", target="honest", kind=DefeatEdgeKind.REBUT, provisional=False)
+    prop = Proposal(operator_id="z", claim=claim, edges=(bad,))
+    assert compile_to_IR(prop, {"honest"}) == "non-provisional-edge"
+    # provisional version of the same edge is admissible
+    ok = DefeatEdge(source="x", target="honest", kind=DefeatEdgeKind.REBUT, provisional=True)
+    prop_ok = Proposal(operator_id="z", claim=claim, edges=(ok,))
+    assert compile_to_IR(prop_ok, {"honest"}) is None
+
+
+# --- C2: compile_to_IR rejects pre-LICENSED / licensing-bearing proposals ---
+
+
+def test_compile_to_IR_rejects_illicit_licensing():
+    # A valid LICENSED claim carrying a licensing block — the licensing check fires first.
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generate import compile_to_IR
+    lic = _make_licensing()
+    smuggled = _claim("x", status=Status.LICENSED, licensing=lic)
+    prop = Proposal(operator_id="z", claim=smuggled)
+    assert compile_to_IR(prop, set()) == "illicit-licensing"
+
+
+def test_compile_to_IR_rejects_illicit_status():
+    # A LICENSED claim with no licensing block — only the status check can catch it.
+    from polymer_protocol.corpus import Proposal
+    from polymer_protocol.generate import compile_to_IR
+    smuggled = _claim("x").model_copy(update={"status": Status.LICENSED})
+    prop = Proposal(operator_id="z", claim=smuggled)
+    assert compile_to_IR(prop, set()) == "illicit-status"

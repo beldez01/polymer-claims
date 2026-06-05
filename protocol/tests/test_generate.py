@@ -69,7 +69,9 @@ def test_invalid_edge_source_is_discarded():
 
 def test_admitted_edge_is_added():
     corp = _corpus([make_claim("a")])
-    edge = DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT)
+    # self-sourced edges from the (still-unlicensed) proposal claim must be provisional —
+    # a non-provisional one is rejected by the C1 trust-boundary backstop in compile_to_IR.
+    edge = DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT, provisional=True)
 
     def prop(corpus, frontier):
         return (Proposal(operator_id="op", claim=make_claim("b"), edges=(edge,)),)
@@ -77,6 +79,35 @@ def test_admitted_edge_is_added():
     out, rec = generate_stage(corp, frontier=(), proposers=(prop,))
     assert "b" in out.by_id()
     assert any(e.source == "b" and e.target == "a" for e in out.defeat_edges)
+
+
+def test_non_provisional_self_sourced_edge_is_rejected():
+    # C1 backstop on the raw proposers= port (not routed through the bridge).
+    corp = _corpus([make_claim("a")])
+    edge = DefeatEdge(source="b", target="a", kind=DefeatEdgeKind.REBUT, provisional=False)
+
+    def prop(corpus, frontier):
+        return (Proposal(operator_id="op", claim=make_claim("b"), edges=(edge,)),)
+
+    out, rec = generate_stage(corp, frontier=(), proposers=(prop,))
+    assert "b" not in out.by_id()
+    assert {d.claim_id: d.reason for d in rec.discarded}.get("b") == "non-provisional-edge"
+
+
+def test_non_provisional_synthetic_sourced_edge_is_rejected():
+    # C1 backstop closes the synthetic-':'-source carve-out: a raw proposer can otherwise forge a
+    # 'refutation:*'-sourced non-provisional edge that is immediately effective against an honest
+    # LICENSED claim (only the protocol's own verify/integrate legitimately mint such edges, and
+    # those never flow through compile_to_IR). It must be rejected, not silently admitted.
+    corp = _corpus([make_claim("a")])
+    edge = DefeatEdge(source="refutation:fake", target="a", kind=DefeatEdgeKind.UNDERMINE, provisional=False)
+
+    def prop(corpus, frontier):
+        return (Proposal(operator_id="op", claim=make_claim("b"), edges=(edge,)),)
+
+    out, rec = generate_stage(corp, frontier=(), proposers=(prop,))
+    assert "b" not in out.by_id()
+    assert {d.claim_id: d.reason for d in rec.discarded}.get("b") == "non-provisional-edge"
 
 
 def test_injected_claim_gets_provenance_and_admitted():

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from polymer_grammar import Claim, GenerationMode, Provenance
+from polymer_grammar import Claim, GenerationMode, Provenance, Status
 
 from .allocate import allocate_subcaps
 from .base import stable_sha
@@ -51,6 +51,13 @@ def compile_to_IR(proposal: Proposal, present_ids: set[str]) -> str | None:
     """Pressure-sensor: return a discard reason, or None if the proposal is admissible.
 
     `present_ids` is the live id set (existing + already-admitted this pass)."""
+    # Trust-boundary backstop (C2): licensing is minted ONLY by the air-gapped verify. No proposal
+    # arriving on any port (injected= or proposers=) may carry a licensing block or claim LICENSED
+    # — that would smuggle an unverified claim past verify_stage. Rejected before anything else.
+    if proposal.claim.licensing is not None:
+        return "illicit-licensing"
+    if proposal.claim.status == Status.LICENSED:
+        return "illicit-status"
     if proposal.claim.id in present_ids:
         return "duplicate"
     for e in proposal.edges:
@@ -60,6 +67,14 @@ def compile_to_IR(proposal: Proposal, present_ids: set[str]) -> str | None:
         # an edge resolves iff its target is an existing claim or the claim being added
         if e.target not in present_ids and e.target != proposal.claim.id:
             return "unresolved-edge"
+        # Trust-boundary backstop (C1): NO proposal-supplied edge may be immediately effective.
+        # The invalid-edge-source check above guarantees e.source is either the proposal's own
+        # (still-unlicensed) claim or a synthetic ':' node — never a third party — so any such edge
+        # must be provisional, else it would defeat an honest claim for free. Only the protocol's
+        # own verify/integrate legitimately mint effective synthetic 'refutation:*' edges, and those
+        # never flow through compile_to_IR.
+        if not e.provisional:
+            return "non-provisional-edge"
     return None
 
 
