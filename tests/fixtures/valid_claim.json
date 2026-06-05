@@ -1,0 +1,27 @@
+{
+  "schema_version": "v1.3",
+  "id": "a",
+  "title": "claim a",
+  "pattern": {
+    "id": "adjusted_effect",
+    "version": "v1"
+  },
+  "leaves": [
+    {
+      "kind": "categorical",
+      "ontology_term": "term-a",
+      "assay": null
+    }
+  ],
+  "status": "conjectured",
+  "pending_reason": null,
+  "strength": null,
+  "conclusion": null,
+  "licensing": null,
+  "roles": null,
+  "subject": null,
+  "provenance": null,
+  "governance": null,
+  "evaluation_plan": null,
+  "representation_revision": null
+}

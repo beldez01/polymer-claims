@@ -1,0 +1,68 @@
+{
+  "claims": [
+    {
+      "schema_version": "v1.3",
+      "id": "a",
+      "title": "claim a",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "term-a",
+          "assay": null
+        }
+      ],
+      "status": "pending",
+      "pending_reason": "untested",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": {
+        "graph": {
+          "nodes": [
+            {
+              "id": "n0",
+              "impl": "builtin::const",
+              "inputs": [],
+              "params": [
+                [
+                  "value",
+                  "0.01"
+                ]
+              ],
+              "produces": {
+                "leaf_kind": "quantity",
+                "measurement_basis": "derived",
+                "unit": null,
+                "dimension": null
+              },
+              "oracle_ref": null
+            }
+          ],
+          "terminal": "n0"
+        },
+        "criterion": {
+          "comparator": "lt",
+          "threshold": 0.05,
+          "reference_leaf_index": null,
+          "tolerance": null
+        }
+      },
+      "representation_revision": null
+    }
+  ],
+  "defeat_edges": [],
+  "equivalences": [],
+  "fdr_ledger": {
+    "target_fdr": 0.05,
+    "procedure": "lond",
+    "tests": []
+  }
+}
