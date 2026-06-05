@@ -1,9 +1,10 @@
 """Strength as a 6-axis Pareto partial order (spec §3.5).
 
-AND = componentwise meet (weakest link); OR = componentwise join. Two claims with a
-cross-axis trade-off are genuinely *incomparable* — there is no hidden scalar and no
-Arrow-style aggregation. A claim is LICENSED only if it dominates a declared threshold
-vector on EVERY axis.
+Every axis is higher-is-better (natural polarity), so `dominates`/`meet`/`join` are
+uniform — no axis needs special-casing. AND = componentwise meet (weakest link); OR =
+componentwise join. Two claims with a cross-axis trade-off are genuinely *incomparable* —
+there is no hidden scalar and no Arrow-style aggregation. A claim is LICENSED only if it
+dominates a declared threshold vector on EVERY axis.
 """
 from __future__ import annotations
 
@@ -13,7 +14,7 @@ from .base import _Model
 
 AXES: tuple[str, ...] = (
     "magnitude",
-    "uncertainty",
+    "certainty",
     "evidence_against_null",
     "severity",
     "world_contact",
@@ -23,7 +24,7 @@ AXES: tuple[str, ...] = (
 
 class StrengthVector(_Model):
     magnitude: float = Field(ge=0.0, le=1.0)
-    uncertainty: float = Field(ge=0.0, le=1.0)
+    certainty: float = Field(ge=0.0, le=1.0)
     evidence_against_null: float = Field(ge=0.0, le=1.0)
     severity: float = Field(ge=0.0, le=1.0)
     world_contact: float = Field(ge=0.0, le=1.0)

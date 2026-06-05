@@ -19,7 +19,7 @@ def _leaf():
 def _sv(severity: float, ean: float) -> StrengthVector:
     # only `severity` and `evidence_against_null` matter for entrenchment; pin the rest mid.
     return StrengthVector(
-        magnitude=0.5, uncertainty=0.5, evidence_against_null=ean,
+        magnitude=0.5, certainty=0.5, evidence_against_null=ean,
         severity=severity, world_contact=0.5, explanatory_virtue=0.5,
     )
 
