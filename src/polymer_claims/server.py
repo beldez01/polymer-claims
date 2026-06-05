@@ -22,6 +22,24 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from .node import NodeRunner
 
+# Per-subscriber SSE queue cap: drop-oldest beyond this many buffered frames so a
+# slow client can't grow an unbounded queue (memory leak).
+_SSE_QUEUE_MAX = 1000
+
+
+def _bounded_put(q, payload) -> None:
+    try:
+        q.put_nowait(payload)
+    except asyncio.QueueFull:
+        try:
+            q.get_nowait()  # drop oldest
+        except asyncio.QueueEmpty:
+            pass
+        try:
+            q.put_nowait(payload)
+        except asyncio.QueueFull:
+            pass  # give up this frame rather than block the ticker
+
 
 def _sse_event(json_str: str) -> bytes:
     return f"event: frame\ndata: {json_str}\n\n".encode()
@@ -46,14 +64,17 @@ def create_app(
 ) -> FastAPI:
     # broadcast hub: each SSE subscriber gets an asyncio.Queue of frame-JSON strings.
     subscribers: set[asyncio.Queue] = set()
+    # serialize the mutating runner.tick() across the ticker and route handlers.
+    lock = asyncio.Lock()
 
     def _publish(frame) -> None:
         payload = frame.model_dump_json()
         for q in list(subscribers):
-            q.put_nowait(payload)
+            _bounded_put(q, payload)
 
-    def _do_tick():
-        frame = runner.tick()
+    async def _do_tick():
+        async with lock:
+            frame = runner.tick()
         _publish(frame)
         return frame
 
@@ -61,7 +82,7 @@ def create_app(
         while True:
             await asyncio.sleep(interval)
             if runner.running:
-                _do_tick()
+                await _do_tick()
 
     @asynccontextmanager
     async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -91,35 +112,35 @@ def create_app(
         }
 
     @app.get("/")
-    def root() -> dict:
+    async def root() -> dict:
         return _status()
 
     @app.get("/state")
-    def state() -> JSONResponse:
+    async def state() -> JSONResponse:
         # current (latest) frame as JSON
         return JSONResponse(content=_frame_obj(runner.frames[-1]))
 
     @app.get("/timeline")
-    def timeline() -> JSONResponse:
+    async def timeline() -> JSONResponse:
         return JSONResponse(content=_obj(runner.snapshot()))
 
     @app.post("/step")
-    def step() -> JSONResponse:
-        frame = _do_tick()
+    async def step() -> JSONResponse:
+        frame = await _do_tick()
         return JSONResponse(content=_frame_obj(frame))
 
     @app.post("/pause")
-    def pause() -> dict:
+    async def pause() -> dict:
         runner.running = False
         return _status()
 
     @app.post("/resume")
-    def resume() -> dict:
+    async def resume() -> dict:
         runner.running = True
         return _status()
 
     async def _event_source() -> AsyncIterator[bytes]:
-        q: asyncio.Queue = asyncio.Queue()
+        q: asyncio.Queue = asyncio.Queue(maxsize=_SSE_QUEUE_MAX)
         subscribers.add(q)
         try:
             # on connect: send the current frame immediately
