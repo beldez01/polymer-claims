@@ -19,8 +19,10 @@ from .base import _Model
 from .belief import accumulated_belief, expected_information_gain
 from .corpus import Corpus
 from .cost import CostModel, CostWeights, aggregate_cost
+from .drift import _is_fresh
 from .generate import _gen_id
 from .ledger import SelectionLedger
+from .select import _is_candidate
 
 
 class ActionKind(str, Enum):
@@ -71,8 +73,10 @@ class SchedulerConfig(_Model):
 
 
 def _selectable(corpus: Corpus):
-    return [c for c in corpus.claims
-            if c.status == Status.PENDING and c.evaluation_plan is not None]
+    # reuse SELECT's exact candidate predicate (PENDING + plan + NOT safety-gated) so the scheduler's
+    # RUN_CYCLE signal matches what select_stage will actually do — a hazard-gated-only corpus must NOT
+    # read as selectable (else the scheduler livelocks recommending a no-op cycle).
+    return [c for c in corpus.claims if _is_candidate(c)]
 
 
 def _red_teamable(corpus: Corpus):
@@ -110,11 +114,18 @@ def next_action(
         candidates.append(_candidate(ActionKind.RUN_CYCLE, w.cycle * w.generation_base,
                                      config.generation_cost, "generation only (no selectable claims)"))
 
-    # DRIFT — maintenance debt = number of LICENSED claims, only when a current context is supplied.
-    n_licensed = sum(1 for c in corpus.claims if c.status == Status.LICENSED)
-    if state.current is not None and n_licensed > 0:
-        candidates.append(_candidate(ActionKind.DRIFT, w.drift * n_licensed, config.daemon_cost,
-                                     f"{n_licensed} licensed claim(s) to re-validate"))
+    # DRIFT — maintenance debt = number of LICENSED claims that would ACTUALLY drift under `current`
+    # (matches drift_pass's finding rule: LICENSED + has a licensing block + not fresh), so the scheduler
+    # never recommends a no-op DRIFT pass.
+    if state.current is not None:
+        n_drifted = sum(
+            1 for c in corpus.claims
+            if c.status == Status.LICENSED and c.licensing is not None
+            and not _is_fresh(c, state.current)
+        )
+        if n_drifted > 0:
+            candidates.append(_candidate(ActionKind.DRIFT, w.drift * n_drifted, config.daemon_cost,
+                                         f"{n_drifted} licensed claim(s) drifted from the current context"))
 
     # ORACLE-VALIDATION — maintenance debt = number of probes ready to run.
     if state.probes_available > 0:
