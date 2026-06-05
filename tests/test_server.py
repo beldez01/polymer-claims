@@ -127,3 +127,29 @@ def test_stream_emits_current_frame_on_connect():
             break
     assert payload is not None
     assert "topology" in payload and "stats" in payload
+
+
+def test_step_serialized_gap_free():
+    # lock + async handlers move /step off the threadpool onto the event loop, so
+    # tick() is atomic w.r.t. the ticker — sequential steps are gap-free/no-dup.
+    client, runner = _client()  # autostart=False, interval high
+    with client:
+        seen = []
+        for _ in range(10):
+            r = client.post("/step")
+            seen.append(r.json()["stats"]["cycle_index"])
+        assert seen == list(range(seen[0], seen[0] + 10))  # contiguous, no gaps/dups
+
+
+def test_bounded_put_drops_oldest():
+    import asyncio
+
+    from polymer_claims.server import _SSE_QUEUE_MAX, _bounded_put
+
+    q = asyncio.Queue(maxsize=3)
+    for i in range(10):
+        _bounded_put(q, f"p{i}")
+    assert q.qsize() == 3
+    items = [q.get_nowait() for _ in range(3)]
+    assert items == ["p7", "p8", "p9"]  # newest 3 retained, oldest dropped
+    assert _SSE_QUEUE_MAX == 1000

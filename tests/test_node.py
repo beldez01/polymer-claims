@@ -27,3 +27,28 @@ def test_node_runner_snapshot_is_valid_before_ticks():
     tl = r.snapshot()
     assert len(tl.frames) == 1
     assert tl.frames[0].stats.cycle_index == 0
+
+
+def test_node_runner_bounded_retention():
+    r = NodeRunner.from_seed(licensing_corpus(), max_frames=5)
+    for _ in range(20):
+        r.tick()
+    tl = r.snapshot()
+    assert len(tl.frames) == 5                      # newest-5 window
+    assert r.frame_index == 20                       # true total preserved
+    assert tl.n_cycles == 20
+    assert tl.frames[-1].stats.cycle_index == 20     # window is the NEWEST frames
+    # warm-start still stable across the retained window
+    for a, b in zip(tl.frames, tl.frames[1:]):
+        pa = {n.id: n.position for n in a.topology.nodes}
+        for n in b.topology.nodes:
+            if n.id in pa:
+                d = sum((x - y) ** 2 for x, y in zip(n.position, pa[n.id])) ** 0.5
+                assert d < 0.75
+
+
+def test_node_runner_unbounded_default_via_none():
+    r = NodeRunner.from_seed(licensing_corpus(), max_frames=None)
+    for _ in range(8):
+        r.tick()
+    assert len(r.snapshot().frames) == 9             # frame 0 + 8, nothing dropped

@@ -50,11 +50,14 @@ def _status_count(corpus: Corpus, status: Status) -> int:
     return sum(1 for c in corpus.claims if c.status == status)
 
 
-def _n_licensed(corpus: Corpus) -> int:
+def n_licensed(corpus: Corpus) -> int:
     return _status_count(corpus, Status.LICENSED)
 
 
-def _frame_stats(
+_n_licensed = n_licensed
+
+
+def frame_stats(
     corpus: Corpus,
     topology: TopologyExport,
     *,
@@ -79,6 +82,9 @@ def _frame_stats(
     )
 
 
+_frame_stats = frame_stats
+
+
 def export_timeline(
     corpus: Corpus,
     adapters: tuple[Adapter, ...],
@@ -101,11 +107,11 @@ def export_timeline(
 
     # frame 0 — the seed corpus, unseeded layout
     topo = export_topology(corpus, layout=layout)
-    licensed_prev = _n_licensed(corpus)
+    licensed_prev = n_licensed(corpus)
     frames: list[TimelineFrame] = [
         TimelineFrame(
             topology=topo,
-            stats=_frame_stats(
+            stats=frame_stats(
                 corpus,
                 topo,
                 cycle_index=0,
@@ -124,8 +130,8 @@ def export_timeline(
         seed_positions = {n.id: n.position for n in frames[-1].topology.nodes}
         topo = export_topology(corpus, layout=layout, seed_positions=seed_positions)
 
-        licensed_now = _n_licensed(corpus)
-        stats = _frame_stats(
+        licensed_now = n_licensed(corpus)
+        stats = frame_stats(
             corpus,
             topo,
             cycle_index=i,
