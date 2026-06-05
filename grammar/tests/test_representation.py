@@ -118,3 +118,14 @@ def test_meta_tier_constants():
     assert RivalSetClosure.ENUMERATED in META_TIER_ALLOWED_CLOSURES
     assert RivalSetClosure.ONTOLOGY_BOUNDED in META_TIER_ALLOWED_CLOSURES
     assert RivalSetClosure.OPEN_ACKNOWLEDGED not in META_TIER_ALLOWED_CLOSURES
+
+
+def test_representation_symbols_exported_from_package():
+    import polymer_grammar as pg
+
+    for name in (
+        "RevisionOperation", "PatternTarget", "OntologyTermTarget", "ConstraintTarget",
+        "RevisionTarget", "RepresentationRevision", "is_representation_revision",
+        "meets_meta_tier_bar", "META_TIER_REQUIRED_ROUTE", "META_TIER_ALLOWED_CLOSURES",
+    ):
+        assert hasattr(pg, name), f"missing export: {name}"
