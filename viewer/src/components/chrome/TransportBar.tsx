@@ -19,6 +19,9 @@ export default function TransportBar() {
   const pause = useViewer((s) => s.pause);
   const seek = useViewer((s) => s.seek);
   const setSpeed = useViewer((s) => s.setSpeed);
+  const connected = useViewer((s) => s.connected);
+  const following = useViewer((s) => s.following);
+  const jumpToLive = useViewer((s) => s.jumpToLive);
 
   if (!timeline) return null;
 
@@ -152,6 +155,29 @@ export default function TransportBar() {
           );
         })}
       </div>
+
+      {/* jump-to-live — shown only when connected and scrubbed off the live edge */}
+      {connected && !following && (
+        <button
+          onClick={() => jumpToLive()}
+          aria-label="jump to live"
+          style={{
+            fontFamily: FONT_FAMILY_MONO,
+            fontSize: 10,
+            fontVariantNumeric: 'tabular-nums',
+            color: COLOR.bg.white,
+            background: COLOR.primary.base,
+            border: `1px solid ${COLOR.primary.base}`,
+            borderRadius: 2,
+            padding: '1px 6px',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+          className="mono tabular"
+        >
+          ⇥ LIVE
+        </button>
+      )}
     </div>
   );
 }
