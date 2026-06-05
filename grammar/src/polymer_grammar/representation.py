@@ -81,13 +81,20 @@ META_TIER_ALLOWED_CLOSURES = frozenset(
 
 
 def meets_meta_tier_bar(licensing: Licensing) -> bool:
-    """The conservative bar a representation-revision's licensing must clear: REPLICATION across independent
-    materializations AND a CLOSED rival set (enumerated or ontology-bounded) — never a single severe test
-    with an open-acknowledged closure. Pure; the PROTOCOL decides to enforce it (this slice gates nothing)."""
-    return (
+    """The conservative bar a representation-revision's licensing must clear, via EITHER route:
+
+    - the qualitative route: REPLICATION across independent materializations AND a CLOSED rival set
+      (enumerated or ontology-bounded) — never a single severe test with an open-acknowledged closure;
+    - the MDL route: an `MDL_GATE`-stamped licensing, which the trusted verify_stage only stamps after
+      it actually computed a clearing `mdl_delta` (the corpus's own compressibility stands in for human
+      replication). `compile_untrusted` rejects any incoming licensing, so MDL_GATE cannot be forged.
+
+    Pure; the PROTOCOL decides to enforce it (this slice gates nothing)."""
+    qualitative = (
         licensing.route == META_TIER_REQUIRED_ROUTE
         and licensing.rival_set_closure in META_TIER_ALLOWED_CLOSURES
     )
+    return qualitative or licensing.route == LicenseRoute.MDL_GATE
 
 
 def is_representation_revision(claim: "Claim") -> bool:

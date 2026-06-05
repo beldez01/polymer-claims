@@ -125,6 +125,17 @@ from .evaluate import (
     evaluate,
     verify,
 )
+from .description_length import (
+    RevisionDiscovery,
+    Schema,
+    classify,
+    clears_mdl_bar,
+    corpus_implied_schema,
+    description_length,
+    mdl_delta,
+    novelty_residual,
+    transport,
+)
 from .representation import (
     META_TIER_ALLOWED_CLOSURES,
     META_TIER_REQUIRED_ROUTE,
@@ -265,4 +276,13 @@ __all__ = [
     "RevisionTarget",
     "is_representation_revision",
     "meets_meta_tier_bar",
+    "Schema",
+    "corpus_implied_schema",
+    "description_length",
+    "transport",
+    "mdl_delta",
+    "novelty_residual",
+    "clears_mdl_bar",
+    "classify",
+    "RevisionDiscovery",
 ]
