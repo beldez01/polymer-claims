@@ -6,6 +6,7 @@ import Header from '@/components/chrome/Header';
 import LegendRail from '@/components/chrome/LegendRail';
 import InspectorPanel from '@/components/chrome/InspectorPanel';
 import ReadoutOverlay from '@/components/chrome/ReadoutOverlay';
+import TransportBar from '@/components/chrome/TransportBar';
 
 // The R3F scene is client-only (WebGL has no SSR). The loading fallback is the
 // D2 mono register on the light canvas — no spinner, no glow.
@@ -50,6 +51,8 @@ export default function Home() {
       <LegendRail />
       <ReadoutOverlay />
       <InspectorPanel />
+      {/* self-hides until a timeline is loaded */}
+      <TransportBar />
     </main>
   );
 }

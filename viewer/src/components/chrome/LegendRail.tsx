@@ -10,7 +10,8 @@ import {
   EDGE_COLOR,
 } from '@/config/theme';
 import { useMemo } from 'react';
-import { useViewer, EDGE_BUCKETS, computeCounts } from '@/store';
+import { useViewer, EDGE_BUCKETS, computeCounts, type Counts } from '@/store';
+import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
 
 const EDGE_BUCKET_META: Record<string, { label: string; color: string; dashed?: boolean }> = {
   defeat: { label: 'defeat', color: EDGE_COLOR.rebut },
@@ -127,7 +128,30 @@ export default function LegendRail() {
   const toggleEdgeKind = useViewer((s) => s.toggleEdgeKind);
   const setShowProvisional = useViewer((s) => s.setShowProvisional);
   const data = useViewer((s) => s.data);
-  const counts = useMemo(() => computeCounts(data), [data]);
+  const timeline = useViewer((s) => s.timeline);
+  const frame = useViewer((s) => s.frame);
+  const interp = useInterpolatedFrame(timeline, frame);
+
+  const counts = useMemo<Counts>(() => {
+    if (interp) {
+      const s = interp.stats;
+      const byStatus: Record<string, number> = {
+        licensed: s.n_licensed,
+        pending: s.n_pending,
+        exploratory: 0,
+        conjectured: s.n_conjectured,
+        rejected: s.n_rejected,
+      };
+      return {
+        total: s.n_nodes,
+        byStatus,
+        edgeTotal: s.n_edges,
+        edgeEffective: s.n_effective_edges,
+        edgeProvisional: s.n_provisional_edges,
+      };
+    }
+    return computeCounts(data);
+  }, [interp, data]);
 
   return (
     <aside

@@ -7,16 +7,18 @@ import { COLOR, FONT_FAMILY_MONO } from '@/config/theme';
 import {
   computeExtent,
   loadTopology,
-  type TopologyExport,
+  type Extent,
+  type TopologyNode,
 } from '@/lib/topology';
+import { loadTimeline } from '@/lib/timeline';
 import ReferenceFrame from '@/components/scene/ReferenceFrame';
 import Nodes from '@/components/scene/Nodes';
 import Edges from '@/components/scene/Edges';
 import CameraBridge from '@/components/scene/CameraBridge';
+import TimelineDriver from '@/components/scene/TimelineDriver';
 import { useViewer } from '@/store';
 
-function Scene({ data }: { data: TopologyExport }) {
-  const extent = useMemo(() => computeExtent(data.nodes), [data.nodes]);
+function Scene({ extent, layoutId }: { extent: Extent; layoutId: string }) {
   const [cx, cy, cz] = extent.center;
   const radius = Math.max(extent.size[0], extent.size[1], extent.size[2]);
   const setSelected = useViewer((s) => s.setSelected);
@@ -33,10 +35,11 @@ function Scene({ data }: { data: TopologyExport }) {
         <meshBasicMaterial side={2} />
       </mesh>
 
-      <ReferenceFrame extent={extent} layoutId={data.layout_id} />
+      <ReferenceFrame extent={extent} layoutId={layoutId} />
       <Edges />
       <Nodes />
       <CameraBridge />
+      <TimelineDriver />
 
       {/* ground grid at the floor plane (y = ymin) — hairline */}
       <Grid
@@ -66,14 +69,36 @@ function Scene({ data }: { data: TopologyExport }) {
 
 export default function ClaimUniverse() {
   const data = useViewer((s) => s.data);
+  const timeline = useViewer((s) => s.timeline);
   const setData = useViewer((s) => s.setData);
+  const setTimeline = useViewer((s) => s.setTimeline);
   const [error, setError] = useState<string | null>(null);
 
+  // Default to the timeline; fall back to the static export if it's absent.
   useEffect(() => {
-    loadTopology()
-      .then(setData)
-      .catch((e) => setError(String(e)));
-  }, [setData]);
+    loadTimeline()
+      .then(setTimeline)
+      .catch(() => {
+        loadTopology()
+          .then(setData)
+          .catch((e) => setError(String(e)));
+      });
+  }, [setTimeline, setData]);
+
+  // A stable reference frame over the WHOLE run: union of every frame's node
+  // positions so the camera/extent never jumps as the universe grows. Falls
+  // back to the static export's nodes when no timeline is loaded.
+  const extent = useMemo(() => {
+    if (timeline && timeline.frames.length > 0) {
+      const all: TopologyNode[] = [];
+      for (const fr of timeline.frames) all.push(...fr.topology.nodes);
+      return computeExtent(all);
+    }
+    if (data) return computeExtent(data.nodes);
+    return null;
+  }, [timeline, data]);
+
+  const layoutId = timeline?.frames[0]?.topology.layout_id ?? data?.layout_id ?? '';
 
   if (error) {
     return (
@@ -95,9 +120,8 @@ export default function ClaimUniverse() {
     );
   }
 
-  if (!data) return null;
+  if (!extent) return null;
 
-  const extent = computeExtent(data.nodes);
   const [cx, cy, cz] = extent.center;
   const radius = Math.max(extent.size[0], extent.size[1], extent.size[2]) || 2;
 
@@ -113,7 +137,7 @@ export default function ClaimUniverse() {
       gl={{ antialias: true }}
     >
       <color attach="background" args={[COLOR.bg.primary]} />
-      <Scene data={data} />
+      <Scene extent={extent} layoutId={layoutId} />
     </Canvas>
   );
 }

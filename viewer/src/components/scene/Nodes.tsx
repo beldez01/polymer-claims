@@ -2,10 +2,13 @@
 
 import { useMemo } from 'react';
 import { Billboard, Line, Html } from '@react-three/drei';
+import { Color } from 'three';
 import { ThreeEvent } from '@react-three/fiber';
 import { COLOR, STATUS_COLOR, FONT_FAMILY_MONO } from '@/config/theme';
 import { useViewer } from '@/store';
-import type { TopologyNode } from '@/lib/topology';
+import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
+import type { InterpNode } from '@/lib/interpolate';
+import type { StrengthVector, Vec3 } from '@/lib/topology';
 
 const BASE_RADIUS = 0.28;
 const RING_SEGMENTS = 48;
@@ -14,9 +17,19 @@ function statusColor(status: string): string {
   return STATUS_COLOR[status] ?? COLOR.text.muted;
 }
 
+/**
+ * Crossfade between two status colors at fraction t (0 = from, 1 = to). Used to
+ * render the "licensing moment" — a node sliding pending-amber → licensed-blue.
+ */
+function crossfadeColor(from: string, to: string, t: number): string {
+  if (from === to || t >= 1) return statusColor(to);
+  const c = new Color(statusColor(from)).lerp(new Color(statusColor(to)), t);
+  return `#${c.getHexString()}`;
+}
+
 // strength axis 2 = evidence_against_null — drives a subtle radius scale.
-function nodeRadius(node: TopologyNode): number {
-  const ean = node.strength ? node.strength[2] : 0.5;
+function nodeRadius(strength: StrengthVector | null): number {
+  const ean = strength ? strength[2] : 0.5;
   return BASE_RADIUS * (0.8 + 0.5 * ean);
 }
 
@@ -29,18 +42,22 @@ function ringPoints(radius: number): [number, number, number][] {
   return pts;
 }
 
-function NodeMesh({ node }: { node: TopologyNode }) {
+function NodeMesh({ node }: { node: InterpNode }) {
   const hoveredId = useViewer((s) => s.hoveredId);
   const selectedId = useViewer((s) => s.selectedId);
   const setHovered = useViewer((s) => s.setHovered);
   const setSelected = useViewer((s) => s.setSelected);
 
-  const color = statusColor(node.status);
-  const r = nodeRadius(node);
+  const color = crossfadeColor(node.prevStatus, node.status, node.statusT);
+  const r = nodeRadius(node.strength);
   const isHovered = hoveredId === node.id;
   const isSelected = selectedId === node.id;
   const ringR = r * 1.7;
   const ring = useMemo(() => ringPoints(ringR), [ringR]);
+
+  // enter/exit: scale the whole group toward 0 and fade the material.
+  const scale = Math.max(node.scale, 0.0001);
+  const transparent = node.opacity < 0.999;
 
   const onOver = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
@@ -57,7 +74,7 @@ function NodeMesh({ node }: { node: TopologyNode }) {
   };
 
   return (
-    <group position={node.position}>
+    <group position={node.position} scale={scale}>
       <mesh onPointerOver={onOver} onPointerOut={onOut} onClick={onClick}>
         {node.is_representation_revision ? (
           <octahedronGeometry args={[r * 1.25, 0]} />
@@ -65,7 +82,13 @@ function NodeMesh({ node }: { node: TopologyNode }) {
           <sphereGeometry args={[r, 24, 24]} />
         )}
         {/* matte — metalness 0, roughness 0.9, NO emissive */}
-        <meshStandardMaterial color={color} metalness={0} roughness={0.9} />
+        <meshStandardMaterial
+          color={color}
+          metalness={0}
+          roughness={0.9}
+          transparent={transparent}
+          opacity={node.opacity}
+        />
       </mesh>
 
       {/* hover / selection — thin electric-blue hairline ring, billboarded */}
@@ -109,15 +132,51 @@ function NodeMesh({ node }: { node: TopologyNode }) {
   );
 }
 
+/** Adapt a static export node into the InterpNode shape (no animation). */
+function staticNode(n: {
+  id: string;
+  status: string;
+  pattern_id: string;
+  subject_kind: string | null;
+  strength: StrengthVector | null;
+  is_representation_revision: boolean;
+  position: Vec3;
+}): InterpNode {
+  return {
+    id: n.id,
+    status: n.status,
+    prevStatus: n.status,
+    statusT: 1,
+    pattern_id: n.pattern_id,
+    subject_kind: n.subject_kind,
+    strength: n.strength,
+    is_representation_revision: n.is_representation_revision,
+    position: n.position,
+    scale: 1,
+    opacity: 1,
+  };
+}
+
 export default function Nodes() {
   const data = useViewer((s) => s.data);
+  const timeline = useViewer((s) => s.timeline);
+  const frame = useViewer((s) => s.frame);
   const filters = useViewer((s) => s.filters);
 
-  if (!data) return null;
+  const interp = useInterpolatedFrame(timeline, frame);
+
+  // Timeline drives the scene when loaded; else fall back to the static export.
+  const nodes: InterpNode[] = useMemo(() => {
+    if (interp) return interp.nodes;
+    if (data) return data.nodes.map(staticNode);
+    return [];
+  }, [interp, data]);
+
+  if (nodes.length === 0) return null;
 
   return (
     <group>
-      {data.nodes
+      {nodes
         .filter((n) => filters.statuses.has(n.status))
         .map((n) => (
           <NodeMesh key={n.id} node={n} />

@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import type { TopologyExport, TopologyNode } from '@/lib/topology';
+import type { TopologyTimeline } from '@/lib/timeline';
 import { STATUS_ORDER, DEFEAT_KINDS } from '@/config/theme';
 
 export interface Filters {
@@ -32,6 +33,14 @@ interface ViewerState {
   filters: Filters;
   camera: CameraCoords;
 
+  // ── timeline playback ────────────────────────────────────────────────────
+  timeline: TopologyTimeline | null;
+  playing: boolean;
+  /** fractional frame index during playback; floor/ceil drive interpolation. */
+  frame: number;
+  /** playback rate in frames/sec. */
+  speed: number;
+
   setData: (data: TopologyExport) => void;
   setHovered: (id: string | null) => void;
   setSelected: (id: string | null) => void;
@@ -39,6 +48,12 @@ interface ViewerState {
   toggleEdgeKind: (bucket: string) => void;
   setShowProvisional: (v: boolean) => void;
   setCamera: (c: CameraCoords) => void;
+
+  setTimeline: (timeline: TopologyTimeline) => void;
+  play: () => void;
+  pause: () => void;
+  seek: (frame: number) => void;
+  setSpeed: (speed: number) => void;
 }
 
 /** Pure derived counts — call inside a component with useMemo over `data`. */
@@ -95,6 +110,11 @@ export const useViewer = create<ViewerState>((set) => ({
   },
   camera: { x: 0, y: 0, z: 0 },
 
+  timeline: null,
+  playing: false,
+  frame: 0,
+  speed: 1,
+
   setData: (data) => set({ data }),
   setHovered: (id) => set({ hoveredId: id }),
   setSelected: (id) => set({ selectedId: id }),
@@ -119,4 +139,25 @@ export const useViewer = create<ViewerState>((set) => ({
     set((s) => ({ filters: { ...s.filters, showProvisional: v } })),
 
   setCamera: (c) => set({ camera: c }),
+
+  setTimeline: (timeline) => set({ timeline, frame: 0, playing: false }),
+
+  play: () =>
+    set((s) => {
+      const last = s.timeline ? s.timeline.frames.length - 1 : 0;
+      // restart from the head if we're parked at the end
+      const frame = s.frame >= last ? 0 : s.frame;
+      return { playing: true, frame };
+    }),
+
+  pause: () => set({ playing: false }),
+
+  seek: (frame) =>
+    set((s) => {
+      const last = s.timeline ? s.timeline.frames.length - 1 : 0;
+      const clamped = Math.min(Math.max(frame, 0), last);
+      return { frame: clamped };
+    }),
+
+  setSpeed: (speed) => set({ speed }),
 }));
