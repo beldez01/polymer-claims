@@ -94,6 +94,22 @@ def test_non_provisional_self_sourced_edge_is_rejected():
     assert {d.claim_id: d.reason for d in rec.discarded}.get("b") == "non-provisional-edge"
 
 
+def test_non_provisional_synthetic_sourced_edge_is_rejected():
+    # C1 backstop closes the synthetic-':'-source carve-out: a raw proposer can otherwise forge a
+    # 'refutation:*'-sourced non-provisional edge that is immediately effective against an honest
+    # LICENSED claim (only the protocol's own verify/integrate legitimately mint such edges, and
+    # those never flow through compile_to_IR). It must be rejected, not silently admitted.
+    corp = _corpus([make_claim("a")])
+    edge = DefeatEdge(source="refutation:fake", target="a", kind=DefeatEdgeKind.UNDERMINE, provisional=False)
+
+    def prop(corpus, frontier):
+        return (Proposal(operator_id="op", claim=make_claim("b"), edges=(edge,)),)
+
+    out, rec = generate_stage(corp, frontier=(), proposers=(prop,))
+    assert "b" not in out.by_id()
+    assert {d.claim_id: d.reason for d in rec.discarded}.get("b") == "non-provisional-edge"
+
+
 def test_injected_claim_gets_provenance_and_admitted():
     corp = _corpus([make_claim("a")])
     injected = make_claim("inj", status=Status.PENDING, plan=make_plan(0.01, 0.05))  # provenance None

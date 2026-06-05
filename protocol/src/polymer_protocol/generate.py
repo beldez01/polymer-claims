@@ -67,10 +67,13 @@ def compile_to_IR(proposal: Proposal, present_ids: set[str]) -> str | None:
         # an edge resolves iff its target is an existing claim or the claim being added
         if e.target not in present_ids and e.target != proposal.claim.id:
             return "unresolved-edge"
-        # Trust-boundary backstop (C1): an edge sourced from the proposal's OWN (still-unlicensed)
-        # claim must be provisional, else it would be immediately effective and defeat an honest
-        # claim for free. Synthetic ':'-sourced edges (refutation nodes) are exempt.
-        if e.source == proposal.claim.id and not e.provisional:
+        # Trust-boundary backstop (C1): NO proposal-supplied edge may be immediately effective.
+        # The invalid-edge-source check above guarantees e.source is either the proposal's own
+        # (still-unlicensed) claim or a synthetic ':' node — never a third party — so any such edge
+        # must be provisional, else it would defeat an honest claim for free. Only the protocol's
+        # own verify/integrate legitimately mint effective synthetic 'refutation:*' edges, and those
+        # never flow through compile_to_IR.
+        if not e.provisional:
             return "non-provisional-edge"
     return None
 
