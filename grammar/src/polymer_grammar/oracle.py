@@ -63,6 +63,21 @@ def weakest_tier(tiers: Iterable[ValidationTier]) -> ValidationTier:
     return min(ts, key=lambda t: _TIER_RANK[t])
 
 
+MAX_TIER_RANK = max(_TIER_RANK.values())  # 4
+_RANK_TO_TIER = {rank: tier for tier, rank in _TIER_RANK.items()}
+
+
+def decay_tier(tier: ValidationTier, pass_rate: float) -> ValidationTier:
+    """The tier a SPOT-probe `pass_rate` earns, capped by the current tier (DECAY-ONLY — never promotes).
+    target_rank = floor(clamp(pass_rate, 0, 1) * MAX_TIER_RANK); new_rank = min(current, target). Gives a
+    proportional decay with a stable fixed point (a 90%-passing oracle settles at ANCHORED and stays);
+    monotone non-increasing; parameter-free. int() truncates toward zero = floor for the non-negative arg."""
+    pr = 0.0 if pass_rate < 0.0 else (1.0 if pass_rate > 1.0 else pass_rate)
+    target_rank = int(pr * MAX_TIER_RANK)
+    new_rank = min(_TIER_RANK[tier], target_rank)
+    return _RANK_TO_TIER[new_rank]
+
+
 def tier_ceiling(tier: ValidationTier) -> StrengthVector:
     """Per-axis ceiling for the GOODNESS empirical axes (capped down to c). `uncertainty` and the theory
     axes stay 1.0 here — uncertainty is reverse-polarity and is floored UP in cap_strength instead."""

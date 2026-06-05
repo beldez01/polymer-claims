@@ -195,3 +195,48 @@ def test_referenced_oracle_ids_empty_when_all_none():
 def test_referenced_oracle_ids_dedups_shared_ref():
     plan = _plan_with_refs("o1", "o1", "o2")
     assert referenced_oracle_ids(plan) == frozenset({"o1", "o2"})
+
+
+def test_decay_tier_full_pass_is_unchanged():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.GOLD, 1.0) == ValidationTier.GOLD
+    assert decay_tier(ValidationTier.INDIRECT, 1.0) == ValidationTier.INDIRECT
+
+
+def test_decay_tier_zero_pass_is_unvalidated():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.GOLD, 0.0) == ValidationTier.UNVALIDATED
+
+
+def test_decay_tier_proportional_from_gold():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.GOLD, 0.9) == ValidationTier.ANCHORED      # floor(3.6)=3
+    assert decay_tier(ValidationTier.GOLD, 0.7) == ValidationTier.BENCHMARKED   # floor(2.8)=2
+    assert decay_tier(ValidationTier.GOLD, 0.5) == ValidationTier.BENCHMARKED   # floor(2.0)=2
+    assert decay_tier(ValidationTier.GOLD, 0.25) == ValidationTier.INDIRECT     # floor(1.0)=1
+
+
+def test_decay_tier_is_decay_only_never_promotes():
+    from polymer_grammar import decay_tier
+    # pass_rate that would "earn" GOLD cannot lift an INDIRECT oracle above INDIRECT.
+    assert decay_tier(ValidationTier.INDIRECT, 1.0) == ValidationTier.INDIRECT
+    assert decay_tier(ValidationTier.BENCHMARKED, 0.9) == ValidationTier.BENCHMARKED  # min(2, 3)=2
+
+
+def test_decay_tier_has_stable_fixed_point():
+    from polymer_grammar import decay_tier
+    once = decay_tier(ValidationTier.GOLD, 0.9)        # ANCHORED
+    twice = decay_tier(once, 0.9)                      # min(3, 3) -> ANCHORED
+    assert once == twice == ValidationTier.ANCHORED
+
+
+def test_decay_tier_clamps_out_of_range():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.GOLD, -0.5) == ValidationTier.UNVALIDATED
+    assert decay_tier(ValidationTier.GOLD, 1.7) == ValidationTier.GOLD
+
+
+def test_decay_tier_unvalidated_stays_unvalidated():
+    from polymer_grammar import decay_tier
+    assert decay_tier(ValidationTier.UNVALIDATED, 1.0) == ValidationTier.UNVALIDATED
+    assert decay_tier(ValidationTier.UNVALIDATED, 0.0) == ValidationTier.UNVALIDATED
