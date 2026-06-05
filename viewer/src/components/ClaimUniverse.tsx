@@ -10,11 +10,15 @@ import {
   type TopologyExport,
 } from '@/lib/topology';
 import ReferenceFrame from '@/components/scene/ReferenceFrame';
+import Nodes from '@/components/scene/Nodes';
+import Edges from '@/components/scene/Edges';
+import { useViewer } from '@/store';
 
 function Scene({ data }: { data: TopologyExport }) {
   const extent = useMemo(() => computeExtent(data.nodes), [data.nodes]);
   const [cx, cy, cz] = extent.center;
   const radius = Math.max(extent.size[0], extent.size[1], extent.size[2]);
+  const setSelected = useViewer((s) => s.setSelected);
 
   return (
     <>
@@ -22,7 +26,15 @@ function Scene({ data }: { data: TopologyExport }) {
       <ambientLight intensity={0.8} />
       <directionalLight position={[cx + radius, cy + radius * 1.5, cz + radius]} intensity={0.4} />
 
+      {/* click empty space → deselect (invisible backing sphere behind all) */}
+      <mesh position={[cx, cy, cz]} onClick={() => setSelected(null)} visible={false}>
+        <sphereGeometry args={[radius * 100, 8, 8]} />
+        <meshBasicMaterial side={2} />
+      </mesh>
+
       <ReferenceFrame extent={extent} layoutId={data.layout_id} />
+      <Edges />
+      <Nodes />
 
       {/* ground grid at the floor plane (y = ymin) — hairline */}
       <Grid
@@ -51,14 +63,15 @@ function Scene({ data }: { data: TopologyExport }) {
 }
 
 export default function ClaimUniverse() {
-  const [data, setData] = useState<TopologyExport | null>(null);
+  const data = useViewer((s) => s.data);
+  const setData = useViewer((s) => s.setData);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadTopology()
       .then(setData)
       .catch((e) => setError(String(e)));
-  }, []);
+  }, [setData]);
 
   if (error) {
     return (
