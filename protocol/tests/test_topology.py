@@ -211,3 +211,25 @@ def test_layout_single_node(empty_ledger):
     exp = export_topology(corpus, layout=Layout.FORCE_DIRECTED)
     assert len(exp.nodes) == 1
     assert len(exp.nodes[0].position) == 3
+
+
+def test_public_surface_importable():
+    import polymer_protocol as pp
+
+    for name in (
+        "export_topology",
+        "TopologyExport",
+        "TopologyNode",
+        "TopologyEdge",
+        "TopologyCluster",
+        "Layout",
+    ):
+        assert hasattr(pp, name), name
+        assert name in pp.__all__, name
+
+
+def test_json_round_trip(small_corpus):
+    from polymer_protocol import TopologyExport as TE
+
+    exp = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED)
+    assert TE.model_validate_json(exp.model_dump_json()) == exp

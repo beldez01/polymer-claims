@@ -66,6 +66,14 @@ from .represent import represent
 from .safety import safety_gate
 from .select import ValueWeights, cell_of, select_stage
 from .stakes import dependency_cone, stakes
+from .topology import (
+    Layout,
+    TopologyCluster,
+    TopologyEdge,
+    TopologyExport,
+    TopologyNode,
+    export_topology,
+)
 from .verify import verify_stage
 
 __all__ = [
@@ -147,4 +155,10 @@ __all__ = [
     "SchedulerState",
     "SchedulerWeights",
     "next_action",
+    "export_topology",
+    "TopologyExport",
+    "TopologyNode",
+    "TopologyEdge",
+    "TopologyCluster",
+    "Layout",
 ]
