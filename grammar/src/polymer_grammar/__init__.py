@@ -125,6 +125,18 @@ from .evaluate import (
     evaluate,
     verify,
 )
+from .representation import (
+    META_TIER_ALLOWED_CLOSURES,
+    META_TIER_REQUIRED_ROUTE,
+    ConstraintTarget,
+    OntologyTermTarget,
+    PatternTarget,
+    RepresentationRevision,
+    RevisionOperation,
+    RevisionTarget,
+    is_representation_revision,
+    meets_meta_tier_bar,
+)
 
 __all__ = [
     "AXES",
@@ -243,4 +255,14 @@ __all__ = [
     "VerifiedEvaluation",
     "evaluate",
     "verify",
+    "META_TIER_ALLOWED_CLOSURES",
+    "META_TIER_REQUIRED_ROUTE",
+    "ConstraintTarget",
+    "OntologyTermTarget",
+    "PatternTarget",
+    "RepresentationRevision",
+    "RevisionOperation",
+    "RevisionTarget",
+    "is_representation_revision",
+    "meets_meta_tier_bar",
 ]
