@@ -10,6 +10,7 @@ import {
 } from '@/config/theme';
 import { useMemo } from 'react';
 import { useViewer, findNode } from '@/store';
+import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
 
 const label: React.CSSProperties = {
   fontFamily: FONT_FAMILY_MONO,
@@ -38,9 +39,22 @@ function Field({ name, children }: { name: string; children: React.ReactNode }) 
 
 export default function InspectorPanel() {
   const data = useViewer((s) => s.data);
+  const timeline = useViewer((s) => s.timeline);
+  const frame = useViewer((s) => s.frame);
   const selectedId = useViewer((s) => s.selectedId);
   const setSelected = useViewer((s) => s.setSelected);
-  const node = useMemo(() => findNode(data, selectedId), [data, selectedId]);
+
+  const interp = useInterpolatedFrame(timeline, frame);
+
+  // Resolve the selected node from the live interpolated frame when a timeline
+  // is loaded; else from the static export.
+  const node = useMemo(() => {
+    if (interp) {
+      if (!selectedId) return null;
+      return interp.nodes.find((n) => n.id === selectedId) ?? null;
+    }
+    return findNode(data, selectedId);
+  }, [interp, data, selectedId]);
 
   if (!node) return null;
 

@@ -87,3 +87,40 @@ body {
   background-color: rgba(15, 98, 254, 0.18);
   color: var(--text-primary);
 }
+
+/* ──────────────────────────────────────────────────────────────────
+   Transport scrub — D2: hairline track, square electric-blue thumb.
+   No glow, no shadow, no rounded pill.
+   ────────────────────────────────────────────────────────────────── */
+.transport-scrub {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+.transport-scrub::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--border-strong);
+}
+.transport-scrub::-moz-range-track {
+  height: 1px;
+  background: var(--border-strong);
+}
+.transport-scrub::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 6px;
+  height: 12px;
+  margin-top: -6px;            /* center the thumb over the 1px track */
+  background: var(--primary);
+  border: none;
+  border-radius: 1px;
+}
+.transport-scrub::-moz-range-thumb {
+  width: 6px;
+  height: 12px;
+  background: var(--primary);
+  border: none;
+  border-radius: 1px;
+}
