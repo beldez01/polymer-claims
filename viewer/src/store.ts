@@ -3,6 +3,8 @@
 import { create } from 'zustand';
 import type { TopologyExport, TopologyNode } from '@/lib/topology';
 import type { TopologyTimeline } from '@/lib/timeline';
+import { connectLive as clientConnectLive, type LiveHandle } from '@/lib/live';
+import type { TimelineFrame } from '@/lib/timeline';
 import { STATUS_ORDER, DEFEAT_KINDS } from '@/config/theme';
 
 export interface Filters {
@@ -40,6 +42,21 @@ interface ViewerState {
   frame: number;
   /** playback rate in frames/sec. */
   speed: number;
+
+  // ── live mode ─────────────────────────────────────────────────────────────
+  /** the connected node URL, or null in file mode */
+  liveUrl: string | null;
+  /** SSE connection is open */
+  connected: boolean;
+  /** auto-advance to the newest frame as it arrives */
+  following: boolean;
+
+  connectLive: (url: string) => void;
+  disconnectLive: () => void;
+  /** append a streamed frame (deduped by cycle_index); glides to live if following */
+  pushFrame: (frame: TimelineFrame) => void;
+  /** snap to the newest frame and resume following */
+  jumpToLive: () => void;
 
   setData: (data: TopologyExport) => void;
   setHovered: (id: string | null) => void;
@@ -99,7 +116,9 @@ export function edgeBucket(kind: string): 'defeat' | 'equivalence' | 'entails' {
 
 export const EDGE_BUCKETS = ['defeat', 'equivalence', 'entails'] as const;
 
-export const useViewer = create<ViewerState>((set) => ({
+let _liveHandle: LiveHandle | null = null;
+
+export const useViewer = create<ViewerState>((set, get) => ({
   data: null,
   selectedId: null,
   hoveredId: null,
@@ -114,6 +133,10 @@ export const useViewer = create<ViewerState>((set) => ({
   playing: false,
   frame: 0,
   speed: 1,
+
+  liveUrl: null,
+  connected: false,
+  following: false,
 
   setData: (data) => set({ data }),
   setHovered: (id) => set({ hoveredId: id }),
@@ -156,8 +179,60 @@ export const useViewer = create<ViewerState>((set) => ({
     set((s) => {
       const last = s.timeline ? s.timeline.frames.length - 1 : 0;
       const clamped = Math.min(Math.max(frame, 0), last);
-      return { frame: clamped };
+      return { frame: clamped, following: false };
     }),
 
   setSpeed: (speed) => set({ speed }),
+
+  connectLive: (url) => {
+    // tear down any prior connection first
+    if (_liveHandle) {
+      _liveHandle.disconnect();
+      _liveHandle = null;
+    }
+    _liveHandle = clientConnectLive(url, {
+      onTimeline: (tl) =>
+        set({
+          timeline: tl,
+          frame: Math.max(0, tl.frames.length - 1),
+          following: true,
+          playing: false,
+        }),
+      onFrame: (fr) => get().pushFrame(fr),
+      onStatus: (connected) => set({ connected }),
+    });
+    set({ liveUrl: url, connected: true, following: true });
+  },
+
+  disconnectLive: () => {
+    if (_liveHandle) {
+      _liveHandle.disconnect();
+      _liveHandle = null;
+    }
+    set({ connected: false, following: false, liveUrl: null });
+  },
+
+  pushFrame: (frame) =>
+    set((s) => {
+      const base = s.timeline ?? { frames: [], n_cycles: 0 };
+      const lastCycle =
+        base.frames.length > 0
+          ? base.frames[base.frames.length - 1].stats.cycle_index
+          : -1;
+      // dedupe: the SSE on-connect frame repeats the last /timeline frame, and a
+      // reconnect can replay — only append strictly-newer frames.
+      if (frame.stats.cycle_index <= lastCycle) return {};
+      const frames = [...base.frames, frame];
+      const timeline = { frames, n_cycles: Math.max(0, frames.length - 1) };
+      // when following, keep gliding toward the new last frame (TimelineDriver
+      // advances `frame` toward the end and the interpolation hook animates it).
+      if (s.following) return { timeline, playing: true };
+      return { timeline };
+    }),
+
+  jumpToLive: () =>
+    set((s) => {
+      const last = s.timeline ? s.timeline.frames.length - 1 : 0;
+      return { following: true, playing: true, frame: last };
+    }),
 }));
