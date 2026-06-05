@@ -51,6 +51,14 @@ from .ledger import (
 )
 from .drift import DriftFinding, DriftRecord, drift_pass, reopen_drifted
 from .oracle import OracleRegistry, oracle_cap
+from .economics import (
+    ActionKind,
+    ScheduledAction,
+    SchedulerConfig,
+    SchedulerState,
+    SchedulerWeights,
+    next_action,
+)
 from .oracle_validation import OracleDecay, OracleValidationRecord, SpotProbe, oracle_validation_pass
 from .plan_synthesis import mirror_criterion, transplant_plan
 from .proposers import frontier_attack, rival_generation
@@ -133,4 +141,10 @@ __all__ = [
     "OracleValidationRecord",
     "SpotProbe",
     "oracle_validation_pass",
+    "ActionKind",
+    "ScheduledAction",
+    "SchedulerConfig",
+    "SchedulerState",
+    "SchedulerWeights",
+    "next_action",
 ]

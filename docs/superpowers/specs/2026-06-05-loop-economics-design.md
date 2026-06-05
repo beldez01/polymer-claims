@@ -77,13 +77,14 @@ class SchedulerState(_Model):
     current: MaterializationContext | None = None   # DRIFT feasibility/value (the "world now")
     probes_available: int = Field(default=0, ge=0)  # ORACLE feasibility/value (count; scheduler only ranks)
     proposers_available: bool = False               # whether GENERATE can produce this cycle
+    red_team_enabled: bool = False                   # whether red-team adapters are wired (RED_TEAM gate — symmetric with current/probes_available)
 
 
 class SchedulerWeights(_Model):
     cycle: float = 1.0
-    drift: float = 0.1
-    oracle: float = 0.1
-    red_team: float = 0.05
+    drift: float = 0.01              # calibrated below the ~0.06-bit EIG-per-claim scale so productive
+    oracle: float = 0.01            # work dominates by default; accumulated maintenance debt or an
+    red_team: float = 0.01          # explicit weight bump still lets a daemon win
     generation_base: float = 0.1     # RUN_CYCLE value when nothing is selectable but proposers can run
 
 
@@ -120,8 +121,15 @@ Behavior (pure, deterministic):
    - **ORACLE_VALIDATION** — feasible iff `probes_available > 0`; `value = w.oracle * probes_available`;
      `cost = daemon_cost`.
    - **RED_TEAM** — `rt = [c for c in corpus.claims if c.representation_revision is None and not
-     c.id.startswith("gen-rt-") and _gen_id("rt", c.id) not in ids]`; feasible iff `rt`;
+     c.id.startswith("gen-rt-") and _gen_id("rt", c.id) not in ids]`; feasible iff `state.red_team_enabled
+     AND rt` (the caller-supplied gate, symmetric with DRIFT's `current` / ORACLE's `probes_available`);
      `value = w.red_team * len(rt)`; `cost = daemon_cost`.
+
+> **Build note (2026-06-05):** the loop integration test surfaced a real runtime property — the
+> cardinality-scaled BH bar (#3a) blocks licensing when ≥2 claims compete in one cycle at moderate evidence
+> (pseudo-p = 1−evidence_against_null must clear `k/M·BH_Q`). The loop test therefore uses a strong-evidence
+> strength (evidence_against_null≈0.99) so a multi-claim cycle still licenses. This is expected runtime
+> behavior, not a scheduler bug.
 2. Keep feasible candidates whose `cost <= budget` (affordable under the shared budget).
 3. If none: return `None` (stop).
 4. Else pick the candidate with the highest `value`; tie-break by `_KIND_ORDER` (prefer RUN_CYCLE).
