@@ -236,3 +236,83 @@ def test_mdl_delta_is_deterministic():
 def test_revision_discovery_record():
     rec = RevisionDiscovery(mdl_delta=-3.0, novelty_residual=0.0, classification="consolidation")
     assert rec.classification == "consolidation"
+
+
+# --- Review fix: ontology-term DEPRECATE coherence + reachability hardening -------------------
+
+from polymer_grammar.description_length import (  # noqa: E402
+    _GENERIC_TERM_ID,
+    _claim_terms,
+)
+
+
+def _term_corpus_t3():
+    # T=3 distinct in-use terms; the target term is load-bearing (used by 2 claims).
+    return (
+        _claim("u1", "A", leaves=(_qleaf(), _cleaf("GO:0008150"))),
+        _claim("u2", "A", leaves=(_qleaf(), _cleaf("GO:0008150"))),
+        _claim("u3", "A", leaves=(_qleaf(), _cleaf("HP:0001250"))),
+        _claim("u4", "A", leaves=(_qleaf(), _cleaf("MONDO:0005148"))),
+    )
+
+
+def test_deprecate_inuse_term_is_rejected():
+    # deprecating a load-bearing (still-in-use) term must RAISE cost, not look like free compression.
+    claims = _term_corpus_t3()
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.DEPRECATE,
+        target=OntologyTermTarget(term_id="GO:0008150"), rationale="x",
+    )
+    assert mdl_delta(claims, s, rev) > 0.0
+    assert not clears_mdl_bar(mdl_delta(claims, s, rev))
+
+
+def test_deprecate_unused_term_does_not_raise_cost():
+    # deprecating a term NOT used by any claim is at most a schema saving (<= the in-use case).
+    claims = _term_corpus_t3()
+    s = corpus_implied_schema(claims)
+    rev_unused = RepresentationRevision(
+        operation=RevisionOperation.DEPRECATE,
+        target=OntologyTermTarget(term_id="EFO:9999999"), rationale="x",  # absent from corpus
+    )
+    rev_inuse = RepresentationRevision(
+        operation=RevisionOperation.DEPRECATE,
+        target=OntologyTermTarget(term_id="GO:0008150"), rationale="x",
+    )
+    assert mdl_delta(claims, s, rev_unused) < mdl_delta(claims, s, rev_inuse)
+    assert mdl_delta(claims, s, rev_unused) <= 0.0
+
+
+def test_deprecate_term_keeps_code_coherent():
+    # after transport, every term emitted in L_corpus must be declared in the post-transport schema
+    # (no dangling term used by a claim but absent from schema.terms).
+    claims = _term_corpus_t3()
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.DEPRECATE,
+        target=OntologyTermTarget(term_id="GO:0008150"), rationale="x",
+    )
+    c2, s2 = transport(claims, s, rev)
+    used_terms = set()
+    for c in c2:
+        used_terms.update(_claim_terms(c))
+    # the generic-term sentinel is priced internally, not declared; every OTHER used term is declared.
+    dangling = {t for t in used_terms if t != _GENERIC_TERM_ID and t not in s2.terms}
+    assert dangling == set()
+    # the deprecated term no longer appears in any claim's selectors.
+    assert "GO:0008150" not in used_terms
+
+
+def test_add_pattern_literally_named_merged_is_still_rejected():
+    # hardening: an ADD of a pattern whose id starts with "merged:" must NOT be misread as a quotient.
+    claims = _dup_corpus()
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.ADD,
+        target=PatternTarget(patterns=(PatternRef(id="merged:foo", version="v1"),)),
+        rationale="x",
+    )
+    # unused ADD still costs bits -> rejected, regardless of the misleading name.
+    assert mdl_delta(claims, s, rev) > 0.0
+    assert classify(mdl_delta(claims, s, rev), novelty_residual(claims, s, rev)) == "rejected"

@@ -45,6 +45,15 @@ _GENERIC_FILL_BITS = 32.0
 # The synthetic generic pattern id a DEPRECATE transport repoints dependent claims onto. It is
 # NOT a real schema atom; it is priced via _GENERIC_FILL_BITS in _corpus_code_length.
 _GENERIC_PATTERN_ID = "__generic__"
+# Inflated per-selector cost for the synthetic generic TERM a term-DEPRECATE repoints in-use term
+# selectors onto. Strictly large (a full new-pattern's worth of bits) so re-encoding a still-in-use
+# term RAISES total cost -> deprecating a load-bearing term is rejected. Keeps the two-part code
+# coherent: no claim emits a term that the post-transport schema fails to declare (the sentinel is
+# priced internally here, never as a frequency selector against schema.terms).
+_GENERIC_TERM_BITS = 32.0
+# The synthetic generic term id a term-DEPRECATE repoints dependent term selectors onto. NOT a real
+# schema atom; priced via _GENERIC_TERM_BITS in _corpus_code_length.
+_GENERIC_TERM_ID = "__generic_term__"
 
 _LOG_STAR_CONST = math.log2(2.865)
 
@@ -136,6 +145,8 @@ def _corpus_code_length(claims: Iterable[Claim], schema: Schema) -> float:
     total_term_slots = 0
     for c in claims:
         for term in _claim_terms(c):
+            if term == _GENERIC_TERM_ID:
+                continue  # sentinel is priced at a flat inflated cost, not a frequency
             term_counts[term] += 1
             total_term_slots += 1
 
@@ -144,9 +155,12 @@ def _corpus_code_length(claims: Iterable[Claim], schema: Schema) -> float:
         # pattern selector, frequency-weighted
         count = pattern_counts[_pattern_key(c)]
         total += -math.log2(count / n)
-        # term selectors, corpus-relative frequency
+        # term selectors, corpus-relative frequency (sentinel priced at the inflated flat cost)
         for term in _claim_terms(c):
-            total += -math.log2(term_counts[term] / total_term_slots)
+            if term == _GENERIC_TERM_ID:
+                total += _GENERIC_TERM_BITS
+            else:
+                total += -math.log2(term_counts[term] / total_term_slots)
         # fixed per-slot fill (inflated for generic-pointed claims)
         fill = _GENERIC_FILL_BITS if c.pattern.id == _GENERIC_PATTERN_ID else _FILL_BITS
         total += fill * _n_structural_slots(c)
@@ -178,6 +192,23 @@ def _revalidate(claim: Claim, new_pattern: PatternRef) -> Claim:
     )
 
 
+def _repoint_term(claim: Claim, target_term: str) -> Claim:
+    """Repoint every CategoricalLeaf.ontology_term (and an ontology_term subject id) that equals
+    `target_term` to the synthetic `_GENERIC_TERM_ID` sentinel, re-running validators. Used by a
+    term-DEPRECATE so a deprecated term leaves no dangling selector (code stays coherent) and a
+    still-in-use term re-encodes at the inflated `_GENERIC_TERM_BITS` (so DEPRECATE is rejected)."""
+    if target_term not in _claim_terms(claim):
+        return claim  # nothing to repoint
+    data = claim.model_dump()
+    for leaf in data["leaves"]:
+        if leaf.get("kind") == "categorical" and leaf.get("ontology_term") == target_term:
+            leaf["ontology_term"] = _GENERIC_TERM_ID
+    subj = data.get("subject")
+    if subj is not None and subj.get("kind") == "ontology_term" and subj.get("id") == target_term:
+        subj["id"] = _GENERIC_TERM_ID
+    return Claim.model_validate(data)
+
+
 def transport(
     claims: Iterable[Claim], schema: Schema, revision: RepresentationRevision
 ) -> tuple[tuple[Claim, ...], Schema]:
@@ -186,10 +217,12 @@ def transport(
     MERGE     — unify the >=2 member patterns into one `merged:` ref; repoint every claim on a
                 member to the unified ref; schema' = members removed + unified added.
     ADD       — claims unchanged; schema' gains the declared pattern/term atom.
-    DEPRECATE — schema' drops the target atom; claims on a target pattern are repointed to the
-                synthetic generic `__generic__` ref (NOT a schema atom — priced via the inflated
-                `_GENERIC_FILL_BITS` in `_corpus_code_length`, so deprecating a load-bearing
-                specific pattern RAISES the corpus code).
+    DEPRECATE — schema' drops the target atom. For a pattern target, claims on it are repointed to
+                the synthetic generic `__generic__` ref; for an ontology-term target, in-use term
+                selectors are repointed to the `__generic_term__` sentinel. Both sentinels are NOT
+                schema atoms — priced via `_GENERIC_FILL_BITS` / `_GENERIC_TERM_BITS` in
+                `_corpus_code_length`, so deprecating a load-bearing pattern OR term RAISES the
+                corpus code (rejected), while the code stays coherent (no dangling selector).
     RELAX     — MDL-deferred: returns (claims, schema) unchanged -> mdl_delta == 0.
     """
     claims = tuple(claims)
@@ -226,8 +259,13 @@ def transport(
             new_patterns = schema.patterns - {key}
             return new_claims, schema.model_copy(update={"patterns": new_patterns})
         assert isinstance(target, OntologyTermTarget)
+        # Symmetric with pattern-DEPRECATE: repoint every in-use selector to the generic-term
+        # sentinel (priced via _GENERIC_TERM_BITS) so the deprecated term leaves no dangling
+        # selector and a load-bearing term re-encodes at a HIGHER cost (rejected). An unused term
+        # repoints nothing -> only the log*(T) schema saving applies.
+        new_claims = tuple(_repoint_term(c, target.term_id) for c in claims)
         new_terms = schema.terms - {target.term_id}
-        return claims, schema.model_copy(update={"terms": new_terms})
+        return new_claims, schema.model_copy(update={"terms": new_terms})
 
     # RELAX (ConstraintTarget): MDL-deferred — no honest structural delta yet.
     return claims, schema
@@ -250,14 +288,21 @@ def _generator_reachable(atom: tuple[str, str], schema: Schema) -> bool:
     a rename or MERGE-quotient of an existing atom (so it introduces NO new structure).
 
     Reachability test (explicit + documented): an already-present atom is trivially reachable; a
-    `merged:` atom IS a quotient of existing atoms -> reachable. Any other brand-new id is NOT
-    derivable from the prior schema -> not reachable (a genuine ADD of new structure).
+    `merged:`-prefixed atom is a genuine MERGE quotient ONLY when it carries real merge provenance —
+    i.e. its `<id>+<id>+…` members are ALL pattern ids present in the prior schema (this is exactly
+    the id `_merged_ref` mints from existing members). This avoids the prior raw string-prefix
+    heuristic: a brand-new ADD of a pattern literally named `merged:foo` whose `foo` is NOT a prior
+    member is correctly NOT reachable (residual > 0). Any other brand-new id is not derivable -> not
+    reachable (a genuine ADD of new structure).
     """
     if atom in schema.patterns:
         return True
     atom_id, _ = atom
     if atom_id.startswith("merged:"):
-        return True
+        members = atom_id[len("merged:"):].split("+")
+        prior_ids = {pid for (pid, _ver) in schema.patterns}
+        # a real quotient names >=2 prior members, all of which existed before the merge.
+        return len(members) >= 2 and all(m in prior_ids for m in members)
     return False
 
 
