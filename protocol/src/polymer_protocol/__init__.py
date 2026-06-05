@@ -38,6 +38,7 @@ from .generation_adapter import (
     bridge_proposer,
     compile_untrusted,
 )
+from .red_team import RepresentationRedTeamAdapter
 from .integrate import integrate
 from .ledger import (
     ClaimOutcome,
@@ -108,6 +109,7 @@ __all__ = [
     "TemplateGenerationAdapter",
     "bridge_proposer",
     "compile_untrusted",
+    "RepresentationRedTeamAdapter",
     "rival_generation",
     "frontier_attack",
     "mirror_criterion",

@@ -106,3 +106,9 @@ def test_belief_neutral_and_converges_through_run_cycle(empty_ledger, ctx, adapt
     ids1 = {c.id for c in r1.corpus.claims}
     r2 = run_cycle(r1.corpus, adapters, ctx, proposers=(proposer,))
     assert {c.id for c in r2.corpus.claims} == ids1  # convergence: a 2nd cycle adds nothing
+
+
+def test_red_team_symbol_is_exported_from_package():
+    import polymer_protocol as pp
+
+    assert hasattr(pp, "RepresentationRedTeamAdapter")
