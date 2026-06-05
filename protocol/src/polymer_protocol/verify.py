@@ -14,7 +14,10 @@ from polymer_grammar import (
     RivalSetClosure,
     SatisfactionVerdict,
     Status,
+    clears_mdl_bar,
+    corpus_implied_schema,
     is_representation_revision,
+    mdl_delta,
     meets_meta_tier_bar,
 )
 
@@ -97,11 +100,37 @@ def verify_stage(
                 satisfactions=(ev.satisfaction,),
                 rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
             )
-            if is_representation_revision(c) and not meets_meta_tier_bar(licensing):
-                # meta-tier gate: a representation-revision is gated MORE conservatively — it cannot ride
-                # the ordinary single-severe-test path. Hold PENDING until replication-grade licensing.
-                new_claims.append(c)
-                continue
+            if is_representation_revision(c):
+                # meta-tier gate: a representation-revision cannot ride the ordinary single-severe-test
+                # path. Try the MDL route first — a revision that COMPRESSES the object corpus earns its
+                # license from the corpus's own compressibility (LicenseRoute.MDL_GATE meets the bar).
+                object_claims = tuple(
+                    x for x in corpus.claims if not is_representation_revision(x)
+                )
+                schema = corpus_implied_schema(object_claims)
+                delta = mdl_delta(object_claims, schema, c.representation_revision)
+                if clears_mdl_bar(delta):
+                    mdl_licensing = Licensing(
+                        route=LicenseRoute.MDL_GATE,
+                        satisfactions=(ev.satisfaction,),
+                        # the compression evidence (mdl_delta) stands in for rival enumeration —
+                        # OPEN_ACKNOWLEDGED keeps the MDL route self-supporting (no rival list required).
+                        rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
+                    )
+                    new_claims.append(
+                        _with_status(
+                            c,
+                            status=Status.LICENSED,
+                            licensing=mdl_licensing,
+                            pending_reason=None,
+                            strength=oracle_cap(c, registry),
+                        )
+                    )
+                    continue
+                if not meets_meta_tier_bar(licensing):
+                    # Non-compressing AND not replication-grade — hold PENDING, exactly as today.
+                    new_claims.append(c)
+                    continue
             new_claims.append(
                 _with_status(
                     c,
