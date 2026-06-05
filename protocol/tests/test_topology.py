@@ -180,3 +180,34 @@ def test_representation_revision_flag(empty_ledger):
 def test_layout_none_id(small_corpus):
     exp = export_topology(small_corpus, layout=Layout.NONE)
     assert exp.layout_id == "none"
+
+
+def test_layout_is_deterministic_and_3d(small_corpus):
+    e1 = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED)
+    e2 = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED)
+    assert e1 == e2  # byte-identical: no clock/random, seeded from id hashes
+    assert all(len(n.position) == 3 for n in e1.nodes)
+    assert e1.layout_id.startswith("fruchterman-reingold")
+    # distinct claims get distinct seed positions (not all collapsed to origin)
+    assert len({n.position for n in e1.nodes}) > 1
+
+
+def test_layout_positions_rounded_to_6dp(small_corpus):
+    exp = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED)
+    for n in exp.nodes:
+        for coord in n.position:
+            assert round(coord, 6) == coord
+
+
+def test_layout_empty_corpus(empty_corpus):
+    exp = export_topology(empty_corpus, layout=Layout.FORCE_DIRECTED)
+    assert exp.nodes == ()
+    assert exp.layout_id.startswith("fruchterman-reingold")
+
+
+def test_layout_single_node(empty_ledger):
+    a = make_claim("a")
+    corpus = Corpus(claims=(a,), fdr_ledger=empty_ledger)
+    exp = export_topology(corpus, layout=Layout.FORCE_DIRECTED)
+    assert len(exp.nodes) == 1
+    assert len(exp.nodes[0].position) == 3
