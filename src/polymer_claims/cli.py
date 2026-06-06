@@ -89,9 +89,29 @@ def _cmd_validate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _build_llm_proposer(model: str):
+    """Lazy-build a bridge_proposer over a real Anthropic-backed LLMGenerationAdapter.
+    Raises RuntimeError with an install/key hint if the [llm] extra or the API key is missing."""
+    import os
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("set ANTHROPIC_API_KEY to use --llm")
+    from polymer_protocol import bridge_proposer  # local import keeps top-level clean
+    from .llm_adapter import LLMGenerationAdapter   # safe (no anthropic at import); .anthropic lazy-imports it
+    adapter = LLMGenerationAdapter.anthropic(model=model)   # raises RuntimeError if [llm] missing
+    return bridge_proposer((adapter,))
+
+
 def _cmd_run_cycle(args: argparse.Namespace) -> int:
     corpus = load_corpus(args.corpus)
-    result = run_cycle(corpus, _ADAPTERS, _CTX)
+    proposers = ()
+    if getattr(args, "llm", False):
+        try:
+            proposers = (_build_llm_proposer(args.llm_model),)
+        except RuntimeError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+    result = run_cycle(corpus, _ADAPTERS, _CTX, proposers=proposers) if proposers \
+        else run_cycle(corpus, _ADAPTERS, _CTX)
     counts = _status_counts(result.corpus)
     summary = ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
     print(f"status: {summary or '(none)'}", file=sys.stderr)
@@ -223,6 +243,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p_run = sub.add_parser("run-cycle", help="run ONE run_cycle over a corpus")
     p_run.add_argument("corpus", help="path to a corpus JSON file")
     p_run.add_argument("--out", default=None, help="write resulting corpus JSON here")
+    p_run.add_argument("--llm", action="store_true", help="generate executable claims via a real LLM (needs the [llm] extra + ANTHROPIC_API_KEY)")
+    p_run.add_argument("--llm-model", default="claude-sonnet-4-6", help="model for --llm")
     p_run.set_defaults(func=_cmd_run_cycle)
 
     p_loop = sub.add_parser("loop", help="drive the budget-governed scheduler")

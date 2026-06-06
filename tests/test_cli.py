@@ -64,6 +64,37 @@ def test_run_cycle_stdout_is_clean_json(capsys, tmp_path):
     assert "status:" in out.err                  # the human summary went to stderr
 
 
+def test_run_cycle_llm_missing_key_or_extra(monkeypatch, capsys, tmp_path):
+    # force the helper to raise (simulates missing extra/key) -> hint on stderr, nonzero exit
+    from polymer_claims import cli
+    monkeypatch.setattr(cli, "_build_llm_proposer", lambda model: (_ for _ in ()).throw(RuntimeError("set ANTHROPIC_API_KEY to use --llm")))
+    p = tmp_path / "c.json"
+    p.write_text(licensing_corpus().model_dump_json())
+    rc = main(["run-cycle", str(p), "--llm"])
+    assert rc == 1
+    assert "ANTHROPIC_API_KEY" in capsys.readouterr().err
+
+
+def test_run_cycle_llm_wires_generator(monkeypatch, capsys, tmp_path):
+    # inject a fake proposer (stub LLM adapter via bridge) so a gen-llm-* claim appears; no network
+    import json
+    from polymer_protocol import bridge_proposer
+    from polymer_claims import cli
+    from polymer_claims.llm_adapter import LLMGenerationAdapter
+    dsl = {"proposals": [{"title": "g", "pattern_id": "adjusted_effect", "ontology_term": "g1",
+                          "value": 0.01, "comparator": "lt", "threshold": 0.05}]}
+    monkeypatch.setattr(cli, "_build_llm_proposer",
+                        lambda model: bridge_proposer((LLMGenerationAdapter(lambda _p: json.dumps(dsl)),)))
+    p = tmp_path / "c.json"
+    p.write_text(licensing_corpus().model_dump_json())
+    out = tmp_path / "out.json"
+    rc = main(["run-cycle", str(p), "--llm", "--out", str(out)])
+    assert rc == 0
+    from polymer_protocol import Corpus
+    result = Corpus.model_validate_json(out.read_text())
+    assert any(c.id.startswith("gen-llm-") for c in result.claims)
+
+
 # ---------------------------------------------------------------------------
 # loop
 # ---------------------------------------------------------------------------

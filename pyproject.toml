@@ -21,6 +21,7 @@ Repository = "https://github.com/beldez01/polymer-claims"
 
 [project.optional-dependencies]
 serve = ["fastapi>=0.110", "uvicorn>=0.27", "sse-starlette>=2"]
+llm = ["anthropic>=0.40"]
 
 [project.scripts]
 polymer-claims = "polymer_claims.cli:main"
