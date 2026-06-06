@@ -632,5 +632,6 @@
       ]
     }
   ],
-  "layout_id": "fruchterman-reingold:iters=50,seed=sha256"
+  "layout_id": "fruchterman-reingold:iters=50,seed=sha256",
+  "contract_version": "1.0"
 }

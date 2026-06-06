@@ -3,7 +3,18 @@ name = "polymer-grammar"
 version = "0.1.0"
 description = "Polymer Claims v1.3 grammar — contained, kept apart from the v1.2 formalclaim IR."
 requires-python = ">=3.12"
+authors = [{ name = "Zachary Belden" }]
+keywords = ["scientific-claims", "epistemics", "claim-grammar", "intermediate-representation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = ["pydantic>=2.6"]
+
+[project.urls]
+Repository = "https://github.com/beldez01/polymer-claims"
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6"]
