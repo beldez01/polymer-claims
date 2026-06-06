@@ -23,3 +23,5 @@ class PendingReason(str, Enum):
     STRENGTH_INCOMPARABLE = "strength_incomparable"
     UNREPRODUCIBLE_BY_GOVERNANCE = "unreproducible_by_governance"
     MATERIALIZATION_DRIFTED = "materialization_drifted"
+    # verify withheld a license: the agreeing adapters are not registry-independent
+    ADAPTER_NOT_INDEPENDENT = "adapter_not_independent"
