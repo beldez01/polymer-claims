@@ -2,8 +2,22 @@
 name = "polymer-claims"
 version = "0.1.0"
 description = "Polymer Claims — the grammar + runtime for a local knowledge-generation node."
+readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["polymer-protocol", "polymer-grammar", "pydantic>=2.6"]
+authors = [{ name = "Zachary Belden" }]
+keywords = ["scientific-claims", "epistemics", "knowledge-graph", "claims-runtime"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+# Internal deps pinned to the current minor (the uv path-sources below override this for local
+# dev; the bounds apply only when resolving from an index, e.g. at publish).
+dependencies = ["polymer-protocol>=0.1,<0.2", "polymer-grammar>=0.1,<0.2", "pydantic>=2.6"]
+
+[project.urls]
+Repository = "https://github.com/beldez01/polymer-claims"
 
 [project.optional-dependencies]
 serve = ["fastapi>=0.110", "uvicorn>=0.27", "sse-starlette>=2"]

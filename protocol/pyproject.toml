@@ -3,7 +3,19 @@ name = "polymer-protocol"
 version = "0.1.0"
 description = "Polymer Claims protocol runtime — the assessment spine over polymer_grammar."
 requires-python = ">=3.12"
-dependencies = ["polymer-grammar", "pydantic>=2.6"]
+authors = [{ name = "Zachary Belden" }]
+keywords = ["scientific-claims", "epistemics", "knowledge-generation", "runtime"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+# The uv path-source below overrides this for local dev; the bound applies at index resolution.
+dependencies = ["polymer-grammar>=0.1,<0.2", "pydantic>=2.6"]
+
+[project.urls]
+Repository = "https://github.com/beldez01/polymer-claims"
 
 [tool.uv.sources]
 polymer-grammar = { path = "../grammar", editable = true }
