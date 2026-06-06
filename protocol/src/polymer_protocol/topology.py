@@ -13,6 +13,8 @@ import hashlib
 import math
 from enum import Enum
 
+from pydantic import model_validator
+
 from polymer_grammar import (
     AXES,
     NeighborEdgeKind,
@@ -23,6 +25,10 @@ from polymer_grammar import (
 
 from .base import _Model
 from .corpus import Corpus
+
+# Bump when the topology/timeline wire shape changes incompatibly, so the viewer can
+# detect drift against a contract it was built for (audit #10).
+CONTRACT_VERSION = "1.0"
 
 
 class Layout(str, Enum):
@@ -35,9 +41,21 @@ class TopologyNode(_Model):
     status: str
     pattern_id: str
     subject_kind: str | None = None
+    # When present, the FULL strength vector — exactly len(AXES) floats in AXES order
+    # (magnitude, certainty, evidence_against_null, severity, world_contact, explanatory_virtue).
+    # The viewer indexes this positionally, so the length/order is a load-bearing contract.
     strength: tuple[float, ...] | None = None
     is_representation_revision: bool = False
     position: tuple[float, float, float] = (0.0, 0.0, 0.0)
+
+    @model_validator(mode="after")
+    def _strength_is_full_axis_vector(self) -> "TopologyNode":
+        if self.strength is not None and len(self.strength) != len(AXES):
+            raise ValueError(
+                f"strength must be the full {len(AXES)}-axis vector in AXES order, "
+                f"got length {len(self.strength)}"
+            )
+        return self
 
 
 class TopologyEdge(_Model):
@@ -59,6 +77,7 @@ class TopologyExport(_Model):
     edges: tuple[TopologyEdge, ...] = ()
     clusters: tuple[TopologyCluster, ...] = ()
     layout_id: str
+    contract_version: str = CONTRACT_VERSION
 
 
 def _effective_set(corpus: Corpus) -> frozenset[tuple[str, str]]:

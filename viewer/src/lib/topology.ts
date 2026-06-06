@@ -7,8 +7,23 @@
 export type Vec3 = [number, number, number];
 
 /** strength 6-vector, ordered as polymer_grammar.AXES:
- *  magnitude, certainty, evidence_against_null, severity, world_contact, explanatory_virtue. */
+ *  magnitude, certainty, evidence_against_null, severity, world_contact, explanatory_virtue.
+ *  The protocol enforces this exact length/order on export (audit #10). */
 export type StrengthVector = [number, number, number, number, number, number];
+
+/** The topology/timeline wire contract this viewer was built against
+ *  (polymer_protocol.CONTRACT_VERSION). Loaders warn on a mismatch. */
+export const SUPPORTED_CONTRACT_VERSION = '1.0';
+
+/** Soft drift check — warns (does not throw) so an older/newer node still renders. */
+export function checkContractVersion(version: string | undefined, source: string): void {
+  if (version !== undefined && version !== SUPPORTED_CONTRACT_VERSION) {
+    console.warn(
+      `[polymer-claims] ${source} contract_version ${version} != viewer ${SUPPORTED_CONTRACT_VERSION}; ` +
+        'fields may be missing or reshaped.',
+    );
+  }
+}
 
 export interface TopologyNode {
   id: string;
@@ -39,6 +54,7 @@ export interface TopologyExport {
   edges: TopologyEdge[];
   clusters: TopologyCluster[];
   layout_id: string;
+  contract_version?: string;
 }
 
 /** Per-axis extent of the node positions — drives the reference frame + ticks. */
@@ -86,5 +102,7 @@ export async function loadTopology(
   if (!res.ok) {
     throw new Error(`failed to load topology: ${res.status} ${res.statusText}`);
   }
-  return (await res.json()) as TopologyExport;
+  const data = (await res.json()) as TopologyExport;
+  checkContractVersion(data.contract_version, 'topology');
+  return data;
 }

@@ -5,7 +5,7 @@
  * interfaces match it field-for-field.
  */
 
-import type { TopologyExport } from '@/lib/topology';
+import { type TopologyExport, checkContractVersion } from '@/lib/topology';
 
 /** Per-cycle summary derived from the CycleResult + post-cycle corpus + topology. */
 export interface FrameStats {
@@ -33,6 +33,7 @@ export interface TimelineFrame {
 export interface TopologyTimeline {
   frames: TimelineFrame[];
   n_cycles: number;
+  contract_version?: string;
 }
 
 /** Load the sample timeline from /public. */
@@ -43,5 +44,7 @@ export async function loadTimeline(
   if (!res.ok) {
     throw new Error(`failed to load timeline: ${res.status} ${res.statusText}`);
   }
-  return (await res.json()) as TopologyTimeline;
+  const data = (await res.json()) as TopologyTimeline;
+  checkContractVersion(data.contract_version, 'timeline');
+  return data;
 }

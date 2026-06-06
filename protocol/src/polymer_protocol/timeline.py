@@ -17,7 +17,7 @@ from .base import _Model
 from .corpus import Corpus
 from .cycle import run_cycle
 from .ledger import SelectionLedger
-from .topology import Layout, TopologyExport, export_topology
+from .topology import CONTRACT_VERSION, Layout, TopologyExport, export_topology
 
 
 class FrameStats(_Model):
@@ -44,6 +44,7 @@ class TimelineFrame(_Model):
 class TopologyTimeline(_Model):
     frames: tuple[TimelineFrame, ...] = ()
     n_cycles: int
+    contract_version: str = CONTRACT_VERSION
 
 
 def _status_count(corpus: Corpus, status: Status) -> int:

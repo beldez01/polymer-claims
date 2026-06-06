@@ -73,6 +73,7 @@ from .safety import safety_gate
 from .select import ValueWeights, cell_of, select_stage
 from .stakes import dependency_cone, stakes
 from .topology import (
+    CONTRACT_VERSION,
     Layout,
     TopologyCluster,
     TopologyEdge,
@@ -90,15 +91,25 @@ from .timeline import (
 )
 from .verify import verify_stage
 
+# Public API. Grouped by stability/role (audit #12, no-refactor sectioning — the names are
+# unchanged; the sections just signal which surfaces are stable contracts vs runtime
+# internals downstream code should lean on cautiously). Everything here is importable today.
 __all__ = [
+    # ── base ──────────────────────────────────────────────────────────────
     "_Model",
     "stable_sha",
     "__version__",
+    # ── stable contracts (the Corpus IR bundle + the run_cycle entrypoint) ─
     "Corpus",
     "CycleResult",
     "CycleScaffolding",
     "ExecRecord",
     "StageAudit",
+    "run_cycle",
+    "Adapter",
+    "MaterializationContext",
+    "SelfLicensingError",
+    # ── runtime stages (composed by run_cycle; callable directly) ──────────
     "represent",
     "canonicalize",
     "safety_gate",
@@ -106,34 +117,36 @@ __all__ = [
     "execute_ground",
     "verify_stage",
     "integrate",
-    "run_cycle",
-    "Adapter",
-    "MaterializationContext",
-    "SelfLicensingError",
+    "select_stage",
+    "generate_stage",
+    # ── oracle credibility (registry + cap) ───────────────────────────────
     "ApplicabilityDomain",
     "OracleDossier",
     "ValidationTier",
     "OracleRegistry",
     "oracle_cap",
+    # ── adapter trust registry (verifier independence) ────────────────────
     "AdapterCredential",
     "AdapterRegistry",
     "adapters_independent",
     "pair_is_registry_independent",
+    # ── selection: belief / stakes / cost / value ─────────────────────────
     "Beta",
     "prior_belief",
     "expected_information_gain",
+    "accumulated_belief",
     "stakes",
     "dependency_cone",
     "CostVector",
     "CostModel",
     "CostWeights",
     "aggregate_cost",
-    "select_stage",
     "ValueVector",
     "ValueWeights",
     "SelectionRecord",
     "SelectionDecision",
-    "generate_stage",
+    "cell_of",
+    # ── generation: bus, proposers, adapters, credit ──────────────────────
     "compile_to_IR",
     "Proposer",
     "Proposal",
@@ -150,6 +163,7 @@ __all__ = [
     "transplant_plan",
     "allocate_subcaps",
     "CREDIT_FLOOR_DEFAULT",
+    # ── ledger / credit economy ───────────────────────────────────────────
     "SelectionLedger",
     "ClaimOutcome",
     "OperatorCredit",
@@ -157,8 +171,7 @@ __all__ = [
     "operator_of",
     "credit_factor",
     "update_ledger",
-    "accumulated_belief",
-    "cell_of",
+    # ── daemons (caller-scheduled standing passes) ────────────────────────
     "DriftFinding",
     "DriftRecord",
     "drift_pass",
@@ -167,12 +180,15 @@ __all__ = [
     "OracleValidationRecord",
     "SpotProbe",
     "oracle_validation_pass",
+    # ── loop economics (the recommend-only scheduler) ─────────────────────
     "ActionKind",
     "ScheduledAction",
     "SchedulerConfig",
     "SchedulerState",
     "SchedulerWeights",
     "next_action",
+    # ── topology / timeline export (the viewer data contract) ─────────────
+    "CONTRACT_VERSION",
     "export_topology",
     "TopologyExport",
     "TopologyNode",
