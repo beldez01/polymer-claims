@@ -24,7 +24,7 @@ def test_pending_reasons_include_governance_and_incomparable():
     assert "strength_incomparable" in vals
     assert "duhem_underdetermined" in vals
     assert "materialization_drifted" in vals
-    assert len(vals) == 10
+    assert len(vals) == 11
 
 
 def test_materialization_drifted_reason_carried_on_a_pending_claim():
@@ -40,3 +40,20 @@ def test_materialization_drifted_reason_carried_on_a_pending_claim():
     )
     assert claim.pending_reason is PendingReason.MATERIALIZATION_DRIFTED
     assert claim.pending_reason.value == "materialization_drifted"
+
+
+def test_adapter_not_independent_reason_carried_on_a_pending_claim():
+    from polymer_grammar import CategoricalLeaf, Claim, PatternRef
+
+    claim = Claim(
+        id="c",
+        title="c",
+        pattern=PatternRef(id="adjusted_effect", version="v1"),
+        leaves=(CategoricalLeaf(ontology_term="t"),),
+        status=Status.PENDING,
+        pending_reason=PendingReason.ADAPTER_NOT_INDEPENDENT,
+    )
+    assert claim.pending_reason is PendingReason.ADAPTER_NOT_INDEPENDENT
+    assert claim.pending_reason.value == "adapter_not_independent"
+    # round-trips through JSON
+    assert Claim.model_validate_json(claim.model_dump_json()).pending_reason is PendingReason.ADAPTER_NOT_INDEPENDENT

@@ -51,6 +51,12 @@ from .ledger import (
 )
 from .drift import DriftFinding, DriftRecord, drift_pass, reopen_drifted
 from .oracle import OracleRegistry, oracle_cap
+from .adapter_registry import (
+    AdapterCredential,
+    AdapterRegistry,
+    adapters_independent,
+    pair_is_registry_independent,
+)
 from .economics import (
     ActionKind,
     ScheduledAction,
@@ -109,6 +115,10 @@ __all__ = [
     "ValidationTier",
     "OracleRegistry",
     "oracle_cap",
+    "AdapterCredential",
+    "AdapterRegistry",
+    "adapters_independent",
+    "pair_is_registry_independent",
     "Beta",
     "prior_belief",
     "expected_information_gain",

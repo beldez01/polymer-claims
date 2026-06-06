@@ -11,6 +11,7 @@ from polymer_grammar import (
     Claim,
     LicenseRoute,
     Licensing,
+    PendingReason,
     RivalSetClosure,
     SatisfactionVerdict,
     Status,
@@ -21,6 +22,7 @@ from polymer_grammar import (
     meets_meta_tier_bar,
 )
 
+from .adapter_registry import AdapterRegistry, pair_is_registry_independent
 from .corpus import Corpus, CycleScaffolding, ExecRecord
 from .oracle import OracleRegistry, oracle_cap
 
@@ -72,6 +74,7 @@ def verify_stage(
     scaffolding: CycleScaffolding,
     exec_records: tuple[ExecRecord, ...],
     oracles: OracleRegistry | None = None,
+    adapter_registry: AdapterRegistry | None = None,
 ) -> Corpus:
     registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
@@ -95,6 +98,16 @@ def verify_stage(
         # requires the lock); the guard is defensive for direct callers.
         if (ev.satisfaction is not None and c.id in in_ext
                 and c.provenance is not None and c.id in permitted):
+            if adapter_registry is not None and not adapter_registry.is_empty:
+                identities = tuple(r.adapter_identity for r in ev.results)
+                if not pair_is_registry_independent(adapter_registry, identities):
+                    new_claims.append(_with_status(
+                        c,
+                        status=Status.PENDING,
+                        pending_reason=PendingReason.ADAPTER_NOT_INDEPENDENT,
+                        licensing=None,
+                    ))
+                    continue
             licensing = Licensing(
                 route=LicenseRoute.SEVERE_TEST,
                 satisfactions=(ev.satisfaction,),
