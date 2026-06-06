@@ -15,8 +15,9 @@ Spec §6.8 + SELECT #3a/#3b + GENERATE #4a + oracle dossier #2.
 """
 from __future__ import annotations
 
-from polymer_grammar import Adapter, Claim, MaterializationContext, Status
+from polymer_grammar import Adapter, Claim, MaterializationContext, PendingReason, Status
 
+from .adapter_registry import AdapterRegistry
 from .canonicalize import canonicalize
 from .commit import commit
 from .corpus import Corpus, CycleResult, StageAudit, is_locked
@@ -41,6 +42,7 @@ def run_cycle(
     adapters: tuple[Adapter, ...],
     ctx: MaterializationContext,
     oracles: OracleRegistry | None = None,
+    adapter_registry: AdapterRegistry | None = None,
     *,
     cost_model: CostModel | None = None,
     budget: float | None = None,
@@ -118,9 +120,14 @@ def run_cycle(
     # operators are belief-neutral), so the grounded_extension of the executed claims is
     # unchanged since represent().
     executed_ids = {r.claim_id for r in records}
-    corpus = verify_stage(corpus, scaffolding, records, oracles)
+    corpus = verify_stage(corpus, scaffolding, records, oracles, adapter_registry=adapter_registry)
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
-    audit.append(StageAudit(stage="verify_stage", note=f"{n_licensed} licensed", count=n_licensed))
+    n_trust_held = sum(1 for c in corpus.claims if c.pending_reason == PendingReason.ADAPTER_NOT_INDEPENDENT)
+    audit.append(StageAudit(
+        stage="verify_stage",
+        note=f"{n_licensed} licensed" + (f", {n_trust_held} held (adapter not independent)" if n_trust_held else ""),
+        count=n_licensed,
+    ))
 
     corpus, skipped = integrate(corpus, scaffolding, records)
     n_added = len(records) - len(skipped)
