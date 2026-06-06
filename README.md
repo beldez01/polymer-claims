@@ -33,6 +33,20 @@ cd viewer && npm install && npm run dev   # → http://localhost:3000
 # In the viewer, click Connect (default http://localhost:8000) to enter LIVE mode.
 ```
 
+### Real generation (optional)
+
+`run-cycle` can generate executable claims via a real LLM (behind the `[llm]` extra):
+
+```bash
+pip install '.[llm]'
+export ANTHROPIC_API_KEY=...
+polymer-claims run-cycle corpus.json --llm     # --llm-model defaults to claude-sonnet-4-6
+```
+
+Honesty caveat: v1 plans run on the deterministic reference adapters (`builtin::const`), so this
+proves the generation→execute→license plumbing end-to-end; meaningful data execution is gated on
+real execution adapters.
+
 **Sample mode vs live mode:** with no connection the viewer plays a precomputed
 `viewer/public/sample-timeline.json` (sample mode); clicking **Connect** switches to **live
 mode**, streaming frames from the running node as the corpus actually generates, licenses, and

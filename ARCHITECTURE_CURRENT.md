@@ -29,6 +29,8 @@ grammar  →  protocol            →  node (src/polymer_claims)  →  viewer
 
 **Local-node hardening (2026-06-05):** the live server is bounded and serialized for hours-long local runs — `--max-frames` ring retention, an `asyncio.Lock` serializing ticks, bounded SSE queues, and a **non-loopback bind guard** (`serve --host` other than loopback refuses unless `--unsafe-remote-control` is passed). It is still **local-only**: the mutating routes (`/step`/`/pause`/`/resume`) are unauthenticated by design. Real auth/multi-tenant/deploy is the future federated step, not shipped.
 
+**Real LLM generation (2026-06-06):** the real `LLMGenerationAdapter` (the `[llm]` extra, Anthropic-backed) is now built behind the existing generation-bus seam and exposed via `run-cycle --llm` (lazy import + `ANTHROPIC_API_KEY` check, mirroring the `[serve]` pattern). Caveat: v1 plans run on the deterministic reference adapters (`builtin::const`), so this proves the generation→execute→license plumbing end-to-end; meaningful data execution is gated on real execution adapters.
+
 ## Frozen (v1.2 — fallback, not the active path)
 
 | Path | What it is |
