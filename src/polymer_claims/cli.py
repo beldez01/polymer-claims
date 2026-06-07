@@ -204,14 +204,33 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
+    llm_proposer = None
+    if getattr(args, "llm", False):
+        try:
+            llm_proposer = _build_llm_proposer(args.llm_model)
+        except RuntimeError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        from .throttle import every_n_ticks
+        # throttle so the live node's GENERATE stage is watchable/affordable
+        llm_proposer = every_n_ticks(llm_proposer, n=args.llm_every)
     if args.seed_corpus:
         corpus = load_corpus(args.seed_corpus)
+        seed_kwargs = {}
+        if llm_proposer is not None:
+            seed_kwargs["proposers"] = (llm_proposer,)
         runner = NodeRunner.from_seed(
-            corpus, scheduler_budget=args.budget, max_frames=args.max_frames
+            corpus,
+            scheduler_budget=args.budget,
+            max_frames=args.max_frames,
+            **seed_kwargs,
         )
     else:
         from .seed import default_seed_corpus
         corpus, kwargs = default_seed_corpus()
+        if llm_proposer is not None:
+            # run the LLM agent ALONGSIDE the seed's rival/revision proposers.
+            kwargs["proposers"] = tuple(kwargs.get("proposers", ())) + (llm_proposer,)
         # `args.budget` is the SCHEDULER budget (gates RUN_CYCLE); the evolving
         # seed's `kwargs["budget"]` is run_cycle's SELECT budget and flows
         # through `**kwargs` to spread licensing progressively across frames.
@@ -296,6 +315,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p_serve.add_argument(
         "--origins", nargs="*", default=None, help="extra CORS origins"
     )
+    p_serve.add_argument("--llm", action="store_true", help="drive GENERATE with a real LLM agent (needs the [llm] extra + ANTHROPIC_API_KEY)")
+    p_serve.add_argument("--llm-model", default="claude-sonnet-4-6", help="model for --llm")
+    p_serve.add_argument("--llm-every", type=int, default=4, help="LLM proposes every Nth tick (throttle)")
     p_serve.set_defaults(func=_cmd_serve)
 
     return parser

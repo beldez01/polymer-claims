@@ -47,6 +47,27 @@ Honesty caveat: v1 plans run on the deterministic reference adapters (`builtin::
 proves the generation→execute→license plumbing end-to-end; meaningful data execution is gated on
 real execution adapters.
 
+### Watch a live agent
+
+Run the live node with a real LLM driving the GENERATE stage and watch the universe evolve in the
+viewer in real time:
+
+```bash
+pip install -e '.[serve,llm]'         # both extras
+export ANTHROPIC_API_KEY=sk-ant-...
+# Terminal 1 — the live agent node:
+polymer-claims serve --llm --interval 3 --llm-every 4   # LLM proposes ~every 4th tick
+# Terminal 2 — the viewer:
+cd viewer && npm run dev               # http://localhost:3000 → Connect to http://localhost:8000
+```
+
+The execution substrate is still the deterministic reference adapters (`builtin::const`), so the
+agent's proposed claims license on LLM-asserted values — this is the real generate→execute→license
+loop driven by a real agent, but not real-data science yet; real-data execution is Phase 2 (a
+future, separate arc). To tune cost vs. activity: lower `--llm-every` or lower `--interval` to
+increase agent cadence (and API spend); the agent runs alongside the seed proposers, so the
+universe stays lively even on the throttle's quiet ticks.
+
 **Sample mode vs live mode:** with no connection the viewer plays a precomputed
 `viewer/public/sample-timeline.json` (sample mode); clicking **Connect** switches to **live
 mode**, streaming frames from the running node as the corpus actually generates, licenses, and
