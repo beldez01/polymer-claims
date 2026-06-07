@@ -86,6 +86,40 @@ def test_serve_threads_max_frames(monkeypatch):
     assert seen["runner"].max_frames == 42
 
 
+def test_serve_llm_threads_proposer_into_runner(monkeypatch):
+    seen = {}
+    def fake_import():
+        def run(app, host=None, port=None): pass
+        def create_app(runner, *, interval, origins): seen["runner"] = runner; return "APP"  # noqa: E702
+        import types; return types.SimpleNamespace(run=run), create_app  # noqa: E702
+    monkeypatch.setattr(cli, "_import_server", fake_import)
+    import json
+    from polymer_protocol import bridge_proposer
+    from polymer_claims.llm_adapter import LLMGenerationAdapter
+    dsl = {"proposals": [{"title": "g", "pattern_id": "adjusted_effect", "ontology_term": "g1",
+                          "value": 0.01, "comparator": "lt", "threshold": 0.05}]}
+    monkeypatch.setattr(cli, "_build_llm_proposer",
+                        lambda model: bridge_proposer((LLMGenerationAdapter(lambda _p: json.dumps(dsl)),)))
+    rc = main(["serve", "--llm", "--llm-every", "4"])
+    assert rc == 0
+    runner = seen["runner"]
+    # the runner ticks; the LLM-generated claim eventually appears + licenses
+    for _ in range(8):
+        runner.tick()
+    assert any(c.id.startswith("gen-llm-") and c.status.value == "licensed"
+               for c in runner.corpus.claims)
+
+
+def test_serve_llm_missing_key_errors(monkeypatch, capsys):
+    monkeypatch.setattr(cli, "_import_server",
+        lambda: (__import__("types").SimpleNamespace(run=lambda *a, **k: None), lambda runner, **k: "APP"))
+    monkeypatch.setattr(cli, "_build_llm_proposer",
+        lambda model: (_ for _ in ()).throw(RuntimeError("set ANTHROPIC_API_KEY to use --llm")))
+    rc = main(["serve", "--llm"])
+    assert rc == 1
+    assert "ANTHROPIC_API_KEY" in capsys.readouterr().err
+
+
 def test_default_seed_evolves():
     from polymer_claims.seed import default_seed_corpus
     corpus, kwargs = default_seed_corpus()
