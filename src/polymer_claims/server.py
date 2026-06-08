@@ -73,8 +73,13 @@ def create_app(
             _bounded_put(q, payload)
 
     async def _do_tick():
+        # Run the (potentially blocking) tick OFF the event loop: a `serve --llm`
+        # generation tick makes a synchronous Anthropic call inside run_cycle, and
+        # running it inline would freeze the loop — stalling /claim, /state and
+        # /stream for the whole API call. asyncio.to_thread keeps the loop free to
+        # serve reads while the tick runs; the lock still serializes ticks.
         async with lock:
-            frame = runner.tick()
+            frame = await asyncio.to_thread(runner.tick)
         _publish(frame)
         return frame
 

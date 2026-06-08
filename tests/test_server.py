@@ -183,3 +183,53 @@ def test_bounded_put_drops_oldest():
     items = [q.get_nowait() for _ in range(3)]
     assert items == ["p7", "p8", "p9"]  # newest 3 retained, oldest dropped
     assert _SSE_QUEUE_MAX == 1000
+
+
+def test_tick_does_not_block_reads(monkeypatch):
+    """A slow (blocking) tick — e.g. a synchronous LLM call inside run_cycle —
+    must NOT freeze the event loop: concurrent reads like /state must still be
+    served promptly while a tick is in flight. Regression guard for the live
+    `serve --llm` node, where the Anthropic call would otherwise stall /claim,
+    /state and /stream for the full duration of each generation tick."""
+    import asyncio
+    import time
+
+    import httpx
+
+    runner = NodeRunner.from_seed(licensing_corpus())
+    real_tick = runner.tick
+
+    def slow_tick():
+        time.sleep(0.4)  # stand in for a blocking LLM/network call inside the tick
+        return real_tick()
+
+    monkeypatch.setattr(runner, "tick", slow_tick)
+    app = create_app(runner, interval=3600, autostart=False)
+
+    async def scenario():
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://t") as c:
+            order: list[str] = []
+            codes: dict[str, int] = {}
+
+            async def do_step():
+                r = await c.post("/step")        # runs the slow (0.4s) tick
+                codes["step"] = r.status_code
+                order.append("step")
+
+            async def do_state():
+                r = await c.get("/state")        # a cheap read
+                codes["state"] = r.status_code
+                order.append("state")
+
+            # Both issued concurrently, /step (the tick) scheduled first.
+            await asyncio.gather(do_step(), do_state())
+            return order, codes
+
+    order, codes = asyncio.run(scenario())
+    assert codes["state"] == 200
+    assert codes["step"] == 200
+    # If the tick blocks the event loop, the cheap /state read cannot complete
+    # until the 0.4s tick finishes -> /step completes first. With the tick run
+    # off-loop, /state returns immediately and completes BEFORE /step.
+    assert order[0] == "state", f"/state was blocked behind the tick; order={order}"
