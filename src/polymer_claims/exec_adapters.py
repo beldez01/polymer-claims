@@ -21,20 +21,43 @@ from polymer_grammar import (
     DataHandle,
     EvaluationPlan,
     ExecValue,
+    GenerationMode,
     MaterializationContext,
     MeasurementBasis,
     OperationNode,
     PatternRef,
     PendingReason,
     ProducedLeafSpec,
+    Provenance,
     SatisfactionCriterion,
     Status,
+    StrengthVector,
 )
-from polymer_protocol import AdapterCredential, AdapterRegistry
+from polymer_protocol import (
+    AdapterCredential,
+    AdapterRegistry,
+    ApplicabilityDomain,
+    OracleDossier,
+    OracleRegistry,
+    ValidationTier,
+)
 
 from .datasets import load_dataset
 
 _IMPL = "stats::mean_diff"
+
+_APPARATUS_ORACLE = "dose_response_apparatus"
+
+# A provisional (asserted, pre-cap) empirical strength a CALLER may pass to mean_diff_claim
+# to exercise the apparatus oracle-tier cap. NOT the default: a strength-bearing claim is
+# subject to the #3a cardinality-scaled selective-inference bar, so in the live multi-claim
+# node it would never license. Live/generated claims therefore use strength=None (exempt →
+# they license). Earned-from-data strength — which legitimately clears the bar — is the
+# documented reconciliation (docs/superpowers/notes/2026-06-08-earned-strength-followup.md).
+_PROVISIONAL_STRENGTH = StrengthVector(
+    magnitude=0.8, certainty=0.7, evidence_against_null=0.8,
+    severity=0.5, world_contact=0.9, explanatory_virtue=0.6,
+)
 
 
 def _resolve(node: OperationNode) -> tuple[list[float], list[float]]:
@@ -99,9 +122,15 @@ def mean_diff_claim(
     ref: str = "dose_response",
     title: str = "high vs low dose mean difference",
     ontology_term: str = "dose-response",
+    rationale: str | None = None,
+    strength: StrengthVector | None = None,
 ) -> Claim:
-    """Build a PENDING Claim whose plan computes mean_diff over a bundled dataset.
-    (In Phase 2b the LLM emits these; here they're constructed directly.)"""
+    """Build a PENDING Claim whose plan computes mean_diff over a bundled dataset, carrying an
+    apparatus oracle_ref so any empirical strength is tier-capped at verify. `strength`
+    defaults to None: a strength-bearing claim is subject to the cardinality-scaled
+    selective-inference bar and would not license in the live multi-claim node, so the live
+    agent emits strength=None claims. Pass a `strength` (e.g. `_PROVISIONAL_STRENGTH`) to
+    exercise the oracle cap on a single claim. (In Phase 2b the LLM emits these.)"""
     node = OperationNode(
         id="n0",
         impl="stats::mean_diff",
@@ -112,12 +141,21 @@ def mean_diff_claim(
             ("group_a", group_a),
             ("group_b", group_b),
         ),
+        oracle_ref=_APPARATUS_ORACLE,
         produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
     )
     plan = EvaluationPlan(
         graph=ComputeGraph(nodes=(node,), terminal="n0"),
         criterion=SatisfactionCriterion(comparator=comparator, threshold=threshold),
     )
+    provenance = None
+    if rationale is not None:
+        provenance = Provenance(
+            generated_by=GenerationMode.AGENT_GENERATED,
+            agent_id="llm-meandiff-proposer",
+            search_cardinality=1,
+            rationale=rationale,
+        )
     return Claim(
         id=claim_id,
         title=title,
@@ -125,6 +163,8 @@ def mean_diff_claim(
         leaves=(CategoricalLeaf(ontology_term=ontology_term),),
         status=Status.PENDING,
         pending_reason=PendingReason.UNTESTED,
+        strength=strength,
+        provenance=provenance,
         evaluation_plan=plan,
     )
 
@@ -136,3 +176,31 @@ def independent_registry() -> AdapterRegistry:
         AdapterCredential(identity="stats-pure", owner="owner-pure", implementation_hash="h-pure"),
         AdapterCredential(identity="stats-stdlib", owner="owner-stdlib", implementation_hash="h-stdlib"),
     ))
+
+
+def apparatus_oracle_registry() -> OracleRegistry:
+    """BENCHMARKED dossier for the bundled mean_diff apparatus; unbounded domain. Supplying it
+    to run_cycle caps a licensed claim's empirical strength to 0.6; omitting it leaves the
+    declared oracle_ref UNVALIDATED (0.0)."""
+    return OracleRegistry(dossiers=(
+        OracleDossier(
+            oracle_id=_APPARATUS_ORACLE,
+            validation_tier=ValidationTier.BENCHMARKED,
+            applicability_domain=ApplicabilityDomain(),
+        ),
+    ))
+
+
+def real_data_seed_corpus():
+    """A tiny seed of real-data mean_diff claims so the live node isn't empty.
+    Returns (corpus, run_cycle_kwargs). The LLM proposer is added by the caller (serve)."""
+    from polymer_grammar import FDRLedger
+    from polymer_protocol import Corpus
+    claims = (
+        mean_diff_claim("seed-md-1", comparator=Comparator.GT, threshold=10.0,
+                        title="high dose raises response (seed)"),
+        mean_diff_claim("seed-md-2", comparator=Comparator.GT, threshold=20.0,
+                        title="high dose raises response by >20 (seed)"),
+    )
+    corpus = Corpus(claims=claims, fdr_ledger=FDRLedger(target_fdr=0.05))
+    return corpus, {"budget": 2.5}

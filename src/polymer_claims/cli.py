@@ -101,6 +101,18 @@ def _build_llm_proposer(model: str):
     return bridge_proposer((adapter,))
 
 
+def _build_real_data_proposer(model: str):
+    """Lazy-build a bridge_proposer over a MeanDiffGenerationAdapter (real-data generation).
+    Raises RuntimeError with a key/extra hint if [llm] or ANTHROPIC_API_KEY is missing."""
+    import os
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("set ANTHROPIC_API_KEY to use --real-data")
+    from polymer_protocol import bridge_proposer
+    from .llm_adapter import MeanDiffGenerationAdapter
+    adapter = MeanDiffGenerationAdapter.anthropic(model=model)   # raises RuntimeError if [llm] missing
+    return bridge_proposer((adapter,))
+
+
 def _cmd_run_cycle(args: argparse.Namespace) -> int:
     corpus = load_corpus(args.corpus)
     proposers = ()
@@ -204,6 +216,36 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
+    if getattr(args, "real_data", False):
+        try:
+            proposer = _build_real_data_proposer(args.llm_model)
+        except RuntimeError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        from .throttle import every_n_ticks
+        from .exec_adapters import (
+            StatsPureAdapter,
+            StatsStdlibAdapter,
+            apparatus_oracle_registry,
+            independent_registry,
+            real_data_seed_corpus,
+        )
+        proposer = every_n_ticks(proposer, n=args.llm_every)
+        corpus, seed_kwargs = real_data_seed_corpus()
+        runner = NodeRunner.from_seed(
+            corpus,
+            adapters=(StatsPureAdapter(), StatsStdlibAdapter()),
+            ctx=_CTX,
+            scheduler_budget=args.budget,
+            max_frames=args.max_frames,
+            adapter_registry=independent_registry(),
+            oracles=apparatus_oracle_registry(),
+            proposers=(proposer,),
+            **seed_kwargs,
+        )
+        app = create_app(runner, interval=args.interval, origins=args.origins or None)
+        uvicorn.run(app, host=args.host, port=args.port)
+        return 0
     llm_proposer = None
     if getattr(args, "llm", False):
         try:
@@ -316,6 +358,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--origins", nargs="*", default=None, help="extra CORS origins"
     )
     p_serve.add_argument("--llm", action="store_true", help="drive GENERATE with a real LLM agent (needs the [llm] extra + ANTHROPIC_API_KEY)")
+    p_serve.add_argument("--real-data", action="store_true", help="LLM proposes REAL-DATA mean_diff plans; node runs the local execution adapters + apparatus oracle (needs [llm] + ANTHROPIC_API_KEY)")
     p_serve.add_argument("--llm-model", default="claude-sonnet-4-6", help="model for --llm")
     p_serve.add_argument("--llm-every", type=int, default=4, help="LLM proposes every Nth tick (throttle)")
     p_serve.set_defaults(func=_cmd_serve)
