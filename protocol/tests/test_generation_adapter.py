@@ -56,6 +56,30 @@ def test_conjectured_claim_is_accepted_and_provenance_forced():
     assert clean.provenance.search_cardinality >= 1
 
 
+def test_rationale_is_preserved_while_identity_is_forced():
+    raw = _claim(
+        "x",
+        provenance=Provenance(
+            generated_by=GenerationMode.AGENT_GENERATED,
+            agent_id="someone",
+            search_cardinality=1,
+            rationale="why-x",
+        ),
+    )
+    clean, reason = compile_untrusted(raw, "trusted-id", fingerprint="fp")
+    assert reason is None and clean is not None
+    assert clean.provenance.rationale == "why-x"          # benign free text survives
+    assert clean.provenance.agent_id == "trusted-id"      # identity still forced
+    assert clean.provenance.generated_by == GenerationMode.AGENT_GENERATED
+
+
+def test_no_provenance_compiles_with_none_rationale():
+    raw = _claim("x")  # provenance=None
+    clean, reason = compile_untrusted(raw, "trusted-id", fingerprint="fp")
+    assert reason is None and clean is not None
+    assert clean.provenance.rationale is None
+
+
 def test_incoming_provenance_is_overwritten_not_trusted():
     raw = _claim("x", provenance=Provenance(generated_by=GenerationMode.IMPORTED, agent_id=None, search_cardinality=1))
     clean, reason = compile_untrusted(raw, "llm-7", fingerprint="fp")

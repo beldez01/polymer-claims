@@ -20,6 +20,19 @@ def test_agent_generated_requires_agent_id():
         Provenance(generated_by=GenerationMode.AGENT_GENERATED, search_cardinality=40)  # no agent_id
 
 
+def test_rationale_roundtrips_and_defaults_none():
+    p = Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id="x",
+                   search_cardinality=1, rationale="because")
+    assert p.rationale == "because"
+    bare = Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id="x",
+                      search_cardinality=1)
+    assert bare.rationale is None
+    # the AGENT_GENERATED-requires-agent_id validator still fires even with a rationale
+    with pytest.raises(ValidationError):
+        Provenance(generated_by=GenerationMode.AGENT_GENERATED, search_cardinality=1,
+                   rationale="because")
+
+
 def test_search_cardinality_must_be_at_least_one():
     with pytest.raises(ValidationError):
         Provenance(generated_by=GenerationMode.HUMAN_AUTHORED, search_cardinality=0)
