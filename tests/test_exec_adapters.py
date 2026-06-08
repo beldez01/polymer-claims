@@ -7,6 +7,7 @@ from polymer_grammar import (
     OperationNode,
     ProducedLeafSpec,
     Status,
+    StrengthVector,
 )
 from polymer_protocol import AdapterCredential, AdapterRegistry, Corpus, run_cycle
 
@@ -123,12 +124,22 @@ def test_same_owner_pair_is_held_pending_by_independence_gate():
 # ---------------------------------------------------------------------------
 
 
-def test_mean_diff_claim_carries_oracle_ref_and_strength():
+# A caller-supplied provisional strength to exercise the oracle cap on a SINGLE claim.
+# (The live node uses the default strength=None so claims clear the selective-inference bar.)
+_STR = StrengthVector(
+    magnitude=0.8, certainty=0.7, evidence_against_null=0.8,
+    severity=0.5, world_contact=0.9, explanatory_virtue=0.6,
+)
+
+
+def test_mean_diff_claim_carries_oracle_ref_default_strength_none():
     c = mean_diff_claim("c-meta")
     node = c.evaluation_plan.graph.nodes[0]
     assert node.oracle_ref == "dose_response_apparatus"
-    assert c.strength is not None
-    assert c.provenance is None  # no rationale passed
+    assert c.strength is None        # default: exempt from the selective-inference bar
+    assert c.provenance is None      # no rationale passed
+    # a caller may opt into a provisional strength
+    assert mean_diff_claim("c-meta2", strength=_STR).strength is not None
 
 
 def test_mean_diff_claim_rationale_sets_provenance():
@@ -138,7 +149,9 @@ def test_mean_diff_claim_rationale_sets_provenance():
 
 
 def test_benchmarked_oracle_caps_goodness_axes_to_0_6():
-    c = mean_diff_claim("c-cap", comparator=Comparator.GT, threshold=10.0)
+    # a strength-bearing claim, run alone (cardinality 1) so the selective-inference bar
+    # doesn't hold it; the BENCHMARKED apparatus tier caps its goodness axes to 0.6.
+    c = mean_diff_claim("c-cap", comparator=Comparator.GT, threshold=10.0, strength=_STR)
     result = run_cycle(_corpus(c), _ADAPTERS, _CTX,
                        adapter_registry=independent_registry(),
                        oracles=apparatus_oracle_registry())
@@ -152,7 +165,7 @@ def test_benchmarked_oracle_caps_goodness_axes_to_0_6():
 
 
 def test_declared_oracle_without_registry_caps_to_unvalidated():
-    c = mean_diff_claim("c-unval", comparator=Comparator.GT, threshold=10.0)
+    c = mean_diff_claim("c-unval", comparator=Comparator.GT, threshold=10.0, strength=_STR)
     result = run_cycle(_corpus(c), _ADAPTERS, _CTX, adapter_registry=independent_registry())
     lic = next(x for x in result.corpus.claims if x.id == "c-unval")
     assert lic.status == Status.LICENSED
