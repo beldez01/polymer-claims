@@ -46,3 +46,11 @@ def test_prompt_mentions_dataset_and_op():
     assert "dose_response" in prompt
     assert "mean" in prompt.lower()
     assert "response" in prompt and "dose" in prompt
+
+
+def test_real_data_seed_corpus_has_mean_diff_claims():
+    from polymer_claims.exec_adapters import real_data_seed_corpus
+    corpus, kwargs = real_data_seed_corpus()
+    assert len(corpus.claims) >= 1
+    assert all(c.evaluation_plan.graph.nodes[0].impl == "stats::mean_diff" for c in corpus.claims)
+    assert "budget" in kwargs

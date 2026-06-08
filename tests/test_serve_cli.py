@@ -138,3 +138,39 @@ def test_default_seed_evolves():
     assert lic[-1] >= 5                                        # reaches a healthy total
     # at least one representation-revision (octahedron) node appears by the end
     assert any(n.is_representation_revision for n in tl.frames[-1].topology.nodes)
+
+
+def test_serve_real_data_threads_real_adapters_and_proposer(monkeypatch):
+    seen = {}
+    def fake_import():
+        def run(app, host=None, port=None): pass
+        def create_app(runner, *, interval, origins): seen["runner"] = runner; return "APP"  # noqa: E702
+        import types as _t
+        return _t.SimpleNamespace(run=run), create_app
+    monkeypatch.setattr(cli, "_import_server", fake_import)
+    import json
+    from polymer_protocol import bridge_proposer
+    from polymer_claims.llm_adapter import MeanDiffGenerationAdapter
+    dsl = {"proposals": [{"title": "g", "value_col": "response", "group_col": "dose",
+                          "group_a": "high", "group_b": "low", "comparator": "gt",
+                          "threshold": 10.0, "rationale": "r"}]}
+    monkeypatch.setattr(cli, "_build_real_data_proposer",
+                        lambda model: bridge_proposer((MeanDiffGenerationAdapter(lambda _p: json.dumps(dsl)),)))
+    rc = main(["serve", "--real-data", "--llm-every", "4"])
+    assert rc == 0
+    runner = seen["runner"]
+    from polymer_claims.exec_adapters import StatsPureAdapter
+    assert any(isinstance(a, StatsPureAdapter) for a in runner.adapters)
+    for _ in range(8):
+        runner.tick()
+    assert any(c.id.startswith("gen-md-") and c.status.value == "licensed" for c in runner.corpus.claims)
+
+
+def test_serve_real_data_missing_key_errors(monkeypatch, capsys):
+    monkeypatch.setattr(cli, "_import_server",
+        lambda: (__import__("types").SimpleNamespace(run=lambda *a, **k: None), lambda runner, **k: "APP"))
+    monkeypatch.setattr(cli, "_build_real_data_proposer",
+        lambda model: (_ for _ in ()).throw(RuntimeError("set ANTHROPIC_API_KEY to use --real-data")))
+    rc = main(["serve", "--real-data"])
+    assert rc == 1
+    assert "ANTHROPIC_API_KEY" in capsys.readouterr().err

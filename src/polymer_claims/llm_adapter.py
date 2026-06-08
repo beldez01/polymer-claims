@@ -308,3 +308,30 @@ class MeanDiffGenerationAdapter:
             title=title,
             rationale=rationale,
         )
+
+    @classmethod
+    def anthropic(
+        cls,
+        *,
+        model: str = "claude-sonnet-4-6",
+        api_key: str | None = None,
+        **kw,
+    ) -> "MeanDiffGenerationAdapter":
+        """Build a real-data adapter backed by the Anthropic SDK (needs the [llm] extra)."""
+        try:
+            import anthropic
+        except ModuleNotFoundError as e:  # pragma: no cover - exercised via CLI, not unit tests
+            raise RuntimeError(
+                "the LLM adapter needs the optional extra: pip install 'polymer-claims[llm]'"
+            ) from e
+        client = anthropic.Anthropic(api_key=api_key)
+
+        def complete(prompt: str) -> str:  # pragma: no cover - real network
+            msg = client.messages.create(
+                model=model,
+                max_tokens=2048,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return "".join(getattr(b, "text", "") for b in msg.content)
+
+        return cls(complete, **kw)
