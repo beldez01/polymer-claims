@@ -40,6 +40,7 @@ _COMPARATORS = {
     "ne": Comparator.NE,
 }
 _GEN_PREFIX = "gen-llm-"
+_MD_PREFIX = "gen-md-"
 
 
 class LLMGenerationAdapter:
@@ -202,3 +203,108 @@ def _extract_json(raw: str) -> dict | None:
     except json.JSONDecodeError:
         return None
     return obj if isinstance(obj, dict) else None
+
+
+class MeanDiffGenerationAdapter:
+    """A GenerationAdapter that maps an injected model's DSL into a REAL-DATA
+    `stats::mean_diff` Claim over a bundled dataset (Phase 2b). Mirrors
+    LLMGenerationAdapter but targets the real-execution substrate, not builtin::const."""
+
+    def __init__(
+        self,
+        complete: Callable[[str], str],
+        *,
+        identity: str = "llm-meandiff-proposer",
+        max_proposals: int = 5,
+        dataset: str = "dose_response",
+    ) -> None:
+        self.complete = complete
+        self.identity = identity
+        self.max_proposals = max_proposals
+        self.dataset = dataset
+
+    def propose(self, corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
+        return self._parse(self.complete(self._build_prompt(corpus, frontier)), corpus)
+
+    def _build_prompt(self, corpus: Corpus, frontier: tuple[str, ...]) -> str:
+        from .datasets import load_dataset
+        data = load_dataset(self.dataset)
+        cols = ", ".join(data.keys())
+        groups = ", ".join(sorted(set(data["dose"]))) if "dose" in data else "(unknown)"
+        lines = [
+            f"- {c.id} [{c.pattern.id}] {c.title}"
+            for c in sorted(corpus.claims, key=lambda c: c.id)[:20]
+        ]
+        existing = "\n".join(lines) or "(none)"
+        schema = (
+            '{"proposals":[{"title":str,"value_col":str,"group_col":str,"group_a":str,'
+            '"group_b":str,"comparator":"lt|le|gt|ge|eq|ne","threshold":number,"rationale":str}]}'
+        )
+        return (
+            "You are a scientific-claim generator working over a REAL dataset. Propose up to "
+            f"{self.max_proposals} NOVEL, testable claims, each a two-group MEAN DIFFERENCE on "
+            f"dataset '{self.dataset}'.\n"
+            f"Columns: {cols}. A numeric value column is 'response'. Group column 'dose' has "
+            f"groups: {groups}.\n"
+            "Each claim asserts: mean(value_col | group_col==group_a) − mean(value_col | "
+            "group_col==group_b) <comparator> threshold.\n"
+            "Output ONLY the JSON object, no prose, no markdown, matching:\n"
+            f"{schema}\n\n"
+            f"Existing claims:\n{existing}\n\nUnresolved frontier: {', '.join(frontier) or '(none)'}\n"
+        )
+
+    def _parse(self, raw: str, corpus: Corpus) -> tuple[Proposal, ...]:
+        obj = _extract_json(raw)
+        if obj is None:
+            return ()
+        existing_ids = set(corpus.by_id().keys())
+        out: list[Proposal] = []
+        seen: set[str] = set()
+        for p in obj.get("proposals", []):
+            try:
+                claim = self._build_claim(p)
+            except (KeyError, ValueError, TypeError):
+                continue
+            if claim.id in existing_ids or claim.id in seen:
+                continue
+            seen.add(claim.id)
+            out.append(Proposal(operator_id=self.identity, claim=claim))
+            if len(out) >= self.max_proposals:
+                break
+        return tuple(out)
+
+    def _build_claim(self, p: dict):
+        from .datasets import load_dataset
+        from .exec_adapters import mean_diff_claim
+        title = str(p["title"]).strip()
+        value_col = str(p["value_col"]).strip()
+        group_col = str(p["group_col"]).strip()
+        group_a = str(p["group_a"]).strip()
+        group_b = str(p["group_b"]).strip()
+        cmp_key = str(p["comparator"]).strip().lower()
+        if cmp_key not in _COMPARATORS:
+            raise ValueError("bad comparator")
+        if not (title and value_col and group_col and group_a and group_b):
+            raise ValueError("empty required field")
+        if group_a == group_b:
+            raise ValueError("groups must differ")
+        threshold = float(p["threshold"])
+        data = load_dataset(self.dataset)  # unknown dataset -> raises -> dropped
+        if value_col not in data or group_col not in data:
+            raise ValueError("unknown column")
+        rationale = str(p["rationale"]).strip() if p.get("rationale") else None
+        cid = _MD_PREFIX + hashlib.sha256(
+            f"{title}|{value_col}|{group_col}|{group_a}|{group_b}|{cmp_key}|{threshold}".encode()
+        ).hexdigest()[:16]
+        return mean_diff_claim(
+            cid,
+            value_col=value_col,
+            group_col=group_col,
+            group_a=group_a,
+            group_b=group_b,
+            comparator=_COMPARATORS[cmp_key],
+            threshold=threshold,
+            ref=self.dataset,
+            title=title,
+            rationale=rationale,
+        )
