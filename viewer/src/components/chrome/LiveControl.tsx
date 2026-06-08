@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { COLOR, FONT_FAMILY_MONO, LAYOUT } from '@/config/theme';
+import { COLOR, FONT_FAMILY_MONO } from '@/config/theme';
 import { useViewer } from '@/store';
 
 /** zero-pad a frame index to a stable 2-digit mono width. */
@@ -10,9 +10,9 @@ function pad(n: number): string {
 }
 
 /**
- * Live-node control — a floating D2 instrument panel under the header (top-right).
- * Owns the node URL input, Connect/Disconnect, the ● LIVE indicator and a mono
- * status readout. Matte, hairline, no glow.
+ * Live-node control — an inline D2 instrument cluster that lives in the header
+ * bar (right-aligned). Owns the node URL input, Connect/Disconnect, the ● LIVE
+ * indicator and a mono status readout. Matte, hairline, no glow.
  */
 export default function LiveControl() {
   const connected = useViewer((s) => s.connected);
@@ -27,18 +27,10 @@ export default function LiveControl() {
   return (
     <div
       style={{
-        position: 'absolute',
-        top: LAYOUT.headerHeight + 12,
-        right: 20,
-        zIndex: 18,
-        pointerEvents: 'auto',
         display: 'flex',
         alignItems: 'center',
         gap: 10,
-        backgroundColor: 'rgba(250,250,250,0.94)',
-        border: `1px solid ${COLOR.border.default}`,
-        borderRadius: 2,
-        padding: '8px 12px',
+        pointerEvents: 'auto',
       }}
     >
       {/* ● LIVE dot — only when connected. Filled = following, hollow = scrubbed back. */}

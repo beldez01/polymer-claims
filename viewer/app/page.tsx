@@ -3,10 +3,8 @@
 import dynamic from 'next/dynamic';
 import { COLOR, FONT_FAMILY_MONO } from '@/config/theme';
 import Header from '@/components/chrome/Header';
-import LiveControl from '@/components/chrome/LiveControl';
 import LegendRail from '@/components/chrome/LegendRail';
-import InspectorPanel from '@/components/chrome/InspectorPanel';
-import ReadoutOverlay from '@/components/chrome/ReadoutOverlay';
+import RightRail from '@/components/chrome/RightRail';
 import TransportBar from '@/components/chrome/TransportBar';
 
 // The R3F scene is client-only (WebGL has no SSR). The loading fallback is the
@@ -49,10 +47,8 @@ export default function Home() {
     >
       <ClaimUniverse />
       <Header />
-      <LiveControl />
       <LegendRail />
-      <ReadoutOverlay />
-      <InspectorPanel />
+      <RightRail />
       {/* self-hides until a timeline is loaded */}
       <TransportBar />
     </main>
