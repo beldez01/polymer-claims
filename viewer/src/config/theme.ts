@@ -112,11 +112,11 @@ export const LAYOUT = {
 
 // status → node color
 export const STATUS_COLOR: Record<string, string> = {
-  licensed:    '#0F62FE',  // electric blue — the licensed core
+  licensed:    '#4589FF',  // classic Polymer blue (Carbon Blue 50) — the licensed core
   pending:     '#B45309',  // amber
   exploratory: '#7C3AED',  // violet
   conjectured: '#71717A',  // neutral gray
-  rejected:    '#BE123C',  // rose
+  rejected:    '#FA4D56',  // bright red (Carbon Red 50) — high-visibility
 };
 
 // human-facing order for the legend colorbar

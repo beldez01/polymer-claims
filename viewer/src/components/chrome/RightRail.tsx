@@ -280,7 +280,7 @@ function ClaimDetailCard({ detail }: { detail: ClaimDetail }) {
   return (
     <>
       <Field name="id">{detail.id}</Field>
-      {detail.title && <Field name="title">{detail.title}</Field>}
+      {detail.title && <Field name="claim">{detail.title}</Field>}
 
       <div style={{ marginBottom: 12 }}>
         <div style={label}>status</div>
