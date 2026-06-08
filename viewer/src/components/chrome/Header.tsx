@@ -1,6 +1,7 @@
 'use client';
 
 import { COLOR, FONT_FAMILY_SANS, FONT_FAMILY_MONO, LAYOUT, WEIGHT } from '@/config/theme';
+import LiveControl from '@/components/chrome/LiveControl';
 
 export default function Header() {
   return (
@@ -56,6 +57,7 @@ export default function Header() {
       >
         TopologyExport · FORCE_DIRECTED
       </span>
+      <LiveControl />
     </header>
   );
 }

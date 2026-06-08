@@ -19,6 +19,43 @@ function normalize(url: string): string {
 }
 
 /**
+ * Full claim detail served by `GET {liveUrl}/claim/{id}`. Mirrors the node's
+ * serialized claim record — nullable fields stay null rather than absent.
+ */
+export interface ClaimDetail {
+  id: string;
+  title: string;
+  status: string;
+  pattern_id: string;
+  subject_term: string | null;
+  plan: { impl: string; value?: number } | null;
+  criterion: { comparator: string; threshold: number | null; tolerance: number | null } | null;
+  criterion_satisfied: boolean | null;
+  strength: number[] | null;
+  provenance: { generated_by: string; agent_id: string | null; method: string | null } | null;
+  rejection_reason: string | null;
+}
+
+/**
+ * Fetch one claim's detail from a connected node. Returns the parsed record on
+ * 2xx, or null on a non-OK response or any thrown error — never throws, so the
+ * rail can fall back to the thin static view.
+ */
+export async function fetchClaimDetail(
+  liveUrl: string,
+  id: string,
+): Promise<ClaimDetail | null> {
+  const base = normalize(liveUrl);
+  try {
+    const res = await fetch(`${base}/claim/${encodeURIComponent(id)}`);
+    if (!res.ok) return null;
+    return (await res.json()) as ClaimDetail;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Connect to a running `polymer-claims serve` node: seed from /timeline, then
  * subscribe to /stream (named `frame` events). EventSource auto-reconnects on
  * drop. Returns a handle whose disconnect() closes the stream.

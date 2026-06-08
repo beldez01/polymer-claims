@@ -124,6 +124,15 @@ def create_app(
     async def timeline() -> JSONResponse:
         return JSONResponse(content=_obj(runner.snapshot()))
 
+    @app.get("/claim/{claim_id}")
+    async def claim(claim_id: str) -> JSONResponse:
+        from .claim_detail import claim_detail
+
+        for c in runner.corpus.claims:
+            if c.id == claim_id:
+                return JSONResponse(content=claim_detail(c))
+        return JSONResponse(content={"error": "not found"}, status_code=404)
+
     @app.post("/step")
     async def step() -> JSONResponse:
         frame = await _do_tick()

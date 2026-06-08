@@ -141,6 +141,36 @@ def test_step_serialized_gap_free():
         assert seen == list(range(seen[0], seen[0] + 10))  # contiguous, no gaps/dups
 
 
+def test_claim_detail_endpoint():
+    client, _ = _client()
+    with client:
+        # licensing_corpus seeds one claim with id "a"
+        r = client.get("/claim/a")
+        assert r.status_code == 200
+        body = r.json()
+        for key in (
+            "id",
+            "title",
+            "status",
+            "pattern_id",
+            "plan",
+            "criterion",
+            "strength",
+            "provenance",
+            "rejection_reason",
+        ):
+            assert key in body
+        assert body["id"] == "a"
+
+
+def test_claim_detail_not_found():
+    client, _ = _client()
+    with client:
+        r = client.get("/claim/__nope__")
+        assert r.status_code == 404
+        assert r.json() == {"error": "not found"}
+
+
 def test_bounded_put_drops_oldest():
     import asyncio
 
