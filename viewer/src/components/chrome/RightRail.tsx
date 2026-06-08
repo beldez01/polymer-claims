@@ -281,6 +281,7 @@ function ClaimDetailCard({ detail }: { detail: ClaimDetail }) {
     <>
       <Field name="id">{detail.id}</Field>
       {detail.title && <Field name="claim">{detail.title}</Field>}
+      {detail.rationale && <Field name="rationale">{detail.rationale}</Field>}
 
       <div style={{ marginBottom: 12 }}>
         <div style={label}>status</div>

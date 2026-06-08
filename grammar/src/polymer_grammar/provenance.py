@@ -30,6 +30,12 @@ class Provenance(_Model):
     version: str | None = None
     search_cardinality: int = Field(ge=1)        # # hypotheses considered to surface this claim
     preregistration_hash: str | None = None      # hash-lock of the primary test (anti-HARKing)
+    # FIRST-PASS rationale surface (2026-06): a free-text justification carried for
+    # display only. NOT validated, NOT structured, NOT linked to the corpus claims it
+    # builds on. See docs/superpowers/notes/2026-06-08-rationale-followups.md for the
+    # rigorous extension (structured premises, cited-claim links, anti-hallucination
+    # validation, promotion out of Provenance metadata).
+    rationale: str | None = None   # FIRST PASS: opaque free-text "why this claim was proposed"
 
     @model_validator(mode="after")
     def _agent_needs_id(self) -> "Provenance":

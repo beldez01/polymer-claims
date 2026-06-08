@@ -19,11 +19,13 @@ from polymer_grammar import (
     Comparator,
     ComputeGraph,
     EvaluationPlan,
+    GenerationMode,
     MeasurementBasis,
     OperationNode,
     PatternRef,
     PendingReason,
     ProducedLeafSpec,
+    Provenance,
     SatisfactionCriterion,
     Status,
 )
@@ -118,6 +120,8 @@ class LLMGenerationAdapter:
             raise ValueError("bad comparator")
         value = float(p["value"])  # raises -> dropped
         threshold = float(p["threshold"])
+        # FIRST PASS: opaque free-text justification, display only. None when absent/empty.
+        rationale = str(p["rationale"]).strip() if p.get("rationale") else None
         cid = _GEN_PREFIX + hashlib.sha256(
             f"{title}|{pattern_id}|{ontology_term}|{value}|{cmp_key}|{threshold}".encode()
         ).hexdigest()[:16]
@@ -144,6 +148,12 @@ class LLMGenerationAdapter:
             pending_reason=PendingReason.UNTESTED,
             strength=None,
             evaluation_plan=plan,
+            provenance=Provenance(
+                generated_by=GenerationMode.AGENT_GENERATED,
+                agent_id=self.identity,
+                search_cardinality=1,
+                rationale=rationale,
+            ),
         )
 
     @classmethod

@@ -141,3 +141,24 @@ def test_provenance_passthrough_and_none():
 
     none_claim = make_claim("pnone", status=Status.CONJECTURED, plan=None)
     assert claim_detail(none_claim)["provenance"] is None
+
+
+def test_rationale_surfaced_top_level_and_none():
+    prov = Provenance(
+        generated_by=GenerationMode.AGENT_GENERATED,
+        agent_id="agent-7",
+        search_cardinality=1,
+        rationale="mediation weakens at dose",
+    )
+    claim = Claim(
+        id="r",
+        title="r",
+        pattern=PatternRef(id=_PATTERN_ID, version="v1"),
+        leaves=(CategoricalLeaf(ontology_term="t"),),
+        status=Status.CONJECTURED,
+        provenance=prov,
+    )
+    assert claim_detail(claim)["rationale"] == "mediation weakens at dose"
+
+    none_claim = make_claim("rnone", status=Status.CONJECTURED, plan=None)
+    assert claim_detail(none_claim)["rationale"] is None

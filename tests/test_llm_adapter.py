@@ -51,6 +51,31 @@ def test_builds_executable_pending_claim():
     assert ("value", "0.02") in node.params
 
 
+def test_rationale_persisted_on_provenance():
+    adapter = _stub(_DSL)
+    claim = adapter.propose(licensing_corpus(), frontier=())[0].claim
+    assert claim.provenance is not None
+    assert claim.provenance.rationale == "extends the corpus"
+
+
+def test_missing_rationale_yields_none():
+    payload = {
+        "proposals": [
+            {  # no rationale key
+                "title": "no rationale",
+                "pattern_id": "adjusted_effect",
+                "ontology_term": "HP:0003333",
+                "value": 0.04,
+                "comparator": "lt",
+                "threshold": 0.06,
+            }
+        ]
+    }
+    claim = _stub(payload).propose(licensing_corpus(), frontier=())[0].claim
+    assert claim.provenance is not None
+    assert claim.provenance.rationale is None
+
+
 def test_malformed_json_yields_empty():
     adapter = _stub("this is not json at all")
     assert adapter.propose(licensing_corpus(), frontier=()) == ()

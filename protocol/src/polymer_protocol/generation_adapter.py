@@ -49,6 +49,9 @@ def compile_untrusted(
         agent_id=identity,
         method=f"{identity}@{fingerprint}",
         search_cardinality=max(1, declared),
+        # rationale is benign descriptive free text (no trust/licensing semantics), so
+        # preserving an agent-supplied rationale does not weaken propose-not-license.
+        rationale=prov.rationale if prov is not None else None,
     )
     return claim.model_copy(update={"provenance": forced}), None
 

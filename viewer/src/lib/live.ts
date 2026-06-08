@@ -33,6 +33,7 @@ export interface ClaimDetail {
   criterion_satisfied: boolean | null;
   strength: number[] | null;
   provenance: { generated_by: string; agent_id: string | null; method: string | null } | null;
+  rationale: string | null;
   rejection_reason: string | null;
 }
 
