@@ -21,20 +21,39 @@ from polymer_grammar import (
     DataHandle,
     EvaluationPlan,
     ExecValue,
+    GenerationMode,
     MaterializationContext,
     MeasurementBasis,
     OperationNode,
     PatternRef,
     PendingReason,
     ProducedLeafSpec,
+    Provenance,
     SatisfactionCriterion,
     Status,
+    StrengthVector,
 )
-from polymer_protocol import AdapterCredential, AdapterRegistry
+from polymer_protocol import (
+    AdapterCredential,
+    AdapterRegistry,
+    ApplicabilityDomain,
+    OracleDossier,
+    OracleRegistry,
+    ValidationTier,
+)
 
 from .datasets import load_dataset
 
 _IMPL = "stats::mean_diff"
+
+_APPARATUS_ORACLE = "dose_response_apparatus"
+
+# Provisional (asserted, pre-cap) empirical strength for a real-data mean_diff claim.
+# Earned-from-data derivation is a documented follow-up; the apparatus oracle tier caps these.
+_PROVISIONAL_STRENGTH = StrengthVector(
+    magnitude=0.8, certainty=0.7, evidence_against_null=0.8,
+    severity=0.5, world_contact=0.9, explanatory_virtue=0.6,
+)
 
 
 def _resolve(node: OperationNode) -> tuple[list[float], list[float]]:
@@ -99,9 +118,12 @@ def mean_diff_claim(
     ref: str = "dose_response",
     title: str = "high vs low dose mean difference",
     ontology_term: str = "dose-response",
+    rationale: str | None = None,
+    strength: StrengthVector | None = _PROVISIONAL_STRENGTH,
 ) -> Claim:
     """Build a PENDING Claim whose plan computes mean_diff over a bundled dataset.
-    (In Phase 2b the LLM emits these; here they're constructed directly.)"""
+    Carries an apparatus oracle_ref (so its empirical strength is tier-capped at verify)
+    and a provisional StrengthVector. (In Phase 2b the LLM emits these.)"""
     node = OperationNode(
         id="n0",
         impl="stats::mean_diff",
@@ -112,12 +134,21 @@ def mean_diff_claim(
             ("group_a", group_a),
             ("group_b", group_b),
         ),
+        oracle_ref=_APPARATUS_ORACLE,
         produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
     )
     plan = EvaluationPlan(
         graph=ComputeGraph(nodes=(node,), terminal="n0"),
         criterion=SatisfactionCriterion(comparator=comparator, threshold=threshold),
     )
+    provenance = None
+    if rationale is not None:
+        provenance = Provenance(
+            generated_by=GenerationMode.AGENT_GENERATED,
+            agent_id="llm-meandiff-proposer",
+            search_cardinality=1,
+            rationale=rationale,
+        )
     return Claim(
         id=claim_id,
         title=title,
@@ -125,6 +156,8 @@ def mean_diff_claim(
         leaves=(CategoricalLeaf(ontology_term=ontology_term),),
         status=Status.PENDING,
         pending_reason=PendingReason.UNTESTED,
+        strength=strength,
+        provenance=provenance,
         evaluation_plan=plan,
     )
 
@@ -135,4 +168,17 @@ def independent_registry() -> AdapterRegistry:
     return AdapterRegistry(credentials=(
         AdapterCredential(identity="stats-pure", owner="owner-pure", implementation_hash="h-pure"),
         AdapterCredential(identity="stats-stdlib", owner="owner-stdlib", implementation_hash="h-stdlib"),
+    ))
+
+
+def apparatus_oracle_registry() -> OracleRegistry:
+    """BENCHMARKED dossier for the bundled mean_diff apparatus; unbounded domain. Supplying it
+    to run_cycle caps a licensed claim's empirical strength to 0.6; omitting it leaves the
+    declared oracle_ref UNVALIDATED (0.0)."""
+    return OracleRegistry(dossiers=(
+        OracleDossier(
+            oracle_id=_APPARATUS_ORACLE,
+            validation_tier=ValidationTier.BENCHMARKED,
+            applicability_domain=ApplicabilityDomain(),
+        ),
     ))

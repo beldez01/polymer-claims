@@ -14,6 +14,7 @@ from polymer_claims.datasets import load_dataset
 from polymer_claims.exec_adapters import (
     StatsPureAdapter,
     StatsStdlibAdapter,
+    apparatus_oracle_registry,
     independent_registry,
     mean_diff_claim,
 )
@@ -115,3 +116,44 @@ def test_same_owner_pair_is_held_pending_by_independence_gate():
     ))
     result = run_cycle(_corpus(c), _ADAPTERS, _CTX, adapter_registry=same_owner)
     assert _status(result, "c-dep") == Status.PENDING
+
+
+# ---------------------------------------------------------------------------
+# Task 1 (2c) — oracle_ref + provisional strength + rationale; tier cap
+# ---------------------------------------------------------------------------
+
+
+def test_mean_diff_claim_carries_oracle_ref_and_strength():
+    c = mean_diff_claim("c-meta")
+    node = c.evaluation_plan.graph.nodes[0]
+    assert node.oracle_ref == "dose_response_apparatus"
+    assert c.strength is not None
+    assert c.provenance is None  # no rationale passed
+
+
+def test_mean_diff_claim_rationale_sets_provenance():
+    c = mean_diff_claim("c-rat", rationale="because dose drives response")
+    assert c.provenance is not None
+    assert c.provenance.rationale == "because dose drives response"
+
+
+def test_benchmarked_oracle_caps_goodness_axes_to_0_6():
+    c = mean_diff_claim("c-cap", comparator=Comparator.GT, threshold=10.0)
+    result = run_cycle(_corpus(c), _ADAPTERS, _CTX,
+                       adapter_registry=independent_registry(),
+                       oracles=apparatus_oracle_registry())
+    lic = next(x for x in result.corpus.claims if x.id == "c-cap")
+    assert lic.status == Status.LICENSED
+    assert lic.strength.magnitude == 0.6
+    assert lic.strength.world_contact == 0.6
+    assert lic.strength.certainty == 0.6
+    assert lic.strength.evidence_against_null == 0.6
+    assert lic.strength.severity == 0.5
+
+
+def test_declared_oracle_without_registry_caps_to_unvalidated():
+    c = mean_diff_claim("c-unval", comparator=Comparator.GT, threshold=10.0)
+    result = run_cycle(_corpus(c), _ADAPTERS, _CTX, adapter_registry=independent_registry())
+    lic = next(x for x in result.corpus.claims if x.id == "c-unval")
+    assert lic.status == Status.LICENSED
+    assert lic.strength.magnitude == 0.0
