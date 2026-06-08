@@ -13,7 +13,24 @@ from __future__ import annotations
 
 import statistics
 
-from polymer_grammar import DataHandle, ExecValue, MaterializationContext, OperationNode
+from polymer_grammar import (
+    CategoricalLeaf,
+    Claim,
+    Comparator,
+    ComputeGraph,
+    DataHandle,
+    EvaluationPlan,
+    ExecValue,
+    MaterializationContext,
+    MeasurementBasis,
+    OperationNode,
+    PatternRef,
+    PendingReason,
+    ProducedLeafSpec,
+    SatisfactionCriterion,
+    Status,
+)
+from polymer_protocol import AdapterCredential, AdapterRegistry
 
 from .datasets import load_dataset
 
@@ -68,3 +85,54 @@ class StatsStdlibAdapter:
     ) -> ExecValue:
         a, b = _resolve(node)
         return ExecValue(value=statistics.fmean(a) - statistics.fmean(b))
+
+
+def mean_diff_claim(
+    claim_id: str,
+    *,
+    value_col: str = "response",
+    group_col: str = "dose",
+    group_a: str = "high",
+    group_b: str = "low",
+    comparator: Comparator = Comparator.GT,
+    threshold: float = 10.0,
+    ref: str = "dose_response",
+    title: str = "high vs low dose mean difference",
+    ontology_term: str = "dose-response",
+) -> Claim:
+    """Build a PENDING Claim whose plan computes mean_diff over a bundled dataset.
+    (In Phase 2b the LLM emits these; here they're constructed directly.)"""
+    node = OperationNode(
+        id="n0",
+        impl="stats::mean_diff",
+        inputs=(DataHandle(ref=ref),),
+        params=(
+            ("value_col", value_col),
+            ("group_col", group_col),
+            ("group_a", group_a),
+            ("group_b", group_b),
+        ),
+        produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
+    )
+    plan = EvaluationPlan(
+        graph=ComputeGraph(nodes=(node,), terminal="n0"),
+        criterion=SatisfactionCriterion(comparator=comparator, threshold=threshold),
+    )
+    return Claim(
+        id=claim_id,
+        title=title,
+        pattern=PatternRef(id="adjusted_effect", version="v1"),
+        leaves=(CategoricalLeaf(ontology_term=ontology_term),),
+        status=Status.PENDING,
+        pending_reason=PendingReason.UNTESTED,
+        evaluation_plan=plan,
+    )
+
+
+def independent_registry() -> AdapterRegistry:
+    """Credentials asserting the two adapters are genuinely independent (distinct owners +
+    impl hashes), so the #5 gate licenses on their agreement."""
+    return AdapterRegistry(credentials=(
+        AdapterCredential(identity="stats-pure", owner="owner-pure", implementation_hash="h-pure"),
+        AdapterCredential(identity="stats-stdlib", owner="owner-stdlib", implementation_hash="h-stdlib"),
+    ))
