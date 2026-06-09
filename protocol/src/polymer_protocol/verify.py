@@ -200,7 +200,7 @@ def verify_stage(
                     status=Status.LICENSED,
                     licensing=licensing,
                     pending_reason=None,
-                    strength=_recorded_strength(c),  # None oracles arg -> empty registry -> unresolved refs are UNVALIDATED
+                    strength=_recorded_strength(c),  # earned -> cap_earned; else oracle_cap (fallback: empty registry -> unresolved refs UNVALIDATED)
                 )
             )
         elif agreed_refuted or c.id not in in_ext:
