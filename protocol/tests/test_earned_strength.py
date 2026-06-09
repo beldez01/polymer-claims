@@ -65,3 +65,10 @@ def test_none_threshold_floors_evidence():
     # To test None threshold, create via reference_leaf_index (which leaves threshold as None).
     s = earn_strength(14.0, SatisfactionCriterion(comparator=Comparator.GT, reference_leaf_index=0), has_real_data=True, agreement=True)
     assert s.evidence_against_null == 0.0
+
+
+def test_public_api_exports():
+    import polymer_protocol as pp
+    assert hasattr(pp, "earn_strength")
+    assert hasattr(pp, "cap_earned")
+    from polymer_protocol import cap_earned, earn_strength  # noqa: F401
