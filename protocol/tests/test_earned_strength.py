@@ -1,5 +1,3 @@
-import math
-
 from polymer_grammar import Comparator, SatisfactionCriterion
 
 from polymer_protocol.earned_strength import earn_strength

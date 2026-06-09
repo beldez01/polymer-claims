@@ -39,3 +39,16 @@ With earned strength, the three mechanisms compose correctly: SELECT prices the 
 (cardinality), VERIFY earns the strength from data, the oracle tier caps it by apparatus
 credibility, and only claims with genuinely strong, multiple-comparisons-surviving evidence
 license at high strength. That is the intended end state; the provisional pass is scaffolding.
+
+## SHIPPED (2026-06-08) — earned strength
+
+`earn_strength` (protocol) derives the StrengthVector from the agreed terminal value's margin
+over the criterion threshold; `verify_stage` builds an earned map for None-strength + oracle_ref
+claims, scores the RAW earned evidence in the selective-inference bar, and records
+`cap_earned(earned, tier)` on license. The reconciliation holds: the bundled true effect
+(high-low = 14.0 vs threshold 10.0) earns evidence (~0.96 at `_EVIDENCE_SHAPE_K=8.0`) that clears
+the bar and licenses, while a thin-margin rival is correctly held PENDING. Const and
+asserted-strength paths are unchanged. Caveat carried forward: evidence is the margin over a
+pre-registered threshold, NOT a p-value with n — the test-statistic enrichment is deferred to the
+2d arc (adapter emits n+SD). Spec `docs/superpowers/specs/2026-06-08-earned-strength-design.md`,
+plan `docs/superpowers/plans/2026-06-08-earned-strength.md`.
