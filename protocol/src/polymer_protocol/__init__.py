@@ -50,7 +50,8 @@ from .ledger import (
     update_ledger,
 )
 from .drift import DriftFinding, DriftRecord, drift_pass, reopen_drifted
-from .oracle import OracleRegistry, oracle_cap
+from .oracle import OracleRegistry, cap_earned, oracle_cap
+from .earned_strength import earn_strength
 from .adapter_registry import (
     AdapterCredential,
     AdapterRegistry,
@@ -125,6 +126,8 @@ __all__ = [
     "ValidationTier",
     "OracleRegistry",
     "oracle_cap",
+    "cap_earned",
+    "earn_strength",
     # ── adapter trust registry (verifier independence) ────────────────────
     "AdapterCredential",
     "AdapterRegistry",

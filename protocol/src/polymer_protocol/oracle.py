@@ -54,16 +54,28 @@ def _effective_tier(
     return dossier.validation_tier
 
 
-def oracle_cap(claim: Claim, registry: OracleRegistry) -> StrengthVector | None:
-    """The strength to write for `claim` after its weakest oracle's ceiling. Returns the
-    (possibly unchanged) strength; None only when the claim has no strength to cap. Pure-builtin
-    claims (no oracle_ref) and claims with no plan get their strength back unchanged."""
-    if claim.strength is None:
-        return None
+def _tier_for_claim(claim: Claim, registry: OracleRegistry) -> ValidationTier:
+    """The weakest effective tier of the oracles the claim's plan references. No plan / no refs
+    -> GOLD (the no-constraint identity: GOLD's ceiling is all-1.0, so capping by it is a no-op)."""
     if claim.evaluation_plan is None:
-        return claim.strength
+        return ValidationTier.GOLD
     refs = referenced_oracle_ids(claim.evaluation_plan)
     if not refs:
-        return claim.strength
-    tiers = [_effective_tier(registry, r, claim.subject) for r in refs]
-    return cap_strength(claim.strength, weakest_tier(tiers))
+        return ValidationTier.GOLD
+    return weakest_tier([_effective_tier(registry, r, claim.subject) for r in refs])
+
+
+def oracle_cap(claim: Claim, registry: OracleRegistry) -> StrengthVector | None:
+    """The strength to write for `claim` after its weakest oracle's ceiling. Returns the
+    (possibly unchanged) strength; None only when the claim has no strength to cap."""
+    if claim.strength is None:
+        return None
+    return cap_strength(claim.strength, _tier_for_claim(claim, registry))
+
+
+def cap_earned(
+    strength: StrengthVector, claim: Claim, registry: OracleRegistry
+) -> StrengthVector:
+    """Cap an EARNED strength (derived in verify_stage, not `claim.strength`) by the claim's
+    weakest oracle tier — the recorded-strength step of the earned path (the 2c reconciliation)."""
+    return cap_strength(strength, _tier_for_claim(claim, registry))

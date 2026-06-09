@@ -9,54 +9,96 @@ from __future__ import annotations
 
 from polymer_grammar import (
     Claim,
+    DataHandle,
     LicenseRoute,
     Licensing,
     PendingReason,
     RivalSetClosure,
     SatisfactionVerdict,
     Status,
+    StrengthVector,
     clears_mdl_bar,
     corpus_implied_schema,
     is_representation_revision,
     mdl_delta,
     meets_meta_tier_bar,
+    referenced_oracle_ids,
 )
 
 from .adapter_registry import AdapterRegistry, pair_is_registry_independent
 from .corpus import Corpus, CycleScaffolding, ExecRecord
-from .oracle import OracleRegistry, oracle_cap
+from .earned_strength import earn_strength
+from .oracle import OracleRegistry, cap_earned, oracle_cap
 
 BH_Q = 0.10
 _BH_EPS = 1e-9
 
 
-def _permitted_by_bar(corpus: Corpus, exec_records: tuple[ExecRecord, ...]) -> set[str]:
+def _build_earned(
+    corpus: Corpus, exec_records: tuple[ExecRecord, ...]
+) -> dict[str, StrengthVector]:
+    """Earned strengths for executed None-strength + oracle_ref claims with a numeric, agreed,
+    SATISFIED result (the spec's D2 scope). Empty for every other claim, which preserves today's
+    behavior (None-strength -> exempt; asserted strength -> scored as before)."""
+    by_id = corpus.by_id()
+    earned: dict[str, StrengthVector] = {}
+    for r in exec_records:
+        c = by_id.get(r.claim_id)
+        if c is None or c.strength is not None or c.evaluation_plan is None:
+            continue
+        if not referenced_oracle_ids(c.evaluation_plan):
+            continue
+        ev = r.evaluation
+        # ev.satisfaction is non-None only for an agreed SATISFIED result (the air-gap mint).
+        if ev.satisfaction is None or not ev.results:
+            continue
+        val = ev.results[0].terminal.value
+        if not isinstance(val, (int, float)) or isinstance(val, bool):
+            continue
+        has_real_data = any(
+            isinstance(i, DataHandle)
+            for n in c.evaluation_plan.graph.nodes
+            for i in n.inputs
+        )
+        earned[c.id] = earn_strength(
+            float(val), c.evaluation_plan.criterion,
+            has_real_data=has_real_data, agreement=ev.agreement,
+        )
+    return earned
+
+
+def _permitted_by_bar(
+    corpus: Corpus,
+    exec_records: tuple[ExecRecord, ...],
+    earned: dict[str, StrengthVector],
+) -> set[str]:
     """Ids of executed claims permitted to license under the cardinality-scaled BH bar.
-    M<=1 -> all permitted (identity). strength=None -> exempt (always permitted)."""
+    M<=1 -> all permitted (identity). strength=None AND not earned -> exempt (always permitted).
+    An earned claim is scored by its RAW earned evidence (the 2c reconciliation: data-evidence
+    survives selection on its own merit; the oracle cap is applied to the recorded strength later)."""
     by_id = corpus.by_id()
     executed = [by_id[r.claim_id] for r in exec_records if r.claim_id in by_id]
     if not executed:
         return set()
-    permitted = {c.id for c in executed if c.strength is None}  # exempt
-    scored = [
-        (1.0 - c.strength.evidence_against_null, c.id)
-        for c in executed
-        if c.strength is not None
-    ]
+    permitted = {c.id for c in executed if c.strength is None and c.id not in earned}  # exempt
+    scored = []
+    for c in executed:
+        if c.id in earned:
+            scored.append((1.0 - earned[c.id].evidence_against_null, c.id))
+        elif c.strength is not None:
+            scored.append((1.0 - c.strength.evidence_against_null, c.id))
     m = max(
         (c.provenance.search_cardinality for c in executed if c.provenance is not None),
         default=1,
     )
-    # defense-in-depth: the BH denominator must cover EVERY scored claim, else a too-small hand-stamped
-    # search_cardinality would let claims ranked beyond M pass on a >1 bar (FDR inversion). In the live
-    # pipeline m already = the candidate-pool size >= len(scored), so this is a no-op there.
+    # defense-in-depth: the BH denominator must cover EVERY scored claim, else a too-small
+    # hand-stamped search_cardinality would let claims ranked beyond M pass on a >1 bar.
     m = max(m, len(scored))
     if m <= 1:
         return {c.id for c in executed}
     scored.sort()  # ascending pseudo-p, ties by id
     k_max = 0
     for k, (p, _) in enumerate(scored, start=1):
-        # inclusive boundary: tolerate float error so p exactly on the BH line passes
         if p <= (k / m) * BH_Q + _BH_EPS:
             k_max = k
     permitted.update(cid for _, cid in scored[:k_max])
@@ -79,7 +121,15 @@ def verify_stage(
     registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
     rec_by_id = {r.claim_id: r for r in exec_records}
-    permitted = _permitted_by_bar(corpus, exec_records)
+    earned = _build_earned(corpus, exec_records)
+    permitted = _permitted_by_bar(corpus, exec_records, earned)
+
+    def _recorded_strength(claim: Claim) -> StrengthVector | None:
+        """Earned claims record cap_earned(earned, tier); everything else keeps oracle_cap."""
+        if claim.id in earned:
+            return cap_earned(earned[claim.id], claim, registry)
+        return oracle_cap(claim, registry)
+
     new_claims = []
     for c in corpus.claims:
         rec = rec_by_id.get(c.id)
@@ -136,7 +186,7 @@ def verify_stage(
                             status=Status.LICENSED,
                             licensing=mdl_licensing,
                             pending_reason=None,
-                            strength=oracle_cap(c, registry),
+                            strength=_recorded_strength(c),
                         )
                     )
                     continue
@@ -150,7 +200,7 @@ def verify_stage(
                     status=Status.LICENSED,
                     licensing=licensing,
                     pending_reason=None,
-                    strength=oracle_cap(c, registry),  # None oracles arg -> empty registry -> unresolved refs are UNVALIDATED
+                    strength=_recorded_strength(c),  # earned -> cap_earned; else oracle_cap (fallback: empty registry -> unresolved refs UNVALIDATED)
                 )
             )
         elif agreed_refuted or c.id not in in_ext:
