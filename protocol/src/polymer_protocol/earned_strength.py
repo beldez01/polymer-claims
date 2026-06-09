@@ -25,7 +25,8 @@ _EXPLANATORY_VIRTUE = 0.5   # neutral — no theory argument supplied
 
 
 def _sat(x: float) -> float:
-    """Saturating squash of a non-negative ratio into [0, 1)."""
+    """Saturating squash of a non-negative ratio into [0, 1] (reaches 1.0 only when a
+    degenerate near-zero threshold scale underflows the exponential; StrengthVector allows 1.0)."""
     if x <= 0.0:
         return 0.0
     return 1.0 - math.exp(-_EVIDENCE_SHAPE_K * x)
