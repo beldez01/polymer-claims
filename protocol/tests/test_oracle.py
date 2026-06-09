@@ -16,6 +16,7 @@ from polymer_grammar import (
 from pydantic import ValidationError
 
 from polymer_protocol import OracleRegistry, oracle_cap
+from polymer_protocol.oracle import cap_earned
 from tests.conftest import make_claim, make_plan
 
 SV = StrengthVector(magnitude=0.9, certainty=0.1, evidence_against_null=0.9,
@@ -97,3 +98,26 @@ def test_oracle_cap_strengthless_claim_is_none():
     c = make_claim("a", plan=make_plan(0.01, 0.05, oracle_ref="g"))  # strength None
     reg = OracleRegistry(dossiers=(_dossier("g", ValidationTier.GOLD),))
     assert oracle_cap(c, reg) is None
+
+
+def test_cap_earned_caps_external_strength_by_tier():
+    earned = StrengthVector(magnitude=0.95, certainty=0.9, evidence_against_null=0.96,
+                            severity=0.7, world_contact=0.9, explanatory_virtue=0.5)
+    c = make_claim("a", plan=make_plan(0.01, 0.05, oracle_ref="g"))  # strength None — irrelevant here
+    reg = OracleRegistry(dossiers=(_dossier("g", ValidationTier.BENCHMARKED),))
+    capped = cap_earned(earned, c, reg)
+    assert capped.magnitude == 0.6              # goodness axis capped to BENCHMARKED ceiling
+    assert capped.evidence_against_null == 0.6
+    assert capped.certainty == 0.6
+    assert capped.world_contact == 0.6
+    assert capped.severity == 0.7               # theory axis untouched
+    assert capped.explanatory_virtue == 0.5
+
+
+def test_cap_earned_unvalidated_without_registry():
+    earned = StrengthVector(magnitude=0.95, certainty=0.9, evidence_against_null=0.96,
+                            severity=0.7, world_contact=0.9, explanatory_virtue=0.5)
+    c = make_claim("a", plan=make_plan(0.01, 0.05, oracle_ref="g"))
+    capped = cap_earned(earned, c, OracleRegistry())  # unresolved -> UNVALIDATED -> 0.0
+    assert capped.magnitude == 0.0
+    assert capped.severity == 0.7
