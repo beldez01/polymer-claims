@@ -250,3 +250,51 @@ def test_strong_evidence_claim_passes_bar_in_a_pool(ctx, adapters):
     out = _verify_through_select([strong, other], adapters, ctx)
     assert out.by_id()["s"].status == Status.LICENSED
     assert out.by_id()["o"].status == Status.LICENSED
+
+
+def test_earned_strength_licenses_and_is_tier_capped(empty_ledger, ctx, adapters):
+    # None-strength + oracle_ref claim that clears the threshold strongly -> earns strength,
+    # licenses (single claim, M small), and the recorded goodness axes are tier-capped (BENCHMARKED).
+    from polymer_grammar import OracleDossier, ValidationTier
+    from polymer_protocol import OracleRegistry
+    # make_plan default comparator LT: value 0.01 clears threshold 0.05 by 0.04/0.05 = 0.8 -> strong.
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"))
+    assert c.strength is None
+    corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
+    corpus, records = execute_ground(corpus, adapters, ctx)
+    scaffolding = CycleScaffolding(grounded_extension=("a",))
+    reg = OracleRegistry(dossiers=(OracleDossier(oracle_id="api",
+                                                 validation_tier=ValidationTier.BENCHMARKED),))
+    out = verify_stage(corpus, scaffolding, records, reg)
+    graded = out.by_id()["a"]
+    assert graded.status == Status.LICENSED
+    assert graded.strength is not None                       # earned (was None)
+    assert graded.strength.evidence_against_null <= 0.6      # capped by BENCHMARKED
+    assert graded.strength.magnitude <= 0.6
+    assert graded.strength.severity == 0.7                   # theory axis uncapped
+
+
+def test_earned_path_leaves_const_none_strength_claim_exempt(empty_ledger, ctx, adapters):
+    # No oracle_ref -> NOT earned -> stays exempt, strength stays None (byte-unchanged behavior).
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
+    corpus, records = execute_ground(corpus, adapters, ctx)
+    scaffolding = CycleScaffolding(grounded_extension=("a",))
+    out = verify_stage(corpus, scaffolding, records)
+    graded = out.by_id()["a"]
+    assert graded.status == Status.LICENSED
+    assert graded.strength is None
+
+
+def test_earned_evidence_prices_the_search(ctx, adapters):
+    # Reconciliation: among competing None-strength + oracle_ref claims, the strongly-supported
+    # one licenses while a thin-margin rival is held PENDING by the selective-inference bar.
+    # strong: LT value 0.01 vs threshold 0.05 -> rel 0.8 -> evidence ~1.0
+    # thin:   LT value 0.049 vs threshold 0.05 -> rel 0.02 -> evidence ~0.15
+    strong = make_claim("strong", status=Status.PENDING,
+                        plan=make_plan(0.01, 0.05, oracle_ref="api"))
+    thin = make_claim("thin", status=Status.PENDING,
+                      plan=make_plan(0.049, 0.05, oracle_ref="api"))
+    out = _verify_through_select([strong, thin], adapters, ctx)
+    assert out.by_id()["strong"].status == Status.LICENSED
+    assert out.by_id()["thin"].status == Status.PENDING
