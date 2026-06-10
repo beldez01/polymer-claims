@@ -124,13 +124,16 @@ def mean_diff_claim(
     ontology_term: str = "dose-response",
     rationale: str | None = None,
     strength: StrengthVector | None = None,
+    oracle_ref: str = _APPARATUS_ORACLE,
 ) -> Claim:
     """Build a PENDING Claim whose plan computes mean_diff over a bundled dataset, carrying an
     apparatus oracle_ref so any empirical strength is tier-capped at verify. `strength`
     defaults to None: a strength-bearing claim is subject to the cardinality-scaled
     selective-inference bar and would not license in the live multi-claim node, so the live
     agent emits strength=None claims. Pass a `strength` (e.g. `_PROVISIONAL_STRENGTH`) to
-    exercise the oracle cap on a single claim. (In Phase 2b the LLM emits these.)"""
+    exercise the oracle cap on a single claim. (In Phase 2b the LLM emits these.)
+    `oracle_ref` defaults to `_APPARATUS_ORACLE` (dose_response apparatus) so existing callers
+    are byte-unchanged; pass `profile_oracle_id(profile)` to bind a profile-as-apparatus."""
     node = OperationNode(
         id="n0",
         impl="stats::mean_diff",
@@ -141,7 +144,7 @@ def mean_diff_claim(
             ("group_a", group_a),
             ("group_b", group_b),
         ),
-        oracle_ref=_APPARATUS_ORACLE,
+        oracle_ref=oracle_ref,
         produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
     )
     plan = EvaluationPlan(

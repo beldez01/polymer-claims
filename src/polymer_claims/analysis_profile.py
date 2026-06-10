@@ -116,7 +116,12 @@ def profile_oracle_dossier(
     subject_kinds: tuple[str, ...] = _DEFAULT_SUBJECT_KINDS,
 ) -> OracleDossier:
     """Build the OracleDossier that makes this profile the apparatus capping a claim's strength.
-    The tier comes from the SUBSTRATE the profile is applied to (not the profile itself)."""
+    The tier comes from the SUBSTRATE the profile is applied to (not the profile itself).
+
+    PRECONDITION: the default `subject_kinds=("genomic_region","cohort")` is a BOUNDED domain,
+    so a claim with `subject=None` resolves out-of-domain -> UNVALIDATED (cap 0.0). Real CES-2
+    methylation claims carry a `genomic_region` subject (default applies); a subjectless proxy
+    must pass `subject_kinds=()` to opt into an unbounded domain."""
     return OracleDossier(
         oracle_id=profile_oracle_id(profile),
         validation_tier=substrate_tier(substrate),
@@ -128,7 +133,9 @@ def profile_oracle_dossier(
 def profile_oracle_registry(
     *profile_substrate_pairs: tuple[AnalysisProfile, str],
 ) -> OracleRegistry:
-    """An OracleRegistry from (profile, substrate) pairs, ready to pass to run_cycle(oracles=…)."""
+    """An OracleRegistry from (profile, substrate) pairs, ready to pass to run_cycle(oracles=…).
+    Uses `profile_oracle_dossier`'s BOUNDED default domain: claims must carry a matching subject
+    (e.g. `genomic_region`) or they resolve UNVALIDATED — see that precondition note."""
     return OracleRegistry(
         dossiers=tuple(
             profile_oracle_dossier(p, substrate=s) for p, s in profile_substrate_pairs
