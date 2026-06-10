@@ -16,6 +16,13 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 
+from polymer_protocol import (
+    ApplicabilityDomain,
+    OracleDossier,
+    OracleRegistry,
+    ValidationTier,
+)
+
 
 class AnalysisProfile(BaseModel):
     """A pinned methylation-analysis regime. Flat + hashable (tuples, no dicts) so its
@@ -76,3 +83,54 @@ def content_hash(profile: AnalysisProfile) -> str:
     payload = profile.model_dump(mode="json")
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+# Substrate (the nature of the DATA the profile is applied to) -> validation-tier ceiling
+# (spec §4 / CES §5). The profile pins the METHOD; the substrate sets the CEILING.
+_SUBSTRATE_TIER = {
+    "wet_lab_anchor": ValidationTier.ANCHORED,        # sorted-cell EM-seq / the 48-sample cohort
+    "recomputable_public": ValidationTier.BENCHMARKED,  # public GEO/TCGA methylation SE Contract
+    "computed_reference": ValidationTier.INDIRECT,
+    "literature": ValidationTier.INDIRECT,
+    "unvalidated": ValidationTier.UNVALIDATED,
+}
+
+_DEFAULT_SUBJECT_KINDS = ("genomic_region", "cohort")
+
+
+def profile_oracle_id(profile: AnalysisProfile) -> str:
+    """The oracle_ref a claim sets to bind this profile-as-apparatus: '<profile_id>@<version>'."""
+    return f"{profile.profile_id}@{profile.version}"
+
+
+def substrate_tier(substrate: str) -> ValidationTier:
+    """Map a substrate key to its tier ceiling; an unknown substrate is conservatively
+    UNVALIDATED (0.0)."""
+    return _SUBSTRATE_TIER.get(substrate, ValidationTier.UNVALIDATED)
+
+
+def profile_oracle_dossier(
+    profile: AnalysisProfile,
+    *,
+    substrate: str,
+    subject_kinds: tuple[str, ...] = _DEFAULT_SUBJECT_KINDS,
+) -> OracleDossier:
+    """Build the OracleDossier that makes this profile the apparatus capping a claim's strength.
+    The tier comes from the SUBSTRATE the profile is applied to (not the profile itself)."""
+    return OracleDossier(
+        oracle_id=profile_oracle_id(profile),
+        validation_tier=substrate_tier(substrate),
+        applicability_domain=ApplicabilityDomain(subject_kinds=subject_kinds),
+        anchor=profile.engine_version,
+    )
+
+
+def profile_oracle_registry(
+    *profile_substrate_pairs: tuple[AnalysisProfile, str],
+) -> OracleRegistry:
+    """An OracleRegistry from (profile, substrate) pairs, ready to pass to run_cycle(oracles=…)."""
+    return OracleRegistry(
+        dossiers=tuple(
+            profile_oracle_dossier(p, substrate=s) for p, s in profile_substrate_pairs
+        )
+    )

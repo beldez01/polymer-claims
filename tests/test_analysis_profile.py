@@ -4,7 +4,16 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from polymer_claims.analysis_profile import AnalysisProfile, content_hash
+from polymer_grammar import ValidationTier
+
+from polymer_claims.analysis_profile import (
+    AnalysisProfile,
+    content_hash,
+    profile_oracle_dossier,
+    profile_oracle_id,
+    profile_oracle_registry,
+    substrate_tier,
+)
 
 
 def _profile(**overrides) -> AnalysisProfile:
@@ -64,3 +73,31 @@ def test_content_hash_changes_with_any_pinned_field():
     assert content_hash(_profile(design_formula="~ 0 + Sample_Group")) != base
     assert content_hash(_profile(norm_prep="QCDP")) != base
     assert content_hash(_profile(covariates=("Age",))) != base
+
+
+def test_profile_oracle_id_is_id_at_version():
+    assert profile_oracle_id(_profile(profile_id="abc", version="3")) == "abc@3"
+
+
+def test_substrate_tier_maps_known_and_defaults_unvalidated():
+    assert substrate_tier("wet_lab_anchor") == ValidationTier.ANCHORED
+    assert substrate_tier("recomputable_public") == ValidationTier.BENCHMARKED
+    assert substrate_tier("literature") == ValidationTier.INDIRECT
+    assert substrate_tier("nonsense") == ValidationTier.UNVALIDATED
+
+
+def test_profile_oracle_dossier_carries_tier_and_domain():
+    d = profile_oracle_dossier(_profile(profile_id="abc", version="1"),
+                               substrate="recomputable_public")
+    assert d.oracle_id == "abc@1"
+    assert d.validation_tier == ValidationTier.BENCHMARKED
+    assert "genomic_region" in d.applicability_domain.subject_kinds
+
+
+def test_profile_oracle_registry_holds_each_profiles_dossier():
+    reg = profile_oracle_registry(
+        (_profile(profile_id="a", version="1"), "recomputable_public"),
+        (_profile(profile_id="b", version="1"), "wet_lab_anchor"),
+    )
+    assert reg.resolve("a@1").validation_tier == ValidationTier.BENCHMARKED
+    assert reg.resolve("b@1").validation_tier == ValidationTier.ANCHORED
