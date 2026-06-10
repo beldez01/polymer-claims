@@ -14,10 +14,25 @@ __version__ = "0.1.0"
 from polymer_grammar import Claim
 from polymer_protocol import Corpus, next_action, run_cycle
 
+from polymer_claims.analysis_profile import (
+    AnalysisProfile,
+    content_hash,
+    profile_oracle_id,
+    profile_oracle_registry,
+    substrate_tier,
+)
+from polymer_claims.profiles import load_profile
+
 __all__ = [
+    "AnalysisProfile",
     "Claim",
     "Corpus",
     "__version__",
+    "content_hash",
+    "load_profile",
     "next_action",
+    "profile_oracle_id",
+    "profile_oracle_registry",
     "run_cycle",
+    "substrate_tier",
 ]

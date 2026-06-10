@@ -30,6 +30,11 @@ class MaterializationContext(_Model):
     api_version: str
     data_version: str
     note: str | None = None
+    # CES content-address keys (all optional; back-compat — existing call sites unchanged).
+    # Populated when a claim is executed against a content-addressed substrate (CES-3):
+    semantic_run_id: str | None = None  # SHA256(tool·params·inputs·profile_hash)
+    profile_hash: str | None = None     # the realized AnalysisProfile content-address
+    dimnames_hash: str | None = None    # the SE-Contract canonical content-address (drift key)
 
 
 class Satisfaction(_Model):
