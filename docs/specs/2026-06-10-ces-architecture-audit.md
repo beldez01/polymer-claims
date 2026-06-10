@@ -111,9 +111,13 @@ context must be named, not assumed:
   M-value clamp bounds, contrast *direction* (factor-level order), `topTable` sort order,
   replicate-collapse method, infinite-M handling.
 
-The canonical-profile and the real-manuscript-pipeline **disagree on detection threshold,
-sex filtering, and normalization prep** — so "which profile" is a real, claim-level question,
-not a default.
+The canonical-profile and the real-manuscript-pipeline **agree** on normalization (both sesame
+`openSesame`/`QCDPB`) but **disagree on the detection regime** (manuscript retain-rate ≥ 0.80 vs
+canonical pOOBAH p ≤ 0.05), the **SNP method** (sesame `M_SNPcommon_1pt` vs minfi
+`dropLociWithSnps`), and the **manuscript additionally pins the design formula**
+(`~ 0 + Sample_Group + Age + Sex`) — so "which profile" is a real, claim-level question, not a
+default. (Sex-chrom handling: canonical `filter_sex=TRUE`; the TET2 script computes a sex-probe
+mask — verify whether it is applied before pinning that field.)
 
 ---
 

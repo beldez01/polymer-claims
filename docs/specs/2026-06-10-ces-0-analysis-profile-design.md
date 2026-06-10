@@ -8,7 +8,9 @@ architecture audit (`2026-06-10-ces-architecture-audit.md`).
 **Decided forks (this session):** profile-reference model (A1); fold Layer-C internals into the
 profile so its hash pins everything (B); scalar reduction for the first terminal, vector leaves
 deferred (C); reuse the existing `oracle_ref` slot to bind the profile (no new grammar slot);
-local-first seam (no live R-Engine in tests); methodological independence as the air-gap default.
+local-first seam (no live R-Engine in tests); methodological independence as the air-gap default;
+**encode BOTH the TET2-manuscript profile and the registry `canonical_epicv2_hg38_v1` profile as
+distinct versioned profiles**, so a claim must name which one it licensed under.
 
 ---
 
@@ -89,6 +91,21 @@ For the local slice, profiles ship as a small in-package registry
 (`src/polymer_claims/profiles/`), mirroring how `datasets/` ships `dose_response.csv`. A
 `load_profile(profile_id, version) -> AnalysisProfile` resolver (impure, like `load_dataset`)
 returns the frozen object. No network; pure + stub-testable.
+
+**Two profiles ship in CES-0**, both EPICv2/hg38, both sesame `openSesame`/`QCDPB` normalization
+(they *agree* there), differing on the choices that make "which profile" a real question:
+
+| | `tet2_epicv2_hg38_manuscript@1` (ground truth) | `canonical_epicv2_hg38_v1@1` (registry) |
+|---|---|---|
+| Detection regime | retain-rate ≥ 0.80 (minfi `rowMeans`) | pOOBAH p ≤ 0.05 + 5% sample-fail |
+| Sex-chrom probes | removed | removed (`filter_sex=TRUE`) |
+| Design formula | pinned: `~ 0 + Sample_Group + Age + Sex`, `TET2_mut − WT` | not pinned by the profile (per-analysis) |
+| SNP | sesame `M_SNPcommon_1pt` | minfi `dropLociWithSnps` SBE+CpG, MAF 0.01 |
+
+The profiles produce *different* hashes, so a claim's `profile_hash` records exactly which
+analytical regime licensed it. The manuscript profile is the first licensing target (§6); the
+canonical profile is encoded alongside it to exercise the "named, not defaulted" property and to
+seed the future registry-vs-manuscript comparison.
 
 ---
 
@@ -185,8 +202,9 @@ local profile registry — the scaffolding every later piece consumes.
 ## 7. What CES-0 delivers vs defers
 
 **Delivers (this phase, as its own plan):**
-- `AnalysisProfile` frozen object + canonical `profile_hash` (umbrella) + the first real profile
-  (`tet2_epicv2_hg38_manuscript@1`) in the local registry.
+- `AnalysisProfile` frozen object + canonical `profile_hash` (umbrella) + **both** real profiles
+  (`tet2_epicv2_hg38_manuscript@1` and `canonical_epicv2_hg38_v1@1`) in the local registry, each
+  with its own distinct hash.
 - The three additive `MaterializationContext` fields (grammar).
 - The `oracle_ref = profile_id@version` binding convention + a substrate→tier helper +
   an `OracleDossier` builder for a profile (umbrella/protocol seam, reusing `oracle_cap`).
@@ -221,10 +239,11 @@ local profile registry — the scaffolding every later piece consumes.
 
 1. **Substrate→tier table (§4):** confirm BENCHMARKED for recomputable-public and ANCHORED for
    the 48-sample sorted cohort, or adjust the ladder.
-2. **Which first profile:** the audit shows the real TET2-manuscript pinning *disagrees* with
-   the registry's `canonical_epicv2_hg38_v1` on normalization/detection/sex-filtering. CES-0
-   encodes the **manuscript** profile (ground truth). Confirm, or encode both as distinct
-   versioned profiles so a claim can name which one it licensed under.
+2. **Which first profile — RESOLVED:** encode **both** as distinct versioned profiles
+   (`tet2_epicv2_hg38_manuscript@1` + `canonical_epicv2_hg38_v1@1`). They agree on normalization
+   (sesame/QCDPB) and differ on the detection regime (retain-rate 0.80 vs pOOBAH 0.05), SNP
+   method, and the manuscript's pinned design formula — so a claim names which regime licensed
+   it (§2a). The manuscript profile is the first licensing target.
 3. **SemanticRunID fold-in (§3):** extend the existing `SHA256(tool·params·inputs)` formula to
    include `profile_hash`, or carry `profile_hash` as a sibling field. (EOS records both either
    way; this is a Polymer-side choice for CES-3.)
