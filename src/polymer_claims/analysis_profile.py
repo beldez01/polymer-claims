@@ -6,8 +6,12 @@ vocabulary stays out of the core.
 
 The profile carries NO stored hash (that would be circular) and NO `substrate` field (substrate
 is a property of the DATA the profile is applied to — see profile_oracle_dossier). `content_hash`
-canonicalizes with sorted-keys/no-whitespace JSON — the SAME canonicalization Polymer's
-SemanticRunID.param_signature uses — so Python and R compute the same digest (hash parity).
+canonicalizes with sorted-keys/no-whitespace JSON, mirroring Polymer's
+SemanticRunID.param_signature canonicalization — the INTENDED basis for Python/R hash parity.
+Parity is not yet validated end-to-end: R's float JSON rendering (e.g. `1e-06`, trailing zeros,
+scientific notation) can differ from Python's, so CES-3 must validate this against the live R
+serializer with a golden-hash fixture before any R-side code relies on the digest. Within Python
+the hash is deterministic, which is all CES-0 requires.
 """
 from __future__ import annotations
 
