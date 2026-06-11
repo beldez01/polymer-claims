@@ -6,9 +6,15 @@ The loader (load_contract) is added in CES-1 Task 4.
 """
 from __future__ import annotations
 
+import hashlib
+import json
+from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
+
+from polymer_claims._hashing import canonical_sha256
 
 
 class _Frozen(BaseModel):
@@ -38,3 +44,50 @@ class SEContractRef(_Frozen):
     size: int
     checksums: tuple[Checksum, ...]
     access_methods: tuple[AccessMethod, ...]
+
+
+_DIR = Path(__file__).parent
+
+
+def _resolve_uid(ref: str) -> str:
+    """Strip an optional 'se:' scheme prefix; the remainder is the contract uid."""
+    return ref[len("se:"):] if ref.startswith("se:") else ref
+
+
+@lru_cache(maxsize=None)
+def load_contract(ref: str) -> SEContractRef:
+    """Resolve a DataHandle.ref to a DRS-shaped, content-addressed SEContractRef over a bundled
+    SE-Contract fixture. Unknown ref -> FileNotFoundError (the caller degrades it to a node error;
+    it never crashes the run — same contract as datasets.load_dataset)."""
+    uid = _resolve_uid(ref)
+    stem = uid.split("@")[0]
+    manifest_path = _DIR / f"{stem}.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"no bundled SE-Contract {ref!r} at {manifest_path}")
+
+    manifest_bytes = manifest_path.read_bytes()
+    manifest = json.loads(manifest_bytes)
+    assay = manifest["assays"][0]
+    betas_path = _DIR / assay["ref"]
+    betas_bytes = betas_path.read_bytes()
+
+    feature_ids = [r["feature_id"] for r in manifest["row_data"]]
+    sample_ids = [c["sample_id"] for c in manifest["col_data"]]
+    dimnames_hash = canonical_sha256(
+        {"feature_ids": feature_ids, "sample_ids": sample_ids}
+    )
+
+    fixture_bytes = manifest_bytes + betas_bytes
+    checksum = hashlib.sha256(fixture_bytes).hexdigest()
+
+    return SEContractRef(
+        contract_uid=manifest["uid"],
+        dimnames_hash=dimnames_hash,
+        assay=assay["name"],
+        selection=(("group_col", "Sample_Group"),),
+        genome_assembly=manifest["metadata"]["genome_assembly"],
+        self_uri=f"drs://local/{manifest['uid']}",
+        size=len(fixture_bytes),
+        checksums=(Checksum(checksum=checksum),),
+        access_methods=(AccessMethod(type="file", access_url=str(betas_path)),),
+    )
