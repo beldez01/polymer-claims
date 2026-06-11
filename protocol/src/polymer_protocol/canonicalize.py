@@ -75,7 +75,7 @@ def canonicalize(corpus: Corpus) -> Corpus:
                     left=rep,
                     right=other,
                     severity=1.0,  # exact structural identity
-                    status=Status.LICENSED,
+                    status=Status.STRUCTURAL,  # true by construction, NOT an evidential license
                     note="structural-key collapse",
                 )
             )
