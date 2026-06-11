@@ -37,6 +37,15 @@ def test_minimal_licensed_claim_builds():
     assert claim.pattern.id == "adjusted_effect"
 
 
+def test_claim_rejects_structural_status():
+    with pytest.raises(ValidationError, match="STRUCTURAL is valid only on an EquivalenceClaim"):
+        Claim(
+            id="c", title="t",
+            pattern=PatternRef(id="adjusted_effect", version="v1"),
+            leaves=[_leaf()], status=Status.STRUCTURAL,
+        )
+
+
 def test_pending_status_requires_a_reason():
     with pytest.raises(ValidationError):
         Claim(
