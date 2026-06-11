@@ -39,7 +39,7 @@ def _probes() -> list[dict]:
 
 
 def _beta(i: int, sample: dict) -> float:
-    base = 0.20 + ((i * 7 + 3) % 60) / 100.0   # deterministic in [0.20, 0.79]
+    base = 0.20 + ((i * 7 + 3) % 60) / 100.0   # deterministic in [0.21, 0.79]
     if i in _PLANTED_PROBES and sample["Sample_Group"] == "TET2_mut":
         base += _PLANTED_SHIFT
     return round(min(base, 0.999999), 6)

@@ -55,3 +55,32 @@ def test_metadata_is_epicv2_hg38():
     m = _manifest()
     assert m["metadata"]["genome_assembly"] == "hg38"
     assert m["metadata"]["array"] == "EPICv2"
+
+
+def test_betas_columns_match_col_data_sample_order():
+    m = _manifest()
+    sample_ids = [c["sample_id"] for c in m["col_data"]]
+    header = _BETAS.read_text().splitlines()[0].split("\t")
+    assert header[1:] == sample_ids  # column order binds sample metadata positionally
+
+
+def test_planted_shift_present_on_first_five_probes_only():
+    m = _manifest()
+    groups = {c["sample_id"]: c["Sample_Group"] for c in m["col_data"]}
+    lines = _BETAS.read_text().splitlines()
+    header = lines[0].split("\t")[1:]
+    rows = {ln.split("\t")[0]: ln.split("\t")[1:] for ln in lines[1:]}
+
+    def _by_group(feature_id):
+        vals = {"TET2_mut": [], "WT": []}
+        for sid, cell in zip(header, rows[feature_id]):
+            vals[groups[sid]].append(float(cell))
+        return vals
+
+    # probes 0-4 (cg00000001..cg00000005): TET2_mut exceeds WT by ~0.20
+    for k in range(1, 6):
+        v = _by_group(f"cg{k:08d}")
+        assert round(min(v["TET2_mut"]) - max(v["WT"]), 6) == 0.20
+    # a non-planted probe (cg00000010): no group difference
+    v = _by_group("cg00000010")
+    assert max(v["TET2_mut"]) == max(v["WT"]) and min(v["TET2_mut"]) == min(v["WT"])
