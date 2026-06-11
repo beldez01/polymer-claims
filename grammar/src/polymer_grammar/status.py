@@ -10,6 +10,8 @@ class Status(str, Enum):
     PENDING = "pending"
     LICENSED = "licensed"
     REJECTED = "rejected"
+    STRUCTURAL = "structural"   # true by construction (e.g. a structural-key equivalence);
+                                # NOT an evidential license. Valid only on EquivalenceClaim.
 
 
 class PendingReason(str, Enum):

@@ -17,6 +17,11 @@ def test_equivalence_builds():
     assert eq.left == "hashA" and eq.right == "hashB"
 
 
+def test_equivalence_accepts_structural_status():
+    eq = _eq(status=Status.STRUCTURAL)
+    assert eq.status == Status.STRUCTURAL
+
+
 def test_self_equivalence_rejected():
     with pytest.raises(ValidationError):
         _eq(left="same", right="same")

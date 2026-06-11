@@ -9,12 +9,14 @@ def test_package_imports():
 
 def test_status_values():
     assert Status.LICENSED.value == "licensed"
+    assert Status.STRUCTURAL.value == "structural"
     assert {s.value for s in Status} == {
         "conjectured",
         "exploratory",
         "pending",
         "licensed",
         "rejected",
+        "structural",
     }
 
 
