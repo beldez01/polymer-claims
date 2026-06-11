@@ -22,6 +22,19 @@ def test_equivalence_accepts_structural_status():
     assert eq.status == Status.STRUCTURAL
 
 
+def test_structural_edge_counts_as_in_back_compat():
+    # back-compat path (grounded_in not supplied): a STRUCTURAL edge merges its endpoints.
+    eq = _eq(status=Status.STRUCTURAL)
+    assert are_equivalent(eq.left, eq.right, [eq])
+    assert equivalence_class(eq.left, [eq]) == frozenset({eq.left, eq.right})
+
+
+def test_conjectured_edge_does_not_count_as_in():
+    # a mere conjecture must NOT merge endpoints in the back-compat path.
+    eq = _eq(status=Status.CONJECTURED)
+    assert not are_equivalent(eq.left, eq.right, [eq])
+
+
 def test_self_equivalence_rejected():
     with pytest.raises(ValidationError):
         _eq(left="same", right="same")
