@@ -26,7 +26,17 @@ true. The whole arc below is ordered to close them.
 
 ## Tier 1 — make "licensed" honest (the core invariant)
 
-### 1a. M1 — stop minting LICENSED without a test (build FIRST: small, independent)
+### 1a. M1 — stop minting LICENSED without a test (build FIRST: small, independent) ✅ DONE 2026-06-11
+
+> **✅ DONE (2026-06-11, branch `feat/m1-structural-equivalence-status`, local-only).** Added
+> `Status.STRUCTURAL` ("true by construction; not an evidential license"), fenced it out of `Claim`
+> (a new `_structural_only_on_equivalence` validator), broadened `equivalence_class`'s back-compat IN
+> gate to `{LICENSED, STRUCTURAL}`, and changed `canonicalize.py:78` to mint `STRUCTURAL`. The
+> false-license path is closed: no path mints a `LICENSED` equivalence without an evidential test.
+> Additive only — Corpus stays 4, viewer/topology contract untouched (`STRUCTURAL` never appears as a
+> node status). 333 grammar + 335 protocol + 94 umbrella green; ruff clean; `check-all.sh` ALL GREEN.
+> Spec `docs/superpowers/specs/2026-06-11-structural-equivalence-status.md`, plan
+> `docs/superpowers/plans/2026-06-11-structural-equivalence-status.md`.
 
 **Seam:** `protocol/src/polymer_protocol/canonicalize.py:53–86`.
 
