@@ -22,7 +22,7 @@ class AccessMethod(_Frozen):
 
 class Checksum(_Frozen):
     type: Literal["sha-256"] = "sha-256"
-    checksum: str  # hex digest
+    checksum: str  # hex digest; mirrors GA4GH DRS ChecksumObject.checksum (deliberate shape fidelity)
 
 
 class SEContractRef(_Frozen):

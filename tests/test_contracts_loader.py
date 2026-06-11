@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from polymer_claims.contracts import AccessMethod, Checksum, SEContractRef
 
@@ -30,5 +31,5 @@ def test_se_contract_ref_round_trips():
 
 def test_se_contract_ref_is_frozen():
     ref = _ref()
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         ref.assay = "counts"  # frozen models reject mutation
