@@ -103,3 +103,9 @@ def test_checksum_is_sha256_over_fixture_bytes():
 def test_unknown_ref_raises_filenotfound():
     with pytest.raises(FileNotFoundError, match="nope"):
         load_contract("se:nope@1")
+
+
+def test_symbols_reexported_from_umbrella():
+    import polymer_claims
+    assert hasattr(polymer_claims, "SEContractRef")
+    assert hasattr(polymer_claims, "load_contract")

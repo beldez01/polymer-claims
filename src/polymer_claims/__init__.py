@@ -22,13 +22,23 @@ from polymer_claims.analysis_profile import (
     substrate_tier,
 )
 from polymer_claims.profiles import load_profile
+from polymer_claims.contracts import (
+    AccessMethod,
+    Checksum,
+    SEContractRef,
+    load_contract,
+)
 
 __all__ = [
+    "AccessMethod",
     "AnalysisProfile",
+    "Checksum",
     "Claim",
     "Corpus",
+    "SEContractRef",
     "__version__",
     "content_hash",
+    "load_contract",
     "load_profile",
     "next_action",
     "profile_oracle_id",
