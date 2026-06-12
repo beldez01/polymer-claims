@@ -62,10 +62,13 @@ The documented next action, and the single most credibility-load-bearing arc: un
 R-Engine, no `~/Desktop/Polymer` or `~/Desktop/TET2` dependency** (the local-first seam was chosen
 precisely so this arc is self-contained).
 
-- **CES-1 (B1) — `DataHandle` → SE-Contract ref.** Shape `DataHandle.ref` (`operations.py:32–37`,
-  today a bare string) into a DRS-style content-addressed reference; bundle a local methylation
-  SE-Contract fixture (a small real EPICv2 slice) + a local realizer that reads it. `dimnames_hash`
-  canonical. No live API. *(CES-0 spec §6 step 2.)*
+- **CES-1 (B1) — `DataHandle` → SE-Contract ref. ✅ DONE 2026-06-11.** `DataHandle.ref` stays a thin
+  `str` (zero grammar change) and resolves umbrella-side to a frozen, DRS-shaped, content-addressed
+  `SEContractRef`; bundled EPICv2-shaped methylation fixture (manifest + sidecar betas, **synthetic**
+  values with a planted shift for CES-2) + `load_contract` realizer; canonical `dimnames_hash` via a
+  shared `canonical_sha256` helper. Data seam only — no computation/licensing. 116 umbrella tests,
+  check-all ALL GREEN. Spec `docs/specs/2026-06-11-ces-1-data-seam-design.md`, plan
+  `docs/superpowers/plans/2026-06-11-ces-1-data-seam.md`.
 - **CES-2 (minimal B2) — one tool, one profile, one claim licenses on real betas.** A local
   `BorisLikeAdapter` computes one **scalar reduction** (region Δβ, or n-DMPs at FDR<0.05) under a
   pinned `AnalysisProfile`, over the CES-1 fixture, with a **methodologically-independent second
