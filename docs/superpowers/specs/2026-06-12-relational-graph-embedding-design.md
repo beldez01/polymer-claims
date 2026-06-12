@@ -52,28 +52,36 @@ narrow seam between them.
 Nodes = **claim ids only** (synthetic `:`-prefixed defeat-source nodes that appear in the topology
 are omitted from the embedding for v1). One symmetric weighted adjacency `W` over claim ids.
 
+**Edge source — reuse the resolved topology edges.** v1 sources its graph from
+`export_topology(corpus, layout=NONE).edges` — the same id→id edge set the viewer already draws as
+lines (so the embedding is consistent with the rendered graph, and protocol's neighborhood/defeat
+resolution is reused rather than re-implemented). That set is `entails ∪ equivalence ∪ defeat-kinds`.
+Proposition-level `INCOMPATIBLE_WITH` is **not** in that export today (only `ENTAILS` neighborhood is
+resolved), so it is **deferred to v1.1** (when/if it is added to the topology edge export); the
+polarity behavior it would serve is fully covered by `REBUT` for v1 (see below).
+
 **Every conceptual edge is attractive**, weighted by kind (the weight is a stated conceptual
 commitment, tunable, defaults below):
 
-| Edge source | Kind(s) | Weight `w` | Meaning |
-|---|---|---|---|
-| equivalence (`EquivalenceClaim`) | LICENSED / STRUCTURAL | 1.0 | same claim → near-coincident |
-| proposition neighborhood | `ENTAILS` | 0.9 | implies → very close |
-| defeat edge | `EVIDENCE_FOR` | 0.8 | supports → close |
-| defeat edge | `UNDERMINE`, `UNDERCUT`, `RECLASSIFY`, `REINTERPRET` | 0.5 | attacks premise/warrant/framing — related but oblique |
-| defeat edge | `REBUT` | 0.4 | same question, contrary conclusion |
-| proposition neighborhood | `INCOMPATIBLE_WITH` | 0.4 | same question, mutually exclusive |
+| Edge kind (as exported) | Weight `w` | Meaning |
+|---|---|---|
+| `equivalence` (LICENSED / STRUCTURAL) | 1.0 | same claim → near-coincident |
+| `entails` | 0.9 | implies → very close |
+| `evidence_for` | 0.8 | supports → close |
+| `undermine`, `undercut`, `reclassify`, `reinterpret` | 0.5 | attacks premise/warrant/framing — related but oblique |
+| `rebut` | 0.4 | same question, contrary conclusion |
+| *(`incompatible_with` — deferred v1.1)* | *0.4* | *same question, mutually exclusive* |
 
 Edges are symmetrized (`W[i,j] = W[j,i] = max` of any contributing kinds; multiple edges between a
-pair take the max, not the sum, so a single strong relation isn't diluted by weak ones). The
-EVIDENCE_FOR / ENTAILS asymmetry of direction is dropped — proximity is symmetric.
+pair take the max, not the sum, so a single strong relation isn't diluted by weak ones).
 
-**Polarity term (the "near but not coincident" requirement).** For a `REBUT` or `INCOMPATIBLE_WITH`
-pair whose two claims' Propositions have **opposite `direction`** (POSITIVE vs NEGATIVE), add a
-signed **repulsion** `-ρ` (default `ρ = 0.3`) to a separate signed matrix `R[i,j]`. The shared
-neighborhood still attracts them (they have many common neighbors → pulled close); the repulsion
-nudges them apart along their disagreement axis → near but separated. `NULL`-direction or
-same-direction opposed pairs get no repulsion (they are merely related, not polar-opposed).
+**Polarity term (the "near but not coincident" requirement).** For a `rebut` pair whose two claims'
+Propositions (their `conclusion`) have **opposite `direction`** (POSITIVE vs NEGATIVE), add a signed
+**repulsion** `-ρ` (default `ρ = 0.3`) to a separate signed matrix `R[i,j]`. The shared neighborhood
+still attracts them (common neighbors → pulled close); the repulsion nudges them apart along their
+disagreement axis → near but separated. `NULL`-direction, same-direction, or missing-conclusion
+pairs get no repulsion (merely related, not polar-opposed). (`incompatible_with` joins this rule in
+v1.1.)
 
 ## 3. The embedding math
 
