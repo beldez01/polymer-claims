@@ -54,21 +54,26 @@ def _resolve_uid(ref: str) -> str:
     return ref[len("se:"):] if ref.startswith("se:") else ref
 
 
-@lru_cache(maxsize=None)
 def load_contract(ref: str) -> SEContractRef:
     """Resolve a DataHandle.ref to a DRS-shaped, content-addressed SEContractRef over a bundled
     SE-Contract fixture. Unknown ref -> FileNotFoundError (the caller degrades it to a node error;
     it never crashes the run — same contract as datasets.load_dataset)."""
-    uid = _resolve_uid(ref)
+    return _load_contract(_resolve_uid(ref))
+
+
+@lru_cache(maxsize=None)
+def _load_contract(uid: str) -> SEContractRef:
     stem = uid.split("@")[0]
     manifest_path = _DIR / f"{stem}.json"
     if not manifest_path.is_file():
-        raise FileNotFoundError(f"no bundled SE-Contract {ref!r} at {manifest_path}")
+        raise FileNotFoundError(f"no bundled SE-Contract {uid!r} at {manifest_path}")
 
     manifest_bytes = manifest_path.read_bytes()
     manifest = json.loads(manifest_bytes)
     assay = manifest["assays"][0]
     betas_path = _DIR / assay["ref"]
+    if not betas_path.is_file():  # FIX 2: name the ref instead of a raw OS error on a missing sidecar
+        raise FileNotFoundError(f"SE-Contract {uid!r} assay file missing at {betas_path}")
     betas_bytes = betas_path.read_bytes()
 
     feature_ids = [r["feature_id"] for r in manifest["row_data"]]
@@ -84,6 +89,7 @@ def load_contract(ref: str) -> SEContractRef:
         contract_uid=manifest["uid"],
         dimnames_hash=dimnames_hash,
         assay=assay["name"],
+        # fixture-default grouping selector; manifest-driven when a 2nd fixture needs a different col
         selection=(("group_col", "Sample_Group"),),
         genome_assembly=manifest["metadata"]["genome_assembly"],
         self_uri=f"drs://local/{manifest['uid']}",
