@@ -97,3 +97,9 @@ def _load_contract(uid: str) -> SEContractRef:
         checksums=(Checksum(checksum=checksum),),
         access_methods=(AccessMethod(type="file", access_url=str(betas_path)),),
     )
+
+
+def clear_contract_cache() -> None:
+    """Drop the bundled-contract lru-cache so the next load_contract re-reads disk
+    (a node refresh after a dataset is re-published)."""
+    _load_contract.cache_clear()
