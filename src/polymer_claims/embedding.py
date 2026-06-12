@@ -6,6 +6,11 @@ See docs/specs/2026-06-12-relational-graph-embedding-design.md.
 """
 from __future__ import annotations
 
+import hashlib
+import math
+
+import numpy as np
+
 from polymer_grammar import Direction
 from polymer_protocol import Layout, export_topology
 from polymer_protocol.corpus import Corpus
@@ -56,3 +61,94 @@ def build_graph(
             if {ds, dt} == {Direction.POSITIVE, Direction.NEGATIVE}:
                 polar.add(key)
     return node_ids, W, polar
+
+
+_FALLBACK_RADIUS = 0.15
+_CELL_SPACING = 2.5
+
+
+def _hash_ball(node_id: str, radius: float = _FALLBACK_RADIUS) -> tuple[float, float, float]:
+    """Deterministic position in a small ball from the id hash (for tiny/isolated components)."""
+    digest = hashlib.sha256(node_id.encode("utf-8")).digest()
+    out = []
+    for i in range(3):
+        u = int.from_bytes(digest[i * 8 : (i + 1) * 8], "big") / float(2**64)
+        out.append(radius * (2.0 * u - 1.0))
+    return (out[0], out[1], out[2])
+
+
+def _components(node_ids: list[str], W: dict[frozenset[str], float]) -> list[list[str]]:
+    adj: dict[str, set[str]] = {n: set() for n in node_ids}
+    for key in W:
+        a, b = tuple(key)
+        adj[a].add(b)
+        adj[b].add(a)
+    seen: set[str] = set()
+    comps: list[list[str]] = []
+    for n in node_ids:
+        if n in seen:
+            continue
+        stack, comp = [n], []
+        while stack:
+            x = stack.pop()
+            if x in seen:
+                continue
+            seen.add(x)
+            comp.append(x)
+            stack.extend(adj[x] - seen)
+        comps.append(sorted(comp))
+    return comps
+
+
+def _embed_component(
+    comp: list[str], W: dict[frozenset[str], float], polar: set[frozenset[str]]
+) -> dict[str, tuple[float, float, float]]:
+    n = len(comp)
+    if n < 4:
+        return {nid: _hash_ball(nid) for nid in comp}
+    idx = {nid: i for i, nid in enumerate(comp)}
+    A = np.zeros((n, n))
+    for key, w in W.items():
+        a, b = tuple(key)
+        if a in idx and b in idx:
+            val = w - (RHO if key in polar else 0.0)
+            A[idx[a], idx[b]] = val
+            A[idx[b], idx[a]] = val
+    deg = np.abs(A).sum(axis=1)
+    deg[deg == 0] = 1.0
+    dinv = 1.0 / np.sqrt(deg)
+    L = np.eye(n) - (dinv[:, None] * A * dinv[None, :])
+    _, vecs = np.linalg.eigh(L)  # ascending eigenvalues; columns are eigenvectors
+    coords = vecs[:, 1:4].copy()  # skip the trivial null component, take the next 3
+    for k in range(coords.shape[1]):
+        col = coords[:, k]
+        j = int(np.argmax(np.abs(col)))  # lowest index on ties → deterministic sign
+        if col[j] < 0:
+            coords[:, k] = -col
+        m = np.abs(coords[:, k]).max()
+        if m > 0:
+            coords[:, k] = coords[:, k] / m
+    return {nid: tuple(float(v) for v in coords[idx[nid]]) for nid in comp}
+
+
+def spectral_layout(corpus: Corpus) -> dict[str, tuple[float, float, float]]:
+    """Deterministic 3D position per claim from the typed-edge signed-Laplacian eigenmap.
+
+    Per connected component (so unrelated subgraphs separate); components placed on a deterministic
+    lattice; sign-canonicalized and rounded → byte-stable. Empty corpus → {}."""
+    node_ids, W, polar = build_graph(corpus)
+    if not node_ids:
+        return {}
+    comps = sorted(_components(node_ids, W), key=lambda c: c[0])
+    side = max(1, math.ceil(len(comps) ** (1.0 / 3.0)))
+    raw: dict[str, tuple[float, float, float]] = {}
+    for ci, comp in enumerate(comps):
+        local = _embed_component(comp, W, polar)
+        gx, gy, gz = ci % side, (ci // side) % side, ci // (side * side)
+        ox = (gx - (side - 1) / 2.0) * _CELL_SPACING
+        oy = (gy - (side - 1) / 2.0) * _CELL_SPACING
+        oz = (gz - (side - 1) / 2.0) * _CELL_SPACING
+        for nid, (x, y, z) in local.items():
+            raw[nid] = (x + ox, y + oy, z + oz)
+    scale = max((abs(v) for xyz in raw.values() for v in xyz), default=1.0) or 1.0
+    return {nid: tuple(round(v / scale, 6) for v in xyz) for nid, xyz in raw.items()}
