@@ -312,28 +312,33 @@ def export_topology(
     *,
     layout: Layout,
     seed_positions: dict[str, tuple[float, float, float]] | None = None,
+    positions: dict[str, tuple[float, float, float]] | None = None,
 ) -> TopologyExport:
     """Pure, deterministic corpus → TopologyExport.
 
-    Layout.NONE zeroes every position (deterministic-extraction tests); FORCE_DIRECTED runs
-    the seeded Fruchterman-Reingold layout. Nodes/edges/clusters are sorted for byte-stable output.
+    Layout.NONE zeroes every position; FORCE_DIRECTED runs the seeded Fruchterman-Reingold layout.
+    `positions` (when supplied) overrides both: each node takes its coordinate from the dict (a
+    missing id → origin), `layout_id="external:spectral-v1"`, and `layout`/`seed_positions` are
+    ignored — this is the seam an external embedder (e.g. the umbrella spectral layout) injects
+    through. Nodes/edges/clusters are sorted for byte-stable output.
 
-    `seed_positions` warm-starts FORCE_DIRECTED from a prior frame's positions (existing nodes
-    hold their place; new nodes settle in from their id-hash seed); the default-None path leaves
-    the no-seed output byte-identical. Determinism: identical `(corpus, seed_positions)` → identical
-    output. Ignored under Layout.NONE.
+    `seed_positions` warm-starts FORCE_DIRECTED from a prior frame's positions; the default-None
+    path leaves the no-seed output byte-identical. Determinism: identical inputs → identical output.
     """
     edges = _extract_edges(corpus)
     clusters = _extract_clusters(corpus)
     node_ids = [c.id for c in corpus.claims]
 
-    if layout is Layout.NONE:
-        positions = {cid: (0.0, 0.0, 0.0) for cid in node_ids}
+    if positions is not None:
+        layout_positions = {cid: positions.get(cid, (0.0, 0.0, 0.0)) for cid in node_ids}
+        layout_id = "external:spectral-v1"
+    elif layout is Layout.NONE:
+        layout_positions = {cid: (0.0, 0.0, 0.0) for cid in node_ids}
         layout_id = "none"
     else:
-        positions, layout_id = _force_directed_layout(node_ids, edges, seed_positions)
+        layout_positions, layout_id = _force_directed_layout(node_ids, edges, seed_positions)
 
-    nodes = _extract_nodes(corpus, positions)
+    nodes = _extract_nodes(corpus, layout_positions)
     return TopologyExport(
         nodes=nodes, edges=edges, clusters=clusters, layout_id=layout_id
     )
