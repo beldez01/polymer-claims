@@ -102,7 +102,7 @@ grammar `CONTRACT_VERSION` / viewer mirror implications in the brainstorm.
 
 ## Tier 2 — make "licensed" mean the *full* thing
 
-### 2a. CES-3 — close the content-address (depends on CES-2)
+### 2a. CES-3 — close the content-address (depends on CES-2) ✅ DONE 2026-06-12
 
 **Seam:** `MaterializationContext` (`licensing.py:28–32`); the drift key (`drift.py`); the
 substrate→`ValidationTier` cap (the `#2 oracle_cap` seam + CES-0's `profile_oracle_registry`).
@@ -112,6 +112,8 @@ profile hash into the DRIFT freshness key, and bind substrate→tier cap. This c
 gap the CES audit found: without it, two "identical" licensed runs can silently diverge on an R
 default or a design-formula change. This is the **fully-pinned** leg — a license now content-addresses
 *the whole apparatus*, not ⅔ of it.
+
+> **✅ DONE (2026-06-12, branch `feat/ces-3-content-address-completeness`, local-only).** License records `dimnames_hash` + `profile_hash` + `semantic_run_id` on `MaterializationContext`; drift re-opens a LICENSED claim on any content-address move (`dimnames_hash` OR `profile_hash` changed); back-compat for const-plan / pre-CES-3 claims (tighten-only-when-present). The CES B1→B3 spine is complete.
 
 ### 2b. Earned-strength 2d — real test statistics (depends on CES-2 outputs)
 

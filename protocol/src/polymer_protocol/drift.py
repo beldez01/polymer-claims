@@ -31,12 +31,19 @@ class DriftRecord(_Model):
 
 
 def _is_fresh(claim: Claim, current: MaterializationContext) -> bool:
-    """A LICENSED claim is fresh if ANY of its satisfaction materializations matches `current`
-    on BOTH api_version and data_version (id/note ignored). Equality match (no semver)."""
+    """A LICENSED claim is fresh if ANY satisfaction materialization matches `current` on
+    api_version AND data_version, AND — when the recorded materialization carries them — on the
+    content-address fields profile_hash and dimnames_hash. A materialization without those fields
+    (const-plan / pre-CES-3) is judged on versions only (back-compat). Equality match (no semver)."""
     for sat in claim.licensing.satisfactions:
         m = sat.materialization
-        if m.api_version == current.api_version and m.data_version == current.data_version:
-            return True
+        if m.api_version != current.api_version or m.data_version != current.data_version:
+            continue
+        if m.profile_hash is not None and m.profile_hash != current.profile_hash:
+            continue
+        if m.dimnames_hash is not None and m.dimnames_hash != current.dimnames_hash:
+            continue
+        return True
     return False
 
 

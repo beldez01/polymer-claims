@@ -36,12 +36,17 @@ def execute_ground(
     adapters: tuple[Adapter, ...],
     ctx: MaterializationContext,
     only: frozenset[str] | None = None,
+    materializations: dict[str, MaterializationContext] | None = None,
 ) -> tuple[Corpus, tuple[ExecRecord, ...]]:
     """Run verify() over executable claims, optionally gated to this cycle's selection.
 
     When ``only`` is provided, a claim additionally must be in that set to execute: the
     permanent preregistration lock alone is no longer sufficient (it stays for anti-HARKing,
     but execution is gated to the selected set). ``only=None`` runs all executable claims.
+
+    ``materializations`` (when supplied) gives a per-claim MaterializationContext: a claim
+    present in the map is verified against its own ctx, absent → falls back to ``ctx``; None →
+    every claim uses ``ctx`` (byte-identical to before). The core only reads the dict — no I/O.
     """
     records = []
     for c in corpus.claims:
@@ -49,6 +54,7 @@ def execute_ground(
             continue
         if not _is_executable(c):
             continue
-        evaluation = verify(c.evaluation_plan, ctx, adapters, claim_leaves=c.leaves)
+        ctx_c = materializations.get(c.id, ctx) if materializations else ctx
+        evaluation = verify(c.evaluation_plan, ctx_c, adapters, claim_leaves=c.leaves)
         records.append(ExecRecord(claim_id=c.id, evaluation=evaluation))
     return corpus, tuple(records)
