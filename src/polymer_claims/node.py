@@ -32,8 +32,10 @@ from polymer_protocol import (
     run_cycle,
 )
 
+from .contracts import clear_contract_cache
 from .materialization import materialization_map
 from .profiles import CANONICAL_EPICV2_V1
+from polymer_protocol.drift import DriftRecord
 
 _ADAPTERS = (IdentityAdapter(), ReferenceAdapter(identity="reference"))
 _CTX = MaterializationContext(id="M1", api_version="v1", data_version="d1")
@@ -98,6 +100,12 @@ class NodeRunner:
             self.frames = self.frames[-self.max_frames:]
         self.prev_positions = {n.id: n.position for n in topo.nodes}
         self._licensed_prev = n_licensed(corpus)
+        self.last_drift: DriftRecord | None = None
+        self.n_reopened: int = 0
+        if self.content_address:
+            self.refresh_world()
+        else:
+            self.current = self.ctx
 
     @classmethod
     def from_seed(
@@ -124,6 +132,16 @@ class NodeRunner:
             profiles=profiles,
             **run_cycle_kwargs,
         )
+
+    def refresh_world(self) -> MaterializationContext:
+        """Re-read the live SE-Contracts/profile and recompute the current-world content-address.
+        Operator/endpoint-triggered (not per-tick): busts the contract cache so a re-published
+        dataset is actually re-read, then takes the v1 single-world representative (all entries of
+        a single-dataset corpus share one address). Empty map -> the seed ctx (drift inert)."""
+        clear_contract_cache()
+        m = materialization_map(self.corpus, self.ctx, profiles=self.profiles)
+        self.current = next(iter(m.values()), self.ctx)
+        return self.current
 
     def tick(self) -> TimelineFrame:
         """Advance one scheduler-driven step; emit and accumulate a frame."""
