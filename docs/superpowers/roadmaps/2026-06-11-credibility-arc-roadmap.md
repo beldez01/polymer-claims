@@ -69,7 +69,7 @@ precisely so this arc is self-contained).
   shared `canonical_sha256` helper. Data seam only — no computation/licensing. 116 umbrella tests,
   check-all ALL GREEN. Spec `docs/specs/2026-06-11-ces-1-data-seam-design.md`, plan
   `docs/superpowers/plans/2026-06-11-ces-1-data-seam.md`.
-- **CES-2 (minimal B2) — one tool, one profile, one claim licenses on real betas.** A local
+- **CES-2 (minimal B2) — one tool, one profile, one claim licenses on real betas.** ✅ DONE 2026-06-12 (licenses on computed Δβ; tier cap + air gap fire; synthetic-data caveat). A local
   `BorisLikeAdapter` computes one **scalar reduction** (region Δβ, or n-DMPs at FDR<0.05) under a
   pinned `AnalysisProfile`, over the CES-1 fixture, with a **methodologically-independent second
   leg** (a different tool, same pinned profile + dataset). The claim licenses on the **computed
