@@ -32,6 +32,9 @@ from polymer_protocol import (
     run_cycle,
 )
 
+from .materialization import materialization_map
+from .profiles import CANONICAL_EPICV2_V1
+
 _ADAPTERS = (IdentityAdapter(), ReferenceAdapter(identity="reference"))
 _CTX = MaterializationContext(id="M1", api_version="v1", data_version="d1")
 
@@ -57,6 +60,8 @@ class NodeRunner:
         config: SchedulerConfig | None = None,
         scheduler_budget: float = 1e9,
         max_frames: int | None = 10000,
+        content_address: bool = False,
+        profiles: tuple = (CANONICAL_EPICV2_V1,),
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -70,6 +75,8 @@ class NodeRunner:
         # to `run_cycle`, where it spreads licensing progressively across cycles.
         self.scheduler_budget = scheduler_budget
         self.max_frames = max_frames
+        self.content_address = content_address
+        self.profiles = profiles
         self.run_cycle_kwargs = run_cycle_kwargs
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
@@ -102,6 +109,8 @@ class NodeRunner:
         config: SchedulerConfig | None = None,
         scheduler_budget: float = 1e9,
         max_frames: int | None = 10000,
+        content_address: bool = False,
+        profiles: tuple = (CANONICAL_EPICV2_V1,),
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
@@ -111,6 +120,8 @@ class NodeRunner:
             config=config,
             scheduler_budget=scheduler_budget,
             max_frames=max_frames,
+            content_address=content_address,
+            profiles=profiles,
             **run_cycle_kwargs,
         )
 
@@ -124,11 +135,17 @@ class NodeRunner:
         action = next_action(state, budget=self.scheduler_budget, config=self.config)
 
         if action is not None and action.kind == ActionKind.RUN_CYCLE:
+            mats = (
+                materialization_map(self.corpus, self.ctx, profiles=self.profiles)
+                if self.content_address
+                else None
+            )
             result = run_cycle(
                 self.corpus,
                 self.adapters,
                 self.ctx,
                 ledger=self.ledger,
+                materializations=mats,
                 **self.run_cycle_kwargs,
             )
             self.corpus = result.corpus
