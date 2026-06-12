@@ -293,6 +293,19 @@ def planted_corpus() -> Corpus:
         _defeat("c2_7", "c2_1", DefeatEdgeKind.UNDERCUT),
     ]
 
+    # ── Weak inter-cluster links ───────────────────────────────────────────────
+    # Three weak UNDERCUT edges, one per cluster pair, between PERIPHERAL claims
+    # (never the equivalence pair c0_0/c0_1 nor the polar pair c0_2/c0_3). These
+    # make the graph a single weakly-connected component, so the lattice can no
+    # longer trivially separate the clusters — the spectral eigenmap must. Dense
+    # intra (entails 0.9 / evidence_for 0.8 / equivalence 1.0) vs a few weak inter
+    # (undercut 0.5) is the canonical spectral-clustering scenario.
+    defeat_edges += [
+        _defeat("c0_7", "c1_0", DefeatEdgeKind.UNDERCUT),
+        _defeat("c1_6", "c2_0", DefeatEdgeKind.UNDERCUT),
+        _defeat("c2_7", "c0_4", DefeatEdgeKind.UNDERCUT),
+    ]
+
     # ── Isolated claims ────────────────────────────────────────────────────────
     # No edges at all — must not appear in any TopologyEdge.
     for iso_id in ISOLATED:

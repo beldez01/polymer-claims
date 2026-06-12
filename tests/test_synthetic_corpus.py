@@ -34,7 +34,11 @@ def test_intra_cluster_edges_dense_inter_sparse():
         else:
             inter += 1
     assert intra >= 9          # dense within clusters
-    assert inter <= 1          # sparse across clusters
+    # Clusters are now WEAKLY connected: three weak cross-cluster UNDERCUT edges
+    # (one per pair) join them into one component, so the lattice can't trivially
+    # separate them and the spectral separation test is non-trivial. Three weak
+    # cross links is still sparse vs ~26 intra-cluster edges.
+    assert inter <= 3          # sparse across clusters
 
 
 def test_each_cluster_is_one_connected_component():
