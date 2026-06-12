@@ -37,6 +37,27 @@ def test_intra_cluster_edges_dense_inter_sparse():
     assert inter <= 1          # sparse across clusters
 
 
+def test_each_cluster_is_one_connected_component():
+    import collections
+    corpus = planted_corpus()
+    export = export_topology(corpus, layout=Layout.NONE)
+    adj = collections.defaultdict(set)
+    for e in export.edges:
+        adj[e.source].add(e.target)
+        adj[e.target].add(e.source)
+    for cl, members in CLUSTERS.items():
+        members = set(members)
+        seen = {next(iter(members))}
+        stack = list(seen)
+        while stack:
+            x = stack.pop()
+            for y in adj[x]:
+                if y in members and y not in seen:
+                    seen.add(y)
+                    stack.append(y)
+        assert seen == members, f"cluster {cl} fragmented: {len(seen)}/{len(members)} reachable"
+
+
 def test_polar_pair_has_opposite_direction_and_rebut_edge():
     corpus = planted_corpus()
     by_id = {c.id: c for c in corpus.claims}

@@ -205,6 +205,7 @@ def planted_corpus() -> Corpus:
     #   EVIDENCE_FOR: c1_0→c1_2, c1_1→c1_3, c1_4→c1_0, c1_5→c1_1
     #   REBUT: c1_6→c1_7
     #   UNDERCUT: c1_7→c1_6 (bidirectional tension keeps both in the subgraph)
+    #   bridge: c1_6→c1_0, c1_7→c1_1 (so {c1_6,c1_7} join the c1_0..c1_5 body)
 
     prop_c1_3 = _simple_prop("synth_mediation_downstream", Direction.POSITIVE)
     prop_c1_2 = _prop_with_entails(
@@ -239,6 +240,9 @@ def planted_corpus() -> Corpus:
         _defeat("c1_5", "c1_1", DefeatEdgeKind.EVIDENCE_FOR),
         _defeat("c1_6", "c1_7", DefeatEdgeKind.REBUT),
         _defeat("c1_7", "c1_6", DefeatEdgeKind.UNDERCUT),
+        # bridge {c1_6, c1_7} into the c1_0..c1_5 body (else c1 fragments)
+        _defeat("c1_6", "c1_0", DefeatEdgeKind.UNDERCUT),
+        _defeat("c1_7", "c1_1", DefeatEdgeKind.UNDERCUT),
     ]
 
     # ── Cluster 2 — synth_dose ────────────────────────────────────────────────
@@ -249,6 +253,7 @@ def planted_corpus() -> Corpus:
     #   EVIDENCE_FOR: c2_0→c2_2, c2_1→c2_3, c2_4→c2_0, c2_5→c2_1
     #   REBUT: c2_6→c2_7
     #   UNDERCUT: c2_7→c2_6
+    #   bridge: c2_6→c2_0, c2_7→c2_1 (so {c2_6,c2_7} join the c2_0..c2_5 body)
 
     prop_c2_3 = _simple_prop("synth_dose_downstream", Direction.POSITIVE)
     prop_c2_2 = _prop_with_entails(
@@ -283,6 +288,9 @@ def planted_corpus() -> Corpus:
         _defeat("c2_5", "c2_1", DefeatEdgeKind.EVIDENCE_FOR),
         _defeat("c2_6", "c2_7", DefeatEdgeKind.REBUT),
         _defeat("c2_7", "c2_6", DefeatEdgeKind.UNDERCUT),
+        # bridge {c2_6, c2_7} into the c2_0..c2_5 body (else c2 fragments)
+        _defeat("c2_6", "c2_0", DefeatEdgeKind.UNDERCUT),
+        _defeat("c2_7", "c2_1", DefeatEdgeKind.UNDERCUT),
     ]
 
     # ── Isolated claims ────────────────────────────────────────────────────────
