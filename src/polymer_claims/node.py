@@ -35,7 +35,7 @@ from polymer_protocol import (
 from .contracts import clear_contract_cache
 from .materialization import materialization_map
 from .profiles import CANONICAL_EPICV2_V1
-from polymer_protocol.drift import DriftRecord
+from polymer_protocol.drift import DriftRecord, drift_pass, reopen_drifted
 
 _ADAPTERS = (IdentityAdapter(), ReferenceAdapter(identity="reference"))
 _CTX = MaterializationContext(id="M1", api_version="v1", data_version="d1")
@@ -149,6 +149,7 @@ class NodeRunner:
             corpus=self.corpus,
             ledger=self.ledger,
             proposers_available=self._proposers_available,
+            current=self.current if self.content_address else None,
         )
         action = next_action(state, budget=self.scheduler_budget, config=self.config)
 
@@ -170,6 +171,13 @@ class NodeRunner:
             self.ledger = result.ledger
             n_frontier = len(result.frontier)
             n_added = len(result.generation.admitted)
+        elif action is not None and action.kind == ActionKind.DRIFT:
+            _, record = drift_pass(self.corpus, current=self.current)
+            self.corpus = reopen_drifted(self.corpus, record)
+            self.last_drift = record
+            self.n_reopened += sum(1 for f in record.drifted if f.re_executable)
+            n_frontier = 0
+            n_added = 0
         else:
             # IDLE tick: action is None, or a daemon kind from_seed never
             # enables in v1. Corpus/ledger unchanged, but still emit a frame so

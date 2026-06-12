@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from polymer_grammar import Status
+from polymer_grammar import PendingReason, Status
 
 from tests.conftest import methyl_node
 
@@ -52,3 +52,29 @@ def test_refresh_world_off_when_not_content_addressed():
     r = methyl_node(content_address=False)
     # self.current falls back to the seed ctx (no content-address fields)
     assert r.current.dimnames_hash is None
+
+
+def test_drift_arm_reopens_after_world_moves(monkeypatch):
+    r = methyl_node()
+    for _ in range(3):
+        r.tick()
+    c = next(x for x in r.corpus.claims if x.id == "c-true")
+    assert c.status == Status.LICENSED
+    assert r.n_reopened == 0  # nothing drifts while the world is fresh
+
+    import polymer_claims.materialization as mat_mod
+    from polymer_claims.contracts import load_contract as real_load
+
+    monkeypatch.setattr(
+        mat_mod, "load_contract",
+        lambda ref: real_load(ref).model_copy(update={"dimnames_hash": "sha256:" + "b" * 64}),
+    )
+    r.refresh_world()        # current now points at the moved dataset
+    r.tick()                 # scheduler should recommend DRIFT
+
+    c = next(x for x in r.corpus.claims if x.id == "c-true")
+    assert c.status == Status.PENDING
+    assert c.pending_reason == PendingReason.MATERIALIZATION_DRIFTED
+    assert r.n_reopened == 1
+    assert r.last_drift is not None
+    assert any(f.claim_id == "c-true" for f in r.last_drift.drifted)
