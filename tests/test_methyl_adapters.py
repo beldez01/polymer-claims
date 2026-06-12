@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import pytest
-from polymer_grammar import DataHandle, MaterializationContext, MeasurementBasis, OperationNode, ProducedLeafSpec
+from polymer_grammar import Comparator, DataHandle, MaterializationContext, MeasurementBasis, OperationNode, ProducedLeafSpec, Status
 
-from polymer_claims.methyl_adapters import RegionLmCoefAdapter, RegionMeanDiffAdapter
+from polymer_claims.methyl_adapters import RegionLmCoefAdapter, RegionMeanDiffAdapter, methyl_independent_registry, region_delta_beta_claim
 
 _CTX = MaterializationContext(id="M1", api_version="v1", data_version="epicv2_casectrl_demo@1")
 _SIGNAL = ("cg00000001", "cg00000002", "cg00000003", "cg00000004", "cg00000005")
@@ -57,3 +57,27 @@ def test_unsupported_impl_raises():
                         produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED))
     with pytest.raises(Exception):
         RegionLmCoefAdapter().execute(bad, (), _CTX)
+
+
+def test_claim_carries_oracle_ref_subject_and_criterion():
+    c = region_delta_beta_claim("c0")
+    node = c.evaluation_plan.graph.nodes[0]
+    assert node.oracle_ref == "canonical_epicv2_hg38_v1@1"
+    assert node.impl == "methyl::region_delta_beta"
+    assert c.subject is not None and c.subject.kind == "genomic_region"
+    assert c.status == Status.PENDING and c.strength is None
+    crit = c.evaluation_plan.criterion
+    assert crit.comparator == Comparator.GT and crit.threshold == 0.10
+
+
+def test_claim_can_omit_subject_for_the_precondition_probe():
+    c = region_delta_beta_claim("c-nosub", with_subject=False)
+    assert c.subject is None
+
+
+def test_independent_registry_has_two_distinct_owners():
+    reg = methyl_independent_registry()
+    owners = {cr.owner for cr in reg.credentials}
+    ids = {cr.identity for cr in reg.credentials}
+    assert ids == {"methyl-meandiff-beta", "methyl-lm-coef"}
+    assert len(owners) == 2

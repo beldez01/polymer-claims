@@ -13,9 +13,29 @@ import json
 from pathlib import Path
 
 import numpy as np
-from polymer_grammar import DataHandle, ExecValue, OperationNode
+from polymer_grammar import (
+    CategoricalLeaf,
+    Claim,
+    Comparator,
+    ComputeGraph,
+    DataHandle,
+    EvaluationPlan,
+    ExecValue,
+    GenomicRegion,
+    MeasurementBasis,
+    OperationNode,
+    PatternRef,
+    PendingReason,
+    ProducedLeafSpec,
+    SatisfactionCriterion,
+    Status,
+    StrengthVector,
+)
+from polymer_protocol import AdapterCredential, AdapterRegistry
 
+from .analysis_profile import profile_oracle_id
 from .contracts import load_contract
+from .profiles import CANONICAL_EPICV2_V1
 
 _IMPL = "methyl::region_delta_beta"
 
@@ -85,3 +105,81 @@ class RegionLmCoefAdapter:
         X = np.column_stack([np.ones_like(ind), ind])
         coef, *_ = np.linalg.lstsq(X, y, rcond=None)
         return ExecValue(value=float(coef[1]))
+
+
+# Default signal region of the bundled fixture (first 5 probes, chr1:1,000,000-1,000,800).
+_DEFAULT_REGION_PROBES = ("cg00000001", "cg00000002", "cg00000003", "cg00000004", "cg00000005")
+_DEFAULT_REGION = ("chr1", 1_000_000, 1_000_800)
+
+
+def region_delta_beta_claim(
+    claim_id: str,
+    *,
+    ref: str = "se:epicv2_casectrl_demo@1",
+    region_probes: tuple[str, ...] = _DEFAULT_REGION_PROBES,
+    region: tuple[str, int, int] = _DEFAULT_REGION,
+    group_col: str = "Sample_Group",
+    level_a: str = "level1",
+    level_b: str = "level2",
+    comparator: Comparator = Comparator.GT,
+    threshold: float = 0.10,
+    ontology_term: str = "differential_methylation",
+    strength: StrengthVector | None = None,
+    with_subject: bool = True,
+    oracle_ref: str | None = None,
+    title: str = "region differential methylation (level2 - level1)",
+) -> Claim:
+    """Build a PENDING claim whose plan computes a region Δβ over the bundled SE Contract, binding
+    CANONICAL_EPICV2_V1 as the apparatus (oracle_ref). `strength=None` → earned at verify. The
+    `genomic_region` subject is REQUIRED for the apparatus domain ({genomic_region, cohort}); pass
+    `with_subject=False` only to probe the out-of-domain precondition."""
+    if oracle_ref is None:
+        oracle_ref = profile_oracle_id(CANONICAL_EPICV2_V1)
+    node = OperationNode(
+        id="n0",
+        impl=_IMPL,
+        inputs=(DataHandle(ref=ref),),
+        params=(
+            ("region_probes", ",".join(region_probes)),
+            ("group_col", group_col),
+            ("level_a", level_a),
+            ("level_b", level_b),
+        ),
+        oracle_ref=oracle_ref,
+        produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
+    )
+    plan = EvaluationPlan(
+        graph=ComputeGraph(nodes=(node,), terminal="n0"),
+        criterion=SatisfactionCriterion(comparator=comparator, threshold=threshold),
+    )
+    subject = None
+    if with_subject:
+        chrom, start, end = region
+        subject = GenomicRegion(
+            id=f"{chrom}:{start}-{end}",
+            display=f"{chrom}:{start:,}-{end:,}",
+            assembly="hg38",
+            chrom=chrom,
+            start=start,
+            end=end,
+        )
+    return Claim(
+        id=claim_id,
+        title=title,
+        pattern=PatternRef(id="adjusted_effect", version="v1"),
+        leaves=(CategoricalLeaf(ontology_term=ontology_term),),
+        status=Status.PENDING,
+        pending_reason=PendingReason.UNTESTED,
+        strength=strength,
+        subject=subject,
+        evaluation_plan=plan,
+    )
+
+
+def methyl_independent_registry() -> AdapterRegistry:
+    """Credentials asserting the two legs are genuinely independent (distinct owners + impl hashes),
+    so the #5 gate licenses on their agreement."""
+    return AdapterRegistry(credentials=(
+        AdapterCredential(identity="methyl-meandiff-beta", owner="owner-meandiff", implementation_hash="h-meandiff"),
+        AdapterCredential(identity="methyl-lm-coef", owner="owner-lm", implementation_hash="h-lm"),
+    ))
