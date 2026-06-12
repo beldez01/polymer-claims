@@ -241,3 +241,50 @@ def test_drift_symbols_are_exported_from_package():
     assert hasattr(pp, "reopen_drifted")
     assert hasattr(pp, "DriftRecord")
     assert hasattr(pp, "DriftFinding")
+
+
+# ---------------------------------------------------------------------------
+# CES-3: content-address fields (profile_hash, dimnames_hash)
+# ---------------------------------------------------------------------------
+
+from polymer_protocol.drift import _is_fresh  # noqa: E402
+
+
+def _licensed_with(mat: MaterializationContext):
+    lic = _lic(mat)
+    return make_claim("c", status=Status.LICENSED, plan=make_plan(0.01, 0.05), licensing=lic)
+
+
+def test_content_addressed_claim_stale_when_dimnames_hash_moves():
+    mat = MaterializationContext(id="M", api_version="v1", data_version="d1",
+                                 profile_hash="sha256:p", dimnames_hash="sha256:DATA1")
+    c = _licensed_with(mat)
+    current = MaterializationContext(id="M", api_version="v1", data_version="d1",
+                                     profile_hash="sha256:p", dimnames_hash="sha256:DATA2")
+    assert _is_fresh(c, current) is False
+
+
+def test_content_addressed_claim_stale_when_profile_hash_moves():
+    mat = MaterializationContext(id="M", api_version="v1", data_version="d1",
+                                 profile_hash="sha256:P1", dimnames_hash="sha256:d")
+    c = _licensed_with(mat)
+    current = MaterializationContext(id="M", api_version="v1", data_version="d1",
+                                     profile_hash="sha256:P2", dimnames_hash="sha256:d")
+    assert _is_fresh(c, current) is False
+
+
+def test_content_addressed_claim_fresh_when_both_match():
+    mat = MaterializationContext(id="M", api_version="v1", data_version="d1",
+                                 profile_hash="sha256:p", dimnames_hash="sha256:d")
+    c = _licensed_with(mat)
+    current = MaterializationContext(id="M", api_version="v1", data_version="d1",
+                                     profile_hash="sha256:p", dimnames_hash="sha256:d")
+    assert _is_fresh(c, current) is True
+
+
+def test_legacy_claim_without_hashes_judged_on_versions_only():
+    mat = MaterializationContext(id="M", api_version="v1", data_version="d1")
+    c = _licensed_with(mat)
+    current = MaterializationContext(id="M", api_version="v1", data_version="d1",
+                                     profile_hash="sha256:whatever", dimnames_hash="sha256:whatever")
+    assert _is_fresh(c, current) is True
