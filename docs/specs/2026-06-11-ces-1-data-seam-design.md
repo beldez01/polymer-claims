@@ -104,8 +104,8 @@ files** (the decided sidecar layout):
     // … 8 samples, balanced TET2_mut / WT
   ],
   "row_data": [                          // one entry per probe, in matrix row order
-    { "feature_id": "cg00000029", "chr": "chr16", "pos": 53434200 }
-    // … 50 EPICv2 cg-format probes with hg38 coordinates
+    { "feature_id": "cg00000001", "chr": "chr4", "pos": 105000000 }
+    // … 50 EPICv2 cg-format probes on chr4 near the TET2 locus, hg38 coordinates
   ],
   "metadata": { "genome_assembly": "hg38", "array": "EPICv2" }
 }
