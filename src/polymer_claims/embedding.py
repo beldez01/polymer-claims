@@ -27,7 +27,7 @@ KIND_WEIGHT: dict[str, float] = {
     "reinterpret": 0.5,
     "rebut": 0.4,
 }
-RHO = 0.3  # polarity repulsion for an opposite-direction rebut pair
+RHO = 0.3  # polarity attenuation for an opposite-direction rebut pair
 
 
 def build_graph(
@@ -100,6 +100,20 @@ def _components(node_ids: list[str], W: dict[frozenset[str], float]) -> list[lis
     return comps
 
 
+def _canonicalize_columns(coords: np.ndarray) -> np.ndarray:
+    """Fix each column's sign deterministically and platform-stably: round to 6dp BEFORE choosing
+    the pivot, so cross-BLAS float noise (~1e-10) can't flip which entry wins an exact-magnitude
+    tie. Flip the column so its largest-|magnitude| (rounded) entry is non-negative; lowest index
+    breaks ties on the identical rounded array."""
+    out = coords.copy()
+    for k in range(out.shape[1]):
+        r = np.round(out[:, k], 6)
+        j = int(np.argmax(np.abs(r)))
+        if r[j] < 0:
+            out[:, k] = -out[:, k]
+    return out
+
+
 def _embed_component(
     comp: list[str], W: dict[frozenset[str], float], polar: set[frozenset[str]]
 ) -> dict[str, tuple[float, float, float]]:
@@ -120,11 +134,8 @@ def _embed_component(
     L = np.eye(n) - (dinv[:, None] * A * dinv[None, :])
     _, vecs = np.linalg.eigh(L)  # ascending eigenvalues; columns are eigenvectors
     coords = vecs[:, 1:4].copy()  # skip the trivial null component, take the next 3
+    coords = _canonicalize_columns(coords)  # platform-stable sign canonicalization
     for k in range(coords.shape[1]):
-        col = coords[:, k]
-        j = int(np.argmax(np.abs(col)))  # lowest index on ties → deterministic sign
-        if col[j] < 0:
-            coords[:, k] = -col
         m = np.abs(coords[:, k]).max()
         if m > 0:
             coords[:, k] = coords[:, k] / m

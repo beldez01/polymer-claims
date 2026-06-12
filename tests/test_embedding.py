@@ -77,3 +77,18 @@ def test_equivalence_pair_is_very_close():
     d_eq = _dist(pos[EQUIV_PAIR[0]], pos[EQUIV_PAIR[1]])
     d_polar = _dist(pos[POLAR_PAIR[0]], pos[POLAR_PAIR[1]])
     assert d_eq < d_polar  # equivalence is the tightest relation in the cluster
+
+
+def test_sign_canonicalization_is_flip_invariant():
+    import numpy as np
+    from polymer_claims.embedding import _canonicalize_columns
+    M = np.array([
+        [0.5, -0.5, 0.1],
+        [0.5,  0.5, -0.2],
+        [-0.5, 0.5,  0.3],
+        [-0.5, -0.5, -0.4],
+    ])
+    base = _canonicalize_columns(M.copy())
+    # flipping the sign of any input columns must NOT change the canonical output
+    flipped = _canonicalize_columns(M * np.array([-1.0, 1.0, -1.0]))
+    assert np.allclose(base, flipped)
