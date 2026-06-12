@@ -15,9 +15,6 @@ the hash is deterministic, which is all CES-0 requires.
 """
 from __future__ import annotations
 
-import hashlib
-import json
-
 from pydantic import BaseModel, ConfigDict
 
 from polymer_protocol import (
@@ -26,6 +23,8 @@ from polymer_protocol import (
     OracleRegistry,
     ValidationTier,
 )
+
+from polymer_claims._hashing import canonical_sha256
 
 
 class AnalysisProfile(BaseModel):
@@ -84,9 +83,7 @@ class AnalysisProfile(BaseModel):
 def content_hash(profile: AnalysisProfile) -> str:
     """Canonical content-address of the whole pinned regime. Sorted-keys/no-whitespace JSON
     (Polymer SemanticRunID parity) -> SHA256, prefixed 'sha256:'."""
-    payload = profile.model_dump(mode="json")
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
-    return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return canonical_sha256(profile.model_dump(mode="json"))
 
 
 # Substrate (the nature of the DATA the profile is applied to) -> validation-tier ceiling

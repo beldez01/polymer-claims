@@ -1,0 +1,319 @@
+{
+  "uid": "tet2_epicv2_demo@1",
+  "dim": [
+    50,
+    8
+  ],
+  "assays": [
+    {
+      "name": "beta",
+      "ref": "tet2_epicv2_demo.betas.tsv"
+    }
+  ],
+  "col_data": [
+    {
+      "sample_id": "S01",
+      "Sample_Group": "TET2_mut",
+      "Age": 40,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "S02",
+      "Sample_Group": "WT",
+      "Age": 43,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "S03",
+      "Sample_Group": "TET2_mut",
+      "Age": 46,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "S04",
+      "Sample_Group": "WT",
+      "Age": 49,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "S05",
+      "Sample_Group": "TET2_mut",
+      "Age": 52,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "S06",
+      "Sample_Group": "WT",
+      "Age": 55,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "S07",
+      "Sample_Group": "TET2_mut",
+      "Age": 58,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "S08",
+      "Sample_Group": "WT",
+      "Age": 61,
+      "Sex": "F"
+    }
+  ],
+  "row_data": [
+    {
+      "feature_id": "cg00000001",
+      "chr": "chr4",
+      "pos": 105000000
+    },
+    {
+      "feature_id": "cg00000002",
+      "chr": "chr4",
+      "pos": 105000500
+    },
+    {
+      "feature_id": "cg00000003",
+      "chr": "chr4",
+      "pos": 105001000
+    },
+    {
+      "feature_id": "cg00000004",
+      "chr": "chr4",
+      "pos": 105001500
+    },
+    {
+      "feature_id": "cg00000005",
+      "chr": "chr4",
+      "pos": 105002000
+    },
+    {
+      "feature_id": "cg00000006",
+      "chr": "chr4",
+      "pos": 105002500
+    },
+    {
+      "feature_id": "cg00000007",
+      "chr": "chr4",
+      "pos": 105003000
+    },
+    {
+      "feature_id": "cg00000008",
+      "chr": "chr4",
+      "pos": 105003500
+    },
+    {
+      "feature_id": "cg00000009",
+      "chr": "chr4",
+      "pos": 105004000
+    },
+    {
+      "feature_id": "cg00000010",
+      "chr": "chr4",
+      "pos": 105004500
+    },
+    {
+      "feature_id": "cg00000011",
+      "chr": "chr4",
+      "pos": 105005000
+    },
+    {
+      "feature_id": "cg00000012",
+      "chr": "chr4",
+      "pos": 105005500
+    },
+    {
+      "feature_id": "cg00000013",
+      "chr": "chr4",
+      "pos": 105006000
+    },
+    {
+      "feature_id": "cg00000014",
+      "chr": "chr4",
+      "pos": 105006500
+    },
+    {
+      "feature_id": "cg00000015",
+      "chr": "chr4",
+      "pos": 105007000
+    },
+    {
+      "feature_id": "cg00000016",
+      "chr": "chr4",
+      "pos": 105007500
+    },
+    {
+      "feature_id": "cg00000017",
+      "chr": "chr4",
+      "pos": 105008000
+    },
+    {
+      "feature_id": "cg00000018",
+      "chr": "chr4",
+      "pos": 105008500
+    },
+    {
+      "feature_id": "cg00000019",
+      "chr": "chr4",
+      "pos": 105009000
+    },
+    {
+      "feature_id": "cg00000020",
+      "chr": "chr4",
+      "pos": 105009500
+    },
+    {
+      "feature_id": "cg00000021",
+      "chr": "chr4",
+      "pos": 105010000
+    },
+    {
+      "feature_id": "cg00000022",
+      "chr": "chr4",
+      "pos": 105010500
+    },
+    {
+      "feature_id": "cg00000023",
+      "chr": "chr4",
+      "pos": 105011000
+    },
+    {
+      "feature_id": "cg00000024",
+      "chr": "chr4",
+      "pos": 105011500
+    },
+    {
+      "feature_id": "cg00000025",
+      "chr": "chr4",
+      "pos": 105012000
+    },
+    {
+      "feature_id": "cg00000026",
+      "chr": "chr4",
+      "pos": 105012500
+    },
+    {
+      "feature_id": "cg00000027",
+      "chr": "chr4",
+      "pos": 105013000
+    },
+    {
+      "feature_id": "cg00000028",
+      "chr": "chr4",
+      "pos": 105013500
+    },
+    {
+      "feature_id": "cg00000029",
+      "chr": "chr4",
+      "pos": 105014000
+    },
+    {
+      "feature_id": "cg00000030",
+      "chr": "chr4",
+      "pos": 105014500
+    },
+    {
+      "feature_id": "cg00000031",
+      "chr": "chr4",
+      "pos": 105015000
+    },
+    {
+      "feature_id": "cg00000032",
+      "chr": "chr4",
+      "pos": 105015500
+    },
+    {
+      "feature_id": "cg00000033",
+      "chr": "chr4",
+      "pos": 105016000
+    },
+    {
+      "feature_id": "cg00000034",
+      "chr": "chr4",
+      "pos": 105016500
+    },
+    {
+      "feature_id": "cg00000035",
+      "chr": "chr4",
+      "pos": 105017000
+    },
+    {
+      "feature_id": "cg00000036",
+      "chr": "chr4",
+      "pos": 105017500
+    },
+    {
+      "feature_id": "cg00000037",
+      "chr": "chr4",
+      "pos": 105018000
+    },
+    {
+      "feature_id": "cg00000038",
+      "chr": "chr4",
+      "pos": 105018500
+    },
+    {
+      "feature_id": "cg00000039",
+      "chr": "chr4",
+      "pos": 105019000
+    },
+    {
+      "feature_id": "cg00000040",
+      "chr": "chr4",
+      "pos": 105019500
+    },
+    {
+      "feature_id": "cg00000041",
+      "chr": "chr4",
+      "pos": 105020000
+    },
+    {
+      "feature_id": "cg00000042",
+      "chr": "chr4",
+      "pos": 105020500
+    },
+    {
+      "feature_id": "cg00000043",
+      "chr": "chr4",
+      "pos": 105021000
+    },
+    {
+      "feature_id": "cg00000044",
+      "chr": "chr4",
+      "pos": 105021500
+    },
+    {
+      "feature_id": "cg00000045",
+      "chr": "chr4",
+      "pos": 105022000
+    },
+    {
+      "feature_id": "cg00000046",
+      "chr": "chr4",
+      "pos": 105022500
+    },
+    {
+      "feature_id": "cg00000047",
+      "chr": "chr4",
+      "pos": 105023000
+    },
+    {
+      "feature_id": "cg00000048",
+      "chr": "chr4",
+      "pos": 105023500
+    },
+    {
+      "feature_id": "cg00000049",
+      "chr": "chr4",
+      "pos": 105024000
+    },
+    {
+      "feature_id": "cg00000050",
+      "chr": "chr4",
+      "pos": 105024500
+    }
+  ],
+  "metadata": {
+    "genome_assembly": "hg38",
+    "array": "EPICv2"
+  }
+}

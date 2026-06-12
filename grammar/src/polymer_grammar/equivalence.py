@@ -57,14 +57,14 @@ def equivalence_class(
 
     An edge counts as "IN" when, if `grounded_in` is supplied, its claim id is a member
     of that grounded extension (the real L3 membership); otherwise (back-compat) when its
-    status is LICENSED.
+    status is LICENSED or STRUCTURAL (a structural-key identity is IN by construction).
     """
     adj: dict[str, set[str]] = defaultdict(set)
     for eq in equivalences:
         counts = (
             eq.id in grounded_in
             if grounded_in is not None
-            else eq.status == Status.LICENSED
+            else eq.status in (Status.LICENSED, Status.STRUCTURAL)
         )
         if counts:
             adj[eq.left].add(eq.right)

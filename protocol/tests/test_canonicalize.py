@@ -15,9 +15,11 @@ def test_structurally_identical_claims_become_one_equivalence_class(empty_ledger
     assert len(out.equivalences) == 1
     eq = out.equivalences[0]
     assert {eq.left, eq.right} == {"a", "b"}
-    assert eq.status == Status.LICENSED
-    # they are now in one equivalence class (back-compat LICENSED gating)
+    assert eq.status == Status.STRUCTURAL
+    # they are now in one equivalence class (back-compat STRUCTURAL gating)
     assert are_equivalent("a", "b", out.equivalences)
+    # canonicalize must never mint a LICENSED equivalence (no evidential test was run)
+    assert all(e.status != Status.LICENSED for e in out.equivalences)
 
 
 def test_distinct_claims_are_not_collapsed(empty_ledger):

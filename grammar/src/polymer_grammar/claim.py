@@ -63,3 +63,12 @@ class Claim(_Model):
                 f"got status={self.status.value}"
             )
         return self
+
+    @model_validator(mode="after")
+    def _structural_only_on_equivalence(self) -> "Claim":
+        if self.status == Status.STRUCTURAL:
+            raise ValueError(
+                "status=STRUCTURAL is valid only on an EquivalenceClaim "
+                "(a Claim is never true by construction); got a Claim"
+            )
+        return self
