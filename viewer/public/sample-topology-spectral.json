@@ -1,0 +1,637 @@
+{
+  "nodes": [
+    {
+      "id": "c0_0",
+      "status": "licensed",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.599105,
+        -0.144244,
+        -0.118447
+      ]
+    },
+    {
+      "id": "c0_1",
+      "status": "licensed",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.615744,
+        -0.135943,
+        -0.114897
+      ]
+    },
+    {
+      "id": "c0_2",
+      "status": "pending",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.647066,
+        -0.391428,
+        -0.922338
+      ]
+    },
+    {
+      "id": "c0_3",
+      "status": "pending",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.626179,
+        -0.360522,
+        -0.94243
+      ]
+    },
+    {
+      "id": "c0_4",
+      "status": "exploratory",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.575061,
+        -0.114897,
+        -0.44605
+      ]
+    },
+    {
+      "id": "c0_5",
+      "status": "exploratory",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.640955,
+        -0.122152,
+        -0.44583
+      ]
+    },
+    {
+      "id": "c0_6",
+      "status": "exploratory",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.658235,
+        -0.185378,
+        -0.996605
+      ]
+    },
+    {
+      "id": "c0_7",
+      "status": "exploratory",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.726055,
+        -0.230016,
+        -1.0
+      ]
+    },
+    {
+      "id": "c1_0",
+      "status": "exploratory",
+      "pattern_id": "synth_mediation",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.9053,
+        -0.750099,
+        -0.715348
+      ]
+    },
+    {
+      "id": "c1_1",
+      "status": "exploratory",
+      "pattern_id": "synth_mediation",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.984159,
+        -0.91194,
+        -0.422832
+      ]
+    },
+    {
+      "id": "c1_2",
+      "status": "exploratory",
+      "pattern_id": "synth_mediation",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.923637,
+        -0.807644,
+        -0.582508
+      ]
+    },
+    {
+      "id": "c1_3",
+      "status": "exploratory",
+      "pattern_id": "synth_mediation",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.956035,
+        -0.859614,
+        -0.483193
+      ]
+    },
+    {
+      "id": "c1_4",
+      "status": "exploratory",
+      "pattern_id": "synth_mediation",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.923637,
+        -0.807644,
+        -0.582508
+      ]
+    },
+    {
+      "id": "c1_5",
+      "status": "exploratory",
+      "pattern_id": "synth_mediation",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.956035,
+        -0.859614,
+        -0.483193
+      ]
+    },
+    {
+      "id": "c1_6",
+      "status": "exploratory",
+      "pattern_id": "synth_mediation",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.63901,
+        -0.778249,
+        -0.598652
+      ]
+    },
+    {
+      "id": "c1_7",
+      "status": "exploratory",
+      "pattern_id": "synth_mediation",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.753058,
+        -0.788205,
+        -0.509843
+      ]
+    },
+    {
+      "id": "c2_0",
+      "status": "exploratory",
+      "pattern_id": "synth_dose",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.195055,
+        -0.805962,
+        -0.600552
+      ]
+    },
+    {
+      "id": "c2_1",
+      "status": "exploratory",
+      "pattern_id": "synth_dose",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.114897,
+        -0.718735,
+        -0.563767
+      ]
+    },
+    {
+      "id": "c2_2",
+      "status": "exploratory",
+      "pattern_id": "synth_dose",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.177858,
+        -0.768035,
+        -0.60169
+      ]
+    },
+    {
+      "id": "c2_3",
+      "status": "exploratory",
+      "pattern_id": "synth_dose",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.143665,
+        -0.749581,
+        -0.589503
+      ]
+    },
+    {
+      "id": "c2_4",
+      "status": "exploratory",
+      "pattern_id": "synth_dose",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.177858,
+        -0.768035,
+        -0.60169
+      ]
+    },
+    {
+      "id": "c2_5",
+      "status": "exploratory",
+      "pattern_id": "synth_dose",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.143665,
+        -0.749581,
+        -0.589503
+      ]
+    },
+    {
+      "id": "c2_6",
+      "status": "exploratory",
+      "pattern_id": "synth_dose",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.346169,
+        -0.630326,
+        -0.543204
+      ]
+    },
+    {
+      "id": "c2_7",
+      "status": "exploratory",
+      "pattern_id": "synth_dose",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.337498,
+        -0.526423,
+        -0.504357
+      ]
+    },
+    {
+      "id": "iso_0",
+      "status": "exploratory",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        0.597772,
+        -0.554333,
+        -0.603955
+      ]
+    },
+    {
+      "id": "iso_1",
+      "status": "exploratory",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        -0.574233,
+        0.575067,
+        -0.526489
+      ]
+    },
+    {
+      "id": "iso_2",
+      "status": "exploratory",
+      "pattern_id": "synth_effect",
+      "subject_kind": null,
+      "strength": null,
+      "is_representation_revision": false,
+      "position": [
+        0.613011,
+        0.632375,
+        -0.579311
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "c0_0",
+      "target": "c0_1",
+      "kind": "equivalence",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c0_0",
+      "target": "c0_4",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c0_1",
+      "target": "c0_5",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c0_2",
+      "target": "c0_3",
+      "kind": "rebut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c0_4",
+      "target": "c0_5",
+      "kind": "entails",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c0_4",
+      "target": "c0_6",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c0_5",
+      "target": "c0_7",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c0_6",
+      "target": "c0_3",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c0_6",
+      "target": "c0_7",
+      "kind": "entails",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c0_7",
+      "target": "c0_2",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c0_7",
+      "target": "c1_0",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c1_0",
+      "target": "c1_2",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c1_1",
+      "target": "c1_3",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c1_2",
+      "target": "c1_3",
+      "kind": "entails",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c1_4",
+      "target": "c1_0",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c1_4",
+      "target": "c1_5",
+      "kind": "entails",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c1_5",
+      "target": "c1_1",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c1_6",
+      "target": "c1_0",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c1_6",
+      "target": "c1_7",
+      "kind": "rebut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c1_6",
+      "target": "c2_0",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c1_7",
+      "target": "c1_1",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c1_7",
+      "target": "c1_6",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c2_0",
+      "target": "c2_2",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c2_1",
+      "target": "c2_3",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c2_2",
+      "target": "c2_3",
+      "kind": "entails",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c2_4",
+      "target": "c2_0",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c2_4",
+      "target": "c2_5",
+      "kind": "entails",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c2_5",
+      "target": "c2_1",
+      "kind": "evidence_for",
+      "effective": false,
+      "provisional": false
+    },
+    {
+      "source": "c2_6",
+      "target": "c2_0",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c2_6",
+      "target": "c2_7",
+      "kind": "rebut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c2_7",
+      "target": "c0_4",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c2_7",
+      "target": "c2_1",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    },
+    {
+      "source": "c2_7",
+      "target": "c2_6",
+      "kind": "undercut",
+      "effective": true,
+      "provisional": false
+    }
+  ],
+  "clusters": [
+    {
+      "id": "pattern:synth_dose",
+      "label": "pattern:synth_dose",
+      "member_ids": [
+        "c2_0",
+        "c2_1",
+        "c2_2",
+        "c2_3",
+        "c2_4",
+        "c2_5",
+        "c2_6",
+        "c2_7"
+      ]
+    },
+    {
+      "id": "pattern:synth_effect",
+      "label": "pattern:synth_effect",
+      "member_ids": [
+        "c0_0",
+        "c0_1",
+        "c0_2",
+        "c0_3",
+        "c0_4",
+        "c0_5",
+        "c0_6",
+        "c0_7",
+        "iso_0",
+        "iso_1",
+        "iso_2"
+      ]
+    },
+    {
+      "id": "pattern:synth_mediation",
+      "label": "pattern:synth_mediation",
+      "member_ids": [
+        "c1_0",
+        "c1_1",
+        "c1_2",
+        "c1_3",
+        "c1_4",
+        "c1_5",
+        "c1_6",
+        "c1_7"
+      ]
+    }
+  ],
+  "layout_id": "external:spectral-v1",
+  "contract_version": "1.0"
+}

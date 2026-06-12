@@ -79,6 +79,18 @@ def test_equivalence_pair_is_very_close():
     assert d_eq < d_polar  # equivalence is the tightest relation in the cluster
 
 
+def test_spectral_sample_file_is_valid_and_nontrivial():
+    import json
+    from pathlib import Path
+    from polymer_protocol.topology import TopologyExport
+
+    p = Path(__file__).resolve().parents[1] / "viewer" / "public" / "sample-topology-spectral.json"
+    export = TopologyExport.model_validate(json.loads(p.read_text()))
+    assert export.layout_id == "external:spectral-v1"
+    assert len(export.nodes) > 10
+    assert any(any(v != 0.0 for v in n.position) for n in export.nodes)
+
+
 def test_sign_canonicalization_is_flip_invariant():
     import numpy as np
     from polymer_claims.embedding import _canonicalize_columns
