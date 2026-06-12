@@ -55,6 +55,7 @@ def run_cycle(
     reserve_fraction: float = 0.0,
     cell_cap_fraction: float = 1.0,
     generation_credit_floor: float | None = None,
+    materializations: dict[str, MaterializationContext] | None = None,
 ) -> CycleResult:
     audit: list[StageAudit] = []
     led = ledger if ledger is not None else SelectionLedger()
@@ -112,7 +113,7 @@ def run_cycle(
     n_committed = len(_locked_ids(corpus) - locked_before)
     audit.append(StageAudit(stage="commit", note=f"{n_committed} claim(s) committed", count=n_committed))
 
-    corpus, records = execute_ground(corpus, adapters, ctx, only=selected_ids)
+    corpus, records = execute_ground(corpus, adapters, ctx, only=selected_ids, materializations=materializations)
     audit.append(StageAudit(stage="execute_ground", note=f"{len(records)} executed", count=len(records)))
 
     # scaffolding stays valid: canonicalize/safety/commit/execute change neither defeat_edges
