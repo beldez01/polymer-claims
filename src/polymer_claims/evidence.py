@@ -11,7 +11,10 @@ from __future__ import annotations
 
 import numpy as np
 
-from polymer_grammar import Comparator
+from polymer_grammar import Comparator, DataHandle
+from polymer_protocol.corpus import Corpus
+
+from .methyl_adapters import _IMPL, _region_group_means
 
 # c<1 caps the betting fraction so every capital factor (1 + lam*W) stays strictly positive (Eq.25);
 # 0.9 recovers power while keeping factors >= 1-c = 0.1. Fixed, data-independent.
@@ -66,3 +69,36 @@ def betting_evalue(
         return 0.0
     es = [_capital(ga, gb, theta0, s) for s in _SEEDS]
     return float(sum(es) / len(es))
+
+
+def _terminal_node(claim):
+    plan = claim.evaluation_plan
+    if plan is None:
+        return None
+    g = plan.graph
+    return next((n for n in g.nodes if n.id == g.terminal), None)
+
+
+def evidence_map(corpus: Corpus) -> dict[str, float]:
+    """Per-claim native e-value keyed by claim id. A claim is included iff its terminal node is the
+    methyl apparatus (impl == _IMPL) with a DataHandle, its contract resolves, and its criterion is
+    one-sided numeric (GT/GE/LT/LE with a threshold). Everything else gets NO entry (caller falls
+    back to the existing 3-way gate). Impure: _region_group_means reads the bundled contract."""
+    out: dict[str, float] = {}
+    for c in corpus.claims:
+        node = _terminal_node(c)
+        if node is None or node.impl != _IMPL:
+            continue
+        if not any(isinstance(i, DataHandle) for i in node.inputs):
+            continue
+        crit = c.evaluation_plan.criterion
+        if crit.threshold is None or crit.comparator not in (
+            Comparator.GT, Comparator.GE, Comparator.LT, Comparator.LE
+        ):
+            continue
+        try:
+            a, b = _region_group_means(node)
+        except (FileNotFoundError, KeyError, ValueError):
+            continue
+        out[c.id] = betting_evalue(a, b, threshold=crit.threshold, comparator=crit.comparator)
+    return out
