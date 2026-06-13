@@ -24,7 +24,7 @@ def test_fdr_ledger_advances_one_test_per_executed_claim(empty_ledger, ctx, adap
     out, skipped = integrate(corpus, scaffolding, (rec,))
     assert out.fdr_ledger.n_tests == 1
     assert out.fdr_ledger.tests[0].claim_id == "a"
-    assert out.fdr_ledger.tests[0].p_value == 0.01
+    assert out.fdr_ledger.tests[0].e_value == 0.01
     assert skipped == ()
 
 

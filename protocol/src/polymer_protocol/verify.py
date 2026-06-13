@@ -19,6 +19,7 @@ from polymer_grammar import (
     StrengthVector,
     clears_mdl_bar,
     corpus_implied_schema,
+    elond_decisions,
     is_representation_revision,
     mdl_delta,
     meets_meta_tier_bar,
@@ -117,12 +118,21 @@ def verify_stage(
     exec_records: tuple[ExecRecord, ...],
     oracles: OracleRegistry | None = None,
     adapter_registry: AdapterRegistry | None = None,
+    evidence: dict[str, float] | None = None,
 ) -> Corpus:
     registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
     rec_by_id = {r.claim_id: r for r in exec_records}
     earned = _build_earned(corpus, exec_records)
     permitted = _permitted_by_bar(corpus, exec_records, earned)
+
+    ev_map = evidence or {}
+    executed_with_e = [(r.claim_id, ev_map[r.claim_id]) for r in exec_records if r.claim_id in ev_map]
+    new_ledger, e_decisions = elond_decisions(corpus.fdr_ledger, executed_with_e)
+
+    def _e_ok(cid: str) -> bool:
+        # claims with no e-value are exempt (3-way gate); claims with one must be a discovery.
+        return cid not in ev_map or e_decisions.get(cid, False)
 
     def _recorded_strength(claim: Claim) -> StrengthVector | None:
         """Earned claims record cap_earned(earned, tier); everything else keeps oracle_cap."""
@@ -147,7 +157,8 @@ def verify_stage(
         # provenance is non-None for anything that passed execute_ground (_is_executable
         # requires the lock); the guard is defensive for direct callers.
         if (ev.satisfaction is not None and c.id in in_ext
-                and c.provenance is not None and c.id in permitted):
+                and c.provenance is not None and c.id in permitted
+                and _e_ok(c.id)):
             if adapter_registry is not None and not adapter_registry.is_empty:
                 identities = tuple(r.adapter_identity for r in ev.results)
                 if not pair_is_registry_independent(adapter_registry, identities):
@@ -209,4 +220,4 @@ def verify_stage(
             )
         else:
             new_claims.append(c)  # stays PENDING — already carries a valid pending_reason
-    return corpus.model_copy(update={"claims": tuple(new_claims)})
+    return corpus.model_copy(update={"claims": tuple(new_claims), "fdr_ledger": new_ledger})
