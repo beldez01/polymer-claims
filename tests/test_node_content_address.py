@@ -78,3 +78,43 @@ def test_drift_arm_reopens_after_world_moves(monkeypatch):
     assert r.n_reopened == 1
     assert r.last_drift is not None
     assert any(f.claim_id == "c-true" for f in r.last_drift.drifted)
+
+
+def test_flywheel_relicenses_against_moved_world(monkeypatch):
+    r = methyl_node()
+    for _ in range(3):
+        r.tick()
+    c = next(x for x in r.corpus.claims if x.id == "c-true")
+    assert c.status == Status.LICENSED
+    h_a = c.licensing.satisfactions[0].materialization.dimnames_hash
+    assert h_a is not None
+
+    import polymer_claims.materialization as mat_mod
+    from polymer_claims.contracts import load_contract as real_load
+
+    h_b = "sha256:" + "b" * 64
+    assert h_b != h_a
+    monkeypatch.setattr(
+        mat_mod, "load_contract",
+        lambda ref: real_load(ref).model_copy(update={"dimnames_hash": h_b}),
+    )
+    r.refresh_world()
+
+    # drift tick -> reopen
+    r.tick()
+    c = next(x for x in r.corpus.claims if x.id == "c-true")
+    assert c.status == Status.PENDING
+
+    # re-license tick(s) -> records the NEW address H_B
+    for _ in range(5):
+        r.tick()
+        c = next(x for x in r.corpus.claims if x.id == "c-true")
+        if c.status == Status.LICENSED:
+            break
+    assert c.status == Status.LICENSED
+    assert c.licensing.satisfactions[0].materialization.dimnames_hash == h_b
+
+    # world is fresh again: another tick does NOT re-open it
+    r.tick()
+    c = next(x for x in r.corpus.claims if x.id == "c-true")
+    assert c.status == Status.LICENSED
