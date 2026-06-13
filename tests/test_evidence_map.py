@@ -28,3 +28,12 @@ def test_evidence_map_skips_non_apparatus_claim():
     from tests.conftest import make_claim, make_plan
     c = make_claim("plain", plan=make_plan(0.01, 0.05))
     assert "plain" not in evidence_map(_corpus(c))
+
+
+def test_evidence_map_multi_claim_keys_only_apparatus():
+    from tests.conftest import make_claim, make_plan
+    good = region_delta_beta_claim("c-true", threshold=0.10)
+    bad = region_delta_beta_claim("c-bad", ref="se:does_not_exist@1")
+    plain = make_claim("plain", plan=make_plan(0.01, 0.05))
+    m = evidence_map(Corpus(claims=(good, bad, plain), fdr_ledger=FDRLedger(target_fdr=0.05)))
+    assert set(m.keys()) == {"c-true"}

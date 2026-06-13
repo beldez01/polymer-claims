@@ -62,7 +62,7 @@
   "equivalences": [],
   "fdr_ledger": {
     "target_fdr": 0.05,
-    "procedure": "lond",
+    "procedure": "elond",
     "tests": []
   }
 }

@@ -68,3 +68,16 @@ def test_evalue_is_deterministic():
     e1 = betting_evalue(a, b, threshold=0.10, comparator=Comparator.GT)
     e2 = betting_evalue(a, b, threshold=0.10, comparator=Comparator.GT)
     assert e1 == e2
+
+
+def test_evalue_valid_when_grapa_bets_under_null():
+    # interior null with within-group spread so GRAPA's lambda goes positive then self-corrects.
+    # mu_b - mu_a = 0.05 < threshold 0.10  =>  strictly under H0  =>  E[e] <= 1.
+    import random
+    rng = random.Random(3)
+    total, trials = 0.0, 3000
+    for _ in range(trials):
+        a = [min(1.0, max(0.0, 0.40 + rng.uniform(-0.05, 0.05))) for _ in range(12)]
+        b = [min(1.0, max(0.0, 0.45 + rng.uniform(-0.05, 0.05))) for _ in range(12)]  # mean diff ~0.05
+        total += betting_evalue(a, b, threshold=0.10, comparator=Comparator.GT)
+    assert total / trials <= 1.0 + 0.06   # valid under an interior null where GRAPA actually bets

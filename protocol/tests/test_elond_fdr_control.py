@@ -38,7 +38,7 @@ def _fdp(discoveries, truth):
 
 def test_elond_controls_fdr_where_naive_breaches():
     rng = random.Random(20260612)
-    target, m, pi0, shift, trials = 0.10, 200, 0.92, 1.6, 400
+    target, m, pi0, shift, trials = 0.10, 200, 0.92, 1.6, 1200
     elond_fdps, naive_fdps = [], []
     naive_bar = 1.0 / target                         # reject e >= 1/target, NO online discount
     for _ in range(trials):
@@ -49,10 +49,6 @@ def test_elond_controls_fdr_where_naive_breaches():
         naive_fdps.append(_fdp(naive_disc, truth))
     elond_fdr = sum(elond_fdps) / trials
     naive_fdr = sum(naive_fdps) / trials
-    # 1) e-LOND controls FDR under dependence:
-    assert elond_fdr <= target + 0.03, f"e-LOND FDR {elond_fdr} > target"
-    # 2) the regime is non-trivial AND the discount is load-bearing: the naive fixed-bar procedure
-    #    BREACHES the ceiling on the SAME streams (so the test would catch a discount regression).
-    assert naive_fdr > target + 0.05, f"naive FDR {naive_fdr} did not breach (regime too easy)"
-    # 3) e-LOND is strictly more disciplined than naive here:
-    assert elond_fdr < naive_fdr
+    assert elond_fdr <= target + 0.02, f"e-LOND FDR {elond_fdr} > target"
+    assert naive_fdr > target + 0.05, f"naive FDR {naive_fdr} did not breach"
+    assert naive_fdr > elond_fdr + 0.05, f"naive ({naive_fdr}) does not clearly exceed e-LOND ({elond_fdr})"
