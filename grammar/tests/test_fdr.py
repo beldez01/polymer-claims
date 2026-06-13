@@ -11,6 +11,7 @@ from polymer_grammar.fdr import (
     is_discovery,
     process_stream,
     process_test,
+    retract_tests,
 )
 
 
@@ -93,3 +94,36 @@ def test_is_discovery():
     led = process_test(FDRLedger(target_fdr=0.05), "a", 40.0)
     assert is_discovery(led, "a") is True
     assert is_discovery(led, "z") is False
+
+
+def test_retracted_discovery_not_counted():
+    led = FDRLedger(target_fdr=0.05, tests=(
+        FDRTest(index=1, claim_id="a", e_value=100.0, alpha_allocated=0.03, discovery=True),
+        FDRTest(index=2, claim_id="b", e_value=100.0, alpha_allocated=0.02, discovery=True, retracted=True),
+    ))
+    assert led.n_discoveries == 1
+    assert led.discoveries == frozenset({"a"})
+    assert is_discovery(led, "a") is True
+    assert is_discovery(led, "b") is False
+
+
+def test_retract_tests_marks_matching_claim_ids():
+    led = FDRLedger(target_fdr=0.05, tests=(
+        FDRTest(index=1, claim_id="a", e_value=100.0, alpha_allocated=0.03, discovery=True),
+        FDRTest(index=2, claim_id="b", e_value=100.0, alpha_allocated=0.02, discovery=True),
+    ))
+    out = retract_tests(led, {"a"})
+    assert out.tests[0].retracted is True and out.tests[1].retracted is False
+    assert out.n_discoveries == 1
+    assert led.tests[0].retracted is False
+    assert retract_tests(led, {"zzz"}).tests == led.tests
+
+
+def test_process_test_after_retraction_uses_live_discovery_count():
+    led = FDRLedger(target_fdr=0.05, tests=(
+        FDRTest(index=1, claim_id="a", e_value=100.0, alpha_allocated=0.03, discovery=True),
+        FDRTest(index=2, claim_id="b", e_value=100.0, alpha_allocated=0.02, discovery=True),
+    ))
+    led = retract_tests(led, {"a"})
+    led = process_test(led, "c", 100.0)
+    assert led.tests[2].alpha_allocated == pytest.approx(0.05 * _gamma(3) * (1 + 1))

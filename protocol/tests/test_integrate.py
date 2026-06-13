@@ -3,6 +3,11 @@ from polymer_grammar import Status
 from polymer_protocol.corpus import Corpus, CycleScaffolding
 from polymer_protocol.integrate import integrate
 from tests.conftest import make_claim, make_plan
+from polymer_grammar import (
+    DefeatEdge, DefeatEdgeKind, FDRLedger, FDRTest, LicenseRoute, Licensing,
+    MaterializationContext, RivalSetClosure, Satisfaction, SatisfactionVerdict,
+    Direction, NeighborEdge, NeighborEdgeKind, Proposition, StrengthVector,
+)
 
 
 def _exec_record_with_value(claim_id, value, ctx, adapters, empty_ledger):
@@ -80,3 +85,105 @@ def test_string_terminal_does_not_affect_ledger(empty_ledger):
     out, skipped = integrate(corpus, scaffolding, (rec,))
     assert out.fdr_ledger.n_tests == 0  # ledger unchanged
     assert skipped == ()                # no skipping in the new integrate
+
+
+# ---------------------------------------------------------------------------
+# Phase 2.2: defeat de-licenses + refunds the e-LOND discovery
+# ---------------------------------------------------------------------------
+
+def _licensing():
+    return Licensing(
+        route=LicenseRoute.SEVERE_TEST,
+        satisfactions=(Satisfaction(
+            verdict=SatisfactionVerdict.SATISFIED,
+            materialization=MaterializationContext(id="M", api_version="v1", data_version="d1"),
+        ),),
+        rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
+    )
+
+
+def _licensed_A_with_discovery():
+    a = make_claim("A", status=Status.LICENSED, licensing=_licensing())
+    ledger = FDRLedger(target_fdr=0.05, tests=(
+        FDRTest(index=1, claim_id="A", e_value=1e6, alpha_allocated=0.03, discovery=True),
+    ))
+    return a, ledger
+
+
+def test_defeat_delicenses_and_refunds_discovery():
+    a, ledger = _licensed_A_with_discovery()
+    b = make_claim("B", status=Status.PENDING)
+    edge = DefeatEdge(source="B", target="A", kind=DefeatEdgeKind.REBUT)
+    corpus = Corpus(claims=(a, b), defeat_edges=(edge,), fdr_ledger=ledger)
+    scaff = CycleScaffolding(grounded_extension=("A", "B"))
+    out, _ = integrate(corpus, scaff, ())
+    a2 = next(c for c in out.claims if c.id == "A")
+    assert a2.status == Status.REJECTED
+    assert a2.licensing is None
+    assert out.fdr_ledger.n_discoveries == 0
+    assert out.fdr_ledger.tests[0].retracted is True
+    assert next(c for c in out.claims if c.id == "B").status == Status.PENDING
+
+
+def test_no_defeat_is_back_compat():
+    a, ledger = _licensed_A_with_discovery()
+    corpus = Corpus(claims=(a,), defeat_edges=(), fdr_ledger=ledger)
+    scaff = CycleScaffolding(grounded_extension=("A",))
+    out, _ = integrate(corpus, scaff, ())
+    a2 = next(c for c in out.claims if c.id == "A")
+    assert a2.status == Status.LICENSED
+    assert out.fdr_ledger.n_discoveries == 1
+    assert out.fdr_ledger.tests[0].retracted is False
+
+
+def _sv(severity: float, ean: float) -> StrengthVector:
+    return StrengthVector(
+        magnitude=0.5, certainty=0.5, evidence_against_null=ean,
+        severity=severity, world_contact=0.5, explanatory_virtue=0.5,
+    )
+
+
+def test_agm_removed_licensed_claim_discovery_tombstoned():
+    """A LICENSED claim removed by an AGM INCOMPATIBLE_WITH contest (less entrenched)
+    has its e-LOND discovery tombstoned — the `removed` path in retract_ids."""
+    # Build two incompatible conclusions: prop_b is incompatible with prop_a
+    prop_b = Proposition(
+        direction=Direction.NEGATIVE, estimand="e", descriptor="B",
+        neighborhood=(NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH, target="dummy_hash_A"),),
+    )
+    prop_a = Proposition(
+        direction=Direction.POSITIVE, estimand="e", descriptor="A",
+        neighborhood=(NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH, target=prop_b.content_hash),),
+    )
+    # Rebuild prop_b to point at prop_a's actual content_hash
+    prop_b2 = Proposition(
+        direction=Direction.NEGATIVE, estimand="e", descriptor="B",
+        neighborhood=(NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH, target=prop_a.content_hash),),
+    )
+    # Rebuild prop_a to point at prop_b2's content_hash
+    prop_a2 = Proposition(
+        direction=Direction.POSITIVE, estimand="e", descriptor="A",
+        neighborhood=(NeighborEdge(kind=NeighborEdgeKind.INCOMPATIBLE_WITH, target=prop_b2.content_hash),),
+    )
+    # strong_a (high strength) vs weak_b (low strength): AGM removes weak_b
+    strong_a = make_claim("strong_a", status=Status.LICENSED, licensing=_licensing(),
+                          conclusion=prop_a2, strength=_sv(0.9, 0.9))
+    weak_b = make_claim("weak_b", status=Status.LICENSED, licensing=_licensing(),
+                        conclusion=prop_b2, strength=_sv(0.1, 0.1))
+    ledger = FDRLedger(target_fdr=0.05, tests=(
+        FDRTest(index=1, claim_id="strong_a", e_value=1e6, alpha_allocated=0.02, discovery=True),
+        FDRTest(index=2, claim_id="weak_b", e_value=1e5, alpha_allocated=0.03, discovery=True),
+    ))
+    corpus = Corpus(claims=(strong_a, weak_b), defeat_edges=(), fdr_ledger=ledger)
+    scaff = CycleScaffolding(grounded_extension=("strong_a", "weak_b"))
+    out, _ = integrate(corpus, scaff, ())
+    # weak_b removed from claims by AGM
+    assert not any(c.id == "weak_b" for c in out.claims)
+    # weak_b's discovery tombstoned
+    weak_test = next(t for t in out.fdr_ledger.tests if t.claim_id == "weak_b")
+    assert weak_test.retracted is True
+    # strong_a survives unaffected
+    assert any(c.id == "strong_a" for c in out.claims)
+    strong_test = next(t for t in out.fdr_ledger.tests if t.claim_id == "strong_a")
+    assert strong_test.retracted is False
+    assert out.fdr_ledger.n_discoveries == 1
