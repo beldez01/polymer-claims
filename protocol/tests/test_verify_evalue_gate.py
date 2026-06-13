@@ -56,3 +56,15 @@ def test_no_evidence_licenses_as_before(ctx, adapters):
     c = next(x for x in out.claims if x.id == "a")
     assert c.status == Status.LICENSED
     assert out.fdr_ledger.n_tests == 0
+
+
+def test_evalue_claim_not_re_tested_when_already_in_ledger(ctx, adapters):
+    # A claim already carrying an e-LOND test is NOT re-tested on a subsequent verify pass
+    # (prevents cross-cycle duplicate FDR entries for a claim lingering PENDING).
+    corpus, scaffolding, records = _setup(ctx, adapters)
+    out1 = verify_stage(corpus, scaffolding, records, evidence={"a": 0.0})  # below bar -> 1 test, PENDING
+    assert out1.fdr_ledger.n_tests == 1
+    # feed the advanced ledger back (as the live loop does) and verify again with the same claim:
+    corpus2 = corpus.model_copy(update={"fdr_ledger": out1.fdr_ledger})
+    out2 = verify_stage(corpus2, scaffolding, records, evidence={"a": 0.0})
+    assert out2.fdr_ledger.n_tests == 1   # NOT 2 — the claim is not re-tested
