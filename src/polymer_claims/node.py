@@ -64,6 +64,7 @@ class NodeRunner:
         max_frames: int | None = 10000,
         content_address: bool = False,
         profiles: tuple = (CANONICAL_EPICV2_V1,),
+        evalue_gate: bool = False,
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -79,6 +80,7 @@ class NodeRunner:
         self.max_frames = max_frames
         self.content_address = content_address
         self.profiles = profiles
+        self.evalue_gate = evalue_gate
         self.run_cycle_kwargs = run_cycle_kwargs
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
@@ -119,6 +121,7 @@ class NodeRunner:
         max_frames: int | None = 10000,
         content_address: bool = False,
         profiles: tuple = (CANONICAL_EPICV2_V1,),
+        evalue_gate: bool = False,
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
@@ -130,6 +133,7 @@ class NodeRunner:
             max_frames=max_frames,
             content_address=content_address,
             profiles=profiles,
+            evalue_gate=evalue_gate,
             **run_cycle_kwargs,
         )
 
@@ -159,12 +163,18 @@ class NodeRunner:
                 if self.content_address
                 else None
             )
+            if self.evalue_gate:
+                from .evidence import evidence_map   # lazy: keeps node.py base import numpy-free
+                ev = evidence_map(self.corpus)
+            else:
+                ev = None
             result = run_cycle(
                 self.corpus,
                 self.adapters,
                 self.ctx,
                 ledger=self.ledger,
                 materializations=mats,
+                evidence=ev,
                 **self.run_cycle_kwargs,
             )
             self.corpus = result.corpus

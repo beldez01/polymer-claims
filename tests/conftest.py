@@ -80,7 +80,7 @@ def methyl_node(**kwargs):
     from polymer_claims.node import NodeRunner
     from polymer_claims.profiles import CANONICAL_EPICV2_V1
 
-    claim = region_delta_beta_claim("c-true", threshold=0.10)
+    claim = kwargs.pop("claim", None) or region_delta_beta_claim("c-true", threshold=0.10)
     corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
     base = MaterializationContext(id="M", api_version="v1", data_version="d1")
     return NodeRunner(
