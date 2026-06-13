@@ -64,6 +64,7 @@ from .fdr import (
     is_discovery,
     process_stream,
     process_test,
+    retract_tests,
 )
 from .subject import (
     Cohort,
@@ -216,6 +217,7 @@ __all__ = [
     "is_discovery",
     "process_stream",
     "process_test",
+    "retract_tests",
     "Cohort",
     "CohortDefinition",
     "CohortSourceDataset",
