@@ -60,6 +60,7 @@ from .revision import (
 from .fdr import (
     FDRLedger,
     FDRTest,
+    elond_decisions,
     is_discovery,
     process_stream,
     process_test,
@@ -211,6 +212,7 @@ __all__ = [
     "revise",
     "FDRLedger",
     "FDRTest",
+    "elond_decisions",
     "is_discovery",
     "process_stream",
     "process_test",

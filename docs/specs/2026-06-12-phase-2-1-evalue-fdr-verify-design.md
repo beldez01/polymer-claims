@@ -93,40 +93,58 @@ internals for e-values:
 New `src/polymer_claims/evidence.py`:
 
 ```python
-def evidence_map(corpus, base_ctx, *, profiles=(CANONICAL_EPICV2_V1,)) -> dict[str, float]:
+def evidence_map(corpus) -> dict[str, float]:
     ...
 ```
 
-mirrors `materialization_map`: for each executable apparatus claim whose criterion is a one-sided
-numeric comparison (`GT/GE/LT/LE` with a numeric threshold), it computes a native e-value via
-`region_evalue(...)` in the methyl module; claims with no apparatus, an unresolvable contract, or a
-non-one-sided criterion (`EQ/NE/WITHIN_TOL`/None threshold) get **no entry** (caller falls back to the
-existing gate).
+mirrors `materialization_map`: for each executable apparatus claim whose terminal node is the methyl
+apparatus and whose criterion is a one-sided numeric comparison (`GT/GE/LT/LE` with a numeric
+threshold), it computes a native e-value via `region_evalue(...)`; claims with no apparatus, an
+unresolvable contract, or a non-one-sided criterion (`EQ/NE/WITHIN_TOL`/None threshold) get **no
+entry** (caller falls back to the existing gate). It needs neither `base_ctx` nor `profiles` — the
+e-value is criterion + data only.
 
-### 3.1 The e-value construction (the rigor crux)
+### 3.1 The e-value construction — the WSR betting e-value (the rigor crux)
 
-Per-sample region-mean betas in group A (`n_A`) and B (`n_B`), each value in **[0,1]**. The agreed
-terminal value is the effect estimate `d̂` (= region Δβ). The criterion threshold is `θ₀`. Test the
-**severe-test null**:
+Per-sample region-mean betas in group A (`n_A`) and B (`n_B`), each value in **[0,1]**. The criterion
+threshold is `θ₀`. We test the **severe-test composite one-sided null** H₀: `d = μ_B − μ_A ≤ θ₀` vs
+H₁: `d > θ₀` (mirrored for `LT/LE`).
 
-- `GT/GE`: H₀: μ_d ≤ θ₀ vs H₁: μ_d > θ₀, with `d̂` as estimated.
-- `LT/LE`: the sign-flipped mirror (H₀: μ_d ≥ θ₀), `d̂ → −d̂`, `θ₀ → −θ₀`.
+We use the **betting / empirical-Bernstein e-value for bounded data** (Waudby-Smith & Ramdas, JRSS-B
+2024, Eqs. 24–26) — chosen over the safe-t because its validity rests on **boundedness alone**
+(β-values are bounded; no Gaussianity assumption — the honest call for small-n, often-skewed
+methylation data), it is **variance-adaptive** (powerful when concentrated, never the Hoeffding
+worst-case), and it **stays finite at zero variance**.
 
-E-value (one-sided sub-Gaussian test statistic):
+Construction:
+1. **Pair** the groups by index (random pairing with a **fixed, data-independent seed** if
+   `n_A ≠ n_B`, taking `n = min(n_A, n_B)`): `wᵢ = b_{π(i)} − a_{σ(i)} ∈ [−1, 1]`.
+2. **Shift** to put the null boundary at zero: `Wᵢ = wᵢ − θ₀` (under H₀, `E[Wᵢ] = d − θ₀ ≤ 0`).
+3. **Capital process** (one-sided, upward bets only): `e = ∏ᵢ (1 + λᵢ·Wᵢ)`, with `λᵢ ≥ 0`.
+4. **Positivity cap:** `0 ≤ λᵢ ≤ λ_max = c/(1+θ₀)`, `c ∈ [0,1)` fixed (default `c = 0.9`), so every
+   factor stays strictly positive.
+5. **Predictable plug-in λ (past-only — the validity trap):** `λᵢ` uses only `W₁…W_{i−1}`:
+   `λᵢ = clip( μ̂_{i−1} / (σ̂²_{i−1} + μ̂²_{i−1}), 0, λ_max )` (GRAPA), with WSR's padded running
+   mean/variance (variance-1/4 prior at `i=1`). **λ must never see `Wᵢ` or any later point** — a
+   leave-one-out λ silently breaks the supermartingale and inflates `E[e]` above 1.
 
-```
-σ²_eff = ¼ · (1/n_A + 1/n_B)                       # Hoeffding sub-Gaussian proxy: betas ∈ [0,1]
-λ      = (δ₁ − θ₀) / σ²_eff                          # predictable: δ₁, θ₀, n_A, n_B are design facts
-e      = exp( λ·(d̂ − θ₀) − λ²·σ²_eff / 2 )          # valid e-value for H₀: μ_d ≤ θ₀
-```
+**Validity (exact):** with `λᵢ` predictable and `≥ 0`, `Lₜ = ∏_{i≤t}(1+λᵢWᵢ)` is a nonnegative
+supermartingale with `L₀ = 1` (since `E[Wᵢ | F_{i−1}] = d−θ₀ ≤ 0` under H₀), so by Ville's inequality
+`E[e] ≤ 1` for **every** distribution in the composite null — needing **only boundedness**. MC-confirmed
+(research pass): `E[e] ≤ 1` at every least-favorable boundary null (`d = θ₀`) across a grid of SDs and
+for Bernoulli/Beta nulls.
 
-**Validity (why E[e] ≤ 1 under H₀):** each group mean is an average of `n` bounded-[0,1] values, hence
-sub-Gaussian with proxy `¼/n` (Hoeffding); `d̂` has proxy `σ²_eff`. For any **fixed** λ,
-`E[exp(λ(d̂−μ_d))] ≤ exp(λ²σ²_eff/2)`, so `E[e] ≤ exp(λ(μ_d−θ₀)) ≤ 1` whenever `μ_d ≤ θ₀`. Validity
-needs **only boundedness of betas** — no Gaussianity. **λ must be predictable** (independent of the
-random beta values): we set it from a fixed target alternative `δ₁` (default `δ₁ = 2·θ₀`) and the
-sample sizes, all design facts. A method-of-mixtures / GRO λ (data-adaptive, still valid via mixing) is
-a documented follow-up.
+**Determinism:** the pairing seed is fixed (e.g. averaged over a small fixed seed set — averaging
+e-values preserves `E[e] ≤ 1` as a convex combination), so the e-value is a deterministic function of
+the data. **Degenerate variance:** the `μ̂²` term in the denominator keeps `λ` finite at `σ̂² = 0`, and
+`c < 1` keeps factors positive, so `e` is large-but-finite (e.g. identical near-noiseless groups at
+`d = 0.22`, `θ₀ = 0.10` → `e ≈ 1.93`; identical groups at `d = 0` → `e = 1.0`).
+
+**Power ⇒ a well-powered fixture.** Clearing the strict e-LOND bar (`≈ 33` for the first discovery at
+FDR 0.05) needs real evidence — roughly `n ≈ 35–40` per group with tight within-group SD and a clear
+effect. The synthetic licensing demonstration therefore uses a **new, realistic, well-powered**
+SE-Contract fixture (realistic within-group biological noise + enough samples), separate from the
+existing noiseless CES fixtures (which stay for the CES-2/3/4 tests).
 
 ### 3.2 One e-value, not a product (North Star §2(E))
 
@@ -187,17 +205,22 @@ SELECT → EXECUTE → VERIFY[ consult evidence → elond_decisions advances led
 ## 6. Components & files
 
 - **Modify `grammar/src/polymer_grammar/fdr.py`** — `FDRTest.p_value → e_value`; e-LOND rejection
-  (`e ≥ 1/α_t`); add `elond_decisions`. Update the module docstring (LOND-p → e-LOND).
-- **Modify `protocol/src/polymer_protocol/verify.py`** — consult `evidence`, run `elond_decisions`,
-  add the fourth gate conjunct, thread the advanced ledger.
+  (`e ≥ 1/α_t`); add `elond_decisions`. Update the module docstring (LOND-p → e-LOND). **[DONE]**
+- **Create `src/polymer_claims/evidence.py`** — `betting_evalue(a, b, theta0, comparator)` (the WSR
+  §3.1 e-value, numpy) + `region_evalue(node, criterion)` (reads betas via `_region_group_means`) +
+  `evidence_map(corpus)`.
+- **Create a new realistic, well-powered SE-Contract fixture** under
+  `src/polymer_claims/contracts/` (a generator script + the bundled `.json`/`.betas.tsv`), separate
+  from the existing noiseless `epicv2_casectrl_demo` (which stays for CES-2/3/4). ~35–40 samples/group,
+  realistic within-group SD, a clear signal-region Δβ.
+- **Modify `protocol/src/polymer_protocol/verify.py`** — `verify_stage(..., evidence=None)`: run
+  `elond_decisions`, add the fourth gate conjunct, return the advanced ledger.
 - **Modify `protocol/src/polymer_protocol/integrate.py`** — remove the p-value FDR advance.
 - **Modify `protocol/src/polymer_protocol/cycle.py`** — `run_cycle(..., evidence=None)`; thread to
-  VERIFY; thread the advanced ledger into the corpus update.
-- **Create `src/polymer_claims/evidence.py`** — `evidence_map(corpus, base_ctx, *, profiles)`.
-- **Modify `src/polymer_claims/methyl_adapters.py`** (or a sibling) — `region_evalue(...)` computing
-  the §3.1 e-value from the per-sample betas (numpy; umbrella).
-- **Tests** — grammar `fdr` migration to e-values; protocol verify/cycle gate + the FDR-control
-  deliverable; umbrella `evidence_map` + the end-to-end methylation license.
+  VERIFY; fix the integrate audit note.
+- **Tests** — grammar `fdr` (DONE); umbrella `betting_evalue` validity guard + `evidence_map` + the
+  e2e methylation license on the realistic fixture; protocol verify gate + the e-LOND FDR-control
+  deliverable.
 
 ---
 
@@ -225,11 +248,15 @@ SELECT → EXECUTE → VERIFY[ consult evidence → elond_decisions advances led
 - back-compat: existing verify/cycle/integrate suites green with `evidence=None`.
 
 **Umbrella (`tests/`):**
-- `evidence_map` computes the §3.1 e-value for the methylation claim; a claim with an unresolvable
-  contract or a non-one-sided criterion gets no entry.
-- **End-to-end:** the planted Δβ=0.20 region run through `run_cycle(evidence=evidence_map(...))`
-  → LICENSED with the e-discovery recorded; a null/negative-control region → e below bar → **not**
-  licensed; the air gap (same-owner adapters) still holds it PENDING.
+- **`betting_evalue` validity guard:** MC under the least-favorable boundary null (`d = θ₀`) across a
+  grid of within-group SDs AND a non-Gaussian (Bernoulli) null → `mean(e) ≤ 1 + MC-tol`. The
+  predictable-λ (past-only) discipline is what this guards.
+- `evidence_map` computes the e-value for the methylation claim; an unresolvable contract or a
+  non-one-sided criterion → no entry.
+- **End-to-end:** a well-powered signal region (the **new realistic fixture**) run through
+  `run_cycle(evidence=evidence_map(corpus))` → LICENSED with the e-discovery recorded; an
+  under-powered / threshold-above-effect variant → e below the e-LOND bar → **not** licensed; the air
+  gap (same-owner adapters) still holds a same-owner pair PENDING.
 - `scripts/check-all.sh` ALL GREEN.
 
 ---
@@ -237,18 +264,23 @@ SELECT → EXECUTE → VERIFY[ consult evidence → elond_decisions advances led
 ## 8. Scope fences & honesty
 
 - **Delivers:** the e-value atom; the e-LOND ledger (FDR control under arbitrary dependence); the
-  native methylation e-value (severe-test null, Hoeffding-valid); the hard 4-way VERIFY gate; the
+  native methylation e-value (WSR betting, severe-test null, valid from boundedness alone,
+  variance-adaptive); a new realistic well-powered fixture; the hard 4-way VERIFY gate; the
   FDR-control deliverable.
 - **Defers (documented):** **defeat-as-e-value-update + alpha-wealth refund** (the next slice — the
   literal "one mechanism" climax where a successful defeat lowers the e-value and refunds error
   budget); **independent e-value multiplication** via the common-cause graph (conceptual replication,
-  North Star §2(E)); the **mixture/GRO λ** (v1 uses a fixed predictable λ); deriving
-  `StrengthVector.evidence_against_null` from the e-value (retires the hand-tuned `_sat` curve);
-  native e-values for **future** apparatus types (one apparatus exists today).
-- **Honesty:** the e-value is valid under **boundedness of betas** (betas ∈ [0,1]) — stated, not
-  hidden; the noise model is Hoeffding sub-Gaussian, not Gaussian. v1 λ is a fixed predictable choice
-  (`δ₁ = 2θ₀`), recalibratable. Synthetic-data caveat carries forward (CES-2): the e-value is real and
-  valid, but addresses synthetic betas until the real-public-data swap.
+  North Star §2(E)); deriving `StrengthVector.evidence_against_null` from the e-value (retires the
+  hand-tuned `_sat` curve); native e-values for **future** apparatus types (one apparatus exists
+  today); the **safe-t** Gaussian alternative (kept as a documented fallback for data where
+  Gaussianity is defensible).
+- **Honesty:** the e-value is **exactly valid from boundedness of betas alone** (β ∈ [0,1]) — no
+  Gaussianity. Validity holds for the composite one-sided null via Ville's inequality on a
+  predictable-λ test supermartingale; the **leave-one-out λ trap** (λ must use only the strict past)
+  is the one thing that silently breaks it, and the validity guard exists to catch it. Determinism via
+  a fixed pairing seed. The licensing demonstration needs a **well-powered** synthetic fixture (the
+  strict e-LOND bar is real); the synthetic-data caveat carries forward (CES-2) — the e-value is real
+  and valid, but addresses synthetic betas until the real-public-data swap.
 
 ---
 

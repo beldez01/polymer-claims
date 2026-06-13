@@ -56,6 +56,7 @@ def run_cycle(
     cell_cap_fraction: float = 1.0,
     generation_credit_floor: float | None = None,
     materializations: dict[str, MaterializationContext] | None = None,
+    evidence: dict[str, float] | None = None,
 ) -> CycleResult:
     audit: list[StageAudit] = []
     led = ledger if ledger is not None else SelectionLedger()
@@ -121,7 +122,10 @@ def run_cycle(
     # operators are belief-neutral), so the grounded_extension of the executed claims is
     # unchanged since represent().
     executed_ids = {r.claim_id for r in records}
-    corpus = verify_stage(corpus, scaffolding, records, oracles, adapter_registry=adapter_registry)
+    corpus = verify_stage(
+        corpus, scaffolding, records, oracles,
+        adapter_registry=adapter_registry, evidence=evidence,
+    )
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
     n_trust_held = sum(1 for c in corpus.claims if c.pending_reason == PendingReason.ADAPTER_NOT_INDEPENDENT)
     audit.append(StageAudit(
@@ -130,13 +134,12 @@ def run_cycle(
         count=n_licensed,
     ))
 
-    corpus, skipped = integrate(corpus, scaffolding, records)
-    n_added = len(records) - len(skipped)
+    corpus, _skipped = integrate(corpus, scaffolding, records)
     audit.append(
         StageAudit(
             stage="integrate",
-            note=f"{n_added} FDR test(s) added ({corpus.fdr_ledger.n_tests} total); {len(skipped)} skipped",
-            count=n_added,
+            note=f"AGM revision; fdr ledger {corpus.fdr_ledger.n_tests} test(s) total",
+            count=corpus.fdr_ledger.n_tests,
         )
     )
 

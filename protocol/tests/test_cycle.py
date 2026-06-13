@@ -16,13 +16,25 @@ def test_cycle_licenses_a_satisfied_claim(empty_ledger, ctx, adapters):
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
     result = run_cycle(Corpus(claims=(c,), fdr_ledger=empty_ledger), adapters, ctx)
     assert result.corpus.by_id()["a"].status == Status.LICENSED
-    assert result.corpus.fdr_ledger.n_tests == 1
+    # FDR ledger advances ONLY in VERIFY when evidence= is supplied; bare run_cycle records zero tests.
+    assert result.corpus.fdr_ledger.n_tests == 0
     assert result.gated_lane == ()
     # audit records one line per stage
     assert {a.stage for a in result.audit} == {
         "represent", "generate_stage", "canonicalize", "safety_gate", "select_stage",
         "commit", "execute_ground", "verify_stage", "integrate",
     }
+
+
+def test_run_cycle_evidence_none_is_back_compat(empty_ledger, ctx, adapters):
+    # run_cycle without evidence=: FDR ledger does NOT advance (the advance lives in VERIFY,
+    # and VERIFY only records an e-test when evidence is supplied). This is the Phase 2.1
+    # back-compat contract: old callers that omit evidence are unaffected by the ledger move.
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    corpus = Corpus(claims=(c,), fdr_ledger=empty_ledger)
+    before = corpus.fdr_ledger.n_tests
+    result = run_cycle(corpus, adapters, ctx)
+    assert result.corpus.fdr_ledger.n_tests == before  # no evidence -> no e-tests recorded
 
 
 def test_cycle_reports_gated_lane(empty_ledger, ctx, adapters):
