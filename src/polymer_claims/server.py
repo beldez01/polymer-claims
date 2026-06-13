@@ -106,6 +106,14 @@ def create_app(
         allow_headers=["*"],
     )
 
+    def _drift_status() -> dict:
+        rec = runner.last_drift
+        return {
+            "n_reopened": runner.n_reopened,
+            "last_drift": None if rec is None
+            else {"examined": rec.examined, "drifted": len(rec.drifted)},
+        }
+
     def _status() -> dict:
         last = runner.frames[-1]
         return {
@@ -114,6 +122,7 @@ def create_app(
             "n_frames": len(runner.frames),
             "n_nodes": last.stats.n_nodes,
             "n_licensed": last.stats.n_licensed,
+            **_drift_status(),
         }
 
     @app.get("/")
@@ -142,6 +151,12 @@ def create_app(
     async def step() -> JSONResponse:
         frame = await _do_tick()
         return JSONResponse(content=_frame_obj(frame))
+
+    @app.post("/refresh")
+    async def refresh() -> JSONResponse:
+        async with lock:
+            current = await asyncio.to_thread(runner.refresh_world)
+        return JSONResponse(content={"current": _obj(current), **_drift_status()})
 
     @app.post("/pause")
     async def pause() -> dict:

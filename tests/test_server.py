@@ -185,6 +185,46 @@ def test_bounded_put_drops_oldest():
     assert _SSE_QUEUE_MAX == 1000
 
 
+def _methyl_client():
+    from tests.conftest import methyl_node
+
+    runner = methyl_node()
+    app = create_app(runner, interval=3600, autostart=False)
+    return TestClient(app), runner
+
+
+def test_refresh_endpoint_and_status_drift(monkeypatch):
+    client, runner = _methyl_client()
+    with client:
+        for _ in range(3):
+            client.post("/step")  # license the claim (records the address)
+
+        body = client.post("/refresh").json()
+        assert body["current"]["dimnames_hash"] is not None
+        assert body["n_reopened"] == 0
+        assert body["last_drift"] is None
+
+        # status carries the same drift fields
+        status = client.get("/").json()
+        assert status["n_reopened"] == 0
+
+        # move the world, refresh, step -> drift re-opens the claim
+        import polymer_claims.materialization as mat_mod
+        from polymer_claims.contracts import load_contract as real_load
+
+        monkeypatch.setattr(
+            mat_mod, "load_contract",
+            lambda ref: real_load(ref).model_copy(update={"dimnames_hash": "sha256:" + "b" * 64}),
+        )
+        body2 = client.post("/refresh").json()
+        assert body2["current"]["dimnames_hash"] != body["current"]["dimnames_hash"]
+        client.post("/step")  # DRIFT tick
+
+        status = client.get("/").json()
+        assert status["n_reopened"] == 1
+        assert status["last_drift"]["drifted"] == 1
+
+
 def test_tick_does_not_block_reads(monkeypatch):
     """A slow (blocking) tick — e.g. a synchronous LLM call inside run_cycle —
     must NOT freeze the event loop: concurrent reads like /state must still be
