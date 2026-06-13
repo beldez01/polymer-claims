@@ -127,7 +127,7 @@ def verify_stage(
     permitted = _permitted_by_bar(corpus, exec_records, earned)
 
     ev_map = evidence or {}
-    already_tested = {t.claim_id for t in corpus.fdr_ledger.tests}
+    already_tested = {t.claim_id for t in corpus.fdr_ledger.tests if not t.retracted}
     executed_with_e = [
         (r.claim_id, ev_map[r.claim_id])
         for r in exec_records

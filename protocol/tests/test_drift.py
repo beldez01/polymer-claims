@@ -243,6 +243,43 @@ def test_drift_symbols_are_exported_from_package():
     assert hasattr(pp, "DriftFinding")
 
 
+def test_reopen_drifted_tombstones_discovery(empty_ledger):
+    """reopen_drifted must retract the reopened claim's e-LOND discovery (Phase 2.4).
+
+    Invariant: LICENSED <=> live e-LOND discovery.  After re-open the claim is PENDING,
+    so its discovery must no longer be live.
+    """
+    from polymer_grammar import FDRTest, retract_tests  # noqa: F401 (retract_tests used indirectly)
+    from polymer_protocol.drift import reopen_drifted
+
+    # Build a LICENSED claim that has drifted.
+    c = make_claim(
+        "c", Status.LICENSED, plan=make_plan(0.01, 0.05), licensing=_lic(_mat("M0", "v0", "d0"))
+    )
+    # Give the ledger a LIVE discovery for that claim.
+    test = FDRTest(
+        index=1,
+        claim_id="c",
+        e_value=1e6,
+        alpha_allocated=0.05,
+        discovery=True,
+        retracted=False,
+    )
+    ledger = empty_ledger.model_copy(update={"tests": (test,)})
+    corpus = Corpus(claims=(c,), fdr_ledger=ledger)
+    assert corpus.fdr_ledger.n_discoveries == 1
+
+    _, rec = drift_pass(corpus, current=_CURRENT)
+    assert [f.claim_id for f in rec.drifted] == ["c"]
+
+    out = reopen_drifted(corpus, rec)
+
+    # The claim is now PENDING.
+    assert out.by_id()["c"].status is Status.PENDING
+    # The discovery has been tombstoned — n_discoveries dropped by one.
+    assert out.fdr_ledger.n_discoveries == 0
+
+
 # ---------------------------------------------------------------------------
 # CES-3: content-address fields (profile_hash, dimnames_hash)
 # ---------------------------------------------------------------------------
