@@ -127,3 +127,31 @@ def test_process_test_after_retraction_uses_live_discovery_count():
     led = retract_tests(led, {"a"})
     led = process_test(led, "c", 100.0)
     assert led.tests[2].alpha_allocated == pytest.approx(0.05 * _gamma(3) * (1 + 1))
+
+
+def test_elond_decisions_sort_is_load_bearing():
+    # ('b',40) and ('a',40): sorted -> a is test 1 (bar ~32.9, 40>=bar -> DISCOVER), b is test 2 with
+    # D=1 (bar ~65.8, 40<bar -> miss). Processing b FIRST would instead discover b, not a. So the
+    # claim_id sort is load-bearing — assert the sorted decision and that the unsorted order differs.
+    base = FDRLedger(target_fdr=0.05)
+    items = [("b", 40.0), ("a", 40.0)]
+    _, decisions = elond_decisions(base, items)
+    assert decisions == {"a": True, "b": False}
+    unsorted = process_stream(base, items)   # b first
+    assert unsorted.discoveries == frozenset({"b"})   # different winner -> order matters
+
+
+def test_retract_tests_idempotent():
+    led = FDRLedger(target_fdr=0.05, tests=(
+        FDRTest(index=1, claim_id="a", e_value=100.0, alpha_allocated=0.03, discovery=True),
+    ))
+    once = retract_tests(led, {"a"})
+    twice = retract_tests(once, {"a"})
+    assert twice.tests == once.tests   # idempotent (the not-retracted guard)
+
+
+def test_process_test_discovery_boundary_inclusive():
+    alpha = 0.05 * _gamma(1) * 1
+    bar = 1.0 / alpha
+    assert process_test(FDRLedger(target_fdr=0.05), "a", bar).tests[0].discovery is True       # e == bar -> discovery
+    assert process_test(FDRLedger(target_fdr=0.05), "a", bar * (1 - 1e-9)).tests[0].discovery is False

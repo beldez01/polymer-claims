@@ -127,12 +127,19 @@ def verify_stage(
     permitted = _permitted_by_bar(corpus, exec_records, earned)
 
     ev_map = evidence or {}
-    executed_with_e = [(r.claim_id, ev_map[r.claim_id]) for r in exec_records if r.claim_id in ev_map]
+    already_tested = {t.claim_id for t in corpus.fdr_ledger.tests}
+    executed_with_e = [
+        (r.claim_id, ev_map[r.claim_id])
+        for r in exec_records
+        if r.claim_id in ev_map and r.claim_id not in already_tested
+    ]
     new_ledger, e_decisions = elond_decisions(corpus.fdr_ledger, executed_with_e)
 
     def _e_ok(cid: str) -> bool:
-        # claims with no e-value are exempt (3-way gate); claims with one must be a discovery.
-        return cid not in ev_map or e_decisions.get(cid, False)
+        # claims with no e-value are exempt (3-way gate). A claim tested THIS cycle uses its decision;
+        # one already in the ledger uses its recorded LIVE discovery (so a claim is e-tested once per
+        # lifetime, never re-tested while it lingers PENDING — which would inflate the ledger).
+        return cid not in ev_map or e_decisions.get(cid, cid in corpus.fdr_ledger.discoveries)
 
     def _recorded_strength(claim: Claim) -> StrengthVector | None:
         """Earned claims record cap_earned(earned, tier); everything else keeps oracle_cap."""

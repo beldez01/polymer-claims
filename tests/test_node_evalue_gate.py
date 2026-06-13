@@ -41,6 +41,13 @@ def test_weak_region_licenses_without_egate():
     assert c.status == Status.LICENSED
 
 
+def test_weak_claim_not_re_tested_across_ticks():
+    # the weak claim lingers PENDING across 3 ticks; it must be e-tested ONCE, not once-per-tick.
+    r = _node(_WEAK, evalue_gate=True)
+    assert r.corpus.fdr_ledger.n_tests == 1
+    assert r.corpus.fdr_ledger.n_discoveries == 0
+
+
 def test_node_import_stays_numpy_free():
     code = ("import polymer_claims.node, sys; "
             "assert 'numpy' not in sys.modules, sorted(m for m in sys.modules if 'numpy' in m)")

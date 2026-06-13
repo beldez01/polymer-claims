@@ -1,7 +1,13 @@
 # Phase 7 — online-FDR ledger — design spec
 
+> **⚠️ SUPERSEDED by Phase 2.1 (e-LOND).** This spec describes the original **p-value LOND** ledger
+> (`discovery ⇔ p ≤ α_t`, `procedure="lond"`). Phase 2.1 migrated the ledger to **e-values / e-LOND**
+> (`discovery ⇔ e ≥ 1/α_t`, `procedure="elond"`, FDR control under arbitrary dependence). For current
+> behavior see `docs/specs/2026-06-12-phase-2-1-evalue-fdr-verify-design.md` and the Phase-2.2 defeat
+> tombstone (`docs/specs/2026-06-12-phase-2-2-defeat-evalue-refund-design.md`). Kept for history.
+
 Date: 2026-06-01
-Status: design (feeds `writing-plans`)
+Status: design (feeds `writing-plans`) — SUPERSEDED, see banner above
 Requirement: unified spec §5 #4 ("corpus-level online-FDR / error-budget object as a first-class IR entity")
 Depends on: nothing in the grammar beyond `base._Model` (it's a standalone corpus-level entity)
 

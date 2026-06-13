@@ -180,7 +180,7 @@ def main():
     print(f"  -> mapped into v1.3 Subject: {subj_mapped}/{subj_present}  "
           f"({100*subj_mapped//max(subj_present,1)}%)  ⬅ the NEW capability")
     print(f"  subject kinds: {dict(by_kind)}")
-    print(f"\n--- STILL-HOMELESS v1.2 fields (no v1.3 home yet) ---")
+    print("\n--- STILL-HOMELESS v1.2 fields (no v1.3 home yet) ---")
     for field, cnt in homeless.most_common():
         print(f"  {cnt:3d}/{n}  {field:22s} -> {FIELD_HOME[field]}")
     print(f"\n--- vector-valued statistics still unmapped: {vec_total} (the L0 vector-Leaf gap) ---")
@@ -188,7 +188,7 @@ def main():
         print(f"\n--- ERRORS ({len(errors)}) ---")
         for r in errors[:10]:
             print(f"  {r['file']}: {r['error']}")
-    print(f"\n--- READING ---")
+    print("\n--- READING ---")
     print("  Subject now has a home (was 47/47 homeless in the first probe). Remaining")
     print("  homeless fields are provenance (Phase 7 #1/#3), the compute graph (Phase 8),")
     print("  and Duhem auxiliaries; vector statistics still need an L0 vector-Leaf. The")
