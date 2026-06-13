@@ -32,6 +32,11 @@ from polymer_protocol import (
     run_cycle,
 )
 
+from .contracts import clear_contract_cache
+from .materialization import materialization_map
+from .profiles import CANONICAL_EPICV2_V1
+from polymer_protocol.drift import DriftRecord, drift_pass, reopen_drifted
+
 _ADAPTERS = (IdentityAdapter(), ReferenceAdapter(identity="reference"))
 _CTX = MaterializationContext(id="M1", api_version="v1", data_version="d1")
 
@@ -57,6 +62,8 @@ class NodeRunner:
         config: SchedulerConfig | None = None,
         scheduler_budget: float = 1e9,
         max_frames: int | None = 10000,
+        content_address: bool = False,
+        profiles: tuple = (CANONICAL_EPICV2_V1,),
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -70,6 +77,8 @@ class NodeRunner:
         # to `run_cycle`, where it spreads licensing progressively across cycles.
         self.scheduler_budget = scheduler_budget
         self.max_frames = max_frames
+        self.content_address = content_address
+        self.profiles = profiles
         self.run_cycle_kwargs = run_cycle_kwargs
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
@@ -91,6 +100,12 @@ class NodeRunner:
             self.frames = self.frames[-self.max_frames:]
         self.prev_positions = {n.id: n.position for n in topo.nodes}
         self._licensed_prev = n_licensed(corpus)
+        self.last_drift: DriftRecord | None = None
+        self.n_reopened: int = 0
+        if self.content_address:
+            self.refresh_world()
+        else:
+            self.current = self.ctx
 
     @classmethod
     def from_seed(
@@ -102,6 +117,8 @@ class NodeRunner:
         config: SchedulerConfig | None = None,
         scheduler_budget: float = 1e9,
         max_frames: int | None = 10000,
+        content_address: bool = False,
+        profiles: tuple = (CANONICAL_EPICV2_V1,),
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
@@ -111,8 +128,20 @@ class NodeRunner:
             config=config,
             scheduler_budget=scheduler_budget,
             max_frames=max_frames,
+            content_address=content_address,
+            profiles=profiles,
             **run_cycle_kwargs,
         )
+
+    def refresh_world(self) -> MaterializationContext:
+        """Re-read the live SE-Contracts/profile and recompute the current-world content-address.
+        Operator/endpoint-triggered (not per-tick): busts the contract cache so a re-published
+        dataset is actually re-read, then takes the v1 single-world representative (all entries of
+        a single-dataset corpus share one address). Empty map -> the seed ctx (drift inert)."""
+        clear_contract_cache()
+        m = materialization_map(self.corpus, self.ctx, profiles=self.profiles)
+        self.current = next(iter(m.values()), self.ctx)
+        return self.current
 
     def tick(self) -> TimelineFrame:
         """Advance one scheduler-driven step; emit and accumulate a frame."""
@@ -120,21 +149,35 @@ class NodeRunner:
             corpus=self.corpus,
             ledger=self.ledger,
             proposers_available=self._proposers_available,
+            current=self.current if self.content_address else None,
         )
         action = next_action(state, budget=self.scheduler_budget, config=self.config)
 
         if action is not None and action.kind == ActionKind.RUN_CYCLE:
+            mats = (
+                materialization_map(self.corpus, self.ctx, profiles=self.profiles)
+                if self.content_address
+                else None
+            )
             result = run_cycle(
                 self.corpus,
                 self.adapters,
                 self.ctx,
                 ledger=self.ledger,
+                materializations=mats,
                 **self.run_cycle_kwargs,
             )
             self.corpus = result.corpus
             self.ledger = result.ledger
             n_frontier = len(result.frontier)
             n_added = len(result.generation.admitted)
+        elif action is not None and action.kind == ActionKind.DRIFT:
+            _, record = drift_pass(self.corpus, current=self.current)
+            self.corpus = reopen_drifted(self.corpus, record)
+            self.last_drift = record
+            self.n_reopened += sum(1 for f in record.drifted if f.re_executable)
+            n_frontier = 0
+            n_added = 0
         else:
             # IDLE tick: action is None, or a daemon kind from_seed never
             # enables in v1. Corpus/ledger unchanged, but still emit a frame so

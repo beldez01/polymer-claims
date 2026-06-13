@@ -62,3 +62,33 @@ def licensing_corpus() -> Corpus:
     """A one-claim corpus whose PENDING claim licenses on a single run_cycle."""
     claim = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
     return Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
+
+
+def methyl_node(**kwargs):
+    """A NodeRunner over a one-claim content-addressed methylation corpus that licenses on a
+    single cycle (the CES-2/CES-3 apparatus). content_address defaults ON. Heavy imports
+    (numpy-backed methyl adapters) are local so importing conftest stays numpy-free."""
+    from polymer_grammar import MaterializationContext
+
+    from polymer_claims.analysis_profile import profile_oracle_registry
+    from polymer_claims.methyl_adapters import (
+        RegionLmCoefAdapter,
+        RegionMeanDiffAdapter,
+        methyl_independent_registry,
+        region_delta_beta_claim,
+    )
+    from polymer_claims.node import NodeRunner
+    from polymer_claims.profiles import CANONICAL_EPICV2_V1
+
+    claim = region_delta_beta_claim("c-true", threshold=0.10)
+    corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
+    base = MaterializationContext(id="M", api_version="v1", data_version="d1")
+    return NodeRunner(
+        corpus,
+        adapters=(RegionMeanDiffAdapter(), RegionLmCoefAdapter()),
+        ctx=base,
+        content_address=kwargs.pop("content_address", True),
+        adapter_registry=methyl_independent_registry(),
+        oracles=profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public")),
+        **kwargs,
+    )
