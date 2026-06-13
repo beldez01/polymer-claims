@@ -8,7 +8,7 @@ separate opt-in `reopen_drifted` action. Daemon state lives in the record, never
 """
 from __future__ import annotations
 
-from polymer_grammar import Claim, MaterializationContext, PendingReason, Status
+from polymer_grammar import Claim, MaterializationContext, PendingReason, Status, retract_tests
 
 from .base import _Model
 from .corpus import Corpus
@@ -84,22 +84,27 @@ def reopen_drifted(
     never performs itself). With `require_plan=True` (default) only re-executable findings are
     re-opened — a planless claim re-opened to PENDING could never self-relicense, so it would
     strand. Pure: returns a new Corpus; findings for absent claim ids — and any target whose
-    current status is no longer LICENSED (a stale record) — are silently skipped."""
+    current status is no longer LICENSED (a stale record) — are silently skipped.
+
+    Tombstones the reopened claims' e-LOND discoveries via `retract_tests`, restoring the
+    invariant that LICENSED <=> live e-LOND discovery (a PENDING claim must not count as a live
+    discovery in the FDR ledger)."""
     targets = {f.claim_id for f in record.drifted if (f.re_executable or not require_plan)}
     if not targets:
         return corpus
-    new_claims = tuple(
-        c.model_copy(
-            update={
+    reopened: set[str] = set()
+    new_claims = []
+    for c in corpus.claims:
+        if c.id in targets and c.status == Status.LICENSED:
+            reopened.add(c.id)
+            new_claims.append(c.model_copy(update={
                 "status": Status.PENDING,
                 "licensing": None,
                 "pending_reason": PendingReason.MATERIALIZATION_DRIFTED,
-            }
-        )
-        if c.id in targets and c.status == Status.LICENSED
-        else c
-        for c in corpus.claims
-    )
-    if new_claims == corpus.claims:
+            }))
+        else:
+            new_claims.append(c)
+    if not reopened:
         return corpus
-    return corpus.model_copy(update={"claims": new_claims})
+    new_ledger = retract_tests(corpus.fdr_ledger, reopened)
+    return corpus.model_copy(update={"claims": tuple(new_claims), "fdr_ledger": new_ledger})

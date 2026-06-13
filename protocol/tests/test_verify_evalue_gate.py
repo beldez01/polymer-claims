@@ -68,3 +68,19 @@ def test_evalue_claim_not_re_tested_when_already_in_ledger(ctx, adapters):
     corpus2 = corpus.model_copy(update={"fdr_ledger": out1.fdr_ledger})
     out2 = verify_stage(corpus2, scaffolding, records, evidence={"a": 0.0})
     assert out2.fdr_ledger.n_tests == 1   # NOT 2 — the claim is not re-tested
+
+
+def test_retracted_test_is_eligible_for_fresh_e_test(ctx, adapters):
+    # A claim whose ONLY e-LOND test was retracted (drift or defeat tombstone) must be
+    # re-testable on the next verify pass — live-dedup only blocks re-testing for LIVE tests.
+    from polymer_grammar import retract_tests
+
+    corpus, scaffolding, records = _setup(ctx, adapters)
+    out1 = verify_stage(corpus, scaffolding, records, evidence={"a": 1e6})  # discovery -> 1 test, LICENSED
+    assert out1.fdr_ledger.n_tests == 1 and out1.fdr_ledger.n_discoveries == 1
+    # simulate a drift/defeat retraction of that test, feed back, and verify again:
+    retracted_ledger = retract_tests(out1.fdr_ledger, {"a"})
+    corpus2 = corpus.model_copy(update={"fdr_ledger": retracted_ledger})
+    out2 = verify_stage(corpus2, scaffolding, records, evidence={"a": 1e6})
+    assert out2.fdr_ledger.n_tests == 2          # a FRESH test was added (the retracted one didn't block it)
+    assert out2.fdr_ledger.n_discoveries == 1     # the new live discovery (old one still retracted)
