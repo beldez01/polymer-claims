@@ -16,27 +16,27 @@ def _exec_record_with_value(claim_id, value, ctx, adapters, empty_ledger):
     return records[0]
 
 
-def test_fdr_ledger_advances_one_test_per_executed_claim(empty_ledger, ctx, adapters):
+def test_integrate_does_not_advance_fdr_ledger(empty_ledger, ctx, adapters):
+    # Phase 2.1: FDR ledger now advances in VERIFY, not INTEGRATE. integrate() must leave
+    # n_tests unchanged regardless of exec_records supplied.
     rec = _exec_record_with_value("a", 0.01, ctx, adapters, empty_ledger)
     licensed = make_claim("a", status=Status.LICENSED)  # post-VERIFY status
     corpus = Corpus(claims=(licensed,), fdr_ledger=empty_ledger)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
+    before = corpus.fdr_ledger.n_tests
     out, skipped = integrate(corpus, scaffolding, (rec,))
-    assert out.fdr_ledger.n_tests == 1
-    assert out.fdr_ledger.tests[0].claim_id == "a"
-    assert out.fdr_ledger.tests[0].e_value == 0.01
-    assert skipped == ()
+    assert out.fdr_ledger.n_tests == before  # ledger unchanged by integrate
+    assert skipped == ()                      # always empty tuple now
 
 
-def test_non_pvalue_terminal_is_skipped(empty_ledger, ctx, adapters):
-    # terminal value 7.0 is outside [0,1] -> not a valid p-value -> skipped, logged.
+def test_integrate_returns_empty_skipped(empty_ledger, ctx, adapters):
+    # integrate() always returns an empty skipped tuple (no FDR logic, no skipping).
     rec = _exec_record_with_value("a", 7.0, ctx, adapters, empty_ledger)
     c = make_claim("a", status=Status.PENDING)
     corpus = Corpus(claims=(c,), fdr_ledger=empty_ledger)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     out, skipped = integrate(corpus, scaffolding, (rec,))
-    assert out.fdr_ledger.n_tests == 0
-    assert skipped == ("a",)
+    assert skipped == ()
 
 
 def test_integrate_keeps_consistent_claims(empty_ledger, ctx, adapters):
@@ -47,7 +47,8 @@ def test_integrate_keeps_consistent_claims(empty_ledger, ctx, adapters):
     assert "a" in out.by_id()  # no inconsistency -> claim survives
 
 
-def test_fdr_ledger_order_is_stable_with_two_claims(empty_ledger, ctx, adapters):
+def test_integrate_ledger_stable_with_two_claims(empty_ledger, ctx, adapters):
+    # The ledger is untouched regardless of exec_record order (no FDR sorting logic).
     rec_a = _exec_record_with_value("a", 0.01, ctx, adapters, empty_ledger)
     rec_b = _exec_record_with_value("b", 0.03, ctx, adapters, empty_ledger)
     corpus = Corpus(
@@ -57,12 +58,12 @@ def test_fdr_ledger_order_is_stable_with_two_claims(empty_ledger, ctx, adapters)
     scaffolding = CycleScaffolding(grounded_extension=("a", "b"))
     out_fwd, _ = integrate(corpus, scaffolding, (rec_a, rec_b))
     out_rev, _ = integrate(corpus, scaffolding, (rec_b, rec_a))
-    assert out_fwd.fdr_ledger == out_rev.fdr_ledger  # integrate sorts -> order-independent
-    assert out_fwd.fdr_ledger.tests[0].claim_id == "a"  # "a" < "b" lexicographically
-    assert out_fwd.fdr_ledger.tests[1].claim_id == "b"
+    # ledger is unchanged in both directions
+    assert out_fwd.fdr_ledger == empty_ledger
+    assert out_rev.fdr_ledger == empty_ledger
 
 
-def test_string_terminal_is_skipped(empty_ledger):
+def test_string_terminal_does_not_affect_ledger(empty_ledger):
     from polymer_grammar import (
         EvaluationResult, ExecValue, SatisfactionVerdict, VerifiedEvaluation,
     )
@@ -77,5 +78,5 @@ def test_string_terminal_is_skipped(empty_ledger):
     corpus = Corpus(claims=(make_claim("z", status=Status.PENDING),), fdr_ledger=empty_ledger)
     scaffolding = CycleScaffolding(grounded_extension=("z",))
     out, skipped = integrate(corpus, scaffolding, (rec,))
-    assert out.fdr_ledger.n_tests == 0
-    assert skipped == ("z",)
+    assert out.fdr_ledger.n_tests == 0  # ledger unchanged
+    assert skipped == ()                # no skipping in the new integrate
