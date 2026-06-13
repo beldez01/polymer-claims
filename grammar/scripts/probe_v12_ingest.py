@@ -116,7 +116,7 @@ def probe(path: Path) -> dict:
         "present_fields": present,
         "homeless_fields": homeless,
         "outcome": outcome,
-        "n_scalar_leaves": sum(1 for l in leaves if getattr(l, "kind", "") == "quantity"),
+        "n_scalar_leaves": sum(1 for lf in leaves if getattr(lf, "kind", "") == "quantity"),
         "leaf_notes": leaf_notes,
         "constructed": False,
         "error": None,
@@ -169,11 +169,11 @@ def main() -> None:
     print(f"v1.3 Claim constructible: {built}/{n}  ({100*built//max(n,1)}%)")
     print(f"claims with 0 scalar leaves (lean on PropositionLeaf fallback): {no_scalar}/{n}")
 
-    print(f"\n--- HOMELESS v1.2 FIELDS (no v1.3 slot in phases 1-4) ---")
+    print("\n--- HOMELESS v1.2 FIELDS (no v1.3 slot in phases 1-4) ---")
     for field, cnt in homeless_counter.most_common():
         print(f"  {cnt:3d}/{n}  {field:22s} -> {FIELD_HOME[field]}")
 
-    print(f"\n--- STATISTICS THAT DON'T FIT A SINGLE LEAF ---")
+    print("\n--- STATISTICS THAT DON'T FIT A SINGLE LEAF ---")
     total_vec = sum(c for k, c in leaf_note_counter.items())
     print(f"  {total_vec} unmappable statistic instances across the corpus, e.g.:")
     for note, cnt in leaf_note_counter.most_common(6):
@@ -184,7 +184,7 @@ def main() -> None:
         for r in errors[:15]:
             print(f"  {r['file'].split('/')[-1]}: {r['error']}")
 
-    print(f"\n--- READING ---")
+    print("\n--- READING ---")
     print("  Constructible != faithful. A built Claim still drops subject, premises,")
     print("  operations, external_assumptions, depends_on, and vector statistics, and")
     print("  fabricates a placeholder pattern + estimand. Those are the real gaps.")
