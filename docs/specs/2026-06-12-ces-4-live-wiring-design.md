@@ -148,14 +148,16 @@ elif action is not None and action.kind == ActionKind.DRIFT:
     _, record = drift_pass(self.corpus, current=self.current)
     self.corpus = reopen_drifted(self.corpus, record)   # re-executable findings -> PENDING
     self.last_drift = record
-    self.n_reopened += len(record.drifted)
+    self.n_reopened += sum(1 for f in record.drifted if f.re_executable)
     n_frontier = 0
     n_added = 0
 ```
 
   Then the shared tail (export topology with warm-start, `frame_stats`, append/trim frame) runs as
   for any tick — so a `DRIFT` tick still emits a heartbeat frame, and the re-opened claim shows up as
-  no-longer-licensed in the next topology.
+  no-longer-licensed in the next topology. `n_reopened` counts only the **re-executable** findings —
+  the ones `reopen_drifted` (default `require_plan=True`) actually re-opens — not every flagged
+  finding, so a planless drifted claim (flagged but stranded) does not inflate the counter.
 - **Flywheel alternation.** On a single-claim corpus: once the claim is `LICENSED` it is not
   selectable, so `RUN_CYCLE` has no productive candidate and `DRIFT` (if `n_drifted>0`) fires; after
   `reopen_drifted` the claim is `PENDING`, so `n_drifted` drops to 0 (no `DRIFT` candidate) and
