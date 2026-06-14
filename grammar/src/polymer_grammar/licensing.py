@@ -56,6 +56,7 @@ class RivalSetClosure(str, Enum):
 
 class IndependenceTier(str, Enum):
     """The independence standing of a license (orthogonal to LicenseRoute).
+
     REPRODUCED = the agreeing implementations share the dataset (today's air-gap).
     REPLICATED = independently reproduced across >=2 datasets with distinct dimnames_hash
     (conceptual replication; only this tier permits multiplying the cohorts' e-values)."""
@@ -107,17 +108,14 @@ class Licensing(_Model):
 
     @model_validator(mode="after")
     def _replicated_tier_needs_two_distinct_cohorts(self) -> "Licensing":
-        if self.independence_tier == IndependenceTier.REPLICATED:
-            cohorts = {
-                s.materialization.dimnames_hash
-                for s in self.satisfactions
-                if s.materialization.dimnames_hash is not None
-            }
-            if len(cohorts) < 2:
-                raise ValueError(
-                    "independence_tier=replicated requires >=2 satisfactions with "
-                    "distinct dimnames_hash (cohorts)"
-                )
+        if (
+            self.independence_tier == IndependenceTier.REPLICATED
+            and independence_tier_of(self.satisfactions) != IndependenceTier.REPLICATED
+        ):
+            raise ValueError(
+                "independence_tier=replicated requires >=2 satisfactions with "
+                "distinct dimnames_hash (cohorts)"
+            )
         return self
 
     @model_validator(mode="after")
