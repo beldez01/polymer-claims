@@ -32,8 +32,9 @@ class PendingReason(str, Enum):
 
 
 class RejectionReason(str, Enum):
-    """Why a claim is REJECTED (symmetric to PendingReason). The protocol decides which causes are
-    reinstatable; only DEFEAT_GROUNDED_OUT is (its attacker may later fall)."""
+    """The one-way counterpart to PendingReason — records why a claim is REJECTED; a REJECTED claim
+    is NOT required to carry one (back-compat). The protocol decides which causes are reinstatable;
+    only DEFEAT_GROUNDED_OUT is (its attacker may later fall)."""
 
     DEFEAT_GROUNDED_OUT = "defeat_grounded_out"   # knocked out of the grounded extension by an attacker
     REFUTED = "refuted"                           # the data refuted it (terminal)

@@ -58,6 +58,8 @@ class Claim(_Model):
 
     @model_validator(mode="after")
     def _rejection_reason_only_when_rejected(self) -> "Claim":
+        # one-directional (rejection_reason => REJECTED): REJECTED need not carry a reason,
+        # for back-compat with pre-field claims. Do NOT tighten into an iff.
         if self.rejection_reason is not None and self.status != Status.REJECTED:
             raise ValueError(
                 f"`rejection_reason` is only valid when status=REJECTED; "
