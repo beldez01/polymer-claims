@@ -1,9 +1,9 @@
 """Deterministic SECOND synthetic case/control EPICv2-shaped cohort (§2E replication).
 
-Synthetic VALUES, real STRUCTURE: 24 cg-format probes x 10 samples (T01..T10), an INDEPENDENT cohort
-from epicv2_casectrl_demo (different sample ids -> different dimnames_hash). Same signal region (first 5
-probes) carries the same planted +0.20 beta shift in level2, so the SAME region claim conceptually
-replicates here. No RNG. Synthetic data: the REPLICATED tier is EXERCISED, not earned.
+Synthetic VALUES, real STRUCTURE: 24 cg-format probes x 100 samples (T01..T100, 50 level1 / 50 level2),
+an INDEPENDENT cohort from epicv2_casectrl_demo (different sample ids -> different dimnames_hash). Same
+signal region (first 5 probes) carries the same planted +0.20 beta shift in level2, so the SAME region
+claim conceptually replicates here. No RNG. Synthetic data: the REPLICATED tier is EXERCISED, not earned.
 Re-run:  python -m polymer_claims.contracts._make_casectrl_fixture_b
 """
 from __future__ import annotations

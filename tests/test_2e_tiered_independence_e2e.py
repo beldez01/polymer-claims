@@ -78,5 +78,6 @@ def test_same_cohort_binding_does_not_multiply_or_replicate():
         replications=rep.replications,
     )
     c = next(x for x in result.corpus.claims if x.id == "c-same")
+    assert c.status == Status.LICENSED
     assert c.licensing.independence_tier is IndependenceTier.REPRODUCED
     assert len(c.licensing.satisfactions) == 1
