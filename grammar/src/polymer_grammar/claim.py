@@ -21,7 +21,7 @@ from .proposition import Proposition
 from .provenance import Provenance
 from .representation import RepresentationRevision
 from .roles import CausalRoles
-from .status import PendingReason, Status
+from .status import PendingReason, RejectionReason, Status
 from .subject import Subject
 from .strength import StrengthVector
 
@@ -34,6 +34,7 @@ class Claim(_Model):
     leaves: tuple[Leaf, ...] = Field(min_length=1)
     status: Status
     pending_reason: PendingReason | None = None
+    rejection_reason: RejectionReason | None = None
     strength: StrengthVector | None = None
     conclusion: Proposition | None = None
     licensing: Licensing | None = None
@@ -51,6 +52,17 @@ class Claim(_Model):
         if self.status != Status.PENDING and self.pending_reason is not None:
             raise ValueError(
                 f"`pending_reason` is only valid when status=PENDING; "
+                f"got status={self.status.value}"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _rejection_reason_only_when_rejected(self) -> "Claim":
+        # one-directional (rejection_reason => REJECTED): REJECTED need not carry a reason,
+        # for back-compat with pre-field claims. Do NOT tighten into an iff.
+        if self.rejection_reason is not None and self.status != Status.REJECTED:
+            raise ValueError(
+                f"`rejection_reason` is only valid when status=REJECTED; "
                 f"got status={self.status.value}"
             )
         return self

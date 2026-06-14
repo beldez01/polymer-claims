@@ -12,7 +12,7 @@ from .leaf import (
     PropositionLeaf,
     QuantityLeaf,
 )
-from .status import PendingReason, Status
+from .status import PendingReason, RejectionReason, Status
 from .strength import AXES, StrengthVector, licensed
 from .pattern import Pattern, PatternRef, get_pattern, registry
 from .claim import Claim
@@ -168,6 +168,7 @@ __all__ = [
     "Pattern",
     "PatternRef",
     "PendingReason",
+    "RejectionReason",
     "Proposition",
     "PropositionLeaf",
     "QuantityLeaf",

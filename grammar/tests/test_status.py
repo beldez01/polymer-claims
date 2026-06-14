@@ -26,7 +26,7 @@ def test_pending_reasons_include_governance_and_incomparable():
     assert "strength_incomparable" in vals
     assert "duhem_underdetermined" in vals
     assert "materialization_drifted" in vals
-    assert len(vals) == 11
+    assert len(vals) == 12
 
 
 def test_materialization_drifted_reason_carried_on_a_pending_claim():

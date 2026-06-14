@@ -13,6 +13,7 @@ from polymer_grammar import (
     LicenseRoute,
     Licensing,
     PendingReason,
+    RejectionReason,
     RivalSetClosure,
     Satisfaction,
     SatisfactionVerdict,
@@ -227,10 +228,17 @@ def verify_stage(
                     strength=_recorded_strength(c),  # earned -> cap_earned; else oracle_cap (fallback: empty registry -> unresolved refs UNVALIDATED)
                 )
             )
-        elif agreed_refuted or c.id not in in_ext:
-            new_claims.append(
-                _with_status(c, status=Status.REJECTED, licensing=None, pending_reason=None)
-            )
+        # Refutation is terminal and takes precedence over the grounded-out (extension boundary) case.
+        elif agreed_refuted:
+            new_claims.append(_with_status(
+                c, status=Status.REJECTED, licensing=None, pending_reason=None,
+                rejection_reason=RejectionReason.REFUTED,
+            ))
+        elif c.id not in in_ext:
+            new_claims.append(_with_status(
+                c, status=Status.REJECTED, licensing=None, pending_reason=None,
+                rejection_reason=RejectionReason.DEFEAT_GROUNDED_OUT,
+            ))
         else:
             new_claims.append(c)  # stays PENDING — already carries a valid pending_reason
     return corpus.model_copy(update={"claims": tuple(new_claims), "fdr_ledger": new_ledger})

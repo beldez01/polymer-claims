@@ -27,3 +27,15 @@ class PendingReason(str, Enum):
     MATERIALIZATION_DRIFTED = "materialization_drifted"
     # verify withheld a license: the agreeing adapters are not registry-independent
     ADAPTER_NOT_INDEPENDENT = "adapter_not_independent"
+    # a defeat-rejected claim whose attacker was itself defeated: reopened to re-test (reinstatement)
+    REINSTATED = "reinstated"
+
+
+class RejectionReason(str, Enum):
+    """The one-way counterpart to PendingReason — records why a claim is REJECTED; a REJECTED claim
+    is NOT required to carry one (back-compat). The protocol decides which causes are reinstatable;
+    only DEFEAT_GROUNDED_OUT is (its attacker may later fall)."""
+
+    DEFEAT_GROUNDED_OUT = "defeat_grounded_out"   # knocked out of the grounded extension by an attacker
+    REFUTED = "refuted"                           # the data refuted it (terminal)
+    ROBUSTLY_BLAMED = "robustly_blamed"           # Duhem robust blame (terminal; reserved, not yet wired)
