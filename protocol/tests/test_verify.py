@@ -286,6 +286,28 @@ def test_earned_path_leaves_const_none_strength_claim_exempt(empty_ledger, ctx, 
     assert graded.strength is None
 
 
+def test_out_of_extension_rejection_stamps_defeat_grounded_out(empty_ledger, ctx, adapters):
+    from polymer_grammar import RejectionReason
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
+    corpus, records = _run_to_records(c, empty_ledger, ctx, adapters)
+    scaffolding = CycleScaffolding(grounded_extension=())  # a is OUT (satisfied but grounded-out)
+    out = verify_stage(corpus, scaffolding, records)
+    a = out.by_id()["a"]
+    assert a.status == Status.REJECTED
+    assert a.rejection_reason == RejectionReason.DEFEAT_GROUNDED_OUT
+
+
+def test_refuted_rejection_stamps_refuted(empty_ledger, ctx, adapters):
+    from polymer_grammar import RejectionReason
+    c = make_claim("a", status=Status.PENDING, plan=make_plan(0.99, 0.05))
+    corpus, records = _run_to_records(c, empty_ledger, ctx, adapters)
+    scaffolding = CycleScaffolding(grounded_extension=("a",))  # IN extension, but refuted
+    out = verify_stage(corpus, scaffolding, records)
+    a = out.by_id()["a"]
+    assert a.status == Status.REJECTED
+    assert a.rejection_reason == RejectionReason.REFUTED
+
+
 def test_earned_evidence_prices_the_search(ctx, adapters):
     # Reconciliation: among competing None-strength + oracle_ref claims, the strongly-supported
     # one licenses while a thin-margin rival is held PENDING by the selective-inference bar.
