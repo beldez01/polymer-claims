@@ -2,7 +2,7 @@
   "uid": "epicv2_casectrl_demo_b@1",
   "dim": [
     24,
-    10
+    100
   ],
   "assays": [
     {
@@ -67,6 +67,546 @@
     },
     {
       "sample_id": "T10",
+      "Sample_Group": "level2",
+      "Age": 65,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T11",
+      "Sample_Group": "level1",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T12",
+      "Sample_Group": "level2",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T13",
+      "Sample_Group": "level1",
+      "Age": 55,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T14",
+      "Sample_Group": "level2",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T15",
+      "Sample_Group": "level1",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T16",
+      "Sample_Group": "level2",
+      "Age": 45,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T17",
+      "Sample_Group": "level1",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T18",
+      "Sample_Group": "level2",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T19",
+      "Sample_Group": "level1",
+      "Age": 60,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T20",
+      "Sample_Group": "level2",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T21",
+      "Sample_Group": "level1",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T22",
+      "Sample_Group": "level2",
+      "Age": 50,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T23",
+      "Sample_Group": "level1",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T24",
+      "Sample_Group": "level2",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T25",
+      "Sample_Group": "level1",
+      "Age": 65,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T26",
+      "Sample_Group": "level2",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T27",
+      "Sample_Group": "level1",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T28",
+      "Sample_Group": "level2",
+      "Age": 55,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T29",
+      "Sample_Group": "level1",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T30",
+      "Sample_Group": "level2",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T31",
+      "Sample_Group": "level1",
+      "Age": 45,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T32",
+      "Sample_Group": "level2",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T33",
+      "Sample_Group": "level1",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T34",
+      "Sample_Group": "level2",
+      "Age": 60,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T35",
+      "Sample_Group": "level1",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T36",
+      "Sample_Group": "level2",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T37",
+      "Sample_Group": "level1",
+      "Age": 50,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T38",
+      "Sample_Group": "level2",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T39",
+      "Sample_Group": "level1",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T40",
+      "Sample_Group": "level2",
+      "Age": 65,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T41",
+      "Sample_Group": "level1",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T42",
+      "Sample_Group": "level2",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T43",
+      "Sample_Group": "level1",
+      "Age": 55,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T44",
+      "Sample_Group": "level2",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T45",
+      "Sample_Group": "level1",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T46",
+      "Sample_Group": "level2",
+      "Age": 45,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T47",
+      "Sample_Group": "level1",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T48",
+      "Sample_Group": "level2",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T49",
+      "Sample_Group": "level1",
+      "Age": 60,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T50",
+      "Sample_Group": "level2",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T51",
+      "Sample_Group": "level1",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T52",
+      "Sample_Group": "level2",
+      "Age": 50,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T53",
+      "Sample_Group": "level1",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T54",
+      "Sample_Group": "level2",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T55",
+      "Sample_Group": "level1",
+      "Age": 65,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T56",
+      "Sample_Group": "level2",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T57",
+      "Sample_Group": "level1",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T58",
+      "Sample_Group": "level2",
+      "Age": 55,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T59",
+      "Sample_Group": "level1",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T60",
+      "Sample_Group": "level2",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T61",
+      "Sample_Group": "level1",
+      "Age": 45,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T62",
+      "Sample_Group": "level2",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T63",
+      "Sample_Group": "level1",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T64",
+      "Sample_Group": "level2",
+      "Age": 60,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T65",
+      "Sample_Group": "level1",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T66",
+      "Sample_Group": "level2",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T67",
+      "Sample_Group": "level1",
+      "Age": 50,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T68",
+      "Sample_Group": "level2",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T69",
+      "Sample_Group": "level1",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T70",
+      "Sample_Group": "level2",
+      "Age": 65,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T71",
+      "Sample_Group": "level1",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T72",
+      "Sample_Group": "level2",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T73",
+      "Sample_Group": "level1",
+      "Age": 55,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T74",
+      "Sample_Group": "level2",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T75",
+      "Sample_Group": "level1",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T76",
+      "Sample_Group": "level2",
+      "Age": 45,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T77",
+      "Sample_Group": "level1",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T78",
+      "Sample_Group": "level2",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T79",
+      "Sample_Group": "level1",
+      "Age": 60,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T80",
+      "Sample_Group": "level2",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T81",
+      "Sample_Group": "level1",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T82",
+      "Sample_Group": "level2",
+      "Age": 50,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T83",
+      "Sample_Group": "level1",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T84",
+      "Sample_Group": "level2",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T85",
+      "Sample_Group": "level1",
+      "Age": 65,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T86",
+      "Sample_Group": "level2",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T87",
+      "Sample_Group": "level1",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T88",
+      "Sample_Group": "level2",
+      "Age": 55,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T89",
+      "Sample_Group": "level1",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T90",
+      "Sample_Group": "level2",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T91",
+      "Sample_Group": "level1",
+      "Age": 45,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T92",
+      "Sample_Group": "level2",
+      "Age": 50,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T93",
+      "Sample_Group": "level1",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T94",
+      "Sample_Group": "level2",
+      "Age": 60,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T95",
+      "Sample_Group": "level1",
+      "Age": 65,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T96",
+      "Sample_Group": "level2",
+      "Age": 45,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T97",
+      "Sample_Group": "level1",
+      "Age": 50,
+      "Sex": "F"
+    },
+    {
+      "sample_id": "T98",
+      "Sample_Group": "level2",
+      "Age": 55,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T99",
+      "Sample_Group": "level1",
+      "Age": 60,
+      "Sex": "M"
+    },
+    {
+      "sample_id": "T100",
       "Sample_Group": "level2",
       "Age": 65,
       "Sex": "F"

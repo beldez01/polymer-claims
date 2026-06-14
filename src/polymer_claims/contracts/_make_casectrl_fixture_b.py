@@ -13,7 +13,7 @@ from pathlib import Path
 
 _DIR = Path(__file__).parent
 N_FEATURES = 24
-N_SAMPLES = 10
+N_SAMPLES = 100
 _SIGNAL_PROBES = set(range(5))
 _SHIFT = 0.20
 
