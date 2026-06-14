@@ -15,7 +15,7 @@ Spec §6.8 + SELECT #3a/#3b + GENERATE #4a + oracle dossier #2.
 """
 from __future__ import annotations
 
-from polymer_grammar import Adapter, Claim, MaterializationContext, PendingReason, Status
+from polymer_grammar import Adapter, Claim, MaterializationContext, PendingReason, Satisfaction, Status
 
 from .adapter_registry import AdapterRegistry
 from .canonicalize import canonicalize
@@ -57,6 +57,7 @@ def run_cycle(
     generation_credit_floor: float | None = None,
     materializations: dict[str, MaterializationContext] | None = None,
     evidence: dict[str, float] | None = None,
+    replications: dict[str, tuple[Satisfaction, ...]] | None = None,
 ) -> CycleResult:
     audit: list[StageAudit] = []
     led = ledger if ledger is not None else SelectionLedger()
@@ -124,7 +125,7 @@ def run_cycle(
     executed_ids = {r.claim_id for r in records}
     corpus = verify_stage(
         corpus, scaffolding, records, oracles,
-        adapter_registry=adapter_registry, evidence=evidence,
+        adapter_registry=adapter_registry, evidence=evidence, replications=replications,
     )
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
     n_trust_held = sum(1 for c in corpus.claims if c.pending_reason == PendingReason.ADAPTER_NOT_INDEPENDENT)
