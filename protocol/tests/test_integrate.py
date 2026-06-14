@@ -5,7 +5,8 @@ from polymer_protocol.integrate import integrate
 from tests.conftest import make_claim, make_plan
 from polymer_grammar import (
     DefeatEdge, DefeatEdgeKind, FDRLedger, FDRTest, LicenseRoute, Licensing,
-    MaterializationContext, RivalSetClosure, Satisfaction, SatisfactionVerdict,
+    MaterializationContext, PendingReason, RejectionReason, RivalSetClosure,
+    Satisfaction, SatisfactionVerdict,
     Direction, NeighborEdge, NeighborEdgeKind, Proposition, StrengthVector,
 )
 
@@ -187,3 +188,67 @@ def test_agm_removed_licensed_claim_discovery_tombstoned():
     strong_test = next(t for t in out.fdr_ledger.tests if t.claim_id == "strong_a")
     assert strong_test.retracted is False
     assert out.fdr_ledger.n_discoveries == 1
+
+
+# ---------------------------------------------------------------------------
+# Task 3: INTEGRATE stamping + reinstatement
+# ---------------------------------------------------------------------------
+
+def test_defeat_stamps_rejection_reason():
+    a, ledger = _licensed_A_with_discovery()
+    b = make_claim("B", status=Status.PENDING)
+    edge = DefeatEdge(source="B", target="A", kind=DefeatEdgeKind.REBUT)
+    corpus = Corpus(claims=(a, b), defeat_edges=(edge,), fdr_ledger=ledger)
+    scaff = CycleScaffolding(grounded_extension=("A", "B"))
+    out, _ = integrate(corpus, scaff, ())
+    a2 = next(c for c in out.claims if c.id == "A")
+    assert a2.status == Status.REJECTED
+    assert a2.rejection_reason == RejectionReason.DEFEAT_GROUNDED_OUT
+
+
+def test_reinstatement_reopens_defeat_rejected_to_pending(empty_ledger):
+    # A was defeat-rejected (B knocked it out). Now C defeats B, so grounded semantics brings A back
+    # IN (flipped_in) -> A reopens to PENDING(REINSTATED) to re-test.
+    a = make_claim("A", status=Status.REJECTED,
+                   rejection_reason=RejectionReason.DEFEAT_GROUNDED_OUT,
+                   plan=make_plan(0.01, 0.05))
+    b = make_claim("B", status=Status.PENDING)
+    c = make_claim("C", status=Status.LICENSED)
+    edges = (DefeatEdge(source="B", target="A", kind=DefeatEdgeKind.REBUT),
+             DefeatEdge(source="C", target="B", kind=DefeatEdgeKind.REBUT))
+    corpus = Corpus(claims=(a, b, c), defeat_edges=edges, fdr_ledger=empty_ledger)
+    scaff = CycleScaffolding(grounded_extension=("C", "B"))  # prior: A OUT
+    out, _ = integrate(corpus, scaff, ())
+    a2 = next(x for x in out.claims if x.id == "A")
+    assert a2.status == Status.PENDING
+    assert a2.pending_reason == PendingReason.REINSTATED
+    assert a2.rejection_reason is None
+
+
+def test_refuted_claim_in_extension_not_reopened(empty_ledger):
+    # A REFUTED claim with no attackers sits in the grounded in_set every cycle (flipped_in) — it must
+    # NOT be reopened (refutation is terminal). The correctness guard.
+    r = make_claim("R", status=Status.REJECTED,
+                   rejection_reason=RejectionReason.REFUTED,
+                   plan=make_plan(0.01, 0.05))
+    corpus = Corpus(claims=(r,), defeat_edges=(), fdr_ledger=empty_ledger)
+    scaff = CycleScaffolding(grounded_extension=())  # R out prior; no attackers -> R in in_set
+    out, _ = integrate(corpus, scaff, ())
+    r2 = next(x for x in out.claims if x.id == "R")
+    assert r2.status == Status.REJECTED
+    assert r2.rejection_reason == RejectionReason.REFUTED
+
+
+def test_defeat_rejected_without_plan_not_reopened(empty_ledger):
+    # A planless reinstated claim could never self-relicense -> the has-plan gate skips it.
+    a = make_claim("A", status=Status.REJECTED,
+                   rejection_reason=RejectionReason.DEFEAT_GROUNDED_OUT)  # no plan
+    b = make_claim("B", status=Status.PENDING)
+    c = make_claim("C", status=Status.LICENSED)
+    edges = (DefeatEdge(source="B", target="A", kind=DefeatEdgeKind.REBUT),
+             DefeatEdge(source="C", target="B", kind=DefeatEdgeKind.REBUT))
+    corpus = Corpus(claims=(a, b, c), defeat_edges=edges, fdr_ledger=empty_ledger)
+    scaff = CycleScaffolding(grounded_extension=("C", "B"))
+    out, _ = integrate(corpus, scaff, ())
+    a2 = next(x for x in out.claims if x.id == "A")
+    assert a2.status == Status.REJECTED  # planless -> not reopened

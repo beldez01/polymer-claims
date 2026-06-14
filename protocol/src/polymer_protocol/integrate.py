@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from polymer_grammar import (
     Claim,
+    PendingReason,
+    RejectionReason,
     Status,
     derived_rebut_edges,
     restore_consistency,
@@ -30,11 +32,31 @@ def _merge_edges(authored, derived):
 
 
 def _reject(c: Claim) -> Claim:
-    """De-license a grounded-OUT survivor: flip to REJECTED + clear licensing (mirrors VERIFY's
-    grounded-OUT path; re-validates so the licensing-only-when-LICENSED invariant holds)."""
+    """De-license a grounded-OUT survivor: flip to REJECTED + clear licensing + record the cause
+    (DEFEAT_GROUNDED_OUT) so a later reinstatement can tell it from a refuted claim."""
     return Claim.model_validate(
         c.model_copy(
-            update={"status": Status.REJECTED, "licensing": None, "pending_reason": None}
+            update={
+                "status": Status.REJECTED,
+                "licensing": None,
+                "pending_reason": None,
+                "rejection_reason": RejectionReason.DEFEAT_GROUNDED_OUT,
+            }
+        ).model_dump()
+    )
+
+
+def _reinstate(c: Claim) -> Claim:
+    """Reopen a defeat-rejected claim whose attacker has fallen (grounded-IN again) to PENDING so it
+    RE-TESTS on current data — never auto-relicense a possibly-stale license. Mirrors drift.reopen_drifted."""
+    return Claim.model_validate(
+        c.model_copy(
+            update={
+                "status": Status.PENDING,
+                "licensing": None,
+                "pending_reason": PendingReason.REINSTATED,
+                "rejection_reason": None,
+            }
         ).model_dump()
     )
 
@@ -56,9 +78,23 @@ def integrate(
     defeated_licensed = {
         c.id for c in rr.claims if c.id in rr.flipped_out and c.status == Status.LICENSED
     }
+    # Symmetric to the de-license: a defeat-rejected claim that grounded-IN again (its attacker fell)
+    # reopens to PENDING to re-test. flipped_out and flipped_in are disjoint, so both apply in one pass.
+    reinstated = {
+        c.id for c in rr.claims
+        if c.id in rr.flipped_in
+        and c.status == Status.REJECTED
+        and c.rejection_reason == RejectionReason.DEFEAT_GROUNDED_OUT
+        and c.evaluation_plan is not None
+    }
     removed = rr.retraction.possibly_retracted if rr.retraction is not None else frozenset()
     retract_ids = frozenset(defeated_licensed) | removed
-    new_claims = tuple(_reject(c) if c.id in defeated_licensed else c for c in rr.claims)
+    new_claims = tuple(
+        _reject(c) if c.id in defeated_licensed
+        else _reinstate(c) if c.id in reinstated
+        else c
+        for c in rr.claims
+    )
     new_ledger = retract_tests(corpus.fdr_ledger, retract_ids)
 
     new_corpus = corpus.model_copy(
