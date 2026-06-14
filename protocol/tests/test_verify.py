@@ -1,6 +1,7 @@
 from polymer_grammar import (
     FDRLedger,
     LicenseRoute,
+    RejectionReason,
     SatisfactionVerdict,
     Status,
     StrengthVector,
@@ -287,7 +288,6 @@ def test_earned_path_leaves_const_none_strength_claim_exempt(empty_ledger, ctx, 
 
 
 def test_out_of_extension_rejection_stamps_defeat_grounded_out(empty_ledger, ctx, adapters):
-    from polymer_grammar import RejectionReason
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
     corpus, records = _run_to_records(c, empty_ledger, ctx, adapters)
     scaffolding = CycleScaffolding(grounded_extension=())  # a is OUT (satisfied but grounded-out)
@@ -298,7 +298,6 @@ def test_out_of_extension_rejection_stamps_defeat_grounded_out(empty_ledger, ctx
 
 
 def test_refuted_rejection_stamps_refuted(empty_ledger, ctx, adapters):
-    from polymer_grammar import RejectionReason
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.99, 0.05))
     corpus, records = _run_to_records(c, empty_ledger, ctx, adapters)
     scaffolding = CycleScaffolding(grounded_extension=("a",))  # IN extension, but refuted

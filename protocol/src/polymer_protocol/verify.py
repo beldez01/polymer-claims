@@ -228,6 +228,7 @@ def verify_stage(
                     strength=_recorded_strength(c),  # earned -> cap_earned; else oracle_cap (fallback: empty registry -> unresolved refs UNVALIDATED)
                 )
             )
+        # Refutation is terminal and takes precedence over the grounded-out (extension boundary) case.
         elif agreed_refuted:
             new_claims.append(_with_status(
                 c, status=Status.REJECTED, licensing=None, pending_reason=None,
