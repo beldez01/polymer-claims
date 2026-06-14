@@ -19,12 +19,14 @@ from .claim import Claim
 from .proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from .equivalence import EquivalenceClaim, are_equivalent, equivalence_class
 from .licensing import (
+    IndependenceTier,
     LicenseRoute,
     Licensing,
     MaterializationContext,
     RivalSetClosure,
     Satisfaction,
     SatisfactionVerdict,
+    independence_tier_of,
 )
 from .roles import CausalRoles, Role
 from .units import DIMENSIONLESS, Dimension, compatible
@@ -176,9 +178,11 @@ __all__ = [
     "equivalence_class",
     "get_pattern",
     "licensed",
+    "IndependenceTier",
     "LicenseRoute",
     "Licensing",
     "MaterializationContext",
+    "independence_tier_of",
     "registry",
     "RivalSetClosure",
     "Satisfaction",
