@@ -9,9 +9,9 @@
 
 ## Current state (2026-06-14)
 
-`main` ALL GREEN — **197 umbrella + 345 grammar + 357 protocol + 2 isolation**; viewer `tsc`+build
+`main` ALL GREEN — **197 umbrella + 351 grammar + 363 protocol + 2 isolation**; viewer `tsc`+build
 clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpus = 4 collections**;
-local-only. (§2E tiered independence just merged — see NEXT.)
+local-only. (§2E tiered independence + reinstatement→PENDING just merged — see NEXT.)
 
 The system is a **compiler + runtime for science**: grammar (*what a claim is*) → protocol (*how a
 corpus evolves* — the `run_cycle` flywheel + 3 daemons + scheduler) → umbrella node/server
@@ -51,19 +51,30 @@ badge; live-node (`NodeRunner`) `replication_map` wiring; byte-derived `implemen
 credential provenance (roadmap 1c). Spec `docs/superpowers/specs/2026-06-14-2e-tiered-independence-design.md`,
 plan `docs/superpowers/plans/2026-06-14-2e-tiered-independence.md`.
 
+**✅ REINSTATEMENT → PENDING DONE (2026-06-14, branch `feat/reinstatement-pending`, local-only).** The
+symmetric counterpart to Phase 2.2's defeat-as-de-license. New grammar `RejectionReason`
+{DEFEAT_GROUNDED_OUT, REFUTED, ROBUSTLY_BLAMED} + additive `Claim.rejection_reason` (one-directional:
+reason ⟹ REJECTED) + `PendingReason.REINSTATED`. VERIFY/INTEGRATE stamp the rejection cause (refutation
+takes precedence); a reinstatement block in INTEGRATE mirrors the `flipped_out` de-license — a defeat-
+rejected claim that grounds-IN again (its attacker fell) reopens to **PENDING** to **re-test** on current
+data (never auto-relicense; has-plan gated). No new tombstone (its e-LOND test was already retracted at
+defeat; Phase-2.4 dedup grants a fresh one). The correctness guard holds: a REFUTED claim sitting in the
+grounded `in_set` is NOT reopened. grammar/protocol pure + numpy-free; Corpus = 4; back-compat (dormant
+unless a defeat-rejected claim flips in). `ROBUSTLY_BLAMED` is reserved (the Duhem-blame path has no
+protocol consumer yet). Spec `docs/superpowers/specs/2026-06-14-reinstatement-pending-design.md`, plan
+`docs/superpowers/plans/2026-06-14-reinstatement-pending.md`.
+
 Next safe slices (decision-ready menu, `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`):
 
-1. **Reinstatement → PENDING** — when an attacker B (which rejected A) is itself defeated, grounded
-   semantics reinstates A; **re-test** it (reopen to PENDING; Phase-2.4 live-dedup then re-licenses it
-   naturally). Needs a small grammar marker distinguishing *defeat-rejection* (reinstatable) from
-   *refutation* (terminal). ~1 slice. Safe.
-2. **n-DMPs-at-FDR** — a second methylation reduction (count of DMPs passing an FDR threshold) with a
+1. **n-DMPs-at-FDR** — a second methylation reduction (count of DMPs passing an FDR threshold) with a
    binomial/Poisson-tail e-value. Now also a natural REPLICATED candidate (a second reduction on a second
    cohort). ~1 slice. Safe.
-3. **Procrustes embedding alignment** — after one wiring call (make the signed-Laplacian spectral
+2. **Procrustes embedding alignment** — after one wiring call (make the signed-Laplacian spectral
    embedding the live node layout), orthogonal-Procrustes-align each frame to the previous so the
    universe evolves smoothly. ~1 slice. Safe.
-4. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
+3. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
+4. **ROBUSTLY_BLAMED wiring** — wire the Duhem robust-blame REJECTED verdict into the protocol and stamp
+   it (tiny; the enum value is reserved). Optional/legibility.
 
 **Deferred / blocked-on-external (supervised):** real-public-data swap (point me at a GEO/ENA dataset);
 Python/R hash parity (needs the R side); standards-skin attestation JSON (in-toto/SLSA/DRS
@@ -122,6 +133,9 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ 2.3 live e-gate (`a8ab596`) · 2.4 drift-reopen tombstone + live-dedup (`bb619f1`)
 - ✅ §2E tiered independence (`feat/2e-tiered-independence`) — REPRODUCED / REPLICATED; product e-value
   across independent cohorts as one e-LOND test; 2nd synthetic cohort demo (see NEXT for detail)
+- ✅ Reinstatement → PENDING (`feat/reinstatement-pending`) — `RejectionReason` marker + INTEGRATE
+  reinstatement block; a defeat-rejected claim reopens to re-test when its attacker falls (symmetric to
+  Phase 2.2); refuted claims stay terminal (see NEXT for detail)
 
 ## Invariants / working agreements (don't relearn)
 
