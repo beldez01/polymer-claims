@@ -21,10 +21,10 @@ def test_dims_and_groups():
     m = _manifest()
     nf, ns = m["dim"]
     assert nf == len(m["row_data"]) == 24
-    assert ns == len(m["col_data"]) == 100
+    assert ns == len(m["col_data"]) == 10
     groups = [c["Sample_Group"] for c in m["col_data"]]
     assert set(groups) == {"level1", "level2"}
-    assert groups.count("level1") == groups.count("level2") == 50
+    assert groups.count("level1") == groups.count("level2") == 5
 
 
 def test_probe_format_and_matrix_shape():

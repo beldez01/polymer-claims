@@ -14,6 +14,8 @@ from polymer_claims.replication import build_replication_inputs
 
 _ADAPTERS = (RegionMeanDiffAdapter(), RegionLmCoefAdapter())
 _BASE = MaterializationContext(id="M", api_version="v1", data_version="d1")
+_POWERED = "se:epicv2_casectrl_powered@1"
+_STRONG = ("cg00000001", "cg00000002", "cg00000003", "cg00000004", "cg00000005")
 _REF_B = "se:epicv2_casectrl_demo_b@1"
 
 
@@ -22,7 +24,9 @@ def _corpus(claim):
 
 
 def test_replicated_across_two_cohorts_licenses_at_replicated_tier():
-    claim = region_delta_beta_claim("c-repl")  # cohort A = epicv2_casectrl_demo@1, signal region
+    # cohort A = powered strong region (already clears the e-gate single-cohort);
+    # cohort B = demo_b@1 (distinct cohort, same cg1-5 signal proposition, n=100)
+    claim = region_delta_beta_claim("c-repl", ref=_POWERED, region_probes=_STRONG)
     corpus = _corpus(claim)
     rep = build_replication_inputs(corpus, _BASE, bindings={"c-repl": _REF_B})
 
@@ -46,7 +50,7 @@ def test_replicated_across_two_cohorts_licenses_at_replicated_tier():
 
 
 def test_single_cohort_demo_stays_reproduced():
-    claim = region_delta_beta_claim("c-solo")  # cohort A only
+    claim = region_delta_beta_claim("c-solo", ref=_POWERED, region_probes=_STRONG)  # cohort A only
     corpus = _corpus(claim)
     result = run_cycle(
         corpus, _ADAPTERS, _BASE,
@@ -62,9 +66,9 @@ def test_single_cohort_demo_stays_reproduced():
 
 
 def test_same_cohort_binding_does_not_multiply_or_replicate():
-    claim = region_delta_beta_claim("c-same")
+    claim = region_delta_beta_claim("c-same", ref=_POWERED, region_probes=_STRONG)
     corpus = _corpus(claim)
-    rep = build_replication_inputs(corpus, _BASE, bindings={"c-same": "se:epicv2_casectrl_demo@1"})
+    rep = build_replication_inputs(corpus, _BASE, bindings={"c-same": _POWERED})
     result = run_cycle(
         corpus, _ADAPTERS, _BASE,
         adapter_registry=methyl_independent_registry(),
