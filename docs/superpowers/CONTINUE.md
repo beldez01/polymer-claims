@@ -7,11 +7,11 @@
 
 ---
 
-## Current state (2026-06-13)
+## Current state (2026-06-14)
 
-`main` ALL GREEN — **190 umbrella + 338 grammar + 356 protocol + 2 isolation**; viewer `tsc`+build
+`main` ALL GREEN — **197 umbrella + 345 grammar + 357 protocol + 2 isolation**; viewer `tsc`+build
 clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpus = 4 collections**;
-local-only.
+local-only. (§2E tiered independence just merged — see NEXT.)
 
 The system is a **compiler + runtime for science**: grammar (*what a claim is*) → protocol (*how a
 corpus evolves* — the `run_cycle` flywheel + 3 daemons + scheduler) → umbrella node/server
@@ -30,29 +30,40 @@ apparatus), running live in the node.
 - Adapter independence is **operator-asserted** (`implementation_hash` is a supplied string compared
   with `!=`); byte-derived hashing + credential provenance on `Satisfaction` still open. [roadmap 1c]
 - The two methylation adapters are **reproducibility-independent, not error-independent** (same estimand,
-  same data) — this is exactly what the §2E decision below addresses.
+  same data) → the single-cohort demo licenses at **REPRODUCED**. **§2E now expresses the stronger tier:**
+  a claim reproduced across two cohorts with distinct `dimnames_hash` licenses at **REPLICATED** (the
+  cross-cohort independence that error-decorrelates). The REPLICATED demo runs on a **2nd synthetic
+  cohort** (`epicv2_casectrl_demo_b`) — still exercised, not earned, until a real 2nd cohort is swapped in.
 
-## ▶ NEXT (concrete plan — §2E decided: TIERED)
+## ▶ NEXT (concrete plan)
 
-**Decision (2026-06-13): §2E "independent" = TIERED `REPRODUCED` / `REPLICATED`.** Two standings —
-`REPRODUCED` = two reproducibility-independent impls agree (the current air-gap; a real-but-lower
-standing); `REPLICATED` = low common-cause / conceptual replication (the gold tier; enables genuine
-independent e-value *multiplication*). Honest + additive: the methylation demo keeps a real `REPRODUCED`
-standing while the gold bar is conceptual replication.
+**✅ §2E TIERED INDEPENDENCE DONE (2026-06-14, branch `feat/2e-tiered-independence`, local-only).**
+`IndependenceTier` {REPRODUCED, REPLICATED} as an additive `Licensing.independence_tier` field (default
+REPRODUCED → byte-identical back-compat) + pure `independence_tier_of` keying on distinct
+`materialization.dimnames_hash`. A claim reproduced across **≥2 cohorts with distinct datasets** licenses
+at **REPLICATED**, and its e-LOND test uses the **product** `e₁·e₂` — **ONE** test/discovery, no α-budget
+double-count. Umbrella `replication.py` (`build_replication_inputs`) air-gaps a 2nd synthetic cohort
+(`epicv2_casectrl_demo_b`) and emits the extra satisfaction + product e-value; protocol threads an additive
+`run_cycle(replications=)` (default None → byte-identical) and stamps the tier. Demo: powered cohort A +
+`demo_b` → REPLICATED (product e≈80k ≫ e-LOND bar); single-cohort stays REPRODUCED; same-cohort doesn't
+multiply. grammar/protocol pure + numpy-free; Corpus = 4. **Deferred follow-ups:** viewer REPLICATED
+badge; live-node (`NodeRunner`) `replication_map` wiring; byte-derived `implementation_hash` +
+credential provenance (roadmap 1c). Spec `docs/superpowers/specs/2026-06-14-2e-tiered-independence-design.md`,
+plan `docs/superpowers/plans/2026-06-14-2e-tiered-independence.md`.
 
-Build sequence (from the decision-ready menu, `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`):
+Next safe slices (decision-ready menu, `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`):
 
-1. **§2E tiered independence** *(the unlock — do first)* — a common-cause DAG over shared
-   inputs/methods/profile + an overlap metric + the `REPRODUCED`/`REPLICATED` tier gate. ~1–2 slices.
-2. **Reinstatement → PENDING** — when an attacker B (which rejected A) is itself defeated, grounded
+1. **Reinstatement → PENDING** — when an attacker B (which rejected A) is itself defeated, grounded
    semantics reinstates A; **re-test** it (reopen to PENDING; Phase-2.4 live-dedup then re-licenses it
    naturally). Needs a small grammar marker distinguishing *defeat-rejection* (reinstatable) from
    *refutation* (terminal). ~1 slice. Safe.
-3. **n-DMPs-at-FDR** — a second methylation reduction (count of DMPs passing an FDR threshold) with a
-   binomial/Poisson-tail e-value; a second independent-ish reduction. ~1 slice. Safe.
-4. **Procrustes embedding alignment** — after one wiring call (make the signed-Laplacian spectral
+2. **n-DMPs-at-FDR** — a second methylation reduction (count of DMPs passing an FDR threshold) with a
+   binomial/Poisson-tail e-value. Now also a natural REPLICATED candidate (a second reduction on a second
+   cohort). ~1 slice. Safe.
+3. **Procrustes embedding alignment** — after one wiring call (make the signed-Laplacian spectral
    embedding the live node layout), orthogonal-Procrustes-align each frame to the previous so the
    universe evolves smoothly. ~1 slice. Safe.
+4. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
 
 **Deferred / blocked-on-external (supervised):** real-public-data swap (point me at a GEO/ENA dataset);
 Python/R hash parity (needs the R side); standards-skin attestation JSON (in-toto/SLSA/DRS
@@ -109,6 +120,8 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ Audit remediation (`3241c8d`) — fixed a CRITICAL cross-cycle duplicate-FDR-entry bug (one e-test
   per claim lifetime)
 - ✅ 2.3 live e-gate (`a8ab596`) · 2.4 drift-reopen tombstone + live-dedup (`bb619f1`)
+- ✅ §2E tiered independence (`feat/2e-tiered-independence`) — REPRODUCED / REPLICATED; product e-value
+  across independent cohorts as one e-LOND test; 2nd synthetic cohort demo (see NEXT for detail)
 
 ## Invariants / working agreements (don't relearn)
 

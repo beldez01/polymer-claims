@@ -54,11 +54,34 @@ class RivalSetClosure(str, Enum):
     OPEN_ACKNOWLEDGED = "open_acknowledged"
 
 
+class IndependenceTier(str, Enum):
+    """The independence standing of a license (orthogonal to LicenseRoute).
+
+    REPRODUCED = the agreeing implementations share the dataset (today's air-gap).
+    REPLICATED = independently reproduced across >=2 datasets with distinct dimnames_hash
+    (conceptual replication; only this tier permits multiplying the cohorts' e-values)."""
+
+    REPRODUCED = "reproduced"
+    REPLICATED = "replicated"
+
+
+def independence_tier_of(satisfactions: tuple["Satisfaction", ...]) -> IndependenceTier:
+    """REPLICATED iff the satisfactions carry >=2 DISTINCT non-None materialization.dimnames_hash
+    (distinct cohorts); else REPRODUCED. None dimnames (pre-CES claims) never reach REPLICATED."""
+    cohorts = {
+        s.materialization.dimnames_hash
+        for s in satisfactions
+        if s.materialization.dimnames_hash is not None
+    }
+    return IndependenceTier.REPLICATED if len(cohorts) >= 2 else IndependenceTier.REPRODUCED
+
+
 class Licensing(_Model):
     route: LicenseRoute
     satisfactions: tuple[Satisfaction, ...]
     rival_set_closure: RivalSetClosure
     rivals_considered: tuple[str, ...] = ()
+    independence_tier: IndependenceTier = IndependenceTier.REPRODUCED
     note: str | None = None
 
     @model_validator(mode="after")
@@ -81,6 +104,18 @@ class Licensing(_Model):
                     "route=replication requires >=2 satisfactions across DISTINCT "
                     "materializations (M1 and M2)"
                 )
+        return self
+
+    @model_validator(mode="after")
+    def _replicated_tier_needs_two_distinct_cohorts(self) -> "Licensing":
+        if (
+            self.independence_tier == IndependenceTier.REPLICATED
+            and independence_tier_of(self.satisfactions) != IndependenceTier.REPLICATED
+        ):
+            raise ValueError(
+                "independence_tier=replicated requires >=2 satisfactions with "
+                "distinct dimnames_hash (cohorts)"
+            )
         return self
 
     @model_validator(mode="after")

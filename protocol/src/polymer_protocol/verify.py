@@ -14,12 +14,14 @@ from polymer_grammar import (
     Licensing,
     PendingReason,
     RivalSetClosure,
+    Satisfaction,
     SatisfactionVerdict,
     Status,
     StrengthVector,
     clears_mdl_bar,
     corpus_implied_schema,
     elond_decisions,
+    independence_tier_of,
     is_representation_revision,
     mdl_delta,
     meets_meta_tier_bar,
@@ -119,6 +121,7 @@ def verify_stage(
     oracles: OracleRegistry | None = None,
     adapter_registry: AdapterRegistry | None = None,
     evidence: dict[str, float] | None = None,
+    replications: dict[str, tuple[Satisfaction, ...]] | None = None,
 ) -> Corpus:
     registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
@@ -176,10 +179,13 @@ def verify_stage(
                         licensing=None,
                     ))
                     continue
+            extra_sats = (replications or {}).get(c.id, ())
+            sats = (ev.satisfaction, *extra_sats)
             licensing = Licensing(
                 route=LicenseRoute.SEVERE_TEST,
-                satisfactions=(ev.satisfaction,),
+                satisfactions=sats,
                 rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
+                independence_tier=independence_tier_of(sats),
             )
             if is_representation_revision(c):
                 # meta-tier gate: a representation-revision cannot ride the ordinary single-severe-test
