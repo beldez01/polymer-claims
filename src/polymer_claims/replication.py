@@ -13,7 +13,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from polymer_grammar import (
-    Comparator,
     DataHandle,
     MaterializationContext,
     Satisfaction,
@@ -21,6 +20,7 @@ from polymer_grammar import (
 )
 from polymer_protocol.corpus import Corpus
 
+from .claim_detail import _compare
 from .contracts import load_contract
 from .evidence import _terminal_node, betting_evalue, evidence_map
 from .methyl_adapters import (
@@ -39,18 +39,6 @@ class ReplicationInputs:
 
     replications: dict[str, tuple[Satisfaction, ...]] = field(default_factory=dict)
     evidence: dict[str, float] = field(default_factory=dict)
-
-
-def _satisfied(value: float, comparator: Comparator, threshold: float) -> bool:
-    if comparator == Comparator.GT:
-        return value > threshold
-    if comparator == Comparator.GE:
-        return value >= threshold
-    if comparator == Comparator.LT:
-        return value < threshold
-    if comparator == Comparator.LE:
-        return value <= threshold
-    return False
 
 
 def _rebind(node, ref_b: str):
@@ -85,10 +73,10 @@ def build_replication_inputs(
             continue
         try:
             dimnames_a = load_contract(handle.ref).dimnames_hash
-            dimnames_b = load_contract(ref_b).dimnames_hash
+            contract_b = load_contract(ref_b)
         except FileNotFoundError:
             continue
-        if dimnames_b == dimnames_a:
+        if contract_b.dimnames_hash == dimnames_a:
             continue  # same cohort -> not a replication
 
         node_b = _rebind(node, ref_b)
@@ -102,20 +90,23 @@ def build_replication_inputs(
             continue  # cohort B did not air-gap (the two legs disagree)
 
         crit = claim.evaluation_plan.criterion
-        if crit.threshold is None or not _satisfied(v_meandiff, crit.comparator, crit.threshold):
+        if crit.threshold is None or not _compare(v_meandiff, crit.comparator, crit.threshold, None):
             continue  # cohort B did not show the effect -> no replication
+
+        if cid not in evidence:
+            continue  # no cohort-A e-value -> cannot earn REPLICATED from cohort B alone
 
         e2 = betting_evalue(a2, b2, threshold=crit.threshold, comparator=crit.comparator)
         sat_b = Satisfaction(
             verdict=SatisfactionVerdict.SATISFIED,
             materialization=MaterializationContext(
-                id=f"{base_ctx.id}-repl-{load_contract(ref_b).contract_uid}",
+                id=f"{base_ctx.id}-repl-{contract_b.contract_uid}",
                 api_version=base_ctx.api_version,
                 data_version=base_ctx.data_version,
-                dimnames_hash=dimnames_b,
+                dimnames_hash=contract_b.dimnames_hash,
             ),
         )
         replications[cid] = (sat_b,)
-        evidence[cid] = evidence.get(cid, 1.0) * e2
+        evidence[cid] = evidence[cid] * e2
 
     return ReplicationInputs(replications=replications, evidence=evidence)
