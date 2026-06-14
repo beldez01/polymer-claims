@@ -18,6 +18,7 @@ See `ARCHITECTURE_CURRENT.md` for how the active pieces fit together.
 - **proposition (L1)** — molecular claim content; identity is an *asserted, licensed equivalence*, never a hash.
 - **strength** — a 6-axis Pareto vector (magnitude, certainty, evidence_against_null, severity, world_contact, explanatory_virtue), uniformly higher-is-better, no hidden scalar.
 - **licensing** — the bridge that mints a LICENSED status: an (σ, M) satisfaction via a severe-test or replication route, with a required rival-set-closure. No "LICENSED-simpliciter."
+- **independence tier (REPRODUCED / REPLICATED)** — the `Licensing.independence_tier` standing (§2E). **REPRODUCED** = the agreeing implementations share the dataset (the air-gap; today's default). **REPLICATED** = reproduced across ≥2 cohorts with distinct `dimnames_hash` — the only tier that permits *multiplying* the cohorts' e-values (independent data → a valid product e-value), recorded as one e-LOND test.
 - **defeat graph / VAF (L3)** — value-based argumentation: a strength-mediated effective-defeat relation whose **grounded extension** is the accepted set.
 - **AGM revision (L4)** — belief-base expand/contract/revise + entrenchment, for how the corpus changes under new incompatible claims.
 - **representation-revision** — a schema/representation change expressed as a first-class licensable (meta-tier) claim.
@@ -26,7 +27,7 @@ See `ARCHITECTURE_CURRENT.md` for how the active pieces fit together.
 
 - **run_cycle** — one pass of the flywheel: represent → generate → canonicalize → safety_gate → select → commit → execute_ground → verify_stage → integrate. Pure; threads a frozen `Corpus` + `SelectionLedger`.
 - **flywheel** — the generate → select → execute → verify → integrate loop that grows the corpus.
-- **air gap** — the evaluator's "writer ≠ verifier" rule: a `Satisfaction` is minted only when ≥2 *distinct adapter identities* agree. (Independence is currently identity-string-based; a registry is future work.)
+- **air gap** — the evaluator's "writer ≠ verifier" rule: a `Satisfaction` is minted only when ≥2 *distinct adapter identities* agree. Independence is enforced by the **adapter trust registry** (trusted ∧ different owner ∧ different `implementation_hash`); cross-cohort independence is the §2E **REPLICATED** tier. (Open: `implementation_hash` is operator-asserted — byte-derived hashing is the next hardening slice.)
 - **adapter** — an injected implementation that resolves data and runs a node's computation. Pure reference adapters ship in-package; real ones live outside.
 - **oracle** — a credibility dossier for a measurement apparatus; its validation tier *caps* a claim's empirical strength axes.
 - **daemon** — a standing maintenance pass: DRIFT (re-examine LICENSED claims as the world moves), ORACLE-VALIDATION (decay failing oracles), RED-TEAM (attack the corpus's representation). Pure, caller-scheduled.
