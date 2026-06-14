@@ -61,10 +61,14 @@ polymer-claims serve --llm --interval 3 --llm-every 4   # LLM proposes ~every 4t
 cd viewer && npm run dev               # http://localhost:3000 → Connect to http://localhost:8000
 ```
 
-The execution substrate is still the deterministic reference adapters (`builtin::const`), so the
-agent's proposed claims license on LLM-asserted values — this is the real generate→execute→license
-loop driven by a real agent, but not real-data science yet; real-data execution is Phase 2 (a
-future, separate arc). To tune cost vs. activity: lower `--llm-every` or lower `--interval` to
+The execution substrate for *this `--llm` quickstart* is still the deterministic reference adapters
+(`builtin::const`), so the agent's proposed claims license on LLM-asserted values — the real
+generate→execute→license loop driven by a real agent, but not real-data science. (Real-data
+execution has since shipped: `serve --real-data` runs the node on genuinely independent stdlib
+execution adapters, and the methylation apparatus licenses on a *computed* region-Δβ — over
+synthetic betas for now; see the CES / Phase-2 arc in `ARCHITECTURE_CURRENT.md`. Wiring real
+adapters into the `--llm` path is a small tracked follow-up.) To tune cost vs. activity: lower
+`--llm-every` or lower `--interval` to
 increase agent cadence (and API spend); the agent runs alongside the seed proposers, so the
 universe stays lively even on the throttle's quiet ticks.
 

@@ -1,5 +1,14 @@
 # The credibility arc — next-steps roadmap (ranked by scientific credibility)
 
+> **✅ ESSENTIALLY COMPLETE (reconciled 2026-06-13).** Tier 1 + Tier 2 shipped: **M1** ✅, **CES-1 →
+> CES-2** ✅, **CES-3** ✅ (and CES-0 apparatus + CES-4 live wiring beyond this roadmap). The arc was
+> then **superseded by the Phase-2 epistemic core** (e-values / e-LOND FDR / defeat-refund — north star
+> `docs/vision/2026-06-12-phase-2-north-star.md`), which is the deeper version of the "beat a criterion"
+> leg. **Only carry-forwards from this roadmap:** **1c** adapter-independence hardening (byte-derived
+> `implementation_hash` + credential provenance on `Satisfaction` — still operator-asserted) and **2b**
+> earned-strength-2d (now largely subsumed by the e-value gate). The live forward plan is
+> `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`.
+>
 > **Status:** roadmap, 2026-06-11. NOT an implementation plan — it surveys the open threads as of
 > CES-0-complete and sequences them by one ranking lens: *what makes the system's core claim true*.
 > Each slice follows the standard rhythm: `superpowers:brainstorming` (2–3 questions → spec → plan) →

@@ -1,6 +1,6 @@
 # Polymer Claims — Current Architecture (the short, true version)
 
-> One-page map of what is **active**, what is **frozen**, and what is **user-gated/future**, as of 2026-06-05.
+> One-page map of what is **active**, what is **frozen**, and what is **user-gated/future**, as of 2026-06-13.
 > For the detailed phase-by-phase build log, see `docs/superpowers/CONTINUE.md` (continuity log — dense by design).
 > For terminology, see `GLOSSARY.md`.
 
@@ -29,7 +29,17 @@ grammar  →  protocol            →  node (src/polymer_claims)  →  viewer
 
 **Local-node hardening (2026-06-05):** the live server is bounded and serialized for hours-long local runs — `--max-frames` ring retention, an `asyncio.Lock` serializing ticks, bounded SSE queues, and a **non-loopback bind guard** (`serve --host` other than loopback refuses unless `--unsafe-remote-control` is passed). It is still **local-only**: the mutating routes (`/step`/`/pause`/`/resume`) are unauthenticated by design. Real auth/multi-tenant/deploy is the future federated step, not shipped.
 
-**Agent-driven live node (2026-06-06):** the real `LLMGenerationAdapter` (the `[llm]` extra, Anthropic-backed) is built behind the existing generation-bus seam and can now drive the **live node** itself via `serve --llm` (flags: `--llm-model`, `--llm-every N`). The `every_n_ticks` throttle wrapper (`src/polymer_claims/throttle.py`) calls the inner proposer on the 1st tick then every Nth tick, making a live LLM loop watchable and affordable. The LLM adapter runs alongside the seed corpus's existing rival/revision proposers; the universe stays lively on quiet ticks. Substrate caveat: v1 plans execute on the deterministic reference adapters (`builtin::const`), so the agent's claims license on LLM-asserted values — the full generate→execute→license loop is real and agent-driven, but not real-data science; meaningful data execution is Phase 2 (real execution adapters, a separate future arc).
+**Agent-driven live node (2026-06-06):** the real `LLMGenerationAdapter` (the `[llm]` extra, Anthropic-backed) is built behind the existing generation-bus seam and can now drive the **live node** itself via `serve --llm` (flags: `--llm-model`, `--llm-every N`). The `every_n_ticks` throttle wrapper (`src/polymer_claims/throttle.py`) calls the inner proposer on the 1st tick then every Nth tick, making a live LLM loop watchable and affordable. The LLM adapter runs alongside the seed corpus's existing rival/revision proposers; the universe stays lively on quiet ticks. (The `builtin::const` LLM-asserted-value substrate this adapter started on has since been superseded by real execution adapters and the methylation apparatus — see *Real computation & the epistemic core* below.)
+
+## Real computation & the epistemic core (Phase 2 — built since 2026-06-08)
+
+The system no longer licenses only on asserted values. Three arcs landed:
+
+- **Real execution adapters (2026-06-08)** — claims compute a two-group mean difference from a bundled dataset via two genuinely independent stdlib adapters and license/reject on the **computed** value; `serve --real-data` runs the live node on them. The adapter trust registry (below) bites: a same-owner pair is held PENDING.
+- **CES-0 → CES-4 (2026-06-10 → 12)** — the credibility-evidence spine: a content-addressed `AnalysisProfile` apparatus (CES-0) → a DRS-shaped SE-Contract data seam (CES-1) → the first claim to **license on a value computed from a methylation matrix** (CES-2, region Δβ, two methodologically-independent legs) → a license that records its **full content-address** — dataset `dimnames_hash` + apparatus `profile_hash` + `semantic_run_id` (CES-3) → all of it **running live** in `NodeRunner`/`serve` with a drift daemon that re-opens content-drifted licenses (CES-4). **Honesty caveat:** the methylation betas are *synthetic*, so the recomputable-public tier is exercised, not earned — a self-contained swap for real GEO data is the deferred next step.
+- **Phase 2.1 → 2.4 (2026-06-12 → 13) — the e-value epistemic core.** Licensing, the corpus FDR budget, and defeat are now **one mechanism**: the FDR ledger is an **e-LOND** online process (FDR control under arbitrary dependence), the native evidence atom is a **Waudby-Smith-Ramdas betting e-value**, and `LICENSED ⇔ adapter-agreement ∧ SATISFIED ∧ grounded ∧ live e-LOND discovery`. A successful **defeat de-licenses through the ledger and refunds** the discovery (`FDRTest.retracted` tombstone). The 4-way gate runs **live** in the node (2.3), and the drift path preserves `LICENSED ⇒ a live discovery` (2.4). grammar/protocol stay pure + numpy-free; Corpus stays 4.
+
+> The detailed build log is in `docs/superpowers/CONTINUE.md`; the forward plan is `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`. The open product decision (§2E independence) was resolved **tiered** (`REPRODUCED` / `REPLICATED`) on 2026-06-13.
 
 ## Frozen (v1.2 — fallback, not the active path)
 
@@ -43,6 +53,6 @@ grammar  →  protocol            →  node (src/polymer_claims)  →  viewer
 
 - **PyPI publish** of `polymer-claims` — the build + `[serve]` extra are ready; blocked operationally by the flagged `beldez01` GitHub account (Actions/OIDC suppressed account-wide). Publish locally with a token only when asked. This is also why there is **no active CI** — workflows would never run; `scripts/check-all.sh` is the local substitute.
 - **PolymerGenomicsAPI / polymerbio.org integration** — lift `<ClaimUniverse>` + `theme.ts` + live mode into `PolymerGenomicsAPI/viewer/` to replace the obsolete `FormalClaimUniverse` there. The aesthetic already matches by construction; no API-repo change has been made.
-- **Adapter trust registry** — today the evaluator's air gap requires two *distinct adapter identity strings*; true verifier independence (owner/implementation-lineage/version) needs a registry. The most science-weighty open item.
+- **Adapter-independence hardening** — the adapter trust registry shipped (`67f98e3`, 2026-06-05): the air gap now requires a registry-independent pair (trusted ∧ different owner ∧ different implementation_hash), not just two distinct identity strings. **Still open:** `implementation_hash` is operator-asserted (byte-derived hashing is the next slice), and the agreeing credential IDs are not yet recorded on the frozen `Satisfaction`. The §2E tiered standing (`REPRODUCED` / `REPLICATED`) is the next independence-rigor build.
 - **Federated / BYO-compute layer** — the eventual "users run their own node" vision; a `POST /inject` claim endpoint is a noted future hook on the live server.
 - **Deferred audit Tier-C** — schema→TypeScript contract codegen, narrowing the protocol public API, broad `model_copy` revalidation. Tracked, not urgent.
