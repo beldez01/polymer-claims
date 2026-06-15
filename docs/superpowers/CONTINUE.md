@@ -9,9 +9,9 @@
 
 ## Current state (2026-06-14)
 
-`main` ALL GREEN — **197 umbrella + 351 grammar + 363 protocol + 2 isolation**; viewer `tsc`+build
+`main` ALL GREEN — **215 umbrella + 351 grammar + 363 protocol + 2 isolation**; viewer `tsc`+build
 clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpus = 4 collections**;
-local-only. (§2E tiered independence + reinstatement→PENDING just merged — see NEXT.)
+local-only. (§2E tiered independence + reinstatement→PENDING + n-DMPs-at-FDR just merged — see NEXT.)
 
 The system is a **compiler + runtime for science**: grammar (*what a claim is*) → protocol (*how a
 corpus evolves* — the `run_cycle` flywheel + 3 daemons + scheduler) → umbrella node/server
@@ -64,15 +64,27 @@ unless a defeat-rejected claim flips in). `ROBUSTLY_BLAMED` is reserved (the Duh
 protocol consumer yet). Spec `docs/superpowers/specs/2026-06-14-reinstatement-pending-design.md`, plan
 `docs/superpowers/plans/2026-06-14-reinstatement-pending.md`.
 
+**✅ n-DMPs-at-FDR DONE (2026-06-14, branch `feat/n-dmps-at-fdr`, local-only).** The second methylation
+reduction (alongside region-Δβ): the **count of differentially-methylated probes** (a probe is a DMP iff
+its per-probe two-group pooled t-test p < α) licenses on a new **one-sample count-enrichment e-value**
+(`count_enrichment_evalue`, a WSR/Ville betting e-value testing H0: per-probe DMP-rate ≤ p0=α — the
+"binomial-tail" e-value). Two independent legs (`NDmpTTestAdapter` manual pooled-t vs `NDmpOlsCoefAdapter`
+numpy-lstsq OLS-coef t) **agree on the integer count** → air-gap. Pure-Python Student-t p-value (incomplete
+beta, no scipy). **Umbrella-only** (new `methyl_ndmp.py`; `_load_betas` extracted from `methyl_adapters`;
+`evidence_map` dispatches on impl) — grammar/protocol untouched, base import numpy-free, Corpus = 4. Demo
+(powered fixture, all 24 probes): **10 DMPs → REPRODUCED license** (e≈164 ≫ e-LOND bar); the null/control
+region (0 DMPs, e=1.0) is **REJECTED** (money-shot); same-owner pair held PENDING. Single-cohort; n-DMPs as
+a REPLICATED second reduction is a §2E follow-up. Spec `docs/superpowers/specs/2026-06-14-n-dmps-at-fdr-design.md`,
+plan `docs/superpowers/plans/2026-06-14-n-dmps-at-fdr.md`.
+
 Next safe slices (decision-ready menu, `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`):
 
-1. **n-DMPs-at-FDR** — a second methylation reduction (count of DMPs passing an FDR threshold) with a
-   binomial/Poisson-tail e-value. Now also a natural REPLICATED candidate (a second reduction on a second
-   cohort). ~1 slice. Safe.
-2. **Procrustes embedding alignment** — after one wiring call (make the signed-Laplacian spectral
+1. **Procrustes embedding alignment** — after one wiring call (make the signed-Laplacian spectral
    embedding the live node layout), orthogonal-Procrustes-align each frame to the previous so the
    universe evolves smoothly. ~1 slice. Safe.
-3. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
+2. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
+3. **n-DMPs as a REPLICATED second reduction** — run the n-DMP count on a second cohort and multiply the
+   two count-enrichment e-values (combines §2E's REPLICATED machinery with the new reduction). ~1 slice.
 4. **ROBUSTLY_BLAMED wiring** — wire the Duhem robust-blame REJECTED verdict into the protocol and stamp
    it (tiny; the enum value is reserved). Optional/legibility.
 
@@ -136,6 +148,9 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ Reinstatement → PENDING (`feat/reinstatement-pending`) — `RejectionReason` marker + INTEGRATE
   reinstatement block; a defeat-rejected claim reopens to re-test when its attacker falls (symmetric to
   Phase 2.2); refuted claims stay terminal (see NEXT for detail)
+- ✅ n-DMPs-at-FDR (`feat/n-dmps-at-fdr`) — second methylation reduction; per-probe-significant DMP count
+  licenses on a one-sample count-enrichment betting e-value; two pooled-t legs agree on the count
+  (air-gap); umbrella-only (see NEXT for detail)
 
 ## Invariants / working agreements (don't relearn)
 

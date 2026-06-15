@@ -94,9 +94,9 @@ N over K), air-gap, and e-LOND gate apply unchanged. numpy stays behind the non-
 
 ## Demo & money-shot (powered fixture, `epicv2_casectrl_powered@1`)
 
-- **Licenses (REPRODUCED):** an n-DMPs claim over all 24 probes (5 strong-signal + ~19 ~null) with
-  `k=3` licenses — `_n_dmps ≈ 5 ≥ 3`, both legs agree (air-gap holds), and the enrichment e-value
-  (≈5/24 passing vs p0=0.05) clears the e-LOND bar.
+- **Licenses (REPRODUCED):** an n-DMPs claim over all 24 probes (5 strong + 5 weak signal probes — both
+  clear p<α at n=50/group — plus 14 ~null controls) with `k=3` licenses — `_n_dmps ≈ 10 ≥ 3`, both legs
+  agree (air-gap holds), and the enrichment e-value (≈10/24 passing vs p0=0.05) clears the e-LOND bar.
 - **Money-shot (does NOT license):** an n-DMPs claim over only the **null/control** probes — count ≈
   α·M (chance), enrichment e-value below the bar → withheld. The corpus error control working on a count.
 - **Air-gap bites:** a same-owner credential pair is held PENDING.

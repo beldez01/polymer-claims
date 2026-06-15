@@ -40,37 +40,45 @@ from .profiles import CANONICAL_EPICV2_V1
 _IMPL = "methyl::region_delta_beta"
 
 
-def _region_group_means(node: OperationNode) -> tuple[list[float], list[float]]:
-    """Resolve the node's DataHandle to per-sample region-mean betas, split by the two levels.
-    Returns (level_a means, level_b means). Raises on bad impl / missing handle / missing probe /
-    empty group (the evaluator degrades a raise to a node error)."""
-    if node.impl != _IMPL:
-        raise ValueError(f"{_IMPL} adapter cannot execute impl {node.impl!r}")
+def _load_betas(
+    node: OperationNode,
+) -> tuple[dict[str, dict[str, float]], list[str], dict[str, str], dict[str, str]]:
+    """Resolve the node's DataHandle to the per-probe-per-sample beta matrix + sample grouping + params.
+    Returns (beta: dict[str, dict[str, float]], sample_ids: list[str],
+    group_of: dict[str, str], params: dict[str, str]). Shared by region-Δβ and n-DMPs.
+    Raises ValueError on a missing DataHandle (the evaluator degrades a raise to a node error)."""
     handle = next((i for i in node.inputs if isinstance(i, DataHandle)), None)
     if handle is None:
-        raise ValueError(f"{_IMPL} requires a DataHandle input")
+        raise ValueError(f"{node.impl} requires a DataHandle input")
     p = {k: v for k, v in node.params}
-    region_probes = [s for s in p["region_probes"].split(",") if s]
-    group_col, level_a, level_b = p["group_col"], p["level_a"], p["level_b"]
-
     se = load_contract(handle.ref)
     betas_path = Path(se.access_methods[0].access_url)
     manifest = json.loads(
         (betas_path.parent / f"{se.contract_uid.split('@')[0]}.json").read_text()
     )
+    group_col = p["group_col"]
     sample_ids = [c["sample_id"] for c in manifest["col_data"]]
     group_of = {c["sample_id"]: c[group_col] for c in manifest["col_data"]}
-
     lines = betas_path.read_text().splitlines()
     header = lines[0].split("\t")[1:]
     beta: dict[str, dict[str, float]] = {}
     for ln in lines[1:]:
         cells = ln.split("\t")
         beta[cells[0]] = {sid: float(v) for sid, v in zip(header, cells[1:])}
+    return beta, sample_ids, group_of, p
+
+
+def _region_group_means(node: OperationNode) -> tuple[list[float], list[float]]:
+    """Resolve the node's DataHandle to per-sample region-mean betas, split by the two levels.
+    Returns (level_a means, level_b means). Raises on bad impl / missing probe / empty group."""
+    if node.impl != _IMPL:
+        raise ValueError(f"{_IMPL} adapter cannot execute impl {node.impl!r}")
+    beta, sample_ids, group_of, p = _load_betas(node)
+    region_probes = [s for s in p["region_probes"].split(",") if s]
+    level_a, level_b = p["level_a"], p["level_b"]
     for cg in region_probes:
         if cg not in beta:
-            raise KeyError(f"region probe {cg!r} not in contract {handle.ref!r}")
-
+            raise KeyError(f"region probe {cg!r} not in contract")
     per_sample = {
         sid: sum(beta[cg][sid] for cg in region_probes) / len(region_probes)
         for sid in sample_ids
