@@ -4,7 +4,7 @@ from tests.conftest import licensing_corpus
 
 
 def test_node_runner_ticks_and_accumulates():
-    r = NodeRunner.from_seed(licensing_corpus())
+    r = NodeRunner.from_seed(licensing_corpus(), layout="force")
     for _ in range(5):
         r.tick()
     tl = r.snapshot()
@@ -23,14 +23,14 @@ def test_node_runner_ticks_and_accumulates():
 
 
 def test_node_runner_snapshot_is_valid_before_ticks():
-    r = NodeRunner.from_seed(licensing_corpus())
+    r = NodeRunner.from_seed(licensing_corpus(), layout="force")
     tl = r.snapshot()
     assert len(tl.frames) == 1
     assert tl.frames[0].stats.cycle_index == 0
 
 
 def test_node_runner_bounded_retention():
-    r = NodeRunner.from_seed(licensing_corpus(), max_frames=5)
+    r = NodeRunner.from_seed(licensing_corpus(), max_frames=5, layout="force")
     for _ in range(20):
         r.tick()
     tl = r.snapshot()
@@ -48,7 +48,7 @@ def test_node_runner_bounded_retention():
 
 
 def test_node_runner_unbounded_default_via_none():
-    r = NodeRunner.from_seed(licensing_corpus(), max_frames=None)
+    r = NodeRunner.from_seed(licensing_corpus(), max_frames=None, layout="force")
     for _ in range(8):
         r.tick()
     assert len(r.snapshot().frames) == 9             # frame 0 + 8, nothing dropped
