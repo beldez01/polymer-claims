@@ -7,12 +7,35 @@ evidence.py. See docs/superpowers/specs/2026-06-14-n-dmps-at-fdr-design.md.
 """
 from __future__ import annotations
 
+import json
 import math
+from pathlib import Path
 
 import numpy as np
-from polymer_grammar import OperationNode
+from polymer_grammar import (
+    CategoricalLeaf,
+    Claim,
+    Comparator,
+    ComputeGraph,
+    DataHandle,
+    EvaluationPlan,
+    ExecValue,
+    GenomicRegion,
+    MeasurementBasis,
+    OperationNode,
+    PatternRef,
+    PendingReason,
+    ProducedLeafSpec,
+    SatisfactionCriterion,
+    Status,
+    StrengthVector,
+)
+from polymer_protocol import AdapterCredential, AdapterRegistry
 
+from .analysis_profile import profile_oracle_id
+from .contracts import load_contract
 from .methyl_adapters import _load_betas
+from .profiles import CANONICAL_EPICV2_V1
 
 _NDMP_IMPL = "methyl::n_dmps"
 
@@ -127,3 +150,114 @@ def dmp_indicators(node: OperationNode) -> list[int]:
     alpha = float(dict(node.params)["alpha"])
     pvals = _per_probe_pvalues(node, leg=_pooled_t)
     return [1 if v < alpha else 0 for v in pvals.values()]
+
+
+def _ols_t(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
+    """OLS group-coefficient t-statistic + df (numpy lstsq). Leg B — equals _pooled_t for two groups."""
+    na, nb = len(a), len(b)
+    df = na + nb - 2
+    y = np.concatenate([a, b])
+    ind = np.concatenate([np.zeros(na), np.ones(nb)])
+    X = np.column_stack([np.ones_like(ind), ind])
+    coef, *_ = np.linalg.lstsq(X, y, rcond=None)
+    resid = y - X @ coef
+    mse = float(resid @ resid) / df
+    xtx_inv = np.linalg.inv(X.T @ X)
+    se = math.sqrt(mse * float(xtx_inv[1, 1]))
+    if se == 0.0:
+        return (0.0 if coef[1] == 0.0 else math.inf), df
+    return (float(coef[1]) / se, df)
+
+
+class NDmpTTestAdapter:
+    """Independent leg A — DMP count via the manual pooled two-sample t-test."""
+
+    identity = "methyl-ndmp-ttest"
+
+    def execute(self, node, upstream, ctx) -> ExecValue:
+        alpha = float(dict(node.params)["alpha"])
+        return ExecValue(value=float(_n_dmps(_per_probe_pvalues(node, leg=_pooled_t), alpha)))
+
+
+class NDmpOlsCoefAdapter:
+    """Independent leg B — DMP count via the per-probe OLS group-coefficient t (numpy lstsq).
+    Equals leg A's count for a two-group design (the OLS-coef t == the pooled t)."""
+
+    identity = "methyl-ndmp-ols"
+
+    def execute(self, node, upstream, ctx) -> ExecValue:
+        alpha = float(dict(node.params)["alpha"])
+        return ExecValue(value=float(_n_dmps(_per_probe_pvalues(node, leg=_ols_t), alpha)))
+
+
+def _all_probe_ids(ref: str) -> tuple[str, ...]:
+    """Read the contract manifest's row_data feature-ids (the full probe set)."""
+    se = load_contract(ref)
+    betas_path = Path(se.access_methods[0].access_url)
+    manifest = json.loads((betas_path.parent / f"{se.contract_uid.split('@')[0]}.json").read_text())
+    return tuple(r["feature_id"] for r in manifest["row_data"])
+
+
+def n_dmps_claim(
+    claim_id: str,
+    *,
+    ref: str = "se:epicv2_casectrl_powered@1",
+    probes: tuple[str, ...] | None = None,
+    group_col: str = "Sample_Group",
+    level_a: str = "level1",
+    level_b: str = "level2",
+    alpha: float = 0.05,
+    k: float,
+    comparator: Comparator = Comparator.GE,
+    oracle_ref: str | None = None,
+    strength: StrengthVector | None = None,
+    title: str = "n differentially-methylated probes (p < alpha)",
+) -> Claim:
+    """Build a PENDING claim whose plan counts DMPs (per-probe p < alpha) over the contract's probes
+    (default = ALL probes) and licenses iff the count clears `k`. Mirrors region_delta_beta_claim;
+    binds CANONICAL_EPICV2_V1 as the apparatus. `strength=None` -> earned at verify."""
+    if probes is None:
+        probes = _all_probe_ids(ref)
+    if oracle_ref is None:
+        oracle_ref = profile_oracle_id(CANONICAL_EPICV2_V1)
+    node = OperationNode(
+        id="n0",
+        impl=_NDMP_IMPL,
+        inputs=(DataHandle(ref=ref),),
+        params=(
+            ("probes", ",".join(probes)),
+            ("group_col", group_col),
+            ("level_a", level_a),
+            ("level_b", level_b),
+            ("alpha", str(alpha)),
+        ),
+        oracle_ref=oracle_ref,
+        produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
+    )
+    plan = EvaluationPlan(
+        graph=ComputeGraph(nodes=(node,), terminal="n0"),
+        criterion=SatisfactionCriterion(comparator=comparator, threshold=float(k)),
+    )
+    subject = GenomicRegion(
+        id="chr1:1000000-1004800", display="chr1:1,000,000-1,004,800",
+        assembly="hg38", chrom="chr1", start=1_000_000, end=1_004_800,
+    )
+    return Claim(
+        id=claim_id,
+        title=title,
+        pattern=PatternRef(id="adjusted_effect", version="v1"),
+        leaves=(CategoricalLeaf(ontology_term="differential_methylation"),),
+        status=Status.PENDING,
+        pending_reason=PendingReason.UNTESTED,
+        strength=strength,
+        subject=subject,
+        evaluation_plan=plan,
+    )
+
+
+def ndmp_independent_registry() -> AdapterRegistry:
+    """Credentials asserting the two n-DMP legs are genuinely independent (distinct owners + hashes)."""
+    return AdapterRegistry(credentials=(
+        AdapterCredential(identity="methyl-ndmp-ttest", owner="owner-ttest", implementation_hash="h-ndmp-ttest"),
+        AdapterCredential(identity="methyl-ndmp-ols", owner="owner-ols", implementation_hash="h-ndmp-ols"),
+    ))
