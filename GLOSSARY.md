@@ -39,6 +39,7 @@ See `ARCHITECTURE_CURRENT.md` for how the active pieces fit together.
 - **node** — the local mutable host (`NodeRunner` + the `serve` FastAPI server). The ONE impure piece; owns the loop/clock/network.
 - **topology / timeline** — the export DTOs: `TopologyExport` (nodes/edges/clusters + a deterministic 3D layout) and `TopologyTimeline` (a sequence of warm-started frames + per-frame stats). The protocol↔viewer contract.
 - **sample mode** vs **live mode** — the viewer either loads a precomputed `public/sample-timeline.json` (sample) or connects to a running node over SSE (live).
+- **layout (spectral / force)** — how the node positions claims. **spectral** (default) = the signed-Laplacian eigenmap (`embedding.py`), orthogonal-Procrustes-aligned to the previous frame so the live universe grows smoothly (`layout_id="external:spectral-v1"`). **force** = the legacy id-hash Fruchterman-Reingold layout. Selected by `serve --layout {spectral,force}`; spectral needs the `[embed]` extra (numpy) and gracefully falls back to force without it.
 - **viewer** — the standalone Next/Three.js UI in `viewer/`. Reserve "viewer" for this app unless explicitly discussing polymerbio.org integration.
 
 ## External / product

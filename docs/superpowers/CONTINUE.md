@@ -97,7 +97,15 @@ region (0 DMPs, e=1.0) is **REJECTED** (money-shot); same-owner pair held PENDIN
 a REPLICATED second reduction is a §2E follow-up. Spec `docs/superpowers/specs/2026-06-14-n-dmps-at-fdr-design.md`,
 plan `docs/superpowers/plans/2026-06-14-n-dmps-at-fdr.md`.
 
-Next safe slices (decision-ready menu, `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`):
+**▶ RECOMMENDED NEXT PHASE — the real-data swap (from *exercised* to *earned*).** The rigor core is
+built; its central proof still runs on **synthetic betas**, so the recomputable-public tier is
+*exercised, not earned*. Swapping in a real public methylation cohort (GEO/ENA, EPIC/EPICv2) is the
+single highest-leverage move — it retires the #1 standing caveat and is the keystone for the standards
+skin. It is the designed-in next step (identical `load_contract` seam) and is **blocked only on you
+choosing a dataset**. Full path + acceptance + what's needed: **`docs/superpowers/2026-06-15-next-phase-real-data.md`**.
+Natural encore: a 2nd real cohort → the §2E **REPLICATED** gold tier.
+
+Other safe slices (decision-ready menu, `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`):
 
 1. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
    (Now also: the viewer spectral-layout follow-ups deferred above — UMAP / content features.)

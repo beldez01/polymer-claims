@@ -13,6 +13,14 @@ appearance of progress. Each is one decision away from buildable.
 
 ---
 
+> **⟳ RECONCILED 2026-06-15 — this is now a historical snapshot.** Since this menu was written, its
+> Tier-1 items all shipped — **reinstatement (1)**, **n-DMPs (2)**, **Procrustes/live-spectral layout (3)** —
+> and the Tier-2 **§2E tiering call (4)** was resolved *tiered* and built (REPRODUCED/REPLICATED). State is
+> now `main` ALL GREEN — **226 umbrella + 351 grammar + 363 protocol + 2 isolation** (the 190/338/356 below
+> is the 06-13 snapshot). The **recommended next phase is item 6, the real-public-data swap** — see
+> `docs/superpowers/2026-06-15-next-phase-real-data.md` and the NEXT section of `CONTINUE.md`. Items 5/7/8
+> remain as described.
+
 ## ✅ Shipped overnight (all merged to `main`, `--no-ff`, ALL GREEN)
 
 1. **Phase 2.3 — live e-gate** (`a8ab596`). The 4-way e-LOND gate now RUNS in a live `NodeRunner`
