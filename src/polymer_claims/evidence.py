@@ -15,6 +15,7 @@ from polymer_grammar import Comparator, DataHandle
 from polymer_protocol.corpus import Corpus
 
 from .methyl_adapters import _IMPL, _region_group_means
+from .methyl_ndmp import _NDMP_IMPL, dmp_indicators
 
 # c<1 caps the betting fraction so every capital factor (1 + lam*W) stays strictly positive (Eq.25);
 # 0.9 recovers power while keeping factors >= 1-c = 0.1. Fixed, data-independent.
@@ -118,14 +119,13 @@ def _terminal_node(claim):
 
 
 def evidence_map(corpus: Corpus) -> dict[str, float]:
-    """Per-claim native e-value keyed by claim id. A claim is included iff its terminal node is the
-    methyl apparatus (impl == _IMPL) with a DataHandle, its contract resolves, and its criterion is
-    one-sided numeric (GT/GE/LT/LE with a threshold). Everything else gets NO entry (caller falls
-    back to the existing 3-way gate). Impure: _region_group_means reads the bundled contract."""
+    """Per-claim native e-value keyed by claim id. region-Δβ (impl _IMPL) -> betting_evalue on the
+    group-mean diff; n-DMPs (impl _NDMP_IMPL) -> count_enrichment_evalue on the DMP indicators. Any other
+    claim gets NO entry (caller falls back to the 3-way gate). Impure: reads the bundled contract."""
     out: dict[str, float] = {}
     for c in corpus.claims:
         node = _terminal_node(c)
-        if node is None or node.impl != _IMPL:
+        if node is None:
             continue
         if not any(isinstance(i, DataHandle) for i in node.inputs):
             continue
@@ -134,9 +134,17 @@ def evidence_map(corpus: Corpus) -> dict[str, float]:
             Comparator.GT, Comparator.GE, Comparator.LT, Comparator.LE
         ):
             continue
-        try:
-            a, b = _region_group_means(node)
-        except (FileNotFoundError, KeyError, ValueError):
-            continue
-        out[c.id] = betting_evalue(a, b, threshold=crit.threshold, comparator=crit.comparator)
+        if node.impl == _IMPL:
+            try:
+                a, b = _region_group_means(node)
+            except (FileNotFoundError, KeyError, ValueError):
+                continue
+            out[c.id] = betting_evalue(a, b, threshold=crit.threshold, comparator=crit.comparator)
+        elif node.impl == _NDMP_IMPL:
+            try:
+                indicators = dmp_indicators(node)
+                p0 = float(dict(node.params)["alpha"])
+            except (FileNotFoundError, KeyError, ValueError):
+                continue
+            out[c.id] = count_enrichment_evalue(indicators, p0=p0)
     return out

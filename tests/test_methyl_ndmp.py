@@ -75,3 +75,17 @@ def test_ndmp_registry_has_two_independent_legs():
     assert ids == {"methyl-ndmp-ttest", "methyl-ndmp-ols"}
     owners = {cr.owner for cr in reg.credentials}
     assert len(owners) == 2  # distinct owners -> registry-independent
+
+
+def test_evidence_map_scores_n_dmps_claim():
+    from polymer_grammar import FDRLedger
+    from polymer_protocol import Corpus
+
+    from polymer_claims.evidence import evidence_map
+    from polymer_claims.methyl_ndmp import n_dmps_claim
+
+    claim = n_dmps_claim("c-ndmp", ref="se:epicv2_casectrl_powered@1", k=3)
+    corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
+    m = evidence_map(corpus)
+    assert "c-ndmp" in m
+    assert m["c-ndmp"] > 32.0  # strong enrichment (~10/24 DMPs vs p0=0.05) clears a typical e-LOND bar
