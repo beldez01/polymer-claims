@@ -1,0 +1,775 @@
+{
+  "frames": [
+    {
+      "topology": {
+        "nodes": [
+          {
+            "id": "c0_0",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.96773,
+              -0.853145,
+              -0.814362
+            ]
+          },
+          {
+            "id": "c0_1",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.841633,
+              -0.870875,
+              -0.899303
+            ]
+          },
+          {
+            "id": "c0_2",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.980227,
+              -0.98865,
+              -0.955883
+            ]
+          },
+          {
+            "id": "c0_3",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              1.0,
+              -0.988854,
+              -0.815093
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "source": "c0_0",
+            "target": "c0_1",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_2",
+            "target": "c0_3",
+            "kind": "rebut",
+            "effective": true,
+            "provisional": false
+          }
+        ],
+        "clusters": [
+          {
+            "id": "pattern:synth_effect",
+            "label": "pattern:synth_effect",
+            "member_ids": [
+              "c0_0",
+              "c0_1",
+              "c0_2",
+              "c0_3"
+            ]
+          }
+        ],
+        "layout_id": "external:spectral-v1",
+        "contract_version": "1.0"
+      },
+      "stats": {
+        "cycle_index": 0,
+        "n_nodes": 4,
+        "n_licensed": 2,
+        "n_pending": 2,
+        "n_conjectured": 0,
+        "n_rejected": 0,
+        "n_edges": 2,
+        "n_effective_edges": 2,
+        "n_provisional_edges": 0,
+        "n_frontier": 0,
+        "n_added": 0,
+        "n_newly_licensed": 2
+      }
+    },
+    {
+      "topology": {
+        "nodes": [
+          {
+            "id": "c0_0",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.948328,
+              -0.854532,
+              -0.815453
+            ]
+          },
+          {
+            "id": "c0_1",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.824652,
+              -0.871922,
+              -0.898763
+            ]
+          },
+          {
+            "id": "c0_2",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.962225,
+              -0.987435,
+              -0.954256
+            ]
+          },
+          {
+            "id": "c0_3",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.981618,
+              -0.987635,
+              -0.816169
+            ]
+          },
+          {
+            "id": "c0_4",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.82807,
+              -0.988346,
+              -1.016727
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "source": "c0_0",
+            "target": "c0_1",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_0",
+            "target": "c0_4",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_2",
+            "target": "c0_3",
+            "kind": "rebut",
+            "effective": true,
+            "provisional": false
+          }
+        ],
+        "clusters": [
+          {
+            "id": "pattern:synth_effect",
+            "label": "pattern:synth_effect",
+            "member_ids": [
+              "c0_0",
+              "c0_1",
+              "c0_2",
+              "c0_3",
+              "c0_4"
+            ]
+          }
+        ],
+        "layout_id": "external:spectral-v1",
+        "contract_version": "1.0"
+      },
+      "stats": {
+        "cycle_index": 1,
+        "n_nodes": 5,
+        "n_licensed": 2,
+        "n_pending": 2,
+        "n_conjectured": 0,
+        "n_rejected": 0,
+        "n_edges": 3,
+        "n_effective_edges": 2,
+        "n_provisional_edges": 0,
+        "n_frontier": 0,
+        "n_added": 0,
+        "n_newly_licensed": 0
+      }
+    },
+    {
+      "topology": {
+        "nodes": [
+          {
+            "id": "c0_0",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.934712,
+              -1.021821,
+              -0.258681
+            ]
+          },
+          {
+            "id": "c0_1",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.850836,
+              -0.316814,
+              -1.274693
+            ]
+          },
+          {
+            "id": "c0_2",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.649044,
+              -0.998882,
+              -0.930573
+            ]
+          },
+          {
+            "id": "c0_3",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.670817,
+              -0.989434,
+              -0.847337
+            ]
+          },
+          {
+            "id": "c0_4",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.191519,
+              -1.36292,
+              -1.190084
+            ]
+          },
+          {
+            "id": "c0_5",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.104017,
+              -0.385507,
+              -0.487463
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "source": "c0_0",
+            "target": "c0_1",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_0",
+            "target": "c0_4",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_1",
+            "target": "c0_5",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_2",
+            "target": "c0_3",
+            "kind": "rebut",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_4",
+            "target": "c0_5",
+            "kind": "entails",
+            "effective": true,
+            "provisional": false
+          }
+        ],
+        "clusters": [
+          {
+            "id": "pattern:synth_effect",
+            "label": "pattern:synth_effect",
+            "member_ids": [
+              "c0_0",
+              "c0_1",
+              "c0_2",
+              "c0_3",
+              "c0_4",
+              "c0_5"
+            ]
+          }
+        ],
+        "layout_id": "external:spectral-v1",
+        "contract_version": "1.0"
+      },
+      "stats": {
+        "cycle_index": 2,
+        "n_nodes": 6,
+        "n_licensed": 2,
+        "n_pending": 2,
+        "n_conjectured": 0,
+        "n_rejected": 0,
+        "n_edges": 5,
+        "n_effective_edges": 3,
+        "n_provisional_edges": 0,
+        "n_frontier": 0,
+        "n_added": 0,
+        "n_newly_licensed": 0
+      }
+    },
+    {
+      "topology": {
+        "nodes": [
+          {
+            "id": "c0_0",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.931018,
+              -1.117834,
+              -0.252037
+            ]
+          },
+          {
+            "id": "c0_1",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.562997,
+              -0.326561,
+              -0.439152
+            ]
+          },
+          {
+            "id": "c0_2",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.690401,
+              -0.592129,
+              -0.319716
+            ]
+          },
+          {
+            "id": "c0_3",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.71916,
+              -1.341444,
+              -0.507557
+            ]
+          },
+          {
+            "id": "c0_4",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.394089,
+              -1.463224,
+              -1.731661
+            ]
+          },
+          {
+            "id": "c0_5",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.074646,
+              -0.234185,
+              -1.738708
+            ]
+          },
+          {
+            "id": "c0_6",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.190181,
+              -1.941079,
+              -1.246396
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "source": "c0_0",
+            "target": "c0_1",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_0",
+            "target": "c0_4",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_1",
+            "target": "c0_5",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_2",
+            "target": "c0_3",
+            "kind": "rebut",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_4",
+            "target": "c0_5",
+            "kind": "entails",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_4",
+            "target": "c0_6",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_6",
+            "target": "c0_3",
+            "kind": "undercut",
+            "effective": true,
+            "provisional": false
+          }
+        ],
+        "clusters": [
+          {
+            "id": "pattern:synth_effect",
+            "label": "pattern:synth_effect",
+            "member_ids": [
+              "c0_0",
+              "c0_1",
+              "c0_2",
+              "c0_3",
+              "c0_4",
+              "c0_5",
+              "c0_6"
+            ]
+          }
+        ],
+        "layout_id": "external:spectral-v1",
+        "contract_version": "1.0"
+      },
+      "stats": {
+        "cycle_index": 3,
+        "n_nodes": 7,
+        "n_licensed": 2,
+        "n_pending": 2,
+        "n_conjectured": 0,
+        "n_rejected": 0,
+        "n_edges": 7,
+        "n_effective_edges": 4,
+        "n_provisional_edges": 0,
+        "n_frontier": 0,
+        "n_added": 0,
+        "n_newly_licensed": 0
+      }
+    },
+    {
+      "topology": {
+        "nodes": [
+          {
+            "id": "c0_0",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.963549,
+              -0.965053,
+              -0.160226
+            ]
+          },
+          {
+            "id": "c0_1",
+            "status": "licensed",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.799004,
+              -0.31332,
+              -0.16597
+            ]
+          },
+          {
+            "id": "c0_2",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              1.035641,
+              -0.104004,
+              -0.274203
+            ]
+          },
+          {
+            "id": "c0_3",
+            "status": "pending",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.551432,
+              -2.021869,
+              -0.257298
+            ]
+          },
+          {
+            "id": "c0_4",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.553719,
+              -1.500363,
+              -2.038426
+            ]
+          },
+          {
+            "id": "c0_5",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              -0.192058,
+              -0.067889,
+              -2.051052
+            ]
+          },
+          {
+            "id": "c0_6",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              0.558249,
+              -2.04396,
+              -1.288053
+            ]
+          },
+          {
+            "id": "c0_7",
+            "status": "exploratory",
+            "pattern_id": "synth_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "position": [
+              1.047814,
+              -0.104879,
+              -1.305144
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "source": "c0_0",
+            "target": "c0_1",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_0",
+            "target": "c0_4",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_1",
+            "target": "c0_5",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_2",
+            "target": "c0_3",
+            "kind": "rebut",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_4",
+            "target": "c0_5",
+            "kind": "entails",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_4",
+            "target": "c0_6",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_5",
+            "target": "c0_7",
+            "kind": "evidence_for",
+            "effective": false,
+            "provisional": false
+          },
+          {
+            "source": "c0_6",
+            "target": "c0_3",
+            "kind": "undercut",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_6",
+            "target": "c0_7",
+            "kind": "entails",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "c0_7",
+            "target": "c0_2",
+            "kind": "undercut",
+            "effective": true,
+            "provisional": false
+          }
+        ],
+        "clusters": [
+          {
+            "id": "pattern:synth_effect",
+            "label": "pattern:synth_effect",
+            "member_ids": [
+              "c0_0",
+              "c0_1",
+              "c0_2",
+              "c0_3",
+              "c0_4",
+              "c0_5",
+              "c0_6",
+              "c0_7"
+            ]
+          }
+        ],
+        "layout_id": "external:spectral-v1",
+        "contract_version": "1.0"
+      },
+      "stats": {
+        "cycle_index": 4,
+        "n_nodes": 8,
+        "n_licensed": 2,
+        "n_pending": 2,
+        "n_conjectured": 0,
+        "n_rejected": 0,
+        "n_edges": 10,
+        "n_effective_edges": 6,
+        "n_provisional_edges": 0,
+        "n_frontier": 0,
+        "n_added": 0,
+        "n_newly_licensed": 0
+      }
+    }
+  ],
+  "n_cycles": 4,
+  "contract_version": "1.0"
+}
