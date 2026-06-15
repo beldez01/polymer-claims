@@ -6,3 +6,6 @@ dist/
 .DS_Store
 /tmp/
 uv-cache/
+
+# Generated docs PDFs (build artifacts rendered from the .md sources; the .md is tracked)
+docs/*.pdf
