@@ -40,10 +40,12 @@ from .profiles import CANONICAL_EPICV2_V1
 _IMPL = "methyl::region_delta_beta"
 
 
-def _load_betas(node: OperationNode):
+def _load_betas(
+    node: OperationNode,
+) -> tuple[dict[str, dict[str, float]], list[str], dict[str, str], dict[str, str]]:
     """Resolve the node's DataHandle to the per-probe-per-sample beta matrix + sample grouping + params.
-    Returns (beta: dict[probe -> dict[sample_id -> float]], sample_ids: list[str],
-    group_of: dict[sample_id -> group], params: dict[str, str]). Shared by region-Δβ and n-DMPs.
+    Returns (beta: dict[str, dict[str, float]], sample_ids: list[str],
+    group_of: dict[str, str], params: dict[str, str]). Shared by region-Δβ and n-DMPs.
     Raises ValueError on a missing DataHandle (the evaluator degrades a raise to a node error)."""
     handle = next((i for i in node.inputs if isinstance(i, DataHandle)), None)
     if handle is None:
