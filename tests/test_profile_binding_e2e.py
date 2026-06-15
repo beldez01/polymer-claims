@@ -51,7 +51,7 @@ def _run_with(profile, substrate):
 
 
 def test_recomputable_public_caps_empirical_axes_to_benchmarked():
-    profile = load_profile("tet2_epicv2_hg38_manuscript", "1")
+    profile = load_profile("pinned_design_epicv2_hg38_v1", "1")
     claim = _run_with(profile, "recomputable_public")
     assert claim.status == Status.LICENSED
     s = claim.strength
@@ -66,7 +66,7 @@ def test_recomputable_public_caps_empirical_axes_to_benchmarked():
 
 
 def test_wet_lab_anchor_caps_higher_than_public():
-    profile = load_profile("tet2_epicv2_hg38_manuscript", "1")
+    profile = load_profile("pinned_design_epicv2_hg38_v1", "1")
     claim = _run_with(profile, "wet_lab_anchor")
     assert claim.status == Status.LICENSED
     # ANCHORED ceiling = 0.85; magnitude 0.8 <= 0.85 so it is UNCAPPED (stays 0.8),

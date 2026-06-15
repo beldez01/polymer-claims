@@ -2,7 +2,7 @@
 
 Claim-level (v1.3 has no per-data-dependency model). Feeds the protocol's SAFETY-GATE
 (via requires_safety_review) and the dormant `unreproducible_by_governance` status (via
-blocks_reproduction). Load-bearing for the TET2/TCGA controlled-access surface. The grammar
+blocks_reproduction). Load-bearing for the controlled-access genomic surface. The grammar
 represents the posture; the protocol acts. Imports nothing from polymer_formalclaim.
 """
 from __future__ import annotations

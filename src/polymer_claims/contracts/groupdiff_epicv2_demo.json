@@ -1,5 +1,5 @@
 {
-  "uid": "tet2_epicv2_demo@1",
+  "uid": "groupdiff_epicv2_demo@1",
   "dim": [
     50,
     8
@@ -7,55 +7,55 @@
   "assays": [
     {
       "name": "beta",
-      "ref": "tet2_epicv2_demo.betas.tsv"
+      "ref": "groupdiff_epicv2_demo.betas.tsv"
     }
   ],
   "col_data": [
     {
       "sample_id": "S01",
-      "Sample_Group": "TET2_mut",
+      "Sample_Group": "case",
       "Age": 40,
       "Sex": "M"
     },
     {
       "sample_id": "S02",
-      "Sample_Group": "WT",
+      "Sample_Group": "control",
       "Age": 43,
       "Sex": "F"
     },
     {
       "sample_id": "S03",
-      "Sample_Group": "TET2_mut",
+      "Sample_Group": "case",
       "Age": 46,
       "Sex": "F"
     },
     {
       "sample_id": "S04",
-      "Sample_Group": "WT",
+      "Sample_Group": "control",
       "Age": 49,
       "Sex": "M"
     },
     {
       "sample_id": "S05",
-      "Sample_Group": "TET2_mut",
+      "Sample_Group": "case",
       "Age": 52,
       "Sex": "F"
     },
     {
       "sample_id": "S06",
-      "Sample_Group": "WT",
+      "Sample_Group": "control",
       "Age": 55,
       "Sex": "F"
     },
     {
       "sample_id": "S07",
-      "Sample_Group": "TET2_mut",
+      "Sample_Group": "case",
       "Age": 58,
       "Sex": "M"
     },
     {
       "sample_id": "S08",
-      "Sample_Group": "WT",
+      "Sample_Group": "control",
       "Age": 61,
       "Sex": "F"
     }

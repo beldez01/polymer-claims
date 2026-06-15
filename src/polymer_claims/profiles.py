@@ -1,22 +1,23 @@
-"""CES-0: the two concrete, versioned AnalysisProfiles + a local resolver.
+"""CES-0: two concrete, versioned AnalysisProfiles + a local resolver.
 
 Mirrors how `datasets/` ships a CSV: a small in-package registry so the local-first slice is
-pure and stub-testable with no live R-Engine. Both profiles are EPICv2/hg38 and AGREE on
-normalization (sesame/QCDPB); they DIFFER on the detection regime, SNP method, and (manuscript
-only) the pinned design formula — proving "which profile" is a named, not defaulted, choice.
+pure and stub-testable with no live analysis engine. Both profiles are EPICv2/hg38 and AGREE on
+normalization (sesame/QCDPB); they DIFFER on the detection regime, SNP method, and (the
+pinned-design profile only) a covariate-adjusted design formula — proving "which profile" is a
+named, not defaulted, choice.
 """
 from __future__ import annotations
 
 from .analysis_profile import AnalysisProfile
 
-# SHA256 + line count of ~/Desktop/Polymer/R-Engine/data/cross_reactive_epicv2_wgbs.txt
-# (Peters 2024 WGBS-validated cross-reactive set; the live cross-project dependency).
-_WGBS_HASH = "sha256:756527d7022855c75a5e0a41895d10c753121b21032c857d159c4bde47fc3013"
-_WGBS_N = 11878
+# SHA256 + line count of the pinned cross-reactive probe list (a content-addressed external
+# dependency). Synthetic placeholder values for this example registry.
+_XREACT_HASH = "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+_XREACT_N = 12000
 
-# The real TET2-manuscript pipeline pinning (audit §3 — ground truth).
-TET2_MANUSCRIPT_V1 = AnalysisProfile(
-    profile_id="tet2_epicv2_hg38_manuscript",
+# A profile that additionally pins a covariate-adjusted design formula (a case/control contrast).
+PINNED_DESIGN_V1 = AnalysisProfile(
+    profile_id="pinned_design_epicv2_hg38_v1",
     version="1",
     array_type="EPICv2",
     genome_assembly="hg38",
@@ -27,9 +28,9 @@ TET2_MANUSCRIPT_V1 = AnalysisProfile(
     detection_threshold=0.80,
     detection_rule="retain_if_rate_ge",
     sample_fail_threshold=None,
-    cross_reactive_source="Peters2024_CH_WGBS",
-    cross_reactive_file_hash=_WGBS_HASH,
-    cross_reactive_n_probes=_WGBS_N,
+    cross_reactive_source="cross_reactive_probes_v1",
+    cross_reactive_file_hash=_XREACT_HASH,
+    cross_reactive_n_probes=_XREACT_N,
     snp_method="sesame:M_SNPcommon_1pt",
     snp_maf=None,
     sex_chrom="removed",
@@ -38,7 +39,7 @@ TET2_MANUSCRIPT_V1 = AnalysisProfile(
     clamp_lower=1e-6,
     clamp_upper=0.999999,
     design_formula="~ 0 + Sample_Group + Age + Sex",
-    contrast="TET2_mut - WT",
+    contrast="case - control",
     covariates=("Age", "Sex"),
     batch_correction=None,
     cell_adjustment=None,
@@ -51,7 +52,7 @@ TET2_MANUSCRIPT_V1 = AnalysisProfile(
     engine_version="sesame/limma/r-4.5.2/bioc-3.22",
 )
 
-# The registry canonical_epicv2_hg38_v1 profile (audit §2 — helpers.R:563-570).
+# The registry canonical_epicv2_hg38_v1 profile.
 CANONICAL_EPICV2_V1 = AnalysisProfile(
     profile_id="canonical_epicv2_hg38_v1",
     version="1",
@@ -64,9 +65,9 @@ CANONICAL_EPICV2_V1 = AnalysisProfile(
     detection_threshold=0.05,
     detection_rule="pOOBAH_p_le",
     sample_fail_threshold=0.05,
-    cross_reactive_source="Peters2024_CH_WGBS",
-    cross_reactive_file_hash=_WGBS_HASH,
-    cross_reactive_n_probes=_WGBS_N,
+    cross_reactive_source="cross_reactive_probes_v1",
+    cross_reactive_file_hash=_XREACT_HASH,
+    cross_reactive_n_probes=_XREACT_N,
     snp_method="minfi:dropLociWithSnps[SBE,CpG]",
     snp_maf=0.01,
     sex_chrom="removed",
@@ -92,7 +93,7 @@ CANONICAL_EPICV2_V1 = AnalysisProfile(
 )
 
 _REGISTRY: dict[tuple[str, str], AnalysisProfile] = {
-    (p.profile_id, p.version): p for p in (TET2_MANUSCRIPT_V1, CANONICAL_EPICV2_V1)
+    (p.profile_id, p.version): p for p in (PINNED_DESIGN_V1, CANONICAL_EPICV2_V1)
 }
 
 

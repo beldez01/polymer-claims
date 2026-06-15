@@ -5,8 +5,8 @@ import re
 from pathlib import Path
 
 _DIR = Path(__file__).resolve().parents[1] / "src" / "polymer_claims" / "contracts"
-_MANIFEST = _DIR / "tet2_epicv2_demo.json"
-_BETAS = _DIR / "tet2_epicv2_demo.betas.tsv"
+_MANIFEST = _DIR / "groupdiff_epicv2_demo.json"
+_BETAS = _DIR / "groupdiff_epicv2_demo.betas.tsv"
 
 
 def _manifest() -> dict:
@@ -47,8 +47,8 @@ def test_probe_ids_are_cg_format_and_match_matrix_order():
 def test_sample_groups_are_binary_and_balanced():
     m = _manifest()
     groups = [c["Sample_Group"] for c in m["col_data"]]
-    assert set(groups) == {"TET2_mut", "WT"}
-    assert groups.count("TET2_mut") == groups.count("WT")
+    assert set(groups) == {"case", "control"}
+    assert groups.count("case") == groups.count("control")
 
 
 def test_metadata_is_epicv2_hg38():
@@ -72,15 +72,15 @@ def test_planted_shift_present_on_first_five_probes_only():
     rows = {ln.split("\t")[0]: ln.split("\t")[1:] for ln in lines[1:]}
 
     def _by_group(feature_id):
-        vals = {"TET2_mut": [], "WT": []}
+        vals = {"case": [], "control": []}
         for sid, cell in zip(header, rows[feature_id]):
             vals[groups[sid]].append(float(cell))
         return vals
 
-    # probes 0-4 (cg00000001..cg00000005): TET2_mut exceeds WT by ~0.20
+    # probes 0-4 (cg00000001..cg00000005): case exceeds control by ~0.20
     for k in range(1, 6):
         v = _by_group(f"cg{k:08d}")
-        assert round(min(v["TET2_mut"]) - max(v["WT"]), 6) == 0.20
+        assert round(min(v["case"]) - max(v["control"]), 6) == 0.20
     # a non-planted probe (cg00000010): no group difference
     v = _by_group("cg00000010")
-    assert max(v["TET2_mut"]) == max(v["WT"]) and min(v["TET2_mut"]) == min(v["WT"])
+    assert max(v["case"]) == max(v["control"]) and min(v["case"]) == min(v["control"])

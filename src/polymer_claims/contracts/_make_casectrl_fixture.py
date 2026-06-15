@@ -2,7 +2,7 @@
 
 Synthetic VALUES, real STRUCTURE: 24 cg-format probes x 10 samples (5 level1 / 5 level2) on chr1
 (hg38). No RNG. The first 5 probes (the SIGNAL REGION) carry a planted +0.20 beta shift in level2;
-the rest have no group difference (the negative-control region). Generic — not TET2-specific.
+the rest have no group difference (the negative-control region). Generic — not tied to any specific assay.
 Re-run:  python -m polymer_claims.contracts._make_casectrl_fixture
 """
 from __future__ import annotations
