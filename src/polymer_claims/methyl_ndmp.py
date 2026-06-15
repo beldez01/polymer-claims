@@ -19,7 +19,10 @@ _NDMP_IMPL = "methyl::n_dmps"
 
 # --- Student-t two-sided p-value via the regularized incomplete beta (pure-Python, no scipy) ---
 
+# Lentz modified continued-fraction; Press et al., "Numerical Recipes" §6.4 (betacf).
 def _betacf(a: float, b: float, x: float) -> float:
+    """Lentz continued-fraction expansion for the regularized incomplete beta."""
+    # MAXIT=300 / EPS=3e-16 / FPMIN=1e-300: standard convergence / machine-eps / underflow guards.
     MAXIT, EPS, FPMIN = 300, 3e-16, 1e-300
     qab, qap, qam = a + b, a + 1.0, a - 1.0
     c = 1.0
@@ -92,12 +95,16 @@ def _pooled_t(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
     sp2 = ((a.var(ddof=1) * (na - 1)) + (b.var(ddof=1) * (nb - 1))) / df
     se = math.sqrt(sp2 * (1.0 / na + 1.0 / nb))
     if se == 0.0:
-        return (0.0 if a.mean() == b.mean() else math.inf), df
+        # se==0: identical values -> t=0 -> p=1.0 (not a DMP); distinct constants -> inf t -> p=0.0 (always a DMP).
+        return (0.0 if a.mean() == b.mean() else math.inf, df)
     return (float(b.mean() - a.mean()) / se, df)
 
 
 def _per_probe_pvalues(node: OperationNode, *, leg) -> dict[str, float]:
-    """Per-probe two-sided p-values over the node's `probes` param, using the `leg` t-statistic fn."""
+    """Per-probe two-sided p-values over the node's `probes` param, using the `leg` t-statistic fn.
+
+    leg: Callable[[np.ndarray, np.ndarray], tuple[float, int]] returning (t_statistic, degrees_of_freedom).
+    """
     beta, sample_ids, group_of, p = _load_betas(node)
     probes = [s for s in p["probes"].split(",") if s]
     level_a, level_b = p["level_a"], p["level_b"]

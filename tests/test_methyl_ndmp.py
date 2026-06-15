@@ -16,9 +16,8 @@ def test_t_pvalue_large_t_is_tiny():
 
 
 def test_t_pvalue_known_value():
-    # t=2.0, df=98 two-sided p ~ 0.048 (close to the normal 0.0455)
-    p = _t_two_sided_p(2.0, 98)
-    assert 0.04 < p < 0.055
+    # t=2.0, df=98 two-sided p ~ 0.0483 (close to the normal 0.0455). Regression pin.
+    assert abs(_t_two_sided_p(2.0, 98) - 0.0483) < 5e-4
 
 
 def test_n_dmps_counts_below_alpha():
