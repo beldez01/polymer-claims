@@ -7,11 +7,12 @@
 
 ---
 
-## Current state (2026-06-14)
+## Current state (2026-06-15)
 
-`main` ALL GREEN — **215 umbrella + 351 grammar + 363 protocol + 2 isolation**; viewer `tsc`+build
+`main` ALL GREEN — **226 umbrella + 351 grammar + 363 protocol + 2 isolation**; viewer `tsc`+build
 clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpus = 4 collections**;
-local-only. (§2E tiered independence + reinstatement→PENDING + n-DMPs-at-FDR just merged — see NEXT.)
+local-only. (Procrustes embedding alignment — spectral as the live node layout — just merged; §2E
+tiered independence + reinstatement→PENDING + n-DMPs-at-FDR before it — see NEXT.)
 
 The system is a **compiler + runtime for science**: grammar (*what a claim is*) → protocol (*how a
 corpus evolves* — the `run_cycle` flywheel + 3 daemons + scheduler) → umbrella node/server
@@ -36,6 +37,25 @@ apparatus), running live in the node.
   cohort** (`epicv2_casectrl_demo_b`) — still exercised, not earned, until a real 2nd cohort is swapped in.
 
 ## ▶ NEXT (concrete plan)
+
+**✅ PROCRUSTES EMBEDDING ALIGNMENT DONE (2026-06-15, branch `procrustes-embedding-alignment`, local-only).**
+The signed-Laplacian spectral eigenmap is now the **live `NodeRunner` default layout** (was a static
+snapshot only), orthogonal-Procrustes-aligned each frame to the previous displayed frame so the universe
+grows smoothly instead of thrashing on eigenbasis sign/rotation ambiguity. New `embedding.procrustes_align`
+(orthogonal R, reflection allowed — sign-flips ARE the reflections we undo — **no det-correction**; 6dp
+round). `NodeRunner(layout="spectral"|"force")`: spectral default lazy-imports the embedder (base import
+stays numpy-free) and threads a `_prev_spectral` alignment chain via the protocol's existing
+`export_topology(positions=)` seam (`layout_id="external:spectral-v1"`); **`layout="force"` is byte-identical**
+to the prior Fruchterman-Reingold path. Graceful fallback to force (warn once) when `[embed]`/numpy absent.
+`serve --layout {spectral,force}` (default spectral). Protocol untouched + numpy-free; Corpus = 4.
+**Design tradeoff (documented):** the small default `serve` seed never grows a ≥4-node component, so it
+never reaches the eigenmap — spectral won't look smoother there (lattice/scale churn, which Procrustes
+can't fix); `--layout force` is the escape hatch. The anti-thrash mechanism (raw≈2.70 → aligned≈1.27) and
+the `make_spectral_timeline.py` demo run on a **growing ≥4-node component** (planted `c0_*` cluster revealed
+one claim at a time) where the alignment provably applies. **Deferred (still):** UMAP / content features
+(embedding spec §8); offline `export_timeline` stays force-directed (protocol purity — it can't compute the
+spectral embedding). Spec `docs/superpowers/specs/2026-06-15-procrustes-embedding-alignment-design.md`,
+plan `docs/superpowers/plans/2026-06-15-procrustes-embedding-alignment.md`.
 
 **✅ §2E TIERED INDEPENDENCE DONE (2026-06-14, branch `feat/2e-tiered-independence`, local-only).**
 `IndependenceTier` {REPRODUCED, REPLICATED} as an additive `Licensing.independence_tier` field (default
@@ -79,13 +99,11 @@ plan `docs/superpowers/plans/2026-06-14-n-dmps-at-fdr.md`.
 
 Next safe slices (decision-ready menu, `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`):
 
-1. **Procrustes embedding alignment** — after one wiring call (make the signed-Laplacian spectral
-   embedding the live node layout), orthogonal-Procrustes-align each frame to the previous so the
-   universe evolves smoothly. ~1 slice. Safe.
-2. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
-3. **n-DMPs as a REPLICATED second reduction** — run the n-DMP count on a second cohort and multiply the
+1. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
+   (Now also: the viewer spectral-layout follow-ups deferred above — UMAP / content features.)
+2. **n-DMPs as a REPLICATED second reduction** — run the n-DMP count on a second cohort and multiply the
    two count-enrichment e-values (combines §2E's REPLICATED machinery with the new reduction). ~1 slice.
-4. **ROBUSTLY_BLAMED wiring** — wire the Duhem robust-blame REJECTED verdict into the protocol and stamp
+3. **ROBUSTLY_BLAMED wiring** — wire the Duhem robust-blame REJECTED verdict into the protocol and stamp
    it (tiny; the enum value is reserved). Optional/legibility.
 
 **Deferred / blocked-on-external (supervised):** real-public-data swap (point me at a GEO/ENA dataset);
@@ -132,6 +150,8 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 **Credibility arc + CES** (`docs/superpowers/roadmaps/2026-06-11-credibility-arc-roadmap.md`):
 - ✅ M1 structural-equivalence status (`Status.STRUCTURAL` — no more false LICENSED on structural
   collapse) · earned-strength · relational graph embedding v1 (signed-Laplacian eigenmap, silhouette 0.62)
+  · live spectral layout (`procrustes-embedding-alignment`) — eigenmap as the live `NodeRunner` default,
+  Procrustes-aligned per frame; `serve --layout`; force path byte-identical (see NEXT for detail)
 - ✅ CES-0 analysis-profile content-address · CES-1 data seam · CES-2 methylation Δβ licensing ·
   CES-3 content-address completeness · CES-4 live wiring
 
