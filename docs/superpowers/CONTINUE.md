@@ -196,6 +196,8 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - **Phase-2 north star:** `docs/vision/2026-06-12-phase-2-north-star.md`
 - **Credibility-arc roadmap:** `docs/superpowers/roadmaps/2026-06-11-credibility-arc-roadmap.md`
 - **Architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`
+- **Spectral layout guides:** `docs/spectral-layout-how-to-use.md` (usage) ·
+  `docs/spectral-layout-how-it-works.md` (eigenmap + Procrustes math/theory)
 - **Memory:** `project_polymer_claims_knowledge_protocol` (full phase history + follow-ups)
 - **Deep design source:**
   `~/Desktop/Research/topics/epistemic-claim-foundations/generative-protocol/_FINAL_knowledge_generation_protocol.md`
