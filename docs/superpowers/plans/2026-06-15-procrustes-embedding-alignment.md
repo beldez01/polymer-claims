@@ -50,7 +50,7 @@ The mechanism Procrustes is for — eigenbasis sign-flips — only appears when 
 - Modify: `src/polymer_claims/embedding.py` (add function after `spectral_layout`, end of file ~line 166)
 - Test: `tests/test_embedding.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `tests/test_embedding.py`:
 
@@ -91,12 +91,12 @@ def test_procrustes_align_underdetermined_returns_new_unchanged():
     assert procrustes_align({"a": (0.0, 0.0, 0.0)}, {"b": (1.0, 1.0, 1.0)}) == {"b": (1.0, 1.0, 1.0)}
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . pytest tests/test_embedding.py::test_procrustes_align_recovers_rotation_and_reflection tests/test_embedding.py::test_procrustes_align_underdetermined_returns_new_unchanged -v`
 Expected: FAIL with `ImportError: cannot import name 'procrustes_align'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `src/polymer_claims/embedding.py`:
 
@@ -140,12 +140,12 @@ def procrustes_align(
     return aligned
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . pytest tests/test_embedding.py -v`
 Expected: PASS (the two new tests + all existing embedding tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/zbb2/Desktop/polymer-claims
@@ -165,7 +165,7 @@ git commit -m "feat(embedding): add orthogonal-Procrustes alignment for spectral
 
 ### Step group A — implementation
 
-- [ ] **Step 1: Add imports for `Literal` and logging**
+- [x] **Step 1: Add imports for `Literal` and logging**
 
 In `src/polymer_claims/node.py`, the file currently starts its imports at line 16 with `from __future__ import annotations`. Add a stdlib block right after it:
 
@@ -191,7 +191,7 @@ Then, immediately after the existing module-level constants (the block ending wi
 logger = logging.getLogger(__name__)
 ```
 
-- [ ] **Step 2: Add the `layout` parameter to `__init__`**
+- [x] **Step 2: Add the `layout` parameter to `__init__`**
 
 In `NodeRunner.__init__` (signature at line 56), add `layout` as a keyword-only parameter. Find the signature line:
 ```python
@@ -207,7 +207,7 @@ Replace with:
     ) -> None:
 ```
 
-- [ ] **Step 3: Initialise spectral state (before the frame-0 build)**
+- [x] **Step 3: Initialise spectral state (before the frame-0 build)**
 
 In `__init__`, find:
 ```python
@@ -232,7 +232,7 @@ Replace with:
         topo = self._layout_topology(corpus)
 ```
 
-- [ ] **Step 4: Thread `layout` through `from_seed`**
+- [x] **Step 4: Thread `layout` through `from_seed`**
 
 In `from_seed` (classmethod at line 112), add the parameter and pass it through. Find:
 ```python
@@ -273,7 +273,7 @@ Replace with:
         )
 ```
 
-- [ ] **Step 5: Route `tick()`'s topology build through the helper**
+- [x] **Step 5: Route `tick()`'s topology build through the helper**
 
 In `tick()`, find:
 ```python
@@ -290,7 +290,7 @@ Replace with:
         topo = self._layout_topology(self.corpus)
 ```
 
-- [ ] **Step 6: Add the `_spectral_positions` and `_layout_topology` helpers**
+- [x] **Step 6: Add the `_spectral_positions` and `_layout_topology` helpers**
 
 Add these two methods to `NodeRunner` (place them immediately before `def snapshot` at line 223):
 
@@ -340,7 +340,7 @@ Add these two methods to `NodeRunner` (place them immediately before `def snapsh
 
 ### Step group B — pin existing force tests (AC#4)
 
-- [ ] **Step 7: Update `tests/test_node.py` to request the force layout**
+- [x] **Step 7: Update `tests/test_node.py` to request the force layout**
 
 The existing tests assert force-directed warm-start behaviour, so they must keep exercising the force path. Update the four `NodeRunner.from_seed(...)` calls to pass `layout="force"`.
 
@@ -384,14 +384,14 @@ Replace with:
     r = NodeRunner.from_seed(licensing_corpus(), max_frames=None, layout="force")
 ```
 
-- [ ] **Step 8: Run the force tests to verify they still pass**
+- [x] **Step 8: Run the force tests to verify they still pass**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . pytest tests/test_node.py -v`
 Expected: PASS (force path unchanged, byte-identical behaviour preserved).
 
 ### Step group C — shared growing-corpus fixture (AC#2)
 
-- [ ] **Step 9: Add `growing_cluster0_corpora()` to `_synthetic_corpus.py`**
+- [x] **Step 9: Add `growing_cluster0_corpora()` to `_synthetic_corpus.py`**
 
 This is the shared fixture for AC#2's mechanism test AND the demo timeline (Task 4): the dense `c0_*` cluster of the planted corpus, revealed one claim at a time, so the connected component grows across the `n>=4` eigenmap threshold (measured: `2→3→4→7→8`) and the eigenvectors recompute / sign-canonicalisation flips frame-to-frame — the eigenbasis thrash Procrustes exists to kill. `Corpus` is already imported in this module (it's what `planted_corpus` returns).
 
@@ -433,7 +433,7 @@ def growing_cluster0_corpora() -> list[Corpus]:
     return out
 ```
 
-- [ ] **Step 10: Smoke-check the fixture from a shell (not a committed test)**
+- [x] **Step 10: Smoke-check the fixture from a shell (not a committed test)**
 
 Run:
 ```bash
@@ -451,7 +451,7 @@ Expected: `largest-component sizes: [2, 3, 4, 7, 8]` then `ok`.
 
 ### Step group D — spectral tests (AC#2 mechanism, AC#3 integration, AC#4 force, fallback)
 
-- [ ] **Step 11: Write the failing spectral tests**
+- [x] **Step 11: Write the failing spectral tests**
 
 Create `tests/test_node_spectral.py`:
 
@@ -568,19 +568,19 @@ def test_spectral_falls_back_to_force_without_embedder(monkeypatch):
     assert runner.frames[0].topology.layout_id.startswith("fruchterman-reingold")
 ```
 
-- [ ] **Step 12: Run test to verify it passes (after Steps 1-9)**
+- [x] **Step 12: Run test to verify it passes (after Steps 1-9)**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . pytest tests/test_node_spectral.py -v`
 Expected: PASS (all six tests).
 
 > If `test_procrustes_kills_eigenbasis_thrash_on_growing_component` fails the `raw_max > 0.5` guard, the planted-corpus reveal didn't grow a ≥4 component — re-run Step 10's smoke check; the sizes MUST be `[2, 3, 4, 7, 8]`. Do NOT weaken the guards; fix the fixture.
 
-- [ ] **Step 13: Verify the base import stays numpy-free (AC#6 regression guard)**
+- [x] **Step 13: Verify the base import stays numpy-free (AC#6 regression guard)**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . pytest tests/test_node_evalue_gate.py::test_node_import_stays_numpy_free -v`
 Expected: PASS (the embedder is lazy-imported inside `_spectral_positions`, so `import polymer_claims.node` still pulls no numpy).
 
-- [ ] **Step 14: Commit**
+- [x] **Step 14: Commit**
 
 ```bash
 cd /Users/zbb2/Desktop/polymer-claims
@@ -596,7 +596,7 @@ git commit -m "feat(node): spectral layout default with Procrustes alignment + g
 - Modify: `src/polymer_claims/cli.py` (parser ~line 364; `_cmd_serve` `from_seed` call sites at lines 235, 264, 279)
 - Test: `tests/test_serve_cli.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `tests/test_serve_cli.py`:
 
@@ -642,12 +642,12 @@ def test_serve_layout_defaults_to_spectral(monkeypatch):
 
 > `types` is already imported in `tests/test_serve_cli.py` (used by `test_serve_builds_runner_and_runs`). Confirm the import is present at the top; if not, add `import types`.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . pytest tests/test_serve_cli.py::test_serve_layout_threads_into_runner -v`
 Expected: FAIL — argparse errors on the unknown `--layout` argument (SystemExit), so `rc` is never 0.
 
-- [ ] **Step 3: Add the `--layout` argument to the serve parser**
+- [x] **Step 3: Add the `--layout` argument to the serve parser**
 
 In `src/polymer_claims/cli.py`, find (the last serve argument before `set_defaults`, ~line 363):
 ```python
@@ -666,7 +666,7 @@ Replace with:
     p_serve.set_defaults(func=_cmd_serve)
 ```
 
-- [ ] **Step 4: Thread `args.layout` into the three `from_seed` call sites**
+- [x] **Step 4: Thread `args.layout` into the three `from_seed` call sites**
 
 In `_cmd_serve`, all three `NodeRunner.from_seed(...)` calls must pass `layout=args.layout`.
 
@@ -733,12 +733,12 @@ Replace with:
         )
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . pytest tests/test_serve_cli.py -v`
 Expected: PASS (new layout tests + all existing serve tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd /Users/zbb2/Desktop/polymer-claims
@@ -754,7 +754,7 @@ git commit -m "feat(cli): serve --layout {spectral,force} (default spectral)"
 - Create: `viewer/scripts/make_spectral_timeline.py`
 - Create (generated): `viewer/public/sample-spectral-timeline.json`
 
-- [ ] **Step 1: Create the demo script**
+- [x] **Step 1: Create the demo script**
 
 This builds a watchable multi-frame `TopologyTimeline` over the growing `c0_*` component (the corpus where Procrustes-aligned spectral genuinely shows SMOOTH growth — see the design note). It drives the spectral+Procrustes chain directly (not `NodeRunner`, which can't grow `c0_*` incrementally) and assembles `TimelineFrame`s the same way `NodeRunner` does (`export_topology(positions=)` + `frame_stats`). Companion to `make_spectral_sample.py` (single static frame).
 
@@ -827,12 +827,12 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 2: Run the script to generate the artifact**
+- [x] **Step 2: Run the script to generate the artifact**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . python viewer/scripts/make_spectral_timeline.py`
 Expected: prints `wrote .../sample-spectral-timeline.json (5 frames, last layout=external:spectral-v1, 8 nodes)` and the JSON file exists.
 
-- [ ] **Step 3: Sanity-check the artifact round-trips as a TopologyTimeline and grows smoothly**
+- [x] **Step 3: Sanity-check the artifact round-trips as a TopologyTimeline and grows smoothly**
 
 Run:
 ```bash
@@ -850,7 +850,7 @@ print('ok', len(tl.frames), 'frames', counts)
 ```
 Expected: `ok 5 frames [4, 5, 6, 7, 8]`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd /Users/zbb2/Desktop/polymer-claims
@@ -864,12 +864,12 @@ git commit -m "feat(viewer): spectral timeline demo artifact (smooth Procrustes-
 
 **Files:** none (verification only)
 
-- [ ] **Step 1: Run the full check suite**
+- [x] **Step 1: Run the full check suite**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && ./scripts/check-all.sh`
 Expected: ALL GREEN (protocol untouched + numpy-free; `node.py` base import numpy-free; Corpus = 4; force byte-identical; spectral live).
 
-- [ ] **Step 2: If anything is red, stop and report**
+- [x] **Step 2: If anything is red, stop and report**
 
 Do not paper over a failure. If `check-all.sh` reports a regression, surface the exact failing command + output before any further change.
 
