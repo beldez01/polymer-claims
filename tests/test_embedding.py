@@ -104,3 +104,57 @@ def test_sign_canonicalization_is_flip_invariant():
     # flipping the sign of any input columns must NOT change the canonical output
     flipped = _canonicalize_columns(M * np.array([-1.0, 1.0, -1.0]))
     assert np.allclose(base, flipped)
+
+
+def test_procrustes_align_recovers_rotation_and_reflection():
+    import numpy as np
+    from polymer_claims.embedding import procrustes_align
+
+    # 4 non-coplanar points (rank-3 → recovery is exact)
+    prev = {
+        "a": (0.1, 0.2, 0.3),
+        "b": (-0.4, 0.5, -0.1),
+        "c": (0.7, -0.2, 0.6),
+        "d": (-0.3, -0.5, 0.2),
+    }
+    # An orthogonal matrix with det = -1 (a rotation composed with a reflection)
+    G = np.array([
+        [0.0, -1.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0],
+    ])
+    assert round(float(np.linalg.det(G)), 6) == -1.0
+    new = {k: tuple(np.asarray(v) @ G) for k, v in prev.items()}
+
+    aligned = procrustes_align(prev, new)
+
+    assert set(aligned) == set(prev)
+    for k in prev:
+        for got, want in zip(aligned[k], prev[k]):
+            assert abs(got - want) < 1e-6
+
+
+def test_procrustes_align_underdetermined_returns_new_unchanged():
+    from polymer_claims.embedding import procrustes_align
+
+    # fewer than 2 common ids → nothing to align to → new returned unchanged
+    assert procrustes_align({}, {"x": (1.0, 2.0, 3.0)}) == {"x": (1.0, 2.0, 3.0)}
+    assert procrustes_align({"a": (0.0, 0.0, 0.0)}, {"b": (1.0, 1.0, 1.0)}) == {"b": (1.0, 1.0, 1.0)}
+
+
+def test_procrustes_align_transforms_new_only_nodes():
+    """Nodes in new but not in prev must receive the same orthogonal transform."""
+    import numpy as np
+    from polymer_claims.embedding import procrustes_align
+
+    prev = {"a": (1.0, 0.0, 0.0), "b": (0.0, 1.0, 0.0), "c": (0.0, 0.0, 1.0)}
+    G = np.array([[0.0, 1.0, 0.0], [-1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])  # 90° about z
+    new = {k: tuple(float(x) for x in np.asarray(v) @ G) for k, v in prev.items()}
+    new["d"] = tuple(float(x) for x in np.asarray([0.707, 0.707, 0.0]) @ G)
+
+    aligned = procrustes_align(prev, new)
+
+    # new["d"] lives in the rotated (new) frame; the recovered transform must carry it back into
+    # prev's frame, i.e. apply G.T (the inverse of G) to the value actually stored in new["d"].
+    expected_d = tuple(round(float(x), 6) for x in np.asarray(new["d"]) @ G.T)
+    assert aligned["d"] == expected_d

@@ -174,3 +174,42 @@ def test_serve_real_data_missing_key_errors(monkeypatch, capsys):
     rc = main(["serve", "--real-data"])
     assert rc == 1
     assert "ANTHROPIC_API_KEY" in capsys.readouterr().err
+
+
+def test_serve_layout_threads_into_runner(monkeypatch):
+    seen = {}
+
+    def fake_import():
+        def run(app, host=None, port=None):
+            seen["bind"] = (host, port)
+        def create_app(runner, *, interval, origins):
+            seen["runner"] = runner
+            return "APP"
+        return types.SimpleNamespace(run=run), create_app
+
+    monkeypatch.setattr(cli, "_import_server", fake_import)
+
+    rc = main(["serve", "--layout", "force", "--port", "1234"])
+    assert rc == 0
+    assert seen["runner"].layout == "force"
+
+    rc = main(["serve", "--layout", "spectral", "--port", "1235"])
+    assert rc == 0
+    assert seen["runner"].layout == "spectral"
+
+
+def test_serve_layout_defaults_to_spectral(monkeypatch):
+    seen = {}
+
+    def fake_import():
+        def run(app, host=None, port=None):
+            seen["bind"] = (host, port)
+        def create_app(runner, *, interval, origins):
+            seen["runner"] = runner
+            return "APP"
+        return types.SimpleNamespace(run=run), create_app
+
+    monkeypatch.setattr(cli, "_import_server", fake_import)
+    rc = main(["serve", "--port", "1236"])
+    assert rc == 0
+    assert seen["runner"].layout == "spectral"

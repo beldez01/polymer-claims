@@ -317,3 +317,38 @@ def planted_corpus() -> Corpus:
         equivalences=tuple(equivalences),
         fdr_ledger=FDRLedger(target_fdr=0.05),
     )
+
+
+# Reveal order for the dense cluster-0 subgraph (see planted_corpus): each prefix is a valid
+# Corpus whose largest connected component grows 2 -> 3 -> 4 -> 7 -> 8, crossing the n>=4 eigenmap
+# threshold so the signed-Laplacian basis genuinely recomputes/flips between frames.
+_CLUSTER0_REVEAL = ("c0_0", "c0_1", "c0_2", "c0_3", "c0_4", "c0_5", "c0_6", "c0_7")
+
+
+def growing_cluster0_corpora() -> list[Corpus]:
+    """A deterministic sequence of growing sub-corpora built from planted_corpus's c0_* cluster.
+
+    Each step reveals one more claim (starting from the first 4) and keeps only the defeat edges /
+    equivalences whose endpoints are present, so every sub-corpus validates. Used to demonstrate
+    the Procrustes anti-thrash mechanism on a genuinely growing >=4-node component (the default
+    serve seed caps at a 3-node component and never reaches the eigenmap)."""
+    pc = planted_corpus()
+    by_id = {c.id: c for c in pc.claims}
+    out: list[Corpus] = []
+    for k in range(4, len(_CLUSTER0_REVEAL) + 1):
+        present = set(_CLUSTER0_REVEAL[:k])
+        sub_defeat = tuple(
+            e for e in pc.defeat_edges if e.source in present and e.target in present
+        )
+        sub_equiv = tuple(
+            e for e in pc.equivalences if e.left in present and e.right in present
+        )
+        out.append(
+            Corpus(
+                claims=tuple(by_id[i] for i in _CLUSTER0_REVEAL[:k]),
+                fdr_ledger=pc.fdr_ledger,
+                defeat_edges=sub_defeat,
+                equivalences=sub_equiv,
+            )
+        )
+    return out

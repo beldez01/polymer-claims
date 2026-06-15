@@ -15,6 +15,9 @@ No web/HTTP here — a streaming server is a later task.
 """
 from __future__ import annotations
 
+import logging
+from typing import Literal
+
 from polymer_grammar import IdentityAdapter, MaterializationContext, ReferenceAdapter
 from polymer_protocol import (
     ActionKind,
@@ -39,6 +42,7 @@ from polymer_protocol.drift import DriftRecord, drift_pass, reopen_drifted
 
 _ADAPTERS = (IdentityAdapter(), ReferenceAdapter(identity="reference"))
 _CTX = MaterializationContext(id="M1", api_version="v1", data_version="d1")
+logger = logging.getLogger(__name__)
 
 
 class NodeRunner:
@@ -65,6 +69,7 @@ class NodeRunner:
         content_address: bool = False,
         profiles: tuple = (CANONICAL_EPICV2_V1,),
         evalue_gate: bool = False,
+        layout: Literal["spectral", "force"] = "spectral",
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -85,10 +90,14 @@ class NodeRunner:
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
         self.prev_positions: dict[str, tuple] = {}
+        self.layout = layout
+        # Previously DISPLAYED spectral positions — the Procrustes alignment target chain.
+        self._prev_spectral: dict[str, tuple] = {}
+        self._spectral_fallback_warned = False
         self.running = True
 
         # Frame 0 — the seed snapshot (no warm-start positions yet).
-        topo = export_topology(corpus, layout=Layout.FORCE_DIRECTED)
+        topo = self._layout_topology(corpus)
         stats = frame_stats(
             corpus,
             topo,
@@ -122,6 +131,7 @@ class NodeRunner:
         content_address: bool = False,
         profiles: tuple = (CANONICAL_EPICV2_V1,),
         evalue_gate: bool = False,
+        layout: Literal["spectral", "force"] = "spectral",
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
@@ -134,6 +144,7 @@ class NodeRunner:
             content_address=content_address,
             profiles=profiles,
             evalue_gate=evalue_gate,
+            layout=layout,
             **run_cycle_kwargs,
         )
 
@@ -196,11 +207,7 @@ class NodeRunner:
             n_added = 0
 
         self.frame_index += 1
-        topo = export_topology(
-            self.corpus,
-            layout=Layout.FORCE_DIRECTED,
-            seed_positions=self.prev_positions,
-        )
+        topo = self._layout_topology(self.corpus)
         licensed_now = n_licensed(self.corpus)
         n_newly_licensed = max(0, licensed_now - self._licensed_prev)
         self._licensed_prev = licensed_now
@@ -219,6 +226,48 @@ class NodeRunner:
             self.frames = self.frames[-self.max_frames:]
         self.prev_positions = {n.id: n.position for n in topo.nodes}
         return frame
+
+    def _spectral_positions(self, corpus: Corpus) -> dict[str, tuple]:
+        """Raw signed-Laplacian eigenmap positions, orthogonal-Procrustes-aligned to the previous
+        displayed spectral frame (kills the per-frame eigenbasis sign/rotation thrash). The numpy
+        embedder is LAZY-imported here so `node.py`'s base import stays numpy-free (mirrors the
+        evalue_gate lazy methyl import). Frame 0 (empty `_prev_spectral`) → the raw reference.
+
+        Raises ImportError if numpy / the `[embed]` extra is absent (caller handles fallback)."""
+        from .embedding import procrustes_align, spectral_layout  # lazy: base import stays numpy-free
+
+        raw = spectral_layout(corpus)
+        aligned = procrustes_align(self._prev_spectral, raw)
+        self._prev_spectral = aligned
+        return aligned
+
+    def _layout_topology(self, corpus: Corpus):
+        """Export a topology frame for the chosen layout.
+
+        - "spectral": inject Procrustes-aligned eigenmap positions through the protocol's
+          `positions=` seam (`layout_id="external:spectral-v1"`). If the numpy embedder is
+          unavailable (ImportError — numpy/`[embed]` absent) fall back to the force path for this
+          frame (logged once); the frame's `layout_id` is self-describing.
+        - "force": today's EXACT warm-started Fruchterman-Reingold path. `self.prev_positions` is
+          `{}` at frame 0, which `export_topology` treats identically to `seed_positions=None`, so
+          this is byte-identical to the historical behaviour."""
+        if self.layout == "spectral":
+            try:
+                positions = self._spectral_positions(corpus)
+            except ImportError:
+                if not self._spectral_fallback_warned:
+                    logger.warning(
+                        "spectral layout unavailable (numpy/[embed] missing); "
+                        "falling back to force-directed"
+                    )
+                    self._spectral_fallback_warned = True
+            else:
+                return export_topology(
+                    corpus, layout=Layout.FORCE_DIRECTED, positions=positions
+                )
+        return export_topology(
+            corpus, layout=Layout.FORCE_DIRECTED, seed_positions=self.prev_positions
+        )
 
     def snapshot(self) -> TopologyTimeline:
         """Immutable view of the accumulated timeline so far."""

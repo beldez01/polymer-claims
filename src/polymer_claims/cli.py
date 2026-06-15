@@ -241,6 +241,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             adapter_registry=independent_registry(),
             oracles=apparatus_oracle_registry(),
             proposers=(proposer,),
+            layout=args.layout,
             **seed_kwargs,
         )
         app = create_app(runner, interval=args.interval, origins=args.origins or None)
@@ -265,6 +266,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             corpus,
             scheduler_budget=args.budget,
             max_frames=args.max_frames,
+            layout=args.layout,
             **seed_kwargs,
         )
     else:
@@ -277,7 +279,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         # seed's `kwargs["budget"]` is run_cycle's SELECT budget and flows
         # through `**kwargs` to spread licensing progressively across frames.
         runner = NodeRunner.from_seed(
-            corpus, scheduler_budget=args.budget, max_frames=args.max_frames, **kwargs
+            corpus, scheduler_budget=args.budget, max_frames=args.max_frames, layout=args.layout, **kwargs
         )
     app = create_app(runner, interval=args.interval, origins=args.origins or None)
     uvicorn.run(app, host=args.host, port=args.port)
@@ -361,6 +363,12 @@ def _build_parser() -> argparse.ArgumentParser:
     p_serve.add_argument("--real-data", action="store_true", help="LLM proposes REAL-DATA mean_diff plans; node runs the local execution adapters + apparatus oracle (needs [llm] + ANTHROPIC_API_KEY)")
     p_serve.add_argument("--llm-model", default="claude-sonnet-4-6", help="model for --llm")
     p_serve.add_argument("--llm-every", type=int, default=4, help="LLM proposes every Nth tick (throttle)")
+    p_serve.add_argument(
+        "--layout",
+        choices=("spectral", "force"),
+        default="spectral",
+        help="live layout: spectral (signed-Laplacian eigenmap, Procrustes-aligned; default) or force (Fruchterman-Reingold)",
+    )
     p_serve.set_defaults(func=_cmd_serve)
 
     return parser
