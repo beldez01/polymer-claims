@@ -33,19 +33,20 @@ def main() -> None:
     corpora = growing_cluster0_corpora()
     frames: list[TimelineFrame] = []
     prev_spectral: dict[str, tuple] = {}
-    licensed_prev = 0
+    licensed_prev = n_licensed(corpora[0])
     for i, corpus in enumerate(corpora):
         aligned = procrustes_align(prev_spectral, spectral_layout(corpus))
         prev_spectral = aligned
         topo = export_topology(corpus, layout=Layout.FORCE_DIRECTED, positions=aligned)
         licensed_now = n_licensed(corpus)
+        n_newly = 0 if i == 0 else max(0, licensed_now - licensed_prev)
         stats = frame_stats(
             corpus,
             topo,
             cycle_index=i,
             n_frontier=0,
             n_added=0,
-            n_newly_licensed=max(0, licensed_now - licensed_prev),
+            n_newly_licensed=n_newly,
         )
         licensed_prev = licensed_now
         frames.append(TimelineFrame(topology=topo, stats=stats))
