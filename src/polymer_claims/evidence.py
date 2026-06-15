@@ -77,19 +77,20 @@ def _capital_onesample(x: np.ndarray, p0: float, seed: int) -> float:
     at 0 (one-sided) and capped so every factor stays positive (the most negative W is -p0)."""
     rng = np.random.default_rng(seed)
     n = len(x)
+    # shuffle observation order so the seed-average is over orderings (the betting process is order-dependent)
     W = (x - p0)[rng.permutation(n)]
     lam_max = _C / p0  # positivity: 1 + lam*(-p0) > 0 needs lam < 1/p0; _C<1 keeps factors >= 1-_C
     e, s, s2, cnt = 1.0, 0.0, 0.0, 0
     for i in range(n):
-        if cnt > 0:
+        if cnt > 0:                                           # estimates use ONLY points 0..i-1
             mu = s / cnt
             var = max(s2 / cnt - mu * mu, 0.0)
         else:
-            mu, var = 0.0, 0.25
+            mu, var = 0.0, 0.25                               # padded variance-1/4 prior (WSR Eq.26)
         denom = var + mu * mu
-        lam = mu / denom if denom > 0.0 else 0.0
-        lam = min(max(lam, 0.0), lam_max)
-        e *= 1.0 + lam * float(W[i])
+        lam = mu / denom if denom > 0.0 else 0.0              # GRAPA fraction
+        lam = min(max(lam, 0.0), lam_max)                     # one-sided (>=0) + positivity cap
+        e *= 1.0 + lam * float(W[i])                          # capital update (WSR Eq.24)
         s += float(W[i])
         s2 += float(W[i]) ** 2
         cnt += 1
