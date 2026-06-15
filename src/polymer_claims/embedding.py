@@ -179,9 +179,10 @@ def procrustes_align(
     deliberately NO det-correction) best mapping the new common positions onto the previous ones,
     so consecutive frames differ only by the genuine corpus change.
 
-    Underdetermined (``prev`` empty, or fewer than 2 common ids) → return ``new`` unchanged: this is
-    the frame-0 reference. Output rounded to 6dp to match ``spectral_layout`` (byte-stable; pins
-    cross-BLAS float noise). Deterministic for a fixed input (numpy SVD is deterministic)."""
+    Underdetermined (``prev`` empty, or fewer than 2 common ids) → return ``new`` as-is (the frame-0
+    reference): callers pass ``spectral_layout`` output, which is already 6dp. The transformed output
+    is rounded to 6dp to match ``spectral_layout`` (byte-stable; pins cross-BLAS float noise).
+    Deterministic for a fixed input (numpy SVD is deterministic)."""
     common = sorted(prev.keys() & new.keys())
     if not prev or len(common) < 2:
         return new
@@ -200,5 +201,5 @@ def procrustes_align(
     aligned: dict[str, tuple[float, float, float]] = {}
     for nid, xyz in new.items():
         v = (np.array(xyz, dtype=float) - q_mean) @ R + p_mean
-        aligned[nid] = tuple(round(float(c), 6) for c in v)
+        aligned[nid] = tuple(round(float(x), 6) for x in v)
     return aligned

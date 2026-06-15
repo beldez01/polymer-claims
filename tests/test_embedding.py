@@ -140,3 +140,21 @@ def test_procrustes_align_underdetermined_returns_new_unchanged():
     # fewer than 2 common ids → nothing to align to → new returned unchanged
     assert procrustes_align({}, {"x": (1.0, 2.0, 3.0)}) == {"x": (1.0, 2.0, 3.0)}
     assert procrustes_align({"a": (0.0, 0.0, 0.0)}, {"b": (1.0, 1.0, 1.0)}) == {"b": (1.0, 1.0, 1.0)}
+
+
+def test_procrustes_align_transforms_new_only_nodes():
+    """Nodes in new but not in prev must receive the same orthogonal transform."""
+    import numpy as np
+    from polymer_claims.embedding import procrustes_align
+
+    prev = {"a": (1.0, 0.0, 0.0), "b": (0.0, 1.0, 0.0), "c": (0.0, 0.0, 1.0)}
+    G = np.array([[0.0, 1.0, 0.0], [-1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])  # 90° about z
+    new = {k: tuple(float(x) for x in np.asarray(v) @ G) for k, v in prev.items()}
+    new["d"] = tuple(float(x) for x in np.asarray([0.707, 0.707, 0.0]) @ G)
+
+    aligned = procrustes_align(prev, new)
+
+    # new["d"] lives in the rotated (new) frame; the recovered transform must carry it back into
+    # prev's frame, i.e. apply G.T (the inverse of G) to the value actually stored in new["d"].
+    expected_d = tuple(round(float(x), 6) for x in np.asarray(new["d"]) @ G.T)
+    assert aligned["d"] == expected_d
