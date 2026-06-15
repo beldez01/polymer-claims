@@ -15,7 +15,7 @@ from polymer_grammar import Comparator, DataHandle
 from polymer_protocol.corpus import Corpus
 
 from .methyl_adapters import _IMPL, _region_group_means
-from .methyl_ndmp import _NDMP_IMPL, dmp_indicators
+from .methyl_ndmp import _NDMP_IMPL, _alpha, dmp_indicators
 
 # c<1 caps the betting fraction so every capital factor (1 + lam*W) stays strictly positive (Eq.25);
 # 0.9 recovers power while keeping factors >= 1-c = 0.1. Fixed, data-independent.
@@ -143,7 +143,7 @@ def evidence_map(corpus: Corpus) -> dict[str, float]:
         elif node.impl == _NDMP_IMPL:
             try:
                 indicators = dmp_indicators(node)
-                p0 = float(dict(node.params)["alpha"])
+                p0 = _alpha(node)
             except (FileNotFoundError, KeyError, ValueError):
                 continue
             out[c.id] = count_enrichment_evalue(indicators, p0=p0)
