@@ -65,6 +65,7 @@ def test_n_dmps_claim_builds_over_all_probes():
     probes = dict(node.params)["probes"].split(",")
     assert len(probes) == 24
     assert c.subject is not None  # GenomicRegion spanning the probes
+    assert c.subject.start == 1_000_000 and c.subject.end == 1_004_800
 
 
 def test_ndmp_registry_has_two_independent_legs():

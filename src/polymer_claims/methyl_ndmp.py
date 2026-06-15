@@ -152,6 +152,10 @@ def dmp_indicators(node: OperationNode) -> list[int]:
     return [1 if v < alpha else 0 for v in pvals.values()]
 
 
+def _alpha(node) -> float:
+    return float(dict(node.params)["alpha"])
+
+
 def _ols_t(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
     """OLS group-coefficient t-statistic + df (numpy lstsq). Leg B — equals _pooled_t for two groups."""
     na, nb = len(a), len(b)
@@ -164,6 +168,7 @@ def _ols_t(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
     mse = float(resid @ resid) / df
     xtx_inv = np.linalg.inv(X.T @ X)
     se = math.sqrt(mse * float(xtx_inv[1, 1]))
+    # coef[1] == mean(b) - mean(a) for two-group OLS, so this mirrors _pooled_t's degenerate guard
     if se == 0.0:
         return (0.0 if coef[1] == 0.0 else math.inf), df
     return (float(coef[1]) / se, df)
@@ -175,8 +180,7 @@ class NDmpTTestAdapter:
     identity = "methyl-ndmp-ttest"
 
     def execute(self, node, upstream, ctx) -> ExecValue:
-        alpha = float(dict(node.params)["alpha"])
-        return ExecValue(value=float(_n_dmps(_per_probe_pvalues(node, leg=_pooled_t), alpha)))
+        return ExecValue(value=float(_n_dmps(_per_probe_pvalues(node, leg=_pooled_t), _alpha(node))))
 
 
 class NDmpOlsCoefAdapter:
@@ -186,12 +190,12 @@ class NDmpOlsCoefAdapter:
     identity = "methyl-ndmp-ols"
 
     def execute(self, node, upstream, ctx) -> ExecValue:
-        alpha = float(dict(node.params)["alpha"])
-        return ExecValue(value=float(_n_dmps(_per_probe_pvalues(node, leg=_ols_t), alpha)))
+        return ExecValue(value=float(_n_dmps(_per_probe_pvalues(node, leg=_ols_t), _alpha(node))))
 
 
 def _all_probe_ids(ref: str) -> tuple[str, ...]:
-    """Read the contract manifest's row_data feature-ids (the full probe set)."""
+    """Read the contract manifest's row_data feature-ids (the full probe set).
+    Lighter than _load_betas — reads only the JSON manifest row_data (no betas TSV / beta matrix)."""
     se = load_contract(ref)
     betas_path = Path(se.access_methods[0].access_url)
     manifest = json.loads((betas_path.parent / f"{se.contract_uid.split('@')[0]}.json").read_text())
@@ -203,6 +207,7 @@ def n_dmps_claim(
     *,
     ref: str = "se:epicv2_casectrl_powered@1",
     probes: tuple[str, ...] | None = None,
+    region: tuple[str, int, int] | None = None,
     group_col: str = "Sample_Group",
     level_a: str = "level1",
     level_b: str = "level2",
@@ -238,9 +243,10 @@ def n_dmps_claim(
         graph=ComputeGraph(nodes=(node,), terminal="n0"),
         criterion=SatisfactionCriterion(comparator=comparator, threshold=float(k)),
     )
+    chrom, start, end = region or ("chr1", 1_000_000, 1_004_800)
     subject = GenomicRegion(
-        id="chr1:1000000-1004800", display="chr1:1,000,000-1,004,800",
-        assembly="hg38", chrom="chr1", start=1_000_000, end=1_004_800,
+        id=f"{chrom}:{start}-{end}", display=f"{chrom}:{start:,}-{end:,}",
+        assembly="hg38", chrom=chrom, start=start, end=end,
     )
     return Claim(
         id=claim_id,
