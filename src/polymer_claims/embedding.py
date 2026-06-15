@@ -163,3 +163,42 @@ def spectral_layout(corpus: Corpus) -> dict[str, tuple[float, float, float]]:
             raw[nid] = (x + ox, y + oy, z + oz)
     scale = max((abs(v) for xyz in raw.values() for v in xyz), default=1.0) or 1.0
     return {nid: tuple(round(v / scale, 6) for v in xyz) for nid, xyz in raw.items()}
+
+
+def procrustes_align(
+    prev: dict[str, tuple[float, float, float]],
+    new: dict[str, tuple[float, float, float]],
+) -> dict[str, tuple[float, float, float]]:
+    """Orthogonal-Procrustes-align ``new`` spectral positions onto ``prev`` (the previously
+    displayed frame) on their common nodes, then apply that single orthogonal transform to ALL
+    of ``new``.
+
+    Eigenvectors are defined only up to sign (and rotation within a degenerate eigenspace), so a
+    naive per-frame recompute can flip/rotate the whole embedding frame-to-frame. We find the
+    orthogonal R (rotation AND reflection — sign-flips are reflections we WANT to undo, so there is
+    deliberately NO det-correction) best mapping the new common positions onto the previous ones,
+    so consecutive frames differ only by the genuine corpus change.
+
+    Underdetermined (``prev`` empty, or fewer than 2 common ids) → return ``new`` unchanged: this is
+    the frame-0 reference. Output rounded to 6dp to match ``spectral_layout`` (byte-stable; pins
+    cross-BLAS float noise). Deterministic for a fixed input (numpy SVD is deterministic)."""
+    common = sorted(prev.keys() & new.keys())
+    if not prev or len(common) < 2:
+        return new
+
+    P = np.array([prev[c] for c in common], dtype=float)  # n x 3 (target, previous frame)
+    Q = np.array([new[c] for c in common], dtype=float)    # n x 3 (source, new raw frame)
+    p_mean = P.mean(axis=0)
+    q_mean = Q.mean(axis=0)
+    Pc = P - p_mean
+    Qc = Q - q_mean
+
+    M = Qc.T @ Pc                  # 3 x 3
+    U, _, Vt = np.linalg.svd(M)
+    R = U @ Vt                     # orthogonal, det ±1 — reflection allowed, NO det-correction
+
+    aligned: dict[str, tuple[float, float, float]] = {}
+    for nid, xyz in new.items():
+        v = (np.array(xyz, dtype=float) - q_mean) @ R + p_mean
+        aligned[nid] = tuple(round(float(c), 6) for c in v)
+    return aligned
