@@ -1,6 +1,6 @@
 # Next phase — the real-data swap (from *exercised* to *earned*)
 
-**Date:** 2026-06-15 · **Status:** readiness brief (blocked on one external input — a dataset)
+**Date:** 2026-06-15 · **Status:** dataset chosen — **TCGA-LAML, IDH1/2-mut vs WT** (GDC, open access); spec next.
 **Reconciles:** `ARCHITECTURE_CURRENT.md`, `CONTINUE.md`, the deferred-analysis menu (item 6).
 
 ---
@@ -41,33 +41,51 @@ is the whole thesis. Every other open item is polish or a parallel arc by compar
    data, the gate correctly **withholds** the license — that is the system working, reported plainly,
    not a failure of the phase.
 
-## The one thing blocking it — your call
+## The dataset (chosen) — TCGA-LAML, IDH1/2-mut vs WT
 
-This needs **a specific public dataset**, which is yours to choose (I won't fabricate a "real"
-fixture — that would corrupt the integrity thesis). To unblock, pick a cohort meeting roughly:
+Acute Myeloid Leukemia (TCGA-LAML), Illumina **HumanMethylation450 (HM450)**, via the NCI **GDC**.
+Verified fit (sourced GDC + NEJM 2013 + Figueroa 2010):
 
-- **Platform:** Illumina EPIC / EPICv2 (matches the `epicv2` apparatus profile), case/control.
-- **Access:** processed beta matrix (or IDATs we can process) publicly downloadable — a GEO/ENA
-  accession (e.g. a `GSExxxxxx`) or equivalent, with a license permitting use.
-- **Shape:** enough samples per group for the region-Δβ criterion to be powered (the synthetic demo
-  used a powered fixture; real n should be comparable or larger).
+- **~194 cases** with HM450 methylation; **fully open access** — Level-3 beta values *and* the somatic
+  MAF (for grouping) *and* clinical (age/sex) are all open in GDC, **no dbGaP / controlled access needed**.
+- **Genome build:** harmonized **GRCh38** (SeSAMe-processed Level-3 betas) are the current default.
+- **Contrast: IDH1/2-mutant vs WT (~38 vs ~155)** — the strongest, most-replicated hypermethylation
+  signal in AML (IDH→2-HG inhibits TET2 demethylation; Figueroa 2010, confirmed in TCGA 2013) and
+  well-powered. (Backup: DNMT3A-mut ~51 — larger N but co-mutation-confounded. Not the small ~17
+  TET2-mut group.)
 
-**Hand me 1–2 candidate accessions** and I'll evaluate fit, then wire + validate.
+**Two adjustments from the synthetic demo's EPICv2 assumption:**
 
-## The wiring path (once a dataset is chosen)
+- **Add a 450K `AnalysisProfile`.** The apparatus is content-addressed precisely so "which platform" is
+  a *named* choice; running HM450 data through the EPICv2 profile would be wrong. A new `HM450` profile
+  (450K manifest, GRCh38, distinct `profile_hash`) is the system working as designed — and a proof point
+  that the apparatus abstraction spans platforms.
+- **Ingest GDC's processed Level-3 betas → the Python legs run directly** (no R normalization for the
+  demo). The `AnalysisProfile` honestly becomes *"GDC HM450 Level-3 SeSAMe pipeline"* — a real, citable
+  upstream apparatus (arguably more honest than re-deriving).
 
-1. **Ingest** the cohort through the SE-Contract/DRS seam → real `dimnames_hash`. (First look at the
-   existing real-data path — `exec_adapters.py: real_data_seed_corpus`, `StatsPureAdapter`,
-   `serve --real-data` — and reuse what transfers.)
-2. **Compute** real betas → region-Δβ and the n-DMP count via the two independent legs.
-3. **Gate**: confirm the legs agree (air-gap), the e-value beats the e-LOND threshold, the claim
-   survives the defeat graph → an **earned** license, not an asserted one.
-4. **Pin & verify**: record the full content-address; run the drift daemon to confirm a content move
+> **Data is NOT committed.** A 194 × ~485k real beta matrix is hundreds of MB and stays local /
+> gitignored; the repo ships the *ingestion + validation*, the 450K profile, and a tiny content-address
+> manifest — not the data. (Exact "what's committed vs local" boundary is a spec fork — see below.)
+
+## The wiring path
+
+1. **Ingest** TCGA-LAML HM450 Level-3 betas + the open MAF + clinical from GDC → real `dimnames_hash`.
+   Define `Sample_Group` = IDH1/2-mut vs WT from the MAF; carry Age/Sex from clinical. (First reuse what
+   transfers from the existing real-data path — `exec_adapters.py: real_data_seed_corpus`,
+   `StatsPureAdapter`, `serve --real-data`.)
+2. **Add the 450K `AnalysisProfile`** (manifest, GRCh38, GDC SeSAMe provenance) → its `profile_hash`.
+3. **Compute** real betas → region-Δβ and the n-DMP count via the two independent legs (over a chosen
+   IDH-hypermethylated region — region selection is a spec fork).
+4. **Gate**: legs agree (air-gap) ∧ e-value beats the e-LOND threshold ∧ survives the defeat graph →
+   an **earned** license, not an asserted one.
+5. **Pin & verify**: record the full content-address; run the drift daemon to confirm a content move
    re-opens it.
-5. **Retire the caveat** in `ARCHITECTURE_CURRENT.md` / `CONTINUE.md`; report `q` on the real run.
+6. **Retire the caveat** in `ARCHITECTURE_CURRENT.md` / `CONTINUE.md`; report `q` on the real run.
 
-Then turn into a spec → plan → subagent-driven build (the established rhythm) — but only after the
-dataset fixes the unknowns.
+Now ready for the **brainstorm → spec → plan → subagent-driven** build — the dataset has fixed the
+unknowns, leaving a handful of design forks (what's committed vs local; region selection; IDAT-vs-betas;
+how `Sample_Group` is derived/pinned) to resolve in the spec.
 
 ## The natural follow-on (REPLICATED)
 
