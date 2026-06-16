@@ -212,6 +212,14 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 
 ## Open follow-ups (tracked, non-blocking)
 
+- **Context-separation / pre-ship scrub (Option 3).** The TET2-vs-WT methylation example (the author's
+  separate research) is removed from the live code AND genericized in the historical CES docs (case/control,
+  `pinned_design` profile; local R-pipeline paths + the real cross-reactive digest stripped) — 2026-06-15.
+  **Still to do before any public release** (external users won't have this content): genericize the remaining
+  **Polymer Genomics / Boris / PlumberClient** integration references in the CES design docs; strip the
+  `~/Desktop/Research/topics/epistemic-claim-foundations/...` design-source absolute paths cited across the
+  protocol specs + this file; and scrub the v1.2 plugin/corpus fixtures that name other research projects
+  (e.g. `Polymer_Evolution`). None affect the running system — pure documentation/context hygiene.
 - **Adapter-independence hardening** (roadmap 1c): byte-derived `implementation_hash` + credential
   provenance on the frozen `Satisfaction`.
 - **Earned-strength 2d:** `evidence_against_null` from a real test statistic with n (now partly

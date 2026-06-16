@@ -315,8 +315,8 @@ def _plan_with_refs(*refs):
 
 
 def test_referenced_oracle_ids_collects_non_none():
-    plan = _plan_with_refs("api-A", None, "r-engine")
-    assert referenced_oracle_ids(plan) == frozenset({"api-A", "r-engine"})
+    plan = _plan_with_refs("api-A", None, "engine-b")
+    assert referenced_oracle_ids(plan) == frozenset({"api-A", "engine-b"})
 
 
 def test_referenced_oracle_ids_empty_when_all_none():

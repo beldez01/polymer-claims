@@ -68,7 +68,7 @@ moves if a new status enters the `TopologyExport`.
 
 The documented next action, and the single most credibility-load-bearing arc: until it lands,
 **real** is unproven. Buildable entirely inside `polymer-claims` with bundled fixtures — **no live
-R-Engine, no `~/Desktop/Polymer` or `~/Desktop/TET2` dependency** (the local-first seam was chosen
+analysis engine required, no external research directory dependency** (the local-first seam was chosen
 precisely so this arc is self-contained).
 
 - **CES-1 (B1) — `DataHandle` → SE-Contract ref. ✅ DONE 2026-06-11.** `DataHandle.ref` stays a thin

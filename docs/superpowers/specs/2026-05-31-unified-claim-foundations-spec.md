@@ -3,8 +3,8 @@
 Date: 2026-05-31
 Status: Foundations spec for review
 Supersedes: `2026-05-29-claim-pattern-architecture-design.md` (the pattern reframe is retained and absorbed here as one element of a deeper target).Source research (read for full justification + citations):
-- `~/Desktop/Research/topics/epistemic-claim-foundations/_FINAL_ideal_claim_grammar.md`
-- `~/Desktop/Research/topics/epistemic-claim-foundations/generative-protocol/_FINAL_knowledge_generation_protocol.md`
+- the reference claim grammar document
+- the reference knowledge generation protocol document
 
 ---
 
@@ -145,7 +145,7 @@ These are *additions to the v1.3 grammar target* without which the protocol cann
 
 1. **`generated_by` + `search_cardinality`** provenance — or selection-aware significance correction is unrepresentable.
 2. **Oracle credibility-qualification object** (validation tier + applicability domain + propagated uncertainty) bound to `operations`; strength capped by oracle tier.
-3. **`hazard_class` + governance/access-scope dimension** on data dependencies; enables SAFETY-GATE and `unreproducible_by_governance`. *(Load-bearing for the TET2/TCGA surface.)*
+3. **`hazard_class` + governance/access-scope dimension** on data dependencies; enables SAFETY-GATE and `unreproducible_by_governance`. *(Load-bearing for the controlled-access genomic surface.)*
 4. **Corpus-level online-FDR / error-budget object** as a first-class IR entity (not
    runtime memory).
 5. **`representation_revision` meta-tier** — claims *about the IR itself* (new patterns, ontology terms, relaxed constraints), gated more conservatively.
@@ -239,7 +239,7 @@ both operate on exactly this latent space.
 - Supersedes `2026-05-29-claim-pattern-architecture-design.md` (pattern reframe absorbed
   into §3.1) and its companion `2026-05-29-claim-architecture-map.html` (spatial map).
 - Research basis: the two keystones + 28 explorer reports + 8 syntheses in
-  `~/Desktop/Research/topics/epistemic-claim-foundations/`.
+  the reference research corpus.
 - Memory: `project_polymer_claims_knowledge_protocol` (telos), `project_formal_claim_ir`,
   `project_polymer_claims_phase0`, `project_biomed_ontology_schema_effort`.
 - Build home: `internal/epistemic_os/MASTER_PLAN.md`; runtime seat: `petri`; IR substrate:

@@ -4,8 +4,8 @@
 **Date:** 2026-06-09
 **Author:** Z. Belden
 **Scope:** the connective tissue between **Polymer EOS** (`polymer_grammar` / `polymer_protocol`,
-`~/Desktop/polymer-claims/`) and **Polymer Genomics** (the SE Contract + R-Engine/Boris stack,
-`~/Desktop/Polymer/`). Defines *how a claim points at real experimental data and a real
+`~/Desktop/polymer-claims/`) and **Polymer Genomics** (the SE Contract + the analysis engine/Boris stack).
+Defines *how a claim points at real experimental data and a real
 computation, and how the result flows back into licensing* — without moving bulk data across any
 API and without a grammar redesign.
 
@@ -79,7 +79,7 @@ The API returns only this reference (small JSON). The bytes are realized **where
 
 **EOS side today:** `impl: str` dispatched by an `Adapter`; only `builtin::*` reference impls exist.
 **Polymer side today:** `tool_registry.json` (82 methods: `deseq2_de`, `champ_dmp`, `marlin_classify`,
-`vaf`, …) executed on the R-Engine via `PlumberClient`.
+`vaf`, …) executed on the analysis engine via `PlumberClient`.
 
 **Contract:** an `OperationNode.impl` in the namespace **`boris::<tool_id>`** denotes a registered
 Boris tool. A **`BorisExecutionAdapter`** implements the EOS `Adapter` Protocol:
@@ -88,7 +88,7 @@ Boris tool. A **`BorisExecutionAdapter`** implements the EOS `Adapter` Protocol:
   air-gap; see §5).
 - `execute(node, upstream, ctx)`:
   1. resolves the node's `DataHandle` to an SE Contract reference (B1);
-  2. instructs the R-Engine to **materialize the assay locally/in-worker** from `storage_hints`
+  2. instructs the analysis engine to **materialize the assay locally/in-worker** from `storage_hints`
      (R side: a `SummarizedExperiment` whose assay is a **`DelayedArray`/`HDF5Array`** — *not*
      `restfulSE`, which was removed at Bioconductor 3.20; Python side: anndata `read_lazy` over
      Zarr v3 if the substrate is AnnData-shaped);
@@ -133,7 +133,7 @@ PENDING claim with evaluation_plan
       for each of ≥2 independent adapters (see §5):
         resolve DataHandle → SE Contract ref            [B1, API: metadata only]
         materialize assay locally/in-worker             [DelayedArray/HDF5Array | read_lazy]
-        run boris::<tool> with params                   [B2, R-Engine; bytes stay put]
+        run boris::<tool> with params                   [B2, analysis engine; bytes stay put]
         return ExecValue                                 [scalar/vector only]
       agreement gate: ≥2 distinct identities + agree
       criterion comparison → verdict
@@ -155,7 +155,7 @@ the claims API**.
 
 The EOS air-gap requires **two independent adapters that agree**. With `builtin::const` or two
 independently-coded arithmetic adapters, independence is genuine. With a single external compute
-engine, two adapters hitting the **same** R-Engine endpoint are **not** independent — they would
+engine, two adapters hitting the **same** analysis engine endpoint are **not** independent — they would
 agree trivially, silently downgrading "verified by replication" to "the API returned a consistent
 value." The socket must pick how independence is achieved per claim. Map each to a `LicenseRoute`:
 
@@ -182,7 +182,7 @@ strength axes (`UNVALIDATED 0.0 → INDIRECT 0.4 → BENCHMARKED 0.6 → ANCHORE
 | Substrate | Example | Tier (ceiling) |
 |---|---|---|
 | Direct wet-lab / clinical anchor | sorted-cell EM-seq, our 48-sample cohort | ANCHORED (0.85) |
-| Recomputable experimental data | a public GEO/TCGA methylation matrix as SE Contract | BENCHMARKED (0.6) |
+| Recomputable experimental data | a public GEO/controlled-access genomic methylation matrix as SE Contract | BENCHMARKED (0.6) |
 | Computed/predicted reference | predicted biophysics from Polymer Genomics | BENCHMARKED→INDIRECT |
 | Literature-reported value | extracted from a paper (future literature API) | INDIRECT (0.4) |
 | Unvalidated / out-of-domain apparatus | — | UNVALIDATED (0.0) |
@@ -304,7 +304,7 @@ already exists on one side or the other.
   "contract_uid": "se-7f3a9c…",
   "dimnames_hash": "sha256:9b1c…",        // canonical content-address (DRS's gap)
   "assay": "beta",
-  "selection": { "group_col": "condition", "group_a": "TET2mut", "group_b": "WT" },
+  "selection": { "group_col": "condition", "group_a": "case", "group_b": "control" },
   "genome_assembly": "refget:SQ.Ya6Rs…",   // not the string "hg38"
   "size": 412000000,
   "checksums": [{ "type": "sha256", "checksum": "…" }],

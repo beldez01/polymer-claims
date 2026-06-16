@@ -21,8 +21,8 @@
 | `src/polymer_claims/_hashing.py` | one canonical content-address primitive for the whole umbrella | Create: `canonical_sha256(obj) -> str` |
 | `src/polymer_claims/analysis_profile.py` | CES-0 profile + `content_hash` | Modify: `content_hash` reuses `canonical_sha256` (DRY) |
 | `src/polymer_claims/contracts/__init__.py` | the data seam: `SEContractRef` model + `load_contract` resolver + `dimnames_hash` | Create |
-| `src/polymer_claims/contracts/tet2_epicv2_demo.json` | bundled SE-Contract manifest (50×8, EPICv2-shaped) | Create (generated) |
-| `src/polymer_claims/contracts/tet2_epicv2_demo.betas.tsv` | bundled beta matrix (synthetic, planted shift) | Create (generated) |
+| `src/polymer_claims/contracts/groupdiff_epicv2_demo.json` | bundled SE-Contract manifest (50×8, EPICv2-shaped) | Create (generated) |
+| `src/polymer_claims/contracts/groupdiff_epicv2_demo.betas.tsv` | bundled beta matrix (synthetic, planted shift) | Create (generated) |
 | `src/polymer_claims/contracts/_make_fixture.py` | deterministic one-off generator for the two fixture files | Create |
 | `src/polymer_claims/__init__.py` | umbrella public surface | Modify: re-export the new symbols |
 | `tests/test_hashing.py` | the shared hash primitive | Create |
@@ -149,12 +149,12 @@ from polymer_claims.contracts import AccessMethod, Checksum, SEContractRef
 
 def _ref(**kw) -> SEContractRef:
     base = dict(
-        contract_uid="tet2_epicv2_demo@1",
+        contract_uid="groupdiff_epicv2_demo@1",
         dimnames_hash="sha256:" + "0" * 64,
         assay="beta",
         selection=(("group_col", "Sample_Group"),),
         genome_assembly="hg38",
-        self_uri="drs://local/tet2_epicv2_demo@1",
+        self_uri="drs://local/groupdiff_epicv2_demo@1",
         size=123,
         checksums=(Checksum(checksum="ab" * 32),),
         access_methods=(AccessMethod(type="file", access_url="/x/y.tsv"),),
@@ -246,7 +246,7 @@ git commit -m "feat(umbrella): SEContractRef model — DRS-shaped SE-Contract re
 
 **Files:**
 - Create: `src/polymer_claims/contracts/_make_fixture.py`
-- Create (generated): `src/polymer_claims/contracts/tet2_epicv2_demo.json`, `…/tet2_epicv2_demo.betas.tsv`
+- Create (generated): `src/polymer_claims/contracts/groupdiff_epicv2_demo.json`, `…/groupdiff_epicv2_demo.betas.tsv`
 - Test: `tests/test_contracts_fixture.py`
 
 - [ ] **Step 1: Write the failing test (raw-file consistency — no loader needed)**
@@ -261,8 +261,8 @@ import re
 from pathlib import Path
 
 _DIR = Path(__file__).resolve().parents[1] / "src" / "polymer_claims" / "contracts"
-_MANIFEST = _DIR / "tet2_epicv2_demo.json"
-_BETAS = _DIR / "tet2_epicv2_demo.betas.tsv"
+_MANIFEST = _DIR / "groupdiff_epicv2_demo.json"
+_BETAS = _DIR / "groupdiff_epicv2_demo.betas.tsv"
 
 
 def _manifest() -> dict:
@@ -303,8 +303,8 @@ def test_probe_ids_are_cg_format_and_match_matrix_order():
 def test_sample_groups_are_binary_and_balanced():
     m = _manifest()
     groups = [c["Sample_Group"] for c in m["col_data"]]
-    assert set(groups) == {"TET2_mut", "WT"}
-    assert groups.count("TET2_mut") == groups.count("WT")
+    assert set(groups) == {"case", "control"}
+    assert groups.count("case") == groups.count("control")
 
 
 def test_metadata_is_epicv2_hg38():
@@ -325,9 +325,9 @@ Create `src/polymer_claims/contracts/_make_fixture.py` (no RNG — fully determi
 ```python
 """Deterministic generator for the CES-1 EPICv2-shaped methylation fixture.
 
-Synthetic VALUES, real STRUCTURE: 50 cg-format probes x 8 samples (4 TET2_mut / 4 WT) on
-chr4 near the TET2 locus (hg38). No RNG — every value is a fixed function of its indices, so the
-fixture is reproducible. Probes 0-4 carry a planted +0.20 beta shift in TET2_mut samples (used by
+Synthetic VALUES, real STRUCTURE: 50 cg-format probes x 8 samples (4 case / 4 control) on
+chr4 near the example locus (hg38). No RNG — every value is a fixed function of its indices, so the
+fixture is reproducible. Probes 0-4 carry a planted +0.20 beta shift in case samples (used by
 CES-2 only; CES-1 asserts nothing about values). Re-run with:  python -m
 polymer_claims.contracts._make_fixture
 """
@@ -339,14 +339,14 @@ from pathlib import Path
 _DIR = Path(__file__).parent
 N_FEATURES = 50
 N_SAMPLES = 8
-_PLANTED_PROBES = set(range(5))   # first 5 probes carry the TET2_mut shift
+_PLANTED_PROBES = set(range(5))   # first 5 probes carry the case shift
 _PLANTED_SHIFT = 0.20
 
 
 def _samples() -> list[dict]:
     out = []
     for j in range(N_SAMPLES):
-        group = "TET2_mut" if j % 2 == 0 else "WT"
+        group = "case" if j % 2 == 0 else "control"
         out.append({
             "sample_id": f"S{j + 1:02d}",
             "Sample_Group": group,
@@ -365,7 +365,7 @@ def _probes() -> list[dict]:
 
 def _beta(i: int, sample: dict) -> float:
     base = 0.20 + ((i * 7 + 3) % 60) / 100.0   # deterministic in [0.20, 0.79]
-    if i in _PLANTED_PROBES and sample["Sample_Group"] == "TET2_mut":
+    if i in _PLANTED_PROBES and sample["Sample_Group"] == "case":
         base += _PLANTED_SHIFT
     return round(min(base, 0.999999), 6)
 
@@ -374,21 +374,21 @@ def build() -> None:
     samples = _samples()
     probes = _probes()
     manifest = {
-        "uid": "tet2_epicv2_demo@1",
+        "uid": "groupdiff_epicv2_demo@1",
         "dim": [N_FEATURES, N_SAMPLES],
-        "assays": [{"name": "beta", "ref": "tet2_epicv2_demo.betas.tsv"}],
+        "assays": [{"name": "beta", "ref": "groupdiff_epicv2_demo.betas.tsv"}],
         "col_data": samples,
         "row_data": probes,
         "metadata": {"genome_assembly": "hg38", "array": "EPICv2"},
     }
-    (_DIR / "tet2_epicv2_demo.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    (_DIR / "groupdiff_epicv2_demo.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
     header = "\t".join(["feature_id"] + [s["sample_id"] for s in samples])
     rows = [header]
     for i, probe in enumerate(probes):
         cells = [probe["feature_id"]] + [f"{_beta(i, s):.6f}" for s in samples]
         rows.append("\t".join(cells))
-    (_DIR / "tet2_epicv2_demo.betas.tsv").write_text("\n".join(rows) + "\n")
+    (_DIR / "groupdiff_epicv2_demo.betas.tsv").write_text("\n".join(rows) + "\n")
 
 
 if __name__ == "__main__":
@@ -398,7 +398,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Generate the fixture files**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . python -m polymer_claims.contracts._make_fixture`
-Then confirm: `ls src/polymer_claims/contracts/` shows `tet2_epicv2_demo.json` and `tet2_epicv2_demo.betas.tsv`.
+Then confirm: `ls src/polymer_claims/contracts/` shows `groupdiff_epicv2_demo.json` and `groupdiff_epicv2_demo.betas.tsv`.
 
 - [ ] **Step 5: Run tests to verify they pass**
 
@@ -409,8 +409,8 @@ Expected: PASS (all six consistency tests).
 
 ```bash
 git add src/polymer_claims/contracts/_make_fixture.py \
-        src/polymer_claims/contracts/tet2_epicv2_demo.json \
-        src/polymer_claims/contracts/tet2_epicv2_demo.betas.tsv \
+        src/polymer_claims/contracts/groupdiff_epicv2_demo.json \
+        src/polymer_claims/contracts/groupdiff_epicv2_demo.betas.tsv \
         tests/test_contracts_fixture.py
 git commit -m "feat(umbrella): bundled EPICv2-shaped methylation fixture + generator (CES-1)"
 ```
@@ -435,19 +435,19 @@ from pathlib import Path
 from polymer_claims._hashing import canonical_sha256
 from polymer_claims.contracts import load_contract
 
-_REF = "se:tet2_epicv2_demo@1"
+_REF = "se:groupdiff_epicv2_demo@1"
 
 
 def test_load_contract_returns_contract_fields():
     ref = load_contract(_REF)
-    assert ref.contract_uid == "tet2_epicv2_demo@1"
+    assert ref.contract_uid == "groupdiff_epicv2_demo@1"
     assert ref.assay == "beta"
     assert ref.genome_assembly == "hg38"
     assert ref.selection  # non-empty selector
 
 
 def test_load_contract_accepts_bare_ref_without_prefix():
-    assert load_contract("tet2_epicv2_demo@1") == load_contract(_REF)
+    assert load_contract("groupdiff_epicv2_demo@1") == load_contract(_REF)
 
 
 def test_dimnames_hash_is_deterministic_and_prefixed():
@@ -459,7 +459,7 @@ def test_dimnames_hash_is_deterministic_and_prefixed():
 def test_dimnames_hash_matches_canonical_recipe_over_ordered_ids():
     # parity: the hash is canonical_sha256 over the ORDERED feature/sample id lists.
     contracts_dir = Path(load_contract(_REF).access_methods[0].access_url).parent
-    manifest = _json.loads((contracts_dir / "tet2_epicv2_demo.json").read_text())
+    manifest = _json.loads((contracts_dir / "groupdiff_epicv2_demo.json").read_text())
     feature_ids = [r["feature_id"] for r in manifest["row_data"]]
     sample_ids = [c["sample_id"] for c in manifest["col_data"]]
     expected = canonical_sha256({"feature_ids": feature_ids, "sample_ids": sample_ids})
@@ -484,8 +484,8 @@ def test_drs_shape_present():
 def test_checksum_is_sha256_over_fixture_bytes():
     ref = load_contract(_REF)
     contracts_dir = Path(ref.access_methods[0].access_url).parent
-    manifest_bytes = (contracts_dir / "tet2_epicv2_demo.json").read_bytes()
-    betas_bytes = (contracts_dir / "tet2_epicv2_demo.betas.tsv").read_bytes()
+    manifest_bytes = (contracts_dir / "groupdiff_epicv2_demo.json").read_bytes()
+    betas_bytes = (contracts_dir / "groupdiff_epicv2_demo.betas.tsv").read_bytes()
     expected = hashlib.sha256(manifest_bytes + betas_bytes).hexdigest()
     assert ref.checksums[0].checksum == expected
     assert ref.size == len(manifest_bytes) + len(betas_bytes)
@@ -620,7 +620,7 @@ Expected: `ALL GREEN`. (Confirms grammar/protocol/viewer untouched and still gre
 
 - [ ] **Step 6: Update CONTINUE + roadmap, then commit**
 
-Add a dated `✅ CES-1 DONE` entry to `docs/superpowers/CONTINUE.md` recording: the thin-handle decision held (no grammar change), `SEContractRef` + `load_contract` + the bundled `tet2_epicv2_demo` fixture, the shared `canonical_sha256` helper, the `dimnames_hash`, the deferral of computation/licensing + real-vs-public data to CES-2, and the final green test counts. Mark CES-1's portion of the roadmap §1b done (note CES-1 complete, CES-2 next).
+Add a dated `✅ CES-1 DONE` entry to `docs/superpowers/CONTINUE.md` recording: the thin-handle decision held (no grammar change), `SEContractRef` + `load_contract` + the bundled `groupdiff_epicv2_demo` fixture, the shared `canonical_sha256` helper, the `dimnames_hash`, the deferral of computation/licensing + real-vs-public data to CES-2, and the final green test counts. Mark CES-1's portion of the roadmap §1b done (note CES-1 complete, CES-2 next).
 
 ```bash
 git add src/polymer_claims/__init__.py docs/superpowers/CONTINUE.md \
@@ -643,4 +643,4 @@ git commit -m "feat(umbrella): re-export the CES-1 data-seam symbols; CONTINUE +
 
 **Placeholder scan:** none — every code/test step shows complete content and exact commands.
 
-**Type consistency:** `SEContractRef`/`AccessMethod`/`Checksum` fields are identical across Task 2 (definition), Task 2 test (`_ref` helper), and Task 4 (loader construction + tests). `canonical_sha256` signature matches across Task 1 and Task 4. `load_contract(ref)` returns `SEContractRef` consistently. Fixture filenames (`tet2_epicv2_demo.json`, `tet2_epicv2_demo.betas.tsv`) and `uid` (`tet2_epicv2_demo@1`) are identical across Tasks 3, 4, and their tests.
+**Type consistency:** `SEContractRef`/`AccessMethod`/`Checksum` fields are identical across Task 2 (definition), Task 2 test (`_ref` helper), and Task 4 (loader construction + tests). `canonical_sha256` signature matches across Task 1 and Task 4. `load_contract(ref)` returns `SEContractRef` consistently. Fixture filenames (`groupdiff_epicv2_demo.json`, `groupdiff_epicv2_demo.betas.tsv`) and `uid` (`groupdiff_epicv2_demo@1`) are identical across Tasks 3, 4, and their tests.

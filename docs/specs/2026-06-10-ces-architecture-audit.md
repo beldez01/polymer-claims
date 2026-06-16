@@ -3,8 +3,8 @@
 **Status:** Architecture findings (input to the next-phase design). Not a design itself.
 **Date:** 2026-06-10
 **Scope:** the two repos the Claim Evidence Socket (CES) must bind —
-Polymer EOS (`~/Desktop/polymer-claims/`) and Polymer Genomics (`~/Desktop/Polymer/`) —
-plus the real in-practice TET2 methylation pipeline (`~/Desktop/TET2/`) as ground truth.
+Polymer EOS (`~/Desktop/polymer-claims/`) and Polymer Genomics — plus the reference
+methylation pipeline as ground truth.
 **Why this exists:** before building the CES, we paused to answer one question — *what
 tool-specific bioinformatic context (normalization, filtering, design, covariates,
 multiple-testing) must a claim capture for a license to be scientifically meaningful, and
@@ -69,8 +69,8 @@ record of what was done.
 list — an existing notion of "which params must be pinned for clinical validity." **These params
 ARE hashed** into the SemanticRunID.
 
-**Layer C — hardcoded R internals** (`R-Engine/R/analysis/methylation/pipeline.R`,
-`helpers.R`): `analysis_profile` (selects sesame-vs-minfi QC), `sesame_prep="QCDPB"`,
+**Layer C — hardcoded R internals** (the analysis engine's `pipeline.R`, `helpers.R`):
+`analysis_profile` (selects sesame-vs-minfi QC), `sesame_prep="QCDPB"`,
 `use_any_sample_rule=TRUE`, `fail_fast`, `cell_reference="FlowSorted.Blood.EPIC"`, and the
 **limma design formula itself (assumed `~ group`)**. **These are NOT tool params and NOT
 hashed.**
@@ -84,40 +84,40 @@ changes — and the design formula / cell reference are invisible to it.
 
 **The `analysis_profile` concept** (e.g. `canonical_epicv2_hg38_v1` in `helpers.R:563–570`)
 is the most important latent asset: it is a *named, versioned bundle of pinned choices*
-(normalization=sesame/QCDPB, detection=0.05, filter_sex=TRUE, cross_reactive=Peters2024_WGBS,
-…). It is exactly the right unit for a claim to reference — but today the profile selection is
-itself a Layer-C internal that the SemanticRunID does not fully capture.
+(normalization=sesame/QCDPB, detection=0.05, filter_sex=TRUE, cross_reactive=a pinned
+cross-reactive probe list, …). It is exactly the right unit for a claim to reference — but
+today the profile selection is itself a Layer-C internal that the SemanticRunID does not fully
+capture.
 
 ---
 
-## 3. Ground truth — what the real TET2 pipeline actually pins
+## 3. Ground truth — what the reference pipeline actually pins
 
-From `~/Desktop/TET2/analysis/early_rscript_pipeline/`. This is the reference for "what a
-real claim must capture," and it diverges from the registry defaults — proving the point that
-context must be named, not assumed:
+From the reference R pipeline. This is the reference for "what a real claim must capture," and
+it diverges from the registry defaults — proving the point that context must be named, not
+assumed:
 
 - **Normalization:** sesame `openSesame(prep="QCDPB")` — *not* the registry default `funnorm`.
-- **Detection:** 0.80 retain-rule (TET2) — *not* the canonical 0.05.
-- **Cross-reactive:** Peters2024 WGBS set, **11,878 probes**, from the live cross-project file
-  `~/Desktop/Polymer/R-Engine/data/cross_reactive_epicv2_wgbs.txt` (the global-config-flagged
-  dependency).
-- **SNP:** sesame `M_SNPcommon_1pt`; **Sex chrom:** filtered (TET2 script) — registry default
-  is FALSE.
+- **Detection:** 0.80 retain-rule (worked example) — *not* the canonical 0.05.
+- **Cross-reactive:** a pinned cross-reactive probe list, **11,878 probes**, sourced from the
+  Polymer Genomics backend (`cross_reactive_probes.txt`, the global-config-flagged dependency).
+- **SNP:** sesame `M_SNPcommon_1pt`; **Sex chrom:** filtered (reference pipeline) — registry
+  default is FALSE.
 - **Array/genome:** EPICv2 / hg38; replicate probes collapsed by mean.
-- **Design:** `~ 0 + Sample_Group + Age + Sex`, contrast `TET2_mut − WT`; **no batch
+- **Design:** `~ 0 + Sample_Group + Age + Sex`, contrast `case − control`; **no batch
   correction, no cell adjustment** in the main model.
 - **DMP:** limma on M-values, clamp `[1e-6, 1−1e-6]`, BH, FDR 0.05.
 - **High-risk implicit choices** (silently lost by any naive capture): BH adjust-method,
   M-value clamp bounds, contrast *direction* (factor-level order), `topTable` sort order,
   replicate-collapse method, infinite-M handling.
 
-The canonical-profile and the real-manuscript-pipeline **agree** on normalization (both sesame
-`openSesame`/`QCDPB`) but **disagree on the detection regime** (manuscript retain-rate ≥ 0.80 vs
-canonical pOOBAH p ≤ 0.05), the **SNP method** (sesame `M_SNPcommon_1pt` vs minfi
-`dropLociWithSnps`), and the **manuscript additionally pins the design formula**
+The canonical-profile and the reference pipeline **agree** on normalization (both sesame
+`openSesame`/`QCDPB`) but **disagree on the detection regime** (reference pipeline retain-rate
+≥ 0.80 vs canonical pOOBAH p ≤ 0.05), the **SNP method** (sesame `M_SNPcommon_1pt` vs minfi
+`dropLociWithSnps`), and the **reference pipeline additionally pins the design formula**
 (`~ 0 + Sample_Group + Age + Sex`) — so "which profile" is a real, claim-level question, not a
-default. (Sex-chrom handling: canonical `filter_sex=TRUE`; the TET2 script computes a sex-probe
-mask — verify whether it is applied before pinning that field.)
+default. (Sex-chrom handling: canonical `filter_sex=TRUE`; the reference pipeline computes a
+sex-probe mask — verify whether it is applied before pinning that field.)
 
 ---
 
@@ -172,8 +172,9 @@ whether EOS needs a `QuantityVectorLeaf` (a real grammar expansion). Recommendat
 reduction for the first slice**, defer vector leaves to a later phase.
 
 **Working defaults already chosen (survive the audit):** local-first seam (build in
-polymer-claims with a local SE-Contract realizer, no live R-Engine in tests); methodological
-independence as the air-gap default (two different tools, same pinned profile + dataset).
+polymer-claims with a local SE-Contract realizer, no live analysis engine in tests);
+methodological independence as the air-gap default (two different tools, same pinned profile +
+dataset).
 
 ---
 
@@ -190,8 +191,8 @@ independence as the air-gap default (two different tools, same pinned profile + 
    profile, with a methodologically-independent second leg, over one public EPICv2 SE Contract.
 4. **Phase CES-3 (B3 + drift + tier) — wire SemanticRunID into materialization, the profile
    hash into the drift key, and the substrate→tier cap.** (Much already exists on one side.)
-5. **(later) live R-Engine `BorisExecutionAdapter` via PlumberClient; vector leaves; the §7
-   public/private promotion ruling.**
+5. **(later) live analysis-engine `BorisExecutionAdapter` via PlumberClient; vector leaves; the
+   §7 public/private promotion ruling.**
 
 The CES spec's open governance ruling (private-evidence-proposes / public-data-licenses) and
 the DRS-shape-vs-endpoint and TileDB-SOMA decisions remain user-gated and do **not** block
@@ -206,7 +207,6 @@ Phases CES-0→2.
 **Polymer Genomics:** `Backend/app/models/{se_contract.py,workflow_memory.py}`;
 `shared/core/{se_contract.json,tool_registry.json}`;
 `Backend/app/services/{plumber_client.py,workflow_memory_service.py}`;
-`R-Engine/R/analysis/methylation/{pipeline.R,helpers.R,methylation.R,methylation_sesame.R}`;
+the analysis engine's `R/analysis/methylation/{pipeline.R,helpers.R,methylation.R,methylation_sesame.R}`;
 `BACKEND_STRUCTURE.md`.
-**Ground truth:** `~/Desktop/TET2/analysis/early_rscript_pipeline/{00_config.R,01_ingestion_qc.R,02_dmp_analysis.R}`;
-`~/Desktop/Polymer/R-Engine/data/cross_reactive_epicv2_wgbs.txt`.
+**Ground truth:** the reference R pipeline; Polymer Genomics backend (`cross_reactive_probes.txt`).

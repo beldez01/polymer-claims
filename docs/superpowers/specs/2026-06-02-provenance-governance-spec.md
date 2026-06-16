@@ -13,7 +13,7 @@ Two additive `Claim` metadata objects the protocol pushes back on the grammar:
   unrepresentable, and the air-gap / no-self-licensing guarantee can't tell human from agent.
 - **`Governance` (#3)** — the *hazard* and *access scope* of the claim's data. Feeds the protocol's
   SAFETY-GATE and the already-present-but-dormant `unreproducible_by_governance` status. Load-bearing
-  for the TET2/TCGA surface (controlled-access genomic data).
+  for the controlled-access genomic surface (controlled-access genomic data).
 
 The grammar **represents**; the protocol **decides** (computes corrections, runs the safety gate,
 sets statuses). Both are additive-optional, frozen, hashable — same discipline as `subject`/etc.

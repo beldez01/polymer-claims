@@ -71,10 +71,10 @@ Polymer-native vocabularies are likely needed for:
 
 Agents should author claims by filling typed semantic slots, not by translating prose directly into arbitrary JSON.
 
-For example, a claim about "TET2-mutant AML vs WT" should not collapse that phrase into a single subject string. It should separate:
+For example, a claim about "a mutation-defined subgroup vs wildtype" should not collapse that phrase into a single subject string. It should separate:
 
 - disease: AML
-- genotype: TET2 mutation status
+- genotype: mutation status
 - comparator: WT / control
 - assay: EPICv2 methylation
 - biological material: blood / marrow / sorted cell type

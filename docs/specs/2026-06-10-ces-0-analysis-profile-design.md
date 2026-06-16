@@ -8,8 +8,8 @@ architecture audit (`2026-06-10-ces-architecture-audit.md`).
 **Decided forks (this session):** profile-reference model (A1); fold Layer-C internals into the
 profile so its hash pins everything (B); scalar reduction for the first terminal, vector leaves
 deferred (C); reuse the existing `oracle_ref` slot to bind the profile (no new grammar slot);
-local-first seam (no live R-Engine in tests); methodological independence as the air-gap default;
-**encode BOTH the TET2-manuscript profile and the registry `canonical_epicv2_hg38_v1` profile as
+local-first seam (no live analysis engine in tests); methodological independence as the air-gap default;
+**encode BOTH the pinned-design profile and the registry `canonical_epicv2_hg38_v1` profile as
 distinct versioned profiles**, so a claim must name which one it licensed under.
 
 ---
@@ -50,27 +50,27 @@ This keeps the "writes-only-IR / no domain in the core" invariant intact.
 ## 2. The `AnalysisProfile` object (umbrella / Polymer-side)
 
 A frozen, hashable record that pins all three audit layers plus the Layer-C residue. Illustrative
-schema (the plan fixes exact field names; values shown are the real TET2-manuscript pinning from
+schema (the plan fixes exact field names; values shown are the reference pipeline pinning from
 the audit §3, which is the first profile we encode):
 
 ```jsonc
 {
-  "profile_id": "tet2_epicv2_hg38_manuscript",
+  "profile_id": "pinned_design_epicv2_hg38_v1",
   "version": "1",
   "array": { "type": "EPICv2", "genome_assembly": "hg38",
              "manifest": "sesameData::EPICv2.hg38.manifest" },
   "normalization": { "package": "sesame", "method": "openSesame", "prep": "QCDPB" },
   "filtering": {
     "detection_threshold": 0.80, "detection_rule": "retain_if_rate_ge",
-    "cross_reactive": { "source": "Peters2024_CH_WGBS",
-                        "file_hash": "sha256:…",  // hash of cross_reactive_epicv2_wgbs.txt (11,878 probes)
+    "cross_reactive": { "source": "cross_reactive_probes_v1",
+                        "file_hash": "sha256:…",  // hash of cross_reactive_probes.txt (11,878 probes)
                         "n_probes": 11878 },
     "snp": { "method": "sesame:M_SNPcommon_1pt", "maf": null },
     "sex_chrom": "removed", "replicate_collapse": "mean_of_variants"
   },
   "value_space": { "test_on": "M_value", "clamp": [1e-6, 0.999999] },
   "design": { "formula": "~ 0 + Sample_Group + Age + Sex",
-              "contrast": "TET2_mut - WT", "covariates": ["Age", "Sex"],
+              "contrast": "case - control", "covariates": ["Age", "Sex"],
               "batch_correction": null, "cell_adjustment": null },
   "dmp": { "method": "limma", "adjust_method": "BH",
            "fdr_threshold": 0.05, "delta_beta_threshold": 0.05 },
@@ -83,7 +83,7 @@ the audit §3, which is the first profile we encode):
 ```
 
 The profile is **declarative**: it records *what the pinned analysis is*, not how to run it. A
-realizer (local fixture adapter now; live R-Engine later) reads it and executes accordingly.
+realizer (local fixture adapter now; live analysis engine later) reads it and executes accordingly.
 
 ### 2a. Local-first registry
 
@@ -95,17 +95,17 @@ returns the frozen object. No network; pure + stub-testable.
 **Two profiles ship in CES-0**, both EPICv2/hg38, both sesame `openSesame`/`QCDPB` normalization
 (they *agree* there), differing on the choices that make "which profile" a real question:
 
-| | `tet2_epicv2_hg38_manuscript@1` (ground truth) | `canonical_epicv2_hg38_v1@1` (registry) |
+| | `pinned_design_epicv2_hg38_v1@1` (ground truth) | `canonical_epicv2_hg38_v1@1` (registry) |
 |---|---|---|
 | Detection regime | retain-rate ≥ 0.80 (minfi `rowMeans`) | pOOBAH p ≤ 0.05 + 5% sample-fail |
 | Sex-chrom probes | removed | removed (`filter_sex=TRUE`) |
-| Design formula | pinned: `~ 0 + Sample_Group + Age + Sex`, `TET2_mut − WT` | not pinned by the profile (per-analysis) |
+| Design formula | pinned: `~ 0 + Sample_Group + Age + Sex`, `case − control` | not pinned by the profile (per-analysis) |
 | SNP | sesame `M_SNPcommon_1pt` | minfi `dropLociWithSnps` SBE+CpG, MAF 0.01 |
 
 The profiles produce *different* hashes, so a claim's `profile_hash` records exactly which
-analytical regime licensed it. The manuscript profile is the first licensing target (§6); the
+analytical regime licensed it. The pinned-design profile is the first licensing target (§6); the
 canonical profile is encoded alongside it to exercise the "named, not defaulted" property and to
-seed the future registry-vs-manuscript comparison.
+seed the future registry-vs-pinned-design comparison.
 
 ---
 
@@ -136,8 +136,8 @@ alongside it is a Polymer-side implementation detail; EOS records both fields re
 
   | Substrate (`profile.substrate`) | Tier ceiling |
   |---|---|
-  | Direct wet-lab / clinical anchor (sorted-cell EM-seq, the 48-sample cohort) | ANCHORED 0.85 |
-  | Recomputable public data (GEO/TCGA methylation SE Contract) | BENCHMARKED 0.6 |
+  | Direct wet-lab / clinical anchor (sorted-cell EM-seq, primary cohort) | ANCHORED 0.85 |
+  | Recomputable public data (GEO/controlled-access genomic methylation SE Contract) | BENCHMARKED 0.6 |
   | Computed/predicted reference | BENCHMARKED→INDIRECT |
   | Literature-reported | INDIRECT 0.4 |
   | Unvalidated / out-of-domain | UNVALIDATED 0.0 |
@@ -178,10 +178,10 @@ here — CES-0 ships only the representation.
 
 ## 6. The first claim (scalar reduction — Fork C)
 
-A single hematopoiesis/TET2 methylation claim licenses over one bundled EPICv2 methylation SE
-Contract fixture under `tet2_epicv2_hg38_manuscript@1`:
+A single hematopoietic methylation claim licenses over one bundled EPICv2 methylation SE
+Contract fixture under `pinned_design_epicv2_hg38_v1@1`:
 
-- **Claim:** "TET2-mutant vs WT methylation at region/locus R differs" — terminal reduced to a
+- **Claim:** "case vs control methylation at region/locus R differs" — terminal reduced to a
   **scalar**: e.g. `Δβ at cgXXXXX ≥ θ`, or `n DMPs at FDR<0.05 ≥ k`. (No vector leaf;
   `QuantityVectorLeaf` deferred to a later phase.)
 - **Air-gap = methodological independence (default):** two distinct impls compute the same
@@ -203,7 +203,7 @@ local profile registry — the scaffolding every later piece consumes.
 
 **Delivers (this phase, as its own plan):**
 - `AnalysisProfile` frozen object + canonical `profile_hash` (umbrella) + **both** real profiles
-  (`tet2_epicv2_hg38_manuscript@1` and `canonical_epicv2_hg38_v1@1`) in the local registry, each
+  (`pinned_design_epicv2_hg38_v1@1` and `canonical_epicv2_hg38_v1@1`) in the local registry, each
   with its own distinct hash.
 - The three additive `MaterializationContext` fields (grammar).
 - The `oracle_ref = profile_id@version` binding convention + a substrate→tier helper +
@@ -216,7 +216,7 @@ local profile registry — the scaffolding every later piece consumes.
 - Minimal B2 local realizer + the two independent reductions + the licensing claim (CES-2).
 - B3 SemanticRunID threading + drift wiring (`profile_hash`/`dimnames_hash` → `drift_pass`) +
   the substrate-tier end-to-end (CES-3).
-- Live R-Engine `BorisExecutionAdapter` via PlumberClient; `QuantityVectorLeaf`; the §7
+- Live analysis engine `BorisExecutionAdapter` via PlumberClient; `QuantityVectorLeaf`; the §7
   public/private promotion governance ruling (user-gated); DRS endpoint vs shape; TileDB-SOMA.
 
 ---
@@ -238,12 +238,12 @@ local profile registry — the scaffolding every later piece consumes.
 ## 9. Open decisions for the user (none block CES-0)
 
 1. **Substrate→tier table (§4):** confirm BENCHMARKED for recomputable-public and ANCHORED for
-   the 48-sample sorted cohort, or adjust the ladder.
+   the primary sorted cohort, or adjust the ladder.
 2. **Which first profile — RESOLVED:** encode **both** as distinct versioned profiles
-   (`tet2_epicv2_hg38_manuscript@1` + `canonical_epicv2_hg38_v1@1`). They agree on normalization
+   (`pinned_design_epicv2_hg38_v1@1` + `canonical_epicv2_hg38_v1@1`). They agree on normalization
    (sesame/QCDPB) and differ on the detection regime (retain-rate 0.80 vs pOOBAH 0.05), SNP
-   method, and the manuscript's pinned design formula — so a claim names which regime licensed
-   it (§2a). The manuscript profile is the first licensing target.
+   method, and the pinned-design profile's locked design formula — so a claim names which regime
+   licensed it (§2a). The pinned-design profile is the first licensing target.
 3. **SemanticRunID fold-in (§3):** extend the existing `SHA256(tool·params·inputs)` formula to
    include `profile_hash`, or carry `profile_hash` as a sibling field. (EOS records both either
    way; this is a Polymer-side choice for CES-3.)

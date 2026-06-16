@@ -8,7 +8,7 @@
 `load_contract`, the SE-Contract fixture shape), and the Phase-2a real-execution pattern
 (`src/polymer_claims/exec_adapters.py`). Slice CES-2 of the CES decomposition; the real-data half
 of the credibility-arc spine.
-**Decided this session:** generic methylation (NOT the TET2 manuscript material) under the canonical
+**Decided this session:** generic methylation (NOT the worked example material) under the canonical
 profile `CANONICAL_EPICV2_V1`; **synthetic** betas (real public-data sourcing is a deferred slice);
 region Δβ reduction (n-DMPs-at-FDR deferred); a static end-to-end test (not wired into `serve`).
 
@@ -63,7 +63,7 @@ generalized `_make_fixture`). **Synthetic** values, real structure:
 - `metadata.genome_assembly = "hg38"`, `array = "EPICv2"`.
 
 Resolved by the existing `load_contract("se:epicv2_casectrl_demo@1")` with no loader change (it is
-generic by stem). The CES-1 TET2 fixture is left in place (CES-1's tests use it); CES-2 does not
+generic by stem). The CES-1 fixture is left in place (CES-1's tests use it); CES-2 does not
 reference it.
 
 ---
@@ -174,7 +174,7 @@ A static end-to-end test (`tests/test_methyl_licensing.py`), no live node:
 - **No grammar/protocol change; Corpus stays 4.** The covariate columns in the fixture are recorded
   but the v1 reduction ignores them (the canonical design formula's covariate adjustment is a later
   reduction, like n-DMPs).
-- **TET2 material untouched** — the CES-0 manuscript profile and CES-1 TET2 fixture remain (CES-1
+- **Pinned-design material untouched** — the CES-0 pinned-design profile and CES-1 fixture remain (CES-1
   tests use the fixture); CES-2 simply does not build on them.
 
 ---

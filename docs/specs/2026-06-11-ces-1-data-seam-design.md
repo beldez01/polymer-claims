@@ -37,7 +37,7 @@ Per CES-0 §1 and the interface contract's "thin handle" law, the grammar must n
 Contract. Therefore:
 
 - **`DataHandle.ref` stays a bare `str`** (`grammar/src/polymer_grammar/operations.py:36`) — a
-  stable contract key, e.g. `"se:tet2_epicv2_demo@1"`. **Zero grammar change.**
+  stable contract key, e.g. `"se:groupdiff_epicv2_demo@1"`. **Zero grammar change.**
 - All richness — the DRS-shaped reference, the fixture, the loader — lives in the **umbrella
   package** (`src/polymer_claims/contracts/`), exactly mirroring `AnalysisProfile`/`load_profile`
   (`src/polymer_claims/profiles.py`) and `load_dataset` (`src/polymer_claims/datasets/`).
@@ -72,7 +72,7 @@ class SEContractRef(_Model):
     genome_assembly: str                   # "hg38" for the local fixture
     refget_digest: str | None = None       # noted slot; a real refget digest needs the reference genome (out of scope)
     # --- GA4GH DRS shape (fixity) ---
-    self_uri: str                          # e.g. "drs://local/tet2_epicv2_demo@1"
+    self_uri: str                          # e.g. "drs://local/groupdiff_epicv2_demo@1"
     size: int                              # total fixture bytes
     checksums: tuple[Checksum, ...]        # sha-256 over the fixture bytes
     access_methods: tuple[AccessMethod, ...]   # here: one {"type":"file","access_url": <bundled path>}
@@ -91,29 +91,29 @@ Notes:
 Bundled under `src/polymer_claims/contracts/`, structural fidelity with placeholder betas. **Two
 files** (the decided sidecar layout):
 
-**`tet2_epicv2_demo.json`** — the SE-Contract manifest:
+**`groupdiff_epicv2_demo.json`** — the SE-Contract manifest:
 
 ```jsonc
 {
-  "uid": "tet2_epicv2_demo@1",
+  "uid": "groupdiff_epicv2_demo@1",
   "dim": [50, 8],                       // [n_features, n_samples] — must match the matrix
-  "assays": [{ "name": "beta", "ref": "tet2_epicv2_demo.betas.tsv" }],
+  "assays": [{ "name": "beta", "ref": "groupdiff_epicv2_demo.betas.tsv" }],
   "col_data": [                          // one entry per sample, in matrix column order
-    { "sample_id": "S01", "Sample_Group": "TET2_mut", "Age": 54, "Sex": "M" },
-    { "sample_id": "S02", "Sample_Group": "WT",       "Age": 49, "Sex": "F" }
-    // … 8 samples, balanced TET2_mut / WT
+    { "sample_id": "S01", "Sample_Group": "case",    "Age": 54, "Sex": "M" },
+    { "sample_id": "S02", "Sample_Group": "control", "Age": 49, "Sex": "F" }
+    // … 8 samples, balanced case / control
   ],
   "row_data": [                          // one entry per probe, in matrix row order
     { "feature_id": "cg00000001", "chr": "chr4", "pos": 105000000 }
-    // … 50 EPICv2 cg-format probes on chr4 near the TET2 locus, hg38 coordinates
+    // … 50 EPICv2 cg-format probes on chr4 near the example locus, hg38 coordinates
   ],
   "metadata": { "genome_assembly": "hg38", "array": "EPICv2" }
 }
 ```
 
-**`tet2_epicv2_demo.betas.tsv`** — the beta matrix: header row of `sample_id`s, then one row per
+**`groupdiff_epicv2_demo.betas.tsv`** — the beta matrix: header row of `sample_id`s, then one row per
 probe (`feature_id` + 8 beta values in [0,1]). 50 probes × 8 samples. Values are synthetic; for
-CES-2's benefit a small subset of probes carries a planted TET2_mut-vs-WT shift (documented in the
+CES-2's benefit a small subset of probes carries a planted case-vs-control shift (documented in the
 fixture, exercised only in CES-2 — CES-1 asserts nothing about values).
 
 **Why synthetic is sufficient for CES-1:** the data seam resolves and content-addresses the dataset;
@@ -133,7 +133,7 @@ def load_contract(ref: str) -> SEContractRef:
 ```
 
 Behavior:
-- Map `ref` (`"se:tet2_epicv2_demo@1"` or the bare `"tet2_epicv2_demo@1"`) to the bundled manifest;
+- Map `ref` (`"se:groupdiff_epicv2_demo@1"` or the bare `"groupdiff_epicv2_demo@1"`) to the bundled manifest;
   unknown ref → `FileNotFoundError` (same contract as `load_dataset`).
 - Read the manifest; extract `feature_ids` (from `row_data`, in order) and `sample_ids` (from
   `col_data`, in order).
@@ -182,7 +182,7 @@ Umbrella-only (`tests/`), pure/offline:
 - **Unknown ref → `FileNotFoundError`** — and the message names the ref (matches `load_dataset`).
 - **Fixture internal consistency** — `dim == [len(row_data), len(col_data)]`; the betas matrix has
   exactly `dim[0]` data rows and `dim[1]` value columns; every `col_data.Sample_Group ∈
-  {TET2_mut, WT}`; feature IDs match the `cg########` format. (A guard so the fixture can't silently
+  {case, control}`; feature IDs match the `cg########` format. (A guard so the fixture can't silently
   drift out of shape.)
 - **Hash-parity canonicalization** — `dimnames_hash` uses the *same* canonical-json encoder as
   `profile_hash` (assert by computing an expected digest with the shared helper, not a hand-rolled
@@ -194,7 +194,7 @@ Umbrella-only (`tests/`), pure/offline:
 
 **Delivers (this phase, as its own plan):**
 - `SEContractRef` (+ `AccessMethod`, `Checksum`) frozen umbrella models.
-- The bundled `tet2_epicv2_demo` fixture: manifest JSON + sidecar betas TSV (EPICv2-shaped,
+- The bundled `groupdiff_epicv2_demo` fixture: manifest JSON + sidecar betas TSV (EPICv2-shaped,
   synthetic values, a planted shift on a few probes for CES-2).
 - `load_contract(ref) -> SEContractRef` + canonical `dimnames_hash` (reusing the CES-0 hash helper).
 - Tests per §6; re-exports from the umbrella `__init__.py`.
@@ -205,7 +205,7 @@ Umbrella-only (`tests/`), pure/offline:
   the **real-vs-public beta-value decision** parked here.
 - **CES-3:** recording `dimnames_hash`/`profile_hash`/`semantic_run_id` on `MaterializationContext`
   through `run_cycle`; the drift-key wiring in `drift_pass`; the substrate→tier end-to-end.
-- Live R-Engine adapter; `refget_digest`; served DRS endpoint; `QuantityVectorLeaf`.
+- Live analysis-engine adapter; `refget_digest`; served DRS endpoint; `QuantityVectorLeaf`.
 
 ---
 

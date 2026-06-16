@@ -25,7 +25,7 @@
 | `tests/test_methyl_adapters.py` | adapter units (agreement, lstsq==meandiff, raises) | Create |
 | `tests/test_methyl_licensing.py` | end-to-end licensing through run_cycle | Create |
 
-`grammar/`, `protocol/`, and the existing TET2 fixture are untouched. `methyl_adapters.py` imports numpy but is imported only by the CES-2 tests (not the CLI/serve), so the base `import polymer_claims` stays numpy-free — do NOT re-export it from `src/polymer_claims/__init__.py`.
+`grammar/`, `protocol/`, and the existing fixture are untouched. `methyl_adapters.py` imports numpy but is imported only by the CES-2 tests (not the CLI/serve), so the base `import polymer_claims` stays numpy-free — do NOT re-export it from `src/polymer_claims/__init__.py`.
 
 ---
 
@@ -120,7 +120,7 @@ Create `src/polymer_claims/contracts/_make_casectrl_fixture.py`:
 
 Synthetic VALUES, real STRUCTURE: 24 cg-format probes x 10 samples (5 level1 / 5 level2) on chr1
 (hg38). No RNG. The first 5 probes (the SIGNAL REGION) carry a planted +0.20 beta shift in level2;
-the rest have no group difference (the negative-control region). Generic — not TET2-specific.
+the rest have no group difference (the negative-control region). Generic case/control fixture.
 Re-run:  python -m polymer_claims.contracts._make_casectrl_fixture
 """
 from __future__ import annotations

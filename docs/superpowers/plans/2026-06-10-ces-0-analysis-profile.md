@@ -4,14 +4,14 @@
 
 **Goal:** Give a claim a versioned, content-addressed `AnalysisProfile` that pins all bioinformatic context, bind it via the existing `oracle_ref` slot so its `ValidationTier` caps strength, and record the realized profile/dataset hashes in `MaterializationContext`.
 
-**Architecture:** Zero new grammar *types* — only three additive-optional string fields on `MaterializationContext`. The `AnalysisProfile` (a frozen pydantic model), its canonical content-hash, the substrate→tier mapping, the profile→`OracleDossier` builders, and the two concrete profiles all live in the umbrella package `polymer_claims` (domain-specific code stays out of the spine). Binding reuses the protocol's existing `oracle_cap` path with no protocol change.
+**Architecture:** Zero new grammar *types* — only three additive-optional string fields on `MaterializationContext`. The `AnalysisProfile` (a frozen pydantic model), its canonical content-hash, the substrate→tier mapping, the profile→`OracleDossier` builders, and the two concrete profiles all live in the umbrella package `polymer_claims` (domain-specific code stays out of the spine). Binding reuses the protocol's existing `oracle_cap` path with no protocol change.  
 
 **Tech Stack:** Python 3.14, pydantic v2 (frozen models), `polymer_grammar` + `polymer_protocol`, pytest, ruff, uv workspaces.
 
 **Spec:** `docs/specs/2026-06-10-ces-0-analysis-profile-design.md`
 **Audit:** `docs/specs/2026-06-10-ces-architecture-audit.md`
 
-**Design refinement made in this plan (flag for user):** the spec §2 schema showed `substrate` as a field ON the profile. This plan moves `substrate` to the **dossier-build call** instead, because the *same* analysis profile can run over public OR private data (the substrate is a property of the data the profile is applied to, per spec §4 "tier = substrate × validation"). So `AnalysisProfile` carries no `substrate` field; `profile_oracle_dossier(profile, substrate=…)` takes it. This keeps the manuscript profile from falsely baking in one substrate.
+**Design refinement made in this plan (flag for user):** the spec §2 schema showed `substrate` as a field ON the profile. This plan moves `substrate` to the **dossier-build call** instead, because the *same* analysis profile can run over public OR private data (the substrate is a property of the data the profile is applied to, per spec §4 "tier = substrate × validation"). So `AnalysisProfile` carries no `substrate` field; `profile_oracle_dossier(profile, substrate=…)` takes it. This keeps the pinned-design profile from falsely baking in one substrate.
 
 **Test commands (memorize):**
 - Umbrella: `cd /Users/zbb2/Desktop/polymer-claims && uv run --project . pytest tests/ -q` ; lint `uv run --project . ruff check src tests`
@@ -162,7 +162,7 @@ def _profile(**overrides) -> AnalysisProfile:
         detection_threshold=0.80,
         detection_rule="retain_if_rate_ge",
         sample_fail_threshold=None,
-        cross_reactive_source="Peters2024_CH_WGBS",
+        cross_reactive_source="cross_reactive_probes_v1",
         cross_reactive_file_hash="sha256:abc",
         cross_reactive_n_probes=11878,
         snp_method="sesame:M_SNPcommon_1pt",
@@ -173,7 +173,7 @@ def _profile(**overrides) -> AnalysisProfile:
         clamp_lower=1e-6,
         clamp_upper=0.999999,
         design_formula="~ 0 + Sample_Group + Age + Sex",
-        contrast="TET2_mut - WT",
+        contrast="case - control",
         covariates=("Age", "Sex"),
         dmp_method="limma",
         dmp_adjust_method="BH",
@@ -390,7 +390,7 @@ Append at the end of the module:
 # Substrate (the nature of the DATA the profile is applied to) -> validation-tier ceiling
 # (spec §4 / CES §5). The profile pins the METHOD; the substrate sets the CEILING.
 _SUBSTRATE_TIER = {
-    "wet_lab_anchor": ValidationTier.ANCHORED,        # sorted-cell EM-seq / the 48-sample cohort
+    "wet_lab_anchor": ValidationTier.ANCHORED,        # sorted-cell EM-seq / primary cohort
     "recomputable_public": ValidationTier.BENCHMARKED,  # public GEO/TCGA methylation SE Contract
     "computed_reference": ValidationTier.INDIRECT,
     "literature": ValidationTier.INDIRECT,
@@ -485,9 +485,9 @@ from polymer_claims.profiles import load_profile
 
 
 def test_both_profiles_load():
-    m = load_profile("tet2_epicv2_hg38_manuscript", "1")
+    m = load_profile("pinned_design_epicv2_hg38_v1", "1")
     c = load_profile("canonical_epicv2_hg38_v1", "1")
-    assert m.profile_id == "tet2_epicv2_hg38_manuscript"
+    assert m.profile_id == "pinned_design_epicv2_hg38_v1"
     assert c.profile_id == "canonical_epicv2_hg38_v1"
 
 
@@ -497,7 +497,7 @@ def test_unknown_profile_raises():
 
 
 def test_profiles_agree_on_normalization_differ_on_detection():
-    m = load_profile("tet2_epicv2_hg38_manuscript", "1")
+    m = load_profile("pinned_design_epicv2_hg38_v1", "1")
     c = load_profile("canonical_epicv2_hg38_v1", "1")
     # they AGREE on normalization (sesame/QCDPB)
     assert (m.norm_package, m.norm_method, m.norm_prep) == (c.norm_package, c.norm_method, c.norm_prep)
@@ -506,18 +506,18 @@ def test_profiles_agree_on_normalization_differ_on_detection():
 
 
 def test_profiles_have_distinct_deterministic_hashes():
-    m1 = content_hash(load_profile("tet2_epicv2_hg38_manuscript", "1"))
-    m2 = content_hash(load_profile("tet2_epicv2_hg38_manuscript", "1"))
+    m1 = content_hash(load_profile("pinned_design_epicv2_hg38_v1", "1"))
+    m2 = content_hash(load_profile("pinned_design_epicv2_hg38_v1", "1"))
     c1 = content_hash(load_profile("canonical_epicv2_hg38_v1", "1"))
     assert m1 == m2          # deterministic
     assert m1 != c1          # distinct regimes -> distinct content-address
 
 
 def test_cross_reactive_file_hash_is_the_real_wgbs_digest():
-    m = load_profile("tet2_epicv2_hg38_manuscript", "1")
+    m = load_profile("pinned_design_epicv2_hg38_v1", "1")
     assert m.cross_reactive_n_probes == 11878
     assert m.cross_reactive_file_hash == (
-        "sha256:756527d7022855c75a5e0a41895d10c753121b21032c857d159c4bde47fc3013"
+        "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     )
 ```
 
@@ -529,29 +529,28 @@ Expected: FAIL — `ModuleNotFoundError: No module named 'polymer_claims.profile
 - [ ] **Step 3: Create the registry**
 
 Create `src/polymer_claims/profiles.py`. The values are the real pinnings from the audit §3 (the
-WGBS file hash + probe count were computed from
-`~/Desktop/Polymer/R-Engine/data/cross_reactive_epicv2_wgbs.txt`):
+cross-reactive file hash + probe count were computed from the reference R pipeline):
 
 ```python
 """CES-0: the two concrete, versioned AnalysisProfiles + a local resolver.
 
 Mirrors how `datasets/` ships a CSV: a small in-package registry so the local-first slice is
-pure and stub-testable with no live R-Engine. Both profiles are EPICv2/hg38 and AGREE on
-normalization (sesame/QCDPB); they DIFFER on the detection regime, SNP method, and (manuscript
-only) the pinned design formula — proving "which profile" is a named, not defaulted, choice.
+pure and stub-testable with no live analysis engine. Both profiles are EPICv2/hg38 and AGREE on
+normalization (sesame/QCDPB); they DIFFER on the detection regime, SNP method, and (pinned-design
+only) the locked design formula — proving "which profile" is a named, not defaulted, choice.
 """
 from __future__ import annotations
 
 from .analysis_profile import AnalysisProfile
 
-# SHA256 + line count of ~/Desktop/Polymer/R-Engine/data/cross_reactive_epicv2_wgbs.txt
-# (Peters 2024 WGBS-validated cross-reactive set; the live cross-project dependency).
-_WGBS_HASH = "sha256:756527d7022855c75a5e0a41895d10c753121b21032c857d159c4bde47fc3013"
-_WGBS_N = 11878
+# SHA256 + line count of cross_reactive_probes.txt
+# (a pinned cross-reactive probe list; the live cross-project dependency).
+_CR_HASH = "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+_CR_N = 11878
 
-# The real TET2-manuscript pipeline pinning (audit §3 — ground truth).
-TET2_MANUSCRIPT_V1 = AnalysisProfile(
-    profile_id="tet2_epicv2_hg38_manuscript",
+# The reference pipeline pinning (audit §3 — ground truth).
+PINNED_DESIGN_V1 = AnalysisProfile(
+    profile_id="pinned_design_epicv2_hg38_v1",
     version="1",
     array_type="EPICv2",
     genome_assembly="hg38",
@@ -562,9 +561,9 @@ TET2_MANUSCRIPT_V1 = AnalysisProfile(
     detection_threshold=0.80,
     detection_rule="retain_if_rate_ge",
     sample_fail_threshold=None,
-    cross_reactive_source="Peters2024_CH_WGBS",
-    cross_reactive_file_hash=_WGBS_HASH,
-    cross_reactive_n_probes=_WGBS_N,
+    cross_reactive_source="cross_reactive_probes_v1",
+    cross_reactive_file_hash=_CR_HASH,
+    cross_reactive_n_probes=_CR_N,
     snp_method="sesame:M_SNPcommon_1pt",
     snp_maf=None,
     sex_chrom="removed",
@@ -573,7 +572,7 @@ TET2_MANUSCRIPT_V1 = AnalysisProfile(
     clamp_lower=1e-6,
     clamp_upper=0.999999,
     design_formula="~ 0 + Sample_Group + Age + Sex",
-    contrast="TET2_mut - WT",
+    contrast="case - control",
     covariates=("Age", "Sex"),
     batch_correction=None,
     cell_adjustment=None,
@@ -599,9 +598,9 @@ CANONICAL_EPICV2_V1 = AnalysisProfile(
     detection_threshold=0.05,
     detection_rule="pOOBAH_p_le",
     sample_fail_threshold=0.05,
-    cross_reactive_source="Peters2024_CH_WGBS",
-    cross_reactive_file_hash=_WGBS_HASH,
-    cross_reactive_n_probes=_WGBS_N,
+    cross_reactive_source="cross_reactive_probes_v1",
+    cross_reactive_file_hash=_CR_HASH,
+    cross_reactive_n_probes=_CR_N,
     snp_method="minfi:dropLociWithSnps[SBE,CpG]",
     snp_maf=0.01,
     sex_chrom="removed",
@@ -627,7 +626,7 @@ CANONICAL_EPICV2_V1 = AnalysisProfile(
 )
 
 _REGISTRY: dict[tuple[str, str], AnalysisProfile] = {
-    (p.profile_id, p.version): p for p in (TET2_MANUSCRIPT_V1, CANONICAL_EPICV2_V1)
+    (p.profile_id, p.version): p for p in (PINNED_DESIGN_V1, CANONICAL_EPICV2_V1)
 }
 
 
@@ -652,9 +651,9 @@ uv run --project . ruff check src tests
 git add src/polymer_claims/profiles.py tests/test_profiles_registry.py
 git commit -m "feat(umbrella): two real versioned profiles + load_profile (CES-0)
 
-Ship tet2_epicv2_hg38_manuscript@1 (ground truth) and canonical_epicv2_hg38_v1@1
+Ship pinned_design_epicv2_hg38_v1@1 (ground truth) and canonical_epicv2_hg38_v1@1
 with distinct content-addresses. They agree on normalization (sesame/QCDPB),
-differ on detection regime / SNP method / design formula. WGBS file hash +
+differ on detection regime / SNP method / design formula. Cross-reactive file hash +
 count are the real digest of the live cross-reactive dependency.
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
@@ -718,7 +717,7 @@ def _run_with(profile, substrate):
 
 
 def test_recomputable_public_caps_empirical_axes_to_benchmarked():
-    profile = load_profile("tet2_epicv2_hg38_manuscript", "1")
+    profile = load_profile("pinned_design_epicv2_hg38_v1", "1")
     claim = _run_with(profile, "recomputable_public")
     assert claim.status == Status.LICENSED
     s = claim.strength
@@ -733,7 +732,7 @@ def test_recomputable_public_caps_empirical_axes_to_benchmarked():
 
 
 def test_wet_lab_anchor_caps_higher_than_public():
-    profile = load_profile("tet2_epicv2_hg38_manuscript", "1")
+    profile = load_profile("pinned_design_epicv2_hg38_v1", "1")
     claim = _run_with(profile, "wet_lab_anchor")
     assert claim.status == Status.LICENSED
     # ANCHORED ceiling = 0.85; magnitude 0.8 <= 0.85 so it is UNCAPPED (stays 0.8),
@@ -798,7 +797,7 @@ git add src/polymer_claims/exec_adapters.py tests/test_profile_binding_e2e.py
 git commit -m "feat(umbrella): profile-bound claim tier-caps through run_cycle (CES-0)
 
 Add an optional oracle_ref to mean_diff_claim (default unchanged) so a claim
-can point at a profile-as-apparatus. End-to-end: binding the manuscript
+can point at a profile-as-apparatus. End-to-end: binding the pinned-design
 profile at recomputable_public substrate caps empirical axes to BENCHMARKED
 0.6; wet_lab_anchor caps to 0.85 — proving the profile->tier->cap path
 through the real protocol with no protocol change.
@@ -868,7 +867,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 ## Self-Review (completed by plan author)
 
-**Spec coverage:** §1 (profile-not-grammar) → Tasks 2/3 keep it umbrella-side. §2 AnalysisProfile + §2a registry → Tasks 2/3. §3 canonical hash + parity → Task 2 `content_hash`. §4 oracle_ref binding + substrate→tier + dossier → Task 2b (+ the substrate-on-binding refinement, flagged in the header). §5 MaterializationContext extension → Task 1. §6 first-claim scalar/methodological-independence → the run_cycle capstone reuses the two independent stats adapters (Task 4); the methylation realizer is explicitly deferred to CES-1/2. §7 deliverables → all Tasks; §8 invariants → grammar touch is 3 optional fields only, no new types, back-compat tested. **Deferred per spec (NOT in this plan):** B1/B2/B3 plumbing, drift wiring, vector leaves, live R-Engine — correct, those are CES-1/2/3.
+**Spec coverage:** §1 (profile-not-grammar) → Tasks 2/3 keep it umbrella-side. §2 AnalysisProfile + §2a registry → Tasks 2/3. §3 canonical hash + parity → Task 2 `content_hash`. §4 oracle_ref binding + substrate→tier + dossier → Task 2b (+ the substrate-on-binding refinement, flagged in the header). §5 MaterializationContext extension → Task 1. §6 first-claim scalar/methodological-independence → the run_cycle capstone reuses the two independent stats adapters (Task 4); the methylation realizer is explicitly deferred to CES-1/2. §7 deliverables → all Tasks; §8 invariants → grammar touch is 3 optional fields only, no new types, back-compat tested. **Deferred per spec (NOT in this plan):** B1/B2/B3 plumbing, drift wiring, vector leaves, live analysis engine — correct, those are CES-1/2/3.
 
 **Placeholder scan:** none — every code block is complete; the one real digest is embedded; Task 4 Step 4 gives a concrete fallback pointing at an existing passing test rather than "handle it."
 

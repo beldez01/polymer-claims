@@ -357,7 +357,7 @@ git commit -m "feat(grammar): PhenopacketRef + PathwayRef subject variants"
 ```python
 def test_cohort_constructs_with_tuple_predicates():
     c = Cohort(
-        id="coh1", display="TET2 cohort", members_hash="blake3-xyz",
+        id="coh1", display="case cohort", members_hash="blake3-xyz",
         definition=CohortDefinition(
             source_dataset=CohortSourceDataset(name="IDAT", version="v2", tissue="blood"),
             inclusion=("age >= 18", "tissue == blood"),
