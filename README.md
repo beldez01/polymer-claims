@@ -169,7 +169,7 @@ by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is bu
 
 - **Foundations spec (canonical):** `docs/superpowers/specs/2026-05-31-unified-claim-foundations-spec.md`
 - **Schema overview (HTML):** `docs/superpowers/specs/2026-05-31-claim-schema-overview.html`
-- **Per-phase specs + plans (with Progress Logs):** `docs/superpowers/specs/` and `docs/superpowers/plans/`
+- **Per-phase specs + plans (with Progress Logs):** `docs/superpowers/specs/` and `docs/superpowers/plans/` (current phases); shipped-phase design docs are archived under `docs/superpowers/archive/`
 - **Resume primer (kept current):** `docs/superpowers/CONTINUE.md`
 - **Superseded v1.2-era design docs** (claim-PATTERN spec + spatial map, ontology note): `v1.2/docs/` — the ontology idea, in particular, still informs v1.3 (see the unified spec §3.1, §7).
 

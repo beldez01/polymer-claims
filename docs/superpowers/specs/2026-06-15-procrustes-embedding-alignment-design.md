@@ -1,7 +1,7 @@
 # Procrustes embedding alignment — the signed-Laplacian eigenmap as the live layout
 
 > **Design spec, 2026-06-15.** Retires the "live-streaming stability" deferral from the relational-graph
-> embedding (§8 of `docs/superpowers/specs/2026-06-12-relational-graph-embedding-design.md`). Makes the
+> embedding (§8 of `docs/superpowers/archive/specs/2026-06-12-relational-graph-embedding-design.md`). Makes the
 > signed-Laplacian spectral embedding the **live `NodeRunner` layout** (it was a static snapshot only),
 > and **orthogonal-Procrustes-aligns** each incremental frame to the previous so the 3D universe evolves
 > smoothly instead of thrashing. Umbrella-only (protocol untouched).

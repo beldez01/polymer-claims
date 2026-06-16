@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-08
 **Status:** approved (design)
-**Predecessor:** `2026-06-08-phase2bc-real-data-generation-and-oracle-design.md` +
+**Predecessor:** `archive/specs/2026-06-08-phase2bc-real-data-generation-and-oracle-design.md` +
 `docs/superpowers/notes/2026-06-08-earned-strength-followup.md`
 **Layer:** protocol (pure) + a tiny umbrella seam adjustment; **zero grammar changes**
 
