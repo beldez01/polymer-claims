@@ -15,14 +15,10 @@ clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpu
 local-only. (Procrustes embedding alignment — spectral as the live node layout — just merged; §2E
 tiered independence + reinstatement→PENDING + n-DMPs-at-FDR before it — see NEXT.)
 
-The system is a **compiler + runtime for science**: grammar (*what a claim is*) → protocol (*how a
-corpus evolves* — the `run_cycle` flywheel + 3 daemons + scheduler) → umbrella node/server
-(`NodeRunner` + FastAPI SSE) → viewer (live 3D topology). The epistemic core is now **e-value native**:
-licensing, the FDR ledger, and defeat are ONE mechanism —
-`LICENSED ⇔ adapter-agreement ∧ SATISFIED ∧ grounded ∧ live e-LOND discovery`, and a successful defeat
-de-licenses *through the ledger* and refunds the discovery. The methylation demo licenses on a
-**computed** region-Δβ (synthetic betas — see caveat) with full content-addressing (dataset +
-apparatus), running live in the node.
+What the system *is* — the full architecture (grammar → protocol → node → viewer; the e-value-native
+epistemic core; real computation + CES) — lives in the canonical spec
+**`docs/superpowers/polymer-claims-canonical-spec.md`**. This file tracks **state + what's next**, not the
+design.
 
 **Standing caveats (carry forward):**
 - Methylation betas are **synthetic** — the BENCHMARKED/recomputable tier is *exercised, not earned*.
@@ -39,84 +35,30 @@ apparatus), running live in the node.
 
 ## ▶ NEXT (concrete plan)
 
-**✅ PROCRUSTES EMBEDDING ALIGNMENT DONE (2026-06-15, branch `procrustes-embedding-alignment`, local-only).**
-The signed-Laplacian spectral eigenmap is now the **live `NodeRunner` default layout** (was a static
-snapshot only), orthogonal-Procrustes-aligned each frame to the previous displayed frame so the universe
-grows smoothly instead of thrashing on eigenbasis sign/rotation ambiguity. New `embedding.procrustes_align`
-(orthogonal R, reflection allowed — sign-flips ARE the reflections we undo — **no det-correction**; 6dp
-round). `NodeRunner(layout="spectral"|"force")`: spectral default lazy-imports the embedder (base import
-stays numpy-free) and threads a `_prev_spectral` alignment chain via the protocol's existing
-`export_topology(positions=)` seam (`layout_id="external:spectral-v1"`); **`layout="force"` is byte-identical**
-to the prior Fruchterman-Reingold path. Graceful fallback to force (warn once) when `[embed]`/numpy absent.
-`serve --layout {spectral,force}` (default spectral). Protocol untouched + numpy-free; Corpus = 4.
-**Design tradeoff (documented):** the small default `serve` seed never grows a ≥4-node component, so it
-never reaches the eigenmap — spectral won't look smoother there (lattice/scale churn, which Procrustes
-can't fix); `--layout force` is the escape hatch. The anti-thrash mechanism (raw≈2.70 → aligned≈1.27) and
-the `make_spectral_timeline.py` demo run on a **growing ≥4-node component** (planted `c0_*` cluster revealed
-one claim at a time) where the alignment provably applies. **Deferred (still):** UMAP / content features
-(embedding spec §8); offline `export_timeline` stays force-directed (protocol purity — it can't compute the
-spectral embedding). Spec `docs/superpowers/archive/specs/2026-06-15-procrustes-embedding-alignment-design.md`,
-plan `docs/superpowers/archive/plans/2026-06-15-procrustes-embedding-alignment.md`.
-
-**✅ §2E TIERED INDEPENDENCE DONE (2026-06-14, branch `feat/2e-tiered-independence`, local-only).**
-`IndependenceTier` {REPRODUCED, REPLICATED} as an additive `Licensing.independence_tier` field (default
-REPRODUCED → byte-identical back-compat) + pure `independence_tier_of` keying on distinct
-`materialization.dimnames_hash`. A claim reproduced across **≥2 cohorts with distinct datasets** licenses
-at **REPLICATED**, and its e-LOND test uses the **product** `e₁·e₂` — **ONE** test/discovery, no α-budget
-double-count. Umbrella `replication.py` (`build_replication_inputs`) air-gaps a 2nd synthetic cohort
-(`epicv2_casectrl_demo_b`) and emits the extra satisfaction + product e-value; protocol threads an additive
-`run_cycle(replications=)` (default None → byte-identical) and stamps the tier. Demo: powered cohort A +
-`demo_b` → REPLICATED (product e≈80k ≫ e-LOND bar); single-cohort stays REPRODUCED; same-cohort doesn't
-multiply. grammar/protocol pure + numpy-free; Corpus = 4. **Deferred follow-ups:** viewer REPLICATED
-badge; live-node (`NodeRunner`) `replication_map` wiring; byte-derived `implementation_hash` +
-credential provenance (roadmap 1c). Spec `docs/superpowers/archive/specs/2026-06-14-2e-tiered-independence-design.md`,
-plan `docs/superpowers/archive/plans/2026-06-14-2e-tiered-independence.md`.
-
-**✅ REINSTATEMENT → PENDING DONE (2026-06-14, branch `feat/reinstatement-pending`, local-only).** The
-symmetric counterpart to Phase 2.2's defeat-as-de-license. New grammar `RejectionReason`
-{DEFEAT_GROUNDED_OUT, REFUTED, ROBUSTLY_BLAMED} + additive `Claim.rejection_reason` (one-directional:
-reason ⟹ REJECTED) + `PendingReason.REINSTATED`. VERIFY/INTEGRATE stamp the rejection cause (refutation
-takes precedence); a reinstatement block in INTEGRATE mirrors the `flipped_out` de-license — a defeat-
-rejected claim that grounds-IN again (its attacker fell) reopens to **PENDING** to **re-test** on current
-data (never auto-relicense; has-plan gated). No new tombstone (its e-LOND test was already retracted at
-defeat; Phase-2.4 dedup grants a fresh one). The correctness guard holds: a REFUTED claim sitting in the
-grounded `in_set` is NOT reopened. grammar/protocol pure + numpy-free; Corpus = 4; back-compat (dormant
-unless a defeat-rejected claim flips in). `ROBUSTLY_BLAMED` is reserved (the Duhem-blame path has no
-protocol consumer yet). Spec `docs/superpowers/archive/specs/2026-06-14-reinstatement-pending-design.md`, plan
-`docs/superpowers/archive/plans/2026-06-14-reinstatement-pending.md`.
-
-**✅ n-DMPs-at-FDR DONE (2026-06-14, branch `feat/n-dmps-at-fdr`, local-only).** The second methylation
-reduction (alongside region-Δβ): the **count of differentially-methylated probes** (a probe is a DMP iff
-its per-probe two-group pooled t-test p < α) licenses on a new **one-sample count-enrichment e-value**
-(`count_enrichment_evalue`, a WSR/Ville betting e-value testing H0: per-probe DMP-rate ≤ p0=α — the
-"binomial-tail" e-value). Two independent legs (`NDmpTTestAdapter` manual pooled-t vs `NDmpOlsCoefAdapter`
-numpy-lstsq OLS-coef t) **agree on the integer count** → air-gap. Pure-Python Student-t p-value (incomplete
-beta, no scipy). **Umbrella-only** (new `methyl_ndmp.py`; `_load_betas` extracted from `methyl_adapters`;
-`evidence_map` dispatches on impl) — grammar/protocol untouched, base import numpy-free, Corpus = 4. Demo
-(powered fixture, all 24 probes): **10 DMPs → REPRODUCED license** (e≈164 ≫ e-LOND bar); the null/control
-region (0 DMPs, e=1.0) is **REJECTED** (money-shot); same-owner pair held PENDING. Single-cohort; n-DMPs as
-a REPLICATED second reduction is a §2E follow-up. Spec `docs/superpowers/archive/specs/2026-06-14-n-dmps-at-fdr-design.md`,
-plan `docs/superpowers/archive/plans/2026-06-14-n-dmps-at-fdr.md`.
+**Recently shipped** (most recent first, all 2026-06-14/15, local-only): Procrustes / live-spectral layout
+· §2E tiered independence (REPRODUCED / REPLICATED) · reinstatement → PENDING · n-DMPs-at-FDR. SHAs +
+one-line summaries in the *Done* checklist below; design rationale in `docs/superpowers/archive/specs/`.
 
 **▶ RECOMMENDED NEXT PHASE — the real-data swap (from *exercised* to *earned*).** The rigor core is
-built; its central proof still runs on **synthetic betas**, so the recomputable-public tier is
-*exercised, not earned*. Swapping in a real public methylation cohort (GEO/ENA, EPIC/EPICv2) is the
-single highest-leverage move — it retires the #1 standing caveat and is the keystone for the standards
-skin. It is the designed-in next step (identical `load_contract` seam) and is **blocked only on you
-choosing a dataset**. Full path + acceptance + what's needed: **`docs/superpowers/2026-06-15-next-phase-real-data.md`**.
-Natural encore: a 2nd real cohort → the §2E **REPLICATED** gold tier.
+built; its central proof still runs on **synthetic betas**. Swapping in a real public methylation cohort
+is the single highest-leverage move — it retires the #1 caveat and is the keystone for the standards skin.
+Dataset is **chosen (TCGA-LAML HM450, GDC open-access, IDH1/2-mut vs WT)** and it's the designed-in next
+step (identical `load_contract` seam), ready for brainstorm → spec → plan. Full path + dataset +
+acceptance: **Phase A of `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`** — the forward
+roadmap (Phase A is the swap; B–D build the autonomous agent loop on top of it). Natural encore: a 2nd
+real cohort → the §2E **REPLICATED** gold tier.
 
-Other safe slices (decision-ready menu, `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`):
+Other safe slices (the historical decision menu is archived at `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`):
 
 1. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
-   (Now also: the viewer spectral-layout follow-ups deferred above — UMAP / content features.)
+   (Plus the viewer spectral-layout follow-ups — UMAP / content features.)
 2. **n-DMPs as a REPLICATED second reduction** — run the n-DMP count on a second cohort and multiply the
    two count-enrichment e-values (combines §2E's REPLICATED machinery with the new reduction). ~1 slice.
 3. **ROBUSTLY_BLAMED wiring** — wire the Duhem robust-blame REJECTED verdict into the protocol and stamp
    it (tiny; the enum value is reserved). Optional/legibility.
 
-**Deferred / blocked-on-external (supervised):** real-public-data swap (point me at a GEO/ENA dataset);
-Python/R hash parity (needs the R side); standards-skin attestation JSON (in-toto/SLSA/DRS
+**Deferred / blocked-on-external (supervised):** Python/R hash parity (needs the R side);
+standards-skin attestation JSON (in-toto/SLSA/DRS
 serialization — the safe first slice of the north-star "standards" arc). Literal per-attack e-value
 combination is **largely a mirage** — Phase 2.2 already caught its sound core; don't build a generic
 combination.
@@ -160,7 +102,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ M1 structural-equivalence status (`Status.STRUCTURAL` — no more false LICENSED on structural
   collapse) · earned-strength · relational graph embedding v1 (signed-Laplacian eigenmap, silhouette 0.62)
   · live spectral layout (`procrustes-embedding-alignment`) — eigenmap as the live `NodeRunner` default,
-  Procrustes-aligned per frame; `serve --layout`; force path byte-identical (see NEXT for detail)
+  Procrustes-aligned per frame; `serve --layout`; force path byte-identical (design rationale in archive/specs/)
 - ✅ CES-0 analysis-profile content-address · CES-1 data seam · CES-2 methylation Δβ licensing ·
   CES-3 content-address completeness · CES-4 live wiring
 
@@ -173,13 +115,13 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   per claim lifetime)
 - ✅ 2.3 live e-gate (`a8ab596`) · 2.4 drift-reopen tombstone + live-dedup (`bb619f1`)
 - ✅ §2E tiered independence (`feat/2e-tiered-independence`) — REPRODUCED / REPLICATED; product e-value
-  across independent cohorts as one e-LOND test; 2nd synthetic cohort demo (see NEXT for detail)
+  across independent cohorts as one e-LOND test; 2nd synthetic cohort demo (design rationale in archive/specs/)
 - ✅ Reinstatement → PENDING (`feat/reinstatement-pending`) — `RejectionReason` marker + INTEGRATE
   reinstatement block; a defeat-rejected claim reopens to re-test when its attacker falls (symmetric to
-  Phase 2.2); refuted claims stay terminal (see NEXT for detail)
+  Phase 2.2); refuted claims stay terminal (design rationale in archive/specs/)
 - ✅ n-DMPs-at-FDR (`feat/n-dmps-at-fdr`) — second methylation reduction; per-probe-significant DMP count
   licenses on a one-sample count-enrichment betting e-value; two pooled-t legs agree on the count
-  (air-gap); umbrella-only (see NEXT for detail)
+  (air-gap); umbrella-only (design rationale in archive/specs/)
 
 ## Invariants / working agreements (don't relearn)
 
@@ -201,7 +143,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 
 ## Reference pointers
 
-- **Forward plan / decision menu:** `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`
+- **Forward roadmap:** `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md` · historical decision menu (archived): `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`
 - **Phase-2 north star:** `docs/vision/2026-06-12-phase-2-north-star.md`
 - **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`
 - **Architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`

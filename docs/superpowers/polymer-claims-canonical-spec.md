@@ -200,7 +200,7 @@ A standalone Next 16 / React Three Fiber app (`viewer/`) with the D2 metrologica
 
 - **Methylation betas are synthetic** — the BENCHMARKED/recomputable-public tier is *exercised, not
   earned*. Real public GEO/ENA data is a self-contained swap (identical `load_contract` seam) and is the
-  recommended next move (`docs/superpowers/2026-06-15-next-phase-real-data.md`).
+  recommended next move (Phase A of `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`).
 - The two methylation adapters are **reproducibility-independent, not error-independent** (same estimand,
   same data) → the single-cohort demo licenses at **REPRODUCED**. The **REPLICATED** demo runs on a 2nd
   *synthetic* cohort (`epicv2_casectrl_demo_b`) — also exercised, not earned, until a real 2nd cohort is
@@ -240,7 +240,7 @@ v1.2 limitations are left as-is under the freeze.
 - **One-page architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`
 - **Per-feature design rationale (archived):** `docs/superpowers/archive/specs/` and
   `docs/superpowers/archive/plans/`
-- **Recommended next phase (real-data swap):** `docs/superpowers/2026-06-15-next-phase-real-data.md`
+- **Forward roadmap (real-data swap = Phase A):** `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`
 - **Phase-2 north star:** `docs/vision/2026-06-12-phase-2-north-star.md`
 - **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`
 - **Spectral-layout guides:** `docs/spectral-layout-how-to-use.md` (usage) ·
