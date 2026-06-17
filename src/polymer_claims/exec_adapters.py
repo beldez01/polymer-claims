@@ -194,6 +194,21 @@ def apparatus_oracle_registry() -> OracleRegistry:
     ))
 
 
+def real_data_seed_corpus():
+    """A tiny seed of real-data mean_diff claims so the live node isn't empty.
+    Returns (corpus, run_cycle_kwargs). The LLM proposer is added by the caller (serve)."""
+    from polymer_grammar import FDRLedger
+    from polymer_protocol import Corpus
+    claims = (
+        mean_diff_claim("seed-md-1", comparator=Comparator.GT, threshold=10.0,
+                        title="high dose raises response (seed)"),
+        mean_diff_claim("seed-md-2", comparator=Comparator.GT, threshold=20.0,
+                        title="high dose raises response by >20 (seed)"),
+    )
+    corpus = Corpus(claims=claims, fdr_ledger=FDRLedger(target_fdr=0.05))
+    return corpus, {"budget": 2.5}
+
+
 def real_ndmp_seed_corpus():
     """Seed the live node with the single REAL-DATA n-DMP claim (genome-wide, REPRODUCED).
     Returns (corpus, from_seed_kwargs). Requires a local se:tcga_laml_idh@1 (ingest first)."""
@@ -215,19 +230,4 @@ def real_ndmp_seed_corpus():
         title="genome-wide n-DMPs, IDH-mut vs WT AML (real TCGA-LAML)",
     )
     corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
-    return corpus, {"budget": 2.5}
-
-
-def real_data_seed_corpus():
-    """A tiny seed of real-data mean_diff claims so the live node isn't empty.
-    Returns (corpus, run_cycle_kwargs). The LLM proposer is added by the caller (serve)."""
-    from polymer_grammar import FDRLedger
-    from polymer_protocol import Corpus
-    claims = (
-        mean_diff_claim("seed-md-1", comparator=Comparator.GT, threshold=10.0,
-                        title="high dose raises response (seed)"),
-        mean_diff_claim("seed-md-2", comparator=Comparator.GT, threshold=20.0,
-                        title="high dose raises response by >20 (seed)"),
-    )
-    corpus = Corpus(claims=claims, fdr_ledger=FDRLedger(target_fdr=0.05))
     return corpus, {"budget": 2.5}

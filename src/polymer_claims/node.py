@@ -70,8 +70,8 @@ class NodeRunner:
         profiles: tuple = (CANONICAL_EPICV2_V1,),
         evalue_gate: bool = False,
         layout: Literal["spectral", "force"] = "spectral",
-        materializations: dict | None = None,
-        evidence: dict | None = None,
+        materializations: dict[str, MaterializationContext] | None = None,
+        evidence: dict[str, float] | None = None,
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -139,8 +139,8 @@ class NodeRunner:
         profiles: tuple = (CANONICAL_EPICV2_V1,),
         evalue_gate: bool = False,
         layout: Literal["spectral", "force"] = "spectral",
-        materializations: dict | None = None,
-        evidence: dict | None = None,
+        materializations: dict[str, MaterializationContext] | None = None,
+        evidence: dict[str, float] | None = None,
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(

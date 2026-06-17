@@ -13,6 +13,14 @@ def test_parse_beta_file_reads_probe_beta_and_na():
     assert out["cg03"] == 0.20
 
 
+def test_parse_beta_file_tolerates_leading_blank_line():
+    # a leading blank line must not break header detection (header heuristic = first NON-blank row)
+    text = "\nComposite Element REF\tBeta_value\ncg01\t0.7\ncg02\t0.3\n"
+    out = parse_beta_file(text)
+    assert out == {"cg01": 0.7, "cg02": 0.3}
+    assert "Composite Element REF" not in out  # the header row was not parsed as a probe
+
+
 def test_parse_beta_meta_reads_chr_and_pos_by_name():
     # GDC harmonized beta files carry per-probe Chromosome/Start annotation columns.
     text = (

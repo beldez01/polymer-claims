@@ -14,13 +14,15 @@ def parse_beta_file(text: str) -> dict[str, float]:
     """GDC per-aliquot methylation beta file -> {probe_id: beta}. Cols 0,1. A first row whose
     2nd column isn't a float is treated as a header and skipped."""
     out: dict[str, float] = {}
-    for i, line in enumerate(text.splitlines()):
+    first = True  # header heuristic applies to the first NON-BLANK row (robust to leading blanks)
+    for line in text.splitlines():
         if not line.strip():
             continue
         parts = line.split("\t")
         if len(parts) < 2:
             continue
-        if i == 0:
+        if first:
+            first = False
             try:
                 float(parts[1])
             except ValueError:
