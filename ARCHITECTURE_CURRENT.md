@@ -1,6 +1,6 @@
 # Polymer Claims — Current Architecture (the short, true version)
 
-> One-page map of what is **active**, what is **frozen**, and what is **user-gated/future**, as of 2026-06-15.
+> One-page map of what is **active**, what is **frozen**, and what is **user-gated/future**. Runtime state as of 2026-06-15 (last feature merge: live spectral layout); doc refreshed 2026-06-17 (v1.2 retired from the repo, docs consolidated).
 > For the detailed phase-by-phase build log, see `docs/superpowers/CONTINUE.md` (continuity log — dense by design).
 > For terminology, see `GLOSSARY.md`.
 
@@ -23,7 +23,7 @@ grammar  →  protocol            →  node (src/polymer_claims)  →  viewer
 | `protocol/` | `polymer_protocol` | The runtime over the grammar: the `run_cycle` flywheel (generate → select → execute → verify → integrate) + 3 standing daemons (DRIFT / ORACLE-VALIDATION / RED-TEAM) + the `next_action` budget scheduler + topology/timeline exports. | **Complete** — all 5 sub-projects + daemons + scheduler merged. One-way dep on grammar (isolation-tested). |
 | `src/polymer_claims/` | `polymer-claims` | The umbrella distribution: a CLI (`version`/`validate`/`run-cycle`/`loop`/`export-topology`/`export-timeline`/`serve`) over the complete runtime, plus the **live local node** (`NodeRunner` + a FastAPI SSE server behind the optional `[serve]` extra). | **Active** — `pip install polymer-claims` → local node works end-to-end. Local-only (see Hardening below). |
 | `viewer/` | (Next 16 app) | The claims-universe 3D viewer (React Three Fiber, D2 metrological aesthetic). Plays a precomputed timeline (**sample mode**) or streams from a running node (**live mode**). The live layout is the **signed-Laplacian spectral eigenmap, Procrustes-aligned per frame** (`serve --layout spectral`, the default; `--layout force` for the legacy Fruchterman-Reingold). | **Active** — `tsc`+`build` clean. |
-| `docs/superpowers/` | — | Specs, plans (with Progress Logs), and `CONTINUE.md`. | Active continuity log. |
+| `docs/superpowers/` | — | The canonical spec (`polymer-claims-canonical-spec.md`), `CONTINUE.md` resume primer, the forward roadmap, the Phase-2 vision docs, and `archive/` of shipped per-feature design docs (specs + plans). | Active. |
 
 **Purity invariant:** `grammar/` and `protocol/` are pure/deterministic (no clock/random/IO; time-like inputs are passed in). The ONLY impure piece is the umbrella node/server (`NodeRunner` owns the loop/clock; the server owns the network). The `Corpus` is exactly 4 collections.
 
