@@ -39,12 +39,14 @@ def test_build_contract_round_trips_through_load_contract(tmp_path, monkeypatch)
     # Point the loader at tmp_path and resolve the freshly-written contract.
     monkeypatch.setattr(contracts_mod, "_DIR", tmp_path)
     clear_contract_cache()
-    ref = load_contract("se:tcga_laml_idh@1")
+    try:
+        ref = load_contract("se:tcga_laml_idh@1")
 
-    assert ref.genome_assembly == "hg38"
-    # the chrX probe was dropped by QC; only cg01,cg02 remain (sorted)
-    expected_dimnames = canonical_sha256(
-        {"feature_ids": ["cg01", "cg02"], "sample_ids": sample_ids}
-    )
-    assert ref.dimnames_hash == expected_dimnames
-    clear_contract_cache()  # leave the cache clean for other tests
+        assert ref.genome_assembly == "hg38"
+        # the chrX probe was dropped by QC; only cg01,cg02 remain (sorted)
+        expected_dimnames = canonical_sha256(
+            {"feature_ids": ["cg01", "cg02"], "sample_ids": sample_ids}
+        )
+        assert ref.dimnames_hash == expected_dimnames
+    finally:
+        clear_contract_cache()  # always leave the cache clean for other tests
