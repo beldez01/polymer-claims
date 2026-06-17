@@ -5,7 +5,7 @@ the per-sample region-mean betas: a direct group mean-difference and an OLS grou
 (numpy lstsq), which equals the mean difference for a two-group design — so they agree (a real
 two-implementation air-gap check) yet are genuinely different estimators. Umbrella/impure (file I/O
 via load_contract). Grammar + protocol untouched. NOT re-exported from __init__ (keeps base import
-numpy-free). See docs/specs/2026-06-12-ces-2-methylation-licensing-design.md.
+numpy-free). See docs/superpowers/archive/specs/2026-06-12-ces-2-methylation-licensing-design.md.
 """
 from __future__ import annotations
 

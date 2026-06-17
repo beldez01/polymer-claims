@@ -2,7 +2,7 @@
 typed conceptual edges, giving each claim a MEANINGFUL 3D position (vs the id-hash force layout).
 Umbrella/impure (numpy). The grammar/protocol core never imports this; it is consumed by the viewer
 harness and tests. NOT re-exported from polymer_claims.__init__ (keeps the base import numpy-free).
-See docs/specs/2026-06-12-relational-graph-embedding-design.md.
+See docs/superpowers/archive/specs/2026-06-12-relational-graph-embedding-design.md.
 """
 from __future__ import annotations
 

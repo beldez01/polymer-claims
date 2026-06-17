@@ -3,7 +3,7 @@ content-addressed dataset (a DataHandle) under an apparatus (oracle_ref), comput
 MaterializationContext carrying its dimnames_hash (SE-Contract address, CES-1), profile_hash
 (apparatus address, CES-0), and the composite semantic_run_id. Passed to run_cycle(materializations=)
 so the minted Satisfaction records the full content-address. Umbrella/impure (load_contract reads the
-bundled SE Contract); no numpy. See docs/specs/2026-06-12-ces-3-content-address-completeness-design.md.
+bundled SE Contract); no numpy. See docs/superpowers/archive/specs/2026-06-12-ces-3-content-address-completeness-design.md.
 """
 from __future__ import annotations
 
