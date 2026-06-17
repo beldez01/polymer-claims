@@ -12,6 +12,11 @@
 #       impossible. This script is the manual substitute — run it before
 #       committing/handing off to confirm the tree is healthy.
 #
+# NOTE: each step is a standalone command (NOT chained with `&&`). Under
+#       `set -e`, a failure in a non-final `&&`-list command is NOT fatal, so
+#       chaining would silently skip the rest and still reach "ALL GREEN" —
+#       a false green. Separate statements make every failure abort.
+#
 # usage: bash scripts/check-all.sh
 #
 set -euo pipefail
@@ -19,18 +24,27 @@ set -euo pipefail
 ROOT=/Users/zbb2/Desktop/polymer-claims
 
 echo "== root (umbrella) =="
-cd "$ROOT" && uv run --project . pytest tests/ -q && uv run --project . ruff check src tests
+cd "$ROOT"
+uv run --project . pytest tests/ -q
+uv run --project . ruff check src tests
 
 echo "== grammar =="
-cd "$ROOT/grammar" && uv run pytest -q && uv run ruff check src tests
+cd "$ROOT/grammar"
+uv run pytest -q
+uv run ruff check src tests
 
 echo "== protocol =="
-cd "$ROOT/protocol" && uv run pytest -q && uv run ruff check src tests
+cd "$ROOT/protocol"
+uv run pytest -q
+uv run ruff check src tests
 
 echo "== grammar isolation =="
-cd "$ROOT/grammar" && uv run pytest tests/test_isolation.py -q
+cd "$ROOT/grammar"
+uv run pytest tests/test_isolation.py -q
 
 echo "== viewer =="
-cd "$ROOT/viewer" && npm run typecheck && npm run build
+cd "$ROOT/viewer"
+npm run typecheck
+npm run build
 
 echo "ALL GREEN"
