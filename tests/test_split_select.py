@@ -69,7 +69,7 @@ def test_top_k_selects_hypermethylated_probe(tmp_path, monkeypatch):
         top1 = top_k_hypermethylated("se:tcga_laml_idh@1", 1, level_a="WT", level_b="IDH_mut")
         assert top1 == ("cg_hi",)  # the planted hypermethylated probe ranks first
         top2 = top_k_hypermethylated("se:tcga_laml_idh@1", 2, level_a="WT", level_b="IDH_mut")
-        assert top2[0] == "cg_hi" and len(top2) == 2
+        assert top2 == ("cg_hi", "cg_b")  # rank 2 = cg_b: Δβ tie with cg_lo broken by probe id
         # deterministic
         assert top_k_hypermethylated("se:tcga_laml_idh@1", 3) == top_k_hypermethylated("se:tcga_laml_idh@1", 3)
     finally:
