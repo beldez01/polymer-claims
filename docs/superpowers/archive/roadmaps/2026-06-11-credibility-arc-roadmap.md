@@ -44,7 +44,7 @@ true. The whole arc below is ordered to close them.
 > false-license path is closed: no path mints a `LICENSED` equivalence without an evidential test.
 > Additive only — Corpus stays 4, viewer/topology contract untouched (`STRUCTURAL` never appears as a
 > node status). 333 grammar + 335 protocol + 94 umbrella green; ruff clean; `check-all.sh` ALL GREEN.
-> Spec `docs/superpowers/specs/2026-06-11-structural-equivalence-status.md`, plan
+> Spec `docs/superpowers/archive/specs/2026-06-11-structural-equivalence-status.md`, plan
 > `docs/superpowers/plans/2026-06-11-structural-equivalence-status.md`.
 
 **Seam:** `protocol/src/polymer_protocol/canonicalize.py:53–86`.

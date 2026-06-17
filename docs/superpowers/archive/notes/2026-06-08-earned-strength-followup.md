@@ -50,5 +50,5 @@ claims, scores the RAW earned evidence in the selective-inference bar, and recor
 the bar and licenses, while a thin-margin rival is correctly held PENDING. Const and
 asserted-strength paths are unchanged. Caveat carried forward: evidence is the margin over a
 pre-registered threshold, NOT a p-value with n — the test-statistic enrichment is deferred to the
-2d arc (adapter emits n+SD). Spec `docs/superpowers/specs/2026-06-08-earned-strength-design.md`,
+2d arc (adapter emits n+SD). Spec `docs/superpowers/archive/specs/2026-06-08-earned-strength-design.md`,
 plan `docs/superpowers/plans/2026-06-08-earned-strength.md`.

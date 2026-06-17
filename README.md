@@ -13,7 +13,7 @@ toward truth, a local node that runs it, and a 3D viewer that renders the live u
 | `protocol/` | **The v1.3 protocol** (`polymer_protocol`) — the runtime over the grammar: the `run_cycle` flywheel + 3 daemons + the `next_action` scheduler + topology/timeline exports. | **Active** — all 5 sub-projects + daemons + scheduler merged |
 | `src/polymer_claims/` | **The umbrella distribution** (`polymer-claims`) — the CLI over the complete runtime + the live local node (`serve`, behind the optional `[serve]` extra). | **Active** — `pip install polymer-claims` → local node works |
 | `viewer/` | **The claims-universe 3D viewer** (Next 16 + React Three Fiber). Plays a sample timeline or streams a live node. Live layout is the signed-Laplacian spectral eigenmap, Procrustes-aligned (`serve --layout spectral`, default; `--layout force` for the legacy force-directed). | **Active** — `tsc`+`build` clean |
-| `docs/superpowers/` | Foundations spec, per-phase specs + plans (with Progress Logs), and `CONTINUE.md` resume primer. | Active |
+| `docs/superpowers/` | The canonical spec (`specs/polymer-claims-canonical-spec.md`), plans (with Progress Logs), `CONTINUE.md` resume primer, and `archive/` of shipped per-feature design docs. | Active |
 | `v1.2/` | **Frozen v1.2 ecosystem, kept as a fallback** — the FormalClaim IR package, the 47-claim corpus, the `claim-harness` plugin, schema, legacy workflows. Does **not** exercise the v1.3 runtime. See `v1.2/README.md`. | Frozen (not deleted) |
 
 ---
@@ -167,9 +167,9 @@ by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is bu
 
 ### Where the design lives
 
-- **Foundations spec (canonical):** `docs/superpowers/specs/2026-05-31-unified-claim-foundations-spec.md`
-- **Schema overview (HTML):** `docs/superpowers/specs/2026-05-31-claim-schema-overview.html`
-- **Per-phase specs + plans (with Progress Logs):** `docs/superpowers/specs/` and `docs/superpowers/plans/` (current phases); shipped-phase design docs are archived under `docs/superpowers/archive/`
+- **Canonical spec (current state of record):** `docs/superpowers/specs/polymer-claims-canonical-spec.md` — the single authoritative spec; consolidates the per-feature design docs.
+- **Original foundations spec (archived):** `docs/superpowers/archive/specs/2026-05-31-unified-claim-foundations-spec.md` · **Schema overview (HTML):** `docs/superpowers/archive/specs/2026-05-31-claim-schema-overview.html`
+- **Per-feature design rationale + plans (with Progress Logs):** `docs/superpowers/archive/specs/` and `docs/superpowers/archive/plans/` (shipped per-slice specs and their plans are archived together)
 - **Resume primer (kept current):** `docs/superpowers/CONTINUE.md`
 - **Superseded v1.2-era design docs** (claim-PATTERN spec + spatial map, ontology note): `v1.2/docs/` — the ontology idea, in particular, still informs v1.3 (see the unified spec §3.1, §7).
 
@@ -249,7 +249,7 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 > credit economy then governs). Executable frontier-attack defense and real model adapters live behind
 > the seam.
 
-- **Design spec:** `docs/superpowers/specs/2026-06-02-protocol-spine-design.md`
+- **Design spec:** `docs/superpowers/archive/specs/2026-06-02-protocol-spine-design.md`
 - **Tests:** `cd protocol && uv run pytest -q`
 
 | Subdir | Package | Status |

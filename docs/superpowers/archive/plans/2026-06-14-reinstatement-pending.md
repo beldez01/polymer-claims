@@ -14,7 +14,7 @@ block in INTEGRATE mirroring the Phase-2.2 `flipped_out` block â€” `flipped_in â
 Corpus = 4.
 
 **Tech Stack:** Python 3.12, pydantic v2 (frozen `_Model`), `uv` + `pytest` + `ruff`. Spec:
-`docs/superpowers/specs/2026-06-14-reinstatement-pending-design.md`.
+`docs/superpowers/archive/specs/2026-06-14-reinstatement-pending-design.md`.
 
 ## File structure
 

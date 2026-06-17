@@ -15,7 +15,7 @@ e-value (`count_enrichment_evalue`) in `evidence.py`; a new `methyl::n_dmps` app
 
 **Tech Stack:** Python 3.12, numpy (umbrella only, behind the non-re-exported methyl seam), `math`
 (pure-Python Student-t p-value via the incomplete beta), `uv` + `pytest` + `ruff`. Spec:
-`docs/superpowers/specs/2026-06-14-n-dmps-at-fdr-design.md`.
+`docs/superpowers/archive/specs/2026-06-14-n-dmps-at-fdr-design.md`.
 
 ## File structure
 
@@ -299,7 +299,7 @@ two-group pooled t-test p-value < alpha), as a second scalar reduction alongside
 independent legs compute the per-probe t two ways (manual pooled-t vs OLS-coef t) and AGREE on the
 integer count -> air-gap. Umbrella/impure (reads the contract via _load_betas). NOT re-exported from
 __init__ (base import stays numpy-free). The count's e-value (count_enrichment_evalue) lives in
-evidence.py. See docs/superpowers/specs/2026-06-14-n-dmps-at-fdr-design.md.
+evidence.py. See docs/superpowers/archive/specs/2026-06-14-n-dmps-at-fdr-design.md.
 """
 from __future__ import annotations
 

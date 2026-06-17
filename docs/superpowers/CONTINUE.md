@@ -2,8 +2,9 @@
 
 > Hook-loaded continuity file (a SessionStart hook surfaces it). **Keep the *Current state* + *NEXT*
 > sections current at every phase boundary.** Detailed build history lives in git (`git log --oneline`),
-> the per-slice specs (`docs/superpowers/specs/`) and plans (`docs/superpowers/plans/`). One-page
-> architecture map: `ARCHITECTURE_CURRENT.md`. Reserved terminology: `GLOSSARY.md`.
+> the canonical spec (`docs/superpowers/specs/polymer-claims-canonical-spec.md`), the per-slice plans
+> (`docs/superpowers/archive/plans/`), and the archived per-feature design specs (`docs/superpowers/archive/specs/`).
+> One-page architecture map: `ARCHITECTURE_CURRENT.md`. Reserved terminology: `GLOSSARY.md`.
 
 ---
 
@@ -54,8 +55,8 @@ can't fix); `--layout force` is the escape hatch. The anti-thrash mechanism (raw
 the `make_spectral_timeline.py` demo run on a **growing ≥4-node component** (planted `c0_*` cluster revealed
 one claim at a time) where the alignment provably applies. **Deferred (still):** UMAP / content features
 (embedding spec §8); offline `export_timeline` stays force-directed (protocol purity — it can't compute the
-spectral embedding). Spec `docs/superpowers/specs/2026-06-15-procrustes-embedding-alignment-design.md`,
-plan `docs/superpowers/plans/2026-06-15-procrustes-embedding-alignment.md`.
+spectral embedding). Spec `docs/superpowers/archive/specs/2026-06-15-procrustes-embedding-alignment-design.md`,
+plan `docs/superpowers/archive/plans/2026-06-15-procrustes-embedding-alignment.md`.
 
 **✅ §2E TIERED INDEPENDENCE DONE (2026-06-14, branch `feat/2e-tiered-independence`, local-only).**
 `IndependenceTier` {REPRODUCED, REPLICATED} as an additive `Licensing.independence_tier` field (default
@@ -68,8 +69,8 @@ double-count. Umbrella `replication.py` (`build_replication_inputs`) air-gaps a 
 `demo_b` → REPLICATED (product e≈80k ≫ e-LOND bar); single-cohort stays REPRODUCED; same-cohort doesn't
 multiply. grammar/protocol pure + numpy-free; Corpus = 4. **Deferred follow-ups:** viewer REPLICATED
 badge; live-node (`NodeRunner`) `replication_map` wiring; byte-derived `implementation_hash` +
-credential provenance (roadmap 1c). Spec `docs/superpowers/specs/2026-06-14-2e-tiered-independence-design.md`,
-plan `docs/superpowers/plans/2026-06-14-2e-tiered-independence.md`.
+credential provenance (roadmap 1c). Spec `docs/superpowers/archive/specs/2026-06-14-2e-tiered-independence-design.md`,
+plan `docs/superpowers/archive/plans/2026-06-14-2e-tiered-independence.md`.
 
 **✅ REINSTATEMENT → PENDING DONE (2026-06-14, branch `feat/reinstatement-pending`, local-only).** The
 symmetric counterpart to Phase 2.2's defeat-as-de-license. New grammar `RejectionReason`
@@ -81,8 +82,8 @@ data (never auto-relicense; has-plan gated). No new tombstone (its e-LOND test w
 defeat; Phase-2.4 dedup grants a fresh one). The correctness guard holds: a REFUTED claim sitting in the
 grounded `in_set` is NOT reopened. grammar/protocol pure + numpy-free; Corpus = 4; back-compat (dormant
 unless a defeat-rejected claim flips in). `ROBUSTLY_BLAMED` is reserved (the Duhem-blame path has no
-protocol consumer yet). Spec `docs/superpowers/specs/2026-06-14-reinstatement-pending-design.md`, plan
-`docs/superpowers/plans/2026-06-14-reinstatement-pending.md`.
+protocol consumer yet). Spec `docs/superpowers/archive/specs/2026-06-14-reinstatement-pending-design.md`, plan
+`docs/superpowers/archive/plans/2026-06-14-reinstatement-pending.md`.
 
 **✅ n-DMPs-at-FDR DONE (2026-06-14, branch `feat/n-dmps-at-fdr`, local-only).** The second methylation
 reduction (alongside region-Δβ): the **count of differentially-methylated probes** (a probe is a DMP iff
@@ -94,8 +95,8 @@ beta, no scipy). **Umbrella-only** (new `methyl_ndmp.py`; `_load_betas` extracte
 `evidence_map` dispatches on impl) — grammar/protocol untouched, base import numpy-free, Corpus = 4. Demo
 (powered fixture, all 24 probes): **10 DMPs → REPRODUCED license** (e≈164 ≫ e-LOND bar); the null/control
 region (0 DMPs, e=1.0) is **REJECTED** (money-shot); same-owner pair held PENDING. Single-cohort; n-DMPs as
-a REPLICATED second reduction is a §2E follow-up. Spec `docs/superpowers/specs/2026-06-14-n-dmps-at-fdr-design.md`,
-plan `docs/superpowers/plans/2026-06-14-n-dmps-at-fdr.md`.
+a REPLICATED second reduction is a §2E follow-up. Spec `docs/superpowers/archive/specs/2026-06-14-n-dmps-at-fdr-design.md`,
+plan `docs/superpowers/archive/plans/2026-06-14-n-dmps-at-fdr.md`.
 
 **▶ RECOMMENDED NEXT PHASE — the real-data swap (from *exercised* to *earned*).** The rigor core is
 built; its central proof still runs on **synthetic betas**, so the recomputable-public tier is
@@ -155,7 +156,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ Tier-C (`2b7ccb5`): viewer `CONTRACT_VERSION` + 6-axis strength validator · `run_cycle` output
   revalidation · packaging metadata
 
-**Credibility arc + CES** (`docs/superpowers/roadmaps/2026-06-11-credibility-arc-roadmap.md`):
+**Credibility arc + CES** (`docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`):
 - ✅ M1 structural-equivalence status (`Status.STRUCTURAL` — no more false LICENSED on structural
   collapse) · earned-strength · relational graph embedding v1 (signed-Laplacian eigenmap, silhouette 0.62)
   · live spectral layout (`procrustes-embedding-alignment`) — eigenmap as the live `NodeRunner` default,
@@ -202,7 +203,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 
 - **Forward plan / decision menu:** `docs/superpowers/2026-06-13-overnight-deferred-analysis.md`
 - **Phase-2 north star:** `docs/vision/2026-06-12-phase-2-north-star.md`
-- **Credibility-arc roadmap:** `docs/superpowers/roadmaps/2026-06-11-credibility-arc-roadmap.md`
+- **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`
 - **Architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`
 - **Spectral layout guides:** `docs/spectral-layout-how-to-use.md` (usage) ·
   `docs/spectral-layout-how-it-works.md` (eigenmap + Procrustes math/theory)

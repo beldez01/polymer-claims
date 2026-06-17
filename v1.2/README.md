@@ -50,4 +50,4 @@ The repo-root `.claude-plugin/marketplace.json` was repointed to `./v1.2/plugins
 
 `docs/FormalClaim_Domain_Ontology_Note.md` lives here, but the **idea it captures (a small IR
 whose biological complexity is carried by versioned, ontology-bound domain profiles) remains
-load-bearing for v1.3** — it is absorbed into the unified foundations spec (`../docs/superpowers/specs/2026-05-31-unified-claim-foundations-spec.md`, §3.1 profiles and §7 functorial ontology migration). Do not treat the ontology question as frozen just because this note is.
+load-bearing for v1.3** — it is absorbed into the unified foundations spec (`../docs/superpowers/archive/specs/2026-05-31-unified-claim-foundations-spec.md`, §3.1 profiles and §7 functorial ontology migration). Do not treat the ontology question as frozen just because this note is.

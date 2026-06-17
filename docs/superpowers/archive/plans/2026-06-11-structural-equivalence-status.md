@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3, Pydantic v2 (frozen models), pytest, uv (per-package projects), ruff.
 
-**Spec:** `docs/superpowers/specs/2026-06-11-structural-equivalence-status.md`
+**Spec:** `docs/superpowers/archive/specs/2026-06-11-structural-equivalence-status.md`
 **Branch:** `feat/m1-structural-equivalence-status` (off the current `docs/credibility-arc-roadmap` HEAD, so it carries the roadmap + spec + this plan).
 
 ---

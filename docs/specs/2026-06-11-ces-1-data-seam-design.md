@@ -6,7 +6,7 @@
 **Depends on:** CES-0 (`2026-06-10-ces-0-analysis-profile-design.md`), the CES interface contract
 (`2026-06-09-claim-evidence-socket.md` §B1), the architecture audit
 (`2026-06-10-ces-architecture-audit.md` §1–2). Slice 1b (first half) of the credibility-arc
-roadmap (`docs/superpowers/roadmaps/2026-06-11-credibility-arc-roadmap.md`).
+roadmap (`docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`).
 **Decided forks (this session):** CES-1 is the **data seam only** — resolution + content-address +
 DRS shape — with **no computation and no claim licensing** (that is CES-2); the fixture is
 **synthetic but EPICv2-shaped** (real `cg########` probe-ID format + hg38 coordinates, synthetic
