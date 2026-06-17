@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from polymer_claims.ingest.gdc_parse import parse_beta_file, parse_clinical, parse_maf
+from polymer_claims.ingest.gdc_parse import parse_beta_file, parse_beta_meta, parse_clinical, parse_maf
 
 
 def test_parse_beta_file_reads_probe_beta_and_na():
@@ -11,6 +11,28 @@ def test_parse_beta_file_reads_probe_beta_and_na():
     assert out["cg01"] == 0.83
     assert math.isnan(out["cg02"])
     assert out["cg03"] == 0.20
+
+
+def test_parse_beta_meta_reads_chr_and_pos_by_name():
+    # GDC harmonized beta files carry per-probe Chromosome/Start annotation columns.
+    text = (
+        "Composite Element REF\tBeta_value\tChromosome\tStart\tGene_Symbol\n"
+        "cg01\t0.83\tchr1\t15865\tGENEA\n"
+        "cgX9\t0.40\tchrX\t250000\tGENEB\n"
+        "cg02\tNA\tchr2\t99\t.\n"
+    )
+    meta = parse_beta_meta(text)
+    assert meta["cg01"] == {"chr": "chr1", "pos": 15865}
+    assert meta["cgX9"] == {"chr": "chrX", "pos": 250000}  # sex-chrom probe -> QC can now drop it
+    assert meta["cg02"] == {"chr": "chr2", "pos": 99}
+
+
+def test_parse_beta_meta_defaults_when_no_annotation_columns():
+    # a minimal 2-column file (no Chromosome/Start) -> every probe still gets an entry (no KeyError downstream)
+    text = "Composite Element REF\tBeta_value\ncg01\t0.5\ncg02\t0.6\n"
+    meta = parse_beta_meta(text)
+    assert meta["cg01"] == {"chr": "", "pos": 0}
+    assert set(meta) == {"cg01", "cg02"}
 
 
 def test_parse_maf_skips_comments_and_reads_named_columns():

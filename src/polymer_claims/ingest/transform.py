@@ -16,8 +16,9 @@ _IDH_HOTSPOTS = {
 _SEX_CHROMS = {"chrX", "chrY"}
 
 
-def _case_id(barcode: str) -> str:
-    """TCGA barcode -> 12-char case (patient) id, e.g. 'TCGA-AB-2802-03A' -> 'TCGA-AB-2802'."""
+def case_id(barcode: str) -> str:
+    """TCGA barcode -> 12-char case (patient) id, e.g. 'TCGA-AB-2802-03A' -> 'TCGA-AB-2802'.
+    Public: the ingest orchestrator joins beta/MAF/clinical records on this case id."""
     return "-".join(barcode.split("-")[:3])
 
 
@@ -40,7 +41,7 @@ def derive_groups(maf_rows: list[dict], all_case_ids: list[str]) -> dict[str, st
     mutated: set[str] = set()
     for r in maf_rows:
         if _is_idh_hotspot(r["Hugo_Symbol"], r["HGVSp_Short"]):
-            mutated.add(_case_id(r["Tumor_Sample_Barcode"]))
+            mutated.add(case_id(r["Tumor_Sample_Barcode"]))
     return {cid: ("IDH_mut" if cid in mutated else "WT") for cid in all_case_ids}
 
 
