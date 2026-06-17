@@ -252,8 +252,8 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 
 | Subdir | Package | Status |
 |---|---|---|
-| `grammar/` | `polymer_grammar` | ✅ 8 phases complete + oracle dossier + provisional defeat edges (#4b) — 268 tests |
-| `protocol/` | `polymer_protocol` | ✅ Sub-projects #1 + #2 + #3a + #3b + #4a + #4b-complete (assessment spine + oracle dossier + SELECT [value engine + QD/heterodox/Goodhart/accumulating belief] + GENERATE [proposer bus + provisional links + executable rivals + credit economy + intelligent-operator seam]) — 208 tests |
+| `grammar/` | `polymer_grammar` | ✅ Complete — all 8 layer-phases + the air-gapped evaluator — 351 tests |
+| `protocol/` | `polymer_protocol` | ✅ Complete — 5 sub-projects (assessment spine · oracle dossier · SELECT · GENERATE) + 3 daemons (DRIFT / ORACLE-VALIDATION / RED-TEAM) + the `next_action` scheduler — 363 tests |
 
 ---
 
