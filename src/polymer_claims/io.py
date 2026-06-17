@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from polymer_grammar import Claim
 from polymer_protocol import Corpus
 
 
@@ -20,9 +19,3 @@ def load_corpus(path: str | Path) -> Corpus:
 def dump_corpus(corpus: Corpus) -> str:
     """Serialize a `Corpus` to a JSON string."""
     return corpus.model_dump_json()
-
-
-def load_claim(path: str | Path) -> Claim:
-    """Read a JSON file and validate it as a `Claim`."""
-    text = Path(path).read_text()
-    return Claim.model_validate_json(text)
