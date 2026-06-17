@@ -214,10 +214,11 @@ A standalone Next 16 / React Three Fiber app (`viewer/`) with the D2 metrologica
 
 ## 10. Frozen, user-gated & future
 
-**Frozen (v1.2 — fallback, not the active path):** `v1.2/` holds the complete v1.2 FormalClaim
-ecosystem (`polymer_formalclaim`, the 47-claim corpus, the `claim-harness` Claude Code plugin, schema,
-legacy workflows). Frozen 2026-06-01. It does **not** exercise the v1.3 grammar/protocol runtime; known
-v1.2 limitations are left as-is under the freeze.
+**v1.2 (moved out of the repo):** the frozen v1.2 FormalClaim ecosystem (`polymer_formalclaim`, the
+47-claim corpus, the `claim-harness` Claude Code plugin, schema, legacy workflows) was moved out of the
+repository on 2026-06-17 (preserved locally, pending eventual deletion). The v1.3 system never depended
+on it — `grammar/` imports nothing from `polymer_formalclaim` (isolation-guard enforced), and it was
+never a build dependency or workspace member.
 
 **User-gated / future (needs an explicit go):**
 - **PyPI publish** of `polymer-claims` — build + `[serve]` ready; blocked operationally by the flagged

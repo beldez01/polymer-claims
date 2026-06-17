@@ -44,13 +44,9 @@ The system no longer licenses only on asserted values. Three arcs landed:
 
 > The detailed build log is in `docs/superpowers/CONTINUE.md`; the **forward roadmap is `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`** (its Phase A is the real-data swap — the recommended next move; the historical decision menu is archived at `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`). The §2E independence decision was resolved **tiered** and **shipped** 2026-06-14 (spec `docs/superpowers/archive/specs/2026-06-14-2e-tiered-independence-design.md`, plan `docs/superpowers/archive/plans/2026-06-14-2e-tiered-independence.md`).
 
-## Frozen (v1.2 — fallback, not the active path)
+## v1.2 (moved out of the repo)
 
-| Path | What it is |
-|---|---|
-| `v1.2/` | The complete v1.2 FormalClaim ecosystem (the `polymer_formalclaim` IR package, the 47-claim corpus, the `claim-harness` Claude Code plugin, schema, legacy workflows). Frozen 2026-06-01, kept as a fallback. |
-
-**v1.2 does NOT exercise the v1.3 grammar/protocol runtime.** The `claim-harness` plugin remains installable (legacy-active), banner-labelled as v1.2-only. Known v1.2 limitations (left as-is under the freeze, not fixed): the v1.2 evaluator can treat pinned JSON inference as license-grade; its corpus evaluator accepts a `--schema` arg it does not use; it has little direct test coverage; its MCP/plugin docs over-advertise tools (`list_tools()` is empty). These matter only if v1.2 is ever un-frozen.
+The frozen v1.2 FormalClaim ecosystem (the `polymer_formalclaim` IR package, the 47-claim corpus, the `claim-harness` Claude Code plugin, schema, legacy workflows) was **moved out of this repository on 2026-06-17** — preserved locally, pending eventual deletion. The v1.3 system never depended on it: `grammar/` imports nothing from `polymer_formalclaim` (isolation-guard enforced), and it was never a build dependency or workspace member. Nothing in the active runtime is affected by its removal.
 
 ## User-gated / future (not done; needs an explicit go)
 

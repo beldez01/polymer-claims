@@ -161,8 +161,9 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   **Still to do before any public release** (external users won't have this content): genericize the remaining
   **Polymer Genomics / Boris / PlumberClient** integration references in the CES design docs; strip the
   `~/Desktop/Research/topics/epistemic-claim-foundations/...` design-source absolute paths cited across the
-  protocol specs + this file; and scrub the v1.2 plugin/corpus fixtures that name other research projects
-  (e.g. `Polymer_Evolution`). None affect the running system — pure documentation/context hygiene.
+  protocol specs + this file. (The v1.2 plugin/corpus fixtures that named other research projects left
+  with the v1.2 tree, moved out of the repo 2026-06-17.) None affect the running system — pure
+  documentation/context hygiene.
 - **Adapter-independence hardening** (roadmap 1c): byte-derived `implementation_hash` + credential
   provenance on the frozen `Satisfaction`.
 - **Earned-strength 2d:** `evidence_against_null` from a real test statistic with n (now partly

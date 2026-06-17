@@ -14,7 +14,6 @@ toward truth, a local node that runs it, and a 3D viewer that renders the live u
 | `src/polymer_claims/` | **The umbrella distribution** (`polymer-claims`) — the CLI over the complete runtime + the live local node (`serve`, behind the optional `[serve]` extra). | **Active** — `pip install polymer-claims` → local node works |
 | `viewer/` | **The claims-universe 3D viewer** (Next 16 + React Three Fiber). Plays a sample timeline or streams a live node. Live layout is the signed-Laplacian spectral eigenmap, Procrustes-aligned (`serve --layout spectral`, default; `--layout force` for the legacy force-directed). | **Active** — `tsc`+`build` clean |
 | `docs/superpowers/` | The canonical spec (`polymer-claims-canonical-spec.md`), `CONTINUE.md` resume primer, and `archive/` of shipped per-feature design docs (specs + plans). | Active |
-| `v1.2/` | **Frozen v1.2 ecosystem, kept as a fallback** — the FormalClaim IR package, the 47-claim corpus, the `claim-harness` plugin, schema, legacy workflows. Does **not** exercise the v1.3 runtime. See `v1.2/README.md`. | Frozen (not deleted) |
 
 ---
 
@@ -162,8 +161,8 @@ underdetermined) when entrenchment can't decide — rather than silently picking
 | 7 | protocol-imposed fields + polymorphic subject | ◐ provenance ✅ (`provenance.py`), governance ✅ (`governance.py`), online-FDR ✅ (`fdr.py`), `reinterpret` ✅ (L3), `Claim.subject` ✅ (`subject.py`); oracle (#2) now unblocked by Phase 8; only `representation_revision` (#5) remains |
 | 8 | the evaluator (runs the grammar) | ✅ merged — typed compute-graph IR (`operations.py`) + air-gapped runtime (`evaluate.py`): `evaluate()` + the two-implementation `verify()` gate that mints an L2 `Satisfaction` only on cross-adapter agreement (no self-licensing) |
 
-240 tests, all green, ruff clean. `grammar/` imports nothing from `v1.2/formalclaim/` (enforced
-by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is built and validated.
+All green, ruff clean. `grammar/` imports nothing from the legacy `polymer_formalclaim` IR
+(enforced by an isolation guard test).
 
 ### Where the design lives
 
@@ -171,13 +170,12 @@ by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is bu
 - **Original foundations spec (archived):** `docs/superpowers/archive/specs/2026-05-31-unified-claim-foundations-spec.md` · **Schema overview (HTML):** `docs/superpowers/archive/specs/2026-05-31-claim-schema-overview.html`
 - **Per-feature design rationale + plans (with Progress Logs):** `docs/superpowers/archive/specs/` and `docs/superpowers/archive/plans/` (shipped per-slice specs and their plans are archived together)
 - **Resume primer (kept current):** `docs/superpowers/CONTINUE.md`
-- **Superseded v1.2-era design docs** (claim-PATTERN spec + spatial map, ontology note): `v1.2/docs/` — the ontology idea, in particular, still informs v1.3 (see the unified spec §3.1, §7).
 
 ---
 
 ## Protocol runtime (`polymer_protocol`)
 
-The `protocol/` package (`polymer_protocol`) is the **runtime half of the compiler/runtime split** — it reads and writes the `polymer_grammar` IR and depends on it one-way (isolation-tested; `protocol/` never imports `v1.2/formalclaim/`).
+The `protocol/` package (`polymer_protocol`) is the **runtime half of the compiler/runtime split** — it reads and writes the `polymer_grammar` IR and depends on it one-way (isolation-tested; `protocol/` never imports the legacy `polymer_formalclaim` IR).
 
 State is a frozen `Corpus` = (claims, defeat_edges, equivalences, fdr_ledger). `run_cycle(corpus, adapters, ctx)` chains seven pure assessment stages:
 
@@ -259,33 +257,27 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 
 ---
 
-## The v1.2 fallback (`v1.2/`, frozen)
+## The v1.2 fallback (moved out of the repo)
 
-v1.2 is **frozen, not deleted** — retained as a working fallback in case the v1.3 rebuild
-proves a dead end. Everything under `v1.2/` still wires up internally:
-
-- **Python IR:** `v1.2/formalclaim/src/polymer_formalclaim/`. The corpus evaluator consumes it
-  via a uv path source (`v1.2/corpus/evaluator/pyproject.toml`); no PyPI needed for local CI.
-- **JSON Schema:** `v1.2/corpus/schema/formal_claim_v1.2.schema.json` is canonical for v1.2;
-  `v1.2/scripts/sync_schema.sh --check` guards plugin drift.
-- **Archived workflows:** `v1.2/legacy-workflows/` (moved out of `.github/workflows/` so they no
-  longer auto-register; GitHub Actions are account-flagged and never ran anyway).
-
-> A first validation of v1.3 is to **ingest the v1.2 corpus into the v1.3 grammar** — a
-> sensitivity test of whether the new schema can represent the claims the old one held.
-> Any bridge between the two will be a deliberate, separately-reviewed migration, never an implicit import.
+v1.2 — the frozen FormalClaim ecosystem (`polymer_formalclaim` IR, the 47-claim corpus, the
+`claim-harness` plugin, schema, legacy workflows) — has been **moved out of this repository**
+(preserved locally, pending eventual deletion). The v1.3 system never depended on it: `grammar/`
+imports nothing from `polymer_formalclaim` (isolation-guard enforced), and it was never a build
+dependency or workspace member. Restoring it (e.g. to validate v1.3 by ingesting the v1.2 corpus)
+would be a deliberate, separately-reviewed step, never an implicit import.
 
 ## History
 
 Consolidated 2026-05-26 from three now-archived repos: `beldez01/claims`,
 `beldez01/polymer-formalclaim`, `beldez01/polymer-claim-marketplace`. The v1.3 grammar effort
 began 2026-05-31 from the foundations research. On 2026-06-01 the v1.2 surface was consolidated
-under `v1.2/` and frozen as a fallback while v1.3 is built and validated.
+under `v1.2/` and frozen as a fallback while v1.3 was built and validated; on 2026-06-17, with v1.3
+validated, v1.2 was moved out of the repository (preserved locally, pending eventual deletion).
 
 ## Deferred
 
 - A navigable **3D latent-space claim-topology viewer** (lasso clusters; network-as-subject) —
   gated on corpus scale; extends the existing `PolymerGenomicsAPI/viewer` universe.
 - **v1.2 PyPI publish** (`polymer-formalclaim`) and the API IR-dedup are deferred indefinitely in
-  favor of the v1.3 rebuild. Revival instructions live in `v1.2/README.md` if v1.2 is ever
-  reactivated.
+  favor of the v1.3 rebuild. Revival instructions live in v1.2's own README (preserved with the
+  v1.2 tree outside the repo) if v1.2 is ever reactivated.

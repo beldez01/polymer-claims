@@ -5,7 +5,7 @@ See `ARCHITECTURE_CURRENT.md` for how the active pieces fit together.
 
 ## Versions & packages
 
-- **FormalClaim** — the **v1.2** claim IR (`polymer_formalclaim`, in `v1.2/`). Reserved for v1.2 only. The frozen fallback.
+- **FormalClaim** — the **v1.2** claim IR (`polymer_formalclaim`). Reserved for v1.2 only. The v1.2 tree was moved out of the repo (2026-06-17, preserved locally); the v1.3 system never depended on it.
 - **grammar** — the **v1.3** claim IR (`polymer_grammar`, in `grammar/`). Reserved for the v1.3 schema/type-system. "What a claim *is*."
 - **protocol** — the **runtime/flywheel** over the grammar (`polymer_protocol`, in `protocol/`). "How a corpus *evolves*." Reserved for the runtime, never the schema.
 - **polymer-claims** — the umbrella distribution package (`src/polymer_claims/`): CLI + local node/server over grammar + protocol.

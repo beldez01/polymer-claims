@@ -1,7 +1,0 @@
-domain: te_surveillance
-scope: |
-  TODO: fill in one-paragraph scope for te_surveillance — what claims belong here,
-  what don't, which MCPs are typically invoked.
-maintainers:
-  - beldez01     # founding admin; Tier-3
-# Additional tier-2 co-reviewers added by PR co-signed with beldez01.
