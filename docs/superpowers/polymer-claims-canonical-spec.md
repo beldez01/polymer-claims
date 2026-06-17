@@ -198,9 +198,17 @@ A standalone Next 16 / React Three Fiber app (`viewer/`) with the D2 metrologica
 
 ## 9. Standing caveats (carry forward)
 
-- **Methylation betas are synthetic** — the BENCHMARKED/recomputable-public tier is *exercised, not
-  earned*. Real public GEO/ENA data is a self-contained swap (identical `load_contract` seam) and is the
-  recommended next move (Phase A of `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`).
+- **n-DMP / REPRODUCED is EARNED on real betas (2026-06-17, Phase A).** The genome-wide n-DMP count
+  licenses at **REPRODUCED** on a **real TCGA-LAML HM450 cohort** (IDH-mut vs WT): 194 samples ×
+  378,894 probes, **50,339 DMPs (p<0.05) vs an 18,945 null floor**, count-enrichment e-value → ∞, two
+  independent legs agreeing on the integer count, full content-address recorded. Betas are the local
+  UCSC-Xena GDC-Level-3 matrix; IDH status from GDC open masked-somatic MAFs. The recomputable-public
+  tier is now *earned, not just exercised*, for this reduction. **Still synthetic** (not yet earned):
+  **region-Δβ** (its own real run is a follow-up) and **REPLICATED** (needs a 2nd real cohort).
+  **Run caveats:** IDH-mut n=10 — GDC open-MAF calling is conservative and uncovered cases default to WT,
+  which only *dilutes* the contrast (biases against a license, so the result is conservative);
+  sex-chromosome QC was skipped (the Xena matrix carries no probe chr/pos). Data is **local-only,
+  gitignored** — nothing real committed.
 - The two methylation adapters are **reproducibility-independent, not error-independent** (same estimand,
   same data) → the single-cohort demo licenses at **REPRODUCED**. The **REPLICATED** demo runs on a 2nd
   *synthetic* cohort (`epicv2_casectrl_demo_b`) — also exercised, not earned, until a real 2nd cohort is
