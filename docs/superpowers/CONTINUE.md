@@ -29,8 +29,13 @@ epistemic core; real computation + CES) — lives in the canonical spec
 design.
 
 **Standing caveats (carry forward):**
-- Methylation betas are **synthetic** — the BENCHMARKED/recomputable tier is *exercised, not earned*.
-  Real public GEO data is a self-contained swap (identical `load_contract` seam). [menu item 6]
+- **n-DMP / REPRODUCED is EARNED on real betas (2026-06-17, Phase A).** The genome-wide n-DMP count
+  licenses at REPRODUCED on a **real TCGA-LAML HM450 cohort** (IDH-mut vs WT; 194×378,894; 50,339 DMPs
+  vs an 18,945 floor; e-value → ∞; legs agree; full content-address). Betas = local Xena GDC-Level-3
+  matrix; IDH = GDC open MAFs. **Still synthetic:** region-Δβ (own real run pending) + REPLICATED (needs
+  a 2nd real cohort). Run caveats: IDH-mut n=10 (GDC open-MAF calling conservative; uncovered→WT dilutes,
+  biases *against* a license); sex-chrom QC skipped (Xena lacks chr/pos). Data local-only, gitignored;
+  builders in `data/tcga_laml/` (gitignored). [menu item 6 — region-Δβ + REPLICATED real runs remain]
 - `semantic_run_id` is the **Python** digest; an R-parity golden fixture is deferred (needs an R
   serializer). [menu item 7]
 - Adapter independence is **operator-asserted** (`implementation_hash` is a supplied string compared
@@ -43,18 +48,20 @@ design.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first, all 2026-06-14/15, local-only): Procrustes / live-spectral layout
-· §2E tiered independence (REPRODUCED / REPLICATED) · reinstatement → PENDING · n-DMPs-at-FDR. SHAs +
-one-line summaries in the *Done* checklist below; design rationale in `docs/superpowers/archive/specs/`.
+**Recently shipped** (most recent first, local-only): **Phase A real-data swap — n-DMP EARNED on real
+TCGA-LAML HM450 betas (2026-06-17)** · Procrustes / live-spectral layout · §2E tiered independence
+(REPRODUCED / REPLICATED) · reinstatement → PENDING · n-DMPs-at-FDR. SHAs + one-line summaries in the
+*Done* checklist below; design rationale in `docs/superpowers/archive/specs/`.
 
-**▶ RECOMMENDED NEXT PHASE — the real-data swap (from *exercised* to *earned*).** The rigor core is
-built; its central proof still runs on **synthetic betas**. Swapping in a real public methylation cohort
-is the single highest-leverage move — it retires the #1 caveat and is the keystone for the standards skin.
-Dataset is **chosen (TCGA-LAML HM450, GDC open-access, IDH1/2-mut vs WT)** and it's the designed-in next
-step (identical `load_contract` seam), ready for brainstorm → spec → plan. Full path + dataset +
-acceptance: **Phase A of `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`** — the forward
-roadmap (Phase A is the swap; B–D build the autonomous agent loop on top of it). Natural encore: a 2nd
-real cohort → the §2E **REPLICATED** gold tier.
+**▶ PHASE A SHIPPED — the real-data swap is *earned* for n-DMP/REPRODUCED.** The genome-wide n-DMP count
+licenses at REPRODUCED on a real TCGA-LAML HM450 cohort (see Standing caveats above for the numbers +
+run caveats). Plan: `docs/superpowers/plans/2026-06-17-phase-a-real-data-swap.md` (Tasks 1–7, spec +
+implementation). Local-only run builders live in `data/tcga_laml/` (gitignored). **Recommended next
+moves:** (a) **region-Δβ on the same real cohort** — earn the second reduction (small, the contract +
+gate already exist); (b) a **2nd real cohort → §2E REPLICATED** gold tier (product e-value); (c) **a real
+HM450 probe manifest** so sex-chrom QC bites + a real platform `profile_hash`; (d) **Phase B** — the
+`MethylGenerationAdapter` (autonomous hypothesizer) on top of the now-real substrate
+(`docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`).
 
 Other safe slices (the historical decision menu is archived at `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`):
 
