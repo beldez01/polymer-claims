@@ -54,6 +54,14 @@ function NodeMesh({ node }: { node: InterpNode }) {
   const isSelected = selectedId === node.id;
   const ringR = r * 1.7;
   const ring = useMemo(() => ringPoints(ringR), [ringR]);
+  const ledgerRingR = r * 2.25;
+  const ledgerRing = useMemo(() => ringPoints(ledgerRingR), [ledgerRingR]);
+  const ledgerColor = node.fdr_retracted
+    ? COLOR.accent.rose
+    : node.fdr_discovery
+      ? COLOR.accent.teal
+      : COLOR.border.strong;
+  const ledgerOpacity = node.fdr_retracted ? 0.9 : node.fdr_discovery ? 0.85 : 0.55;
 
   // enter/exit: scale the whole group toward 0 and fade the material.
   const scale = Math.max(node.scale, 0.0001);
@@ -104,6 +112,22 @@ function NodeMesh({ node }: { node: InterpNode }) {
         </Billboard>
       )}
 
+      {/* FDR ledger overlay: node body is graph status; this ring is ledger state. */}
+      {node.fdr_tested && (
+        <Billboard>
+          <Line
+            points={ledgerRing}
+            color={ledgerColor}
+            lineWidth={1}
+            transparent
+            opacity={ledgerOpacity * node.opacity}
+            dashed={node.fdr_retracted}
+            dashSize={0.08}
+            gapSize={0.06}
+          />
+        </Billboard>
+      )}
+
       {/* hover label — mono, no scale-bloom */}
       {isHovered && (
         <Html position={[0, ringR + 0.06, 0]} center distanceFactor={10}>
@@ -125,6 +149,11 @@ function NodeMesh({ node }: { node: InterpNode }) {
             className="mono tabular"
           >
             {node.id} · {node.status}
+            {node.fdr_tested
+              ? ` · FDR ${node.fdr_discovery ? 'discovery' : 'tested'}${
+                  node.fdr_retracted ? ' retracted' : ''
+                }`
+              : ''}
           </div>
         </Html>
       )}
@@ -140,6 +169,12 @@ function staticNode(n: {
   subject_kind: string | null;
   strength: StrengthVector | null;
   is_representation_revision: boolean;
+  fdr_tested?: boolean;
+  fdr_discovery?: boolean;
+  fdr_retracted?: boolean;
+  fdr_index?: number | null;
+  fdr_e_value?: number | null;
+  fdr_alpha_allocated?: number | null;
   position: Vec3;
 }): InterpNode {
   return {
@@ -151,6 +186,12 @@ function staticNode(n: {
     subject_kind: n.subject_kind,
     strength: n.strength,
     is_representation_revision: n.is_representation_revision,
+    fdr_tested: n.fdr_tested ?? false,
+    fdr_discovery: n.fdr_discovery ?? false,
+    fdr_retracted: n.fdr_retracted ?? false,
+    fdr_index: n.fdr_index ?? null,
+    fdr_e_value: n.fdr_e_value ?? null,
+    fdr_alpha_allocated: n.fdr_alpha_allocated ?? null,
     position: n.position,
     scale: 1,
     opacity: 1,

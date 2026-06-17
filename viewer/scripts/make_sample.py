@@ -30,6 +30,7 @@ from polymer_grammar import (
     Direction,
     EquivalenceClaim,
     FDRLedger,
+    FDRTest,
     LicenseRoute,
     Licensing,
     MaterializationContext,
@@ -270,7 +271,33 @@ def build_corpus() -> Corpus:
         claims=tuple(claims),
         defeat_edges=tuple(defeat_edges),
         equivalences=tuple(equivalences),
-        fdr_ledger=FDRLedger(target_fdr=0.05),
+        fdr_ledger=FDRLedger(
+            target_fdr=0.05,
+            tests=(
+                FDRTest(
+                    index=1,
+                    claim_id="A01",
+                    e_value=1000.0,
+                    alpha_allocated=0.030396,
+                    discovery=True,
+                ),
+                FDRTest(
+                    index=2,
+                    claim_id="A07",
+                    e_value=500.0,
+                    alpha_allocated=0.015198,
+                    discovery=True,
+                    retracted=True,
+                ),
+                FDRTest(
+                    index=3,
+                    claim_id="A03",
+                    e_value=0.7,
+                    alpha_allocated=0.006755,
+                    discovery=False,
+                ),
+            ),
+        ),
     )
 
 

@@ -148,6 +148,9 @@ export default function LegendRail() {
         edgeTotal: s.n_edges,
         edgeEffective: s.n_effective_edges,
         edgeProvisional: s.n_provisional_edges,
+        fdrTested: interp.nodes.filter((n) => n.fdr_tested).length,
+        fdrDiscoveries: interp.nodes.filter((n) => n.fdr_discovery).length,
+        fdrRetracted: interp.nodes.filter((n) => n.fdr_retracted).length,
       };
     }
     return computeCounts(data);
@@ -185,6 +188,26 @@ export default function LegendRail() {
             </span>
           </CheckRow>
         ))}
+      </div>
+
+      {/* FDR LEDGER OVERLAY */}
+      <SectionMarker>§ FDR — outer ring</SectionMarker>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 4px' }}>
+          <Chip color={COLOR.border.strong} />
+          <span style={{ ...rowLabel, flex: 1 }}>tested</span>
+          <span style={{ ...rowLabel, color: COLOR.text.faint }}>{counts.fdrTested}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 4px' }}>
+          <Chip color={COLOR.accent.teal} />
+          <span style={{ ...rowLabel, flex: 1 }}>discovery</span>
+          <span style={{ ...rowLabel, color: COLOR.text.faint }}>{counts.fdrDiscoveries}</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 4px' }}>
+          <Chip color={COLOR.accent.rose} />
+          <span style={{ ...rowLabel, flex: 1 }}>retracted</span>
+          <span style={{ ...rowLabel, color: COLOR.text.faint }}>{counts.fdrRetracted}</span>
+        </div>
       </div>
 
       {/* EDGE KIND */}

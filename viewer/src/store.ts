@@ -20,6 +20,9 @@ export interface Counts {
   edgeTotal: number;
   edgeEffective: number;
   edgeProvisional: number;
+  fdrTested: number;
+  fdrDiscoveries: number;
+  fdrRetracted: number;
 }
 
 export interface CameraCoords {
@@ -80,10 +83,25 @@ export function computeCounts(data: TopologyExport | null): Counts {
   let edgeEffective = 0;
   let edgeProvisional = 0;
   if (!data) {
-    return { total: 0, byStatus, edgeTotal: 0, edgeEffective: 0, edgeProvisional: 0 };
+    return {
+      total: 0,
+      byStatus,
+      edgeTotal: 0,
+      edgeEffective: 0,
+      edgeProvisional: 0,
+      fdrTested: 0,
+      fdrDiscoveries: 0,
+      fdrRetracted: 0,
+    };
   }
+  let fdrTested = 0;
+  let fdrDiscoveries = 0;
+  let fdrRetracted = 0;
   for (const n of data.nodes) {
     byStatus[n.status] = (byStatus[n.status] ?? 0) + 1;
+    if (n.fdr_tested) fdrTested++;
+    if (n.fdr_discovery) fdrDiscoveries++;
+    if (n.fdr_retracted) fdrRetracted++;
   }
   for (const e of data.edges) {
     if (e.effective) edgeEffective++;
@@ -95,6 +113,9 @@ export function computeCounts(data: TopologyExport | null): Counts {
     edgeTotal: data.edges.length,
     edgeEffective,
     edgeProvisional,
+    fdrTested,
+    fdrDiscoveries,
+    fdrRetracted,
   };
 }
 

@@ -32,6 +32,12 @@ export interface TopologyNode {
   subject_kind: string | null;
   strength: StrengthVector | null;
   is_representation_revision: boolean;
+  fdr_tested: boolean;
+  fdr_discovery: boolean;
+  fdr_retracted: boolean;
+  fdr_index: number | null;
+  fdr_e_value: number | null;
+  fdr_alpha_allocated: number | null;
   position: Vec3;
 }
 

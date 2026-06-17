@@ -7,6 +7,8 @@ from polymer_grammar import (
     DefeatEdgeKind,
     Direction,
     EquivalenceClaim,
+    FDRLedger,
+    FDRTest,
     GenomicRegion,
     NeighborEdge,
     NeighborEdgeKind,
@@ -85,6 +87,49 @@ def test_nodes_carry_claim_attributes(small_corpus):
     assert n["b"].is_representation_revision is False
     # NONE layout -> all positions at origin
     assert all(node.position == (0.0, 0.0, 0.0) for node in exp.nodes)
+
+
+def test_nodes_carry_fdr_ledger_state():
+    a = make_claim("a", Status.REJECTED)
+    b = make_claim("b", Status.LICENSED)
+    corpus = Corpus(
+        claims=(a, b),
+        fdr_ledger=FDRLedger(
+            target_fdr=0.05,
+            tests=(
+                FDRTest(
+                    index=1,
+                    claim_id="a",
+                    e_value=100.0,
+                    alpha_allocated=0.01,
+                    discovery=True,
+                    retracted=True,
+                ),
+                FDRTest(
+                    index=2,
+                    claim_id="b",
+                    e_value=80.0,
+                    alpha_allocated=0.02,
+                    discovery=True,
+                ),
+            ),
+        ),
+    )
+    exp = export_topology(corpus, layout=Layout.NONE)
+    n = {x.id: x for x in exp.nodes}
+
+    assert n["a"].status == "rejected"
+    assert n["a"].fdr_tested is True
+    assert n["a"].fdr_discovery is True
+    assert n["a"].fdr_retracted is True
+    assert n["a"].fdr_index == 1
+    assert n["a"].fdr_e_value == pytest.approx(100.0)
+    assert n["a"].fdr_alpha_allocated == pytest.approx(0.01)
+
+    assert n["b"].status == "licensed"
+    assert n["b"].fdr_tested is True
+    assert n["b"].fdr_discovery is True
+    assert n["b"].fdr_retracted is False
 
 
 def test_nodes_sorted_by_id(small_corpus):

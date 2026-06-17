@@ -14,6 +14,12 @@
         0.78
       ],
       "is_representation_revision": false,
+      "fdr_tested": true,
+      "fdr_discovery": true,
+      "fdr_retracted": false,
+      "fdr_index": 1,
+      "fdr_e_value": 1000.0,
+      "fdr_alpha_allocated": 0.030396,
       "position": [
         2.448322,
         1.730191,
@@ -34,6 +40,12 @@
         0.71
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         2.250282,
         1.82619,
@@ -54,6 +66,12 @@
         0.42
       ],
       "is_representation_revision": false,
+      "fdr_tested": true,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": 3,
+      "fdr_e_value": 0.7,
+      "fdr_alpha_allocated": 0.006755,
       "position": [
         0.654299,
         -1.424665,
@@ -74,6 +92,12 @@
         0.48
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         0.443797,
         -2.751902,
@@ -87,6 +111,12 @@
       "subject_kind": "ontology_term",
       "strength": null,
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         2.454071,
         -0.445633,
@@ -107,6 +137,12 @@
         0.22
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         0.400223,
         -2.335978,
@@ -127,6 +163,12 @@
         0.15
       ],
       "is_representation_revision": false,
+      "fdr_tested": true,
+      "fdr_discovery": true,
+      "fdr_retracted": true,
+      "fdr_index": 2,
+      "fdr_e_value": 500.0,
+      "fdr_alpha_allocated": 0.015198,
       "position": [
         0.395917,
         -1.451958,
@@ -147,6 +189,12 @@
         0.5
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         0.287016,
         3.083406,
@@ -160,6 +208,12 @@
       "subject_kind": "ontology_term",
       "strength": null,
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         0.0433,
         2.976217,
@@ -180,6 +234,12 @@
         0.62
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         2.182418,
         -0.612091,
@@ -200,6 +260,12 @@
         0.74
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         1.81785,
         1.638409,
@@ -220,6 +286,12 @@
         0.4
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         1.239772,
         -1.744667,
@@ -240,6 +312,12 @@
         0.46
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         0.350575,
         0.899127,
@@ -253,6 +331,12 @@
       "subject_kind": "ontology_term",
       "strength": null,
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -1.244824,
         0.693926,
@@ -273,6 +357,12 @@
         0.16
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         0.960882,
         -1.534044,
@@ -293,6 +383,12 @@
         0.45
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -1.172924,
         0.402662,
@@ -313,6 +409,12 @@
         0.24
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         0.529263,
         1.127703,
@@ -326,6 +428,12 @@
       "subject_kind": "ontology_term",
       "strength": null,
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -1.389594,
         3.091009,
@@ -346,6 +454,12 @@
         0.64
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -1.508518,
         -0.816704,
@@ -366,6 +480,12 @@
         0.76
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -1.864377,
         -0.646766,
@@ -386,6 +506,12 @@
         0.41
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -2.977734,
         0.369691,
@@ -406,6 +532,12 @@
         0.44
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -0.513296,
         0.936482,
@@ -419,6 +551,12 @@
       "subject_kind": "ontology_term",
       "strength": null,
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -2.214096,
         -0.469107,
@@ -439,6 +577,12 @@
         0.17
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -3.07264,
         0.663044,
@@ -459,6 +603,12 @@
         0.25
       ],
       "is_representation_revision": false,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         -0.25912,
         0.752909,
@@ -479,6 +629,12 @@
         0.88
       ],
       "is_representation_revision": true,
+      "fdr_tested": false,
+      "fdr_discovery": false,
+      "fdr_retracted": false,
+      "fdr_index": null,
+      "fdr_e_value": null,
+      "fdr_alpha_allocated": null,
       "position": [
         3.370169,
         -0.577076,

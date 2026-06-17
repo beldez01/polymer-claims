@@ -31,6 +31,12 @@ export interface InterpNode {
   subject_kind: string | null;
   strength: TopologyNode['strength'];
   is_representation_revision: boolean;
+  fdr_tested: boolean;
+  fdr_discovery: boolean;
+  fdr_retracted: boolean;
+  fdr_index: number | null;
+  fdr_e_value: number | null;
+  fdr_alpha_allocated: number | null;
   position: Vec3;
   /** enter/exit growth in [0,1] — drives both mesh scale and material opacity. */
   scale: number;
@@ -117,6 +123,12 @@ export function interpolateFrame(
         subject_kind: nb.subject_kind,
         strength: nb.strength,
         is_representation_revision: nb.is_representation_revision,
+        fdr_tested: nb.fdr_tested ?? false,
+        fdr_discovery: nb.fdr_discovery ?? false,
+        fdr_retracted: nb.fdr_retracted ?? false,
+        fdr_index: nb.fdr_index ?? null,
+        fdr_e_value: nb.fdr_e_value ?? null,
+        fdr_alpha_allocated: nb.fdr_alpha_allocated ?? null,
         position: lerpVec3(na.position, nb.position, t),
         scale: 1,
         opacity: 1,
@@ -132,6 +144,12 @@ export function interpolateFrame(
         subject_kind: nb.subject_kind,
         strength: nb.strength,
         is_representation_revision: nb.is_representation_revision,
+        fdr_tested: nb.fdr_tested ?? false,
+        fdr_discovery: nb.fdr_discovery ?? false,
+        fdr_retracted: nb.fdr_retracted ?? false,
+        fdr_index: nb.fdr_index ?? null,
+        fdr_e_value: nb.fdr_e_value ?? null,
+        fdr_alpha_allocated: nb.fdr_alpha_allocated ?? null,
         position: nb.position,
         scale: t,
         opacity: t,
@@ -151,6 +169,12 @@ export function interpolateFrame(
       subject_kind: na.subject_kind,
       strength: na.strength,
       is_representation_revision: na.is_representation_revision,
+      fdr_tested: na.fdr_tested ?? false,
+      fdr_discovery: na.fdr_discovery ?? false,
+      fdr_retracted: na.fdr_retracted ?? false,
+      fdr_index: na.fdr_index ?? null,
+      fdr_e_value: na.fdr_e_value ?? null,
+      fdr_alpha_allocated: na.fdr_alpha_allocated ?? null,
       position: na.position,
       scale: 1 - t,
       opacity: 1 - t,

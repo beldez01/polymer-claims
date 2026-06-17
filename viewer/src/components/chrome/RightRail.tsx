@@ -161,6 +161,9 @@ function statsCounts(stats: FrameStats): Counts {
     edgeTotal: stats.n_edges,
     edgeEffective: stats.n_effective_edges,
     edgeProvisional: stats.n_provisional_edges,
+    fdrTested: 0,
+    fdrDiscoveries: 0,
+    fdrRetracted: 0,
   };
 }
 
@@ -174,7 +177,16 @@ function UniverseOverview() {
 
   // Timeline drives the readout when loaded; else the static export counts.
   const counts = useMemo(
-    () => (interp ? statsCounts(interp.stats) : computeCounts(data)),
+    () => {
+      const base = interp ? statsCounts(interp.stats) : computeCounts(data);
+      if (!interp) return base;
+      return {
+        ...base,
+        fdrTested: interp.nodes.filter((n) => n.fdr_tested).length,
+        fdrDiscoveries: interp.nodes.filter((n) => n.fdr_discovery).length,
+        fdrRetracted: interp.nodes.filter((n) => n.fdr_retracted).length,
+      };
+    },
     [interp, data],
   );
 
@@ -235,6 +247,15 @@ function UniverseOverview() {
             <span style={cell}>eff {counts.edgeEffective}</span>
             <span style={{ ...cell, color: COLOR.text.faint }}>·</span>
             <span style={cell}>prov {counts.edgeProvisional}</span>
+          </Row>
+
+          <Row>
+            <span style={{ ...cell, color: COLOR.text.faint }}>fdr ledger</span>
+            <span style={{ ...cell, color: COLOR.text.primary }}>{counts.fdrTested}</span>
+            <span style={{ ...cell, color: COLOR.text.faint }}>·</span>
+            <span style={cell}>disc {counts.fdrDiscoveries}</span>
+            <span style={{ ...cell, color: COLOR.text.faint }}>·</span>
+            <span style={cell}>retr {counts.fdrRetracted}</span>
           </Row>
 
           {/* per-cycle deltas (timeline only) */}
@@ -392,6 +413,19 @@ function NodePanel({ selectedId }: { selectedId: string }) {
       <Field name="is_representation_revision">
         {node.is_representation_revision ? 'true · octahedron' : 'false'}
       </Field>
+      <Field name="fdr_ledger">
+        {node.fdr_tested
+          ? `#${node.fdr_index ?? '—'} · ${
+              node.fdr_discovery ? 'discovery' : 'tested'
+            }${node.fdr_retracted ? ' · retracted' : ''}`
+          : '—'}
+      </Field>
+      {node.fdr_tested && (
+        <>
+          <Field name="e_value">{node.fdr_e_value ?? '—'}</Field>
+          <Field name="alpha_allocated">{node.fdr_alpha_allocated ?? '—'}</Field>
+        </>
+      )}
 
       <StrengthTable strength={node.strength ?? null} />
     </>

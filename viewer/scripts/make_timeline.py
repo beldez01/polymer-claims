@@ -181,6 +181,18 @@ def main() -> None:
         proposers=(rival_generation, revision_proposer),
         cost_model=cost_model,
         budget=2.5,  # ~2 still-PENDING claims (by ascending id) license each cycle
+        evidence={cid: 1_000_000.0 for cid, _, _ in [
+            ("A01", P_EFFECT, 0.010),
+            ("A02", P_EFFECT, 0.011),
+            ("A03", P_EFFECT, 0.012),
+            ("B01", P_MEDIATION, 0.013),
+            ("B02", P_MEDIATION, 0.014),
+            ("B03", P_MEDIATION, 0.015),
+            ("C01", P_DOSE, 0.016),
+            ("C02", P_DOSE, 0.017),
+            (_SENTINEL, P_DOSE, 0.018),
+            ("C04", P_DOSE, 0.019),
+        ]},
     )
 
     out = Path(__file__).resolve().parent.parent / "public" / "sample-timeline.json"

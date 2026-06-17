@@ -46,6 +46,12 @@ class TopologyNode(_Model):
     # The viewer indexes this positionally, so the length/order is a load-bearing contract.
     strength: tuple[float, ...] | None = None
     is_representation_revision: bool = False
+    fdr_tested: bool = False
+    fdr_discovery: bool = False
+    fdr_retracted: bool = False
+    fdr_index: int | None = None
+    fdr_e_value: float | None = None
+    fdr_alpha_allocated: float | None = None
     position: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
     @model_validator(mode="after")
@@ -92,7 +98,9 @@ def _extract_nodes(
     corpus: Corpus, positions: dict[str, tuple[float, float, float]]
 ) -> tuple[TopologyNode, ...]:
     nodes = []
+    latest_fdr = {t.claim_id: t for t in corpus.fdr_ledger.tests}
     for c in corpus.claims:
+        fdr = latest_fdr.get(c.id)
         strength = (
             tuple(getattr(c.strength, ax) for ax in AXES)
             if c.strength is not None
@@ -106,6 +114,12 @@ def _extract_nodes(
                 subject_kind=c.subject.kind if c.subject is not None else None,
                 strength=strength,
                 is_representation_revision=is_representation_revision(c),
+                fdr_tested=fdr is not None,
+                fdr_discovery=fdr.discovery if fdr is not None else False,
+                fdr_retracted=fdr.retracted if fdr is not None else False,
+                fdr_index=fdr.index if fdr is not None else None,
+                fdr_e_value=fdr.e_value if fdr is not None else None,
+                fdr_alpha_allocated=fdr.alpha_allocated if fdr is not None else None,
                 position=positions.get(c.id, (0.0, 0.0, 0.0)),
             )
         )
