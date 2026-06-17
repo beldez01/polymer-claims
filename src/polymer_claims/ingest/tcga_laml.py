@@ -8,7 +8,7 @@ from pathlib import Path
 from polymer_claims import contracts as _contracts
 from polymer_claims.ingest.gdc_fetch import fetch_file, load_pinned_manifest
 from polymer_claims.ingest.gdc_parse import parse_beta_file, parse_beta_meta, parse_clinical, parse_maf
-from polymer_claims.ingest.transform import _case_id, build_contract, derive_groups
+from polymer_claims.ingest.transform import build_contract, case_id, derive_groups
 
 
 def ingest_tcga_laml(data_dir: str) -> str:
@@ -42,7 +42,7 @@ def ingest_tcga_laml(data_dir: str) -> str:
     # 2. MAF -> IDH grouping.
     maf_raw = fetch_file(man["maf"]["uuid"], man["maf"]["md5"], cache / man["maf"]["filename"])
     maf_text = gzip.decompress(maf_raw).decode("utf-8") if man["maf"]["filename"].endswith(".gz") else maf_raw.decode("utf-8")
-    groups = derive_groups(parse_maf(maf_text), [_case_id(s) for s in sample_ids])
+    groups = derive_groups(parse_maf(maf_text), [case_id(s) for s in sample_ids])
 
     # 3. clinical -> Age/Sex.
     clin_raw = fetch_file(man["clinical"]["uuid"], man["clinical"]["md5"], cache / man["clinical"]["filename"])
