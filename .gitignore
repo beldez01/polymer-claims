@@ -12,3 +12,8 @@ docs/*.pdf
 
 # Local-only strategic/vision musings (kept out of the repo by request)
 docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md
+
+# Phase A real-data: raw GDC cache + the generated real SE-Contract (never committed)
+/data/
+src/polymer_claims/contracts/tcga_laml_idh.json
+src/polymer_claims/contracts/tcga_laml_idh.betas.tsv

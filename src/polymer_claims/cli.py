@@ -89,6 +89,19 @@ def _cmd_validate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_ingest(args: argparse.Namespace) -> int:
+    if args.dataset != "tcga-laml":
+        print(f"unknown ingest dataset: {args.dataset!r}", file=sys.stderr)
+        return 1
+    from .ingest.tcga_laml import ingest_tcga_laml
+    try:
+        print(ingest_tcga_laml(args.data_dir))
+    except Exception as exc:  # noqa: BLE001 — surface fetch/parse failures to the user
+        print(f"ingest failed: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def _build_llm_proposer(model: str):
     """Lazy-build a bridge_proposer over a real Anthropic-backed LLMGenerationAdapter.
     Raises RuntimeError with an install/key hint if the [llm] extra or the API key is missing."""
@@ -302,6 +315,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p_validate = sub.add_parser("validate", help="validate a claim JSON")
     p_validate.add_argument("claim", help="path to a claim JSON file")
     p_validate.set_defaults(func=_cmd_validate)
+
+    p_ingest = sub.add_parser("ingest", help="fetch + transform a real dataset into a local SE-Contract")
+    p_ingest.add_argument("dataset", choices=("tcga-laml",), help="which dataset to ingest")
+    p_ingest.add_argument("--data-dir", default="./data/tcga_laml", help="local cache dir for raw GDC files (gitignored)")
+    p_ingest.set_defaults(func=_cmd_ingest)
 
     p_run = sub.add_parser("run-cycle", help="run ONE run_cycle over a corpus")
     p_run.add_argument("corpus", help="path to a corpus JSON file")
