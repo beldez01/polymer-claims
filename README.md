@@ -13,7 +13,7 @@ toward truth, a local node that runs it, and a 3D viewer that renders the live u
 | `protocol/` | **The v1.3 protocol** (`polymer_protocol`) — the runtime over the grammar: the `run_cycle` flywheel + 3 daemons + the `next_action` scheduler + topology/timeline exports. | **Active** — all 5 sub-projects + daemons + scheduler merged |
 | `src/polymer_claims/` | **The umbrella distribution** (`polymer-claims`) — the CLI over the complete runtime + the live local node (`serve`, behind the optional `[serve]` extra). | **Active** — `pip install polymer-claims` → local node works |
 | `viewer/` | **The claims-universe 3D viewer** (Next 16 + React Three Fiber). Plays a sample timeline or streams a live node. Live layout is the signed-Laplacian spectral eigenmap, Procrustes-aligned (`serve --layout spectral`, default; `--layout force` for the legacy force-directed). | **Active** — `tsc`+`build` clean |
-| `docs/superpowers/` | The canonical spec (`specs/polymer-claims-canonical-spec.md`), plans (with Progress Logs), `CONTINUE.md` resume primer, and `archive/` of shipped per-feature design docs. | Active |
+| `docs/superpowers/` | The canonical spec (`polymer-claims-canonical-spec.md`), `CONTINUE.md` resume primer, and `archive/` of shipped per-feature design docs (specs + plans). | Active |
 | `v1.2/` | **Frozen v1.2 ecosystem, kept as a fallback** — the FormalClaim IR package, the 47-claim corpus, the `claim-harness` plugin, schema, legacy workflows. Does **not** exercise the v1.3 runtime. See `v1.2/README.md`. | Frozen (not deleted) |
 
 ---
@@ -167,7 +167,7 @@ by an isolation guard test) — v1.2 stays frozen as a fallback while v1.3 is bu
 
 ### Where the design lives
 
-- **Canonical spec (current state of record):** `docs/superpowers/specs/polymer-claims-canonical-spec.md` — the single authoritative spec; consolidates the per-feature design docs.
+- **Canonical spec (current state of record):** `docs/superpowers/polymer-claims-canonical-spec.md` — the single authoritative spec; consolidates the per-feature design docs.
 - **Original foundations spec (archived):** `docs/superpowers/archive/specs/2026-05-31-unified-claim-foundations-spec.md` · **Schema overview (HTML):** `docs/superpowers/archive/specs/2026-05-31-claim-schema-overview.html`
 - **Per-feature design rationale + plans (with Progress Logs):** `docs/superpowers/archive/specs/` and `docs/superpowers/archive/plans/` (shipped per-slice specs and their plans are archived together)
 - **Resume primer (kept current):** `docs/superpowers/CONTINUE.md`

@@ -2,7 +2,7 @@
 
 > Hook-loaded continuity file (a SessionStart hook surfaces it). **Keep the *Current state* + *NEXT*
 > sections current at every phase boundary.** Detailed build history lives in git (`git log --oneline`),
-> the canonical spec (`docs/superpowers/specs/polymer-claims-canonical-spec.md`), the per-slice plans
+> the canonical spec (`docs/superpowers/polymer-claims-canonical-spec.md`), the per-slice plans
 > (`docs/superpowers/archive/plans/`), and the archived per-feature design specs (`docs/superpowers/archive/specs/`).
 > One-page architecture map: `ARCHITECTURE_CURRENT.md`. Reserved terminology: `GLOSSARY.md`.
 
