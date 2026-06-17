@@ -5,7 +5,7 @@ import json
 import polymer_claims.contracts as contracts_mod
 from polymer_claims.contracts import clear_contract_cache, load_contract
 from polymer_claims.ingest.transform import build_contract
-from polymer_claims.split_select import split_contract, stratified_split
+from polymer_claims.split_select import split_contract, stratified_split, top_k_hypermethylated
 
 
 def test_stratified_split_disjoint_covers_all_and_stratified():
@@ -57,5 +57,20 @@ def test_split_contract_round_trips_disjoint(tmp_path, monkeypatch):
         tm = json.loads((tmp_path / "tcga_laml_idh_test.json").read_text())
         assert [r["feature_id"] for r in dm["row_data"]] == [r["feature_id"] for r in tm["row_data"]]
         assert {c["sample_id"] for c in dm["col_data"]}.isdisjoint(c["sample_id"] for c in tm["col_data"])
+    finally:
+        clear_contract_cache()
+
+
+def test_top_k_selects_hypermethylated_probe(tmp_path, monkeypatch):
+    _planted_contract(tmp_path)
+    monkeypatch.setattr(contracts_mod, "_DIR", tmp_path)
+    clear_contract_cache()
+    try:
+        top1 = top_k_hypermethylated("se:tcga_laml_idh@1", 1, level_a="WT", level_b="IDH_mut")
+        assert top1 == ("cg_hi",)  # the planted hypermethylated probe ranks first
+        top2 = top_k_hypermethylated("se:tcga_laml_idh@1", 2, level_a="WT", level_b="IDH_mut")
+        assert top2[0] == "cg_hi" and len(top2) == 2
+        # deterministic
+        assert top_k_hypermethylated("se:tcga_laml_idh@1", 3) == top_k_hypermethylated("se:tcga_laml_idh@1", 3)
     finally:
         clear_contract_cache()
