@@ -15,6 +15,14 @@ clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpu
 local-only. (Procrustes embedding alignment — spectral as the live node layout — just merged; §2E
 tiered independence + reinstatement→PENDING + n-DMPs-at-FDR before it — see NEXT.)
 
+**Repo hygiene (2026-06-17):** a full cleanup pass — `docs/` consolidated (one canonical spec +
+this file + the forward roadmap + the Phase-2 vision docs under `docs/superpowers/`; everything
+historical under `archive/`); the closed external audit archived; obsolete v1.2 migration scripts +
+dev-only fixture generators removed; one dead helper (`io.load_claim`) dropped. **v1.2 retired from
+the repo** (moved out to a local sibling, preserved pending deletion — the v1.3 system never
+depended on it; isolation-guard enforced). Runtime is unchanged — the test counts above still
+describe `main`.
+
 What the system *is* — the full architecture (grammar → protocol → node → viewer; the e-value-native
 epistemic core; real computation + CES) — lives in the canonical spec
 **`docs/superpowers/polymer-claims-canonical-spec.md`**. This file tracks **state + what's next**, not the

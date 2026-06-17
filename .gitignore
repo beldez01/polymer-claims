@@ -9,3 +9,6 @@ uv-cache/
 
 # Generated docs PDFs (build artifacts rendered from the .md sources; the .md is tracked)
 docs/*.pdf
+
+# Local-only strategic/vision musings (kept out of the repo by request)
+docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md
