@@ -106,7 +106,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ CES-0 analysis-profile content-address · CES-1 data seam · CES-2 methylation Δβ licensing ·
   CES-3 content-address completeness · CES-4 live wiring
 
-**Phase 2 — epistemic core** (north star: `docs/vision/2026-06-12-phase-2-north-star.md`):
+**Phase 2 — epistemic core** (north star: `docs/superpowers/2026-06-12-phase-2-north-star.md`):
 - ✅ 2.1 e-value / FDR / VERIFY unification (`6960100`) — e-LOND (FDR under arbitrary dependence) +
   Waudby-Smith-Ramdas betting e-value + the hard 4-way VERIFY gate
 - ✅ 2.2 defeat-as-e-value-update + alpha-wealth refund (`eef6143`) — `FDRTest.retracted` tombstone;
@@ -144,7 +144,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 ## Reference pointers
 
 - **Forward roadmap:** `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md` · historical decision menu (archived): `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`
-- **Phase-2 north star:** `docs/vision/2026-06-12-phase-2-north-star.md`
+- **Phase-2 north star:** `docs/superpowers/2026-06-12-phase-2-north-star.md`
 - **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`
 - **Architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`
 - **Spectral layout guides:** `docs/spectral-layout-how-to-use.md` (usage) ·

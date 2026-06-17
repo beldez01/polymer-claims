@@ -241,7 +241,7 @@ v1.2 limitations are left as-is under the freeze.
 - **Per-feature design rationale (archived):** `docs/superpowers/archive/specs/` and
   `docs/superpowers/archive/plans/`
 - **Forward roadmap (real-data swap = Phase A):** `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`
-- **Phase-2 north star:** `docs/vision/2026-06-12-phase-2-north-star.md`
+- **Phase-2 north star:** `docs/superpowers/2026-06-12-phase-2-north-star.md`
 - **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`
 - **Spectral-layout guides:** `docs/spectral-layout-how-to-use.md` (usage) ·
   `docs/spectral-layout-how-it-works.md` (eigenmap + Procrustes theory)
