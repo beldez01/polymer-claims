@@ -89,7 +89,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   3D viewer (Next 16 / React Three Fiber; sample + live modes), verified in-browser
 - ✅ Real LLM generation adapter (`[llm]` extra) driving the live node (`serve --llm`)
 
-**External audit — CLOSED** (`polymer-claims-audit.md`):
+**External audit — CLOSED** (`docs/superpowers/archive/polymer-claims-audit.md`):
 - ✅ Tier A+B (`c662f1c`): bounded frame retention · tick-serialization lock · bounded SSE queues ·
   non-loopback bind guard · machine-clean JSON · `ARCHITECTURE_CURRENT.md` + `GLOSSARY.md` · v1.2 frozen
   banners
