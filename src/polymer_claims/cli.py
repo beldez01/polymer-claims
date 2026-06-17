@@ -89,6 +89,19 @@ def _cmd_validate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_ingest(args: argparse.Namespace) -> int:
+    if args.dataset != "tcga-laml":
+        print(f"unknown ingest dataset: {args.dataset!r}", file=sys.stderr)
+        return 1
+    from .ingest.tcga_laml import ingest_tcga_laml
+    try:
+        print(ingest_tcga_laml(args.data_dir))
+    except Exception as exc:  # noqa: BLE001 — surface fetch/parse failures to the user
+        print(f"ingest failed: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def _build_llm_proposer(model: str):
     """Lazy-build a bridge_proposer over a real Anthropic-backed LLMGenerationAdapter.
     Raises RuntimeError with an install/key hint if the [llm] extra or the API key is missing."""
@@ -216,6 +229,30 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
+    if getattr(args, "tcga_laml", False):
+        from .methyl_ndmp import NDmpOlsCoefAdapter, NDmpTTestAdapter, ndmp_independent_registry
+        from .analysis_profile import profile_oracle_registry
+        from .evidence import evidence_map
+        from .materialization import materialization_map
+        from .profiles import CANONICAL_HM450_V1
+        from .exec_adapters import real_ndmp_seed_corpus
+        corpus, seed_kwargs = real_ndmp_seed_corpus()
+        runner = NodeRunner.from_seed(
+            corpus,
+            adapters=(NDmpTTestAdapter(), NDmpOlsCoefAdapter()),
+            ctx=_CTX,
+            scheduler_budget=args.budget,
+            max_frames=args.max_frames,
+            adapter_registry=ndmp_independent_registry(),
+            oracles=profile_oracle_registry((CANONICAL_HM450_V1, "recomputable_public")),
+            materializations=materialization_map(corpus, _CTX, profiles=(CANONICAL_HM450_V1,)),
+            evidence=evidence_map(corpus),
+            layout=args.layout,
+            **seed_kwargs,
+        )
+        app = create_app(runner, interval=args.interval, origins=args.origins or None)
+        uvicorn.run(app, host=args.host, port=args.port)
+        return 0
     if getattr(args, "real_data", False):
         try:
             proposer = _build_real_data_proposer(args.llm_model)
@@ -303,6 +340,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p_validate.add_argument("claim", help="path to a claim JSON file")
     p_validate.set_defaults(func=_cmd_validate)
 
+    p_ingest = sub.add_parser("ingest", help="fetch + transform a real dataset into a local SE-Contract")
+    p_ingest.add_argument("dataset", choices=("tcga-laml",), help="which dataset to ingest")
+    p_ingest.add_argument("--data-dir", default="./data/tcga_laml", help="local cache dir for raw GDC files (gitignored)")
+    p_ingest.set_defaults(func=_cmd_ingest)
+
     p_run = sub.add_parser("run-cycle", help="run ONE run_cycle over a corpus")
     p_run.add_argument("corpus", help="path to a corpus JSON file")
     p_run.add_argument("--out", default=None, help="write resulting corpus JSON here")
@@ -361,6 +403,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_serve.add_argument("--llm", action="store_true", help="drive GENERATE with a real LLM agent (needs the [llm] extra + ANTHROPIC_API_KEY)")
     p_serve.add_argument("--real-data", action="store_true", help="LLM proposes REAL-DATA mean_diff plans; node runs the local execution adapters + apparatus oracle (needs [llm] + ANTHROPIC_API_KEY)")
+    p_serve.add_argument("--tcga-laml", action="store_true", help="seed the live node with the REAL TCGA-LAML genome-wide n-DMP claim (ingest first; one-shot compute, then displays)")
     p_serve.add_argument("--llm-model", default="claude-sonnet-4-6", help="model for --llm")
     p_serve.add_argument("--llm-every", type=int, default=4, help="LLM proposes every Nth tick (throttle)")
     p_serve.add_argument(

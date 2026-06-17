@@ -92,8 +92,50 @@ CANONICAL_EPICV2_V1 = AnalysisProfile(
     engine_version="sesame/minfi/limma/DMRcate/r-4.5.2/bioc-3.22",
 )
 
+# The GDC HM450 Level-3 (SeSAMe-processed) apparatus, GRCh38. Distinct platform + distinct
+# content-address from the EPICv2 profile -> the apparatus abstraction spans platforms. The
+# differential method is the in-repo unadjusted two-group pooled-t (NOT limma): Phase A's n-DMP
+# count licenses on per-probe p<alpha with corpus-level FDR governed by the e-LOND ledger, not a
+# per-probe BH adjustment. Age/Sex are carried in the contract but NOT adjusted for (honest
+# simplification — see plan Global Constraints).
+CANONICAL_HM450_V1 = AnalysisProfile(
+    profile_id="canonical_hm450_grch38_v1",
+    version="1",
+    array_type="HM450",
+    genome_assembly="hg38",
+    manifest="sesameData::HM450.hg38.manifest",
+    norm_package="sesame",
+    norm_method="openSesame",
+    norm_prep="QCDPB",
+    detection_threshold=0.05,
+    detection_rule="pOOBAH_p_le",
+    sample_fail_threshold=0.05,
+    cross_reactive_source="cross_reactive_probes_hm450_v1",
+    cross_reactive_file_hash="sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    cross_reactive_n_probes=29233,
+    snp_method="minfi:dropLociWithSnps[SBE,CpG]",
+    snp_maf=0.01,
+    sex_chrom="removed",
+    replicate_collapse="none",
+    test_on="M_value",
+    clamp_lower=1e-6,
+    clamp_upper=0.999999,
+    design_formula="~ 0 + group",
+    contrast="IDH_mut - WT",
+    covariates=(),
+    batch_correction=None,
+    cell_adjustment=None,
+    dmp_method="two_group_pooled_t",
+    dmp_adjust_method="none",
+    fdr_threshold=0.05,
+    delta_beta_threshold=None,
+    dmr_method=None,
+    seed=None,
+    engine_version="gdc-sesame-level3/python-pooled-t/polymer-claims",
+)
+
 _REGISTRY: dict[tuple[str, str], AnalysisProfile] = {
-    (p.profile_id, p.version): p for p in (PINNED_DESIGN_V1, CANONICAL_EPICV2_V1)
+    (p.profile_id, p.version): p for p in (PINNED_DESIGN_V1, CANONICAL_EPICV2_V1, CANONICAL_HM450_V1)
 }
 
 

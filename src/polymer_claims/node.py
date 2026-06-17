@@ -70,6 +70,8 @@ class NodeRunner:
         profiles: tuple = (CANONICAL_EPICV2_V1,),
         evalue_gate: bool = False,
         layout: Literal["spectral", "force"] = "spectral",
+        materializations: dict | None = None,
+        evidence: dict | None = None,
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -87,6 +89,11 @@ class NodeRunner:
         self.profiles = profiles
         self.evalue_gate = evalue_gate
         self.run_cycle_kwargs = run_cycle_kwargs
+        # Optional static overrides for materializations/evidence.  When provided,
+        # these bypass the content_address / evalue_gate flag-based recomputation in
+        # tick() (additive/optional: None → byte-identical existing behaviour).
+        self._static_materializations = materializations
+        self._static_evidence = evidence
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
         self.prev_positions: dict[str, tuple] = {}
@@ -132,6 +139,8 @@ class NodeRunner:
         profiles: tuple = (CANONICAL_EPICV2_V1,),
         evalue_gate: bool = False,
         layout: Literal["spectral", "force"] = "spectral",
+        materializations: dict | None = None,
+        evidence: dict | None = None,
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
@@ -145,6 +154,8 @@ class NodeRunner:
             profiles=profiles,
             evalue_gate=evalue_gate,
             layout=layout,
+            materializations=materializations,
+            evidence=evidence,
             **run_cycle_kwargs,
         )
 
@@ -169,12 +180,15 @@ class NodeRunner:
         action = next_action(state, budget=self.scheduler_budget, config=self.config)
 
         if action is not None and action.kind == ActionKind.RUN_CYCLE:
-            mats = (
-                materialization_map(self.corpus, self.ctx, profiles=self.profiles)
-                if self.content_address
-                else None
-            )
-            if self.evalue_gate:
+            if self._static_materializations is not None:
+                mats = self._static_materializations
+            elif self.content_address:
+                mats = materialization_map(self.corpus, self.ctx, profiles=self.profiles)
+            else:
+                mats = None
+            if self._static_evidence is not None:
+                ev = self._static_evidence
+            elif self.evalue_gate:
                 from .evidence import evidence_map   # lazy: keeps node.py base import numpy-free
                 ev = evidence_map(self.corpus)
             else:

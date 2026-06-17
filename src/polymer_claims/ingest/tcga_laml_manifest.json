@@ -1,0 +1,10 @@
+{
+  "project": "TCGA-LAML",
+  "platform": "Illumina Human Methylation 450",
+  "data_release": "TODO: pin the GDC data release tag at population time",
+  "betas": [
+    {"uuid": "PLACEHOLDER-UUID", "md5": "PLACEHOLDER-MD5", "case_id": "TCGA-AB-2802", "filename": "PLACEHOLDER.txt"}
+  ],
+  "maf": {"uuid": "PLACEHOLDER-UUID", "md5": "PLACEHOLDER-MD5", "filename": "TCGA-LAML.maf.gz"},
+  "clinical": {"uuid": "PLACEHOLDER-UUID", "md5": "PLACEHOLDER-MD5", "filename": "clinical.tsv"}
+}
