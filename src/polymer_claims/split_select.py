@@ -49,7 +49,9 @@ def split_contract(
         sel = [col_of[s] for s in ids]
         with open(cdir / f"{in_stem}.betas.tsv") as fin, open(cdir / f"{stem}.betas.tsv", "w") as fout:
             fout.write("\t".join(["feature_id", *ids]) + "\n")
-            next(fin)  # skip the header
+            in_header = next(fin).rstrip("\n").split("\t")[1:]
+            if in_header != sample_order:
+                raise ValueError("betas TSV header does not match manifest col_data order")
             for line in fin:
                 cells = line.rstrip("\n").split("\t")
                 fout.write("\t".join([cells[0], *(cells[i] for i in sel)]) + "\n")
@@ -78,18 +80,18 @@ def top_k_hypermethylated(
     betas_path = Path(se.access_methods[0].access_url)
     manifest = json.loads((betas_path.parent / f"{se.contract_uid.split('@')[0]}.json").read_text())
     group_of = {c["sample_id"]: c[group_col] for c in manifest["col_data"]}
-    lines = betas_path.read_text().splitlines()
-    header = lines[0].split("\t")[1:]
-    a_idx = [i for i, sid in enumerate(header) if group_of[sid] == level_a]
-    b_idx = [i for i, sid in enumerate(header) if group_of[sid] == level_b]
-    if not a_idx or not b_idx:
-        raise ValueError(f"empty group (level_a={len(a_idx)}, level_b={len(b_idx)})")
     scored: list[tuple[float, str]] = []
-    for ln in lines[1:]:
-        cells = ln.split("\t")
-        vals = cells[1:]
-        ma = sum(float(vals[i]) for i in a_idx) / len(a_idx)
-        mb = sum(float(vals[i]) for i in b_idx) / len(b_idx)
-        scored.append((mb - ma, cells[0]))
+    with open(betas_path) as fh:
+        header = next(fh).rstrip("\n").split("\t")[1:]
+        a_idx = [i for i, sid in enumerate(header) if group_of[sid] == level_a]
+        b_idx = [i for i, sid in enumerate(header) if group_of[sid] == level_b]
+        if not a_idx or not b_idx:
+            raise ValueError(f"empty group (level_a={len(a_idx)}, level_b={len(b_idx)})")
+        for ln in fh:
+            cells = ln.rstrip("\n").split("\t")
+            vals = cells[1:]
+            ma = sum(float(vals[i]) for i in a_idx) / len(a_idx)
+            mb = sum(float(vals[i]) for i in b_idx) / len(b_idx)
+            scored.append((mb - ma, cells[0]))
     scored.sort(key=lambda t: (-t[0], t[1]))  # Δβ desc, probe-id tiebreak -> deterministic
     return tuple(p for _, p in scored[:k])
