@@ -194,6 +194,30 @@ def apparatus_oracle_registry() -> OracleRegistry:
     ))
 
 
+def real_ndmp_seed_corpus():
+    """Seed the live node with the single REAL-DATA n-DMP claim (genome-wide, REPRODUCED).
+    Returns (corpus, from_seed_kwargs). Requires a local se:tcga_laml_idh@1 (ingest first)."""
+    import math
+
+    from polymer_grammar import FDRLedger
+    from polymer_protocol import Corpus
+
+    from .analysis_profile import profile_oracle_id
+    from .methyl_ndmp import _all_probe_ids, n_dmps_claim
+    from .profiles import CANONICAL_HM450_V1
+
+    ref = "se:tcga_laml_idh@1"
+    k = math.ceil(0.05 * len(_all_probe_ids(ref)))  # pre-registered null floor
+    claim = n_dmps_claim(
+        "tcga-laml-ndmp", ref=ref,
+        group_col="Sample_Group", level_a="WT", level_b="IDH_mut",
+        alpha=0.05, k=k, oracle_ref=profile_oracle_id(CANONICAL_HM450_V1),
+        title="genome-wide n-DMPs, IDH-mut vs WT AML (real TCGA-LAML)",
+    )
+    corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
+    return corpus, {"budget": 2.5}
+
+
 def real_data_seed_corpus():
     """A tiny seed of real-data mean_diff claims so the live node isn't empty.
     Returns (corpus, run_cycle_kwargs). The LLM proposer is added by the caller (serve)."""
