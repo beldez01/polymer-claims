@@ -7,7 +7,7 @@ from pathlib import Path
 
 from polymer_claims import contracts as _contracts
 from polymer_claims.ingest.gdc_fetch import fetch_file, load_pinned_manifest
-from polymer_claims.ingest.gdc_parse import parse_beta_file, parse_clinical, parse_maf
+from polymer_claims.ingest.gdc_parse import parse_beta_file, parse_beta_meta, parse_clinical, parse_maf
 from polymer_claims.ingest.transform import _case_id, build_contract, derive_groups
 
 
@@ -17,19 +17,27 @@ def ingest_tcga_laml(data_dir: str) -> str:
     man = load_pinned_manifest()
 
     # 1. betas: one file per case -> {case_id: {probe: beta}} and the union probe set + row meta.
+    #    The per-probe Chromosome/Start annotation is platform-fixed (identical across aliquot files),
+    #    so row_meta is parsed ONCE from the first file's annotation columns (real chr/pos -> the
+    #    genome-wide QC sex-chrom filter bites and row_data carries true coordinates).
     betas: dict[str, dict[str, float]] = {}
     sample_ids: list[str] = []
+    row_meta: dict[str, dict] = {}
     for entry in man["betas"]:
         raw = fetch_file(entry["uuid"], entry["md5"], cache / entry["filename"])
-        col = parse_beta_file(raw.decode("utf-8", errors="replace"))
+        text = raw.decode("utf-8", errors="replace")
+        col = parse_beta_file(text)
+        if not row_meta:
+            row_meta = parse_beta_meta(text)
         cid = entry["case_id"]
         sample_ids.append(cid)
         for probe, beta in col.items():
             betas.setdefault(probe, {})[cid] = beta
 
-    # row_meta: probe -> chr/pos. The pinned manifest's per-probe annotation is platform-fixed;
-    # for the demo we read it from the HM450 manifest sidecar if present, else default chr/pos 0.
-    row_meta = {probe: {"chr": "chr1", "pos": 0} for probe in betas}  # see implementation note
+    # every probe in betas must have a row_meta entry (build_contract indexes row_meta[p] directly);
+    # GDC aliquot files share the platform probe set, so this only fills genuine gaps.
+    for probe in betas:
+        row_meta.setdefault(probe, {"chr": "", "pos": 0})
 
     # 2. MAF -> IDH grouping.
     maf_raw = fetch_file(man["maf"]["uuid"], man["maf"]["md5"], cache / man["maf"]["filename"])
