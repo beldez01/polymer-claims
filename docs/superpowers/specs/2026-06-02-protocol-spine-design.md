@@ -1,6 +1,6 @@
 # Protocol Runtime — Sub-project #1: Corpus + the Assessment Spine
 
-> Design spec. Status: **approved** (brainstorm 2026-06-02). First sub-project of the
+> Design spec. Status: **shipped to `main`** (approved 2026-06-02; live state in `docs/superpowers/CONTINUE.md`). First sub-project of the
 > protocol runtime (the 8-stage flywheel + 3 daemons from the unified spec §4 and the
 > keystone `_FINAL_knowledge_generation_protocol.md`). Builds the **deterministic backbone**:
 > a `Corpus` container + the assessment stages wired as total `corpus → corpus` transforms,

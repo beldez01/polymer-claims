@@ -6,8 +6,7 @@
 > and **orthogonal-Procrustes-aligns** each incremental frame to the previous so the 3D universe evolves
 > smoothly instead of thrashing. Umbrella-only (protocol untouched).
 >
-> Rhythm: this spec → `superpowers:writing-plans` → `superpowers:subagent-driven-development` →
-> merge `--no-ff` → update `CONTINUE.md`.
+> **Status: shipped to `main`.** This is the design record; live build state + test counts in `docs/superpowers/CONTINUE.md`.
 
 ## Problem
 

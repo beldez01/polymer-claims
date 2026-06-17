@@ -1,8 +1,8 @@
 # Earned strength — the full 2c reconciliation (design)
 
 **Date:** 2026-06-08
-**Status:** approved (design)
-**Predecessor:** `archive/specs/2026-06-08-phase2bc-real-data-generation-and-oracle-design.md` +
+**Status:** shipped to `main` (design approved 2026-06-08); live state in `docs/superpowers/CONTINUE.md`
+**Predecessor:** `docs/superpowers/archive/specs/2026-06-08-phase2bc-real-data-generation-and-oracle-design.md` +
 `docs/superpowers/notes/2026-06-08-earned-strength-followup.md`
 **Layer:** protocol (pure) + a tiny umbrella seam adjustment; **zero grammar changes**
 

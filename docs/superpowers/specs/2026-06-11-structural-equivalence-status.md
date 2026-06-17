@@ -3,7 +3,7 @@
 > **Status:** design spec, 2026-06-11. Slice 1a of the credibility-arc roadmap
 > (`docs/superpowers/roadmaps/2026-06-11-credibility-arc-roadmap.md`). Closes the "beat a
 > criterion" gap's cheapest leg: a `LICENSED` edge that never passed a criterion.
-> **Next step after approval:** `superpowers:writing-plans` → `superpowers:subagent-driven-development`.
+> **Status: shipped to `main`.** This is the design record; live build state + test counts in `docs/superpowers/CONTINUE.md`.
 
 ## Problem
 

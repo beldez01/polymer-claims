@@ -5,8 +5,7 @@
 > for LICENSED" by splitting the single licensed standing into two tiers, and lets the gold tier do what
 > the current air-gap cannot: **multiply two genuinely-independent e-values**.
 >
-> Rhythm: brainstorm (this spec) → `superpowers:writing-plans` → `superpowers:subagent-driven-development`
-> → merge `--no-ff` → update `CONTINUE.md` + memory.
+> **Status: shipped to `main`.** This is the design record; live build state + test counts in `docs/superpowers/CONTINUE.md`.
 
 ## Problem
 

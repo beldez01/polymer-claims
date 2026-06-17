@@ -1,7 +1,7 @@
 # Unified Claim Foundations — Grammar + Protocol (v1.3 Target)
 
 Date: 2026-05-31
-Status: Foundations spec for review
+Status: Realized in v1.3 — grammar + protocol built; remains the canonical foundations reference (live state: `docs/superpowers/CONTINUE.md`)
 Supersedes: `2026-05-29-claim-pattern-architecture-design.md` (the pattern reframe is retained and absorbed here as one element of a deeper target).Source research (read for full justification + citations):
 - the reference claim grammar document
 - the reference knowledge generation protocol document

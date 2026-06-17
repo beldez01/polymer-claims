@@ -6,8 +6,7 @@
 > defeated, grounded semantics reinstates the original claim — and we reopen it to **PENDING so it
 > re-tests** (never auto-relicense a possibly-stale license).
 >
-> Rhythm: this spec → `superpowers:writing-plans` → `superpowers:subagent-driven-development` →
-> merge `--no-ff` → update `CONTINUE.md`.
+> **Status: shipped to `main`.** This is the design record; live build state + test counts in `docs/superpowers/CONTINUE.md`.
 
 ## Problem
 

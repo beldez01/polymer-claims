@@ -6,8 +6,7 @@
 > reduction with its own **count-enrichment e-value**. Umbrella-only (grammar + protocol untouched),
 > exactly like CES-2.
 >
-> Rhythm: this spec → `superpowers:writing-plans` → `superpowers:subagent-driven-development` →
-> merge `--no-ff` → update `CONTINUE.md`.
+> **Status: shipped to `main`.** This is the design record; live build state + test counts in `docs/superpowers/CONTINUE.md`.
 
 ## Problem
 
