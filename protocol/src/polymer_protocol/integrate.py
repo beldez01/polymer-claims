@@ -13,6 +13,7 @@ from polymer_grammar import (
     RejectionReason,
     Status,
     derived_rebut_edges,
+    null_bearing_knockout_ids,
     restore_consistency,
     retract_tests,
 )
@@ -88,7 +89,16 @@ def integrate(
         and c.evaluation_plan is not None
     }
     removed = rr.retraction.possibly_retracted if rr.retraction is not None else frozenset()
-    retract_ids = frozenset(defeated_licensed) | removed
+    # Refund gate (evalue-claim-graph/refund-validity.md §4): ALL grounded-OUT licensed claims (and
+    # AGM removals) de-license in the graph, but ONLY null-bearing knockouts refund the e-LOND
+    # ledger. A warrant-only defeat (undercut/reinterpret/reclassify) moves the interpretation, not
+    # the effect-null, so tombstoning its discovery would corrupt the FDR. Use the pre-drop `merged`
+    # edges so an AGM-removed claim's null-bearing attacker is still visible (rr.edges drops it).
+    strength_map = {c.id: c.strength for c in corpus.claims}
+    licensed_ids = frozenset(c.id for c in rr.claims if c.status == Status.LICENSED)
+    retract_ids = null_bearing_knockout_ids(
+        frozenset(defeated_licensed) | removed, merged, strength_map, rr.in_set, licensed_ids
+    )
     new_claims = tuple(
         _reject(c) if c.id in defeated_licensed
         else _reinstate(c) if c.id in reinstated

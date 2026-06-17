@@ -252,3 +252,34 @@ def test_defeat_rejected_without_plan_not_reopened(empty_ledger):
     out, _ = integrate(corpus, scaff, ())
     a2 = next(x for x in out.claims if x.id == "A")
     assert a2.status == Status.REJECTED  # planless -> not reopened
+
+
+# ---------------------------------------------------------------------------
+# Refund gate (evalue-claim-graph/fix-edge-kind-refund.md): a WARRANT-only defeat
+# (undercut/reinterpret/reclassify) de-licenses in the graph but must NOT refund
+# the e-LOND ledger — the effect is real, only the interpretation moved.
+# ---------------------------------------------------------------------------
+
+def test_warrant_only_defeat_delicenses_but_keeps_discovery_live():
+    a, ledger = _licensed_A_with_discovery()
+    b = make_claim("B", status=Status.PENDING)
+    edge = DefeatEdge(source="B", target="A", kind=DefeatEdgeKind.UNDERCUT)
+    corpus = Corpus(claims=(a, b), defeat_edges=(edge,), fdr_ledger=ledger)
+    scaff = CycleScaffolding(grounded_extension=("A", "B"))
+    out, _ = integrate(corpus, scaff, ())
+    a2 = next(c for c in out.claims if c.id == "A")
+    assert a2.status == Status.REJECTED          # de-licensed in the graph (grounded-OUT)
+    assert out.fdr_ledger.tests[0].retracted is False   # but the ledger is NOT refunded
+    assert out.fdr_ledger.n_discoveries == 1
+
+
+def test_reinterpret_defeat_keeps_discovery_live():
+    a, ledger = _licensed_A_with_discovery()
+    b = make_claim("B", status=Status.PENDING)
+    edge = DefeatEdge(source="B", target="A", kind=DefeatEdgeKind.REINTERPRET)
+    corpus = Corpus(claims=(a, b), defeat_edges=(edge,), fdr_ledger=ledger)
+    scaff = CycleScaffolding(grounded_extension=("A", "B"))
+    out, _ = integrate(corpus, scaff, ())
+    assert next(c for c in out.claims if c.id == "A").status == Status.REJECTED
+    assert out.fdr_ledger.tests[0].retracted is False
+    assert out.fdr_ledger.n_discoveries == 1

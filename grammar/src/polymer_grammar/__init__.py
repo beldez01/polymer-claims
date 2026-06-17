@@ -32,11 +32,14 @@ from .roles import CausalRoles, Role
 from .units import DIMENSIONLESS, Dimension, compatible
 from .defeat import (
     ATTACK_KINDS,
+    NULL_BEARING_KINDS,
     DefeatEdge,
     DefeatEdgeKind,
     derived_rebut_edges,
     effective_defeats,
     grounded_extension,
+    is_null_bearing,
+    null_bearing_knockout_ids,
     undermine_edges_from_failed_satisfactions,
 )
 from .blame import (
@@ -194,8 +197,11 @@ __all__ = [
     "Dimension",
     "compatible",
     "ATTACK_KINDS",
+    "NULL_BEARING_KINDS",
     "DefeatEdge",
     "DefeatEdgeKind",
+    "is_null_bearing",
+    "null_bearing_knockout_ids",
     "derived_rebut_edges",
     "effective_defeats",
     "grounded_extension",

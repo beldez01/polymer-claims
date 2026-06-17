@@ -4,11 +4,14 @@ from pydantic import ValidationError
 from polymer_grammar.claim import Claim
 from polymer_grammar.defeat import (
     ATTACK_KINDS,
+    NULL_BEARING_KINDS,
     DefeatEdge,
     DefeatEdgeKind,
     derived_rebut_edges,
     effective_defeats,
     grounded_extension,
+    is_null_bearing,
+    null_bearing_knockout_ids,
     undermine_edges_from_failed_satisfactions,
 )
 from polymer_grammar.licensing import MaterializationContext, Satisfaction, SatisfactionVerdict
@@ -278,3 +281,75 @@ def test_grounded_extension_honors_provisional_activation():
     assert "a" not in g0 and "b" in g0 and "d" in g0
     g1 = grounded_extension(ids, (e_ba, e_db), strength, licensed_ids=frozenset({"d"}))
     assert "a" in g1 and "b" not in g1 and "d" in g1                           # d licensed -> d defeats b -> a reinstated
+
+
+# ---------------------------------------------------------------------------
+# Null-bearing refund gate (evalue-claim-graph/fix-edge-kind-refund.md):
+# only defeats that ENTAIL the effect-null may refund the e-LOND ledger.
+# ---------------------------------------------------------------------------
+
+def test_null_bearing_kinds_is_rebut_only():
+    assert NULL_BEARING_KINDS == frozenset({DefeatEdgeKind.REBUT})
+
+
+def test_defeat_edge_entails_null_defaults_none():
+    assert DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT).entails_null is None
+
+
+def test_is_null_bearing_rebut_true_warrant_false():
+    assert is_null_bearing(DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT)) is True
+    for k in (DefeatEdgeKind.UNDERCUT, DefeatEdgeKind.RECLASSIFY,
+              DefeatEdgeKind.REINTERPRET, DefeatEdgeKind.UNDERMINE):
+        assert is_null_bearing(DefeatEdge(source="a", target="b", kind=k)) is False
+
+
+def test_is_null_bearing_explicit_override():
+    # an undermine that genuinely entails the null can be flagged; a rebut can be opted out.
+    assert is_null_bearing(
+        DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.UNDERMINE, entails_null=True)
+    ) is True
+    assert is_null_bearing(
+        DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT, entails_null=False)
+    ) is False
+
+
+def test_null_bearing_knockout_rebut_from_accepted_source():
+    edges = (DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT),)
+    strength = {"a": None, "b": None}
+    out = null_bearing_knockout_ids(frozenset({"b"}), edges, strength, in_set=frozenset({"a"}))
+    assert out == frozenset({"b"})
+
+
+def test_null_bearing_knockout_warrant_kind_excluded():
+    edges = (DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.UNDERCUT),)
+    strength = {"a": None, "b": None}
+    out = null_bearing_knockout_ids(frozenset({"b"}), edges, strength, in_set=frozenset({"a"}))
+    assert out == frozenset()
+
+
+def test_null_bearing_knockout_requires_accepted_source():
+    edges = (DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT),)
+    strength = {"a": None, "b": None}
+    # source "a" is NOT grounded-IN -> not an accepted knockout
+    out = null_bearing_knockout_ids(frozenset({"b"}), edges, strength, in_set=frozenset())
+    assert out == frozenset()
+
+
+def test_null_bearing_knockout_mixed_kinds_tombstones_if_any_null_bearing():
+    edges = (
+        DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.UNDERCUT),
+        DefeatEdge(source="c", target="b", kind=DefeatEdgeKind.REBUT),
+    )
+    strength = {"a": None, "b": None, "c": None}
+    out = null_bearing_knockout_ids(
+        frozenset({"b"}), edges, strength, in_set=frozenset({"a", "c"})
+    )
+    assert out == frozenset({"b"})
+
+
+def test_null_bearing_knockout_provisional_inert_is_not_a_knockout():
+    edges = (DefeatEdge(source="a", target="b", kind=DefeatEdgeKind.REBUT, provisional=True),)
+    strength = {"a": None, "b": None}
+    # provisional + source not licensed -> inert -> not an effective defeat -> no refund
+    out = null_bearing_knockout_ids(frozenset({"b"}), edges, strength, in_set=frozenset({"a"}))
+    assert out == frozenset()

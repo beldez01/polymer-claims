@@ -45,6 +45,14 @@ ATTACK_KINDS = frozenset(
     }
 )
 
+# Only defeats that ENTAIL the effect-null (H0: effect <= tau) may refund the e-LOND ledger
+# (evalue-claim-graph/refund-validity.md Theorem 1). Edge kind is a coarse proxy: REBUT asserts
+# the contrary conclusion -> entails the null. UNDERMINE attacks the data basis but does NOT by
+# itself establish the null (the effect may be real in valid data), so it is null-bearing only
+# when flagged explicitly via DefeatEdge.entails_null. UNDERCUT/RECLASSIFY/REINTERPRET move only
+# the warrant/interpretation and never tombstone.
+NULL_BEARING_KINDS = frozenset({DefeatEdgeKind.REBUT})
+
 
 class DefeatEdge(_Model):
     source: str
@@ -52,6 +60,7 @@ class DefeatEdge(_Model):
     kind: DefeatEdgeKind
     note: str | None = None
     provisional: bool = False
+    entails_null: bool | None = None  # explicit effect-null entailment override (the refund gate)
 
     @model_validator(mode="after")
     def _no_self_loop(self) -> "DefeatEdge":
@@ -86,6 +95,39 @@ def effective_defeats(
             continue  # target at-least-as-strong on every axis (>=, standard VAF preference) -> attack filtered out
         out.add((e.source, e.target))
     return frozenset(out)
+
+
+def is_null_bearing(edge: DefeatEdge) -> bool:
+    """True iff this defeat's acceptance entails the defeated claim's effect-null, so it may
+    refund (tombstone) the e-LOND discovery. `entails_null` overrides the kind default; absent
+    it, only REBUT is null-bearing. See evalue-claim-graph/fix-edge-kind-refund.md."""
+    if edge.entails_null is not None:
+        return edge.entails_null
+    return edge.kind in NULL_BEARING_KINDS
+
+
+def null_bearing_knockout_ids(
+    defeated_ids: Iterable[str],
+    edges: Iterable[DefeatEdge],
+    strength: Mapping[str, StrengthVector | None],
+    in_set: frozenset[str],
+    licensed_ids: frozenset[str] = frozenset(),
+) -> frozenset[str]:
+    """Of `defeated_ids`, those knocked out by at least one EFFECTIVE, ACCEPTED (grounded-IN
+    source), NULL-BEARING defeat — the ONLY claims whose e-LOND discovery may be refunded.
+    Warrant-only knockouts (undercut/reinterpret/reclassify) de-license in the graph but keep
+    their live discovery (evalue-claim-graph/refund-validity.md §4)."""
+    targets = frozenset(defeated_ids)
+    edges = tuple(edges)
+    effective = effective_defeats(edges, strength, licensed_ids)
+    return frozenset(
+        e.target
+        for e in edges
+        if e.target in targets
+        and is_null_bearing(e)
+        and (e.source, e.target) in effective
+        and e.source in in_set
+    )
 
 
 def grounded_extension(
