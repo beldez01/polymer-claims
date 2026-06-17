@@ -74,13 +74,17 @@ def test_real_ndmp_licenses_reproduced_with_full_content_address():
     sat = c.licensing.satisfactions[0]
     mctx = sat.materialization  # Satisfaction.materialization: MaterializationContext
     assert mctx.dimnames_hash and mctx.profile_hash and mctx.semantic_run_id
-    # target_fdr is the honest headline — assert it is a finite false-license rate
-    q = result.corpus.fdr_ledger.target_fdr
-    assert 0.0 < q <= 1.0
+    # q (the headline "we expect ≤ q of LICENSED claims to be false") is the e-LOND control
+    # level; the grammar exposes it as target_fdr (no separate realized/empirical q exists).
+    assert result.corpus.fdr_ledger.target_fdr == 0.05
 
 
 def test_real_ndmp_legs_agree_on_the_integer_count():
-    node = n_dmps_claim("tmp", ref=_REF, alpha=_ALPHA, k=1).evaluation_plan.graph.nodes[0]
+    node = n_dmps_claim(
+        "tmp", ref=_REF,
+        group_col="Sample_Group", level_a="WT", level_b="IDH_mut",
+        alpha=_ALPHA, k=1,
+    ).evaluation_plan.graph.nodes[0]
     a = NDmpTTestAdapter().execute(node, (), _BASE).value
     b = NDmpOlsCoefAdapter().execute(node, (), _BASE).value
     assert a == b  # air-gap holds on real data
