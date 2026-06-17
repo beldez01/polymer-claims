@@ -203,12 +203,19 @@ A standalone Next 16 / React Three Fiber app (`viewer/`) with the D2 metrologica
   378,894 probes, **50,339 DMPs (p<0.05) vs an 18,945 null floor**, count-enrichment e-value → ∞, two
   independent legs agreeing on the integer count, full content-address recorded. Betas are the local
   UCSC-Xena GDC-Level-3 matrix; IDH status from GDC open masked-somatic MAFs. The recomputable-public
-  tier is now *earned, not just exercised*, for this reduction. **Still synthetic** (not yet earned):
-  **region-Δβ** (its own real run is a follow-up) and **REPLICATED** (needs a 2nd real cohort).
-  **Run caveats:** IDH-mut n=10 — GDC open-MAF calling is conservative and uncovered cases default to WT,
-  which only *dilutes* the contrast (biases against a license, so the result is conservative);
-  sex-chromosome QC was skipped (the Xena matrix carries no probe chr/pos). Data is **local-only,
-  gitignored** — nothing real committed.
+  tier is now *earned, not just exercised*, for this reduction. **Run caveats:** IDH-mut n=10 — GDC
+  open-MAF calling is conservative and uncovered cases default to WT, which only *dilutes* the contrast
+  (biases against a license, so the result is conservative); sex-chromosome QC was skipped (the Xena
+  matrix carries no probe chr/pos). Data is **local-only, gitignored** — nothing real committed.
+- **Region-Δβ is NOT earned — attempted on real data, gate WITHHELD at n=10 (severity demonstrated).**
+  The honest region reduction (top-10k DMPs selected on a discovery half, Δβ tested on a held-out half —
+  `src/polymer_claims/split_select.py`) ran on the real cohort and the gate **withheld**: held-out
+  betting e-value (Δβ > pre-registered τ=0.10) = 0.867 (< 1) → PENDING. The discovery/test split
+  correctly refused a license the naive in-sample test would have granted (the top-10k regress below the
+  0.10 floor on held-out data). Cause is **power (n=10 → ~5 per split), not biology** — *power-limited,
+  not refuted*; a fuller IDH cohort would likely clear it (τ stays fixed, no post-hoc tuning). This is the
+  first on-real-data prototype of the autonomous-loop §5b sample-splitting discipline. **REPLICATED**
+  remains synthetic (needs a 2nd real cohort).
 - The two methylation adapters are **reproducibility-independent, not error-independent** (same estimand,
   same data) → the single-cohort demo licenses at **REPRODUCED**. The **REPLICATED** demo runs on a 2nd
   *synthetic* cohort (`epicv2_casectrl_demo_b`) — also exercised, not earned, until a real 2nd cohort is

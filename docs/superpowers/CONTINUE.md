@@ -48,7 +48,8 @@ design.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first, local-only): **Phase A real-data swap — n-DMP EARNED on real
+**Recently shipped** (most recent first, local-only): **Region-Δβ via held-out top-10k — gate WITHHELD
+at n=10 (2026-06-17), severity demonstrated** · **Phase A real-data swap — n-DMP EARNED on real
 TCGA-LAML HM450 betas (2026-06-17)** · Procrustes / live-spectral layout · §2E tiered independence
 (REPRODUCED / REPLICATED) · reinstatement → PENDING · n-DMPs-at-FDR. SHAs + one-line summaries in the
 *Done* checklist below; design rationale in `docs/superpowers/archive/specs/`.
@@ -56,10 +57,22 @@ TCGA-LAML HM450 betas (2026-06-17)** · Procrustes / live-spectral layout · §2
 **▶ PHASE A SHIPPED — the real-data swap is *earned* for n-DMP/REPRODUCED.** The genome-wide n-DMP count
 licenses at REPRODUCED on a real TCGA-LAML HM450 cohort (see Standing caveats above for the numbers +
 run caveats). Plan: `docs/superpowers/plans/2026-06-17-phase-a-real-data-swap.md` (Tasks 1–7, spec +
-implementation). Local-only run builders live in `data/tcga_laml/` (gitignored). **Recommended next
-moves:** (a) **region-Δβ on the same real cohort** — earn the second reduction (small, the contract +
-gate already exist); (b) a **2nd real cohort → §2E REPLICATED** gold tier (product e-value); (c) **a real
-HM450 probe manifest** so sex-chrom QC bites + a real platform `profile_hash`; (d) **Phase B** — the
+implementation). Local-only run builders live in `data/tcga_laml/` (gitignored).
+
+**▶ REGION-Δβ via held-out top-10k — ATTEMPTED, gate WITHHELD at n=10 (severity demonstrated, NOT
+earned).** The honest region reduction (no hand-picked region): select the top-10k DMPs on a discovery
+half, test Δβ on the held-out half. Outcome on the real cohort: discovery/test = 97/97; held-out betting
+e-value (Δβ > pre-registered τ=0.10) = **0.867 (< 1)** → **PENDING, not licensed**. This is the system
+working — the discovery/test split enforced severity and **refused a license the naive in-sample test
+would have granted** (the top-10k regress below the 0.10 floor on held-out data). Cause is **power
+(n=10 IDH-mut → ~5 per split), not biology** — a fuller IDH cohort (~38) would likely clear it; τ stays
+fixed (no post-hoc tuning). The reusable severity machinery is `src/polymer_claims/split_select.py`
+(`stratified_split` / `split_contract` / `top_k_hypermethylated`) — the first on-real-data prototype of
+the autonomous-loop §5b discipline. Plan: `docs/superpowers/plans/2026-06-17-region-delta-beta-split.md`.
+Region-Δβ remains **UNEARNED** (power-limited, not refuted). **Recommended next
+moves:** (a) **a fuller IDH-status source** (more IDH-mut cases) → re-run region-Δβ at proper power, and
+re-run n-DMP non-diluted; (b) a **2nd real cohort → §2E REPLICATED** gold tier (product e-value); (c) **a
+real HM450 probe manifest** so sex-chrom QC bites + a real platform `profile_hash`; (d) **Phase B** — the
 `MethylGenerationAdapter` (autonomous hypothesizer) on top of the now-real substrate
 (`docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`).
 
