@@ -6,9 +6,10 @@
 > structural-equivalence, §2E, n-DMPs, reinstatement, procrustes) — read those for the design rationale
 > behind any one slice.
 >
-> **State of record:** `main`, as of 2026-06-15 (last merge: `procrustes-embedding-alignment`).
-> `scripts/check-all.sh` green — **226 umbrella + 351 grammar + 363 protocol + 2 isolation** tests;
-> viewer `tsc`+build clean. Local-only (commits not pushed — flagged account, no active CI).
+> **State of record:** `main`, as of 2026-06-17 (last main merge: `region-delta-beta-split`).
+> `scripts/check-all.sh` was green at the phase boundary; current local branch
+> `fix/null-bearing-refund-gate` carries viewer/FDR-ledger follow-ups on top of `main`. Local-only
+> (commits not pushed from this machine — flagged account, no active CI).
 >
 > Companion docs: live build log `docs/superpowers/CONTINUE.md` · one-page map `ARCHITECTURE_CURRENT.md`
 > · reserved terminology `GLOSSARY.md`.
@@ -120,7 +121,8 @@ LICENSED ⇔ adapter-agreement ∧ SATISFIED ∧ grounded ∧ live e-LOND discov
   (default REPRODUCED → byte-identical). **REPRODUCED** = agreeing implementations share the dataset (the
   air gap). **REPLICATED** = reproduced across ≥2 cohorts with distinct `dimnames_hash` — the only tier
   that may **multiply** the cohorts' e-values (`e₁·e₂`) as *one* e-LOND test/discovery, with no α-budget
-  double-count.
+  double-count. `NodeRunner` can compute live replication inputs from `replication_bindings`, and topology
+  export/viewer nodes expose `independence_tier`.
 
 **The air gap & adapter independence:** independence is enforced by the **adapter trust registry**
 (trusted ∧ different owner ∧ different `implementation_hash`); a same-owner pair is held PENDING.
@@ -134,6 +136,12 @@ The system no longer licenses only on asserted values.
 - **Real execution adapters** — claims compute a two-group mean difference from a bundled dataset via
   two genuinely independent stdlib adapters and license/reject on the **computed** value
   (`serve --real-data`).
+- **Phase B methylation hypothesizer slice** — `MethylGenerationAdapter` maps a constrained LLM DSL into
+  executable `region_delta_beta` / `n_dmps` methylation claims over SE-Contracts. The live node exposes
+  this through `serve --methyl-data`, which runs the methylation adapters and content/e-value gate; the
+  gate still decides license/reject/PENDING. A small methylation data-asset catalog supplies prompt
+  metadata (refs, group columns, levels, profiles, allowed ops) from bundled fixtures and locally
+  generated real contracts when present.
 - **CES-0 → CES-4, the credibility-evidence spine:** a content-addressed `AnalysisProfile` apparatus
   (CES-0) → a DRS-shaped SE-Contract data seam (CES-1) → the first claim to license on a value computed
   from a methylation matrix (CES-2, **region Δβ**, two methodologically-independent legs) → a license
@@ -150,12 +158,13 @@ The system no longer licenses only on asserted values.
 
 ## 6. The umbrella node + product
 
-- **`pip install polymer-claims`** → a CLI: `version` / `validate` / `run-cycle` / `loop` /
-  `export-topology` / `export-timeline` / `serve`.
+- **`pip install polymer-claims`** → a CLI: `version` / `validate` / `ingest tcga-laml` /
+  `run-cycle` / `loop` / `export-topology` / `export-timeline` / `serve`.
 - **Live local node:** `NodeRunner` (owns the loop/clock) + a FastAPI SSE server (`[serve]` extra; owns
   the network). `NodeRunner` is the one impure piece.
 - **Optional extras:** `[serve]` (FastAPI server), `[llm]` (the Anthropic-backed `LLMGenerationAdapter`,
-  driving the live node via `serve --llm` with an `every_n_ticks` throttle), `[embed]` (numpy, behind
+  `MeanDiffGenerationAdapter`, and `MethylGenerationAdapter`, driving the live node via `serve --llm`,
+  `serve --real-data`, or `serve --methyl-data` with an `every_n_ticks` throttle), `[embed]` (numpy, behind
   which `embedding.py`/`methyl_adapters.py` live so base import stays numpy-free).
 - **Local-node hardening:** `--max-frames` ring retention, an `asyncio.Lock` serializing ticks, bounded
   SSE queues, and a **non-loopback bind guard** (`serve --host` other than loopback refuses without

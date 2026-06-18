@@ -176,6 +176,73 @@ def test_serve_real_data_missing_key_errors(monkeypatch, capsys):
     assert "ANTHROPIC_API_KEY" in capsys.readouterr().err
 
 
+def test_serve_methyl_data_threads_methyl_adapters_and_proposer(monkeypatch):
+    seen = {}
+
+    def fake_import():
+        def run(app, host=None, port=None):
+            pass
+
+        def create_app(runner, *, interval, origins):
+            seen["runner"] = runner
+            return "APP"
+
+        import types as _t
+        return _t.SimpleNamespace(run=run), create_app
+
+    monkeypatch.setattr(cli, "_import_server", fake_import)
+    import json
+    from polymer_protocol import bridge_proposer
+    from polymer_claims.llm_adapter import MethylGenerationAdapter
+
+    dsl = {
+        "proposals": [
+            {
+                "kind": "region_delta_beta",
+                "title": "fixture signal region",
+                "ref": "se:epicv2_casectrl_demo@1",
+                "region_probes": ["cg00000001", "cg00000002", "cg00000003"],
+                "group_col": "Sample_Group",
+                "level_a": "level1",
+                "level_b": "level2",
+                "comparator": "gt",
+                "threshold": 0.10,
+                "rationale": "r",
+            }
+        ]
+    }
+    monkeypatch.setattr(
+        cli,
+        "_build_methyl_proposer",
+        lambda model: bridge_proposer((MethylGenerationAdapter(lambda _p: json.dumps(dsl)),)),
+    )
+    rc = main(["serve", "--methyl-data", "--llm-every", "4"])
+    assert rc == 0
+    runner = seen["runner"]
+    from polymer_claims.methyl_adapters import RegionMeanDiffAdapter
+
+    assert any(isinstance(a, RegionMeanDiffAdapter) for a in runner.adapters)
+    for _ in range(8):
+        runner.tick()
+    assert any(c.id.startswith("gen-methyl-region-") for c in runner.corpus.claims)
+
+
+def test_serve_methyl_data_missing_key_errors(monkeypatch, capsys):
+    monkeypatch.setattr(
+        cli,
+        "_import_server",
+        lambda: (__import__("types").SimpleNamespace(run=lambda *a, **k: None), lambda runner, **k: "APP"),
+    )
+    monkeypatch.setattr(
+        cli,
+        "_build_methyl_proposer",
+        lambda model: (_ for _ in ()).throw(RuntimeError("set ANTHROPIC_API_KEY to use --methyl-data")),
+    )
+    rc = main(["serve", "--methyl-data"])
+    assert rc == 1
+    assert "ANTHROPIC_API_KEY" in capsys.readouterr().err
+
+
 def test_serve_layout_threads_into_runner(monkeypatch):
     seen = {}
 

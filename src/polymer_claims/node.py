@@ -72,6 +72,8 @@ class NodeRunner:
         layout: Literal["spectral", "force"] = "spectral",
         materializations: dict[str, MaterializationContext] | None = None,
         evidence: dict[str, float] | None = None,
+        replications: dict | None = None,
+        replication_bindings: dict[str, str] | None = None,
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -94,6 +96,8 @@ class NodeRunner:
         # tick() (additive/optional: None → byte-identical existing behaviour).
         self._static_materializations = materializations
         self._static_evidence = evidence
+        self._static_replications = replications
+        self.replication_bindings = replication_bindings
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
         self.prev_positions: dict[str, tuple] = {}
@@ -141,6 +145,8 @@ class NodeRunner:
         layout: Literal["spectral", "force"] = "spectral",
         materializations: dict[str, MaterializationContext] | None = None,
         evidence: dict[str, float] | None = None,
+        replications: dict | None = None,
+        replication_bindings: dict[str, str] | None = None,
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
@@ -156,6 +162,8 @@ class NodeRunner:
             layout=layout,
             materializations=materializations,
             evidence=evidence,
+            replications=replications,
+            replication_bindings=replication_bindings,
             **run_cycle_kwargs,
         )
 
@@ -188,11 +196,21 @@ class NodeRunner:
                 mats = None
             if self._static_evidence is not None:
                 ev = self._static_evidence
+                reps = self._static_replications
+            elif self.replication_bindings:
+                from .replication import build_replication_inputs
+                rep = build_replication_inputs(
+                    self.corpus, self.ctx, bindings=self.replication_bindings
+                )
+                ev = rep.evidence
+                reps = rep.replications
             elif self.evalue_gate:
                 from .evidence import evidence_map   # lazy: keeps node.py base import numpy-free
                 ev = evidence_map(self.corpus)
+                reps = self._static_replications
             else:
                 ev = None
+                reps = self._static_replications
             result = run_cycle(
                 self.corpus,
                 self.adapters,
@@ -200,6 +218,7 @@ class NodeRunner:
                 ledger=self.ledger,
                 materializations=mats,
                 evidence=ev,
+                replications=reps,
                 **self.run_cycle_kwargs,
             )
             self.corpus = result.corpus

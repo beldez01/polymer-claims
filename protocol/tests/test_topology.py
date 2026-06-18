@@ -10,13 +10,20 @@ from polymer_grammar import (
     FDRLedger,
     FDRTest,
     GenomicRegion,
+    IndependenceTier,
+    LicenseRoute,
+    Licensing,
+    MaterializationContext,
     NeighborEdge,
     NeighborEdgeKind,
     Proposition,
     RepresentationRevision,
     RevisionOperation,
     Status,
+    Satisfaction,
+    SatisfactionVerdict,
     StrengthVector,
+    RivalSetClosure,
 )
 
 from polymer_protocol.corpus import Corpus
@@ -130,6 +137,32 @@ def test_nodes_carry_fdr_ledger_state():
     assert n["b"].fdr_tested is True
     assert n["b"].fdr_discovery is True
     assert n["b"].fdr_retracted is False
+
+
+def test_nodes_carry_independence_tier():
+    lic = Licensing(
+        route=LicenseRoute.SEVERE_TEST,
+        rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
+        satisfactions=(
+            Satisfaction(
+                verdict=SatisfactionVerdict.SATISFIED,
+                materialization=MaterializationContext(
+                    id="M1", api_version="v1", data_version="d1", dimnames_hash="hA"
+                ),
+            ),
+            Satisfaction(
+                verdict=SatisfactionVerdict.SATISFIED,
+                materialization=MaterializationContext(
+                    id="M2", api_version="v1", data_version="d2", dimnames_hash="hB"
+                ),
+            ),
+        ),
+        independence_tier=IndependenceTier.REPLICATED,
+    )
+    a = make_claim("a", Status.LICENSED, licensing=lic)
+    corpus = Corpus(claims=(a,), fdr_ledger=FDRLedger(target_fdr=0.05))
+    exp = export_topology(corpus, layout=Layout.NONE)
+    assert exp.nodes[0].independence_tier == "replicated"
 
 
 def test_nodes_sorted_by_id(small_corpus):

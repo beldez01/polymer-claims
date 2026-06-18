@@ -83,6 +83,29 @@ function StatusPill({ status }: { status: string }) {
   );
 }
 
+function TierPill({ tier }: { tier: string | null | undefined }) {
+  if (!tier) return <span style={{ ...value, color: COLOR.text.faint }}>—</span>;
+  const isReplicated = tier === 'replicated';
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        fontFamily: FONT_FAMILY_MONO,
+        fontSize: 11,
+        color: isReplicated ? COLOR.accent.teal : COLOR.text.secondary,
+        border: `1px solid ${isReplicated ? COLOR.accent.teal : COLOR.border.default}`,
+        borderRadius: 2,
+        padding: '2px 7px',
+        marginTop: 2,
+        textTransform: 'uppercase',
+      }}
+    >
+      {tier}
+    </span>
+  );
+}
+
 /** strength 6-vector table — driven by a `number[] | null` strength vector. */
 function StrengthTable({ strength }: { strength: number[] | null }) {
   return (
@@ -420,6 +443,10 @@ function NodePanel({ selectedId }: { selectedId: string }) {
             }${node.fdr_retracted ? ' · retracted' : ''}`
           : '—'}
       </Field>
+      <div style={{ marginBottom: 12 }}>
+        <div style={label}>independence_tier</div>
+        <TierPill tier={node.independence_tier ?? null} />
+      </div>
       {node.fdr_tested && (
         <>
           <Field name="e_value">{node.fdr_e_value ?? '—'}</Field>

@@ -41,6 +41,8 @@ _COMPARATORS = {
 }
 _GEN_PREFIX = "gen-llm-"
 _MD_PREFIX = "gen-md-"
+_METHYL_REGION_PREFIX = "gen-methyl-region-"
+_METHYL_NDMP_PREFIX = "gen-methyl-ndmp-"
 
 
 class LLMGenerationAdapter:
@@ -323,6 +325,228 @@ class MeanDiffGenerationAdapter:
         except ModuleNotFoundError as e:  # pragma: no cover - exercised via CLI, not unit tests
             raise RuntimeError(
                 "the LLM adapter needs the optional extra: pip install 'polymer-claims[llm]'"
+            ) from e
+        client = anthropic.Anthropic(api_key=api_key)
+
+        def complete(prompt: str) -> str:  # pragma: no cover - real network
+            msg = client.messages.create(
+                model=model,
+                max_tokens=2048,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return "".join(getattr(b, "text", "") for b in msg.content)
+
+        return cls(complete, **kw)
+
+
+class MethylGenerationAdapter:
+    """A GenerationAdapter that maps an injected model's constrained DSL into executable
+    methylation claims over SE-Contracts. This is Phase B's first slice: the agent can propose
+    `region_delta_beta` and `n_dmps` claims, while the existing independent methylation legs and
+    e-value/FDR gate decide whether anything licenses."""
+
+    def __init__(
+        self,
+        complete: Callable[[str], str],
+        *,
+        identity: str = "llm-methyl-proposer",
+        max_proposals: int = 5,
+        refs: tuple[str, ...] | None = None,
+        assets: tuple | None = None,
+    ) -> None:
+        self.complete = complete
+        self.identity = identity
+        self.max_proposals = max_proposals
+        if assets is None:
+            from .assets import methylation_asset_catalog
+            assets = methylation_asset_catalog()
+        self.assets = assets
+        self.refs = refs if refs is not None else tuple(a.ref for a in assets)
+
+    def propose(self, corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
+        return self._parse(self.complete(self._build_prompt(corpus, frontier)), corpus)
+
+    def _build_prompt(self, corpus: Corpus, frontier: tuple[str, ...]) -> str:
+        lines = [
+            f"- {c.id} [{c.pattern.id}] {c.title}"
+            for c in sorted(corpus.claims, key=lambda c: c.id)[:20]
+        ]
+        existing = "\n".join(lines) or "(none)"
+        asset_lines = []
+        for asset in self.assets:
+            asset_lines.append(
+                f"- {asset.ref}: {asset.label}; group_col={asset.group_col}; "
+                f"levels={','.join(asset.levels)}; profile={asset.profile_id}; "
+                f"ops={','.join(asset.operations)}"
+            )
+        refs = "\n".join(asset_lines) or ", ".join(self.refs)
+        schema = (
+            '{"proposals":[{"kind":"region_delta_beta|n_dmps","title":str,"ref":str,'
+            '"group_col":"Sample_Group","level_a":str,"level_b":str,'
+            '"region_probes":[str,...],"alpha":number,"k":number,'
+            '"comparator":"lt|le|gt|ge|eq|ne","threshold":number,"rationale":str}]}'
+        )
+        return (
+            "You are a scientific-claim generator working over methylation SE-Contracts. "
+            f"Propose up to {self.max_proposals} NOVEL executable methylation claims.\n"
+            f"Available assets:\n{refs}\n"
+            "Allowed kinds: region_delta_beta (requires region_probes and threshold) or n_dmps "
+            "(requires alpha and k). Use group_col Sample_Group unless the asset metadata says "
+            "otherwise. For IDH AML contrasts use level_a WT and level_b IDH_mut; for fixtures use "
+            "level1 and level2. Output ONLY strict JSON matching:\n"
+            f"{schema}\n\n"
+            f"Existing claims:\n{existing}\n\nUnresolved frontier: {', '.join(frontier) or '(none)'}\n"
+        )
+
+    def _parse(self, raw: str, corpus: Corpus) -> tuple[Proposal, ...]:
+        obj = _extract_json(raw)
+        if obj is None:
+            return ()
+        existing_ids = set(corpus.by_id().keys())
+        out: list[Proposal] = []
+        seen: set[str] = set()
+        for p in obj.get("proposals", []):
+            try:
+                claim = self._build_claim(p)
+            except (KeyError, ValueError, TypeError, FileNotFoundError):
+                continue
+            if claim.id in existing_ids or claim.id in seen:
+                continue
+            seen.add(claim.id)
+            out.append(Proposal(operator_id=self.identity, claim=claim))
+            if len(out) >= self.max_proposals:
+                break
+        return tuple(out)
+
+    def _build_claim(self, p: dict):
+        kind = str(p["kind"]).strip()
+        if kind == "region_delta_beta":
+            return self._build_region_claim(p)
+        if kind == "n_dmps":
+            return self._build_ndmp_claim(p)
+        raise ValueError("bad methylation proposal kind")
+
+    def _common(self, p: dict) -> tuple[str, str, str, str, str, Comparator, str | None]:
+        title = str(p["title"]).strip()
+        ref = str(p["ref"]).strip()
+        group_col = str(p.get("group_col", "Sample_Group")).strip()
+        level_a = str(p["level_a"]).strip()
+        level_b = str(p["level_b"]).strip()
+        cmp_key = str(p["comparator"]).strip().lower()
+        if cmp_key not in _COMPARATORS:
+            raise ValueError("bad comparator")
+        if not (title and ref and group_col and level_a and level_b):
+            raise ValueError("empty required field")
+        if level_a == level_b:
+            raise ValueError("levels must differ")
+        self._validate_contract(ref, group_col, level_a, level_b)
+        rationale = str(p["rationale"]).strip() if p.get("rationale") else None
+        return title, ref, group_col, level_a, level_b, _COMPARATORS[cmp_key], rationale
+
+    def _build_region_claim(self, p: dict):
+        from .analysis_profile import profile_oracle_id
+        from .methyl_adapters import region_delta_beta_claim
+        from .profiles import CANONICAL_HM450_V1
+
+        title, ref, group_col, level_a, level_b, comparator, rationale = self._common(p)
+        probes = tuple(str(x).strip() for x in p["region_probes"] if str(x).strip())
+        if not probes:
+            raise ValueError("region_delta_beta requires region_probes")
+        self._validate_probes(ref, probes)
+        threshold = float(p["threshold"])
+        cid = _METHYL_REGION_PREFIX + hashlib.sha256(
+            f"{title}|{ref}|{','.join(probes)}|{group_col}|{level_a}|{level_b}|{comparator.value}|{threshold}".encode()
+        ).hexdigest()[:16]
+        claim = region_delta_beta_claim(
+            cid,
+            ref=ref,
+            region_probes=probes,
+            group_col=group_col,
+            level_a=level_a,
+            level_b=level_b,
+            comparator=comparator,
+            threshold=threshold,
+            oracle_ref=profile_oracle_id(CANONICAL_HM450_V1) if "tcga_laml" in ref else None,
+            title=title,
+        )
+        return self._with_generated_provenance(claim, rationale)
+
+    def _build_ndmp_claim(self, p: dict):
+        from .analysis_profile import profile_oracle_id
+        from .methyl_ndmp import n_dmps_claim
+        from .profiles import CANONICAL_HM450_V1
+
+        title, ref, group_col, level_a, level_b, comparator, rationale = self._common(p)
+        alpha = float(p["alpha"])
+        k = float(p["k"])
+        if not (0.0 < alpha < 1.0):
+            raise ValueError("alpha must be in (0,1)")
+        cid = _METHYL_NDMP_PREFIX + hashlib.sha256(
+            f"{title}|{ref}|{group_col}|{level_a}|{level_b}|{alpha}|{k}|{comparator.value}".encode()
+        ).hexdigest()[:16]
+        claim = n_dmps_claim(
+            cid,
+            ref=ref,
+            group_col=group_col,
+            level_a=level_a,
+            level_b=level_b,
+            alpha=alpha,
+            k=k,
+            comparator=comparator,
+            oracle_ref=profile_oracle_id(CANONICAL_HM450_V1) if "tcga_laml" in ref else None,
+            title=title,
+        )
+        return self._with_generated_provenance(claim, rationale)
+
+    def _with_generated_provenance(self, claim, rationale: str | None):
+        return claim.model_copy(
+            update={
+                "provenance": Provenance(
+                    generated_by=GenerationMode.AGENT_GENERATED,
+                    agent_id=self.identity,
+                    search_cardinality=1,
+                    rationale=rationale,
+                )
+            }
+        )
+
+    @staticmethod
+    def _validate_contract(ref: str, group_col: str, level_a: str, level_b: str) -> None:
+        from .contracts import load_contract
+
+        se = load_contract(ref)
+        import json
+        from pathlib import Path
+
+        betas_path = Path(se.access_methods[0].access_url)
+        manifest = json.loads((betas_path.parent / f"{se.contract_uid.split('@')[0]}.json").read_text())
+        levels = {c[group_col] for c in manifest["col_data"]}
+        if level_a not in levels or level_b not in levels:
+            raise ValueError("unknown group level")
+
+    @staticmethod
+    def _validate_probes(ref: str, probes: tuple[str, ...]) -> None:
+        from .methyl_ndmp import _all_probe_ids
+
+        available = set(_all_probe_ids(ref))
+        missing = [p for p in probes if p not in available]
+        if missing:
+            raise ValueError("unknown region probe")
+
+    @classmethod
+    def anthropic(
+        cls,
+        *,
+        model: str = "claude-sonnet-4-6",
+        api_key: str | None = None,
+        **kw,
+    ) -> "MethylGenerationAdapter":
+        """Build a methylation adapter backed by the Anthropic SDK (needs the [llm] extra)."""
+        try:
+            import anthropic
+        except ModuleNotFoundError as e:  # pragma: no cover - exercised via CLI, not unit tests
+            raise RuntimeError(
+                "the methylation LLM adapter needs the optional extra: pip install 'polymer-claims[llm]'"
             ) from e
         client = anthropic.Anthropic(api_key=api_key)
 

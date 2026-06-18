@@ -56,7 +56,8 @@ TCGA-LAML HM450 betas (2026-06-17)** · Procrustes / live-spectral layout · §2
 
 **▶ PHASE A SHIPPED — the real-data swap is *earned* for n-DMP/REPRODUCED.** The genome-wide n-DMP count
 licenses at REPRODUCED on a real TCGA-LAML HM450 cohort (see Standing caveats above for the numbers +
-run caveats). Plan: `docs/superpowers/plans/2026-06-17-phase-a-real-data-swap.md` (Tasks 1–7, spec +
+run caveats). Archived plan:
+`docs/superpowers/archive/plans/2026-06-17-phase-a-real-data-swap.md` (Tasks 1–7, spec +
 implementation). Local-only run builders live in `data/tcga_laml/` (gitignored).
 
 **▶ REGION-Δβ via held-out top-10k — ATTEMPTED, gate WITHHELD at n=10 (severity demonstrated, NOT
@@ -68,7 +69,8 @@ would have granted** (the top-10k regress below the 0.10 floor on held-out data)
 (n=10 IDH-mut → ~5 per split), not biology** — a fuller IDH cohort (~38) would likely clear it; τ stays
 fixed (no post-hoc tuning). The reusable severity machinery is `src/polymer_claims/split_select.py`
 (`stratified_split` / `split_contract` / `top_k_hypermethylated`) — the first on-real-data prototype of
-the autonomous-loop §5b discipline. Plan: `docs/superpowers/plans/2026-06-17-region-delta-beta-split.md`.
+the autonomous-loop §5b discipline. Archived plan:
+`docs/superpowers/archive/plans/2026-06-17-region-delta-beta-split.md`.
 Region-Δβ remains **UNEARNED** (power-limited, not refuted). **Recommended next
 moves:** (a) **a fuller IDH-status source** (more IDH-mut cases) → re-run region-Δβ at proper power, and
 re-run n-DMP non-diluted; (b) a **2nd real cohort → §2E REPLICATED** gold tier (product e-value); (c) **a
@@ -76,10 +78,24 @@ real HM450 probe manifest** so sex-chrom QC bites + a real platform `profile_has
 `MethylGenerationAdapter` (autonomous hypothesizer) on top of the now-real substrate
 (`docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`).
 
+**▶ PHASE B FIRST SLICE SHIPPED — methylation hypothesizer.** `MethylGenerationAdapter` now mirrors
+`MeanDiffGenerationAdapter`: a constrained LLM DSL emits executable `region_delta_beta` / `n_dmps`
+methylation claims against SE-Contracts, with validation, deterministic IDs, generated provenance, and
+tests. Live wiring is available as `serve --methyl-data`, which runs methylation adapters plus
+content-address/e-value gating. This is the autonomous hypothesis loop's first real-methylation agent
+surface; the gate still decides license/reject/PENDING.
+
+**▶ §2E LIVE WIRING + ASSET CATALOG SHIPPED.** `NodeRunner` can now compute `replication_map` inputs
+live via `replication_bindings`, so a live tick can license a bound methylation claim at
+`independence_tier=replicated` instead of requiring a hand-built `run_cycle(...)` call. The viewer
+already displays `independence_tier`. Phase B also has a small methylation data-asset catalog
+(`methylation_asset_catalog`) that lists bundled SE-Contract fixtures and locally generated TCGA
+contracts when present; the methylation generator prompt is now metadata-driven rather than hardcoded.
+
 Other safe slices (the historical decision menu is archived at `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`):
 
-1. **§2E follow-ups** — the viewer REPLICATED badge + live-node `replication_map` wiring, when wanted.
-   (Plus the viewer spectral-layout follow-ups — UMAP / content features.)
+1. **§2E follow-ups** — viewer tier display + live-node `replication_map` wiring are done. Remaining:
+   bind a **real** second cohort when available so REPLICATED is earned, not only exercised.
 2. **n-DMPs as a REPLICATED second reduction** — run the n-DMP count on a second cohort and multiply the
    two count-enrichment e-values (combines §2E's REPLICATED machinery with the new reduction). ~1 slice.
 3. **ROBUSTLY_BLAMED wiring** — wire the Duhem robust-blame REJECTED verdict into the protocol and stamp

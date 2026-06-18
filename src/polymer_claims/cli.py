@@ -126,6 +126,18 @@ def _build_real_data_proposer(model: str):
     return bridge_proposer((adapter,))
 
 
+def _build_methyl_proposer(model: str):
+    """Lazy-build a bridge_proposer over a MethylGenerationAdapter (Phase B).
+    Raises RuntimeError with a key/extra hint if [llm] or ANTHROPIC_API_KEY is missing."""
+    import os
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("set ANTHROPIC_API_KEY to use --methyl-data")
+    from polymer_protocol import bridge_proposer
+    from .llm_adapter import MethylGenerationAdapter
+    adapter = MethylGenerationAdapter.anthropic(model=model)
+    return bridge_proposer((adapter,))
+
+
 def _cmd_run_cycle(args: argparse.Namespace) -> int:
     corpus = load_corpus(args.corpus)
     proposers = ()
@@ -284,6 +296,55 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         app = create_app(runner, interval=args.interval, origins=args.origins or None)
         uvicorn.run(app, host=args.host, port=args.port)
         return 0
+    if getattr(args, "methyl_data", False):
+        try:
+            proposer = _build_methyl_proposer(args.llm_model)
+        except RuntimeError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        from polymer_grammar import FDRLedger
+        from .analysis_profile import profile_oracle_registry
+        from .methyl_adapters import (
+            RegionLmCoefAdapter,
+            RegionMeanDiffAdapter,
+            methyl_independent_registry,
+        )
+        from .methyl_ndmp import NDmpOlsCoefAdapter, NDmpTTestAdapter, ndmp_independent_registry
+        from .profiles import CANONICAL_EPICV2_V1, CANONICAL_HM450_V1
+        from .throttle import every_n_ticks
+
+        reg_a = methyl_independent_registry()
+        reg_b = ndmp_independent_registry()
+        from polymer_protocol import AdapterRegistry
+        adapter_registry = AdapterRegistry(credentials=reg_a.credentials + reg_b.credentials)
+        proposer = every_n_ticks(proposer, n=args.llm_every)
+        corpus = Corpus(fdr_ledger=FDRLedger(target_fdr=0.05))
+        runner = NodeRunner.from_seed(
+            corpus,
+            adapters=(
+                RegionMeanDiffAdapter(),
+                RegionLmCoefAdapter(),
+                NDmpTTestAdapter(),
+                NDmpOlsCoefAdapter(),
+            ),
+            ctx=_CTX,
+            scheduler_budget=args.budget,
+            max_frames=args.max_frames,
+            adapter_registry=adapter_registry,
+            oracles=profile_oracle_registry(
+                (CANONICAL_EPICV2_V1, "recomputable_public"),
+                (CANONICAL_HM450_V1, "recomputable_public"),
+            ),
+            proposers=(proposer,),
+            content_address=True,
+            evalue_gate=True,
+            profiles=(CANONICAL_EPICV2_V1, CANONICAL_HM450_V1),
+            layout=args.layout,
+            budget=2.5,
+        )
+        app = create_app(runner, interval=args.interval, origins=args.origins or None)
+        uvicorn.run(app, host=args.host, port=args.port)
+        return 0
     llm_proposer = None
     if getattr(args, "llm", False):
         try:
@@ -403,6 +464,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_serve.add_argument("--llm", action="store_true", help="drive GENERATE with a real LLM agent (needs the [llm] extra + ANTHROPIC_API_KEY)")
     p_serve.add_argument("--real-data", action="store_true", help="LLM proposes REAL-DATA mean_diff plans; node runs the local execution adapters + apparatus oracle (needs [llm] + ANTHROPIC_API_KEY)")
+    p_serve.add_argument("--methyl-data", action="store_true", help="LLM proposes executable methylation claims over SE-Contracts; node runs methylation adapters + e-value gate (needs [llm] + ANTHROPIC_API_KEY)")
     p_serve.add_argument("--tcga-laml", action="store_true", help="seed the live node with the REAL TCGA-LAML genome-wide n-DMP claim (ingest first; one-shot compute, then displays)")
     p_serve.add_argument("--llm-model", default="claude-sonnet-4-6", help="model for --llm")
     p_serve.add_argument("--llm-every", type=int, default=4, help="LLM proposes every Nth tick (throttle)")

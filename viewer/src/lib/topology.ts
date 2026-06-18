@@ -38,6 +38,7 @@ export interface TopologyNode {
   fdr_index: number | null;
   fdr_e_value: number | null;
   fdr_alpha_allocated: number | null;
+  independence_tier?: string | null;
   position: Vec3;
 }
 
