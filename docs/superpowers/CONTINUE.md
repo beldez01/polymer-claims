@@ -8,7 +8,7 @@
 
 ---
 
-## Current state (2026-06-15)
+## Current state (2026-06-18)
 
 `main` ALL GREEN — **226 umbrella + 351 grammar + 363 protocol + 2 isolation**; viewer `tsc`+build
 clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpus = 4 collections**;
@@ -29,13 +29,24 @@ epistemic core; real computation + CES) — lives in the canonical spec
 design.
 
 **Standing caveats (carry forward):**
-- **n-DMP / REPRODUCED is EARNED on real betas (2026-06-17, Phase A).** The genome-wide n-DMP count
-  licenses at REPRODUCED on a **real TCGA-LAML HM450 cohort** (IDH-mut vs WT; 194×378,894; 50,339 DMPs
-  vs an 18,945 floor; e-value → ∞; legs agree; full content-address). Betas = local Xena GDC-Level-3
-  matrix; IDH = GDC open MAFs. **Still synthetic:** region-Δβ (own real run pending) + REPLICATED (needs
-  a 2nd real cohort). Run caveats: IDH-mut n=10 (GDC open-MAF calling conservative; uncovered→WT dilutes,
-  biases *against* a license); sex-chrom QC skipped (Xena lacks chr/pos). Data local-only, gitignored;
-  builders in `data/tcga_laml/` (gitignored). [menu item 6 — region-Δβ + REPLICATED real runs remain]
+- **n-DMP / REPRODUCED is EARNED on real betas (2026-06-17 Phase A; IDH source upgraded 2026-06-18).**
+  The genome-wide n-DMP count licenses at REPRODUCED on a **real TCGA-LAML HM450 cohort** (IDH-mut vs WT;
+  194×378,894; e-value → ∞; legs agree; full content-address). **IDH calling swapped to cBioPortal
+  complete genotyping (`tcga_laml_idh@2`, 2026-06-18):** IDH-mut **n=10 → 36** (cBioPortal
+  `laml_tcga_pub@86690e1`; WT now = genotyped-and-not-hotspot, never a missing-data default;
+  dropped_ungenotyped=0 so betas are byte-identical to @1, only labels+metadata change — captured by a
+  `group_digest`). Non-diluted, the DMP count rose 50,339 → **115,405** (floor 18,945). Betas = local Xena
+  GDC-Level-3 matrix. Run caveat: sex-chrom QC skipped (Xena lacks chr/pos). Data local-only, gitignored;
+  builders in `data/tcga_laml/` (gitignored).
+- **Region-Δβ re-run at proper power (2026-06-18) — held-out e-value 0.867 → 5.672, still PENDING (honest).**
+  On `@2` (now ~18 IDH-mut/split vs ~5 at n=10) the held-out top-10k betting e-value (Δβ > pre-registered
+  τ=0.10) jumped to **5.672** — it crossed break-even (>1), so the held-out data now genuinely favors the
+  effect; the n=10 power diagnosis was correct. It is **still WITHHELD**: the e-LOND first-test discovery
+  threshold is **1/α₁ = 32.90** (q=0.05, γ₁=6/π²) and 5.672 < 32.9 → PENDING. **τ stays fixed at 0.10 — no
+  tuning.** Clearing 32.9 as a §2E REPLICATED **product** e₁·e₂ needs each cohort ≈ √32.9 = 5.74; the
+  single-cohort e=5.67 is right at that bar, so **a 2nd real cohort would license it at REPLICATED**.
+  Region-Δβ remains **UNEARNED** (FDR-withheld, not refuted). **Still synthetic:** REPLICATED (needs the
+  2nd real cohort). [next: 2nd real cohort → §2E REPLICATED]
 - `semantic_run_id` is the **Python** digest; an R-parity golden fixture is deferred (needs an R
   serializer). [menu item 7]
 - Adapter independence is **operator-asserted** (`implementation_hash` is a supplied string compared
@@ -48,7 +59,9 @@ design.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first, local-only): **Region-Δβ via held-out top-10k — gate WITHHELD
+**Recently shipped** (most recent first, local-only): **IDH-source swap — cBioPortal genotyping →
+`tcga_laml_idh@2` (IDH-mut n=10→36); region-Δβ re-run at proper power: held-out e 0.867→5.672, still
+PENDING below the e-LOND threshold 32.9 (2026-06-18)** · **Region-Δβ via held-out top-10k — gate WITHHELD
 at n=10 (2026-06-17), severity demonstrated** · **Phase A real-data swap — n-DMP EARNED on real
 TCGA-LAML HM450 betas (2026-06-17)** · Procrustes / live-spectral layout · §2E tiered independence
 (REPRODUCED / REPLICATED) · reinstatement → PENDING · n-DMPs-at-FDR. SHAs + one-line summaries in the
@@ -60,23 +73,26 @@ run caveats). Archived plan:
 `docs/superpowers/archive/plans/2026-06-17-phase-a-real-data-swap.md` (Tasks 1–7, spec +
 implementation). Local-only run builders live in `data/tcga_laml/` (gitignored).
 
-**▶ REGION-Δβ via held-out top-10k — ATTEMPTED, gate WITHHELD at n=10 (severity demonstrated, NOT
-earned).** The honest region reduction (no hand-picked region): select the top-10k DMPs on a discovery
-half, test Δβ on the held-out half. Outcome on the real cohort: discovery/test = 97/97; held-out betting
-e-value (Δβ > pre-registered τ=0.10) = **0.867 (< 1)** → **PENDING, not licensed**. This is the system
-working — the discovery/test split enforced severity and **refused a license the naive in-sample test
-would have granted** (the top-10k regress below the 0.10 floor on held-out data). Cause is **power
-(n=10 IDH-mut → ~5 per split), not biology** — a fuller IDH cohort (~38) would likely clear it; τ stays
-fixed (no post-hoc tuning). The reusable severity machinery is `src/polymer_claims/split_select.py`
-(`stratified_split` / `split_contract` / `top_k_hypermethylated`) — the first on-real-data prototype of
-the autonomous-loop §5b discipline. Archived plan:
+**▶ REGION-Δβ re-run at proper power on `tcga_laml_idh@2` — held-out e 0.867 → 5.672, still PENDING
+(FDR-withheld, NOT refuted).** The honest region reduction (no hand-picked region): select the top-10k
+DMPs on a discovery half, test Δβ on the held-out half. After the IDH-source swap (n=10→36; ~18
+IDH-mut/split): discovery/test = 97/97; held-out betting e-value (Δβ > pre-registered τ=0.10) = **5.672**
+— it **crossed break-even (>1)**, confirming the n=10 power diagnosis (the held-out data now genuinely
+favors the effect). **Still WITHHELD:** the e-LOND first-test discovery threshold is **1/α₁ = 32.90**
+(q=0.05, γ₁=6/π²) and 5.672 < 32.9 → PENDING. **τ stays fixed at 0.10 (no post-hoc tuning).** The reusable
+severity machinery is `src/polymer_claims/split_select.py` (`stratified_split` / `split_contract` /
+`top_k_hypermethylated`). Plans: design + impl at
+`docs/superpowers/specs/2026-06-18-idh-source-swap-design.md` +
+`docs/superpowers/plans/2026-06-18-idh-source-swap.md`; the n=10 attempt at
 `docs/superpowers/archive/plans/2026-06-17-region-delta-beta-split.md`.
-Region-Δβ remains **UNEARNED** (power-limited, not refuted). **Recommended next
-moves:** (a) **a fuller IDH-status source** (more IDH-mut cases) → re-run region-Δβ at proper power, and
-re-run n-DMP non-diluted; (b) a **2nd real cohort → §2E REPLICATED** gold tier (product e-value); (c) **a
-real HM450 probe manifest** so sex-chrom QC bites + a real platform `profile_hash`; (d) **Phase B** — the
+Region-Δβ remains **UNEARNED** (FDR-withheld, not refuted). **Recommended next
+moves (re-ordered):** (a) **a 2nd real cohort → §2E REPLICATED** gold tier — the product e₁·e₂ needs each
+cohort ≈ √32.9 = 5.74 and the single-cohort e=5.67 sits right at that bar, so a comparable 2nd cohort
+**would license region-Δβ at REPLICATED** (now the highest-leverage move); (b) **a real HM450 probe
+manifest** so sex-chrom QC bites + a real platform `profile_hash`; (c) **Phase B** — the
 `MethylGenerationAdapter` (autonomous hypothesizer) on top of the now-real substrate
-(`docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`).
+(`docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`). [IDH-source swap (a fuller IDH cohort) —
+DONE 2026-06-18.]
 
 **▶ PHASE B FIRST SLICE SHIPPED — methylation hypothesizer.** `MethylGenerationAdapter` now mirrors
 `MeanDiffGenerationAdapter`: a constrained LLM DSL emits executable `region_delta_beta` / `n_dmps`
