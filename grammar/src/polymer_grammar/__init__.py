@@ -14,6 +14,13 @@ from .leaf import (
 )
 from .status import PendingReason, RejectionReason, Status
 from .strength import AXES, StrengthVector, licensed
+from .shared_cause import (
+    CONFIRMATORY_SEVERITY_CEILING,
+    SeverityProvenance,
+    cap_severity_for_confirmatory,
+    severity_provenance_of,
+    shared_cause_overlap,
+)
 from .pattern import Pattern, PatternRef, get_pattern, registry
 from .claim import Claim
 from .proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
@@ -306,4 +313,9 @@ __all__ = [
     "classify",
     "RevisionDiscovery",
     "commitment_hash",
+    "CONFIRMATORY_SEVERITY_CEILING",
+    "SeverityProvenance",
+    "cap_severity_for_confirmatory",
+    "severity_provenance_of",
+    "shared_cause_overlap",
 ]

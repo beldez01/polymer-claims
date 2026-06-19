@@ -36,6 +36,10 @@ class Provenance(_Model):
     # rigorous extension (structured premises, cited-claim links, anti-hallucination
     # validation, promotion out of Provenance metadata).
     rationale: str | None = None   # FIRST PASS: opaque free-text "why this claim was proposed"
+    # §5a literature-shared-cause: cohort identities (dimnames_hash namespace) that this
+    # hypothesis's motivating prior was established on. Empty => no shared-cause info (inert).
+    # Operator/agent-asserted (same trust model as adapter independence).
+    prior_cohorts: tuple[str, ...] = ()
 
     @model_validator(mode="after")
     def _agent_needs_id(self) -> "Provenance":

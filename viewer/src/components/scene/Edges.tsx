@@ -41,6 +41,7 @@ export default function Edges() {
         fdr_e_value: n.fdr_e_value ?? null,
         fdr_alpha_allocated: n.fdr_alpha_allocated ?? null,
         independence_tier: n.independence_tier ?? null,
+        severity_provenance: n.severity_provenance ?? null,
         position: n.position,
         scale: 1,
         opacity: 1,

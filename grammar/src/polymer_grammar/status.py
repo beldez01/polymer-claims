@@ -29,6 +29,9 @@ class PendingReason(str, Enum):
     ADAPTER_NOT_INDEPENDENT = "adapter_not_independent"
     # a defeat-rejected claim whose attacker was itself defeated: reopened to re-test (reinstatement)
     REINSTATED = "reinstated"
+    # verify withheld a license under strict_shared_cause: the hypothesis prior shares a cohort
+    # with the test data (confirmatory, not a held-out severe test)
+    SHARED_CAUSE_CONFIRMATORY = "shared_cause_confirmatory"
 
 
 class RejectionReason(str, Enum):

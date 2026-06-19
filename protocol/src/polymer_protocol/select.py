@@ -10,8 +10,11 @@ with a per-cell budget cap, and a heterodox reserve lane for dominated candidate
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from polymer_grammar import (
     Claim,
+    DataHandle,
     GenerationMode,
     Provenance,
     Status,
@@ -54,6 +57,29 @@ def _density(value: ValueVector, cost: float, w: ValueWeights) -> float:
     return (w.eig * value.eig + w.stakes * value.stakes) / cost
 
 
+# Tunable: a candidate whose plan target cohort overlaps its own prior-derivation cohorts is a
+# confirmatory (weak severe) test, so its fill-order density is discounted. 1.0 == inert.
+CONFIRMATORY_RANK_PENALTY: float = 0.5
+
+
+def _severity_factor(claim: Claim, cohort_of_ref: Mapping[str, str]) -> float:
+    """Data-blind: reads only the claim's prior_cohorts provenance and its plan's DataHandle refs
+    (resolved to cohort ids via the injected map). Never executes / reads test data. 1.0 unless a
+    confirmatory overlap is provable from metadata."""
+    prior = claim.provenance.prior_cohorts if claim.provenance is not None else ()
+    if not prior or not cohort_of_ref or claim.evaluation_plan is None:
+        return 1.0
+    targets = {
+        cohort_of_ref[i.ref]
+        for n in claim.evaluation_plan.graph.nodes
+        for i in n.inputs
+        if isinstance(i, DataHandle) and i.ref in cohort_of_ref
+    }
+    if not targets:
+        return 1.0
+    return CONFIRMATORY_RANK_PENALTY if (set(prior) & targets) else 1.0
+
+
 def _stamp_cardinality(claim: Claim, m: int) -> Claim:
     if claim.provenance is None:
         prov = Provenance(generated_by=GenerationMode.IMPORTED, search_cardinality=m)
@@ -72,11 +98,15 @@ def select_stage(
     ledger: SelectionLedger = SelectionLedger(),
     reserve_fraction: float = 0.0,
     cell_cap_fraction: float = 1.0,
+    cohort_of_ref: Mapping[str, str] | None = None,
 ) -> tuple[Corpus, SelectionRecord]:
     candidates = [c for c in corpus.claims if _is_candidate(c)]
     m = len(candidates)
     if m == 0:
         return corpus, SelectionRecord()
+
+    cmap = cohort_of_ref or {}
+    sev_of = {c.id: _severity_factor(c, cmap) for c in candidates}
 
     scored = []  # (claim, value, cost, cell, credit)
     for c in candidates:
@@ -94,7 +124,7 @@ def select_stage(
 
     def density(item) -> float:
         c, value, cost, cell, credit = item
-        return _density(value, cost, value_weights) * credit
+        return _density(value, cost, value_weights) * credit * sev_of[c.id]
 
     def order_key(item):
         c, value, cost, cell, credit = item

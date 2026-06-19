@@ -53,6 +53,7 @@ class TopologyNode(_Model):
     fdr_e_value: float | None = None
     fdr_alpha_allocated: float | None = None
     independence_tier: str | None = None
+    severity_provenance: str | None = None
     position: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
     @model_validator(mode="after")
@@ -123,6 +124,11 @@ def _extract_nodes(
                 fdr_alpha_allocated=fdr.alpha_allocated if fdr is not None else None,
                 independence_tier=(
                     c.licensing.independence_tier.value if c.licensing is not None else None
+                ),
+                severity_provenance=(
+                    c.licensing.severity_provenance.value
+                    if c.licensing is not None and c.licensing.severity_provenance is not None
+                    else None
                 ),
                 position=positions.get(c.id, (0.0, 0.0, 0.0)),
             )

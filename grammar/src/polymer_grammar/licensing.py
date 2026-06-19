@@ -17,6 +17,7 @@ from enum import Enum
 from pydantic import model_validator
 
 from .base import _Model
+from .shared_cause import SeverityProvenance
 
 
 class SatisfactionVerdict(str, Enum):
@@ -82,6 +83,7 @@ class Licensing(_Model):
     rival_set_closure: RivalSetClosure
     rivals_considered: tuple[str, ...] = ()
     independence_tier: IndependenceTier = IndependenceTier.REPRODUCED
+    severity_provenance: SeverityProvenance | None = None
     note: str | None = None
 
     @model_validator(mode="after")

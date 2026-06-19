@@ -447,6 +447,10 @@ function NodePanel({ selectedId }: { selectedId: string }) {
         <div style={label}>independence_tier</div>
         <TierPill tier={node.independence_tier ?? null} />
       </div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={label}>severity_provenance</div>
+        <TierPill tier={node.severity_provenance ?? null} />
+      </div>
       {node.fdr_tested && (
         <>
           <Field name="e_value">{node.fdr_e_value ?? '—'}</Field>
