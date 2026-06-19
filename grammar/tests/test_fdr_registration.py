@@ -58,7 +58,7 @@ def test_strict_no_refund_unexecuted_keeps_its_slot():
     led = register_test(_ledger(), "never_run", "h")   # registered, never resolved
     led = register_test(led, "c2", "h")                # c2 is test t=2, not t=1
     assert led.tests[1].index == 2
-    assert led.tests[1].alpha_allocated == pytest.approx(Q * (6.0 / math.pi**2 / 4) * 1)  # gamma_2
+    assert led.tests[1].alpha_allocated == pytest.approx(Q * (6.0 / math.pi**2 / 4) * 1)  # q*gamma_2*(D+1), D=0
 
 
 def test_resolve_without_pending_raises():

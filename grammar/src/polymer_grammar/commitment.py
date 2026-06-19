@@ -8,6 +8,8 @@ import hashlib
 
 from .claim import Claim
 
+__all__ = ["commitment_hash"]
+
 
 def commitment_hash(claim: Claim) -> str:
     """Content hash of the claim's evaluation_plan. Raises ValueError if the claim has no plan."""

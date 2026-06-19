@@ -95,6 +95,12 @@ Augment the FDR block (`verify.py:134-146`). Before the existing charge-at-verif
 **No-refund invariant:** a registered claim that never executes (no exec record / no e-value) keeps its
 pending entry across the cycle — slot consumed, not a discovery, not refunded.
 
+**E-exemption is unchanged (pre-existing 3-way gate).** A claim with a satisfaction but no supplied
+e-value remains e-exempt today (it can license without an e-test). Registration does **not** widen this:
+the *fished* hypothesis still pays its e-LOND slot at registration regardless of whether an e-value is
+later supplied — which is exactly the multiplicity guarantee §5a targets. Coupling a supplied e-value to
+every satisfaction is the caller's contract (out of scope here).
+
 ## 5. What this does NOT change (invariants)
 
 - **Corpus = exactly 4 collections.** Registration lives in `fdr_ledger`.
