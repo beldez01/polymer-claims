@@ -16,9 +16,11 @@ from .status import PendingReason, RejectionReason, Status
 from .strength import AXES, StrengthVector, licensed
 from .shared_cause import (
     CONFIRMATORY_SEVERITY_CEILING,
+    SHARED_CAUSE_TAU,
     SeverityProvenance,
     cap_severity_for_confirmatory,
     severity_provenance_of,
+    shared_cause_jaccard,
     shared_cause_overlap,
 )
 from .pattern import Pattern, PatternRef, get_pattern, registry
@@ -314,8 +316,10 @@ __all__ = [
     "RevisionDiscovery",
     "commitment_hash",
     "CONFIRMATORY_SEVERITY_CEILING",
+    "SHARED_CAUSE_TAU",
     "SeverityProvenance",
     "cap_severity_for_confirmatory",
     "severity_provenance_of",
+    "shared_cause_jaccard",
     "shared_cause_overlap",
 ]
