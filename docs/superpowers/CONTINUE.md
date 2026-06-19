@@ -94,6 +94,22 @@ manifest** so sex-chrom QC bites + a real platform `profile_hash`; (c) **Phase B
 (`docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`). [IDH-source swap (a fuller IDH cohort) —
 DONE 2026-06-18.]
 
+**▶ §2E REPLICATED (move a) — STAGED, BLOCKED on data access (key finding 2026-06-18).** Attempted on
+branch `feat/replicated-second-cohort` (spec+plan committed: `docs/superpowers/{specs,plans}/2026-06-18-replicated-second-cohort*`).
+Cohort B = **GSE86409** (Study Alliance Leukemia adult-AML, HM450, n=79) — its 419k-probe betas are
+public + downloaded, BUT a hunt across GEO returned a hard lesson: **no open independent HM450 adult-AML
+cohort exposes machine-readable per-sample IDH status.** GSE86409 / GSE159907 keep IDH only in paper
+supplements or controlled-access dbGaP (phs001657); the GEO series that DO carry per-sample `idh1:`/`idh2:`
+(GSE146173, GSE98350) are RNA/seq, not 450K. **So earning REPLICATED on real data is *data-access*-gated,
+not code-gated** — the binding machinery (`build_replication_inputs` / `replication_bindings`) already
+works. Ingestion + run scripts are written & compile-clean (`data/sal_aml/build_contract_gse86409.py`
+reads a user-supplied `data/sal_aml/idh_status.tsv` keyed by eAML-NGS title or GSM, drops unlabeled
+samples — no WT dilution; `data/sal_aml/run_replicated.py` gates the product vs 32.9). **Resume =** drop
+`data/sal_aml/idh_status.tsv` (SAL PMID 28366934 supplement / dbGaP phs001657) → run the two scripts. **No
+fabrication of genotypes — the run waits on real labels.** Non-data-blocked alternatives if REPLICATED
+stays gated: **Phase D integrity ledger** (pre-registration + close the §5a literature-shared-cause leak)
+or **North Star §E common-cause-DAG independence** — both pure-code, no external data.
+
 **▶ PHASE B FIRST SLICE SHIPPED — methylation hypothesizer.** `MethylGenerationAdapter` now mirrors
 `MeanDiffGenerationAdapter`: a constrained LLM DSL emits executable `region_delta_beta` / `n_dmps`
 methylation claims against SE-Contracts, with validation, deterministic IDs, generated provenance, and
