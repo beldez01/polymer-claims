@@ -26,10 +26,11 @@ def _gamma(j: int) -> float:
 class FDRTest(_Model):
     index: int                            # 1-based position in the test stream
     claim_id: str
-    e_value: float = Field(ge=0.0)        # a valid e-value (E[e] ≤ 1 under the null); no upper bound
+    e_value: float | None = Field(default=None, ge=0.0)  # None = registered, unresolved
     alpha_allocated: float                # the α_t this test was judged at
     discovery: bool                       # e_value >= 1 / alpha_allocated
     retracted: bool = False               # defeat tombstone: a retracted discovery is no longer live
+    commitment_hash: str | None = None    # pre-registration hash; None for immediate process_test entries
 
 
 class FDRLedger(_Model):
@@ -100,3 +101,34 @@ def elond_decisions(
 def is_discovery(ledger: FDRLedger, claim_id: str) -> bool:
     """True iff some recorded test for `claim_id` was a discovery."""
     return claim_id in ledger.discoveries
+
+
+def register_test(ledger: FDRLedger, claim_id: str, commitment_hash: str) -> FDRLedger:
+    """Pre-registration: advance the e-LOND stream and LOCK α_t for `claim_id` BEFORE its e-value
+    exists. Appends a pending FDRTest (e_value=None, discovery=False). Strict: the slot is consumed
+    even if the hypothesis is never resolved. Returns a NEW ledger (append-only)."""
+    t = ledger.n_tests + 1
+    alpha = ledger.target_fdr * _gamma(t) * (ledger.n_discoveries + 1)
+    entry = FDRTest(
+        index=t, claim_id=claim_id, e_value=None, alpha_allocated=alpha,
+        discovery=False, commitment_hash=commitment_hash,
+    )
+    return ledger.model_copy(update={"tests": ledger.tests + (entry,)})
+
+
+def resolve_test(ledger: FDRLedger, claim_id: str, e_value: float) -> FDRLedger:
+    """Fill the e-value for `claim_id`'s pending registration and decide discovery against the
+    LOCKED alpha (e_value >= 1/alpha_allocated). Raises ValueError if no pending entry exists."""
+    idx = next(
+        (i for i in range(len(ledger.tests) - 1, -1, -1)
+         if ledger.tests[i].claim_id == claim_id
+         and ledger.tests[i].e_value is None and not ledger.tests[i].retracted),
+        None,
+    )
+    if idx is None:
+        raise ValueError(f"no pending registration for claim {claim_id!r}")
+    old = ledger.tests[idx]
+    resolved = old.model_copy(update={
+        "e_value": e_value, "discovery": e_value >= 1.0 / old.alpha_allocated,
+    })
+    return ledger.model_copy(update={"tests": ledger.tests[:idx] + (resolved,) + ledger.tests[idx + 1:]})
