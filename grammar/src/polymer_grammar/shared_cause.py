@@ -41,7 +41,7 @@ def severity_provenance_of(
 
 
 def cap_severity_for_confirmatory(strength: StrengthVector) -> StrengthVector:
-    """Return a copy with `severity` floored to CONFIRMATORY_SEVERITY_CEILING; all other axes
+    """Return a copy with `severity` capped at CONFIRMATORY_SEVERITY_CEILING; all other axes
     untouched. A no-op when the current severity is already <= the ceiling."""
     return strength.model_copy(
         update={"severity": min(strength.severity, CONFIRMATORY_SEVERITY_CEILING)}

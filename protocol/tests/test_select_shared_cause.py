@@ -35,9 +35,9 @@ def test_ranking_is_data_blind_default_is_byte_identical():
         corpus, cost_model=SIMPLE_COST, budget=None,
         value_weights=ValueWeights(), cost_weights=SIMPLE_COST_WEIGHTS,
     )
-    # the factor reads only provenance + plan identity, never executes; passing the map must not
-    # require any materialized data — same call, identical decisions for the disjoint candidate.
-    assert _rank(rec_off, "c_held") == _rank(rec_off, "c_held")
+    # Without cohort_of_ref both candidates have the same density (no confirmatory penalty), so
+    # neither is demoted relative to the other: their ranks must be adjacent (differ by at most 1).
+    assert abs(_rank(rec_off, "c_held") - _rank(rec_off, "c_conf")) <= 1
     # and with the map, the held-out candidate's own rank is unchanged vs off for the disjoint one
     _, rec_on = select_stage(
         corpus, cost_model=SIMPLE_COST, budget=None,

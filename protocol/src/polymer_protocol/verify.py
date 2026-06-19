@@ -275,13 +275,20 @@ def verify_stage(
                         # OPEN_ACKNOWLEDGED keeps the MDL route self-supporting (no rival list required).
                         rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
                     )
+                    # Stamp the shared-cause tier computed by _apply_shared_cause onto the MDL
+                    # licensing so the annotation is not silently dropped (Decision A1: license still
+                    # mints, honestly annotated + capped). `licensing` and `recorded` are already
+                    # post-_apply_shared_cause (computed before the is_representation_revision block).
+                    mdl_licensing = mdl_licensing.model_copy(
+                        update={"severity_provenance": licensing.severity_provenance}
+                    )
                     new_claims.append(
                         _with_status(
                             c,
                             status=Status.LICENSED,
                             licensing=mdl_licensing,
                             pending_reason=None,
-                            strength=_recorded_strength(c),
+                            strength=recorded,  # capped by _apply_shared_cause when CONFIRMATORY
                         )
                     )
                     continue

@@ -15,7 +15,6 @@ from polymer_grammar import (
     MaterializationContext,
     ReferenceAdapter,
     Satisfaction,
-    SatisfactionVerdict,
     Status,
     StrengthVector,
 )
@@ -82,7 +81,7 @@ def with_dimnames(
             update={"dimnames_hash": dimnames_hash}
         )
         new_sat = Satisfaction(
-            verdict=SatisfactionVerdict.SATISFIED,
+            verdict=ev.satisfaction.verdict,
             materialization=new_mat,
         )
         new_ev = ev.model_copy(update={"satisfaction": new_sat})
