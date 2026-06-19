@@ -26,6 +26,7 @@ from polymer_grammar import (
     elond_decisions,
     independence_tier_of,
     is_representation_revision,
+    max_shared_cause_overlap,
     mdl_delta,
     meets_meta_tier_bar,
     referenced_oracle_ids,
@@ -247,6 +248,7 @@ def verify_stage(
                 satisfactions=sats,
                 rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
                 independence_tier=independence_tier_of(sats),
+                shared_cause_overlap=max_shared_cause_overlap(sats),
             )
             recorded = _recorded_strength(c)
             licensing, recorded, withhold = _apply_shared_cause(

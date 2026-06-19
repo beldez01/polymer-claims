@@ -451,6 +451,10 @@ function NodePanel({ selectedId }: { selectedId: string }) {
         <div style={label}>severity_provenance</div>
         <TierPill tier={node.severity_provenance ?? null} />
       </div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={label}>shared_cause_overlap</div>
+        <div>{node.shared_cause_overlap ?? '—'}</div>
+      </div>
       {node.fdr_tested && (
         <>
           <Field name="e_value">{node.fdr_e_value ?? '—'}</Field>
