@@ -17,6 +17,7 @@ from polymer_grammar import (
     MaterializationContext,
     Satisfaction,
     SatisfactionVerdict,
+    cohorts_error_independent,
 )
 from polymer_protocol.corpus import Corpus
 
@@ -104,9 +105,16 @@ def build_replication_inputs(
                 api_version=base_ctx.api_version,
                 data_version=base_ctx.data_version,
                 dimnames_hash=contract_b.dimnames_hash,
+                shared_cause_factors=getattr(contract_b, "shared_cause_factors", ()),
             ),
         )
         replications[cid] = (sat_b,)
-        evidence[cid] = evidence[cid] * e2
+        # §E: only multiply the cohorts' e-values when their errors are independent (low shared-cause
+        # overlap). cohorts_error_independent is None when factors are absent -> multiply as today
+        # (byte-identical); False (high overlap) -> keep the single e1 so the evidence matches the
+        # REPRODUCED tier independence_tier_of will stamp.
+        sat_a = Satisfaction(verdict=SatisfactionVerdict.SATISFIED, materialization=base_ctx)
+        if cohorts_error_independent((sat_a, sat_b)) is not False:
+            evidence[cid] = evidence[cid] * e2
 
     return ReplicationInputs(replications=replications, evidence=evidence)
