@@ -47,7 +47,7 @@ from polymer_grammar.status import Status
 from polymer_grammar.strength import Comparator
 from polymer_grammar.claim import Claim
 
-_PATTERN = PatternRef(pattern_id="adjusted_effect", version="1")
+_PATTERN = PatternRef(id="adjusted_effect", version="v1")   # field is `id` (matches conftest _PATTERN)
 
 
 def _plan(value: float, threshold: float, comparator=Comparator.GT, region=("cg1", "cg2")):
@@ -223,6 +223,19 @@ def test_pending_entry_serializes_roundtrip():
     led = register_test(_ledger(), "c1", "sha256:aa")
     again = FDRLedger.model_validate_json(led.model_dump_json())
     assert again.tests[0].e_value is None and again.tests[0].commitment_hash == "sha256:aa"
+
+
+def test_out_of_order_resolution_is_conservative():
+    # register A then B; resolve B (a discovery) BEFORE A. A's alpha was LOCKED at registration with
+    # D=0, so it must NOT retroactively benefit from B's later discovery -> conservative (FDR<=q safe).
+    led = register_test(_ledger(), "A", "h")
+    led = register_test(led, "B", "h")
+    a_alpha = next(t for t in led.tests if t.claim_id == "A").alpha_allocated
+    led = resolve_test(led, "B", 1e6)          # B resolves first, as a discovery
+    led = resolve_test(led, "A", 1e6)          # A resolves second
+    a = next(t for t in led.tests if t.claim_id == "A")
+    assert a.alpha_allocated == a_alpha == pytest.approx(Q * G1 * 1)   # unchanged; D was 0 at A's registration
+    assert a.discovery is True
 ```
 
 - [ ] **Step 2: Run — verify it fails**
@@ -331,7 +344,7 @@ def test_registers_one_pending_entry_per_claim_sorted():
     c_b = make_claim("b", Status.CONJECTURED, plan=make_plan(0.2, 0.1, Comparator.GT))
     c_a = make_claim("a", Status.CONJECTURED, plan=make_plan(0.2, 0.1, Comparator.GT))
     out = register_hypotheses(_corpus(c_b, c_a))
-    led = out.fdr_ledger
+    led = out.corpus.fdr_ledger
     assert led.n_tests == 2
     assert [t.claim_id for t in led.tests] == ["a", "b"]            # claim-id-sorted, deterministic
     assert all(t.e_value is None and t.commitment_hash for t in led.tests)
@@ -340,7 +353,7 @@ def test_registers_one_pending_entry_per_claim_sorted():
 def test_skips_claims_without_a_plan():
     c = make_claim("a", Status.CONJECTURED, plan=None)
     out = register_hypotheses(_corpus(c))
-    assert out.fdr_ledger.n_tests == 0
+    assert out.corpus.fdr_ledger.n_tests == 0
 
 
 def test_idempotent_no_double_charge():
@@ -354,7 +367,7 @@ def test_commitment_hash_recorded_matches_grammar():
     from polymer_grammar.commitment import commitment_hash
     c = make_claim("a", Status.CONJECTURED, plan=make_plan(0.2, 0.1, Comparator.GT))
     out = register_hypotheses(_corpus(c))
-    assert out.fdr_ledger.tests[0].commitment_hash == commitment_hash(c)
+    assert out.corpus.fdr_ledger.tests[0].commitment_hash == commitment_hash(c)
 ```
 
 - [ ] **Step 2: Run — verify it fails**
@@ -445,9 +458,9 @@ def test_registered_claim_resolves_and_can_license():
     c = make_claim("c", Status.PENDING, plan=make_plan(12.0, 10.0, Comparator.GT))
     corpus = register_hypotheses(Corpus(claims=(c,), fdr_ledger=FDRLedger(target_fdr=0.05)))
     out = _run(corpus, {"c": 1e6})
-    led = out.fdr_ledger
+    led = out.corpus.fdr_ledger
     assert led.n_tests == 1 and led.tests[0].e_value == 1e6 and led.tests[0].discovery is True
-    assert out.claims[0].status is Status.LICENSED
+    assert out.corpus.claims[0].status is Status.LICENSED
 
 
 def test_post_hoc_alteration_is_rejected():
@@ -458,11 +471,11 @@ def test_post_hoc_alteration_is_rejected():
     altered = make_claim("c", Status.PENDING, plan=make_plan(12.0, 5.0, Comparator.GT))   # same id, new plan
     corpus = corpus.model_copy(update={"claims": (altered,)})
     out = _run(corpus, {"c": 1e6})
-    c_out = out.claims[0]
+    c_out = out.corpus.claims[0]
     assert c_out.status is Status.REJECTED
     assert c_out.rejection_reason is RejectionReason.HYPOTHESIS_ALTERED
     # the slot stays consumed and pending (never a discovery)
-    assert out.fdr_ledger.tests[0].e_value is None and out.fdr_ledger.n_discoveries == 0
+    assert out.corpus.fdr_ledger.tests[0].e_value is None and out.corpus.fdr_ledger.n_discoveries == 0
 
 
 def test_no_registration_is_byte_identical():
@@ -471,8 +484,8 @@ def test_no_registration_is_byte_identical():
     c = make_claim("c", Status.PENDING, plan=make_plan(12.0, 10.0, Comparator.GT))
     plain = Corpus(claims=(c,), fdr_ledger=FDRLedger(target_fdr=0.05))
     out = _run(plain, {"c": 1e6})
-    assert out.fdr_ledger.n_tests == 1 and out.fdr_ledger.tests[0].commitment_hash is None
-    assert out.claims[0].status is Status.LICENSED   # identical outcome to pre-Phase-D
+    assert out.corpus.fdr_ledger.n_tests == 1 and out.corpus.fdr_ledger.tests[0].commitment_hash is None
+    assert out.corpus.claims[0].status is Status.LICENSED   # identical outcome to pre-Phase-D
 
 
 def test_strict_no_refund_across_a_cycle():
@@ -481,7 +494,7 @@ def test_strict_no_refund_across_a_cycle():
     c = make_claim("c", Status.PENDING, plan=make_plan(12.0, 10.0, Comparator.GT))
     corpus = register_hypotheses(Corpus(claims=(c,), fdr_ledger=FDRLedger(target_fdr=0.05)))
     out = _run(corpus, {})            # no e-value supplied -> not resolved
-    assert out.fdr_ledger.n_tests == 1 and out.fdr_ledger.tests[0].e_value is None
+    assert out.corpus.fdr_ledger.n_tests == 1 and out.corpus.fdr_ledger.tests[0].e_value is None
 ```
 
 - [ ] **Step 2: Run — verify it fails**
@@ -536,14 +549,14 @@ Then in the per-claim loop (`for c in corpus.claims:`), before the normal licens
 
 ```python
         if c.id in altered_ids:
-            new_claims.append(c.model_copy(update={
-                "status": Status.REJECTED, "pending_reason": None,
-                "rejection_reason": RejectionReason.HYPOTHESIS_ALTERED,
-            }))
+            new_claims.append(_with_status(
+                c, status=Status.REJECTED, pending_reason=None,
+                rejection_reason=RejectionReason.HYPOTHESIS_ALTERED,
+            ))
             continue
 ```
 
-(Ensure `RejectionReason` and `Status` are imported in verify.py — `Status` already is; add `RejectionReason`.)
+Use the existing `_with_status` helper (`verify.py:112`) — like every other status mutation in this file — so `Claim` validators re-run after the copy (a bare `model_copy` skips them). Ensure `RejectionReason` is imported in verify.py (`Status` already is).
 
 - [ ] **Step 4: Run — verify it passes + nothing regressed**
 
@@ -594,12 +607,11 @@ def test_multiplicity_charged_end_to_end():
               for i in range(9)]
     corpus = register_hypotheses(
         Corpus(claims=(*decoys, target), fdr_ledger=FDRLedger(target_fdr=q)))
-    out = run_cycle(corpus, ADAPTERS, CTX, evidence={"zzz_target": moderate_e})
-    t = next(x for x in out.fdr_ledger.tests if x.claim_id == "zzz_target")
+    out = run_cycle(corpus, ADAPTERS, CTX, evidence={"zzz_target": moderate_e})   # returns CycleResult
+    t = next(x for x in out.corpus.fdr_ledger.tests if x.claim_id == "zzz_target")
     assert t.index == 10 and t.discovery is False         # multiplicity charged -> withheld
-    assert out.claims_by_id["zzz_target"].status is not Status.LICENSED \
-        if hasattr(out, "claims_by_id") else \
-        next(c for c in out.claims if c.id == "zzz_target").status is not Status.LICENSED
+    target_out = next(c for c in out.corpus.claims if c.id == "zzz_target")
+    assert target_out.status is not Status.LICENSED
 
 
 def test_hypothesis_altered_is_not_reinstatable():
@@ -616,16 +628,25 @@ def test_hypothesis_altered_is_not_reinstatable():
 Run: `cd protocol && uv run pytest tests/test_preregistration_e2e.py -q`
 Expected: `test_hypothesis_altered_is_not_reinstatable` may FAIL if `_reinstate` reopens any REJECTED claim regardless of reason. Inspect `integrate.py:_reinstate`.
 
-- [ ] **Step 3: Implement the guard**
+- [ ] **Step 3: Implement the guard (REQUIRED — `_reinstate` is currently unconditional)**
 
-In `protocol/src/polymer_protocol/integrate.py`, ensure the reinstatement pass only reopens `RejectionReason.DEFEAT_GROUNDED_OUT`. If `_reinstate` (or its caller) doesn't already gate on the reason, add:
+`integrate.py:_reinstate` (lines ~50-62) **always** returns `status=PENDING` — the reason gate lives in the caller `integrate()`, not here. Make `_reinstate` defensive so a non-reinstatable reason is never reopened (this is what `test_hypothesis_altered_is_not_reinstatable` pins). Add as the **first statement** of `_reinstate`:
 
 ```python
+def _reinstate(c: Claim) -> Claim:
+    # only a defeat-grounded-out rejection reopens; refuted / robustly-blamed / hypothesis-altered
+    # are terminal. (Mirrors the integrate() gate; makes _reinstate safe to call directly.)
     if c.rejection_reason is not RejectionReason.DEFEAT_GROUNDED_OUT:
-        return c                                          # refuted / robustly-blamed / hypothesis-altered stay terminal
+        return c
+    return Claim.model_validate(
+        c.model_copy(update={
+            "status": Status.PENDING, "licensing": None,
+            "pending_reason": PendingReason.REINSTATED, "rejection_reason": None,
+        }).model_dump()
+    )
 ```
 
-at the top of the reinstatement decision (mirror the existing "refuted stays terminal" logic — if it already gates this way, no code change is needed and the test documents the invariant).
+Ensure `RejectionReason` is imported in `integrate.py` (it already is — used for `DEFEAT_GROUNDED_OUT`). This is a real, required code change — not a no-op.
 
 - [ ] **Step 4: Run — verify it passes + full protocol suite**
 
@@ -683,6 +704,7 @@ git add -A && git commit -m "chore: ruff + gate green for the pre-registration l
 | §1.2 strict, no refund | 2, 4 | `test_strict_no_refund_unexecuted_keeps_its_slot`, `test_strict_no_refund_across_a_cycle` |
 | §7.1 multiplicity charged | 2, 5 | `test_multiplicity_is_charged`, `test_multiplicity_charged_end_to_end` |
 | §3.1 soundness (register+resolve == process_test in order) | 2 | `test_register_then_resolve_in_order_equals_process_test` |
+| §7.4 out-of-order resolution is conservative | 2 | `test_out_of_order_resolution_is_conservative` |
 | §3.1 pending not a discovery / serialization | 2 | `test_register_appends_pending_and_locks_alpha`, `test_pending_entry_serializes_roundtrip` |
 | §3.2 `commitment_hash` deterministic + plan-sensitive | 1 | `test_hash_is_deterministic_and_prefixed`, `test_hash_changes_on_threshold_region_or_comparator`, `test_hash_independent_of_claim_id` |
 | §4.1 REGISTER sorted/idempotent/plan-guarded | 3 | `test_registers_one_pending_entry_per_claim_sorted`, `test_idempotent_no_double_charge`, `test_skips_claims_without_a_plan`, `test_commitment_hash_recorded_matches_grammar` |
@@ -700,6 +722,17 @@ git add -A && git commit -m "chore: ruff + gate green for the pre-registration l
 5. **Zero blast radius when off.** No registration ⇒ no pending entries ⇒ the new branch is skipped and the existing charge-at-verify path runs verbatim (`test_no_registration_is_byte_identical` + the unchanged 351+363 suites in Task 6).
 
 **C. Gap analysis (known limitations, explicitly out of scope — not silent):**
-- Deferred-resolution conservatism is argued + unit-checked in-order; a multi-cycle *interleaved* register/resolve property test is **not** included (the in-order + single-cycle tests bound the behavior the protocol actually produces today, since `run_cycle` registers-then-resolves within a cycle). Flagged for a future property test if interleaving across cycles is added.
+- Deferred-resolution conservatism is argued + unit-checked **in-order and out-of-order within a single ledger** (`test_out_of_order_resolution_is_conservative`). A multi-cycle *interleaved* register/resolve **property** test (randomized, many cycles) is not included — the unit tests bound the behavior `run_cycle` actually produces today (register-then-resolve within a cycle). Flagged for a future property test if cross-cycle interleaving is added.
 - `commitment_hash` hashes the entire `evaluation_plan`; a benign re-serialization that changed plan JSON without changing meaning would (conservatively) trip the gate. Pydantic frozen+tuple canonical JSON makes this stable, but it is a *conservative* hash by design (false-positive REJECT, never false-negative ALLOW).
 - No live-node/agent wiring (§6) — the mechanism is proven through `run_cycle`, which is the substrate the live node already uses.
+
+## Independent Audit Resolution (2026-06-19)
+
+This plan passed an independent adversarial completeness audit that verified the test code against the real APIs. All findings folded:
+- **Critical — `run_cycle` returns `CycleResult`, not `Corpus`.** Every test now uses `out.corpus.fdr_ledger` / `out.corpus.claims` (and `next(c for c in out.corpus.claims …)` for lookups).
+- **Critical — `PatternRef` field is `id`, version `v1`.** Fixed in `test_commitment.py` `_PATTERN`.
+- **Critical — `integrate._reinstate` is unconditional.** Task 5 Step 3 now *requires* adding the `DEFEAT_GROUNDED_OUT`-only guard to `_reinstate` (no "no-op" hedge).
+- **Important — status mutation must re-run validators.** Task 4 uses the existing `_with_status` helper, not a bare `model_copy`.
+- **Important — export ordering.** Task 2 Step 3 exports `register_test`/`resolve_test` from `polymer_grammar.__init__`; Task 4's `verify.py` import depends on Task 2 completing first (task order already enforces this).
+- **Minor — out-of-order conservatism** now has a dedicated test (`test_out_of_order_resolution_is_conservative`).
+- Confirmed non-issues: `_e_ok` prior-discovery fallback reads the pre-cycle ledger by design; `γ₂` precedence is correct; the `register_hypotheses` pending-set snapshot is safe for a single call.
