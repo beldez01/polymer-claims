@@ -27,7 +27,9 @@ from polymer_grammar import (
     mdl_delta,
     meets_meta_tier_bar,
     referenced_oracle_ids,
+    resolve_test,
 )
+from polymer_grammar.commitment import commitment_hash
 
 from .adapter_registry import AdapterRegistry, pair_is_registry_independent
 from .corpus import Corpus, CycleScaffolding, ExecRecord
@@ -131,19 +133,41 @@ def verify_stage(
     permitted = _permitted_by_bar(corpus, exec_records, earned)
 
     ev_map = evidence or {}
-    already_tested = {t.claim_id for t in corpus.fdr_ledger.tests if not t.retracted}
+    led = corpus.fdr_ledger
+
+    # --- Phase D: resolve pre-registered claims (match-gate + locked-alpha resolution) ---
+    pending = {t.claim_id: t for t in led.tests if t.e_value is None and not t.retracted}
+    by_id = {c.id: c for c in corpus.claims}
+    altered_ids: set[str] = set()
+    reg_decisions: dict[str, bool] = {}
+    for rec in exec_records:
+        cid = rec.claim_id
+        if cid in pending and cid in ev_map:
+            claim = by_id.get(cid)
+            if claim is None or claim.evaluation_plan is None:
+                continue
+            if commitment_hash(claim) != pending[cid].commitment_hash:
+                altered_ids.add(cid)                      # post-hoc change -> integrity violation
+                continue
+            led = resolve_test(led, cid, ev_map[cid])
+            reg_decisions[cid] = led.tests[next(
+                i for i in range(len(led.tests) - 1, -1, -1) if led.tests[i].claim_id == cid
+            )].discovery
+
+    # --- existing charge-at-verify path (unchanged) for NON-registered, NON-altered claims ---
+    already_tested = {t.claim_id for t in led.tests if not t.retracted}
     executed_with_e = [
         (r.claim_id, ev_map[r.claim_id])
         for r in exec_records
-        if r.claim_id in ev_map and r.claim_id not in already_tested
+        if r.claim_id in ev_map and r.claim_id not in already_tested and r.claim_id not in altered_ids
     ]
-    new_ledger, e_decisions = elond_decisions(corpus.fdr_ledger, executed_with_e)
+    new_ledger, e_decisions = elond_decisions(led, executed_with_e)
 
     def _e_ok(cid: str) -> bool:
-        # claims with no e-value are exempt (3-way gate). A claim tested THIS cycle uses its decision;
-        # one already in the ledger uses its recorded LIVE discovery (so a claim is e-tested once per
-        # lifetime, never re-tested while it lingers PENDING — which would inflate the ledger).
-        return cid not in ev_map or e_decisions.get(cid, cid in corpus.fdr_ledger.discoveries)
+        if cid in altered_ids:
+            return False
+        return (cid not in ev_map
+                or reg_decisions.get(cid, e_decisions.get(cid, cid in corpus.fdr_ledger.discoveries)))
 
     def _recorded_strength(claim: Claim) -> StrengthVector | None:
         """Earned claims record cap_earned(earned, tier); everything else keeps oracle_cap."""
@@ -153,6 +177,12 @@ def verify_stage(
 
     new_claims = []
     for c in corpus.claims:
+        if c.id in altered_ids:
+            new_claims.append(_with_status(
+                c, status=Status.REJECTED, pending_reason=None,
+                rejection_reason=RejectionReason.HYPOTHESIS_ALTERED,
+            ))
+            continue
         rec = rec_by_id.get(c.id)
         if rec is None:
             new_claims.append(c)

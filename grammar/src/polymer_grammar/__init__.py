@@ -69,6 +69,8 @@ from .fdr import (
     is_discovery,
     process_stream,
     process_test,
+    register_test,
+    resolve_test,
     retract_tests,
 )
 from .subject import (
@@ -155,6 +157,7 @@ from .representation import (
     is_representation_revision,
     meets_meta_tier_bar,
 )
+from .commitment import commitment_hash
 
 __all__ = [
     "AXES",
@@ -228,6 +231,8 @@ __all__ = [
     "is_discovery",
     "process_stream",
     "process_test",
+    "register_test",
+    "resolve_test",
     "retract_tests",
     "Cohort",
     "CohortDefinition",
@@ -300,4 +305,5 @@ __all__ = [
     "clears_mdl_bar",
     "classify",
     "RevisionDiscovery",
+    "commitment_hash",
 ]

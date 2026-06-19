@@ -50,6 +50,10 @@ def _reject(c: Claim) -> Claim:
 def _reinstate(c: Claim) -> Claim:
     """Reopen a defeat-rejected claim whose attacker has fallen (grounded-IN again) to PENDING so it
     RE-TESTS on current data — never auto-relicense a possibly-stale license. Mirrors drift.reopen_drifted."""
+    # only a defeat-grounded-out rejection reopens; refuted / robustly-blamed / hypothesis-altered
+    # are terminal. (Mirrors the integrate() gate; makes _reinstate safe to call directly.)
+    if c.rejection_reason is not RejectionReason.DEFEAT_GROUNDED_OUT:
+        return c
     return Claim.model_validate(
         c.model_copy(
             update={

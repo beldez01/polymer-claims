@@ -39,3 +39,4 @@ class RejectionReason(str, Enum):
     DEFEAT_GROUNDED_OUT = "defeat_grounded_out"   # knocked out of the grounded extension by an attacker
     REFUTED = "refuted"                           # the data refuted it (terminal)
     ROBUSTLY_BLAMED = "robustly_blamed"           # Duhem robust blame (terminal; reserved, not yet wired)
+    HYPOTHESIS_ALTERED = "hypothesis_altered"     # plan changed after pre-registration (terminal)

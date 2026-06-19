@@ -90,6 +90,7 @@ from .timeline import (
     frame_stats,
     n_licensed,
 )
+from .register import register_hypotheses
 from .verify import verify_stage
 
 # Public API. Grouped by stability/role (audit #12, no-refactor sectioning — the names are
@@ -115,6 +116,7 @@ __all__ = [
     "canonicalize",
     "safety_gate",
     "commit",
+    "register_hypotheses",
     "execute_ground",
     "verify_stage",
     "integrate",

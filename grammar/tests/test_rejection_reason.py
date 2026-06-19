@@ -21,7 +21,7 @@ def _claim(status, **extra):
 
 def test_rejection_reason_values():
     assert {r.value for r in RejectionReason} == {
-        "defeat_grounded_out", "refuted", "robustly_blamed",
+        "defeat_grounded_out", "refuted", "robustly_blamed", "hypothesis_altered",
     }
 
 
