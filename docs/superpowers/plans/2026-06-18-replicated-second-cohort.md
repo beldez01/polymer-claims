@@ -393,3 +393,38 @@ EOF
 **3. Type consistency:** `groups` (dict[gsm,str]), `sel_probes` (list), `n_idh`/`n_wt` (int), `group_digest`/`idh_call_source` (str) consistent Task 2→3. Run script: `repl.evidence`/`repl.replications` match `ReplicationInputs` fields in `replication.py`; `build_replication_inputs(corpus, base_ctx, *, bindings)` signature matches; `e_product = repl.evidence[CID]`, `e2 = e_product/e1`. Manifest keys match the spec §3 + the loader.
 
 **Note for the implementer:** Task 1 is a real characterization gate — the IDH characteristic field and IDH-mut count are unknown until the Series Matrix is inspected. If GEO carries no per-sample IDH field, switch to the supplement-derived `idh_status.tsv` (Task 1 Step 2) before Task 2. And confirm `run_cycle(..., replications=...)` against the existing synthetic REPLICATED caller before running Task 3.
+
+---
+
+## Implementation status (2026-06-18→19)
+
+- **Task 1 — DONE + BLOCKED finding.** GSE86409 betas downloaded (419,415 HM450 probes, [0,1]; sha256 `3e308c82…`), but GEO carries **no per-sample IDH** (only AML/stage/tissue/sex). A full GEO hunt confirmed **no open HM450 adult-AML cohort exposes machine-readable IDH** (it's in paper supplements / dbGaP phs001657; the GEO series carrying `idh1:`/`idh2:` — GSE146173, GSE98350 — are RNA/seq). The series-matrix join key is `!Sample_title` = `eAML-NGS-*` (or GSM).
+- **Tasks 2–3 — STAGED (gitignored), awaiting one real input.** `data/sal_aml/build_contract_gse86409.py` (reads a user-supplied `data/sal_aml/idh_status.tsv` keyed by `eAML-NGS`/GSM, classifies IDH labels, **drops unlabeled samples — no WT dilution**, builds `sal_aml_idh@1`, runs the self-checks) and `data/sal_aml/run_replicated.py` (binds cohort B, gates the product vs 32.9) are written and `py_compile`-clean. **Resume = drop `idh_status.tsv` → run both.** No genotype fabrication.
+
+## Completeness & Validity Audit
+
+This arc is **local-only / gitignored** (no `src/` change), so its test surface is **builder hard-asserts + the `run_cycle` air-gap + acceptance criteria** (not pytest). Every spec requirement maps to an executable check:
+
+| Spec requirement | Task / file | Executable check (the "test") |
+|---|---|---|
+| §2 cohort B = independent adult-AML HM450 w/ IDH | T1 | platform grep `GPL13534`; series-title adult-AML; IDH labels present (via `idh_status.tsv`) |
+| §3 WT = annotated-not-hotspot, never missing | T2 builder | unlabeled samples DROPPED (`dropped_unlabeled_n`), never defaulted WT — code path + printed count |
+| §3 contrast-matched (IDH1/2 hotspot → IDH_mut) | T2 builder | `_classify_idh` aborts on unclassifiable token (no silent mislabel) |
+| §3 distinct dimnames_hash (a real replication) | T2 builder | hard assert `ref_b.dimnames_hash != cohort-A` |
+| §4/§5 top-10k probe overlap complete | T2 builder | hard assert `top - set(sel_probes) == ∅` (else rebind can't compute e₂) |
+| §3 IDH-mut N powered (≥12) | T2 builder | hard assert `n_idh >= 12` |
+| §4 product gate e₁·e₂ vs 32.9 | T3 run | `run_replicated.py` prints e₁, e₂, product, STATUS, `independence_tier` |
+| §4 cohort-B air-gap (legs agree ∧ Δβ>τ) | machinery | `build_replication_inputs` DROPS cohort B if the two region legs disagree or Δβ≤τ (`replication.py:89-94`) — silent inflation is impossible |
+| §1 τ/K/q fixed (no tuning) | Global Constraints | hard-coded `K=10_000, TAU=0.10`, `target_fdr=0.05` in `run_replicated.py` |
+| machinery validated | pre-flight | `run_cycle(..., replications=)` confirmed at `cycle.py:60`; canonical caller `tests/test_2e_tiered_independence_e2e.py` |
+
+**Validity arguments:**
+1. **Severity on both legs.** The top-10k is selected on cohort-A's *discovery* half only ⇒ e₁ (cohort-A test half) and e₂ (all of cohort B) are each valid severe e-values on data unused for selection; their product is the §2E REPLICATED test (one e-LOND slot).
+2. **No silent license.** Two independent region legs must agree on *each* cohort (air-gap), and cohort B must independently clear τ, before any e₂ is emitted — a mis-ingested cohort B fails closed (drops out), it cannot inflate the product.
+3. **No dilution reintroduced.** Drop-not-default mirrors the cohort-A IDH-source fix; an unlabeled GSE86409 sample is excluded, never silently labeled WT.
+4. **Honest outcome.** Deliverable is "tested for replication," not "REPLICATED licensed" — a product < 32.9 is reported PENDING with τ/K/q untouched.
+
+**Gap analysis (explicit, not silent):**
+- **Hard-blocked on real IDH labels.** The only missing input is `idh_status.tsv` (SAL PMID 28366934 / dbGaP phs001657) — user-supplied; not fabricable. Until then the arc is *built but not earned* (region-Δβ stays PENDING).
+- **Independence is cohort/lab/pipeline-level**, content-addressed only as `dimnames_hash ≠`; the formal common-cause-DAG bar (North Star §E) is **not** cleared and the caveat must say so (Task 4 Step 1).
+- **No pytest coverage** (gitignored data) — the air-gap + builder asserts are the substitute; a `skip-if-absent` local e2e test mirroring `test_2e_tiered_independence_e2e.py` could be added once `sal_aml_idh@1` exists (future, optional).
