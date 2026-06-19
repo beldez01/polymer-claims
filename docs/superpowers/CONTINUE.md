@@ -8,12 +8,17 @@
 
 ---
 
-## Current state (2026-06-18)
+## Current state (2026-06-19)
 
-`main` ALL GREEN — **226 umbrella + 351 grammar + 363 protocol + 2 isolation**; viewer `tsc`+build
-clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpus = 4 collections**;
-local-only. (Procrustes embedding alignment — spectral as the live node layout — just merged; §2E
-tiered independence + reinstatement→PENDING + n-DMPs-at-FDR before it — see NEXT.)
+`main` ALL GREEN — **261 umbrella + 372 grammar + 377 protocol + 2 isolation**; viewer `tsc`+build
+clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpus = 4 collections**.
+(**Phase D slice 1 — pre-registration ledger — just shipped + merged**; the IDH-source swap → `@2`,
+the §2E REPLICATED attempt, and the live-methyl hypothesizer before it — see NEXT.)
+
+**Repo reconciled to a single trunk (2026-06-19).** The git tangle is gone: ~9 stacked feature branches
+were fast-forwarded into `main` (zero divergence, nothing lost), all stale local + remote branches
+pruned, and **`main` pushed to `origin` (`origin/main == main`)**. The account flag is RESOLVED, so the
+old "local-only, never push" rule no longer applies — `main` is now kept in sync with origin.
 
 **Repo hygiene (2026-06-17):** a full cleanup pass — `docs/` consolidated (one canonical spec +
 this file + the forward roadmap + the Phase-2 vision docs under `docs/superpowers/`; everything
@@ -59,7 +64,11 @@ design.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first, local-only): **IDH-source swap — cBioPortal genotyping →
+**Recently shipped** (most recent first): **Phase D slice 1 — pre-registration ledger: a hypothesis
+commits before it sees data; registration charges+locks the e-LOND α-slot (strict, no refund) + a verify
+match-gate rejects post-hoc changes (`HYPOTHESIS_ALTERED`, terminal) — closes the §5a multiplicity leak;
+pure-code grammar+protocol, byte-identical when off (subagent-driven, whole-branch-reviewed; merged
+2026-06-19)** · **IDH-source swap — cBioPortal genotyping →
 `tcga_laml_idh@2` (IDH-mut n=10→36); region-Δβ re-run at proper power: held-out e 0.867→5.672, still
 PENDING below the e-LOND threshold 32.9 (2026-06-18)** · **Region-Δβ via held-out top-10k — gate WITHHELD
 at n=10 (2026-06-17), severity demonstrated** · **Phase A real-data swap — n-DMP EARNED on real
@@ -107,8 +116,9 @@ reads a user-supplied `data/sal_aml/idh_status.tsv` keyed by eAML-NGS title or G
 samples — no WT dilution; `data/sal_aml/run_replicated.py` gates the product vs 32.9). **Resume =** drop
 `data/sal_aml/idh_status.tsv` (SAL PMID 28366934 supplement / dbGaP phs001657) → run the two scripts. **No
 fabrication of genotypes — the run waits on real labels.** Non-data-blocked alternatives if REPLICATED
-stays gated: **Phase D integrity ledger** (pre-registration + close the §5a literature-shared-cause leak)
-or **North Star §E common-cause-DAG independence** — both pure-code, no external data.
+stays gated (both pure-code, no external data): **Phase D slice 1 (pre-registration ledger) — DONE
+2026-06-19**; remaining non-blocked work is **Phase D slice 2** (close the §5a literature-shared-cause
+leak + incubation/ranking) or **North Star §E common-cause-DAG independence**.
 
 **▶ PHASE B FIRST SLICE SHIPPED — methylation hypothesizer.** `MethylGenerationAdapter` now mirrors
 `MeanDiffGenerationAdapter`: a constrained LLM DSL emits executable `region_delta_beta` / `n_dmps`
@@ -198,6 +208,20 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ n-DMPs-at-FDR (`feat/n-dmps-at-fdr`) — second methylation reduction; per-probe-significant DMP count
   licenses on a one-sample count-enrichment betting e-value; two pooled-t legs agree on the count
   (air-gap); umbrella-only (design rationale in archive/specs/)
+- ✅ **§2E REPLICATED on a real 2nd cohort — STAGED, data-blocked** (2026-06-18) — cohort B = GSE86409
+  (SAL adult-AML HM450); betas downloaded, ingestion + run scripts staged (`data/sal_aml/`, gitignored).
+  Key finding: no open HM450 adult-AML cohort exposes machine-readable IDH → blocked on a real
+  `idh_status.tsv` (user-supplied; no genotype fabrication). spec+plan
+  `docs/superpowers/{specs,plans}/2026-06-18-replicated-second-cohort*`.
+- ✅ **Phase D slice 1 — pre-registration ledger** (2026-06-19) — closes the §5a multiplicity leak:
+  grammar `commitment_hash` + `register_test`/`resolve_test` (charge+lock the e-LOND α at REGISTRATION,
+  strict no-refund) + `RejectionReason.HYPOTHESIS_ALTERED`; protocol `register_hypotheses` REGISTER stage
+  + verify match-gate (post-hoc plan change → terminal REJECT) + `_reinstate` guard. Additive/opt-in,
+  byte-identical when off; an agent fishing N hypotheses pays all N slots, FDR ≤ q preserved
+  (conservative locked α). Subagent-driven; whole-branch opus review READY-TO-MERGE. spec+plan
+  `docs/superpowers/{specs,plans}/2026-06-19-preregistration-ledger*`. **Deferred Phase-D slices:** §5a
+  literature-shared-cause provenance (overlaps North Star §E), incubation/ranking, require-registration
+  strict mode, live-agent wiring.
 
 ## Invariants / working agreements (don't relearn)
 
@@ -214,8 +238,10 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   re-exported, so base import stays numpy-free.
 - Tests: per-package `uv run pytest -q` + `uv run ruff check src tests`; full gate `scripts/check-all.sh`.
   TDD: failing test first.
-- Merge to `main` `--no-ff`, **local-only** — commits are NOT pushed to origin (flagged account; no
-  active CI; `check-all.sh` is the substitute).
+- Merge feature work to `main` `--no-ff`; **`main` is now pushed to `origin`** (the account flag is
+  RESOLVED — 2026-06-19, `origin/main == main`). The old "local-only, never push" rule is retired. No
+  active CI yet, so `check-all.sh` is still the pre-merge gate. Repo is a **single trunk** — no long-lived
+  feature branches; the 2026-06-19 reconcile pruned all stale local + remote branches.
 
 ## Reference pointers
 
