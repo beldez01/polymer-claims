@@ -79,33 +79,41 @@ def test_gate_predicate_no_factors_returns_none():
 # ---------------------------------------------------------------------------
 
 
+_REF_A = "se:epicv2_casectrl_demo@1"  # primary cohort ref used by region_delta_beta_claim
+
+
 def test_umbrella_skips_multiply_when_shared_cause_overlap_high(monkeypatch):
-    """When base_ctx carries overlapping factors AND contract_b exposes overlapping factors,
-    cohorts_error_independent returns False -> evidence stays at e1 (NOT e1*e2),
-    but replications[cid] is still populated with sat_b.
+    """Production-faithful: base_ctx has NO dimnames_hash / factors (like every real caller).
+    Cohort-A's identity comes from its contract; cohort-B's comes from its contract.
+    Both contracts carry overlapping shared_cause_factors -> Jaccard >= tau -> False -> skip product.
+    replications[cid] is still set; evidence stays at e1 (NOT e1*e2).
     """
+    real_contract_a = _real_load_contract(_REF_A)
     real_contract_b = _real_load_contract(_REF_B)
 
-    # Wrap the real contract to add shared_cause_factors with enough overlap
-    # for Jaccard(base_ctx factors, contract_b factors) >= tau (0.5).
-    # base_ctx has ("manifest:HM450", "norm:noob", "ref:GRCh38") — 3 factors.
-    # contract_b gets ("manifest:HM450", "norm:noob", "lib:numpy") — 2 shared -> Jaccard 2/4 = 0.5 -> False.
+    # Both contracts get overlapping factors so Jaccard(A, B) >= 0.5 -> False.
+    # A: ("manifest:HM450", "norm:noob", "ref:GRCh38") — 3 factors
+    # B: ("manifest:HM450", "norm:noob", "lib:numpy")   — 2 shared, union 4 -> Jaccard 2/4 = 0.5 -> False
     class _WrappedContract:
-        """Thin proxy that delegates everything to the real contract but adds shared_cause_factors."""
+        """Thin proxy that adds shared_cause_factors; keeps real dimnames_hash and contract_uid."""
 
-        def __init__(self, real):
+        def __init__(self, real, factors):
             self._real = real
+            self._factors = factors
 
         def __getattr__(self, name):
             return getattr(self._real, name)
 
         @property
         def shared_cause_factors(self):
-            return ("manifest:HM450", "norm:noob", "lib:numpy")
+            return self._factors
 
-    wrapped_b = _WrappedContract(real_contract_b)
+    wrapped_a = _WrappedContract(real_contract_a, ("manifest:HM450", "norm:noob", "ref:GRCh38"))
+    wrapped_b = _WrappedContract(real_contract_b, ("manifest:HM450", "norm:noob", "lib:numpy"))
 
     def _patched_load(ref):
+        if ref == _REF_A:
+            return wrapped_a
         if ref == _REF_B:
             return wrapped_b
         return _real_load_contract(ref)
@@ -115,14 +123,15 @@ def test_umbrella_skips_multiply_when_shared_cause_overlap_high(monkeypatch):
     claim = region_delta_beta_claim("c1")
     corpus = _corpus(claim)
 
-    rep = build_replication_inputs(corpus, _BASE_WITH_FACTORS, bindings={"c1": _REF_B})
+    # Use _BASE_NO_FACTORS — the production-faithful context (no dimnames_hash, no factors)
+    rep = build_replication_inputs(corpus, _BASE_NO_FACTORS, bindings={"c1": _REF_B})
 
     # sat_b still recorded (replications always set before gate)
     assert "c1" in rep.replications
     (sat_b,) = rep.replications["c1"]
     assert sat_b.materialization.dimnames_hash == real_contract_b.dimnames_hash
 
-    # e-value NOT multiplied — gate fires and blocks the product
+    # e-value NOT multiplied — gate fires because both contract factors overlap
     node = claim.evaluation_plan.graph.nodes[0]
     comparator = claim.evaluation_plan.criterion.comparator
     a1, b1 = _region_group_means(node)

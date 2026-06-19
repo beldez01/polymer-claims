@@ -73,7 +73,8 @@ def build_replication_inputs(
         if handle is None:
             continue
         try:
-            dimnames_a = load_contract(handle.ref).dimnames_hash
+            contract_a = load_contract(handle.ref)
+            dimnames_a = contract_a.dimnames_hash
             contract_b = load_contract(ref_b)
         except FileNotFoundError:
             continue
@@ -113,7 +114,16 @@ def build_replication_inputs(
         # overlap). cohorts_error_independent is None when factors are absent -> multiply as today
         # (byte-identical); False (high overlap) -> keep the single e1 so the evidence matches the
         # REPRODUCED tier independence_tier_of will stamp.
-        sat_a = Satisfaction(verdict=SatisfactionVerdict.SATISFIED, materialization=base_ctx)
+        sat_a = Satisfaction(
+            verdict=SatisfactionVerdict.SATISFIED,
+            materialization=MaterializationContext(
+                id=f"{base_ctx.id}-primary-{contract_a.contract_uid}",
+                api_version=base_ctx.api_version,
+                data_version=base_ctx.data_version,
+                dimnames_hash=contract_a.dimnames_hash,
+                shared_cause_factors=getattr(contract_a, "shared_cause_factors", ()),
+            ),
+        )
         if cohorts_error_independent((sat_a, sat_b)) is not False:
             evidence[cid] = evidence[cid] * e2
 
