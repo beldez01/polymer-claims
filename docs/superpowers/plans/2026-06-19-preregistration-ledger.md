@@ -40,11 +40,10 @@ import pytest
 from polymer_grammar.commitment import commitment_hash
 from polymer_grammar.leaf import CategoricalLeaf, MeasurementBasis
 from polymer_grammar.operations import (
-    ComputeGraph, EvaluationPlan, OperationNode, ProducedLeafSpec, SatisfactionCriterion,
+    Comparator, ComputeGraph, EvaluationPlan, OperationNode, ProducedLeafSpec, SatisfactionCriterion,
 )
 from polymer_grammar.pattern import PatternRef
 from polymer_grammar.status import Status
-from polymer_grammar.strength import Comparator
 from polymer_grammar.claim import Claim
 
 _PATTERN = PatternRef(id="adjusted_effect", version="v1")   # field is `id` (matches conftest _PATTERN)
