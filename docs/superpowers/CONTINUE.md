@@ -10,10 +10,10 @@
 
 ## Current state (2026-06-19)
 
-`main` ALL GREEN — **261 umbrella + 372 grammar + 377 protocol + 2 isolation**; viewer `tsc`+build
-clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free; **Corpus = 4 collections**.
-(**Phase D slice 1 — pre-registration ledger — just shipped + merged**; the IDH-source swap → `@2`,
-the §2E REPLICATED attempt, and the live-methyl hypothesizer before it — see NEXT.)
+`feat/shared-cause-incubation` ALL GREEN — **261 umbrella + 380 grammar + 391 protocol + 2 isolation**;
+viewer `tsc`+build clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free;
+**Corpus = 4 collections**. (**Phase D slice 2 — literature-shared-cause gate + incubation/ranking —
+shipped 2026-06-19, awaiting merge**; Phase D slice 1 merged 2026-06-19; see NEXT.)
 
 **Repo reconciled to a single trunk (2026-06-19).** The git tangle is gone: ~9 stacked feature branches
 were fast-forwarded into `main` (zero divergence, nothing lost), all stale local + remote branches
@@ -64,11 +64,16 @@ design.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first): **Phase D slice 1 — pre-registration ledger: a hypothesis
-commits before it sees data; registration charges+locks the e-LOND α-slot (strict, no refund) + a verify
-match-gate rejects post-hoc changes (`HYPOTHESIS_ALTERED`, terminal) — closes the §5a multiplicity leak;
-pure-code grammar+protocol, byte-identical when off (subagent-driven, whole-branch-reviewed; merged
-2026-06-19)** · **IDH-source swap — cBioPortal genotyping →
+**Recently shipped** (most recent first): **Phase D slice 2 — literature-shared-cause gate +
+incubation/ranking: a hypothesis records the cohorts its motivating prior was established on
+(`Provenance.prior_cohorts`); overlap with the test cohort → `severity_provenance=CONFIRMATORY`
+license + `severity`-axis cap (strict mode withholds). The same data-blind signal feeds SELECT
+ranking (injected `cohort_of_ref`) + `register_selected` budget-aware top-k commit. First concrete
+edge of north-star §E. Additive/byte-identical when off; merged 2026-06-19.** · **Phase D slice 1 —
+pre-registration ledger: a hypothesis commits before it sees data; registration charges+locks the
+e-LOND α-slot (strict, no refund) + a verify match-gate rejects post-hoc changes
+(`HYPOTHESIS_ALTERED`, terminal) — closes the §5a multiplicity leak; pure-code grammar+protocol,
+byte-identical when off (subagent-driven, whole-branch-reviewed; merged 2026-06-19)** · **IDH-source swap — cBioPortal genotyping →
 `tcga_laml_idh@2` (IDH-mut n=10→36); region-Δβ re-run at proper power: held-out e 0.867→5.672, still
 PENDING below the e-LOND threshold 32.9 (2026-06-18)** · **Region-Δβ via held-out top-10k — gate WITHHELD
 at n=10 (2026-06-17), severity demonstrated** · **Phase A real-data swap — n-DMP EARNED on real
@@ -219,9 +224,18 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   + verify match-gate (post-hoc plan change → terminal REJECT) + `_reinstate` guard. Additive/opt-in,
   byte-identical when off; an agent fishing N hypotheses pays all N slots, FDR ≤ q preserved
   (conservative locked α). Subagent-driven; whole-branch opus review READY-TO-MERGE. spec+plan
-  `docs/superpowers/{specs,plans}/2026-06-19-preregistration-ledger*`. **Deferred Phase-D slices:** §5a
-  literature-shared-cause provenance (overlaps North Star §E), incubation/ranking, require-registration
-  strict mode, live-agent wiring.
+  `docs/superpowers/{specs,plans}/2026-06-19-preregistration-ledger*`.
+- ✅ **Phase D slice 2 — literature-shared-cause gate + incubation/ranking** (2026-06-19) — closes the
+  §5a literature-shared-cause provenance leak: grammar `shared_cause` module (`SeverityProvenance`
+  enum, `shared_cause_overlap`, `severity_provenance_of`, `cap_severity_for_confirmatory`) + grammar
+  `Provenance.prior_cohorts` + `Licensing.severity_provenance`; VERIFY gate stamps CONFIRMATORY/HELD_OUT
+  + applies severity ceiling (0.2) + strict-mode withholds; SELECT data-blind ranking penalty
+  (`CONFIRMATORY_RANK_PENALTY=0.5`, injected `cohort_of_ref`) + `register_selected` budget-aware top-k
+  commit; viewer passthrough + `severity_provenance` display. First concrete edge of north-star §E
+  common-cause DAG. Additive/byte-identical when off; subagent-driven (7-task plan). spec+plan
+  `docs/superpowers/{specs,plans}/2026-06-19-shared-cause-incubation*`. **Deferred Phase-D slices:**
+  incubation strict-mode wiring, live-agent wiring, fuzzy literature→cohort resolution, full §E
+  common-cause DAG.
 
 ## Invariants / working agreements (don't relearn)
 
