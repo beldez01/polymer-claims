@@ -400,6 +400,7 @@ EOF
 
 - **Task 1 — DONE + BLOCKED finding.** GSE86409 betas downloaded (419,415 HM450 probes, [0,1]; sha256 `3e308c82…`), but GEO carries **no per-sample IDH** (only AML/stage/tissue/sex). A full GEO hunt confirmed **no open HM450 adult-AML cohort exposes machine-readable IDH** (it's in paper supplements / dbGaP phs001657; the GEO series carrying `idh1:`/`idh2:` — GSE146173, GSE98350 — are RNA/seq). The series-matrix join key is `!Sample_title` = `eAML-NGS-*` (or GSM).
 - **Tasks 2–3 — STAGED (gitignored), awaiting one real input.** `data/sal_aml/build_contract_gse86409.py` (reads a user-supplied `data/sal_aml/idh_status.tsv` keyed by `eAML-NGS`/GSM, classifies IDH labels, **drops unlabeled samples — no WT dilution**, builds `sal_aml_idh@1`, runs the self-checks) and `data/sal_aml/run_replicated.py` (binds cohort B, gates the product vs 32.9) are written and `py_compile`-clean. **Resume = drop `idh_status.tsv` → run both.** No genotype fabrication.
+- **Audit fixes applied (2026-06-19, independent review).** (1) HIGH: `_classify_idh` rewritten to **WT-precedence token logic** — a `'IDH1 WT'`/`'IDH2 wild-type'` label now classifies as WT, not IDH_mut (the old `startswith` guard mis-fired because the gene name leads); unit-verified on 11 label forms. (2) join now uses a **majority-vote** GSM-vs-title key detector + a **coverage assert** (`universe ≥ 0.5·min(labels, samples)`) so a wrong key fails loudly instead of silently dropping rows. (3) `run_replicated.py` reports `e2 = N/A` (not a misleading `1.0`) when the air-gap drops cohort B, and **freezes the e₁ reference** (`assert |e1−5.672|<0.05`) so contract drift can't slip through. The control-GSM assert in the original Task 2 is **superseded** by the user-supplied-label path (GEO has no per-sample IDH ⇒ no GSM control); its role is covered by the classifier-abort + coverage assert + `n_idh ≥ 12` + top-10k-overlap + distinct-dimnames checks.
 
 ## Completeness & Validity Audit
 
@@ -414,6 +415,7 @@ This arc is **local-only / gitignored** (no `src/` change), so its test surface 
 | §4/§5 top-10k probe overlap complete | T2 builder | hard assert `top - set(sel_probes) == ∅` (else rebind can't compute e₂) |
 | §3 IDH-mut N powered (≥12) | T2 builder | hard assert `n_idh >= 12` |
 | §4 product gate e₁·e₂ vs 32.9 | T3 run | `run_replicated.py` prints e₁, e₂, product, STATUS, `independence_tier` |
+| §4 cohort-B is a genuine replication (distinct dimnames) | machinery | `build_replication_inputs` DROPS cohort B if `dimnames_hash == cohort A` (`replication.py:79-80`) — a same-cohort re-run cannot pose as a replication |
 | §4 cohort-B air-gap (legs agree ∧ Δβ>τ) | machinery | `build_replication_inputs` DROPS cohort B if the two region legs disagree or Δβ≤τ (`replication.py:89-94`) — silent inflation is impossible |
 | §1 τ/K/q fixed (no tuning) | Global Constraints | hard-coded `K=10_000, TAU=0.10`, `target_fdr=0.05` in `run_replicated.py` |
 | machinery validated | pre-flight | `run_cycle(..., replications=)` confirmed at `cycle.py:60`; canonical caller `tests/test_2e_tiered_independence_e2e.py` |
