@@ -17,8 +17,10 @@ from polymer_grammar import (
     RivalSetClosure,
     Satisfaction,
     SatisfactionVerdict,
+    SeverityProvenance,
     Status,
     StrengthVector,
+    cap_severity_for_confirmatory,
     clears_mdl_bar,
     corpus_implied_schema,
     elond_decisions,
@@ -28,6 +30,7 @@ from polymer_grammar import (
     meets_meta_tier_bar,
     referenced_oracle_ids,
     resolve_test,
+    severity_provenance_of,
 )
 from polymer_grammar.commitment import commitment_hash
 
@@ -117,6 +120,32 @@ def _with_status(claim: Claim, **update) -> Claim:
     return Claim.model_validate(claim.model_copy(update=update).model_dump())
 
 
+def _apply_shared_cause(
+    claim: Claim,
+    licensing: Licensing,
+    strength: StrengthVector | None,
+    strict: bool,
+) -> tuple[Licensing, StrengthVector | None, bool]:
+    """Annotate the license with its severity-provenance tier and (when CONFIRMATORY) cap the
+    `severity` axis. Returns (licensing', strength', withhold). Inert when prior_cohorts is empty."""
+    prior = claim.provenance.prior_cohorts if claim.provenance is not None else ()
+    if not prior:
+        return licensing, strength, False
+    test_cohorts = tuple(
+        s.materialization.dimnames_hash
+        for s in licensing.satisfactions
+        if s.materialization.dimnames_hash is not None
+    )
+    tier = severity_provenance_of(prior, test_cohorts)
+    licensing = licensing.model_copy(update={"severity_provenance": tier})
+    if tier == SeverityProvenance.CONFIRMATORY:
+        if strict:
+            return licensing, strength, True
+        if strength is not None:
+            strength = cap_severity_for_confirmatory(strength)
+    return licensing, strength, False
+
+
 def verify_stage(
     corpus: Corpus,
     scaffolding: CycleScaffolding,
@@ -125,6 +154,7 @@ def verify_stage(
     adapter_registry: AdapterRegistry | None = None,
     evidence: dict[str, float] | None = None,
     replications: dict[str, tuple[Satisfaction, ...]] | None = None,
+    strict_shared_cause: bool = False,
 ) -> Corpus:
     registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
@@ -218,6 +248,16 @@ def verify_stage(
                 rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
                 independence_tier=independence_tier_of(sats),
             )
+            recorded = _recorded_strength(c)
+            licensing, recorded, withhold = _apply_shared_cause(
+                c, licensing, recorded, strict_shared_cause
+            )
+            if withhold:
+                new_claims.append(_with_status(
+                    c, status=Status.PENDING,
+                    pending_reason=PendingReason.SHARED_CAUSE_CONFIRMATORY, licensing=None,
+                ))
+                continue
             if is_representation_revision(c):
                 # meta-tier gate: a representation-revision cannot ride the ordinary single-severe-test
                 # path. Try the MDL route first — a revision that COMPRESSES the object corpus earns its
@@ -255,7 +295,7 @@ def verify_stage(
                     status=Status.LICENSED,
                     licensing=licensing,
                     pending_reason=None,
-                    strength=_recorded_strength(c),  # earned -> cap_earned; else oracle_cap (fallback: empty registry -> unresolved refs UNVALIDATED)
+                    strength=recorded,  # earned -> cap_earned; else oracle_cap (fallback: empty registry -> unresolved refs UNVALIDATED)
                 )
             )
         # Refutation is terminal and takes precedence over the grounded-out (extension boundary) case.
