@@ -35,7 +35,9 @@ from .licensing import (
     RivalSetClosure,
     Satisfaction,
     SatisfactionVerdict,
+    cohorts_error_independent,
     independence_tier_of,
+    max_shared_cause_overlap,
 )
 from .roles import CausalRoles, Role
 from .units import DIMENSIONLESS, Dimension, compatible
@@ -198,7 +200,9 @@ __all__ = [
     "LicenseRoute",
     "Licensing",
     "MaterializationContext",
+    "cohorts_error_independent",
     "independence_tier_of",
+    "max_shared_cause_overlap",
     "registry",
     "RivalSetClosure",
     "Satisfaction",
