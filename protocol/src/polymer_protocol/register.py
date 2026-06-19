@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from polymer_grammar import register_test
 from polymer_grammar.commitment import commitment_hash
 
-from .corpus import Corpus
+from .corpus import Corpus, SelectionRecord
 
 
 def register_hypotheses(corpus: Corpus, claim_ids: Iterable[str] | None = None) -> Corpus:
@@ -25,3 +25,18 @@ def register_hypotheses(corpus: Corpus, claim_ids: Iterable[str] | None = None) 
     if ledger == corpus.fdr_ledger:
         return corpus
     return corpus.model_copy(update={"fdr_ledger": ledger})
+
+
+def register_selected(
+    corpus: Corpus, record: SelectionRecord, *, k: int | None = None
+) -> Corpus:
+    """Budget-aware incubation commit: register (e-LOND slot, slice-1 register_test) only the
+    SELECT-selected claims, in rank order, optionally truncated to top-k. Non-selected/incubated
+    candidates are NOT charged — honest because SELECT ranking is data-blind (it did not peek at
+    the outcome)."""
+    ranked = [
+        d.claim_id for d in sorted(record.decisions, key=lambda d: d.rank) if d.selected
+    ]
+    if k is not None:
+        ranked = ranked[:k]
+    return register_hypotheses(corpus, ranked)
