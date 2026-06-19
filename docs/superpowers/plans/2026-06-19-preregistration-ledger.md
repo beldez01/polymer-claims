@@ -331,7 +331,7 @@ git commit -m "feat(grammar): register_test/resolve_test — pre-registration ch
 from polymer_grammar import Comparator, Status
 from polymer_protocol import Corpus, register_hypotheses
 
-from conftest import make_claim, make_plan
+from tests.conftest import make_claim, make_plan   # tests/ is a package (has __init__.py)
 
 
 def _corpus(*claims):
@@ -342,8 +342,8 @@ def _corpus(*claims):
 def test_registers_one_pending_entry_per_claim_sorted():
     c_b = make_claim("b", Status.CONJECTURED, plan=make_plan(0.2, 0.1, Comparator.GT))
     c_a = make_claim("a", Status.CONJECTURED, plan=make_plan(0.2, 0.1, Comparator.GT))
-    out = register_hypotheses(_corpus(c_b, c_a))
-    led = out.corpus.fdr_ledger
+    out = register_hypotheses(_corpus(c_b, c_a))   # returns a plain Corpus (not CycleResult)
+    led = out.fdr_ledger
     assert led.n_tests == 2
     assert [t.claim_id for t in led.tests] == ["a", "b"]            # claim-id-sorted, deterministic
     assert all(t.e_value is None and t.commitment_hash for t in led.tests)
@@ -352,7 +352,7 @@ def test_registers_one_pending_entry_per_claim_sorted():
 def test_skips_claims_without_a_plan():
     c = make_claim("a", Status.CONJECTURED, plan=None)
     out = register_hypotheses(_corpus(c))
-    assert out.corpus.fdr_ledger.n_tests == 0
+    assert out.fdr_ledger.n_tests == 0
 
 
 def test_idempotent_no_double_charge():
@@ -366,7 +366,7 @@ def test_commitment_hash_recorded_matches_grammar():
     from polymer_grammar.commitment import commitment_hash
     c = make_claim("a", Status.CONJECTURED, plan=make_plan(0.2, 0.1, Comparator.GT))
     out = register_hypotheses(_corpus(c))
-    assert out.corpus.fdr_ledger.tests[0].commitment_hash == commitment_hash(c)
+    assert out.fdr_ledger.tests[0].commitment_hash == commitment_hash(c)
 ```
 
 - [ ] **Step 2: Run — verify it fails**
@@ -441,7 +441,7 @@ from polymer_grammar import Comparator, MaterializationContext, RejectionReason,
 from polymer_grammar import IdentityAdapter, ReferenceAdapter
 from polymer_protocol import Corpus, register_hypotheses, run_cycle
 
-from conftest import make_claim, make_plan
+from tests.conftest import make_claim, make_plan   # tests/ is a package (has __init__.py)
 
 ADAPTERS = (IdentityAdapter(), ReferenceAdapter(identity="reference"))
 CTX = MaterializationContext(id="M", api_version="v1", data_version="d1")
@@ -589,7 +589,7 @@ from polymer_grammar import Comparator, FDRLedger, MaterializationContext, Rejec
 from polymer_grammar import IdentityAdapter, ReferenceAdapter
 from polymer_protocol import Corpus, register_hypotheses, run_cycle
 
-from conftest import make_claim, make_plan
+from tests.conftest import make_claim, make_plan   # tests/ is a package (has __init__.py)
 
 ADAPTERS = (IdentityAdapter(), ReferenceAdapter(identity="reference"))
 CTX = MaterializationContext(id="M", api_version="v1", data_version="d1")
