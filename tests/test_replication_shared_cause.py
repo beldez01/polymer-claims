@@ -140,14 +140,13 @@ def test_umbrella_skips_multiply_when_shared_cause_overlap_high(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Integration: byte-identical path (factors absent -> None -> product applied)
+# Integration: allowed path (low overlap -> product applied)
 # ---------------------------------------------------------------------------
 
 
-def test_umbrella_still_multiplies_when_no_factors():
-    """When neither base_ctx nor contract_b carries shared_cause_factors,
-    cohorts_error_independent returns None -> gate NOT blocked -> product e1*e2 applied.
-    Byte-identical with the existing test_replication_inputs.py behaviour.
+def test_umbrella_still_multiplies_when_shared_cause_overlap_low():
+    """Bundled contracts share only the EPICv2 platform factor, so Jaccard is below tau.
+    The §E gate is active but not blocked, and the product e1*e2 is applied.
     """
     claim = region_delta_beta_claim("c2")
     corpus = _corpus(claim)

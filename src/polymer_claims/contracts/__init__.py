@@ -39,6 +39,7 @@ class SEContractRef(_Frozen):
     selection: tuple[tuple[str, str], ...] = ()
     genome_assembly: str
     refget_digest: str | None = None
+    shared_cause_factors: tuple[str, ...] = ()
     # --- GA4GH DRS shape (fixity) ---
     self_uri: str
     size: int
@@ -92,6 +93,7 @@ def _load_contract(uid: str) -> SEContractRef:
         # fixture-default grouping selector; manifest-driven when a 2nd fixture needs a different col
         selection=(("group_col", "Sample_Group"),),
         genome_assembly=manifest["metadata"]["genome_assembly"],
+        shared_cause_factors=tuple(manifest["metadata"].get("shared_cause_factors", ())),
         self_uri=f"drs://local/{manifest['uid']}",
         size=len(fixture_bytes),
         checksums=(Checksum(checksum=checksum),),

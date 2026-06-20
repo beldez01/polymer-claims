@@ -18,6 +18,7 @@ def _ref(**kw) -> SEContractRef:
         assay="beta",
         selection=(("group_col", "Sample_Group"),),
         genome_assembly="hg38",
+        shared_cause_factors=("platform:EPICv2",),
         self_uri="drs://local/groupdiff_epicv2_demo@1",
         size=123,
         checksums=(Checksum(checksum="ab" * 32),),
@@ -53,6 +54,15 @@ def test_load_contract_returns_contract_fields():
     assert ref.assay == "beta"
     assert ref.genome_assembly == "hg38"
     assert ref.selection  # non-empty selector
+
+
+def test_load_contract_reads_shared_cause_factors_from_metadata():
+    ref = load_contract("se:epicv2_casectrl_demo@1")
+    assert ref.shared_cause_factors == (
+        "platform:EPICv2",
+        "cohort:epicv2_casectrl_demo",
+        "fixture:epicv2_casectrl_demo",
+    )
 
 
 def test_load_contract_accepts_bare_ref_without_prefix():

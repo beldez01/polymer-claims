@@ -35,7 +35,7 @@ from polymer_grammar import (
 )
 from polymer_grammar.commitment import commitment_hash
 
-from .adapter_registry import AdapterRegistry, pair_is_registry_independent
+from .adapter_registry import AdapterRegistry, independent_credential_pair
 from .corpus import Corpus, CycleScaffolding, ExecRecord
 from .earned_strength import earn_strength
 from .oracle import OracleRegistry, cap_earned, oracle_cap
@@ -231,9 +231,11 @@ def verify_stage(
         if (ev.satisfaction is not None and c.id in in_ext
                 and c.provenance is not None and c.id in permitted
                 and _e_ok(c.id)):
+            credential_pair: tuple[str, str] | None = None
             if adapter_registry is not None and not adapter_registry.is_empty:
                 identities = tuple(r.adapter_identity for r in ev.results)
-                if not pair_is_registry_independent(adapter_registry, identities):
+                credential_pair = independent_credential_pair(adapter_registry, identities)
+                if credential_pair is None:
                     new_claims.append(_with_status(
                         c,
                         status=Status.PENDING,
@@ -241,8 +243,12 @@ def verify_stage(
                         licensing=None,
                     ))
                     continue
+            primary_sat = (
+                ev.satisfaction.model_copy(update={"credential_ids": credential_pair})
+                if credential_pair is not None else ev.satisfaction
+            )
             extra_sats = (replications or {}).get(c.id, ())
-            sats = (ev.satisfaction, *extra_sats)
+            sats = (primary_sat, *extra_sats)
             licensing = Licensing(
                 route=LicenseRoute.SEVERE_TEST,
                 satisfactions=sats,
@@ -272,7 +278,7 @@ def verify_stage(
                 if clears_mdl_bar(delta):
                     mdl_licensing = Licensing(
                         route=LicenseRoute.MDL_GATE,
-                        satisfactions=(ev.satisfaction,),
+                        satisfactions=(primary_sat,),
                         # the compression evidence (mdl_delta) stands in for rival enumeration —
                         # OPEN_ACKNOWLEDGED keeps the MDL route self-supporting (no rival list required).
                         rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,

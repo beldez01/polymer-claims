@@ -188,9 +188,9 @@ The project's discipline is **honesty over polish** — caveats travel with ever
   *computed* region-Δβ from two independent legs — but over **synthetic betas** for now, so the
   recomputable-public tier is *exercised, not earned*. A self-contained swap for real GEO/ENA data is
   the deferred next step.
-- **Independence is partly operator-asserted.** The air gap requires distinct implementations, but
-  `implementation_hash` is currently a supplied string; byte-derived hashing + credential provenance
-  is the next hardening slice.
+- **Independence is partly operator-authored.** Local registries derive `implementation_hash` from adapter
+  bytecode, and licensed satisfactions record the credential pair that justified the air gap. Owner/trust
+  metadata still comes from the operator registry.
 - **It is local-only.** The live node's mutating routes are unauthenticated by design; real
   auth / multi-tenant / a federated "run your own node" layer is future work (a `POST /inject` hook
   is the noted seam). There is no CI — `scripts/check-all.sh` is the local gate.

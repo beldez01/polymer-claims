@@ -10,9 +10,9 @@
 
 ## Current state (2026-06-20)
 
-`feat/common-cause-replicated` GREEN — **266 umbrella + 396 grammar + 393 protocol + 2 isolation**, ruff
+`main` GREEN — **269 umbrella + 396 grammar + 394 protocol + 2 isolation**, ruff
 clean, viewer `tsc` clean. grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**§E
-common-cause slice — earn REPLICATED on low shared-cause overlap — shipped 2026-06-19, awaiting merge**;
+common-cause slice — earn REPLICATED on low shared-cause overlap — shipped 2026-06-19, merged**;
 Phase D slice 2 + slice 1 merged 2026-06-19; see NEXT.) **Viewer-build caveat:** `npm run typecheck`
 passes; the `next build` step of `scripts/check-all.sh` currently fails *only* because the sandbox cannot
 fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not a code defect — the build
@@ -57,15 +57,18 @@ design.
   2nd real cohort). [next: 2nd real cohort → §2E REPLICATED]
 - `semantic_run_id` is the **Python** digest; an R-parity golden fixture is deferred (needs an R
   serializer). [menu item 7]
-- Adapter independence is **operator-asserted** (`implementation_hash` is a supplied string compared
-  with `!=`); byte-derived hashing + credential provenance on `Satisfaction` still open. [roadmap 1c]
+- Adapter independence is now **partly hardened**: local adapter registries derive
+  `implementation_hash` from adapter implementation bytecode, and licensed `Satisfaction`s record the
+  registry credential identities that justified the independent air gap. Registry owner/trust metadata
+  remains operator-authored. [roadmap 1c residual]
 - The two methylation adapters are **reproducibility-independent, not error-independent** (same estimand,
   same data) → the single-cohort demo licenses at **REPRODUCED**. **§2E now expresses the stronger tier:**
   a claim reproduced across two cohorts with distinct `dimnames_hash` licenses at **REPLICATED** (the
   cross-cohort independence that error-decorrelates). **§E now gates this (2026-06-19):** when runs declare
   `shared_cause_factors`, REPLICATED additionally requires every pairwise Jaccard < 0.5 — else REPRODUCED,
-  with the e-value product withheld (factors operator-asserted; populating contracts is a follow-up, so the
-  gate is live but inert until then). The REPLICATED demo runs on a **2nd synthetic
+  with the e-value product withheld (factors operator-asserted; bundled SE-Contracts now carry flat
+  factors and `materialization_map` propagates cohort-A factors, so the gate is active on bundled
+  contract-backed runs). The REPLICATED demo runs on a **2nd synthetic
   cohort** (`epicv2_casectrl_demo_b`) — still exercised, not earned, until a real 2nd cohort is swapped in.
 
 ## ▶ NEXT (concrete plan)
@@ -75,10 +78,12 @@ each run declares `MaterializationContext.shared_cause_factors`; the REPLICATED 
 multiplying e₁·e₂) now requires distinct `dimnames_hash` AND every pairwise Jaccard < `SHARED_CAUSE_TAU=0.5`
 (else REPRODUCED); the umbrella `build_replication_inputs` gates the e-value product on the same
 `cohorts_error_independent` predicate (cohort-A proxy built from its contract, so the gate fires in
-production). `Licensing.shared_cause_overlap` recorded + viewer-surfaced. Second concrete edge of north-star
-§E. Operator-asserted factors; populating SE-Contracts with factors is an operational follow-up.
+production). `Licensing.shared_cause_overlap` recorded + viewer-surfaced. Bundled SE-Contracts now carry
+flat factors, and `materialization_map` propagates cohort-A factors so verify's label agrees with
+replication's e-value multiplication gate. Second concrete edge of north-star §E. Operator-asserted factors;
+byte-derived factor provenance remains a hardening follow-up.
 Additive/byte-identical when off; subagent-driven (5-task plan, whole-branch opus review). spec+plan
-`docs/superpowers/{specs,plans}/2026-06-19-common-cause-replicated*`; shipped 2026-06-19, awaiting merge.** ·
+`docs/superpowers/{specs,plans}/2026-06-19-common-cause-replicated*`; shipped and merged 2026-06-19.** ·
 **Phase D slice 2 — literature-shared-cause gate +
 incubation/ranking: a hypothesis records the cohorts its motivating prior was established on
 (`Provenance.prior_cohorts`); overlap with the test cohort → `severity_provenance=CONFIRMATORY`
@@ -261,7 +266,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   whole-branch opus review). spec+plan `docs/superpowers/{specs,plans}/2026-06-19-common-cause-replicated*`.
   **Deferred (full §E):** the real per-implementation causal DAG (vs the flat factor set), the formal
   screening-off probability derivation, per-adapter factor sets / grading `adapters_independent`, and
-  populating SE-Contracts with real `shared_cause_factors`. NOTE: populating SE-Contracts with `shared_cause_factors` MUST simultaneously update `materialization.py`'s `materialization_map` to propagate cohort-A factors onto verify's satisfaction context — otherwise REPLICATED labels will appear on un-multiplied evidence (a label↔evidence divergence).
+  byte-derived/credential-backed provenance for `shared_cause_factors`.
 
 ## Invariants / working agreements (don't relearn)
 
@@ -306,8 +311,9 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   protocol specs + this file. (The v1.2 plugin/corpus fixtures that named other research projects left
   with the v1.2 tree, moved out of the repo 2026-06-17.) None affect the running system — pure
   documentation/context hygiene.
-- **Adapter-independence hardening** (roadmap 1c): byte-derived `implementation_hash` + credential
-  provenance on the frozen `Satisfaction`.
+- **Adapter-independence residual hardening** (roadmap 1c): owner/trust credential provenance is still
+  operator-authored; local implementation hashes are now byte-derived and satisfactions record the
+  credential pair.
 - **Earned-strength 2d:** `evidence_against_null` from a real test statistic with n (now partly
   subsumed by the e-value gate).
 - **I2 / I1:** `grounded_extension` ~O(N³) worklist rewrite + untrusted-corpus ingestion size/depth

@@ -114,7 +114,6 @@ def build_replication_inputs(
         # overlap). cohorts_error_independent is None when factors are absent -> multiply as today
         # (byte-identical); False (high overlap) -> keep the single e1 so the evidence matches the
         # REPRODUCED tier independence_tier_of will stamp.
-        # COUPLING: when SE-Contracts gain shared_cause_factors, materialization.py's materialization_map MUST propagate the same cohort-A factors onto ev.satisfaction's context, or verify's independence_tier_of will see empty factors and stamp REPLICATED while this gate withholds the product (label↔evidence divergence). See CONTINUE.md §E deferred note.
         sat_a = Satisfaction(
             verdict=SatisfactionVerdict.SATISFIED,
             materialization=MaterializationContext(

@@ -536,6 +536,11 @@
   ],
   "metadata": {
     "genome_assembly": "hg38",
-    "array": "EPICv2"
+    "array": "EPICv2",
+    "shared_cause_factors": [
+      "platform:EPICv2",
+      "cohort:epicv2_casectrl_powered",
+      "fixture:epicv2_casectrl_powered"
+    ]
   }
 }

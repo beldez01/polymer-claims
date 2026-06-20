@@ -56,6 +56,7 @@ from .adapter_registry import (
     AdapterCredential,
     AdapterRegistry,
     adapters_independent,
+    independent_credential_pair,
     pair_is_registry_independent,
 )
 from .economics import (
@@ -135,6 +136,7 @@ __all__ = [
     "AdapterCredential",
     "AdapterRegistry",
     "adapters_independent",
+    "independent_credential_pair",
     "pair_is_registry_independent",
     # ── selection: belief / stakes / cost / value ─────────────────────────
     "Beta",

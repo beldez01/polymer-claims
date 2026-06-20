@@ -33,6 +33,7 @@ from polymer_grammar import (
 )
 from polymer_protocol import AdapterCredential, AdapterRegistry
 
+from .adapter_identity import implementation_hash_for_adapter
 from .analysis_profile import profile_oracle_id
 from .contracts import load_contract
 from .profiles import CANONICAL_EPICV2_V1
@@ -188,6 +189,14 @@ def methyl_independent_registry() -> AdapterRegistry:
     """Credentials asserting the two legs are genuinely independent (distinct owners + impl hashes),
     so the #5 gate licenses on their agreement."""
     return AdapterRegistry(credentials=(
-        AdapterCredential(identity="methyl-meandiff-beta", owner="owner-meandiff", implementation_hash="h-meandiff"),
-        AdapterCredential(identity="methyl-lm-coef", owner="owner-lm", implementation_hash="h-lm"),
+        AdapterCredential(
+            identity="methyl-meandiff-beta",
+            owner="owner-meandiff",
+            implementation_hash=implementation_hash_for_adapter(RegionMeanDiffAdapter),
+        ),
+        AdapterCredential(
+            identity="methyl-lm-coef",
+            owner="owner-lm",
+            implementation_hash=implementation_hash_for_adapter(RegionLmCoefAdapter),
+        ),
     ))

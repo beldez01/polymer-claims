@@ -52,11 +52,22 @@ def pair_is_registry_independent(registry: AdapterRegistry, identities: tuple[st
     """True iff SOME pair among the producing `identities` resolves (both) to registered
     credentials that are `adapters_independent`. An UNREGISTERED identity resolves to None and
     so contributes no independent pair (treated as untrusted under an active registry)."""
+    return independent_credential_pair(registry, identities) is not None
+
+
+def independent_credential_pair(
+    registry: AdapterRegistry, identities: tuple[str, ...]
+) -> tuple[str, str] | None:
+    """Return the first producing credential-identity pair that proves registry independence.
+
+    This is the audit witness stored on a minted Satisfaction. None means no independent pair
+    exists under the active registry.
+    """
     creds = [registry.resolve(i) for i in identities]
     n = len(creds)
     for i in range(n):
         for j in range(i + 1, n):
             ca, cb = creds[i], creds[j]
             if ca is not None and cb is not None and adapters_independent(ca, cb):
-                return True
-    return False
+                return (ca.identity, cb.identity)
+    return None

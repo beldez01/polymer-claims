@@ -20,9 +20,16 @@ def test_map_records_dimnames_and_profile_hash():
     c = region_delta_beta_claim("c0")
     mats = materialization_map(_corpus(c), _BASE)
     m = mats["c0"]
-    assert m.dimnames_hash == load_contract("se:epicv2_casectrl_demo@1").dimnames_hash
+    contract = load_contract("se:epicv2_casectrl_demo@1")
+    assert m.dimnames_hash == contract.dimnames_hash
     assert m.profile_hash == content_hash(CANONICAL_EPICV2_V1)
     assert m.api_version == "v1" and m.data_version == "d1"
+
+
+def test_map_propagates_contract_shared_cause_factors():
+    c = region_delta_beta_claim("c0")
+    m = materialization_map(_corpus(c), _BASE)["c0"]
+    assert m.shared_cause_factors == load_contract("se:epicv2_casectrl_demo@1").shared_cause_factors
 
 
 def test_semantic_run_id_is_deterministic_composite():

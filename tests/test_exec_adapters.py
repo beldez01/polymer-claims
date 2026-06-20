@@ -101,6 +101,8 @@ def test_true_claim_licenses_on_computed_value():
     c = mean_diff_claim("c-true", comparator=Comparator.GT, threshold=10.0)
     result = run_cycle(_corpus(c), _ADAPTERS, _CTX, adapter_registry=independent_registry())
     assert _status(result, "c-true") == Status.LICENSED
+    lic = result.corpus.by_id()["c-true"].licensing
+    assert lic.satisfactions[0].credential_ids == ("stats-pure", "stats-stdlib")
 
 
 def test_false_claim_is_rejected_on_computed_value():
@@ -117,6 +119,14 @@ def test_same_owner_pair_is_held_pending_by_independence_gate():
     ))
     result = run_cycle(_corpus(c), _ADAPTERS, _CTX, adapter_registry=same_owner)
     assert _status(result, "c-dep") == Status.PENDING
+
+
+def test_independent_registry_uses_byte_derived_hashes():
+    reg = independent_registry()
+    hashes = {cr.implementation_hash for cr in reg.credentials}
+    assert len(hashes) == 2
+    assert all(h.startswith("sha256:") for h in hashes)
+    assert not any(h.startswith("h-") for h in hashes)
 
 
 # ---------------------------------------------------------------------------

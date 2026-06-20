@@ -45,6 +45,9 @@ class MaterializationContext(_Model):
 class Satisfaction(_Model):
     verdict: SatisfactionVerdict
     materialization: MaterializationContext
+    # Adapter credential identities that justified this satisfaction under an active registry.
+    # Empty => not recorded / legacy path; tuple keeps the model frozen and content-addressable.
+    credential_ids: tuple[str, ...] = ()
 
 
 class LicenseRoute(str, Enum):

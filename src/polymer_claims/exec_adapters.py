@@ -42,6 +42,7 @@ from polymer_protocol import (
     ValidationTier,
 )
 
+from .adapter_identity import implementation_hash_for_adapter
 from .datasets import load_dataset
 
 _IMPL = "stats::mean_diff"
@@ -176,8 +177,16 @@ def independent_registry() -> AdapterRegistry:
     """Credentials asserting the two adapters are genuinely independent (distinct owners +
     impl hashes), so the #5 gate licenses on their agreement."""
     return AdapterRegistry(credentials=(
-        AdapterCredential(identity="stats-pure", owner="owner-pure", implementation_hash="h-pure"),
-        AdapterCredential(identity="stats-stdlib", owner="owner-stdlib", implementation_hash="h-stdlib"),
+        AdapterCredential(
+            identity="stats-pure",
+            owner="owner-pure",
+            implementation_hash=implementation_hash_for_adapter(StatsPureAdapter),
+        ),
+        AdapterCredential(
+            identity="stats-stdlib",
+            owner="owner-stdlib",
+            implementation_hash=implementation_hash_for_adapter(StatsStdlibAdapter),
+        ),
     ))
 
 

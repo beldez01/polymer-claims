@@ -44,9 +44,10 @@ def materialization_map(
         if handle is None:
             continue
         try:
-            dimnames_hash = load_contract(handle.ref).dimnames_hash
+            contract = load_contract(handle.ref)
         except FileNotFoundError:
             continue
+        dimnames_hash = contract.dimnames_hash
         profile = by_oracle.get(node.oracle_ref) if node.oracle_ref else None
         profile_hash = content_hash(profile) if profile is not None else None
         semantic_run_id = canonical_sha256({
@@ -55,7 +56,6 @@ def materialization_map(
             "input_signature": [dimnames_hash],
             "profile_hash": profile_hash,
         })
-        # COUPLING (§E): shared_cause_factors is intentionally NOT set here today (SE-Contracts carry none). When contracts gain factors, propagate shared_cause_factors=load_contract(handle.ref).shared_cause_factors here so verify's independence_tier_of agrees with replication.py's multiplication gate. See CONTINUE.md §E deferred note.
         out[c.id] = MaterializationContext(
             id=base_ctx.id,
             api_version=base_ctx.api_version,
@@ -64,5 +64,6 @@ def materialization_map(
             semantic_run_id=semantic_run_id,
             profile_hash=profile_hash,
             dimnames_hash=dimnames_hash,
+            shared_cause_factors=contract.shared_cause_factors,
         )
     return out

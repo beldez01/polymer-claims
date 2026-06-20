@@ -79,5 +79,8 @@ def test_independent_registry_has_two_distinct_owners():
     reg = methyl_independent_registry()
     owners = {cr.owner for cr in reg.credentials}
     ids = {cr.identity for cr in reg.credentials}
+    hashes = {cr.implementation_hash for cr in reg.credentials}
     assert ids == {"methyl-meandiff-beta", "methyl-lm-coef"}
     assert len(owners) == 2
+    assert len(hashes) == 2
+    assert all(h.startswith("sha256:") for h in hashes)

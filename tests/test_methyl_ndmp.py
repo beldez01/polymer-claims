@@ -74,7 +74,10 @@ def test_ndmp_registry_has_two_independent_legs():
     ids = {cr.identity for cr in reg.credentials}
     assert ids == {"methyl-ndmp-ttest", "methyl-ndmp-ols"}
     owners = {cr.owner for cr in reg.credentials}
+    hashes = {cr.implementation_hash for cr in reg.credentials}
     assert len(owners) == 2  # distinct owners -> registry-independent
+    assert len(hashes) == 2
+    assert all(h.startswith("sha256:") for h in hashes)
 
 
 def test_evidence_map_scores_n_dmps_claim():

@@ -30,7 +30,9 @@ def test_no_registry_licenses_as_before(empty_ledger, adapters, ctx):   # back-c
 
 def test_independent_registry_licenses(empty_ledger, adapters, ctx):
     res = run_cycle(_licensing_corpus(empty_ledger), adapters, ctx, adapter_registry=_registry())
-    assert res.corpus.by_id()["a"].status == Status.LICENSED
+    a = res.corpus.by_id()["a"]
+    assert a.status == Status.LICENSED
+    assert a.licensing.satisfactions[0].credential_ids == ("identity", "reference")
 
 
 def test_same_owner_holds_pending(empty_ledger, adapters, ctx):

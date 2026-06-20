@@ -1,274 +1,199 @@
-# Polymer Claims — Canonical Specification (current state of record)
+# Polymer Claims — Canonical Specification
 
-> **The single canonical spec for polymer-claims.** It describes what the system *is* as built and
-> merged on `main`, not a design target. It supersedes and consolidates the per-feature design specs
-> now in `docs/superpowers/archive/specs/` (foundations, protocol-spine, earned-strength,
-> structural-equivalence, §2E, n-DMPs, reinstatement, procrustes) — read those for the design rationale
-> behind any one slice.
->
-> **State of record:** `main`, as of 2026-06-17 (last main merge: `region-delta-beta-split`).
-> `scripts/check-all.sh` was green at the phase boundary; current local branch
-> `fix/null-bearing-refund-gate` carries viewer/FDR-ledger follow-ups on top of `main`. Local-only
-> (commits not pushed from this machine — flagged account, no active CI).
->
-> Companion docs: live build log `docs/superpowers/CONTINUE.md` · one-page map `ARCHITECTURE_CURRENT.md`
-> · reserved terminology `GLOSSARY.md`.
+> Current state of record for `main` as of 2026-06-20. This document states what the
+> system is, not the phase history. Use `docs/superpowers/CONTINUE.md` for the live
+> build log and next work; use the dated specs/plans for design rationale.
 
----
+## 1. System Shape
 
-## 1. What the system is
-
-A **compiler + runtime for science**. The grammar defines *what a claim is*; the protocol defines *how
-a corpus of claims evolves toward truth*; the local node *hosts* a running corpus; the viewer *renders*
-the evolving topology.
+Polymer Claims is a compiler and runtime for empirical claims. The grammar defines what
+a claim is; the protocol defines how a corpus evolves; the umbrella package hosts a local
+mutable node; the viewer renders the evolving topology.
 
 ```
-grammar            →  protocol                  →  node (src/polymer_claims)  →  viewer
-"what a claim is"     "how a corpus evolves"        a local mutable host          renders the live
- (v1.3 IR, 5 layers)   (run_cycle flywheel +         (NodeRunner + serve)          topology over SSE
-                        3 daemons + scheduler)
+grammar  ->  protocol  ->  node (src/polymer_claims)  ->  viewer
+claim IR     pure corpus    local mutable host             Next/R3F UI
+             runtime        + FastAPI SSE
 ```
 
 | Layer | Package | Path | State |
 |---|---|---|---|
-| Grammar (v1.3 claim IR) | `polymer_grammar` | `grammar/` | Complete — 8 layer-phases |
-| Protocol runtime | `polymer_protocol` | `protocol/` | Complete — 5 sub-projects + 3 daemons + scheduler |
-| Umbrella distribution (CLI + live node) | `polymer-claims` | `src/polymer_claims/` | Active — `pip install` works end-to-end |
-| Viewer (3D claims universe) | Next 16 app | `viewer/` | Active — `tsc`+build clean |
+| Claim grammar | `polymer_grammar` | `grammar/` | Complete v1.3 IR |
+| Protocol runtime | `polymer_protocol` | `protocol/` | Complete flywheel + daemons |
+| Umbrella node/CLI | `polymer-claims` | `src/polymer_claims/` | Active local runtime |
+| Viewer | Next/React Three Fiber | `viewer/` | Active sample + live viewer |
 
----
+## 2. Hard Invariants
 
-## 2. The grammar (v1.3) — what a claim is
+- `Corpus` has exactly four collections: `claims`, `defeat_edges`, `equivalences`,
+  `fdr_ledger`.
+- Grammar and protocol are pure, deterministic, numpy-free, and filesystem/network-free.
+  Time-like inputs are passed in. The umbrella node/server is the only impure layer.
+- `grammar/` never imports legacy `polymer_formalclaim`; `protocol/` depends one-way on
+  `grammar/`. Isolation tests enforce this.
+- Models subclass frozen `_Model` with `extra="forbid"`; collection fields are tuples.
+- Cross-cutting fields are additive and inert by default (`None` or `()`), preserving
+  byte-identical behavior when a feature is off.
+- Numpy is behind optional umbrella extras (`[embed]`); base import stays light.
 
-A 5-layer grammar plus protocol-imposed fields and an air-gapped evaluator. All models subclass a
-frozen `_Model` (`extra="forbid"`); **collections are tuples** (deep immutability + content-addressing);
-there are no `dict`/`list` fields on models.
+## 3. Claim Grammar
 
-- **L0 — leaf:** the empirical anchor, a sum type (`Quantity` / `Categorical` / `Existence` /
-  `Proposition`) so qualitative and warrant findings are first-class, not faked into statistics.
-- **L1 — proposition:** molecular claim content; identity is an *asserted, licensed equivalence*, never
-  a hash. Defeasible `Equivalence` edges.
-- **L2 — licensing bridge + roles/units:** the bridge that mints `LICENSED` status via an (σ, M)
-  satisfaction (severe-test or replication route) with required rival-set closure — there is no
-  "LICENSED-simpliciter." Typed causal roles + a Dimension algebra (units).
-- **L3 — defeat graph (VAF) + Duhem blame:** value-based argumentation; a strength-mediated
-  effective-defeat relation whose **grounded extension** is the accepted set.
-- **L4 — AGM/TMS revision:** belief-base expand/contract/revise + entrenchment for how the corpus
-  changes under incompatible claims.
+The grammar is a five-layer IR plus protocol-imposed fields and a verifier-facing compute
+graph.
 
-**Strength** is a 6-axis Pareto vector (magnitude, certainty, evidence_against_null, severity,
-world_contact, explanatory_virtue), uniformly higher-is-better, with no hidden scalar collapse.
+- **L0 leaf:** empirical anchors as a sum type: quantity, categorical, existence, or
+  proposition.
+- **L1 proposition:** molecular claim content; identity is an asserted and licensed
+  equivalence, not a hash.
+- **L2 licensing + roles/units:** `LICENSED` status is minted only through a satisfaction
+  route with rival-set closure. Typed roles and unit dimensions live here.
+- **L3 defeat graph:** value-based argumentation with a strength-mediated effective
+  defeat relation and grounded extension.
+- **L4 revision:** AGM/TMS-style expand, contract, and revise operations.
 
-**Phase-7 protocol-imposed fields:** provenance · governance · the online-FDR ledger · subject slot ·
-a `representation_revision` meta-tier (a schema change expressed as a first-class licensable claim).
+Strength is a six-axis Pareto vector:
+`magnitude`, `certainty`, `evidence_against_null`, `severity`, `world_contact`,
+`explanatory_virtue`. Higher is better on every axis; there is no hidden scalar collapse.
 
-**Phase-8 evaluator (the air gap):** a typed compute-graph IR with an air-gapped `verify()` — a
-`Satisfaction` is minted only when **≥2 distinct adapter identities agree**.
+Protocol-imposed fields include provenance, governance, subject, online-FDR state,
+representation-revision metadata, pre-registration commitment hashes, severity provenance,
+and independence tier metadata.
 
----
+## 4. Protocol Runtime
 
-## 3. The protocol runtime — how a corpus evolves
-
-A `Corpus` is **exactly 4 collections** (claims, defeat_edges, equivalences, fdr_ledger) — the unit the
-protocol transforms.
-
-**`run_cycle`** is one pass of the flywheel, threading a frozen `Corpus` + `SelectionLedger`:
-
-```
-represent → generate → canonicalize → safety_gate → select → commit → execute_ground → verify_stage → integrate
-```
-
-**Three standing daemons** (pure, caller-scheduled):
-- **DRIFT** — re-examine `LICENSED` claims as the world (or content) moves; re-opens drifted licenses.
-- **ORACLE-VALIDATION** — decay failing oracles (an oracle is a credibility dossier whose validation
-  tier *caps* a claim's empirical strength axes).
-- **REPRESENTATION RED-TEAM** — attack the corpus's representation.
-
-**Scheduler (`next_action`)** — a recommend-only budget scheduler that value-ranks the next action
-(RUN_CYCLE vs a daemon pass) under a shared budget.
-
-**Exports (protocol ↔ viewer contract):** `TopologyExport` (nodes/edges/clusters + a deterministic 3D
-layout) and `TopologyTimeline` (warm-started frames + per-frame stats).
-
-**Purity invariant:** `grammar/` and `protocol/` are pure/deterministic and **numpy-free** — no
-clock/random/IO; time-like inputs are passed in. `grammar/` must never import `polymer_formalclaim`
-(isolation-tested); `protocol/` depends one-way on `grammar/` (isolation-tested). The only impure piece
-is the umbrella node/server.
-
----
-
-## 4. The epistemic core (e-value native)
-
-Licensing, the corpus FDR budget, and defeat are **one mechanism**:
+`run_cycle` is the pure flywheel:
 
 ```
-LICENSED ⇔ adapter-agreement ∧ SATISFIED ∧ grounded ∧ live e-LOND discovery
+represent -> generate -> canonicalize -> safety_gate -> select -> commit
+          -> execute_ground -> verify_stage -> integrate
 ```
 
-- **FDR ledger = e-LOND** — an online process giving FDR control under arbitrary dependence over the
-  open-ended test stream. **One e-test per claim lifetime** (a cross-cycle duplicate-entry bug was found
-  and fixed in audit remediation).
-- **Evidence atom = a Waudby-Smith-Ramdas betting e-value.**
-- **Defeat de-licenses *through the ledger* and refunds** the discovery (`FDRTest.retracted` tombstone +
-  alpha-wealth refund). The 4-way gate runs live in the node; the drift path preserves
-  `LICENSED ⇒ a live discovery`.
-- **Reinstatement → PENDING** (symmetric counterpart to defeat-as-de-license): a `RejectionReason`
-  marker {DEFEAT_GROUNDED_OUT, REFUTED, ROBUSTLY_BLAMED} + an INTEGRATE reinstatement pass reopen a
-  *defeat-rejected* claim to **PENDING** (to re-test on current data — never auto-relicense) when its
-  attacker falls. **Refuted** claims stay terminal; `ROBUSTLY_BLAMED` is reserved (no protocol consumer
-  yet).
-- **§2E tiered independence** — `Licensing.independence_tier` {**REPRODUCED**, **REPLICATED**}, additive
-  (default REPRODUCED → byte-identical). **REPRODUCED** = agreeing implementations share the dataset (the
-  air gap). **REPLICATED** = reproduced across ≥2 cohorts with distinct `dimnames_hash` — the only tier
-  that may **multiply** the cohorts' e-values (`e₁·e₂`) as *one* e-LOND test/discovery, with no α-budget
-  double-count. `NodeRunner` can compute live replication inputs from `replication_bindings`, and topology
-  export/viewer nodes expose `independence_tier`.
+The standing daemons are pure caller-scheduled passes:
 
-**The air gap & adapter independence:** independence is enforced by the **adapter trust registry**
-(trusted ∧ different owner ∧ different `implementation_hash`); a same-owner pair is held PENDING.
+- **DRIFT:** re-examines licensed claims when content/world state changes.
+- **ORACLE-VALIDATION:** decays or caps claims through apparatus/oracle credibility.
+- **REPRESENTATION RED-TEAM:** attacks the corpus representation.
 
----
+`next_action` recommends budget-aware scheduling across cycle and daemon actions. Topology
+exports are protocol DTOs consumed by the viewer.
 
-## 5. Real computation — from asserted values to computed evidence
+## 5. Epistemic Core
 
-The system no longer licenses only on asserted values.
+Licensing, corpus FDR, and defeat are one e-value-native mechanism:
 
-- **Real execution adapters** — claims compute a two-group mean difference from a bundled dataset via
-  two genuinely independent stdlib adapters and license/reject on the **computed** value
-  (`serve --real-data`).
-- **Phase B methylation hypothesizer slice** — `MethylGenerationAdapter` maps a constrained LLM DSL into
-  executable `region_delta_beta` / `n_dmps` methylation claims over SE-Contracts. The live node exposes
-  this through `serve --methyl-data`, which runs the methylation adapters and content/e-value gate; the
-  gate still decides license/reject/PENDING. A small methylation data-asset catalog supplies prompt
-  metadata (refs, group columns, levels, profiles, allowed ops) from bundled fixtures and locally
-  generated real contracts when present.
-- **CES-0 → CES-4, the credibility-evidence spine:** a content-addressed `AnalysisProfile` apparatus
-  (CES-0) → a DRS-shaped SE-Contract data seam (CES-1) → the first claim to license on a value computed
-  from a methylation matrix (CES-2, **region Δβ**, two methodologically-independent legs) → a license
-  recording its **full content-address** — dataset `dimnames_hash` + apparatus `profile_hash` +
-  `semantic_run_id` (CES-3) → all of it running **live** in `NodeRunner`/`serve` with a drift daemon that
-  re-opens content-drifted licenses (CES-4).
-- **Second methylation reduction — n-DMPs-at-FDR:** the **count of differentially-methylated probes**
-  (a probe is a DMP iff its per-probe pooled-t p < α) licenses on a **one-sample count-enrichment
-  betting e-value** (testing H0: per-probe DMP-rate ≤ p0 = α). Two independent legs (manual pooled-t vs
-  numpy-lstsq OLS-coef t) **agree on the integer count** (air gap). Pure-Python Student-t p-value
-  (incomplete beta, no scipy). Umbrella-only.
+```
+LICENSED iff adapter-agreement and SATISFIED and grounded and live e-LOND discovery
+```
 
----
+- The FDR ledger is online e-LOND over an open-ended claim stream, with one e-test per
+  claim lifetime.
+- Evidence atoms are Waudby-Smith-Ramdas betting e-values.
+- Defeat de-licenses through the ledger by tombstoning/retracting the discovery and
+  refunding alpha wealth.
+- Reinstatement reopens defeat-rejected claims to `PENDING` when their attacker falls.
+  Refuted claims remain terminal.
+- Pre-registration charges and locks the e-LOND slot before data is seen. Verify rejects
+  post-hoc plan changes with `HYPOTHESIS_ALTERED`.
 
-## 6. The umbrella node + product
+## 6. Independence And Shared Causes
 
-- **`pip install polymer-claims`** → a CLI: `version` / `validate` / `ingest tcga-laml` /
-  `run-cycle` / `loop` / `export-topology` / `export-timeline` / `serve`.
-- **Live local node:** `NodeRunner` (owns the loop/clock) + a FastAPI SSE server (`[serve]` extra; owns
-  the network). `NodeRunner` is the one impure piece.
-- **Optional extras:** `[serve]` (FastAPI server), `[llm]` (the Anthropic-backed `LLMGenerationAdapter`,
-  `MeanDiffGenerationAdapter`, and `MethylGenerationAdapter`, driving the live node via `serve --llm`,
-  `serve --real-data`, or `serve --methyl-data` with an `every_n_ticks` throttle), `[embed]` (numpy, behind
-  which `embedding.py`/`methyl_adapters.py` live so base import stays numpy-free).
-- **Local-node hardening:** `--max-frames` ring retention, an `asyncio.Lock` serializing ticks, bounded
-  SSE queues, and a **non-loopback bind guard** (`serve --host` other than loopback refuses without
-  `--unsafe-remote-control`). Still **local-only** by design: the mutating routes
-  (`/step`/`/pause`/`/resume`) are unauthenticated.
+The system distinguishes reproducibility from error-independent replication.
 
----
+- **REPRODUCED:** independent implementations agree on the same cohort/data. This is the
+  default air-gap tier.
+- **REPLICATED:** agreement spans at least two distinct cohorts and may combine cohort
+  e-values as a single e-LOND test.
 
-## 7. The viewer
+REPLICATED is now common-cause gated. When runs declare
+`MaterializationContext.shared_cause_factors`, the tier requires both distinct
+`dimnames_hash` values and every pairwise shared-cause Jaccard overlap below
+`SHARED_CAUSE_TAU = 0.5`. If overlap is too high, the claim remains REPRODUCED and the
+umbrella replication path withholds the e-value product. `Licensing.shared_cause_overlap`
+records the assessed maximum overlap.
 
-A standalone Next 16 / React Three Fiber app (`viewer/`) with the D2 metrological aesthetic.
+When no factor sets are declared, behavior falls back to the pre-existing §2E rule so old
+fixtures and external contracts remain byte-identical. Bundled SE-Contracts carry flat
+operator-authored factors; byte-derived or credential-backed factor provenance is future
+hardening.
 
-- **Sample mode** — plays a precomputed `viewer/public/sample-timeline.json`.
-- **Live mode** — streams from a running node over SSE.
-- **Layout (`serve --layout {spectral,force}`):** **spectral** (default) is the signed-Laplacian
-  eigenmap (`embedding.py`), **orthogonal-Procrustes-aligned per frame** to the previous displayed frame
-  so the universe grows smoothly instead of thrashing on eigenbasis sign/rotation ambiguity
-  (`layout_id="external:spectral-v1"`; reflection allowed, no det-correction; 6dp round). **force** is
-  the legacy id-hash Fruchterman-Reingold path and is **byte-identical** to the prior implementation.
-  Spectral lazy-imports the embedder (base import stays numpy-free) and gracefully falls back to force
-  (warn once) when `[embed]`/numpy is absent. Offline `export_timeline` stays force-directed (protocol
-  purity — it cannot compute the spectral embedding).
+## 7. Severity Provenance And Incubation
 
----
+Hypotheses can record `Provenance.prior_cohorts`, the cohorts on which their motivating
+prior was established. Verify compares those to the test cohort identities:
 
-## 8. Invariants (working agreements)
+- no prior cohorts: inert;
+- no overlap: `severity_provenance=HELD_OUT`;
+- overlap: `severity_provenance=CONFIRMATORY` and the `severity` strength axis is capped.
 
-- `Corpus` = exactly 4 collections; all models frozen `_Model` (`extra="forbid"`); collections are
-  tuples; no `dict`/`list` fields.
-- `grammar/` + `protocol/` are pure/deterministic + numpy-free; the only impurity is the umbrella
-  node/server. `grammar/` never imports `polymer_formalclaim`; `protocol/` → `grammar/` one-way (both
-  isolation-tested).
-- New cross-cutting fields land **additive/optional** (`X | None = None`) with a present-only-when-Y
-  validator; opt-in features default to byte-identical behavior when off.
-- numpy lives behind the `[embed]` extra; `embedding.py` / `methyl_adapters.py` are not re-exported.
-- Tests: per-package `uv run pytest -q` + `uv run ruff check src tests`; full gate
-  `scripts/check-all.sh`. TDD: failing test first. Merge to `main` `--no-ff`, local-only.
+Strict shared-cause mode can withhold confirmatory claims. SELECT can use an injected
+`cohort_of_ref` mapping to rank confirmatory candidates lower without reading outcome data,
+and `register_selected` registers only selected/top-k hypotheses. This keeps incubation
+data-blind while preserving the pre-registration accounting.
 
----
+## 8. Real Computation
 
-## 9. Standing caveats (carry forward)
+The runtime licenses computed evidence, not just asserted values.
 
-- **n-DMP / REPRODUCED is EARNED on real betas (2026-06-17, Phase A).** The genome-wide n-DMP count
-  licenses at **REPRODUCED** on a **real TCGA-LAML HM450 cohort** (IDH-mut vs WT): 194 samples ×
-  378,894 probes, **50,339 DMPs (p<0.05) vs an 18,945 null floor**, count-enrichment e-value → ∞, two
-  independent legs agreeing on the integer count, full content-address recorded. Betas are the local
-  UCSC-Xena GDC-Level-3 matrix; IDH status from GDC open masked-somatic MAFs. The recomputable-public
-  tier is now *earned, not just exercised*, for this reduction. **Run caveats:** IDH-mut n=10 — GDC
-  open-MAF calling is conservative and uncovered cases default to WT, which only *dilutes* the contrast
-  (biases against a license, so the result is conservative); sex-chromosome QC was skipped (the Xena
-  matrix carries no probe chr/pos). Data is **local-only, gitignored** — nothing real committed.
-- **Region-Δβ is NOT earned — attempted on real data, gate WITHHELD at n=10 (severity demonstrated).**
-  The honest region reduction (top-10k DMPs selected on a discovery half, Δβ tested on a held-out half —
-  `src/polymer_claims/split_select.py`) ran on the real cohort and the gate **withheld**: held-out
-  betting e-value (Δβ > pre-registered τ=0.10) = 0.867 (< 1) → PENDING. The discovery/test split
-  correctly refused a license the naive in-sample test would have granted (the top-10k regress below the
-  0.10 floor on held-out data). Cause is **power (n=10 → ~5 per split), not biology** — *power-limited,
-  not refuted*; a fuller IDH cohort would likely clear it (τ stays fixed, no post-hoc tuning). This is the
-  first on-real-data prototype of the autonomous-loop §5b sample-splitting discipline. **REPLICATED**
-  remains synthetic (needs a 2nd real cohort).
-- The two methylation adapters are **reproducibility-independent, not error-independent** (same estimand,
-  same data) → the single-cohort demo licenses at **REPRODUCED**. The **REPLICATED** demo runs on a 2nd
-  *synthetic* cohort (`epicv2_casectrl_demo_b`) — also exercised, not earned, until a real 2nd cohort is
-  swapped in.
-- Adapter independence is **operator-asserted** (`implementation_hash` is a supplied string compared with
-  `!=`); byte-derived hashing + credential provenance on the frozen `Satisfaction` are still open.
-- `semantic_run_id` is the **Python** digest; an R-parity golden fixture is deferred (needs an R
-  serializer).
+- Mean-difference claims can execute over bundled data with two independent stdlib
+  adapters.
+- Methylation claims run through SE-Contracts and `AnalysisProfile` content addressing.
+  The main claim families are `region_delta_beta` and `n_dmps`.
+- The n-DMP reduction is earned at REPRODUCED on real TCGA-LAML HM450 betas. The IDH labels
+  were upgraded to cBioPortal complete genotyping (`tcga_laml_idh@2`); real data remain
+  local and gitignored.
+- The region-delta-beta reduction is honest but currently PENDING: after the IDH-source
+  swap its held-out e-value is 5.672, below the first e-LOND discovery bar 32.9.
 
----
+Real second-cohort REPLICATED licensing is intentionally skipped for now. It is
+data-access-blocked, not code-blocked: GSE86409 betas are available, but public GEO does
+not expose machine-readable per-sample IDH status.
 
-## 10. Frozen, user-gated & future
+## 9. Umbrella Node
 
-**v1.2 (moved out of the repo):** the frozen v1.2 FormalClaim ecosystem (`polymer_formalclaim`, the
-47-claim corpus, the `claim-harness` Claude Code plugin, schema, legacy workflows) was moved out of the
-repository on 2026-06-17 (preserved locally, pending eventual deletion). The v1.3 system never depended
-on it — `grammar/` imports nothing from `polymer_formalclaim` (isolation-guard enforced), and it was
-never a build dependency or workspace member.
+The umbrella package provides:
 
-**User-gated / future (needs an explicit go):**
-- **PyPI publish** of `polymer-claims` — build + `[serve]` ready; blocked operationally by the flagged
-  GitHub account (Actions/OIDC suppressed → no active CI; `scripts/check-all.sh` is the substitute).
-  Publish locally with a token only when asked.
-- **polymerbio.org / PolymerGenomicsAPI integration** — lift `<ClaimUniverse>` + theme + live mode into
-  the API repo's viewer (aesthetic already matches by construction).
-- **Adapter-independence hardening** — byte-derived `implementation_hash` + recorded agreeing credential
-  IDs on `Satisfaction`.
-- **Federated / BYO-compute layer** — the "users run their own node" vision; a `POST /inject` endpoint is
-  a noted future hook.
-- **Deferred audit Tier-C** — schema→TypeScript contract codegen, narrowing the protocol public API,
-  broad `model_copy` revalidation.
+- CLI: `version`, `validate`, `ingest tcga-laml`, `run-cycle`, `loop`,
+  `export-topology`, `export-timeline`, `serve`;
+- `NodeRunner`, which owns clock, loop state, layout choice, and live corpus state;
+- FastAPI SSE server behind `[serve]`;
+- optional `[llm]` generation adapters and `[embed]` spectral layout support.
 
----
+The local server is hardened for local use with max-frame retention, a tick lock, bounded
+SSE queues, and a non-loopback bind guard. Mutating routes remain unauthenticated by
+design; this is not a deployed multi-tenant service.
 
-## 11. Where the rest lives
+## 10. Viewer
 
-- **Live build log + NEXT plan:** `docs/superpowers/CONTINUE.md`
-- **One-page architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`
-- **Per-feature design rationale (archived):** `docs/superpowers/archive/specs/` and
-  `docs/superpowers/archive/plans/`
-- **Forward roadmap (real-data swap = Phase A):** `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`
-- **Phase-2 north star:** `docs/superpowers/2026-06-12-phase-2-north-star.md`
-- **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`
-- **Spectral-layout guides:** `docs/spectral-layout-how-to-use.md` (usage) ·
-  `docs/spectral-layout-how-it-works.md` (eigenmap + Procrustes theory)
-</content>
-</invoke>
+The viewer is a standalone Next/React Three Fiber app. It supports:
+
+- sample timeline playback from `viewer/public`;
+- live SSE streaming from `serve`;
+- force layout for deterministic protocol exports;
+- spectral live layout via signed-Laplacian eigenmap with per-frame Procrustes alignment.
+
+Viewer nodes surface `independence_tier`, `severity_provenance`, and
+`shared_cause_overlap` when present.
+
+## 11. Current Caveats
+
+- Local adapter registries derive `implementation_hash` values from adapter implementation
+  bytecode, and licensed satisfactions record the credential identities that justified the
+  registry-independent air gap. Registry owner/trust metadata remains operator-authored.
+- `semantic_run_id` is currently the Python digest. R parity is deferred until an R
+  serializer exists.
+- Bundled SE-Contracts carry flat `shared_cause_factors`, and `materialization.py`
+  propagates cohort-A factors into verify's satisfaction context. The factor sets are still
+  operator-authored metadata; byte-derived or credential-backed factor provenance is future
+  work.
+- A real second methylation cohort remains skipped until valid per-sample genotype labels
+  are available.
+
+## 12. References
+
+- Live state and next work: `docs/superpowers/CONTINUE.md`
+- Architecture map: `ARCHITECTURE_CURRENT.md`
+- Terminology: `GLOSSARY.md`
+- Forward roadmap: `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`
+- Phase 2 north star: `docs/superpowers/2026-06-12-phase-2-north-star.md`
+- Current plans/specs: `docs/superpowers/plans/` and `docs/superpowers/specs/`
+- Historical plans/specs: `docs/superpowers/archive/`

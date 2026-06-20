@@ -41,6 +41,7 @@ def test_replicated_across_two_cohorts_licenses_at_replicated_tier():
     c = next(x for x in result.corpus.claims if x.id == "c-repl")
     assert c.status == Status.LICENSED
     assert c.licensing.independence_tier is IndependenceTier.REPLICATED
+    assert c.licensing.shared_cause_overlap == 0.2
     # two satisfactions across two distinct cohorts
     cohorts = {s.materialization.dimnames_hash for s in c.licensing.satisfactions}
     assert len(cohorts) == 2

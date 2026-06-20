@@ -32,6 +32,7 @@ from polymer_grammar import (
 )
 from polymer_protocol import AdapterCredential, AdapterRegistry
 
+from .adapter_identity import implementation_hash_for_adapter
 from .analysis_profile import profile_oracle_id
 from .contracts import load_contract
 from .methyl_adapters import _load_betas
@@ -264,6 +265,14 @@ def n_dmps_claim(
 def ndmp_independent_registry() -> AdapterRegistry:
     """Credentials asserting the two n-DMP legs are genuinely independent (distinct owners + hashes)."""
     return AdapterRegistry(credentials=(
-        AdapterCredential(identity="methyl-ndmp-ttest", owner="owner-ttest", implementation_hash="h-ndmp-ttest"),
-        AdapterCredential(identity="methyl-ndmp-ols", owner="owner-ols", implementation_hash="h-ndmp-ols"),
+        AdapterCredential(
+            identity="methyl-ndmp-ttest",
+            owner="owner-ttest",
+            implementation_hash=implementation_hash_for_adapter(NDmpTTestAdapter),
+        ),
+        AdapterCredential(
+            identity="methyl-ndmp-ols",
+            owner="owner-ols",
+            implementation_hash=implementation_hash_for_adapter(NDmpOlsCoefAdapter),
+        ),
     ))

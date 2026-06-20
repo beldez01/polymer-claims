@@ -411,6 +411,11 @@ In `build_replication_inputs`, where `sat_b` is built and the product is applied
 ```
 
 > Note: `getattr(contract_b, "shared_cause_factors", ())` defaults to `()` because SE-Contracts do not yet carry factors — so the umbrella gate is wired but **inert until contracts/runs declare factors** (an operational follow-up). The grammar mechanism (Task 2) is fully tested regardless.
+>
+> **Post-implementation update (2026-06-20):** bundled SE-Contracts now carry flat
+> `shared_cause_factors`, and `materialization_map` propagates cohort-A factors into verify's
+> satisfaction context. The gate is active for bundled contract-backed runs; factor provenance remains
+> operator-authored.
 
 - [ ] **Step 4: Run test to verify it passes**
 

@@ -1,5 +1,9 @@
 from polymer_protocol import (
-    AdapterCredential, AdapterRegistry, adapters_independent, pair_is_registry_independent,
+    AdapterCredential,
+    AdapterRegistry,
+    adapters_independent,
+    independent_credential_pair,
+    pair_is_registry_independent,
 )
 
 
@@ -31,6 +35,12 @@ def test_pair_is_registry_independent():
     assert not pair_is_registry_independent(r, ("identity", "ghost"))       # unregistered -> no pair
     r2 = AdapterRegistry(credentials=(_cred("identity", "alice", "h1"), _cred("reference", "alice", "h2")))
     assert not pair_is_registry_independent(r2, ("identity", "reference"))   # same owner
+
+
+def test_independent_credential_pair_returns_witness_pair():
+    r = AdapterRegistry(credentials=(_cred("identity", "alice", "h1"), _cred("reference", "bob", "h2")))
+    assert independent_credential_pair(r, ("identity", "reference")) == ("identity", "reference")
+    assert independent_credential_pair(r, ("identity", "ghost")) is None
 
 
 def test_frozen_and_json_roundtrips():
