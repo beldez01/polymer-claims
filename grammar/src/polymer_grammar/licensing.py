@@ -17,7 +17,7 @@ from enum import Enum
 from pydantic import model_validator
 
 from .base import _Model
-from .shared_cause import SeverityProvenance
+from .shared_cause import SHARED_CAUSE_TAU, SeverityProvenance, shared_cause_jaccard
 
 
 class SatisfactionVerdict(str, Enum):
@@ -36,6 +36,10 @@ class MaterializationContext(_Model):
     semantic_run_id: str | None = None  # SHA256(tool·params·inputs·profile_hash)
     profile_hash: str | None = None     # the realized AnalysisProfile content-address
     dimnames_hash: str | None = None    # the SE-Contract canonical content-address (drift key)
+    # §E common-cause: namespaced causal-dependency tags this run's result depends on
+    # (e.g. "manifest:HM450", "norm:noob", "ref:GRCh38", "lib:numpy-lstsq", "prior:idh-hypermeth").
+    # Operator-asserted. Empty => not assessable (inert). The flat first form of the common-cause DAG.
+    shared_cause_factors: tuple[str, ...] = ()
 
 
 class Satisfaction(_Model):
@@ -66,15 +70,72 @@ class IndependenceTier(str, Enum):
     REPLICATED = "replicated"
 
 
+def _distinct_cohort_reps(
+    satisfactions: tuple["Satisfaction", ...]
+) -> list["Satisfaction"]:
+    """One representative Satisfaction per distinct non-None dimnames_hash, deterministic
+    (ascending dimnames_hash, first occurrence)."""
+    reps: dict[str, "Satisfaction"] = {}
+    for s in satisfactions:
+        h = s.materialization.dimnames_hash
+        if h is not None and h not in reps:
+            reps[h] = s
+    return [reps[h] for h in sorted(reps)]
+
+
+def cohorts_error_independent(
+    satisfactions: tuple["Satisfaction", ...]
+) -> bool | None:
+    """§E: are the distinct cohorts' errors independent (low shared-cause overlap)?
+    None  -> not assessable: <2 distinct cohorts, OR any representative has empty factors
+             (partial adoption falls back to today's behavior — byte-identical when off).
+    True  -> every pairwise Jaccard < SHARED_CAUSE_TAU.
+    False -> some pair's Jaccard >= SHARED_CAUSE_TAU (the runs share too much cause)."""
+    reps = _distinct_cohort_reps(satisfactions)
+    if len(reps) < 2:
+        return None
+    factors = [r.materialization.shared_cause_factors for r in reps]
+    if any(not f for f in factors):
+        return None
+    for i in range(len(factors)):
+        for j in range(i + 1, len(factors)):
+            if shared_cause_jaccard(factors[i], factors[j]) >= SHARED_CAUSE_TAU:
+                return False
+    return True
+
+
+def max_shared_cause_overlap(
+    satisfactions: tuple["Satisfaction", ...]
+) -> float | None:
+    """The max pairwise Jaccard among distinct-cohort representatives, or None when not
+    assessable (matches cohorts_error_independent's None cases). Recorded on the license."""
+    reps = _distinct_cohort_reps(satisfactions)
+    if len(reps) < 2:
+        return None
+    factors = [r.materialization.shared_cause_factors for r in reps]
+    if any(not f for f in factors):
+        return None
+    return max(
+        shared_cause_jaccard(factors[i], factors[j])
+        for i in range(len(factors))
+        for j in range(i + 1, len(factors))
+    )
+
+
 def independence_tier_of(satisfactions: tuple["Satisfaction", ...]) -> IndependenceTier:
-    """REPLICATED iff the satisfactions carry >=2 DISTINCT non-None materialization.dimnames_hash
-    (distinct cohorts); else REPRODUCED. None dimnames (pre-CES claims) never reach REPLICATED."""
+    """REPLICATED iff >=2 DISTINCT non-None dimnames_hash AND the cohorts are error-independent.
+    cohorts_error_independent is None (factors absent / partial) => today's behavior (REPLICATED on
+    distinct cohorts — byte-identical when off); False (high overlap) => REPRODUCED (the §E gate)."""
     cohorts = {
         s.materialization.dimnames_hash
         for s in satisfactions
         if s.materialization.dimnames_hash is not None
     }
-    return IndependenceTier.REPLICATED if len(cohorts) >= 2 else IndependenceTier.REPRODUCED
+    if len(cohorts) < 2:
+        return IndependenceTier.REPRODUCED
+    if cohorts_error_independent(satisfactions) is False:
+        return IndependenceTier.REPRODUCED
+    return IndependenceTier.REPLICATED
 
 
 class Licensing(_Model):
@@ -84,6 +145,7 @@ class Licensing(_Model):
     rivals_considered: tuple[str, ...] = ()
     independence_tier: IndependenceTier = IndependenceTier.REPRODUCED
     severity_provenance: SeverityProvenance | None = None
+    shared_cause_overlap: float | None = None
     note: str | None = None
 
     @model_validator(mode="after")

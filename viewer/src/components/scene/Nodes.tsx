@@ -177,6 +177,7 @@ function staticNode(n: {
   fdr_alpha_allocated?: number | null;
   independence_tier?: string | null;
   severity_provenance?: string | null;
+  shared_cause_overlap?: number | null;
   position: Vec3;
 }): InterpNode {
   return {
@@ -196,6 +197,7 @@ function staticNode(n: {
     fdr_alpha_allocated: n.fdr_alpha_allocated ?? null,
     independence_tier: n.independence_tier ?? null,
     severity_provenance: n.severity_provenance ?? null,
+    shared_cause_overlap: n.shared_cause_overlap ?? null,
     position: n.position,
     scale: 1,
     opacity: 1,

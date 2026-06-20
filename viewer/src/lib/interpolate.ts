@@ -39,6 +39,7 @@ export interface InterpNode {
   fdr_alpha_allocated: number | null;
   independence_tier: string | null;
   severity_provenance: string | null;
+  shared_cause_overlap: number | null;
   position: Vec3;
   /** enter/exit growth in [0,1] — drives both mesh scale and material opacity. */
   scale: number;
@@ -133,6 +134,7 @@ export function interpolateFrame(
         fdr_alpha_allocated: nb.fdr_alpha_allocated ?? null,
         independence_tier: nb.independence_tier ?? null,
         severity_provenance: nb.severity_provenance ?? null,
+        shared_cause_overlap: nb.shared_cause_overlap ?? null,
         position: lerpVec3(na.position, nb.position, t),
         scale: 1,
         opacity: 1,
@@ -156,6 +158,7 @@ export function interpolateFrame(
         fdr_alpha_allocated: nb.fdr_alpha_allocated ?? null,
         independence_tier: nb.independence_tier ?? null,
         severity_provenance: nb.severity_provenance ?? null,
+        shared_cause_overlap: nb.shared_cause_overlap ?? null,
         position: nb.position,
         scale: t,
         opacity: t,
@@ -183,6 +186,7 @@ export function interpolateFrame(
       fdr_alpha_allocated: na.fdr_alpha_allocated ?? null,
       independence_tier: na.independence_tier ?? null,
       severity_provenance: na.severity_provenance ?? null,
+      shared_cause_overlap: na.shared_cause_overlap ?? null,
       position: na.position,
       scale: 1 - t,
       opacity: 1 - t,

@@ -16,9 +16,11 @@ from .status import PendingReason, RejectionReason, Status
 from .strength import AXES, StrengthVector, licensed
 from .shared_cause import (
     CONFIRMATORY_SEVERITY_CEILING,
+    SHARED_CAUSE_TAU,
     SeverityProvenance,
     cap_severity_for_confirmatory,
     severity_provenance_of,
+    shared_cause_jaccard,
     shared_cause_overlap,
 )
 from .pattern import Pattern, PatternRef, get_pattern, registry
@@ -33,7 +35,9 @@ from .licensing import (
     RivalSetClosure,
     Satisfaction,
     SatisfactionVerdict,
+    cohorts_error_independent,
     independence_tier_of,
+    max_shared_cause_overlap,
 )
 from .roles import CausalRoles, Role
 from .units import DIMENSIONLESS, Dimension, compatible
@@ -196,7 +200,9 @@ __all__ = [
     "LicenseRoute",
     "Licensing",
     "MaterializationContext",
+    "cohorts_error_independent",
     "independence_tier_of",
+    "max_shared_cause_overlap",
     "registry",
     "RivalSetClosure",
     "Satisfaction",
@@ -314,8 +320,10 @@ __all__ = [
     "RevisionDiscovery",
     "commitment_hash",
     "CONFIRMATORY_SEVERITY_CEILING",
+    "SHARED_CAUSE_TAU",
     "SeverityProvenance",
     "cap_severity_for_confirmatory",
     "severity_provenance_of",
+    "shared_cause_jaccard",
     "shared_cause_overlap",
 ]

@@ -55,6 +55,7 @@ def materialization_map(
             "input_signature": [dimnames_hash],
             "profile_hash": profile_hash,
         })
+        # COUPLING (§E): shared_cause_factors is intentionally NOT set here today (SE-Contracts carry none). When contracts gain factors, propagate shared_cause_factors=load_contract(handle.ref).shared_cause_factors here so verify's independence_tier_of agrees with replication.py's multiplication gate. See CONTINUE.md §E deferred note.
         out[c.id] = MaterializationContext(
             id=base_ctx.id,
             api_version=base_ctx.api_version,

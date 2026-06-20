@@ -46,3 +46,19 @@ def cap_severity_for_confirmatory(strength: StrengthVector) -> StrengthVector:
     return strength.model_copy(
         update={"severity": min(strength.severity, CONFIRMATORY_SEVERITY_CEILING)}
     )
+
+
+# §E (north-star common-cause): Reichenbach screening-off, first concrete form. The graded
+# shared-cause overlap between two runs' causal-dependency factor sets. Pairwise overlap below
+# SHARED_CAUSE_TAU ⇒ the runs' errors are treated as independent (license may multiply their
+# e-values). Operator-asserted factors; derived overlap. Tunable.
+SHARED_CAUSE_TAU: float = 0.5
+
+
+def shared_cause_jaccard(a: tuple[str, ...], b: tuple[str, ...]) -> float:
+    """Jaccard overlap |A∩B|/|A∪B| of two factor-tag sets; 0.0 when the union is empty."""
+    sa, sb = set(a), set(b)
+    union = sa | sb
+    if not union:
+        return 0.0
+    return len(sa & sb) / len(union)

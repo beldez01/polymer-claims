@@ -54,6 +54,7 @@ class TopologyNode(_Model):
     fdr_alpha_allocated: float | None = None
     independence_tier: str | None = None
     severity_provenance: str | None = None
+    shared_cause_overlap: float | None = None
     position: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
     @model_validator(mode="after")
@@ -129,6 +130,9 @@ def _extract_nodes(
                     c.licensing.severity_provenance.value
                     if c.licensing is not None and c.licensing.severity_provenance is not None
                     else None
+                ),
+                shared_cause_overlap=(
+                    c.licensing.shared_cause_overlap if c.licensing is not None else None
                 ),
                 position=positions.get(c.id, (0.0, 0.0, 0.0)),
             )

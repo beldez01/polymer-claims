@@ -40,6 +40,7 @@ export interface TopologyNode {
   fdr_alpha_allocated: number | null;
   independence_tier?: string | null;
   severity_provenance?: string | null;
+  shared_cause_overlap?: number | null;
   position: Vec3;
 }
 
