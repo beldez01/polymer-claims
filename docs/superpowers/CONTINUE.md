@@ -261,7 +261,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   whole-branch opus review). spec+plan `docs/superpowers/{specs,plans}/2026-06-19-common-cause-replicated*`.
   **Deferred (full §E):** the real per-implementation causal DAG (vs the flat factor set), the formal
   screening-off probability derivation, per-adapter factor sets / grading `adapters_independent`, and
-  populating SE-Contracts with real `shared_cause_factors`.
+  populating SE-Contracts with real `shared_cause_factors`. NOTE: populating SE-Contracts with `shared_cause_factors` MUST simultaneously update `materialization.py`'s `materialization_map` to propagate cohort-A factors onto verify's satisfaction context — otherwise REPLICATED labels will appear on un-multiplied evidence (a label↔evidence divergence).
 
 ## Invariants / working agreements (don't relearn)
 

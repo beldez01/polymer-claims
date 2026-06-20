@@ -50,6 +50,7 @@ def test_partial_factor_adoption_falls_back_to_none():
     sats = (_sat("cohortA", ("a", "b")), _sat("cohortB"))
     assert cohorts_error_independent(sats) is None
     assert independence_tier_of(sats) is IndependenceTier.REPLICATED
+    assert max_shared_cause_overlap(sats) is None
 
 
 def test_single_cohort_is_reproduced():

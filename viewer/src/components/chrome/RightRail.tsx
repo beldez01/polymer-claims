@@ -453,7 +453,7 @@ function NodePanel({ selectedId }: { selectedId: string }) {
       </div>
       <div style={{ marginBottom: 12 }}>
         <div style={label}>shared_cause_overlap</div>
-        <div>{node.shared_cause_overlap ?? '—'}</div>
+        <div>{node.shared_cause_overlap != null ? node.shared_cause_overlap.toFixed(2) : '—'}</div>
       </div>
       {node.fdr_tested && (
         <>
