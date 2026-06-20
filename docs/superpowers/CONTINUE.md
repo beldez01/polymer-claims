@@ -8,12 +8,15 @@
 
 ---
 
-## Current state (2026-06-19)
+## Current state (2026-06-20)
 
-`feat/shared-cause-incubation` ALL GREEN — **261 umbrella + 380 grammar + 391 protocol + 2 isolation**;
-viewer `tsc`+build clean; `scripts/check-all.sh` green. grammar/protocol pure + numpy-free;
-**Corpus = 4 collections**. (**Phase D slice 2 — literature-shared-cause gate + incubation/ranking —
-shipped 2026-06-19, awaiting merge**; Phase D slice 1 merged 2026-06-19; see NEXT.)
+`feat/common-cause-replicated` GREEN — **266 umbrella + 396 grammar + 393 protocol + 2 isolation**, ruff
+clean, viewer `tsc` clean. grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**§E
+common-cause slice — earn REPLICATED on low shared-cause overlap — shipped 2026-06-19, awaiting merge**;
+Phase D slice 2 + slice 1 merged 2026-06-19; see NEXT.) **Viewer-build caveat:** `npm run typecheck`
+passes; the `next build` step of `scripts/check-all.sh` currently fails *only* because the sandbox cannot
+fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not a code defect — the build
+passed when network was available). All pytest suites + ruff + isolation + viewer typecheck are green.
 
 **Repo reconciled to a single trunk (2026-06-19).** The git tangle is gone: ~9 stacked feature branches
 were fast-forwarded into `main` (zero divergence, nothing lost), all stale local + remote branches
@@ -59,12 +62,24 @@ design.
 - The two methylation adapters are **reproducibility-independent, not error-independent** (same estimand,
   same data) → the single-cohort demo licenses at **REPRODUCED**. **§2E now expresses the stronger tier:**
   a claim reproduced across two cohorts with distinct `dimnames_hash` licenses at **REPLICATED** (the
-  cross-cohort independence that error-decorrelates). The REPLICATED demo runs on a **2nd synthetic
+  cross-cohort independence that error-decorrelates). **§E now gates this (2026-06-19):** when runs declare
+  `shared_cause_factors`, REPLICATED additionally requires every pairwise Jaccard < 0.5 — else REPRODUCED,
+  with the e-value product withheld (factors operator-asserted; populating contracts is a follow-up, so the
+  gate is live but inert until then). The REPLICATED demo runs on a **2nd synthetic
   cohort** (`epicv2_casectrl_demo_b`) — still exercised, not earned, until a real 2nd cohort is swapped in.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first): **Phase D slice 2 — literature-shared-cause gate +
+**Recently shipped** (most recent first): **§E common-cause — earn REPLICATED on low shared-cause overlap:
+each run declares `MaterializationContext.shared_cause_factors`; the REPLICATED tier (which licenses
+multiplying e₁·e₂) now requires distinct `dimnames_hash` AND every pairwise Jaccard < `SHARED_CAUSE_TAU=0.5`
+(else REPRODUCED); the umbrella `build_replication_inputs` gates the e-value product on the same
+`cohorts_error_independent` predicate (cohort-A proxy built from its contract, so the gate fires in
+production). `Licensing.shared_cause_overlap` recorded + viewer-surfaced. Second concrete edge of north-star
+§E. Operator-asserted factors; populating SE-Contracts with factors is an operational follow-up.
+Additive/byte-identical when off; subagent-driven (5-task plan, whole-branch opus review). spec+plan
+`docs/superpowers/{specs,plans}/2026-06-19-common-cause-replicated*`; shipped 2026-06-19, awaiting merge.** ·
+**Phase D slice 2 — literature-shared-cause gate +
 incubation/ranking: a hypothesis records the cohorts its motivating prior was established on
 (`Provenance.prior_cohorts`); overlap with the test cohort → `severity_provenance=CONFIRMATORY`
 license + `severity`-axis cap (strict mode withholds). The same data-blind signal feeds SELECT
@@ -234,8 +249,19 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   commit; viewer passthrough + `severity_provenance` display. First concrete edge of north-star §E
   common-cause DAG. Additive/byte-identical when off; subagent-driven (7-task plan). spec+plan
   `docs/superpowers/{specs,plans}/2026-06-19-shared-cause-incubation*`. **Deferred Phase-D slices:**
-  incubation strict-mode wiring, live-agent wiring, fuzzy literature→cohort resolution, full §E
-  common-cause DAG.
+  incubation strict-mode wiring, live-agent wiring, fuzzy literature→cohort resolution.
+- ✅ **§E common-cause — earn REPLICATED on low shared-cause overlap** (2026-06-19) — makes the §5b
+  implementation-independence condition derived+evidenced (Reichenbach screening-off, first concrete form):
+  grammar `shared_cause_jaccard` + `SHARED_CAUSE_TAU=0.5`; `MaterializationContext.shared_cause_factors` +
+  `Licensing.shared_cause_overlap`; overlap-aware `independence_tier_of` + `cohorts_error_independent` +
+  `max_shared_cause_overlap` (REPLICATED requires distinct dimnames AND every pairwise Jaccard < τ, else
+  REPRODUCED); umbrella `build_replication_inputs` gates the e₁·e₂ product on the same predicate (cohort-A
+  proxy built from its contract — review caught+fixed an inert-in-production bug); verify records the
+  overlap + topology/viewer surface it. Additive/byte-identical when off; subagent-driven (5-task plan,
+  whole-branch opus review). spec+plan `docs/superpowers/{specs,plans}/2026-06-19-common-cause-replicated*`.
+  **Deferred (full §E):** the real per-implementation causal DAG (vs the flat factor set), the formal
+  screening-off probability derivation, per-adapter factor sets / grading `adapters_independent`, and
+  populating SE-Contracts with real `shared_cause_factors`.
 
 ## Invariants / working agreements (don't relearn)
 
