@@ -85,6 +85,9 @@ interface ViewerState {
   lastConsistencyCycle: number;
   consistencyInFlight: boolean;
 
+  focusedObstruction: string | null;
+  setFocusedObstruction: (id: string | null) => void;
+
   setOverlayOn: (b: boolean) => void;
   fetchConsistency: () => Promise<void>;
 }
@@ -279,6 +282,9 @@ export const useViewer = create<ViewerState>((set, get) => ({
   maxTension: 0,
   lastConsistencyCycle: -1,
   consistencyInFlight: false,
+
+  focusedObstruction: null,
+  setFocusedObstruction: (id) => set({ focusedObstruction: id }),
 
   setOverlayOn: (b: boolean) => set({ overlayOn: b }),
 

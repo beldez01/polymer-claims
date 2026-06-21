@@ -14,14 +14,20 @@
  * Safety: any pair whose endpoint id is absent from the current frame's
  * position map is silently skipped — no NaN, no crash.
  *
- * Task 9 adds focusedObstruction; this component renders all obstructions
- * uniformly (no focus-brighten here).
+ * Task 9: reads `focusedObstruction` from the store; when set, the focused
+ * obstruction's lines+ring render at full opacity/width and all others are
+ * dimmed. When null, all render uniformly.
+ *
+ * Obstruction key scheme (consistent with RightRail.tsx `obstructionKey`):
+ *   key = ob.claim_ids[0] if non-empty, else String(index).
+ *
+ * Task-8 cleanup: ObstructionRing's dead useFrame (wrote userData.opacity but
+ * never drove the material) has been removed. The ring is now static.
  */
 
 import { useMemo, useRef } from 'react';
 import { Billboard, Line } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import type { Group } from 'three';
 import { COLOR } from '@/config/theme';
 import { useViewer } from '@/store';
 import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
@@ -35,6 +41,7 @@ const ROSE = COLOR.accent.rose; // '#BE123C'
 
 /** Cycle-edge line width — bold to stand out from the topology edges (w=1). */
 const CYCLE_LINE_WIDTH = 2.5;
+const CYCLE_LINE_WIDTH_FOCUSED = 4.0;
 
 /** Pulse: full period in seconds. */
 const PULSE_PERIOD = 1.8;
@@ -47,6 +54,12 @@ const BASE_RADIUS = 0.28;
 const OBSTRUCTION_RING_FACTOR = 1.95;
 const RING_SEGMENTS = 48;
 
+// Opacity levels for focus dimming.
+const OPACITY_FOCUSED_LINE = 0.95;
+const OPACITY_DIMMED_LINE = 0.18;
+const OPACITY_FOCUSED_RING = 0.85;
+const OPACITY_DIMMED_RING = 0.18;
+
 // ── helpers ────────────────────────────────────────────────────────────────
 
 function ringPoints(radius: number): [number, number, number][] {
@@ -58,34 +71,38 @@ function ringPoints(radius: number): [number, number, number][] {
   return pts;
 }
 
+/** Obstruction key — must match `obstructionKey` in RightRail.tsx. */
+function obKey(ob: { claim_ids: string[] }, index: number): string {
+  return ob.claim_ids.length > 0 ? ob.claim_ids[0] : String(index);
+}
+
 // ── sub-components ─────────────────────────────────────────────────────────
 
 /**
  * Single rose ring rendered as a Billboard around a node, indicating it is a
- * member of at least one H¹ obstruction cycle.
+ * member of at least one H¹ obstruction cycle. Static opacity (Task-8 dead
+ * useFrame removed — it wrote userData.opacity but never drove the material).
  */
-function ObstructionRing({ position, ringR }: { position: Vec3; ringR: number }) {
-  const groupRef = useRef<Group>(null);
+function ObstructionRing({
+  position,
+  ringR,
+  opacity,
+}: {
+  position: Vec3;
+  ringR: number;
+  opacity: number;
+}) {
   const ring = useMemo(() => ringPoints(ringR), [ringR]);
 
-  // Subtle breathing on the ring: opacity [0.5, 0.85] at half the line frequency.
-  useFrame(({ clock }) => {
-    if (!groupRef.current) return;
-    const t = clock.getElapsedTime();
-    const raw = Math.sin((t / (PULSE_PERIOD * 1.3)) * Math.PI * 2);
-    // Store on userData to avoid triggering react re-renders.
-    groupRef.current.userData.opacity = 0.5 + (raw * 0.5 + 0.5) * 0.35;
-  });
-
   return (
-    <group position={position} ref={groupRef}>
+    <group position={position}>
       <Billboard>
         <Line
           points={ring}
           color={ROSE}
           lineWidth={1.5}
           transparent
-          opacity={0.65}
+          opacity={opacity}
           dashed
           dashSize={0.07}
           gapSize={0.05}
@@ -98,24 +115,38 @@ function ObstructionRing({ position, ringR }: { position: Vec3; ringR: number })
 /**
  * Single animated obstruction edge between two 3D positions.
  * Opacity pulses sinusoidally; phase offset staggers multiple obstructions.
+ * When focused, renders brighter + wider; when dimmed, low opacity.
  */
 function ObstructionLine({
   a,
   b,
   phaseOffset,
+  focused,
+  dimmed,
 }: {
   a: Vec3;
   b: Vec3;
   phaseOffset: number;
+  focused: boolean;
+  dimmed: boolean;
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lineRef = useRef<any>(null);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
-    // sin oscillation: range [0.40, 0.95] — never fully invisible, never fully solid.
-    const raw = Math.sin(((t + phaseOffset) / PULSE_PERIOD) * Math.PI * 2);
-    const opacity = 0.4 + (raw * 0.5 + 0.5) * 0.55;
+    let opacity: number;
+    if (dimmed) {
+      opacity = OPACITY_DIMMED_LINE;
+    } else if (focused) {
+      // Focused: pulse between 0.80 and 1.0 for extra emphasis.
+      const raw = Math.sin(((t + phaseOffset) / PULSE_PERIOD) * Math.PI * 2);
+      opacity = 0.80 + (raw * 0.5 + 0.5) * 0.20;
+    } else {
+      // Uniform (no focus): original pulse range [0.40, 0.95].
+      const raw = Math.sin(((t + phaseOffset) / PULSE_PERIOD) * Math.PI * 2);
+      opacity = 0.4 + (raw * 0.5 + 0.5) * 0.55;
+    }
     if (lineRef.current?.material) {
       lineRef.current.material.opacity = opacity;
     }
@@ -126,9 +157,9 @@ function ObstructionLine({
       ref={lineRef}
       points={[a, b]}
       color={ROSE}
-      lineWidth={CYCLE_LINE_WIDTH}
+      lineWidth={focused ? CYCLE_LINE_WIDTH_FOCUSED : CYCLE_LINE_WIDTH}
       transparent
-      opacity={0.72}
+      opacity={focused ? OPACITY_FOCUSED_LINE : dimmed ? OPACITY_DIMMED_LINE : 0.72}
     />
   );
 }
@@ -138,6 +169,7 @@ function ObstructionLine({
 export default function Obstructions() {
   const overlayOn = useViewer((s) => s.overlayOn);
   const obstructions = useViewer((s) => s.obstructions);
+  const focusedObstruction = useViewer((s) => s.focusedObstruction);
   const data = useViewer((s) => s.data);
   const timeline = useViewer((s) => s.timeline);
   const frame = useViewer((s) => s.frame);
@@ -181,6 +213,17 @@ export default function Obstructions() {
     return map;
   }, [interp, data]);
 
+  // Collect member node ids per obstruction key — for per-obstruction ring opacity.
+  const membersByKey = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (let oi = 0; oi < obstructions.length; oi++) {
+      const ob = obstructions[oi];
+      const key = obKey(ob, oi);
+      map.set(key, new Set(ob.claim_ids));
+    }
+    return map;
+  }, [obstructions]);
+
   // Collect all unique member node ids — for placing rings.
   const memberIds = useMemo(() => {
     const ids = new Set<string>();
@@ -195,15 +238,25 @@ export default function Obstructions() {
   if (!overlayOn || obstructions.length === 0) return null;
 
   const ringR = BASE_RADIUS * OBSTRUCTION_RING_FACTOR;
+  const hasFocus = focusedObstruction !== null;
 
   // Phase-stagger obstructions so they don't all pulse in lockstep.
   const phaseStep = PULSE_PERIOD / Math.max(obstructions.length, 1);
 
+  // Determine which node ids belong to the focused obstruction (for ring emphasis).
+  const focusedMemberIds: Set<string> =
+    hasFocus && focusedObstruction !== null
+      ? (membersByKey.get(focusedObstruction) ?? new Set())
+      : new Set();
+
   return (
     <group>
       {/* ── Cycle edges ─────────────────────────────────────────────────── */}
-      {obstructions.flatMap((ob, oi) =>
-        ob.edges.map(([srcId, tgtId], ei) => {
+      {obstructions.flatMap((ob, oi) => {
+        const key = obKey(ob, oi);
+        const isFocused = hasFocus && key === focusedObstruction;
+        const isDimmed = hasFocus && !isFocused;
+        return ob.edges.map(([srcId, tgtId], ei) => {
           const a = positions.get(srcId);
           const b = positions.get(tgtId);
           // Skip any pair whose endpoint is not in the current frame — no NaN.
@@ -214,21 +267,32 @@ export default function Obstructions() {
               a={a}
               b={b}
               phaseOffset={oi * phaseStep}
+              focused={isFocused}
+              dimmed={isDimmed}
             />
           );
-        }),
-      )}
+        });
+      })}
 
       {/* ── Member-node outline rings ────────────────────────────────────── */}
       {Array.from(memberIds).map((id) => {
         const pos = positions.get(id);
         // Skip if node not in current frame.
         if (!pos) return null;
+        const isFocusedMember = hasFocus && focusedMemberIds.has(id);
+        const isDimmedMember = hasFocus && !isFocusedMember;
         return (
           <ObstructionRing
             key={`ob-ring-${id}`}
             position={pos}
             ringR={ringR}
+            opacity={
+              !hasFocus
+                ? 0.65
+                : isFocusedMember
+                  ? OPACITY_FOCUSED_RING
+                  : OPACITY_DIMMED_RING
+            }
           />
         );
       })}

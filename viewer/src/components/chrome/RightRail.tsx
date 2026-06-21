@@ -8,6 +8,7 @@ import {
   STATUS_COLOR,
   STATUS_ORDER,
   STRENGTH_AXES,
+  tensionScale,
 } from '@/config/theme';
 import { useEffect, useMemo, useState } from 'react';
 import { useViewer, computeCounts, findNode, type Counts } from '@/store';
@@ -103,6 +104,113 @@ function TierPill({ tier }: { tier: string | null | undefined }) {
     >
       {tier}
     </span>
+  );
+}
+
+/**
+ * Tension pill — mirrors TierPill but maps tension magnitude to the heat scale.
+ * `t01` is the raw tension value (not normalised); `maxTension` is the global max
+ * so callers normalise before colouring.
+ */
+function TensionPill({ tension, maxTension }: { tension: number; maxTension: number }) {
+  const t01 = maxTension > 0 ? tension / maxTension : 0;
+  const col = tensionScale(t01);
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        fontFamily: FONT_FAMILY_MONO,
+        fontSize: 11,
+        color: col,
+        border: `1px solid ${col}`,
+        borderRadius: 2,
+        padding: '2px 7px',
+        marginTop: 2,
+        fontVariantNumeric: 'tabular-nums',
+      }}
+    >
+      {tension.toFixed(4)}
+    </span>
+  );
+}
+
+// ── §03 obstructions panel ───────────────────────────────────────────────────
+
+/**
+ * Obstruction key: the first claim_id in the obstruction's claim_ids array, or
+ * its index as a string if claim_ids is empty. Must be consistent between
+ * ObstructionPanel (sets) and Obstructions.tsx (reads).
+ */
+export function obstructionKey(ob: { claim_ids: string[] }, index: number): string {
+  return ob.claim_ids.length > 0 ? ob.claim_ids[0] : String(index);
+}
+
+function ObstructionPanel() {
+  const obstructions = useViewer((s) => s.obstructions);
+  const focusedObstruction = useViewer((s) => s.focusedObstruction);
+  const setFocusedObstruction = useViewer((s) => s.setFocusedObstruction);
+
+  if (obstructions.length === 0) {
+    return (
+      <span style={{ ...cell, color: COLOR.text.faint, fontSize: 10 }}>
+        no obstructions
+      </span>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {obstructions.map((ob, oi) => {
+        const key = obstructionKey(ob, oi);
+        const focused = focusedObstruction === key;
+        return (
+          <button
+            key={key}
+            onClick={() => setFocusedObstruction(focused ? null : key)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 3,
+              padding: '6px 8px',
+              background: focused ? COLOR.bg.deep : 'transparent',
+              border: `1px solid ${focused ? COLOR.accent.rose : COLOR.border.default}`,
+              borderRadius: 2,
+              cursor: 'pointer',
+              textAlign: 'left',
+              transition: 'border-color 0.12s, background 0.12s',
+            }}
+          >
+            {/* claim_ids */}
+            <div
+              style={{
+                fontFamily: FONT_FAMILY_MONO,
+                fontSize: 10,
+                color: focused ? COLOR.accent.rose : COLOR.text.secondary,
+                letterSpacing: '0.02em',
+                wordBreak: 'break-all',
+              }}
+            >
+              {ob.claim_ids.join(' · ') || '—'}
+            </div>
+            {/* magnitude */}
+            <div style={{ display: 'flex', gap: 4, alignItems: 'baseline' }}>
+              <span style={{ ...label, fontSize: 9 }}>magnitude</span>
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY_MONO,
+                  fontSize: 11,
+                  color: COLOR.accent.rose,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {ob.magnitude.toFixed(4)}
+              </span>
+            </div>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -321,6 +429,10 @@ function planText(plan: ClaimDetail['plan']): string {
 }
 
 function ClaimDetailCard({ detail }: { detail: ClaimDetail }) {
+  const tensionByClaimId = useViewer((s) => s.tensionByClaimId);
+  const maxTension = useViewer((s) => s.maxTension);
+  const tension = tensionByClaimId[detail.id] ?? null;
+
   return (
     <>
       <Field name="id">{detail.id}</Field>
@@ -368,6 +480,13 @@ function ClaimDetailCard({ detail }: { detail: ClaimDetail }) {
         </div>
       )}
 
+      {tension !== null && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={label}>tension</div>
+          <TensionPill tension={tension} maxTension={maxTension} />
+        </div>
+      )}
+
       <StrengthTable strength={detail.strength} />
 
       {detail.provenance && (
@@ -390,6 +509,8 @@ function NodePanel({ selectedId }: { selectedId: string }) {
   const frame = useViewer((s) => s.frame);
   const connected = useViewer((s) => s.connected);
   const liveUrl = useViewer((s) => s.liveUrl);
+  const tensionByClaimId = useViewer((s) => s.tensionByClaimId);
+  const maxTension = useViewer((s) => s.maxTension);
 
   const interp = useInterpolatedFrame(timeline, frame);
 
@@ -451,6 +572,12 @@ function NodePanel({ selectedId }: { selectedId: string }) {
         <div style={label}>severity_provenance</div>
         <TierPill tier={node.severity_provenance ?? null} />
       </div>
+      {tensionByClaimId[selectedId] !== undefined && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={label}>tension</div>
+          <TensionPill tension={tensionByClaimId[selectedId]} maxTension={maxTension} />
+        </div>
+      )}
       <div style={{ marginBottom: 12 }}>
         <div style={label}>shared_cause_overlap</div>
         <div>{node.shared_cause_overlap != null ? node.shared_cause_overlap.toFixed(2) : '—'}</div>
@@ -475,6 +602,7 @@ function NodePanel({ selectedId }: { selectedId: string }) {
 export default function RightRail() {
   const selectedId = useViewer((s) => s.selectedId);
   const setSelected = useViewer((s) => s.setSelected);
+  const overlayOn = useViewer((s) => s.overlayOn);
 
   return (
     <aside
@@ -493,7 +621,22 @@ export default function RightRail() {
       }}
     >
       {selectedId === null ? (
-        <UniverseOverview />
+        <>
+          <UniverseOverview />
+
+          {/* §03 obstructions — only when overlay is active */}
+          {overlayOn && (
+            <div style={{ marginTop: 20 }}>
+              <div
+                className="section-marker"
+                style={{ ...sectionMarker, marginBottom: 8 }}
+              >
+                §03 — H¹ OBSTRUCTIONS
+              </div>
+              <ObstructionPanel />
+            </div>
+          )}
+        </>
       ) : (
         <>
           <div
@@ -525,6 +668,19 @@ export default function RightRail() {
           </div>
 
           <NodePanel selectedId={selectedId} />
+
+          {/* §03 obstructions — only when overlay is active, shown below node panel */}
+          {overlayOn && (
+            <div style={{ marginTop: 20 }}>
+              <div
+                className="section-marker"
+                style={{ ...sectionMarker, marginBottom: 8 }}
+              >
+                §03 — H¹ OBSTRUCTIONS
+              </div>
+              <ObstructionPanel />
+            </div>
+          )}
         </>
       )}
     </aside>
