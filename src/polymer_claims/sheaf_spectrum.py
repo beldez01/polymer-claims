@@ -13,6 +13,7 @@ import numpy as np
 from polymer_protocol.sheaf import (
     ClaimTension,
     ConsistencyReport,
+    Obstruction,
     SheafStructure,
 )
 
@@ -21,7 +22,7 @@ _ROUND = 6          # 6dp byte-stable output, matching embedding.py
 
 
 def _coboundary(structure: SheafStructure):
-    """Return (idx, x, delta, w, kinds): vertex index map, value vector, coboundary δ (m×n),
+    """Return (x, delta, w, kinds): value vector, coboundary δ (m×n),
     edge weights, and the per-edge kind list."""
     verts = structure.vertices
     idx = {v.claim_id: i for i, v in enumerate(verts)}
@@ -35,11 +36,11 @@ def _coboundary(structure: SheafStructure):
         delta[k, idx[e.v]] += -float(e.sign)        # d_e = x_u - sign*x_v
         w[k] = e.weight
         kinds.append(e.kind)
-    return idx, x, delta, w, kinds
+    return x, delta, w, kinds
 
 
 def consistency_report(structure: SheafStructure) -> ConsistencyReport:
-    idx, x, delta, w, kinds = _coboundary(structure)
+    x, delta, w, kinds = _coboundary(structure)
     n = len(structure.vertices)
     m = len(structure.edges)
     total_w = float(w.sum())
@@ -57,6 +58,10 @@ def consistency_report(structure: SheafStructure) -> ConsistencyReport:
     raw = float(per_edge.sum())
     eq = float(per_edge[np.array([k == "equivalence" for k in kinds])].sum())
     df = float(per_edge[np.array([k == "defeat" for k in kinds])].sum())
+    # Exhaustiveness: energy split must account for all edges (catch unknown future kinds)
+    assert abs(eq + df - raw) <= 1e-9 * (1.0 + abs(raw)), (
+        f"Energy split mismatch: eq={eq} + df={df} != raw={raw}"
+    )
 
     L = delta.T @ (w[:, None] * delta)              # δᵀ W δ
     evals = np.linalg.eigvalsh(L)
@@ -76,7 +81,73 @@ def consistency_report(structure: SheafStructure) -> ConsistencyReport:
         defeat_energy=round(df / total_w, _ROUND),
         spectral_gap=round(spectral_gap, _ROUND),
         h0_dim=h0_dim,
-        h1_obstructions=(),                         # Task 5
+        h1_obstructions=_frustration_obstructions(structure),
         per_claim_tension=tuple(tensions),
         flags=structure.flags,
     )
+
+
+def _cycle_ids(parent: dict, u: str, v: str) -> list[str]:
+    """Tree path v→root and u→root, spliced into the fundamental cycle through edge (u,v)."""
+    def up(x: str) -> list[str]:
+        path = []
+        while x is not None:
+            path.append(x)
+            x = parent[x]
+        return path
+
+    pu, pv = up(u), up(v)
+    sv = {p: i for i, p in enumerate(pv)}
+    anc = next(p for p in pu if p in sv)            # lowest common ancestor
+    left = pu[: pu.index(anc) + 1]                  # u → anc (inclusive)
+    right = pv[: sv[anc]]                            # v → (just below anc)
+    return left + right[::-1]
+
+
+def _frustration_obstructions(structure: SheafStructure) -> tuple[Obstruction, ...]:
+    """Signed-BFS frustration detection.
+
+    Each vertex gets a label in {+1,-1}; edge (u,v,sign) demands label[v] == sign*label[u].
+    A back-edge that violates the running label witnesses a frustrated fundamental cycle
+    (tree path u→…→v plus that edge). Deterministic: sorted ids.
+    """
+    adj: dict[str, list[tuple[str, int, float]]] = {v.claim_id: [] for v in structure.vertices}
+    for e in structure.edges:
+        adj[e.u].append((e.v, e.sign, e.weight))
+        adj[e.v].append((e.u, e.sign, e.weight))    # undirected for balance check
+
+    label: dict[str, int] = {}
+    parent: dict[str, str | None] = {}
+    obstructions: list[Obstruction] = []
+    seen_cycles: set[frozenset[str]] = set()
+
+    for root in sorted(adj):
+        if root in label:
+            continue
+        label[root] = 1
+        parent[root] = None
+        queue = [root]
+        while queue:
+            u = queue.pop(0)
+            for v, sign, _w in sorted(adj[u]):
+                want = sign * label[u]
+                if v not in label:
+                    label[v] = want
+                    parent[v] = u
+                    queue.append(v)
+                elif label[v] != want:
+                    cyc = _cycle_ids(parent, u, v)
+                    key = frozenset(cyc)
+                    if key not in seen_cycles:
+                        seen_cycles.add(key)
+                        edges = tuple(
+                            (cyc[i], cyc[(i + 1) % len(cyc)]) for i in range(len(cyc))
+                        )
+                        mag = round(
+                            float(sum(e.weight for e in structure.edges if {e.u, e.v} <= key)),
+                            _ROUND,
+                        )
+                        obstructions.append(
+                            Obstruction(claim_ids=tuple(cyc), edges=edges, magnitude=mag)
+                        )
+    return tuple(obstructions)

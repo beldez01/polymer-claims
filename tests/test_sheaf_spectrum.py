@@ -57,3 +57,51 @@ def test_report_is_deterministic():
 def test_sheaf_spectrum_not_re_exported():
     import polymer_claims
     assert not hasattr(polymer_claims, "consistency_report")   # lazy-only, like embedding
+
+
+# --- H¹ frustration obstruction tests (Task 5) ---
+
+def test_frustrated_cycle_is_localized():
+    # A≡B, B≡C, C⊣A : odd defeat count -> frustrated, no global assignment
+    s = SheafStructure(
+        vertices=(_vert("A", 1.0), _vert("B", 1.0), _vert("C", 1.0)),
+        edges=(
+            SheafEdge(kind="equivalence", u="A", v="B", weight=1.0, sign=1),
+            SheafEdge(kind="equivalence", u="B", v="C", weight=1.0, sign=1),
+            SheafEdge(kind="defeat", u="C", v="A", weight=1.0, sign=-1),
+        ),
+    )
+    r = consistency_report(s)
+    assert len(r.h1_obstructions) == 1
+    assert set(r.h1_obstructions[0].claim_ids) == {"A", "B", "C"}
+
+
+def test_balanced_cycle_has_no_obstruction():
+    # A≡B, B≡C, C≡A : balanced
+    s = SheafStructure(
+        vertices=(_vert("A", 1.0), _vert("B", 1.0), _vert("C", 1.0)),
+        edges=(
+            SheafEdge(kind="equivalence", u="A", v="B", weight=1.0, sign=1),
+            SheafEdge(kind="equivalence", u="B", v="C", weight=1.0, sign=1),
+            SheafEdge(kind="equivalence", u="C", v="A", weight=1.0, sign=1),
+        ),
+    )
+    assert consistency_report(s).h1_obstructions == ()
+
+
+# --- Folded review finding (2): total energy in defeat test ---
+
+def test_defeat_sign_total_energy():
+    s = SheafStructure(vertices=(_vert("a", 3.0), _vert("b", 3.0)),
+                       edges=(SheafEdge(kind="defeat", u="a", v="b", weight=1.0, sign=-1),))
+    r = consistency_report(s)
+    assert r.inconsistency_energy == pytest.approx(36.0)
+
+
+# --- Folded review finding (3): empty/zero-weight guard ---
+
+def test_no_edges_zero_energy_and_n_h0():
+    s = SheafStructure(vertices=(_vert("a", 1.0), _vert("b", 2.0), _vert("c", 3.0)), edges=())
+    r = consistency_report(s)
+    assert r.inconsistency_energy == 0.0
+    assert r.h0_dim == 3
