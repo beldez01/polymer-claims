@@ -14,7 +14,10 @@ docs/*.pdf
 docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md
 
 # Phase A real-data: raw GDC cache + the generated real SE-Contracts (never committed)
-/data/
+/data/tcga_laml/
+/data/sal_aml/
+# demo fixtures are public (no real data) — committed
+!/data/demo/
 src/polymer_claims/contracts/tcga_laml_idh.json
 src/polymer_claims/contracts/tcga_laml_idh.betas.tsv
 # region-Δβ split sub-contracts (real betas: disc/test halves)

@@ -10,7 +10,7 @@
 
 ## Current state (2026-06-21)
 
-`main` GREEN — **281 umbrella + 396 grammar + 404 protocol + 2 isolation**, ruff
+`main` GREEN — **285 umbrella + 396 grammar + 404 protocol + 2 isolation**, ruff
 clean, viewer `tsc` clean (full `scripts/check-all.sh` printed **ALL GREEN** incl. `next build` on the merge
 — network was available that run). grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**Sheaf
 consistency gauge shipped + merged to `main` 2026-06-21 — `fe1214d`, `--no-ff`, pushed to origin
@@ -278,8 +278,18 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   on the topology frame; instrument not a gate; pure protocol extractor (`protocol/sheaf.py`) + numpy spectrum
   (`polymer_claims/sheaf_spectrum.py`) behind `[embed]`. spec+plan
   `docs/superpowers/{specs,plans}/2026-06-21-sheaf-consistency-gauge*`. **Deferred:** stalk enrichments
-  (standardized-effect, ℝ²(value,uncertainty)), unit-conversion registry (ρ≠1), rich viewer obstruction viz,
+  (standardized-effect, ℝ²(value,uncertainty)), unit-conversion registry (ρ≠1),
   instrument→gate.
+- ✅ **Sheaf gauge live viz** (2026-06-21) — the viewer renders the gauge behind one opt-in "consistency
+  overlay" toggle: falling energy HUD + sparkline, per-claim tension halos, animated H¹ frustration-cycle
+  overlay, obstruction panel (click-to-focus) + node-tension display. New throttled `GET /consistency` route
+  (snapshot-then-release, never blocks ticks). Gauge corrections landed first: **P1** per-frame headline is
+  energy-only (`ConsistencyHeadline.spectral_gap` now `float|None`, no per-tick eigendecomposition); **P3**
+  `per_claim_tension` is a nonnegative edge-share attribution (valid as opacity). Off ⇒ rendered view
+  unchanged; `[embed]`-absent ⇒ degrades silently. Demo: `data/demo/frustrated_cycle_corpus.json` →
+  exactly one H¹ obstruction. spec+plan `docs/superpowers/{specs,plans}/2026-06-21-sheaf-viewer-viz*`.
+  **Deferred** (spec §10): rich layer in sample mode, λ₂-on-frame (Lanczos), tension in protocol export,
+  hyperbolic/Lorentz layout, instrument→gate.
 - ✅ **Adapter-independence hardening** (`d3be2bb`, 2026-06-20) — byte-derived `implementation_hash` from adapter bytecode; licensed `Satisfaction` records the credential-witness pair that justified the air gap; §E `shared_cause_factors` activated on bundled SE-Contracts.
 
 ## Invariants / working agreements (don't relearn)
