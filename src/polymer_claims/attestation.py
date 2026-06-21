@@ -6,9 +6,12 @@ is the only IO. Design: docs/superpowers/specs/2026-06-21-standards-skin-attesta
 """
 from __future__ import annotations
 
+import re
+
 from pydantic import Field
 
 from polymer_grammar.base import _Model
+from polymer_claims._hashing import canonical_sha256
 
 _STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
 _PREDICATE_TYPE = "https://slsa.dev/provenance/v1"
@@ -125,3 +128,23 @@ class AttestationBundle(_Model):
     attestations: tuple[Statement, ...] = ()
     drs_objects: tuple[DrsObject, ...] = Field(default=(), alias="drsObjects")
     unresolved_datasets: tuple[str, ...] = Field(default=(), alias="unresolvedDatasets")
+
+
+_SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+
+def _bare_hex(h: str) -> str:
+    """Strip a leading `<alg>:` prefix from a content-address, leaving bare hex."""
+    return h.split(":", 1)[1] if ":" in h else h
+
+
+def _digest_or_none(value: str | None) -> DigestSet | None:
+    """A DigestSet for a valid `sha256:<64hex>` value, else None (never emit an invalid digest)."""
+    if value is not None and _SHA256_RE.match(value):
+        return DigestSet(sha256=_bare_hex(value))
+    return None
+
+
+def _subject(claim) -> Subject:
+    """in-toto subject for a licensed claim: name = claim.id, digest = canonical claim hash."""
+    return Subject(name=claim.id, digest=DigestSet(sha256=_bare_hex(canonical_sha256(claim.model_dump(mode="json")))))
