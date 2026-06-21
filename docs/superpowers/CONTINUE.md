@@ -8,15 +8,16 @@
 
 ---
 
-## Current state (2026-06-20)
+## Current state (2026-06-21)
 
-`main` GREEN — **269 umbrella + 396 grammar + 394 protocol + 2 isolation**, ruff
-clean, viewer `tsc` clean. grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**§E
-common-cause slice — earn REPLICATED on low shared-cause overlap — shipped 2026-06-19, merged**;
-Phase D slice 2 + slice 1 merged 2026-06-19; see NEXT.) **Viewer-build caveat:** `npm run typecheck`
-passes; the `next build` step of `scripts/check-all.sh` currently fails *only* because the sandbox cannot
-fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not a code defect — the build
-passed when network was available). All pytest suites + ruff + isolation + viewer typecheck are green.
+`main` GREEN — **281 umbrella + 396 grammar + 404 protocol + 2 isolation**, ruff
+clean, viewer `tsc` clean. grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**Sheaf
+consistency gauge shipped 2026-06-21**; §E common-cause slice — earn REPLICATED on low shared-cause overlap
+— shipped 2026-06-19, merged; Phase D slice 2 + slice 1 merged 2026-06-19; see NEXT.) **Viewer-build
+caveat:** `npm run typecheck` passes; the `next build` step of `scripts/check-all.sh` currently fails *only*
+because the sandbox cannot fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not
+a code defect — the build passed when network was available). All pytest suites + ruff + isolation + viewer
+typecheck are green.
 
 **Repo reconciled to a single trunk (2026-06-19).** The git tangle is gone: ~9 stacked feature branches
 were fast-forwarded into `main` (zero divergence, nothing lost), all stale local + remote branches
@@ -73,7 +74,12 @@ design.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first): **§E common-cause — earn REPLICATED on low shared-cause overlap:
+**Recently shipped** (most recent first): **Sheaf consistency gauge** (2026-06-21) — cellular sheaf over the
+claims graph; inconsistency energy (consistency radius) + dim H⁰ + localized H¹ frustration obstructions;
+`export-consistency` CLI + cheap live headline on the topology frame; instrument not a gate; pure protocol
+extractor + numpy spectrum behind `[embed]`. spec+plan `docs/superpowers/{specs,plans}/2026-06-21-sheaf-consistency-gauge*`.
+Deferred: stalk enrichments (standardized-effect, ℝ²(value,uncertainty)), unit-conversion registry (ρ≠1),
+rich viewer obstruction viz, instrument→gate. · **§E common-cause — earn REPLICATED on low shared-cause overlap:
 each run declares `MaterializationContext.shared_cause_factors`; the REPLICATED tier (which licenses
 multiplying e₁·e₂) now requires distinct `dimnames_hash` AND every pairwise Jaccard < `SHARED_CAUSE_TAU=0.5`
 (else REPRODUCED); the umbrella `build_replication_inputs` gates the e-value product on the same
@@ -267,6 +273,15 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   **Deferred (full §E):** the real per-implementation causal DAG (vs the flat factor set), the formal
   screening-off probability derivation, per-adapter factor sets / grading `adapters_independent`, and
   byte-derived/credential-backed provenance for `shared_cause_factors`.
+- ✅ **Sheaf consistency gauge** (2026-06-21) — cellular sheaf over the claims graph; scalar-ℝ stalks on
+  Quantity-leaf claims; equivalence edges = agreement, defeat edges = sign-flipped antagonism (generalizing
+  the signed-Laplacian embedding); Laplacian → inconsistency energy (consistency radius) + dim H⁰ + localized
+  H¹ frustration obstructions; `export-consistency` CLI + cheap live headline (`TopologyExport.consistency`)
+  on the topology frame; instrument not a gate; pure protocol extractor (`protocol/sheaf.py`) + numpy spectrum
+  (`polymer_claims/sheaf_spectrum.py`) behind `[embed]`. spec+plan
+  `docs/superpowers/{specs,plans}/2026-06-21-sheaf-consistency-gauge*`. **Deferred:** stalk enrichments
+  (standardized-effect, ℝ²(value,uncertainty)), unit-conversion registry (ρ≠1), rich viewer obstruction viz,
+  instrument→gate.
 
 ## Invariants / working agreements (don't relearn)
 

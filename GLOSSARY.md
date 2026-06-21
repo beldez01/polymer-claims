@@ -34,6 +34,10 @@ See `ARCHITECTURE_CURRENT.md` for how the active pieces fit together.
 - **scheduler / next_action** — the recommend-only budget scheduler that value-ranks the next action (RUN_CYCLE vs a daemon pass) under a shared budget.
 - **FDR ledger** — the online false-discovery-rate controller (LOND) over the open-ended test stream.
 
+## Sheaf gauge
+
+- **sheaf consistency gauge** — a cellular sheaf over the claims graph — scalar-ℝ stalks on Quantity-leaf claims, equivalence edges = agreement, defeat edges = sign-flipped antagonism (generalizing the signed-Laplacian embedding). Its Laplacian gives the corpus *inconsistency energy* (Robinson consistency radius — a distance-to-consensus that falls as recomputation harmonizes claims), dim H⁰, and localized H¹ frustration obstructions (contradiction cycles no pairwise check sees). An instrument, not a gate. Umbrella/`[embed]`; pure extractor in `protocol/sheaf.py`, numpy spectrum in `polymer_claims/sheaf_spectrum.py`.
+
 ## Node, viewer & exports
 
 - **node** — the local mutable host (`NodeRunner` + the `serve` FastAPI server). The ONE impure piece; owns the loop/clock/network.
