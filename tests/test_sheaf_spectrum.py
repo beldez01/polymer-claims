@@ -114,4 +114,21 @@ def test_consistency_headline_matches_report_scalars():
     h = consistency_headline(s)
     r = consistency_report(s)
     assert h.inconsistency_energy == r.inconsistency_energy
-    assert h.spectral_gap == r.spectral_gap
+    assert h.spectral_gap is None          # λ₂ lives only on the report now
+
+
+def test_headline_is_energy_only_no_eigendecomposition(monkeypatch):
+    import polymer_claims.sheaf_spectrum as ss
+    s = SheafStructure(
+        vertices=(_vert("a", 1.0), _vert("b", 4.0)),
+        edges=(SheafEdge(kind="equivalence", u="a", v="b", weight=2.0, sign=1),),
+    )
+    calls = {"eig": 0}
+    real = ss.np.linalg.eigvalsh
+    monkeypatch.setattr(ss.np.linalg, "eigvalsh",
+                        lambda M: (calls.__setitem__("eig", calls["eig"] + 1), real(M))[1])
+    h = ss.consistency_headline(s)
+    assert calls["eig"] == 0                 # headline path does NO eigendecomposition
+    assert h.spectral_gap is None
+    # energy still correct: 2*(1-4)^2 / 2 == 9.0
+    assert h.inconsistency_energy == 9.0

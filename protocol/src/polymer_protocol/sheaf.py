@@ -55,7 +55,7 @@ class Obstruction(_Model):
 
 class ConsistencyHeadline(_Model):
     inconsistency_energy: float
-    spectral_gap: float
+    spectral_gap: float | None = None
 
 
 class ConsistencyReport(_Model):

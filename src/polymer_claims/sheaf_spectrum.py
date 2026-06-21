@@ -69,9 +69,21 @@ def _spectrum_core(structure: SheafStructure):
     return raw / total_w, eq / total_w, df / total_w, gap, h0, L, x, total_w
 
 
+def _energy(structure: SheafStructure) -> float:
+    """Inconsistency energy only (Robinson radius): O(edges) mat-vec, NO eigendecomposition."""
+    x, delta, w, _kinds = _coboundary(structure)
+    total_w = float(w.sum())
+    if delta.shape[0] == 0 or total_w == 0.0:
+        return 0.0
+    d = delta @ x
+    return float((w * (d * d)).sum()) / total_w
+
+
 def consistency_headline(structure: SheafStructure) -> ConsistencyHeadline:
-    energy, _eq, _df, gap, _h0, _L, _x, _tw = _spectrum_core(structure)
-    return ConsistencyHeadline(inconsistency_energy=round(energy, _ROUND), spectral_gap=round(gap, _ROUND))
+    return ConsistencyHeadline(
+        inconsistency_energy=round(_energy(structure), _ROUND),
+        spectral_gap=None,                 # λ₂ is on-demand only (see consistency_report)
+    )
 
 
 def consistency_report(structure: SheafStructure) -> ConsistencyReport:
