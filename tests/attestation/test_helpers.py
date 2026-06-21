@@ -3,10 +3,12 @@ from __future__ import annotations
 from polymer_grammar import FDRLedger
 from polymer_grammar.fdr import FDRTest
 from polymer_grammar.licensing import IndependenceTier
+from polymer_protocol import AdapterCredential, AdapterRegistry
 
 from polymer_claims._hashing import canonical_sha256
 from polymer_claims.attestation import (
     _bare_hex,
+    _builder,
     _digest_or_none,
     _external_parameters,
     _internal_parameters,
@@ -159,3 +161,43 @@ def test_resolved_dependencies_shared_profile_collects_run_ids():
     apparatus = [d for d in deps if d.annotations.role == "apparatus"]
     assert len(apparatus) == 1  # one per distinct profile hash
     assert apparatus[0].annotations.semantic_run_ids == ("r1", "r2")  # sorted, none lost
+
+
+def test_builder_no_registry_emits_named_deps_unwitnessed():
+    lic = licensing(sat(mc(), credential_ids=("adapter-x", "adapter-y")))
+    builder, witnessed = _builder(lic, None)
+    assert builder.id == "https://polymerclaims.org/recompute-gate/v1"
+    assert [d.name for d in builder.builder_dependencies] == ["adapter-x", "adapter-y"]
+    assert all(d.digest is None for d in builder.builder_dependencies)
+    assert witnessed is False
+
+
+def test_builder_empty_credentials_is_empty_and_unwitnessed():
+    builder, witnessed = _builder(licensing(sat(mc())), None)
+    assert builder.builder_dependencies == ()
+    assert witnessed is False
+
+
+def test_builder_with_registry_resolves_digest_and_witness():
+    registry = AdapterRegistry(
+        credentials=(
+            AdapterCredential(identity="adapter-x", owner="lab-a", implementation_hash="sha256:" + "1" * 64),
+            AdapterCredential(identity="adapter-y", owner="lab-b", implementation_hash="sha256:" + "2" * 64),
+        )
+    )
+    lic = licensing(sat(mc(), credential_ids=("adapter-x", "adapter-y")))
+    builder, witnessed = _builder(lic, registry)
+    by_name = {d.name: d for d in builder.builder_dependencies}
+    assert by_name["adapter-x"].digest.sha256 == "1" * 64
+    assert witnessed is True  # distinct owner + distinct impl hash -> independent pair
+
+
+def test_builder_registry_nonsha_hash_omits_digest_keeps_raw():
+    registry = AdapterRegistry(
+        credentials=(AdapterCredential(identity="adapter-z", owner="lab-c", implementation_hash="h1"),)
+    )
+    lic = licensing(sat(mc(), credential_ids=("adapter-z",)))
+    builder, _w = _builder(lic, registry)
+    dep = builder.builder_dependencies[0]
+    assert dep.digest is None
+    assert dep.annotations.raw_implementation_hash == "h1"

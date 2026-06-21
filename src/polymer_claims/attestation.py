@@ -12,6 +12,7 @@ from pydantic import Field
 
 from polymer_grammar.base import _Model
 from polymer_claims._hashing import canonical_sha256
+from polymer_protocol import independent_credential_pair
 
 _STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
 _PREDICATE_TYPE = "https://slsa.dev/provenance/v1"
@@ -269,3 +270,32 @@ def _resolved_dependencies(licensing, contract_index):
         )
 
     return tuple(deps), tuple(drs[k] for k in sorted(drs)), tuple(unresolved)
+
+
+def _adapter_descriptor(identity: str, registry) -> ResourceDescriptor:
+    digest = None
+    raw = None
+    if registry is not None:
+        cred = registry.resolve(identity)
+        if cred is not None:
+            digest = _digest_or_none(cred.implementation_hash)
+            if digest is None:
+                raw = cred.implementation_hash
+    return ResourceDescriptor(
+        name=identity,
+        digest=digest,
+        annotations=Annotations(role="adapter", raw_implementation_hash=raw),
+    )
+
+
+def _builder(licensing, registry):
+    """Return (Builder, independence_witnessed). builderDependencies = the union of recorded
+    credential_ids across satisfactions (deduped, sorted); digests resolved only via a supplied
+    registry. independence_witnessed iff a registry verifies an independent pair on any satisfaction."""
+    identities = sorted({cid for s in licensing.satisfactions for cid in s.credential_ids})
+    deps = tuple(_adapter_descriptor(i, registry) for i in identities)
+    witnessed = registry is not None and any(
+        independent_credential_pair(registry, s.credential_ids) is not None
+        for s in licensing.satisfactions
+    )
+    return Builder(id=_BUILD_TYPE, builder_dependencies=deps), witnessed
