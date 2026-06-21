@@ -147,6 +147,24 @@ def create_app(
                 return JSONResponse(content=claim_detail(c))
         return JSONResponse(content={"error": "not found"}, status_code=404)
 
+    @app.get("/consistency")
+    async def consistency() -> JSONResponse:
+        async with lock:
+            corpus = runner.corpus            # snapshot the frozen, immutable corpus, then RELEASE
+        # lock released — the eigendecomp must not serialize ticks
+
+        def _compute() -> dict:
+            try:
+                from polymer_protocol import extract_sheaf
+                from .sheaf_spectrum import consistency_report
+            except ImportError:               # numpy/[embed] absent — caught INSIDE the worker
+                return {"available": False}
+            report = consistency_report(extract_sheaf(corpus))
+            return {"available": True, **_obj(report)}
+
+        body = await asyncio.to_thread(_compute)
+        return JSONResponse(content=body)
+
     @app.post("/step")
     async def step() -> JSONResponse:
         frame = await _do_tick()

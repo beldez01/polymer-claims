@@ -171,6 +171,50 @@ def test_claim_detail_not_found():
         assert r.json() == {"error": "not found"}
 
 
+def test_consistency_route_returns_report():
+    client, _ = _client()
+    with client:
+        r = client.get("/consistency")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["available"] is True
+        assert "inconsistency_energy" in body and "h1_obstructions" in body and "per_claim_tension" in body
+
+
+def test_consistency_does_not_block_step(monkeypatch):
+    """P2: holding the lock during the eigendecomp would serialize /step behind /consistency.
+    Block consistency_report; a concurrent /step must still complete promptly."""
+    import threading
+    import time
+
+    import polymer_claims.sheaf_spectrum as ss
+
+    release = threading.Event()
+    real = ss.consistency_report
+
+    def slow(structure):
+        release.wait(timeout=5.0)  # block the worker thread
+        return real(structure)
+
+    monkeypatch.setattr(ss, "consistency_report", slow)
+
+    client, _ = _client()
+    out = {}
+
+    def hit_consistency():
+        out["consistency"] = client.get("/consistency").status_code
+
+    with client:
+        t = threading.Thread(target=hit_consistency)
+        t.start()
+        time.sleep(0.2)  # let /consistency take its corpus snapshot + enter the worker
+        step = client.post("/step")  # must NOT be serialized behind the blocked worker
+        assert step.status_code == 200  # completes while /consistency is still blocked
+        release.set()
+        t.join(timeout=5.0)
+    assert out["consistency"] == 200
+
+
 def test_bounded_put_drops_oldest():
     import asyncio
 
