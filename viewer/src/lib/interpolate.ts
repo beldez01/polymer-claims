@@ -14,6 +14,7 @@ import type {
   TopologyTimeline,
 } from '@/lib/timeline';
 import type {
+  ConsistencyHeadline,
   TopologyEdge,
   TopologyNode,
   Vec3,
@@ -61,6 +62,7 @@ export interface InterpFrame {
   edges: InterpEdge[];
   stats: FrameStats;
   layoutId: string;
+  consistency?: ConsistencyHeadline | null;
 }
 
 function lerp(a: number, b: number, t: number): number {
@@ -236,5 +238,6 @@ export function interpolateFrame(
     edges,
     stats: dom.stats,
     layoutId: dom.topology.layout_id,
+    consistency: dom.topology.consistency ?? null,
   };
 }

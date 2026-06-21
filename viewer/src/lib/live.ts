@@ -1,4 +1,5 @@
 import type { TimelineFrame, TopologyTimeline } from '@/lib/timeline';
+import type { ConsistencyReport } from './topology';
 
 export interface LiveCallbacks {
   /** the accumulated timeline fetched once on connect (late-joiner catch-up) */
@@ -11,6 +12,16 @@ export interface LiveCallbacks {
 
 export interface LiveHandle {
   disconnect: () => void;
+}
+
+export type ConsistencyResponse =
+  | { available: false }
+  | ({ available: true } & ConsistencyReport);
+
+export async function fetchConsistency(baseUrl: string): Promise<ConsistencyResponse> {
+  const res = await fetch(baseUrl.replace(/\/$/, '') + '/consistency');
+  if (!res.ok) return { available: false };
+  return (await res.json()) as ConsistencyResponse;
 }
 
 /** strip a trailing slash so `${base}/stream` is well-formed. */

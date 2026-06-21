@@ -64,6 +64,7 @@ export interface TopologyExport {
   clusters: TopologyCluster[];
   layout_id: string;
   contract_version?: string;
+  consistency?: ConsistencyHeadline | null;
 }
 
 /** Per-axis extent of the node positions — drives the reference frame + ticks. */
@@ -101,6 +102,28 @@ export function computeExtent(nodes: TopologyNode[]): Extent {
   ];
   const size: Vec3 = [max[0] - min[0], max[1] - min[1], max[2] - min[2]];
   return { min, max, center, size };
+}
+
+export interface ConsistencyHeadline {
+  inconsistency_energy: number;
+  spectral_gap: number | null;   // null on the live headline; populated only by the full report
+}
+
+export interface ClaimTension { claim_id: string; tension: number; }
+export interface Obstruction {
+  claim_ids: string[];
+  edges: [string, string][];
+  magnitude: number;
+}
+export interface ConsistencyReport {
+  inconsistency_energy: number;
+  equivalence_energy: number;
+  defeat_energy: number;
+  spectral_gap: number;
+  h0_dim: number;
+  h1_obstructions: Obstruction[];
+  per_claim_tension: ClaimTension[];
+  flags: { kind: string; claim_ids: [string, string]; detail: string }[];
 }
 
 /** Load the sample export from /public. */
