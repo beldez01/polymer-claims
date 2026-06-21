@@ -164,3 +164,35 @@ def distinct_cohort_reps(licensing) -> tuple:
         reps.append(s)
     reps.sort(key=lambda s: s.materialization.dimnames_hash)
     return tuple(reps)
+
+
+def _fdr_test_for(ledger, claim_id: str):
+    """First non-retracted FDR test for this claim id, or None."""
+    for t in ledger.tests:
+        if t.claim_id == claim_id and not t.retracted:
+            return t
+    return None
+
+
+def _external_parameters(claim, licensing, ledger) -> ExternalParameters:
+    test = _fdr_test_for(ledger, claim.id)
+    return ExternalParameters(
+        claim_id=claim.id,
+        pattern_id=claim.pattern.id,
+        license_route=licensing.route.value,
+        rival_set_closure=licensing.rival_set_closure.value,
+        target_fdr=ledger.target_fdr,
+        fdr_test_index=test.index if test is not None else None,
+        fdr_alpha_allocated=test.alpha_allocated if test is not None else None,
+        fdr_e_value=test.e_value if test is not None else None,
+    )
+
+
+def _internal_parameters(licensing, *, independence_witnessed: bool) -> InternalParameters:
+    sp = licensing.severity_provenance
+    return InternalParameters(
+        independence_tier=licensing.independence_tier.value,
+        independence_witnessed=independence_witnessed,
+        severity_provenance=sp.value if sp is not None else None,
+        shared_cause_overlap=licensing.shared_cause_overlap,
+    )
