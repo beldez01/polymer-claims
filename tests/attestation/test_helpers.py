@@ -12,7 +12,9 @@ from polymer_claims.attestation import (
     _internal_parameters,
     _subject,
     distinct_cohort_reps,
+    _resolved_dependencies,
 )
+from polymer_claims.contracts import AccessMethod, Checksum, SEContractRef
 
 from tests.attestation._fixtures import licensed_claim, licensing, mc, sat
 
@@ -101,3 +103,59 @@ def test_internal_parameters_reflects_tier_and_witness():
     assert ip.independence_witnessed is True
     assert ip.severity_provenance is None
     assert ip.shared_cause_overlap is None
+
+
+def _ref(dimnames_hash: str, uid: str) -> SEContractRef:
+    return SEContractRef(
+        contract_uid=uid,
+        dimnames_hash=dimnames_hash,
+        assay="meth",
+        genome_assembly="GRCh38",
+        self_uri=f"drs://local/{uid}",
+        size=10,
+        checksums=(Checksum(checksum="f" * 64),),
+        access_methods=(AccessMethod(type="file", access_url="/tmp/x"),),
+    )
+
+
+def test_resolved_dependencies_resolved_dataset_plus_apparatus():
+    lic = licensing(
+        sat(mc(dimnames_hash="sha256:" + "a" * 64, profile_hash="sha256:" + "b" * 64, semantic_run_id="r1"))
+    )
+    idx = {"sha256:" + "a" * 64: _ref("sha256:" + "a" * 64, "ds1")}
+    deps, drs, unresolved = _resolved_dependencies(lic, idx)
+    roles = {d.annotations.role for d in deps}
+    assert roles == {"dataset", "apparatus"}
+    dataset = next(d for d in deps if d.annotations.role == "dataset")
+    assert dataset.uri == "drs://local/ds1"
+    assert dataset.digest.sha256 == "f" * 64  # DRS fixture checksum
+    assert dataset.annotations.dimnames_hash == "a" * 64
+    apparatus = next(d for d in deps if d.annotations.role == "apparatus")
+    assert apparatus.digest.sha256 == "b" * 64
+    assert apparatus.annotations.semantic_run_ids == ("r1",)
+    assert len(drs) == 1 and drs[0].id == "ds1"
+    assert unresolved == ()
+
+
+def test_resolved_dependencies_unresolved_dataset_falls_back():
+    h = "sha256:" + "c" * 64
+    lic = licensing(sat(mc(dimnames_hash=h)))
+    deps, drs, unresolved = _resolved_dependencies(lic, {})  # empty index
+    dataset = next(d for d in deps if d.annotations.role == "dataset")
+    assert dataset.uri == "drs://local/dimnames/" + "c" * 64
+    assert dataset.digest.sha256 == "c" * 64
+    assert drs == ()
+    assert unresolved == (h,)
+
+
+def test_resolved_dependencies_shared_profile_collects_run_ids():
+    p = "sha256:" + "b" * 64
+    lic = licensing(
+        sat(mc(dimnames_hash="sha256:" + "a" * 64, profile_hash=p, semantic_run_id="r2")),
+        sat(mc(dimnames_hash="sha256:" + "d" * 64, profile_hash=p, semantic_run_id="r1")),
+        independence_tier=IndependenceTier.REPLICATED,
+    )
+    deps, _drs, _u = _resolved_dependencies(lic, {})
+    apparatus = [d for d in deps if d.annotations.role == "apparatus"]
+    assert len(apparatus) == 1  # one per distinct profile hash
+    assert apparatus[0].annotations.semantic_run_ids == ("r1", "r2")  # sorted, none lost

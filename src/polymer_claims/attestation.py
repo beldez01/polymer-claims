@@ -196,3 +196,76 @@ def _internal_parameters(licensing, *, independence_witnessed: bool) -> Internal
         severity_provenance=sp.value if sp is not None else None,
         shared_cause_overlap=licensing.shared_cause_overlap,
     )
+
+
+def _drs_object(ref) -> DrsObject:
+    return DrsObject(
+        id=ref.contract_uid,
+        name=ref.contract_uid,
+        self_uri=ref.self_uri,
+        size=ref.size,
+        checksums=tuple(DrsChecksum(type=c.type, checksum=c.checksum) for c in ref.checksums),
+        access_methods=tuple(
+            DrsAccessMethod(type=a.type, access_url=DrsAccessURL(url=a.access_url))
+            for a in ref.access_methods
+        ),
+    )
+
+
+def _resolved_dependencies(licensing, contract_index):
+    """Return (deps, drs_objects, unresolved_dimnames_hashes) for one claim's licensing.
+
+    One dataset dep per distinct dimnames_hash (cohort representatives), one apparatus dep per
+    distinct profile_hash (carrying the sorted tuple of that profile's semantic_run_ids)."""
+    reps = distinct_cohort_reps(licensing)
+    deps: list = []
+    drs: dict = {}
+    unresolved: list[str] = []
+
+    # dataset deps
+    for s in reps:
+        h = s.materialization.dimnames_hash
+        ref = contract_index.get(h)
+        if ref is not None:
+            deps.append(
+                ResourceDescriptor(
+                    name=f"se-contract:{ref.contract_uid}",
+                    uri=ref.self_uri,
+                    digest=DigestSet(sha256=_bare_hex(ref.checksums[0].checksum)),
+                    annotations=Annotations(role="dataset", dimnames_hash=_bare_hex(h)),
+                )
+            )
+            drs[ref.contract_uid] = _drs_object(ref)
+        else:
+            deps.append(
+                ResourceDescriptor(
+                    name=f"se-contract:dimnames:{_bare_hex(h)}",
+                    uri=f"drs://local/dimnames/{_bare_hex(h)}",
+                    digest=_digest_or_none(h),
+                    annotations=Annotations(role="dataset", dimnames_hash=_bare_hex(h)),
+                )
+            )
+            unresolved.append(h)
+
+    # apparatus deps: one per distinct profile_hash, with the sorted tuple of its run ids
+    run_ids_by_profile: dict[str, set[str]] = {}
+    for s in reps:
+        ph = s.materialization.profile_hash
+        if ph is None:
+            continue
+        bucket = run_ids_by_profile.setdefault(ph, set())
+        if s.materialization.semantic_run_id is not None:
+            bucket.add(s.materialization.semantic_run_id)
+    for ph in sorted(run_ids_by_profile):
+        rids = tuple(sorted(run_ids_by_profile[ph]))
+        deps.append(
+            ResourceDescriptor(
+                name="analysis-profile",
+                digest=_digest_or_none(ph),
+                annotations=Annotations(
+                    role="apparatus", semantic_run_ids=rids if rids else None
+                ),
+            )
+        )
+
+    return tuple(deps), tuple(drs[k] for k in sorted(drs)), tuple(unresolved)
