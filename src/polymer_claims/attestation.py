@@ -10,6 +10,7 @@ import re
 
 from pydantic import Field
 
+from polymer_grammar import Status
 from polymer_grammar.base import _Model
 from polymer_claims._hashing import canonical_sha256
 from polymer_protocol import independent_credential_pair
@@ -299,3 +300,61 @@ def _builder(licensing, registry):
         for s in licensing.satisfactions
     )
     return Builder(id=_BUILD_TYPE, builder_dependencies=deps), witnessed
+
+
+def _dep_sort_key(d) -> tuple:
+    role = d.annotations.role if d.annotations and d.annotations.role else ""
+    sha = d.digest.sha256 if d.digest else ""
+    rids = d.annotations.semantic_run_ids if d.annotations else None
+    first_rid = rids[0] if rids else ""
+    return (role, d.name, d.uri or "", sha, first_rid)
+
+
+def _statement(claim, ledger, contract_index, registry):
+    lic = claim.licensing
+    deps, drs_objects, unresolved = _resolved_dependencies(lic, contract_index)
+    deps = tuple(sorted(deps, key=_dep_sort_key))
+    builder, witnessed = _builder(lic, registry)
+    reps = distinct_cohort_reps(lic)
+    invocation_id = reps[0].materialization.semantic_run_id if reps else None
+    metadata = RunMetadata(invocation_id=invocation_id) if invocation_id is not None else None
+    statement = Statement(
+        subject=(_subject(claim),),
+        predicate=SlsaPredicate(
+            build_definition=BuildDefinition(
+                build_type=_BUILD_TYPE,
+                external_parameters=_external_parameters(claim, lic, ledger),
+                internal_parameters=_internal_parameters(lic, independence_witnessed=witnessed),
+                resolved_dependencies=deps,
+            ),
+            run_details=RunDetails(builder=builder, metadata=metadata),
+        ),
+    )
+    return statement, drs_objects, unresolved
+
+
+def build_attestation_bundle(corpus, *, contract_index, registry=None) -> AttestationBundle:
+    """Deterministic in-toto/SLSA attestation bundle + DRS object docs for a corpus's LICENSED claims.
+
+    Pure: `contract_index` (dimnames_hash -> SEContractRef) and `registry` (AdapterRegistry | None)
+    are injected; no IO/clock/random."""
+    statements = []
+    drs: dict = {}
+    unresolved: set[str] = set()
+    licensed = sorted(
+        (c for c in corpus.claims if c.status == Status.LICENSED and c.licensing is not None),
+        key=lambda c: c.id,
+    )
+    for claim in licensed:
+        statement, drs_objects, claim_unresolved = _statement(
+            claim, corpus.fdr_ledger, contract_index, registry
+        )
+        statements.append(statement)
+        for obj in drs_objects:
+            drs[obj.id] = obj
+        unresolved.update(claim_unresolved)
+    return AttestationBundle(
+        attestations=tuple(statements),
+        drs_objects=tuple(drs[k] for k in sorted(drs)),
+        unresolved_datasets=tuple(sorted(unresolved)),
+    )
