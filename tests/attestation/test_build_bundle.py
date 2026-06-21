@@ -77,3 +77,14 @@ def test_golden_statement_shape_for_resolved_corpus():
     assert data["drsObjects"][0]["self_uri"] == "drs://local/ds1"
     assert data["drsObjects"][0]["access_methods"][0]["access_url"]["url"] == "/tmp/x"
     assert data["unresolvedDatasets"] == []
+
+
+def test_public_api_exports():
+    import polymer_claims as pc
+
+    assert hasattr(pc, "build_attestation_bundle")
+    assert hasattr(pc, "resolve_contract_index")
+    assert hasattr(pc, "AttestationBundle")
+    assert "build_attestation_bundle" in pc.__all__
+    assert "AttestationBundle" in pc.__all__
+    assert "resolve_contract_index" in pc.__all__
