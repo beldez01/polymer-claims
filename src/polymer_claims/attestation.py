@@ -6,13 +6,17 @@ is the only IO. Design: docs/superpowers/specs/2026-06-21-standards-skin-attesta
 """
 from __future__ import annotations
 
+import json
 import re
+from collections.abc import Iterable
 
 from pydantic import Field
 
 from polymer_grammar import Status
 from polymer_grammar.base import _Model
 from polymer_claims._hashing import canonical_sha256
+from polymer_claims.contracts import _DIR as _CONTRACTS_DIR
+from polymer_claims.contracts import load_contract
 from polymer_protocol import independent_credential_pair
 
 _STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
@@ -358,3 +362,25 @@ def build_attestation_bundle(corpus, *, contract_index, registry=None) -> Attest
         drs_objects=tuple(drs[k] for k in sorted(drs)),
         unresolved_datasets=tuple(sorted(unresolved)),
     )
+
+
+def resolve_contract_index(corpus, *, extra: Iterable = ()) -> dict:
+    """Reverse-map available SE-Contracts by dimnames_hash. The only IO in this module.
+
+    Enumerates bundled SE-Contract manifests, loads each best-effort (failures skipped, never
+    crash — mirrors load_contract's degradation contract), plus any `extra` refs injected without
+    IO. Datasets that don't resolve here degrade gracefully in build_attestation_bundle."""
+    index: dict = {}
+    for manifest_path in sorted(_CONTRACTS_DIR.glob("*.json")):
+        try:
+            manifest = json.loads(manifest_path.read_bytes())
+            uid = manifest.get("uid")
+            if not uid or "assays" not in manifest:
+                continue
+            ref = load_contract(uid)
+        except Exception:
+            continue
+        index[ref.dimnames_hash] = ref
+    for ref in extra:
+        index[ref.dimnames_hash] = ref
+    return index
