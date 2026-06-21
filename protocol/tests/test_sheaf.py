@@ -5,7 +5,7 @@ from polymer_grammar import FDRLedger, Status
 from polymer_protocol.corpus import Corpus
 from polymer_protocol.sheaf import SheafVertex, extract_sheaf
 
-from .conftest import make_quantity_claim
+from .conftest import _make_quantity_claim as make_quantity_claim
 
 
 def _corpus(*claims):
@@ -29,8 +29,6 @@ def test_no_quantity_leaf_claims_excluded():
     cat_lic = make_claim("c1", status=Status.LICENSED)
     struct = extract_sheaf(_corpus(cat_lic))
     assert struct.vertices == ()
-    assert struct.edges == ()
-    assert struct.flags == ()
 
 
 def test_custom_status_filter():
@@ -55,3 +53,21 @@ def test_empty_corpus():
     assert struct.vertices == ()
     assert struct.edges == ()
     assert struct.flags == ()
+
+
+def test_equivalence_edge_weight_and_commensurability(make_quantity_claim, make_equiv, fdr):
+    a = make_quantity_claim("a", value=1.0, status=Status.LICENSED, dim=(("mass", 1),), unit=None)
+    b = make_quantity_claim("b", value=1.2, status=Status.LICENSED, dim=(("mass", 1),), unit=None)
+    c = make_quantity_claim("c", value=3.0, status=Status.LICENSED, dim=(("time", 1),), unit=None)  # other dim
+    from polymer_protocol.corpus import Corpus
+    corpus = Corpus(
+        claims=(a, b, c),
+        equivalences=(make_equiv("e1", "a", "b", severity=0.8), make_equiv("e2", "a", "c", severity=0.9)),
+        fdr_ledger=fdr,
+    )
+    struct = extract_sheaf(corpus)
+    eq_edges = [e for e in struct.edges if e.kind == "equivalence"]
+    assert len(eq_edges) == 1
+    e = eq_edges[0]
+    assert (e.u, e.v, e.weight, e.sign) == ("a", "b", 0.8, 1)            # canonical id order, severity weight
+    assert any(f.kind == "dimension_mismatch" and set(f.claim_ids) == {"a", "c"} for f in struct.flags)

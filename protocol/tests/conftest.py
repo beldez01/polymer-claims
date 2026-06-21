@@ -24,6 +24,8 @@ from polymer_grammar import (
     StrengthVector,
 )
 
+from polymer_grammar import EquivalenceClaim
+
 from polymer_protocol.corpus import Corpus
 
 _PATTERN = PatternRef(id="adjusted_effect", version="v1")
@@ -74,7 +76,7 @@ def make_plan(
     )
 
 
-def make_quantity_claim(
+def _make_quantity_claim(
     cid: str,
     value: float,
     status: Status = Status.LICENSED,
@@ -118,6 +120,7 @@ def make_quantity_claim(
     )
 
 
+
 @pytest.fixture
 def ctx() -> MaterializationContext:
     return MaterializationContext(id="M1", api_version="v1", data_version="d1")
@@ -137,3 +140,28 @@ def empty_ledger() -> FDRLedger:
 @pytest.fixture
 def empty_corpus(empty_ledger) -> Corpus:
     return Corpus(fdr_ledger=empty_ledger)
+
+
+@pytest.fixture
+def make_quantity_claim():
+    return _make_quantity_claim
+
+
+@pytest.fixture
+def make_equiv():
+    def _make_equiv(
+        eid: str,
+        left: str,
+        right: str,
+        *,
+        severity: float,
+        status: Status = Status.LICENSED,
+    ) -> EquivalenceClaim:
+        return EquivalenceClaim(id=eid, left=left, right=right, severity=severity, status=status)
+
+    return _make_equiv
+
+
+@pytest.fixture
+def fdr() -> FDRLedger:
+    return FDRLedger(target_fdr=0.05)

@@ -43,10 +43,27 @@ class SheafStructure(_Model):
 
 
 def _quantity_leaf(claim):
+    # Take the FIRST QuantityLeaf encountered (deterministic, since leaves is an ordered tuple).
+    # The grammar allows multiple quantity leaves per claim, but for the scalar stalk we
+    # deliberately pick the first one. Multi-quantity stalks are a planned future enrichment.
     for lf in claim.leaves:
         if lf.kind == "quantity":
             return lf
     return None
+
+
+def _commensurable(a: SheafVertex, b: SheafVertex) -> bool | None:
+    """Return True if a and b can form an equivalence edge, False for unit mismatch, None for dimension mismatch.
+
+    None  → either dimension_sig is None, or they differ (dimension_mismatch flag, edge skipped).
+    False → same dimension, different unit (unit_mismatch flag, edge skipped).
+    True  → same dimension AND same unit (edge built).
+    """
+    if a.dimension_sig is None or b.dimension_sig is None or a.dimension_sig != b.dimension_sig:
+        return None
+    if a.unit != b.unit:
+        return False
+    return True
 
 
 def extract_sheaf(
@@ -57,7 +74,8 @@ def extract_sheaf(
     """Extract a SheafStructure from a Corpus.
 
     Only Quantity-leaf claims whose status is in ``status_filter`` become vertices.
-    Edges and flags are empty after Task 1 (filled by Tasks 2–3).
+    Equivalence edges (Task 2) and defeat edges (Task 3) are built here; the numpy
+    spectrum (Task 4) lives umbrella-side.
     """
     vertices: list[SheafVertex] = []
     for c in corpus.claims:
@@ -75,4 +93,33 @@ def extract_sheaf(
                 unit=lf.unit,
             )
         )
-    return SheafStructure(vertices=tuple(vertices), edges=(), flags=())
+
+    vmap = {v.claim_id: v for v in vertices}
+    edges: list[SheafEdge] = []
+    flags: list[DataQualityFlag] = []
+
+    for eq in corpus.equivalences:
+        if eq.status not in status_filter:
+            continue
+        if eq.left not in vmap or eq.right not in vmap:
+            continue
+        a, b = vmap[eq.left], vmap[eq.right]
+        comm = _commensurable(a, b)
+        if comm is None:
+            flags.append(DataQualityFlag(
+                kind="dimension_mismatch",
+                claim_ids=(eq.left, eq.right),
+                detail=f"{a.dimension_sig} vs {b.dimension_sig}",
+            ))
+            continue
+        if comm is False:
+            flags.append(DataQualityFlag(
+                kind="unit_mismatch",
+                claim_ids=(eq.left, eq.right),
+                detail=f"{a.unit!r} vs {b.unit!r}",
+            ))
+            continue
+        u, v = sorted((eq.left, eq.right))
+        edges.append(SheafEdge(kind="equivalence", u=u, v=v, weight=float(eq.severity), sign=1))
+
+    return SheafStructure(vertices=tuple(vertices), edges=tuple(edges), flags=tuple(flags))
