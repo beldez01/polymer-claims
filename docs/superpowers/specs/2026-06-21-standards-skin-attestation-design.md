@@ -160,8 +160,21 @@ predicate:
   `exclude_none` otherwise). Surfacing these as scalars lets a downstream policy verifier check the FDR
   budget without re-parsing the whole licensed-claim artifact. (Exact ledger field names are bound in the
   plan; the builder reads the ledger entry already available in the in-memory `Corpus`.)
-- If **no** independent pair is recorded (legacy / empty `credential_ids`): `builderDependencies: ()`
-  and an annotation `independenceWitnessed: false`. We never fabricate witnesses.
+- **builderDependencies population (registry-optional).** The witness *identities* are recorded directly
+  on `satisfaction.credential_ids`, but `implementation_hash` lives only in an `AdapterRegistry` (there
+  is **no** module-level default registry in the umbrella). So `build_attestation_bundle` takes
+  `registry: AdapterRegistry | None = None` and:
+    - emits one `ResourceDescriptor` per identity in `satisfaction.credential_ids` (deterministic;
+      `role: "adapter"`), with a `digest` **only** when a registry is supplied and resolves that
+      identity to a valid `sha256:` `implementation_hash` (else no digest, per digest-normalization);
+    - sets `independenceWitnessed: true` **iff** a registry is supplied **and**
+      `independent_credential_pair(registry, satisfaction.credential_ids)` returns a verified pair;
+      otherwise `independenceWitnessed: false`. We never fabricate a witness or a hash.
+    - **empty `credential_ids`** (legacy) → `builderDependencies: ()` + `independenceWitnessed: false`.
+  The **slice-1 CLI** runs on a cold from-disk corpus with `registry=None` → witness identities are
+  emitted by name, digests omitted, `independenceWitnessed: false`. Registry-backed digests +
+  verified-independence are exercised by tests (injected `AdapterRegistry` fixture) and by programmatic
+  in-process callers (the live node, which holds the registry) — wiring that into the CLI is a follow-up.
 - **Apparatus `semanticRunIds`** is a **sorted tuple** of every run id among the representatives sharing
   that `profileHash` (deduped → sorted) — so no run id is lost when two cohorts share an analysis profile.
 - **Digest normalization.** Any content-address that is a valid `sha256:<hex>` is stripped to bare hex in
