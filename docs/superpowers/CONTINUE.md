@@ -131,9 +131,7 @@ Region-Δβ remains **UNEARNED** (FDR-withheld, not refuted). **Recommended next
 moves (re-ordered):** (a) **a 2nd real cohort → §2E REPLICATED** gold tier — the product e₁·e₂ needs each
 cohort ≈ √32.9 = 5.74 and the single-cohort e=5.67 sits right at that bar, so a comparable 2nd cohort
 **would license region-Δβ at REPLICATED** (now the highest-leverage move); (b) **a real HM450 probe
-manifest** so sex-chrom QC bites + a real platform `profile_hash`; (c) **Phase B** — the
-`MethylGenerationAdapter` (autonomous hypothesizer) on top of the now-real substrate
-(`docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`). [IDH-source swap (a fuller IDH cohort) —
+manifest** so sex-chrom QC bites + a real platform `profile_hash`; (c) **north-star arc-2 standards skin** (in-toto/SLSA/DRS attestation — the safe first slice of arc 2) or **Phase B** (autonomous `MethylGenerationAdapter`, `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`) — both non-blocked; with the sheaf gauge opening arc-3 and arc-1 epistemic core substantially done, arc-2 is now the more natural next candidate. [IDH-source swap (a fuller IDH cohort) —
 DONE 2026-06-18.]
 
 **▶ §2E REPLICATED (move a) — STAGED, BLOCKED on data access (key finding 2026-06-18).** Attempted on
@@ -150,8 +148,7 @@ samples — no WT dilution; `data/sal_aml/run_replicated.py` gates the product v
 `data/sal_aml/idh_status.tsv` (SAL PMID 28366934 supplement / dbGaP phs001657) → run the two scripts. **No
 fabrication of genotypes — the run waits on real labels.** Non-data-blocked alternatives if REPLICATED
 stays gated (both pure-code, no external data): **Phase D slice 1 (pre-registration ledger) — DONE
-2026-06-19**; remaining non-blocked work is **Phase D slice 2** (close the §5a literature-shared-cause
-leak + incubation/ranking) or **North Star §E common-cause-DAG independence**.
+2026-06-19**; Phase D slices 1+2 and §E common-cause independence all shipped 2026-06-19; current non-blocked candidates are the north-star **arc-2 standards skin** or **Phase B** (autonomous hypothesizer).
 
 **▶ PHASE B FIRST SLICE SHIPPED — methylation hypothesizer.** `MethylGenerationAdapter` now mirrors
 `MeanDiffGenerationAdapter`: a constrained LLM DSL emits executable `region_delta_beta` / `n_dmps`
@@ -212,8 +209,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ Tier A+B (`c662f1c`): bounded frame retention · tick-serialization lock · bounded SSE queues ·
   non-loopback bind guard · machine-clean JSON · `ARCHITECTURE_CURRENT.md` + `GLOSSARY.md` · v1.2 frozen
   banners
-- ✅ Adapter trust registry (`67f98e3`) — the independence gate (registry core done; byte-hash +
-  credential-provenance hardening still open, see caveat)
+- ✅ Adapter trust registry (`67f98e3`) — the independence gate (registry core done); **byte-hash hardening DONE (`d3be2bb`, 2026-06-20)** — `implementation_hash` byte-derived from adapter bytecode, `Satisfaction` records the credential-witness pair. Residual: registry owner/trust metadata remains operator-authored (roadmap 1c).
 - ✅ Tier-C (`2b7ccb5`): viewer `CONTRACT_VERSION` + 6-axis strength validator · `run_cycle` output
   revalidation · packaging metadata
 
@@ -284,6 +280,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   `docs/superpowers/{specs,plans}/2026-06-21-sheaf-consistency-gauge*`. **Deferred:** stalk enrichments
   (standardized-effect, ℝ²(value,uncertainty)), unit-conversion registry (ρ≠1), rich viewer obstruction viz,
   instrument→gate.
+- ✅ **Adapter-independence hardening** (`d3be2bb`, 2026-06-20) — byte-derived `implementation_hash` from adapter bytecode; licensed `Satisfaction` records the credential-witness pair that justified the air gap; §E `shared_cause_factors` activated on bundled SE-Contracts.
 
 ## Invariants / working agreements (don't relearn)
 
@@ -307,7 +304,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 
 ## Reference pointers
 
-- **Forward roadmap:** `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md` · historical decision menu (archived): `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`
+- **Forward roadmap:** `docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md` (three-arc linchpin; authoritative) · `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md` (autonomous-loop; partly leapfrogged — sheaf gauge opened arc-3) · historical decision menu (archived): `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`
 - **Phase-2 north star:** `docs/superpowers/2026-06-12-phase-2-north-star.md`
 - **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`
 - **Architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`

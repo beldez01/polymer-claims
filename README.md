@@ -10,8 +10,8 @@ toward truth, a local node that runs it, and a 3D viewer that renders the live u
 | Subdir | What it is | Status / Distribution |
 |---|---|---|
 | `grammar/` | **The v1.3 grammar** (`polymer_grammar`) — the active claim IR. A five-layer grammar derived from first principles (see Direction below). | **Active** — all 8 layer-phases merged |
-| `protocol/` | **The v1.3 protocol** (`polymer_protocol`) — the runtime over the grammar: the `run_cycle` flywheel + 3 daemons + the `next_action` scheduler + topology/timeline exports. | **Active** — all 5 sub-projects + daemons + scheduler merged |
-| `src/polymer_claims/` | **The umbrella distribution** (`polymer-claims`) — the CLI over the complete runtime + the live local node (`serve`, behind the optional `[serve]` extra). | **Active** — `pip install polymer-claims` → local node works |
+| `protocol/` | **The v1.3 protocol** (`polymer_protocol`) — the runtime over the grammar: the `run_cycle` flywheel + 3 daemons + the `next_action` scheduler + topology/timeline exports. | **Active** — all 5 sub-projects + daemons + scheduler merged; sheaf consistency gauge + adapter-independence hardening merged |
+| `src/polymer_claims/` | **The umbrella distribution** (`polymer-claims`) — the CLI over the complete runtime + the live local node (`serve`, behind the optional `[serve]` extra). | **Active** — `pip install polymer-claims` → local node works. New CLI: `export-consistency` (sheaf gauge, `[embed]`), `ingest tcga-laml` + `serve --tcga-laml` (real TCGA-LAML n-DMP) |
 | `viewer/` | **The claims-universe 3D viewer** (Next 16 + React Three Fiber). Plays a sample timeline or streams a live node. Live layout is the signed-Laplacian spectral eigenmap, Procrustes-aligned (`serve --layout spectral`, default; `--layout force` for the legacy force-directed). | **Active** — `tsc`+`build` clean |
 | `docs/superpowers/` | The canonical spec (`polymer-claims-canonical-spec.md`), `CONTINUE.md` resume primer, and `archive/` of shipped per-feature design docs (specs + plans). | Active |
 
@@ -252,8 +252,8 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 
 | Subdir | Package | Status |
 |---|---|---|
-| `grammar/` | `polymer_grammar` | ✅ Complete — all 8 layer-phases + the air-gapped evaluator — 351 tests |
-| `protocol/` | `polymer_protocol` | ✅ Complete — 5 sub-projects (assessment spine · oracle dossier · SELECT · GENERATE) + 3 daemons (DRIFT / ORACLE-VALIDATION / RED-TEAM) + the `next_action` scheduler — 363 tests |
+| `grammar/` | `polymer_grammar` | ✅ Complete — all 8 layer-phases + the air-gapped evaluator — 396 tests |
+| `protocol/` | `polymer_protocol` | ✅ Complete — 5 sub-projects (assessment spine · oracle dossier · SELECT · GENERATE) + 3 daemons (DRIFT / ORACLE-VALIDATION / RED-TEAM) + the `next_action` scheduler — 404 tests |
 
 ---
 

@@ -8,6 +8,8 @@ in what already exists, so it can be reviewed/cross-checked before we spec the f
 > This is an **overall plan**, not an implementation plan. No code yet. The terminal step is to pick
 > one phase and run it through the normal brainstorm → spec → plan → subagent-driven rhythm.
 
+> **Status as of 2026-06-21 — partially superseded.** Phase A (real TCGA-LAML n-DMP at REPRODUCED) shipped. The integrity layer described in Phase D (pre-registration ledger, shared-cause gate, §E common-cause REPLICATED machinery) also shipped, ahead of B/C. Phase B/C (methylation hypothesizer, asset catalog) had first slices, but the project pivoted to the north-star living-universe arc (`docs/superpowers/2026-06-12-phase-2-north-star.md`), anchored by the linchpin (`docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md`). The sheaf consistency gauge (arc 3, Reproducibility Observatory) shipped 2026-06-21. Real-2nd-cohort REPLICATED (Phase C) remains data-blocked — no open HM450 AML cohort with machine-readable IDH. This doc is preserved as a design-rationale anchor; §5 in particular remains the live epistemic contract for agent-chosen hypotheses.
+
 ---
 
 ## 0. The thesis

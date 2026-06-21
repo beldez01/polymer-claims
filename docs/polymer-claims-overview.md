@@ -176,7 +176,7 @@ standards-native, and alive**, in three arcs:
    hierarchical), the local-compute **agent protocol** ("deploy an agent to examine a region,
    re-execute, post verification/attack events"), a credence layer, and — the long horizon — a
    **sheaf-cohomology consistency gauge** that turns "grows toward truth" into a number that falls as
-   independent recomputations bring claims into harmony.
+   independent recomputations bring claims into harmony. *The first piece of this is built:* a cellular sheaf over the claims graph computes Robinson inconsistency energy, `dim H⁰`, and `H¹` frustration obstructions, available via `export-consistency` and as a live headline on every `TopologyExport`. It is an instrument, not a gate.
 
 ---
 
@@ -194,6 +194,7 @@ The project's discipline is **honesty over polish** — caveats travel with ever
 - **It is local-only.** The live node's mutating routes are unauthenticated by design; real
   auth / multi-tenant / a federated "run your own node" layer is future work (a `POST /inject` hook
   is the noted seam). There is no CI — `scripts/check-all.sh` is the local gate.
+- **The sheaf gauge covers Quantity-leaf claims only.** Non-quantity claims (categorical, existence, proposition) are excluded from the cellular sheaf; unit/dimension-mismatched equivalence pairs are flagged but not connected. The energy reflects the scalar-value sub-graph, not the full topology.
 
 ---
 

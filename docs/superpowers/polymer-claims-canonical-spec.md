@@ -1,6 +1,6 @@
 # Polymer Claims — Canonical Specification
 
-> Current state of record for `main` as of 2026-06-20. This document states what the
+> Current state of record for `main` as of 2026-06-21. This document states what the
 > system is, not the phase history. Use `docs/superpowers/CONTINUE.md` for the live
 > build log and next work; use the dated specs/plans for design rationale.
 
@@ -34,7 +34,7 @@ claim IR     pure corpus    local mutable host             Next/R3F UI
 - Models subclass frozen `_Model` with `extra="forbid"`; collection fields are tuples.
 - Cross-cutting fields are additive and inert by default (`None` or `()`), preserving
   byte-identical behavior when a feature is off.
-- Numpy is behind optional umbrella extras (`[embed]`); base import stays light.
+- Numpy is behind optional umbrella extras (`[embed]`); base import stays light. The sheaf structure extractor (`protocol/sheaf.py`) is pure and numpy-free; only the spectrum computation (`polymer_claims/sheaf_spectrum.py`) requires `[embed]`.
 
 ## 3. Claim Grammar
 
@@ -95,6 +95,10 @@ LICENSED iff adapter-agreement and SATISFIED and grounded and live e-LOND discov
 - Pre-registration charges and locks the e-LOND slot before data is seen. Verify rejects
   post-hoc plan changes with `HYPOTHESIS_ALTERED`.
 
+## 5a. Sheaf consistency gauge
+
+The corpus's defeat and equivalence edges form a **cellular sheaf over the claims graph**: a scalar-ℝ stalk on each Quantity-leaf claim, equivalence edges encoding agreement (sign `+1`), and defeat edges encoding antagonism (sign `−1`, generalising the signed-Laplacian embedding). `protocol/sheaf.py` extracts a pure, numpy-free `SheafStructure`; umbrella-side `polymer_claims/sheaf_spectrum.py` (behind `[embed]`) computes the **Robinson inconsistency energy** (normalized squared edge tension — a distance-to-consensus that falls as recomputation harmonizes claims), `dim H⁰` (consistent components), and signed-BFS-localised `H¹` frustration obstructions (contradiction cycles no pairwise check sees). This is an **instrument, not a gate** — no claim status changes. A cheap `ConsistencyHeadline` (energy + spectral gap λ₂) attaches to every `TopologyExport` as `TopologyExport.consistency` when numpy is present; the full `ConsistencyReport` is available via the `export-consistency` CLI. Cross-unit equivalences are flagged as `DataQualityFlag`s rather than silently dropped. First concrete realisation of the North-Star §3 sheaf-cohomology global-consistency gauge / linchpin A3 (Reproducibility Observatory).
+
 ## 6. Independence And Shared Causes
 
 The system distinguishes reproducibility from error-independent replication.
@@ -153,7 +157,7 @@ not expose machine-readable per-sample IDH status.
 The umbrella package provides:
 
 - CLI: `version`, `validate`, `ingest tcga-laml`, `run-cycle`, `loop`,
-  `export-topology`, `export-timeline`, `serve`;
+  `export-topology`, `export-timeline`, `export-consistency`, `serve`;
 - `NodeRunner`, which owns clock, loop state, layout choice, and live corpus state;
 - FastAPI SSE server behind `[serve]`;
 - optional `[llm]` generation adapters and `[embed]` spectral layout support.
@@ -172,7 +176,7 @@ The viewer is a standalone Next/React Three Fiber app. It supports:
 - spectral live layout via signed-Laplacian eigenmap with per-frame Procrustes alignment.
 
 Viewer nodes surface `independence_tier`, `severity_provenance`, and
-`shared_cause_overlap` when present.
+`shared_cause_overlap` when present. `TopologyExport.consistency` carries a `ConsistencyHeadline` (inconsistency energy + spectral gap) when `[embed]` is installed; `None` otherwise.
 
 ## 11. Current Caveats
 
