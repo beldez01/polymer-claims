@@ -28,21 +28,29 @@ from polymer_claims.contracts import (
     SEContractRef,
     load_contract,
 )
+from polymer_claims.attestation import (
+    AttestationBundle,
+    build_attestation_bundle,
+    resolve_contract_index,
+)
 
 __all__ = [
     "AccessMethod",
     "AnalysisProfile",
+    "AttestationBundle",
     "Checksum",
     "Claim",
     "Corpus",
     "SEContractRef",
     "__version__",
+    "build_attestation_bundle",
     "content_hash",
     "load_contract",
     "load_profile",
     "next_action",
     "profile_oracle_id",
     "profile_oracle_registry",
+    "resolve_contract_index",
     "run_cycle",
     "substrate_tier",
 ]
