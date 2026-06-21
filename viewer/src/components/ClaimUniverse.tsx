@@ -14,6 +14,7 @@ import { loadTimeline } from '@/lib/timeline';
 import ReferenceFrame from '@/components/scene/ReferenceFrame';
 import Nodes from '@/components/scene/Nodes';
 import Edges from '@/components/scene/Edges';
+import Obstructions from '@/components/scene/Obstructions';
 import CameraBridge from '@/components/scene/CameraBridge';
 import TimelineDriver from '@/components/scene/TimelineDriver';
 import { useViewer } from '@/store';
@@ -39,6 +40,7 @@ function Scene({ extent, layoutId }: { extent: Extent; layoutId: string }) {
       <ReferenceFrame extent={extent} layoutId={layoutId} />
       <Edges />
       <Nodes />
+      <Obstructions />
       <CameraBridge />
       <TimelineDriver />
 

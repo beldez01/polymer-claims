@@ -1,0 +1,237 @@
+'use client';
+
+/**
+ * Obstructions — H¹ frustration-cycle overlay.
+ *
+ * Renders rose cycle-edges and node outline rings for each H¹ obstruction in
+ * the consistency report. This is a SEPARATE pass from Edges.tsx — cycle pairs
+ * are NOT topology edges. Draws only when `overlayOn === true`.
+ *
+ * Position resolution reuses the exact same interpolation path as Edges.tsx:
+ *   useInterpolatedFrame(timeline, frame) → interp.nodes → Map<id, Vec3>
+ * with an identical static-export fallback when no timeline is loaded.
+ *
+ * Safety: any pair whose endpoint id is absent from the current frame's
+ * position map is silently skipped — no NaN, no crash.
+ *
+ * Task 9 adds focusedObstruction; this component renders all obstructions
+ * uniformly (no focus-brighten here).
+ */
+
+import { useMemo, useRef } from 'react';
+import { Billboard, Line } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import type { Group } from 'three';
+import { COLOR } from '@/config/theme';
+import { useViewer } from '@/store';
+import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
+import type { InterpNode } from '@/lib/interpolate';
+import type { Vec3 } from '@/lib/topology';
+
+// ── constants ──────────────────────────────────────────────────────────────
+
+/** Rose — defeat / H¹ accent; mirrors EDGE_COLOR for the defeat family. */
+const ROSE = COLOR.accent.rose; // '#BE123C'
+
+/** Cycle-edge line width — bold to stand out from the topology edges (w=1). */
+const CYCLE_LINE_WIDTH = 2.5;
+
+/** Pulse: full period in seconds. */
+const PULSE_PERIOD = 1.8;
+
+/**
+ * Outline ring sits between the hover ring (r·1.7) and the FDR ring (r·2.25),
+ * so obstruction membership is visually distinct from both.
+ */
+const BASE_RADIUS = 0.28;
+const OBSTRUCTION_RING_FACTOR = 1.95;
+const RING_SEGMENTS = 48;
+
+// ── helpers ────────────────────────────────────────────────────────────────
+
+function ringPoints(radius: number): [number, number, number][] {
+  const pts: [number, number, number][] = [];
+  for (let i = 0; i <= RING_SEGMENTS; i++) {
+    const a = (i / RING_SEGMENTS) * Math.PI * 2;
+    pts.push([Math.cos(a) * radius, Math.sin(a) * radius, 0]);
+  }
+  return pts;
+}
+
+// ── sub-components ─────────────────────────────────────────────────────────
+
+/**
+ * Single rose ring rendered as a Billboard around a node, indicating it is a
+ * member of at least one H¹ obstruction cycle.
+ */
+function ObstructionRing({ position, ringR }: { position: Vec3; ringR: number }) {
+  const groupRef = useRef<Group>(null);
+  const ring = useMemo(() => ringPoints(ringR), [ringR]);
+
+  // Subtle breathing on the ring: opacity [0.5, 0.85] at half the line frequency.
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    const raw = Math.sin((t / (PULSE_PERIOD * 1.3)) * Math.PI * 2);
+    // Store on userData to avoid triggering react re-renders.
+    groupRef.current.userData.opacity = 0.5 + (raw * 0.5 + 0.5) * 0.35;
+  });
+
+  return (
+    <group position={position} ref={groupRef}>
+      <Billboard>
+        <Line
+          points={ring}
+          color={ROSE}
+          lineWidth={1.5}
+          transparent
+          opacity={0.65}
+          dashed
+          dashSize={0.07}
+          gapSize={0.05}
+        />
+      </Billboard>
+    </group>
+  );
+}
+
+/**
+ * Single animated obstruction edge between two 3D positions.
+ * Opacity pulses sinusoidally; phase offset staggers multiple obstructions.
+ */
+function ObstructionLine({
+  a,
+  b,
+  phaseOffset,
+}: {
+  a: Vec3;
+  b: Vec3;
+  phaseOffset: number;
+}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const lineRef = useRef<any>(null);
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    // sin oscillation: range [0.40, 0.95] — never fully invisible, never fully solid.
+    const raw = Math.sin(((t + phaseOffset) / PULSE_PERIOD) * Math.PI * 2);
+    const opacity = 0.4 + (raw * 0.5 + 0.5) * 0.55;
+    if (lineRef.current?.material) {
+      lineRef.current.material.opacity = opacity;
+    }
+  });
+
+  return (
+    <Line
+      ref={lineRef}
+      points={[a, b]}
+      color={ROSE}
+      lineWidth={CYCLE_LINE_WIDTH}
+      transparent
+      opacity={0.72}
+    />
+  );
+}
+
+// ── main component ─────────────────────────────────────────────────────────
+
+export default function Obstructions() {
+  const overlayOn = useViewer((s) => s.overlayOn);
+  const obstructions = useViewer((s) => s.obstructions);
+  const data = useViewer((s) => s.data);
+  const timeline = useViewer((s) => s.timeline);
+  const frame = useViewer((s) => s.frame);
+
+  const interp = useInterpolatedFrame(timeline, frame);
+
+  // Resolve node positions — identical pattern to Edges.tsx / Nodes.tsx.
+  // ALL hooks must be called unconditionally (before any early return).
+  const positions = useMemo(() => {
+    const map = new Map<string, Vec3>();
+    let nodes: InterpNode[] = [];
+
+    if (interp) {
+      nodes = interp.nodes;
+    } else if (data) {
+      nodes = data.nodes.map((n) => ({
+        id: n.id,
+        status: n.status,
+        prevStatus: n.status,
+        statusT: 1,
+        pattern_id: n.pattern_id,
+        subject_kind: n.subject_kind,
+        strength: n.strength,
+        is_representation_revision: n.is_representation_revision,
+        fdr_tested: n.fdr_tested ?? false,
+        fdr_discovery: n.fdr_discovery ?? false,
+        fdr_retracted: n.fdr_retracted ?? false,
+        fdr_index: n.fdr_index ?? null,
+        fdr_e_value: n.fdr_e_value ?? null,
+        fdr_alpha_allocated: n.fdr_alpha_allocated ?? null,
+        independence_tier: n.independence_tier ?? null,
+        severity_provenance: n.severity_provenance ?? null,
+        shared_cause_overlap: n.shared_cause_overlap ?? null,
+        position: n.position,
+        scale: 1,
+        opacity: 1,
+      }));
+    }
+
+    for (const n of nodes) map.set(n.id, n.position);
+    return map;
+  }, [interp, data]);
+
+  // Collect all unique member node ids — for placing rings.
+  const memberIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const ob of obstructions) {
+      for (const id of ob.claim_ids) ids.add(id);
+    }
+    return ids;
+  }, [obstructions]);
+
+  // Gate: render nothing when overlay is off or there are no obstructions.
+  // Early return AFTER all hooks have been called.
+  if (!overlayOn || obstructions.length === 0) return null;
+
+  const ringR = BASE_RADIUS * OBSTRUCTION_RING_FACTOR;
+
+  // Phase-stagger obstructions so they don't all pulse in lockstep.
+  const phaseStep = PULSE_PERIOD / Math.max(obstructions.length, 1);
+
+  return (
+    <group>
+      {/* ── Cycle edges ─────────────────────────────────────────────────── */}
+      {obstructions.flatMap((ob, oi) =>
+        ob.edges.map(([srcId, tgtId], ei) => {
+          const a = positions.get(srcId);
+          const b = positions.get(tgtId);
+          // Skip any pair whose endpoint is not in the current frame — no NaN.
+          if (!a || !b) return null;
+          return (
+            <ObstructionLine
+              key={`ob-${oi}-edge-${ei}`}
+              a={a}
+              b={b}
+              phaseOffset={oi * phaseStep}
+            />
+          );
+        }),
+      )}
+
+      {/* ── Member-node outline rings ────────────────────────────────────── */}
+      {Array.from(memberIds).map((id) => {
+        const pos = positions.get(id);
+        // Skip if node not in current frame.
+        if (!pos) return null;
+        return (
+          <ObstructionRing
+            key={`ob-ring-${id}`}
+            position={pos}
+            ringR={ringR}
+          />
+        );
+      })}
+    </group>
+  );
+}
