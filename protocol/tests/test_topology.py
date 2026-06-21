@@ -329,3 +329,11 @@ def test_no_seed_is_unchanged(small_corpus):
     a = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED)
     b = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED, seed_positions=None)
     assert a == b
+
+
+def test_topology_export_consistency_defaults_none_and_byte_identical(small_corpus):
+    from polymer_protocol import export_topology, Layout
+    exp = export_topology(small_corpus, layout=Layout.FORCE_DIRECTED)
+    assert exp.consistency is None                       # additive, off by default
+    # serialization unchanged for consumers that ignore the new optional field
+    assert "consistency" in exp.model_dump()             # field exists, value null

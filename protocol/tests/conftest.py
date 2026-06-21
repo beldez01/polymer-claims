@@ -7,6 +7,8 @@ from polymer_grammar import (
     Claim,
     Comparator,
     ComputeGraph,
+    Dimension,
+    EquivalenceClaim,
     EvaluationPlan,
     FDRLedger,
     IdentityAdapter,
@@ -16,6 +18,7 @@ from polymer_grammar import (
     PatternRef,
     PendingReason,
     ProducedLeafSpec,
+    QuantityLeaf,
     ReferenceAdapter,
     SatisfactionCriterion,
     Status,
@@ -72,6 +75,50 @@ def make_plan(
     )
 
 
+def _make_quantity_claim(
+    cid: str,
+    value: float,
+    status: Status = Status.LICENSED,
+    *,
+    dim: tuple[tuple[str, int], ...] | None = (),
+    unit: str | None = None,
+    pending_reason: PendingReason | None = None,
+    pattern: PatternRef | None = None,
+) -> Claim:
+    """Build a minimal valid Claim with one QuantityLeaf for sheaf tests.
+
+    ``dim`` is the raw exponents tuple for Dimension (or None for no dimension).
+    ``unit`` is only valid for FUNDAMENTAL basis; use None for DERIVED (formula required).
+    """
+    if status == Status.PENDING and pending_reason is None:
+        pending_reason = PendingReason.UNTESTED
+    dimension = Dimension(exponents=dim) if dim is not None else None
+    if unit is not None:
+        # FUNDAMENTAL basis allows a unit; no formula needed
+        leaf = QuantityLeaf(
+            value=value,
+            unit=unit,
+            measurement_basis=MeasurementBasis.FUNDAMENTAL,
+            dimension=dimension,
+        )
+    else:
+        # DERIVED basis: no unit, formula required
+        leaf = QuantityLeaf(
+            value=value,
+            measurement_basis=MeasurementBasis.DERIVED,
+            formula="test::const",
+            dimension=dimension,
+        )
+    return Claim(
+        id=cid,
+        title=f"claim {cid}",
+        pattern=pattern or _PATTERN,
+        leaves=(leaf,),
+        status=status,
+        pending_reason=pending_reason,
+    )
+
+
 @pytest.fixture
 def ctx() -> MaterializationContext:
     return MaterializationContext(id="M1", api_version="v1", data_version="d1")
@@ -91,3 +138,28 @@ def empty_ledger() -> FDRLedger:
 @pytest.fixture
 def empty_corpus(empty_ledger) -> Corpus:
     return Corpus(fdr_ledger=empty_ledger)
+
+
+@pytest.fixture
+def make_quantity_claim():
+    return _make_quantity_claim
+
+
+@pytest.fixture
+def make_equiv():
+    def _make_equiv(
+        eid: str,
+        left: str,
+        right: str,
+        *,
+        severity: float,
+        status: Status = Status.LICENSED,
+    ) -> EquivalenceClaim:
+        return EquivalenceClaim(id=eid, left=left, right=right, severity=severity, status=status)
+
+    return _make_equiv
+
+
+@pytest.fixture
+def fdr() -> FDRLedger:
+    return FDRLedger(target_fdr=0.05)

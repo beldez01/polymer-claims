@@ -274,6 +274,15 @@ class NodeRunner:
         self._prev_spectral = aligned
         return aligned
 
+    def _attach_consistency(self, topo):
+        """Attach the cheap sheaf headline (energy + λ2) when numpy/[embed] is present; else passthrough."""
+        try:
+            from polymer_protocol import extract_sheaf
+            from .sheaf_spectrum import consistency_headline   # lazy: base import stays numpy-free
+        except ImportError:
+            return topo
+        return topo.model_copy(update={"consistency": consistency_headline(extract_sheaf(self.corpus))})
+
     def _layout_topology(self, corpus: Corpus):
         """Export a topology frame for the chosen layout.
 
@@ -295,12 +304,12 @@ class NodeRunner:
                     )
                     self._spectral_fallback_warned = True
             else:
-                return export_topology(
+                return self._attach_consistency(export_topology(
                     corpus, layout=Layout.FORCE_DIRECTED, positions=positions
-                )
-        return export_topology(
+                ))
+        return self._attach_consistency(export_topology(
             corpus, layout=Layout.FORCE_DIRECTED, seed_positions=self.prev_positions
-        )
+        ))
 
     def snapshot(self) -> TopologyTimeline:
         """Immutable view of the accumulated timeline so far."""

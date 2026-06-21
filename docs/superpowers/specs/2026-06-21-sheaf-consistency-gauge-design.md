@@ -103,16 +103,21 @@ For an edge `e` incident to `u, v`, the coboundary `δ` produces a scalar discre
 
 ## 4. What we compute
 
-Weighted sheaf Laplacian `L = δᵀ W δ` over the scalar stalks. Computed **per connected component**
-(mirroring `embedding.py`), with deterministic sign/ordering handling.
+Weighted sheaf Laplacian `L = δᵀ W δ` over the scalar stalks, built **globally** over all vertices. `L`
+is block-diagonal across connected components, so `inconsistency_energy` (`x*ᵀLx*`) and `h0_dim`
+(`dim ker L`) are **identical** to a per-component computation — no need to split. (H¹ frustration IS
+localized per component via signed BFS; see below.)
 
 - **`inconsistency_energy`** `= x*ᵀ L x*`, **normalized by total edge weight `Σ w_e`** (a per-edge mean
   tension, so the number is comparable as the corpus grows). This is **Robinson's consistency radius**:
   the squared distance from the corpus's *actual* values to the nearest globally-consistent assignment.
   **The headline "distance-to-consensus" that falls as recomputation harmonizes claims.** Reported as the
   total and the `equivalence_energy` / `defeat_energy` split.
-- **`spectral_gap`** `= λ₂(L)` (smallest non-trivial eigenvalue) — the continuous algebraic-connectivity
-  gauge; a separate, structure-only consensus readout.
+- **`spectral_gap`** `=` the smallest **non-trivial** eigenvalue of the global `L` — the continuous
+  algebraic-connectivity gauge; a separate, structure-only consensus readout. Over a disconnected corpus
+  this is the connectivity of the **weakest** component (the global smallest positive eigenvalue, since
+  each extra component contributes another zero eigenvalue to the kernel counted by `h0_dim`), which is a
+  defensible corpus-level "weakest-link consensus" signal rather than a single graph's λ₂.
 - **`h0_dim`** `= dim ker L` — the consistent-world degrees of freedom (≈ count of independent consensus
   clusters / global sections).
 - **`h1_obstructions`** — the differentiator. On a graph sheaf these live on the **cycle space**, and
