@@ -43,7 +43,12 @@ def _coboundary(structure: SheafStructure):
 
 def _spectrum_core(structure: SheafStructure):
     """Shared numpy core. Returns (energy, eq_energy, df_energy, spectral_gap, h0_dim, L, x, total_w).
-    Empty/zero-weight → (0.0, 0.0, 0.0, 0.0, n_vertices, None, x, 0.0). Excludes H1 + per-claim tension."""
+    Empty/zero-weight → (0.0, 0.0, 0.0, 0.0, n_vertices, None, x, 0.0). Excludes H1 + per-claim tension.
+
+    L is built globally over all vertices; it is block-diagonal across connected components, so energy
+    and h0_dim equal a per-component computation. spectral_gap is the global smallest POSITIVE eigenvalue
+    — over a disconnected corpus that is the weakest component's algebraic connectivity (each extra
+    component adds another kernel eigenvalue counted by h0_dim)."""
     x, delta, w, kinds = _coboundary(structure)
     n = len(structure.vertices)
     total_w = float(w.sum())
