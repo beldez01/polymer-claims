@@ -21,6 +21,8 @@ export default function LiveControl() {
   const liveUrl = useViewer((s) => s.liveUrl);
   const connectLive = useViewer((s) => s.connectLive);
   const disconnectLive = useViewer((s) => s.disconnectLive);
+  const overlayOn = useViewer((s) => s.overlayOn);
+  const setOverlayOn = useViewer((s) => s.setOverlayOn);
 
   const [url, setUrl] = useState('http://localhost:8000');
 
@@ -132,6 +134,23 @@ export default function LiveControl() {
             }}
           >
             Disconnect
+          </button>
+          <button
+            onClick={() => setOverlayOn(!overlayOn)}
+            className="mono"
+            aria-pressed={overlayOn}
+            style={{
+              fontFamily: FONT_FAMILY_MONO,
+              fontSize: 10,
+              color: overlayOn ? COLOR.bg.white : COLOR.text.secondary,
+              background: overlayOn ? COLOR.primary.base : 'transparent',
+              border: `1px solid ${overlayOn ? COLOR.primary.base : COLOR.border.strong}`,
+              borderRadius: 2,
+              padding: '1px 6px',
+              cursor: 'pointer',
+            }}
+          >
+            Consistency overlay
           </button>
         </>
       )}

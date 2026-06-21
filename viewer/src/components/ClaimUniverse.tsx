@@ -17,6 +17,7 @@ import Edges from '@/components/scene/Edges';
 import CameraBridge from '@/components/scene/CameraBridge';
 import TimelineDriver from '@/components/scene/TimelineDriver';
 import { useViewer } from '@/store';
+import { useConsistencySync } from '@/lib/useConsistencySync';
 
 function Scene({ extent, layoutId }: { extent: Extent; layoutId: string }) {
   const [cx, cy, cz] = extent.center;
@@ -68,6 +69,8 @@ function Scene({ extent, layoutId }: { extent: Extent; layoutId: string }) {
 }
 
 export default function ClaimUniverse() {
+  useConsistencySync();
+
   const data = useViewer((s) => s.data);
   const timeline = useViewer((s) => s.timeline);
   const setData = useViewer((s) => s.setData);

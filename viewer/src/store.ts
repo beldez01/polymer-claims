@@ -1,9 +1,9 @@
 'use client';
 
 import { create } from 'zustand';
-import type { TopologyExport, TopologyNode } from '@/lib/topology';
+import type { TopologyExport, TopologyNode, ConsistencyReport, Obstruction } from '@/lib/topology';
 import type { TopologyTimeline } from '@/lib/timeline';
-import { connectLive as clientConnectLive, type LiveHandle } from '@/lib/live';
+import { connectLive as clientConnectLive, type LiveHandle, fetchConsistency as fetchConsistencyApi } from '@/lib/live';
 import type { TimelineFrame } from '@/lib/timeline';
 import { STATUS_ORDER, DEFEAT_KINDS } from '@/config/theme';
 
@@ -74,6 +74,19 @@ interface ViewerState {
   pause: () => void;
   seek: (frame: number) => void;
   setSpeed: (speed: number) => void;
+
+  // ── consistency overlay ──────────────────────────────────────────────────
+  overlayOn: boolean;
+  consistencyReport: ConsistencyReport | null;
+  consistencyAvailable: boolean;
+  obstructions: Obstruction[];
+  tensionByClaimId: Record<string, number>;
+  maxTension: number;
+  lastConsistencyCycle: number;
+  consistencyInFlight: boolean;
+
+  setOverlayOn: (b: boolean) => void;
+  fetchConsistency: () => Promise<void>;
 }
 
 /** Pure derived counts — call inside a component with useMemo over `data`. */
@@ -256,4 +269,38 @@ export const useViewer = create<ViewerState>((set, get) => ({
       const last = s.timeline ? s.timeline.frames.length - 1 : 0;
       return { following: true, playing: true, frame: last };
     }),
+
+  // ── consistency overlay ──────────────────────────────────────────────────
+  overlayOn: false,
+  consistencyReport: null,
+  consistencyAvailable: false,
+  obstructions: [],
+  tensionByClaimId: {},
+  maxTension: 0,
+  lastConsistencyCycle: -1,
+  consistencyInFlight: false,
+
+  setOverlayOn: (b: boolean) => set({ overlayOn: b }),
+
+  fetchConsistency: async () => {
+    const { liveUrl, consistencyInFlight } = get();
+    if (!liveUrl || consistencyInFlight) return;
+    set({ consistencyInFlight: true });
+    try {
+      const resp = await fetchConsistencyApi(liveUrl);
+      const latest = get().timeline?.frames.at(-1)?.stats.cycle_index ?? -1;
+      if (resp.available) {
+        const tension: Record<string, number> = {};
+        let max = 0;
+        for (const t of resp.per_claim_tension) { tension[t.claim_id] = t.tension; if (t.tension > max) max = t.tension; }
+        set({ consistencyReport: resp, consistencyAvailable: true, obstructions: resp.h1_obstructions,
+              tensionByClaimId: tension, maxTension: max, lastConsistencyCycle: latest });
+      } else {
+        set({ consistencyAvailable: false, obstructions: [], tensionByClaimId: {}, maxTension: 0,
+              lastConsistencyCycle: latest });
+      }
+    } finally {
+      set({ consistencyInFlight: false });
+    }
+  },
 }));
