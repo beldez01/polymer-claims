@@ -94,11 +94,7 @@ def consistency_report(structure: SheafStructure) -> ConsistencyReport:
             spectral_gap=0.0, h0_dim=h0, h1_obstructions=(),
             per_claim_tension=(), flags=structure.flags,
         )
-    Lx = L @ x
-    tensions = tuple(
-        ClaimTension(claim_id=v.claim_id, tension=round(float(x[i] * Lx[i]) / total_w, _ROUND))
-        for i, v in enumerate(structure.vertices)
-    )
+    tensions = _edge_share_tension(structure, total_w)
     return ConsistencyReport(
         inconsistency_energy=round(energy, _ROUND),
         equivalence_energy=round(eq, _ROUND),
@@ -108,6 +104,25 @@ def consistency_report(structure: SheafStructure) -> ConsistencyReport:
         h1_obstructions=_frustration_obstructions(structure),
         per_claim_tension=tensions,
         flags=structure.flags,
+    )
+
+
+def _edge_share_tension(structure: SheafStructure, total_w: float) -> tuple[ClaimTension, ...]:
+    """Nonnegative per-claim attribution: each edge's w·d² split half to each endpoint.
+    Sums to the inconsistency energy. Defensively skips self-loop / malformed edges."""
+    x, delta, w, _kinds = _coboundary(structure)
+    d = delta @ x
+    per_edge = w * (d * d)
+    acc = {v.claim_id: 0.0 for v in structure.vertices}
+    for k, e in enumerate(structure.edges):
+        if e.u == e.v or e.u not in acc or e.v not in acc:
+            continue                                   # self-loop / malformed: should not occur
+        share = float(per_edge[k]) / 2.0
+        acc[e.u] += share
+        acc[e.v] += share
+    return tuple(
+        ClaimTension(claim_id=v.claim_id, tension=round(acc[v.claim_id] / total_w, _ROUND))
+        for v in structure.vertices
     )
 
 

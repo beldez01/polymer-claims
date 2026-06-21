@@ -117,6 +117,22 @@ def test_consistency_headline_matches_report_scalars():
     assert h.spectral_gap is None          # λ₂ lives only on the report now
 
 
+def test_per_claim_tension_nonnegative_and_reconciles_with_energy():
+    # mixed corpus: a disagreeing equivalence + a defeat — Rayleigh diagonal could go negative here
+    s = SheafStructure(
+        vertices=(_vert("a", 1.0), _vert("b", 4.0), _vert("c", 2.0)),
+        edges=(
+            SheafEdge(kind="equivalence", u="a", v="b", weight=2.0, sign=1),
+            SheafEdge(kind="defeat", u="b", v="c", weight=1.0, sign=-1),
+        ),
+    )
+    r = consistency_report(s)
+    assert all(t.tension >= 0.0 for t in r.per_claim_tension)        # valid as opacity
+    total = sum(t.tension for t in r.per_claim_tension)
+    n = len(r.per_claim_tension)
+    assert abs(total - r.inconsistency_energy) <= n * 1e-6           # 6dp-rounded tolerance
+
+
 def test_headline_is_energy_only_no_eigendecomposition(monkeypatch):
     import polymer_claims.sheaf_spectrum as ss
     s = SheafStructure(
