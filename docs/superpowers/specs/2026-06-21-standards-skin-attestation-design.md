@@ -9,8 +9,8 @@
 
 Add a new umbrella command `export-attestation <corpus>` that turns every **LICENSED** claim in a
 corpus into a deterministic, content-addressed **in-toto Statement v1** carrying a **SLSA Provenance
-v1** predicate, plus standalone **GA4GH DRS object** docs for the datasets those claims were licensed
-on.
+v1** predicate (current v1.x Build Provenance shape — see §1.1), plus standalone **GA4GH DRS object** docs
+for the datasets those claims were licensed on.
 
 The thesis: don't integrate the world's data/compute — integrate *trust over* it. Re-express the
 content-address / apparatus / run model we already compute **as the standards that already exist**, so
@@ -20,9 +20,21 @@ content-addressed JSON shape any third party could **later** sign; signing/Rekor
 **In scope:** the deterministic serializer + CLI command + new exports. Strictly additive — existing
 behavior is byte-identical; nothing existing changes.
 
-**Standards fidelity:** strict — a real in-toto Statement v1 envelope whose `predicate` matches SLSA
-Provenance v1 (`buildDefinition` / `runDetails`), and GA4GH `DrsObject`-shaped dataset handles, such
-that an off-the-shelf verifier accepts the shape.
+**Standards fidelity:** strict at the **Statement** level — each element of the bundle is a real in-toto
+Statement v1 envelope whose `predicate` matches the SLSA Provenance v1 / current v1.x Build Provenance
+shape (`buildDefinition` / `runDetails`), and each DRS doc is GA4GH `DrsObject`-shaped, such that an
+off-the-shelf verifier handed a single **Statement** accepts its shape. The **top-level bundle**
+(`{ bundleType, attestations, drsObjects, unresolvedDatasets }`) is a Polymer-specific envelope, NOT a
+standard container — a standard verifier expects a bare Statement or a DSSE envelope, not the bundle.
+The bundle is a convenience container over verifier-compatible Statements; a future slice can add a
+`--format ndjson` / one-Statement-per-file export mode (and, later, DSSE) for direct verifier ingestion.
+
+### 1.1 SLSA version note
+
+The predicate type stays `https://slsa.dev/provenance/v1` — it is stable across the v1.x line. SLSA
+**v1.0** is retired; the current approved spec is **v1.2 Build Provenance**, which preserves the same
+predicate type and the `buildDefinition` / `runDetails` structure used here. Throughout this doc "SLSA
+Provenance v1" means "the current v1.x Build Provenance shape," not v1.0 specifically.
 
 ## 2. Hard invariants (inherited)
 
@@ -65,9 +77,17 @@ fabricate a hash).
 ## 4. The mapping (in-toto v1 / SLSA Provenance v1)
 
 **Granularity:** one Statement per LICENSED claim, collected into a bundle (mirrors how a real CI emits
-one provenance per produced artifact). For a claim's datasets, reuse the existing "one representative
-`Satisfaction` per distinct `dimnames_hash`" logic in `licensing.py` so REPLICATED claims contribute
-one dependency per distinct cohort.
+one provenance per produced artifact). For a claim's datasets we need "one representative `Satisfaction`
+per distinct `dimnames_hash`" so REPLICATED claims contribute one dependency per distinct cohort.
+
+**Cohort-representative helper (umbrella-local).** Grammar's `licensing.py` has this dedup but as a
+**private** helper (`_distinct_cohort_reps`) — and this slice must stay umbrella-side without reaching
+into grammar internals. So `attestation.py` gets its own small public helper
+`distinct_cohort_reps(licensing) -> tuple[Satisfaction, ...]` (one representative per distinct non-None
+`dimnames_hash`, deterministic: ascending `dimnames_hash`, first occurrence — identical rule to grammar's).
+A **parity test** asserts it agrees with grammar's private helper on shared fixtures, so the duplication
+can't silently drift. (Alternative considered and rejected: promote/export the grammar private — avoided
+to keep grammar untouched and the slice umbrella-only.)
 
 ### 4.1 in-toto Statement v1
 
@@ -103,25 +123,36 @@ predicate:
       # one APPARATUS dep per distinct profileHash across those representatives:
       - name: "analysis-profile"
         digest: { sha256: <profileHash hex> }
-        annotations: { role: "apparatus", semanticRunId: <semanticRunId> }   # per-run id lives here
+        annotations: { role: "apparatus", semanticRunIds: (<sorted tuple of run ids>) }  # see note
   runDetails:
     builder:
-      id: "https://polymerclaims.org/recompute-gate/v1"   # the gate IS the build platform
-      builderDependencies:                                 # the air-gap witnesses
+      id: "https://polymerclaims.org/recompute-gate/v1"   # resolves to the build-type/security-model doc
+      builderDependencies:                                 # the air-gap witnesses (security-relevant; see note)
         - name: <credential_id_1>, digest:{ sha256:<implementation_hash> }, annotations:{role:"adapter"}
         - name: <credential_id_2>, digest:{ sha256:<implementation_hash> }, annotations:{role:"adapter"}
     metadata: { invocationId: <representative semanticRunId> }   # lowest-dimnames_hash rep; NO clock
 ```
 
-- **builder** = the independent credential pair from `independent_credential_pair(registry,
-  satisfaction.credential_ids)`. The recompute gate is the SLSA "builder"; the two air-gapped adapters
-  are its pinned `builderDependencies`. This is the faithful reading: the recomputation gate is the
-  build platform, the two independent adapters are pinned dependencies that witnessed the air gap.
-- If **no** independent pair is recorded (legacy / empty `credential_ids`): `builderDependencies: []`
+- **builder / security model.** SLSA reserves `builder.builderDependencies` for *orchestrator*
+  dependencies that affect the provenance's security guarantees — not ordinary workload inputs. That is
+  exactly what the adapter pair is here: the **recompute gate is the trusted build platform**, and its
+  core security guarantee is **independence** (two air-gapped adapters, distinct owner + distinct
+  `implementation_hash`, from `independent_credential_pair(registry, satisfaction.credential_ids)`).
+  The adapters are therefore part of the gate's trusted boundary, which is why they belong in
+  `builderDependencies` rather than `resolvedDependencies` (workload inputs) or `byproducts`. This trust
+  boundary is documented at the `buildType` / `builder.id` URI
+  (`https://polymerclaims.org/recompute-gate/v1` resolves to the build-type + security-model doc).
+- If **no** independent pair is recorded (legacy / empty `credential_ids`): `builderDependencies: ()`
   and an annotation `independenceWitnessed: false`. We never fabricate witnesses.
-- All `sha256:`-prefixed content-addresses (`profileHash`, `dimnames_hash`, `implementation_hash`)
-  are stripped to bare hex inside any `digest` map; the prefixed form may appear only in an opaque
-  annotation if useful.
+- **Apparatus `semanticRunIds`** is a **sorted tuple** of every run id among the representatives sharing
+  that `profileHash` (deduped → sorted) — so no run id is lost when two cohorts share an analysis profile.
+- **Digest normalization.** Any content-address that is a valid `sha256:<hex>` is stripped to bare hex in
+  its `digest` map. If a value is **not** a valid `sha256:` digest (e.g. a legacy/test
+  `implementation_hash` like `h1`), the exporter **omits** the `digest` field and records the raw value
+  in a transparent annotation (`rawImplementationHash: <value>`) — it never emits an invalid digest. A
+  small `_digest_or_none(value) -> DigestSet | None` helper centralizes this. Applies to
+  `implementation_hash`, and defensively to `profileHash` / `dimnames_hash` (which are
+  `canonical_sha256`-produced and so normally valid).
 - **Timestamps omitted** (`startedOn`/`finishedOn`) — keeps output deterministic; SLSA marks them
   optional.
 
@@ -143,18 +174,24 @@ Datasets that don't resolve to a bundled contract produce **no** DRS object (see
 
 ```
 AttestationBundle:
+  bundleType:          "https://polymerclaims.org/attestation-bundle/v1"   # version the custom envelope
   attestations:        (Statement, ...)        # sorted by claim.id
   drsObjects:          (DrsObject, ...)         # sorted by id
   unresolvedDatasets:  (<dimnames_hash hex>, ...)   # best-effort transparency for non-bundled contracts
 ```
 
+`bundleType` versions this Polymer-specific envelope so a future signing/DSSE slice can distinguish
+bundle versions without guessing (the per-element Statements carry their own in-toto/SLSA type URIs).
 One CLI call → one bundle JSON containing both the attestations and their companion DRS objects.
 
 ## 5. Determinism, errors, edge cases
 
-- **Determinism:** sorted `attestations` (by `claim.id`), sorted `drsObjects` (by `id`), sorted
-  `resolvedDependencies` (by `name`), tuple collections, no clock/random. A test exports the same corpus
-  twice and asserts byte-identical output.
+- **Determinism:** sorted `attestations` (by `claim.id`), sorted `drsObjects` (by `id`), tuple
+  collections, no clock/random. `resolvedDependencies` sort on a **full stable key** —
+  `(annotations.role, name, uri or "", digest.sha256 or "", first-of annotations.semanticRunIds or "")`
+  — so multiple `analysis-profile` entries (distinct profile hashes) can't tie. `builderDependencies`
+  sort by `(name, digest.sha256 or "")`. A test exports the same corpus twice and asserts byte-identical
+  output.
 - **No LICENSED claims** → empty bundle (`attestations: ()`, `drsObjects: ()`,
   `unresolvedDatasets: ()`), exit 0.
 - **`dimnames_hash` is None** (apparatus-only / `builtin::const` run) → the dataset dependency is
@@ -169,8 +206,9 @@ One CLI call → one bundle JSON containing both the attestations and their comp
 ## 6. Serialization
 
 Typed frozen `_Model` DTOs (`Statement`, `Subject`, `SlsaPredicate`, `BuildDefinition`, `RunDetails`,
-`Builder`, `ResourceDescriptor`, `DigestSet`, `DrsObject`, `Checksum`, `AccessMethod`, `AttestationBundle`)
-with pydantic `alias=` for camelCase and `_type` (python field `type_`, `alias="_type"`). Serialize via
+`Builder`, `ResourceDescriptor`, `DigestSet`, `DrsObject`, `Checksum`, `AccessMethod`, `AttestationBundle`;
+`AttestationBundle` carries the `bundleType` envelope-version field) with pydantic `alias=` for camelCase
+and `_type` (python field `type_`, `alias="_type"`). Serialize via
 `model_dump_json(by_alias=True, exclude_none=True)`. This matches the repo's DTO convention (like
 `TopologyExport`), gives schema validation, and is deterministic (ordered fields + tuples). `_Model`'s
 `populate_by_name=True` supports the alias plumbing.
@@ -184,14 +222,24 @@ the repo's frozen-DTO convention. The typed route is preferred for consistency +
 - Golden in-toto Statement for a fixture LICENSED claim — byte-stable.
 - `subject.digest.sha256` equals an independently recomputed `canonical_sha256(claim)` (prefix-stripped).
 - REPLICATED claim → two dataset `resolvedDependencies` + `independenceTier == "REPLICATED"`.
-- Structural conformance: required in-toto fields (`_type`, `subject`, `predicateType`, `predicate`)
-  and required SLSA fields (`buildDefinition.buildType`, `runDetails.builder.id`) are present — asserted
-  structurally, no new schema dependency.
+- Structural conformance (current in-toto Statement v1 + SLSA v1.x Build Provenance): required in-toto
+  fields (`_type`, `subject`, `predicateType`, `predicate`) and required SLSA fields
+  (`buildDefinition.buildType`, `runDetails.builder.id`) are present — asserted structurally, no new
+  schema dependency.
 - DRS object shape (`self_uri`, `checksums[].type == "sha-256"`, `access_methods[].access_url.url`).
+- **Cohort-rep parity** (#7): `distinct_cohort_reps` agrees with grammar's private `_distinct_cohort_reps`
+  on shared single- and multi-cohort fixtures, so the umbrella-local copy can't drift.
+- **Apparatus run-id completeness** (#4): two representatives sharing a `profileHash` but with different
+  `semanticRunId`s → the apparatus dep's `semanticRunIds` is the sorted tuple of both (none lost).
+- **Digest normalization** (#6): a credential whose `implementation_hash` is not a valid `sha256:` digest
+  (e.g. `h1`) → that builder-dependency has **no** `digest`, carries `rawImplementationHash`, no crash.
+- **Full-key determinism** (#5): a claim with two distinct `analysis-profile` deps → stable, non-tying
+  `resolvedDependencies` order; two exports byte-identical.
+- **Bundle envelope** (#8): `bundleType == "https://polymerclaims.org/attestation-bundle/v1"` present.
 - Unresolved-contract fallback: DRS object skipped, dependency digest falls back to `dimnames_hash`,
-  id recorded in `unresolvedDatasets`, no crash.
+  `uri` is the synthetic `drs://local/dimnames/<hash>`, id recorded in `unresolvedDatasets`, no crash.
 - Determinism: two exports of the same corpus are byte-identical.
-- Empty / no-LICENSED corpus → empty bundle, exit 0.
+- Empty / no-LICENSED corpus → empty bundle (`bundleType` still present), exit 0.
 - No-credential-pair claim → empty `builderDependencies` + `independenceWitnessed: false`.
 - CLI smoke: `export-attestation <fixture> --out` exits 0 and the file re-parses as the bundle.
 
