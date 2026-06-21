@@ -218,6 +218,15 @@ def _cmd_export_consistency(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_export_attestation(args: argparse.Namespace) -> int:
+    from .attestation import build_attestation_bundle, resolve_contract_index
+
+    corpus = load_corpus(args.corpus)
+    bundle = build_attestation_bundle(corpus, contract_index=resolve_contract_index(corpus))
+    _write_or_print(bundle.model_dump_json(by_alias=True, exclude_none=True), args.out)
+    return 0
+
+
 def _cmd_export_timeline(args: argparse.Namespace) -> int:
     corpus = load_corpus(args.corpus)
     timeline = export_timeline(corpus, _ADAPTERS, _CTX, n_cycles=args.cycles)
@@ -497,6 +506,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="live layout: spectral (signed-Laplacian eigenmap, Procrustes-aligned; default) or force (Fruchterman-Reingold)",
     )
     p_serve.set_defaults(func=_cmd_serve)
+
+    p_att = sub.add_parser(
+        "export-attestation",
+        help="emit an in-toto/SLSA attestation bundle (+ DRS objects) for a corpus's LICENSED claims",
+    )
+    p_att.add_argument("corpus", help="path to a corpus JSON file")
+    p_att.add_argument("--out", default=None, help="write the attestation bundle JSON here")
+    p_att.set_defaults(func=_cmd_export_attestation)
 
     return parser
 

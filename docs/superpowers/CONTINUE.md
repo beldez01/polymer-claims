@@ -19,7 +19,9 @@ consistency gauge shipped + merged to `main` 2026-06-21 — `fe1214d`, `--no-ff`
 caveat:** `npm run typecheck` passes; the `next build` step of `scripts/check-all.sh` can fail *only*
 because the sandbox cannot fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not
 a code defect — the build passed when network was available). All pytest suites + ruff + isolation + viewer
-typecheck are green.
+typecheck are green. (**North-Star arc 2 — standards-skin attestation export, slice 1 — shipped 2026-06-21**:
+`export-attestation` CLI; new umbrella module `attestation.py` + 31 attestation tests; additive/umbrella-only;
+see *Recently shipped*.)
 
 **Repo reconciled to a single trunk (2026-06-19).** The git tangle is gone: ~9 stacked feature branches
 were fast-forwarded into `main` (zero divergence, nothing lost), all stale local + remote branches
@@ -76,7 +78,18 @@ design.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first): **Sheaf consistency gauge** (2026-06-21) — cellular sheaf over the
+**Recently shipped** (most recent first): **Standards-skin attestation export — North-Star arc 2, slice 1**
+(2026-06-21) — `export-attestation <corpus>` emits one deterministic **in-toto Statement v1 / SLSA Provenance
+v1** attestation per LICENSED claim **+ GA4GH DRS** object docs, built from the content-address we already
+compute (`dimnames_hash`/`profile_hash`/`semantic_run_id`) with the air-gap credential pair as the SLSA
+`builderDependencies` (the recompute gate = the trusted builder; independence = its security guarantee). Pure
+umbrella module `src/polymer_claims/attestation.py` (typed frozen DTOs + builder) + IO-only
+`resolve_contract_index`; stdlib-only, no signing/network/clock; additive/byte-identical when off. The
+recompute gate re-expressed as the GA4GH/in-toto/SLSA trust fabric (north-star §4 seam #3). spec+plan
+`docs/superpowers/{specs,plans}/2026-06-21-standards-skin-attestation*`. Deferred (later slices):
+signing/DSSE/Sigstore/Rekor, `--format ndjson` direct-verifier export, publishing the recompute-gate
+build-type/security-model doc at the `builder.id` URI, WES/TRS/RO-Crate, FAIR Signposting, Refget SeqCol. ·
+**Sheaf consistency gauge** (2026-06-21) — cellular sheaf over the
 claims graph; inconsistency energy (consistency radius) + dim H⁰ + localized H¹ frustration obstructions;
 `export-consistency` CLI + cheap live headline on the topology frame; instrument not a gate; pure protocol
 extractor + numpy spectrum behind `[embed]`. spec+plan `docs/superpowers/{specs,plans}/2026-06-21-sheaf-consistency-gauge*`.
