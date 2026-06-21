@@ -9,9 +9,11 @@ docs/superpowers/specs/2026-06-21-sheaf-consistency-gauge-design.md.
 from __future__ import annotations
 
 import numpy as np
+from collections import deque
 
 from polymer_protocol.sheaf import (
     ClaimTension,
+    ConsistencyHeadline,
     ConsistencyReport,
     Obstruction,
     SheafStructure,
@@ -39,50 +41,55 @@ def _coboundary(structure: SheafStructure):
     return x, delta, w, kinds
 
 
-def consistency_report(structure: SheafStructure) -> ConsistencyReport:
+def _spectrum_core(structure: SheafStructure):
+    """Shared numpy core. Returns (energy, eq_energy, df_energy, spectral_gap, h0_dim, L, x, total_w).
+    Empty/zero-weight → (0.0, 0.0, 0.0, 0.0, n_vertices, None, x, 0.0). Excludes H1 + per-claim tension."""
     x, delta, w, kinds = _coboundary(structure)
     n = len(structure.vertices)
-    m = len(structure.edges)
     total_w = float(w.sum())
-
-    if m == 0 or total_w == 0.0:
-        # no constraints: perfectly consistent; every vertex is its own consensus dof
-        return ConsistencyReport(
-            inconsistency_energy=0.0, equivalence_energy=0.0, defeat_energy=0.0,
-            spectral_gap=0.0, h0_dim=n, h1_obstructions=(), per_claim_tension=(),
-            flags=structure.flags,
-        )
-
-    d = delta @ x                                   # per-edge discrepancy
-    per_edge = w * (d * d)                          # contribution of each edge to x^T L x
+    if delta.shape[0] == 0 or total_w == 0.0:
+        return 0.0, 0.0, 0.0, 0.0, n, None, x, 0.0
+    d = delta @ x
+    per_edge = w * (d * d)
     raw = float(per_edge.sum())
     eq = float(per_edge[np.array([k == "equivalence" for k in kinds])].sum())
     df = float(per_edge[np.array([k == "defeat" for k in kinds])].sum())
-    # Exhaustiveness: energy split must account for all edges (catch unknown future kinds)
-    assert abs(eq + df - raw) <= 1e-9 * (1.0 + abs(raw)), (
-        f"Energy split mismatch: eq={eq} + df={df} != raw={raw}"
-    )
-
-    L = delta.T @ (w[:, None] * delta)              # δᵀ W δ
+    if abs(eq + df - raw) > 1e-9 * (1.0 + abs(raw)):            # was an assert; raise so -O can't disable it
+        raise ValueError(f"energy split does not sum to total: eq={eq}, df={df}, raw={raw}")
+    L = delta.T @ (w[:, None] * delta)
     evals = np.linalg.eigvalsh(L)
-    h0_dim = int(np.sum(evals < _ZERO_TOL))
+    h0 = int(np.sum(evals < _ZERO_TOL))
     positive = evals[evals >= _ZERO_TOL]
-    spectral_gap = float(positive.min()) if positive.size else 0.0
+    gap = float(positive.min()) if positive.size else 0.0
+    return raw / total_w, eq / total_w, df / total_w, gap, h0, L, x, total_w
 
+
+def consistency_headline(structure: SheafStructure) -> ConsistencyHeadline:
+    energy, _eq, _df, gap, _h0, _L, _x, _tw = _spectrum_core(structure)
+    return ConsistencyHeadline(inconsistency_energy=round(energy, _ROUND), spectral_gap=round(gap, _ROUND))
+
+
+def consistency_report(structure: SheafStructure) -> ConsistencyReport:
+    energy, eq, df, gap, h0, L, x, total_w = _spectrum_core(structure)
+    if L is None:  # empty/zero-weight
+        return ConsistencyReport(
+            inconsistency_energy=0.0, equivalence_energy=0.0, defeat_energy=0.0,
+            spectral_gap=0.0, h0_dim=h0, h1_obstructions=(),
+            per_claim_tension=(), flags=structure.flags,
+        )
     Lx = L @ x
-    tensions = [
+    tensions = tuple(
         ClaimTension(claim_id=v.claim_id, tension=round(float(x[i] * Lx[i]) / total_w, _ROUND))
         for i, v in enumerate(structure.vertices)
-    ]
-
+    )
     return ConsistencyReport(
-        inconsistency_energy=round(raw / total_w, _ROUND),
-        equivalence_energy=round(eq / total_w, _ROUND),
-        defeat_energy=round(df / total_w, _ROUND),
-        spectral_gap=round(spectral_gap, _ROUND),
-        h0_dim=h0_dim,
+        inconsistency_energy=round(energy, _ROUND),
+        equivalence_energy=round(eq, _ROUND),
+        defeat_energy=round(df, _ROUND),
+        spectral_gap=round(gap, _ROUND),
+        h0_dim=h0,
         h1_obstructions=_frustration_obstructions(structure),
-        per_claim_tension=tuple(tensions),
+        per_claim_tension=tensions,
         flags=structure.flags,
     )
 
@@ -126,9 +133,9 @@ def _frustration_obstructions(structure: SheafStructure) -> tuple[Obstruction, .
             continue
         label[root] = 1
         parent[root] = None
-        queue = [root]
+        queue: deque[str] = deque([root])
         while queue:
-            u = queue.pop(0)
+            u = queue.popleft()
             for v, sign, _w in sorted(adj[u]):
                 want = sign * label[u]
                 if v not in label:

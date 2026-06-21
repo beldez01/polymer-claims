@@ -105,3 +105,13 @@ def test_no_edges_zero_energy_and_n_h0():
     r = consistency_report(s)
     assert r.inconsistency_energy == 0.0
     assert r.h0_dim == 3
+
+
+def test_consistency_headline_matches_report_scalars():
+    from polymer_claims.sheaf_spectrum import consistency_headline
+    s = SheafStructure(vertices=(_vert("a", 1.0), _vert("b", 4.0)),
+                       edges=(SheafEdge(kind="equivalence", u="a", v="b", weight=2.0, sign=1),))
+    h = consistency_headline(s)
+    r = consistency_report(s)
+    assert h.inconsistency_energy == r.inconsistency_energy
+    assert h.spectral_gap == r.spectral_gap

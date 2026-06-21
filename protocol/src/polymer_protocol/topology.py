@@ -25,6 +25,7 @@ from polymer_grammar import (
 
 from .base import _Model
 from .corpus import Corpus
+from .sheaf import ConsistencyHeadline
 
 # Bump when the topology/timeline wire shape changes incompatibly, so the viewer can
 # detect drift against a contract it was built for (audit #10).
@@ -87,6 +88,7 @@ class TopologyExport(_Model):
     clusters: tuple[TopologyCluster, ...] = ()
     layout_id: str
     contract_version: str = CONTRACT_VERSION
+    consistency: ConsistencyHeadline | None = None      # additive; filled umbrella-side when [embed] present
 
 
 def _effective_set(corpus: Corpus) -> frozenset[tuple[str, str]]:
