@@ -14,6 +14,8 @@ from pydantic import Field
 
 from polymer_grammar import Status
 from polymer_grammar.base import _Model
+from polymer_grammar.fdr import FDRTest
+from polymer_grammar.licensing import Satisfaction
 from polymer_claims._hashing import canonical_sha256
 from polymer_claims.contracts import _DIR as _CONTRACTS_DIR
 from polymer_claims.contracts import load_contract
@@ -33,8 +35,9 @@ class DigestSet(_Model):
 class Annotations(_Model):
     role: str | None = None
     dimnames_hash: str | None = Field(default=None, alias="dimnamesHash")
-    semantic_run_ids: tuple[str, ...] | None = Field(default=None, alias="semanticRunIds")
     raw_implementation_hash: str | None = Field(default=None, alias="rawImplementationHash")
+    raw_profile_hash: str | None = Field(default=None, alias="rawProfileHash")
+    semantic_run_ids: tuple[str, ...] | None = Field(default=None, alias="semanticRunIds")
 
 
 class ResourceDescriptor(_Model):
@@ -156,7 +159,7 @@ def _subject(claim) -> Subject:
     return Subject(name=claim.id, digest=DigestSet(sha256=_bare_hex(canonical_sha256(claim.model_dump(mode="json")))))
 
 
-def distinct_cohort_reps(licensing) -> tuple:
+def distinct_cohort_reps(licensing) -> tuple[Satisfaction, ...]:
     """One representative Satisfaction per distinct non-None dimnames_hash, deterministic
     (ascending dimnames_hash, first occurrence). Umbrella-local mirror of grammar's private
     `_distinct_cohort_reps` (parity-guarded in tests) to keep this slice umbrella-only."""
@@ -172,7 +175,7 @@ def distinct_cohort_reps(licensing) -> tuple:
     return tuple(reps)
 
 
-def _fdr_test_for(ledger, claim_id: str):
+def _fdr_test_for(ledger, claim_id: str) -> FDRTest | None:
     """First non-retracted FDR test for this claim id, or None."""
     for t in ledger.tests:
         if t.claim_id == claim_id and not t.retracted:
@@ -264,12 +267,16 @@ def _resolved_dependencies(licensing, contract_index):
             bucket.add(s.materialization.semantic_run_id)
     for ph in sorted(run_ids_by_profile):
         rids = tuple(sorted(run_ids_by_profile[ph]))
+        digest = _digest_or_none(ph)
+        raw_ph = ph if digest is None else None
         deps.append(
             ResourceDescriptor(
                 name="analysis-profile",
-                digest=_digest_or_none(ph),
+                digest=digest,
                 annotations=Annotations(
-                    role="apparatus", semantic_run_ids=rids if rids else None
+                    role="apparatus",
+                    raw_profile_hash=raw_ph,
+                    semantic_run_ids=rids if rids else None,
                 ),
             )
         )
@@ -311,10 +318,11 @@ def _dep_sort_key(d) -> tuple:
     sha = d.digest.sha256 if d.digest else ""
     rids = d.annotations.semantic_run_ids if d.annotations else None
     first_rid = rids[0] if rids else ""
-    return (role, d.name, d.uri or "", sha, first_rid)
+    raw_ph = d.annotations.raw_profile_hash if d.annotations else None
+    return (role, d.name, d.uri or "", sha, first_rid, raw_ph or "")
 
 
-def _statement(claim, ledger, contract_index, registry):
+def _statement(claim, ledger, contract_index, registry) -> tuple[Statement, tuple[DrsObject, ...], tuple[str, ...]]:
     lic = claim.licensing
     deps, drs_objects, unresolved = _resolved_dependencies(lic, contract_index)
     deps = tuple(sorted(deps, key=_dep_sort_key))

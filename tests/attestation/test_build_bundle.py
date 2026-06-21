@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from polymer_grammar import Status
+from polymer_grammar.licensing import IndependenceTier
 
-from polymer_claims.attestation import build_attestation_bundle
+from polymer_claims.attestation import _resolved_dependencies, build_attestation_bundle
 from tests.attestation._fixtures import corpus_with, licensed_claim, licensing, mc, sat
 
 
@@ -88,3 +89,25 @@ def test_public_api_exports():
     assert "build_attestation_bundle" in pc.__all__
     assert "AttestationBundle" in pc.__all__
     assert "resolve_contract_index" in pc.__all__
+
+
+def test_non_sha256_profile_hashes_deterministic_order_and_raw_annotation():
+    """Two apparatus deps with distinct non-sha256 profile hashes must sort deterministically
+    across repeated calls, and each must carry the expected rawProfileHash annotation."""
+    lic = licensing(
+        sat(mc(dimnames_hash="sha256:" + "a" * 64, profile_hash="p2")),
+        sat(mc(dimnames_hash="sha256:" + "b" * 64, profile_hash="p1")),
+        independence_tier=IndependenceTier.REPLICATED,
+    )
+    deps1, _, _ = _resolved_dependencies(lic, {})
+    deps2, _, _ = _resolved_dependencies(lic, {})
+    # Results must be identical across two calls (determinism)
+    assert deps1 == deps2
+    # Apparatus deps, sorted by raw_profile_hash (p1 < p2)
+    apparatus = [d for d in deps1 if d.annotations.role == "apparatus"]
+    assert len(apparatus) == 2
+    raw_hashes = [d.annotations.raw_profile_hash for d in apparatus]
+    assert raw_hashes == sorted(raw_hashes), "apparatus deps not in deterministic order"
+    assert set(raw_hashes) == {"p1", "p2"}
+    # Each apparatus dep should have no sha256 digest (non-sha256 input)
+    assert all(d.digest is None for d in apparatus)

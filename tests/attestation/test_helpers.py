@@ -11,10 +11,11 @@ from polymer_claims.attestation import (
     _builder,
     _digest_or_none,
     _external_parameters,
+    _fdr_test_for,
     _internal_parameters,
+    _resolved_dependencies,
     _subject,
     distinct_cohort_reps,
-    _resolved_dependencies,
 )
 from polymer_claims.contracts import AccessMethod, Checksum, SEContractRef
 
@@ -201,3 +202,19 @@ def test_builder_registry_nonsha_hash_omits_digest_keeps_raw():
     dep = builder.builder_dependencies[0]
     assert dep.digest is None
     assert dep.annotations.raw_implementation_hash == "h1"
+
+
+def test_fdr_test_for_skips_retracted_returns_live():
+    """_fdr_test_for must skip retracted entries and return the first live match."""
+    retracted = FDRTest(index=1, claim_id="c1", e_value=1.0, alpha_allocated=0.05, discovery=True, retracted=True)
+    live = FDRTest(index=2, claim_id="c1", e_value=2.0, alpha_allocated=0.025, discovery=True)
+    ledger = FDRLedger(target_fdr=0.05, tests=(retracted, live))
+    result = _fdr_test_for(ledger, "c1")
+    assert result is live
+
+
+def test_fdr_test_for_only_retracted_returns_none():
+    """When every matching test is retracted, _fdr_test_for returns None."""
+    retracted = FDRTest(index=1, claim_id="c1", e_value=1.0, alpha_allocated=0.05, discovery=True, retracted=True)
+    ledger = FDRLedger(target_fdr=0.05, tests=(retracted,))
+    assert _fdr_test_for(ledger, "c1") is None
