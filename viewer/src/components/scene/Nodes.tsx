@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { Billboard, Line, Html } from '@react-three/drei';
 import { Color } from 'three';
 import { ThreeEvent } from '@react-three/fiber';
-import { COLOR, STATUS_COLOR, FONT_FAMILY_MONO } from '@/config/theme';
+import { COLOR, STATUS_COLOR, FONT_FAMILY_MONO, tensionScale } from '@/config/theme';
 import { useViewer } from '@/store';
 import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
 import type { InterpNode } from '@/lib/interpolate';
@@ -42,11 +42,20 @@ function ringPoints(radius: number): [number, number, number][] {
   return pts;
 }
 
+// Tension halo disc radius — between node body and hover ring (r·1.7).
+// Hover ring: r·1.7 | Halo disc: r·1.35 | FDR ring: r·2.25 — no collision.
+const HALO_RADIUS_FACTOR = 1.35;
+
 function NodeMesh({ node }: { node: InterpNode }) {
   const hoveredId = useViewer((s) => s.hoveredId);
   const selectedId = useViewer((s) => s.selectedId);
   const setHovered = useViewer((s) => s.setHovered);
   const setSelected = useViewer((s) => s.setSelected);
+
+  // Consistency overlay data
+  const overlayOn = useViewer((s) => s.overlayOn);
+  const tensionByClaimId = useViewer((s) => s.tensionByClaimId);
+  const maxTension = useViewer((s) => s.maxTension);
 
   const color = crossfadeColor(node.prevStatus, node.status, node.statusT);
   const r = nodeRadius(node.strength);
@@ -62,6 +71,18 @@ function NodeMesh({ node }: { node: InterpNode }) {
       ? COLOR.accent.teal
       : COLOR.border.strong;
   const ledgerOpacity = node.fdr_retracted ? 0.9 : node.fdr_discovery ? 0.85 : 0.55;
+
+  // Tension halo — only computed when the overlay is on and this node has tension data.
+  const rawTension = overlayOn ? tensionByClaimId[node.id] : undefined;
+  const hasTension = overlayOn && rawTension !== undefined;
+  // t01 ∈ [0,1]; guard against maxTension === 0 (all nodes at rest → no halo).
+  const t01 = hasTension && maxTension > 0 ? rawTension / maxTension : 0;
+  const haloColor = hasTension && maxTension > 0 ? tensionScale(t01) : '#000000';
+  // Opacity: min 0.15 so even low-tension nodes show a faint halo; max 0.72.
+  const haloOpacity = hasTension && maxTension > 0
+    ? 0.15 + t01 * 0.57
+    : 0;
+  const haloR = r * HALO_RADIUS_FACTOR;
 
   // enter/exit: scale the whole group toward 0 and fade the material.
   const scale = Math.max(node.scale, 0.0001);
@@ -83,6 +104,22 @@ function NodeMesh({ node }: { node: InterpNode }) {
 
   return (
     <group position={node.position} scale={scale}>
+      {/* Tension halo — soft billboarded disc, radius r·1.35 (between node and hover ring r·1.7).
+          Fully gated: renders ONLY when overlayOn && node has a tension entry && maxTension > 0. */}
+      {hasTension && maxTension > 0 && (
+        <Billboard>
+          <mesh position={[0, 0, -0.001]}>
+            <circleGeometry args={[haloR, 48]} />
+            <meshBasicMaterial
+              color={haloColor}
+              transparent
+              opacity={haloOpacity * node.opacity}
+              depthWrite={false}
+            />
+          </mesh>
+        </Billboard>
+      )}
+
       <mesh onPointerOver={onOver} onPointerOut={onOut} onClick={onClick}>
         {node.is_representation_revision ? (
           <octahedronGeometry args={[r * 1.25, 0]} />
