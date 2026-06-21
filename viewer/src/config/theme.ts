@@ -151,6 +151,41 @@ export const DEFEAT_KINDS = [
   'reinterpret',
 ] as const;
 
+// ── Consistency / Energy heat scale ───────────────────────────────────────
+// 3-stop gradient: teal (low) → amber (mid) → rose (high).
+// `tensionScale(t01)` accepts a value in [0, 1] and returns a hex colour.
+// Stops are anchored at the D2 accent tokens; lerp is in linear RGB.
+
+const HEAT_STOPS: [number, number, number][] = [
+  // #08A097 — teal
+  [0x08, 0xa0, 0x97],
+  // #B45309 — amber
+  [0xb4, 0x53, 0x09],
+  // #BE123C — rose
+  [0xbe, 0x12, 0x3c],
+];
+
+function _lerpHeat(t: number): string {
+  const clamped = Math.max(0, Math.min(1, t));
+  // segment: 0→0.5 maps to stop 0→1; 0.5→1 maps to stop 1→2
+  const seg = clamped < 0.5 ? 0 : 1;
+  const local = clamped < 0.5 ? clamped / 0.5 : (clamped - 0.5) / 0.5;
+  const a = HEAT_STOPS[seg];
+  const b = HEAT_STOPS[seg + 1];
+  const r = Math.round(a[0] + (b[0] - a[0]) * local);
+  const g = Math.round(a[1] + (b[1] - a[1]) * local);
+  const bv = Math.round(a[2] + (b[2] - a[2]) * local);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${bv.toString(16).padStart(2, '0')}`;
+}
+
+/**
+ * Map a normalised energy value (0 = min tension, 1 = max tension) to a heat
+ * colour: teal → amber → rose.  Values outside [0, 1] are clamped.
+ */
+export function tensionScale(t01: number): string {
+  return _lerpHeat(t01);
+}
+
 // the 6 strength axes, in canonical order (matches polymer_grammar.AXES)
 export const STRENGTH_AXES = [
   'magnitude',

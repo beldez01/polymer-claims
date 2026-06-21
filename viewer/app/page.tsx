@@ -6,6 +6,7 @@ import Header from '@/components/chrome/Header';
 import LegendRail from '@/components/chrome/LegendRail';
 import RightRail from '@/components/chrome/RightRail';
 import TransportBar from '@/components/chrome/TransportBar';
+import EnergyHud from '@/components/chrome/EnergyHud';
 
 // The R3F scene is client-only (WebGL has no SSR). The loading fallback is the
 // D2 mono register on the light canvas — no spinner, no glow.
@@ -51,6 +52,8 @@ export default function Home() {
       <RightRail />
       {/* self-hides until a timeline is loaded */}
       <TransportBar />
+      {/* self-hides when overlayOn=false or no consistency on current frame */}
+      <EnergyHud />
     </main>
   );
 }
