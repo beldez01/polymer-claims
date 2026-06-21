@@ -41,10 +41,13 @@ and tested **before** any viewer work:
   rides **every live frame** (`TopologyExport.consistency`, emitted in `NodeRunner._attach_consistency`,
   `node.py`), do **not** delete the λ₂ field — that would be a subtractive wire break. Instead **retain
   `ConsistencyHeadline.spectral_gap` as `float | None = None`** and have the headline path set it to
-  `None`. λ₂ is populated **only in `consistency_report`** (on-demand). This is schema-stable — the
-  field is retained, so **no `CONTRACT_VERSION` bump** is needed. The HUD's live signal is the falling
-  energy; λ₂ comes from the pulled report. Update the `consistency_headline` test to assert no
-  eigendecomposition and `spectral_gap is None`.
+  `None`. λ₂ is populated **only in `consistency_report`** (on-demand). This is **schema-compatible for
+  current first-party consumers** — the field is retained (its value goes numeric→`null` on the live
+  headline) and the TS viewer does not yet model it, so **no `CONTRACT_VERSION` bump** is needed.
+  Nullable is the right design here; strict numeric compatibility would instead need a sentinel value or
+  a separate `live_spectral_gap_available` flag. The HUD's live signal is the falling energy; λ₂ comes
+  from the pulled report. Update the `consistency_headline` test to assert no eigendecomposition and
+  `spectral_gap is None`.
 - **P2 — `/consistency` must not hold the tick lock during compute.** Acquire the runner `lock` only
   long enough to **snapshot `runner.corpus`** (a reference grab — `Corpus` is a frozen, immutable
   model, so the snapshot is safe to read without the lock), **release**, then run
@@ -55,10 +58,14 @@ and tested **before** any viewer work:
   be negative** — invalid as an opacity. Keep the `per_claim_tension` field but recompute it as the
   **edge-share attribution** `tension_i = Σ_{e incident to i} w_e · d_e² / 2`, normalized by total edge
   weight. This is **nonnegative**, still sums to the inconsistency energy, and is directly
-  interpretable ("how much edge tension touches this claim"). Update `sheaf_spectrum.py` + its test.
+  interpretable ("how much edge tension touches this claim"). The attribution must **defensively skip
+  self-loop / malformed edges** (an endpoint not a participating vertex) even though the extractor
+  should never produce them. Update `sheaf_spectrum.py` + its test.
 
-**Schema discipline (resolves the additive-vs-subtractive concern):** P1 is **schema-stable** (retains
-`spectral_gap` as Optional, set `None` by the headline path — no wire break, no version bump). P3 keeps
+**Schema discipline (resolves the additive-vs-subtractive concern):** P1 is **schema-compatible for
+current first-party consumers** (retains `spectral_gap` as Optional; its value goes numeric→`None` on
+the live headline). This is a *semantic* change (number→null) for any client reading the live λ₂, not a
+structural field removal — and the TS viewer doesn't model the field yet, so no version bump. P3 keeps
 the same `per_claim_tension` field and changes only how it is **computed** (nonnegative edge-share, same
 units, still sums to energy). The only runtime consumers today are the `export-consistency` CLI + tests,
 and the viewer doesn't yet read these — so both are explicit, versioned schema corrections, not silent
@@ -104,9 +111,11 @@ RICH, throttled pull:   GET /consistency ──(lock: snapshot corpus → releas
 ## 5. Backend — one new route
 
 `GET /consistency` in `src/polymer_claims/server.py` (uses the P2 snapshot pattern):
-- Acquire `lock` → take `corpus = runner.corpus` → release lock. Then in `asyncio.to_thread`, lazily
-  import `extract_sheaf` (protocol) + `consistency_report` (`sheaf_spectrum`, `[embed]`), wrapped in
-  `try/except ImportError`.
+- Acquire `lock` → take `corpus = runner.corpus` → release lock. Then run the work in
+  `asyncio.to_thread`; the lazy import of `extract_sheaf` (protocol) + `consistency_report`
+  (`sheaf_spectrum`, `[embed]`) and its `try/except ImportError` live **inside the worker function**
+  (the import executes in the thread, so the ImportError is raised there) — the worker returns a
+  sentinel the route maps to `{available:false}`. Do not wrap only the `await`.
 - **Response is a discriminated union:** `{ "available": false }` (HTTP 200) when numpy is absent;
   otherwise `{ "available": true, ...ConsistencyReport.model_dump() }`. The UI keys "disabled" off
   `available === false` — distinct from a real `available:true` report whose `h1_obstructions` is
@@ -212,6 +221,11 @@ forwarding) → **(4) store + `useConsistencySync` hook** → **(5) R3F visuals 
 work (5) should be built via the **frontend-design** skill; P1–P3, the route, types, and store are
 ordinary TDD tasks.
 
+**Carry-forward implementation notes:** (a) P3's edge-share attribution guards self-loop / malformed
+edges defensively; (b) `/consistency` catches `ImportError` **inside** the `to_thread` worker (not
+around the `await`), since the lazy import runs in the thread; (c) `ConsistencyHeadline.spectral_gap` is
+nullable — first-party-compatible, a number→null semantic change, not a structural removal.
+
 ## 10. Future enrichments (deferred)
 
 - **Rich layer in sample mode** — bundle a static `ConsistencyReport` fixture or precompute per-frame
@@ -242,7 +256,7 @@ ordinary TDD tasks.
 **Round 2:**
 | Finding | Resolution |
 |---|---|
-| 1/2. P1 removal is a wire break, not additive | **Retain `spectral_gap` as `float \| None = None`** (schema-stable, no `CONTRACT_VERSION` bump); headline sets it `None` (§2) |
+| 1/2. P1 removal is a wire break, not additive | **Retain `spectral_gap` as `float \| None = None`** — schema-compatible for first-party consumers (numeric→null semantic change, no `CONTRACT_VERSION` bump); headline sets it `None` (§2) |
 | 3. P3 1e-9 tolerance too strict vs 6-dp rounding | Assert unrounded ~1e-9 **or** public DTO to `n_claims·1e-6` (§8) |
 | 4. P2 "inspection" too weak | Real **concurrency test**: block `consistency_report`, assert `/step` not serialized (§8) |
 | 5. "byte-for-byte" wrong (payload carries `consistency`) | Invariant is **rendered view** unchanged, not network JSON (§3, one-liner) |
