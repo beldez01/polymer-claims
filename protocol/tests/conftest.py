@@ -8,6 +8,7 @@ from polymer_grammar import (
     Comparator,
     ComputeGraph,
     Dimension,
+    EquivalenceClaim,
     EvaluationPlan,
     FDRLedger,
     IdentityAdapter,
@@ -23,8 +24,6 @@ from polymer_grammar import (
     Status,
     StrengthVector,
 )
-
-from polymer_grammar import EquivalenceClaim
 
 from polymer_protocol.corpus import Corpus
 
@@ -118,7 +117,6 @@ def _make_quantity_claim(
         status=status,
         pending_reason=pending_reason,
     )
-
 
 
 @pytest.fixture

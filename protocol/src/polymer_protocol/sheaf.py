@@ -7,7 +7,7 @@ Design: docs/superpowers/specs/2026-06-21-sheaf-consistency-gauge-design.md.
 """
 from __future__ import annotations
 
-from polymer_grammar import Status
+from polymer_grammar import Status, effective_defeats
 
 from .base import _Model
 from .corpus import Corpus
@@ -66,6 +66,40 @@ def _commensurable(a: SheafVertex, b: SheafVertex) -> bool | None:
     return True
 
 
+def _check_commensurable(
+    a: SheafVertex,
+    b: SheafVertex,
+    left_id: str,
+    right_id: str,
+    flags: list[DataQualityFlag],
+) -> bool:
+    """Call _commensurable, append the correct DataQualityFlag on mismatch, return True only when an edge should be built."""
+    comm = _commensurable(a, b)
+    if comm is None:
+        flags.append(DataQualityFlag(
+            kind="dimension_mismatch",
+            claim_ids=(left_id, right_id),
+            detail=f"{a.dimension_sig} vs {b.dimension_sig}",
+        ))
+        return False
+    if comm is False:
+        flags.append(DataQualityFlag(
+            kind="unit_mismatch",
+            claim_ids=(left_id, right_id),
+            detail=f"{a.unit!r} vs {b.unit!r}",
+        ))
+        return False
+    return True
+
+
+def _attacker_evalue(latest: dict, claim_id: str) -> float:
+    """Return the attacker's latest non-retracted e-value, or 1.0 as the neutral fallback."""
+    t = latest.get(claim_id)
+    if t is None or t.retracted or t.e_value is None:
+        return 1.0
+    return float(t.e_value)
+
+
 def extract_sheaf(
     corpus: Corpus,
     *,
@@ -104,22 +138,21 @@ def extract_sheaf(
         if eq.left not in vmap or eq.right not in vmap:
             continue
         a, b = vmap[eq.left], vmap[eq.right]
-        comm = _commensurable(a, b)
-        if comm is None:
-            flags.append(DataQualityFlag(
-                kind="dimension_mismatch",
-                claim_ids=(eq.left, eq.right),
-                detail=f"{a.dimension_sig} vs {b.dimension_sig}",
-            ))
-            continue
-        if comm is False:
-            flags.append(DataQualityFlag(
-                kind="unit_mismatch",
-                claim_ids=(eq.left, eq.right),
-                detail=f"{a.unit!r} vs {b.unit!r}",
-            ))
+        if not _check_commensurable(a, b, eq.left, eq.right, flags):
             continue
         u, v = sorted((eq.left, eq.right))
         edges.append(SheafEdge(kind="equivalence", u=u, v=v, weight=float(eq.severity), sign=1))
+
+    strength = {c.id: c.strength for c in corpus.claims}
+    licensed = frozenset(c.id for c in corpus.claims if c.status == Status.LICENSED)
+    eff = effective_defeats(corpus.defeat_edges, strength, licensed_ids=licensed)
+    latest = {t.claim_id: t for t in corpus.fdr_ledger.tests}   # last write wins = latest test per claim
+    for src, tgt in sorted(eff):
+        if src not in vmap or tgt not in vmap:
+            continue                                            # synthetic ':' source or non-quantity endpoint
+        a, b = vmap[src], vmap[tgt]
+        if not _check_commensurable(a, b, src, tgt, flags):
+            continue
+        edges.append(SheafEdge(kind="defeat", u=src, v=tgt, weight=_attacker_evalue(latest, src), sign=-1))
 
     return SheafStructure(vertices=tuple(vertices), edges=tuple(edges), flags=tuple(flags))
