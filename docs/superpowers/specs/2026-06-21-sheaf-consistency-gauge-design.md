@@ -115,11 +115,17 @@ Weighted sheaf Laplacian `L = δᵀ W δ` over the scalar stalks. Computed **per
   gauge; a separate, structure-only consensus readout.
 - **`h0_dim`** `= dim ker L` — the consistent-world degrees of freedom (≈ count of independent consensus
   clusters / global sections).
-- **`h1_obstructions`** — the differentiator. On a graph sheaf these live on the **cycle space**. A cycle
-  carries an obstruction iff it is **closed but inexact** (its discrepancies are locally consistent yet
-  admit no global value assignment) — equivalently, nontrivial holonomy / a nonzero harmonic H¹
-  representative around the loop. Each is returned **localized**: the `claim_ids` and `edges` on the
-  cycle plus a scalar `magnitude`. *This is the contradiction no pairwise check sees.*
+- **`h1_obstructions`** — the differentiator. On a graph sheaf these live on the **cycle space**, and
+  with scalar stalks they are exactly **signed-graph frustration**: a cycle's **holonomy** is the product
+  of its edge signs (and, once a unit-conversion registry exists, its unit-ratios ρ). A cycle is
+  **frustrated** — carries an obstruction — iff holonomy = −1, i.e. it contains an **odd number of defeat
+  (sign-flip) edges**: each edge is individually satisfiable, but no nonzero value assignment satisfies
+  the whole loop (e.g. `A ≡ B`, `B ≡ C`, `C ⊣ A`). Detected and localized by signed BFS (2-coloring): a
+  back-edge that violates the running labels witnesses a frustrated **fundamental cycle**, returned as an
+  `Obstruction(claim_ids, edges, magnitude)`. *This is the contradiction no pairwise check sees.* (With
+  ρ=1 throughout slice 1, equivalence-only cycles are always balanced; ρ≠1 holonomy arrives with the
+  future unit-conversion registry, §8.) Frustration also shows in the spectrum — an unbalanced component
+  has no zero eigenvalue — giving `h0_dim` / H¹ a built-in cross-check.
 - **`per_claim_tension`** — each claim's contribution to `inconsistency_energy` (its rows of `x*ᵀ L x*`),
   so blame is localizable to the specific claim dragging consensus down.
 
@@ -174,8 +180,9 @@ Corpus ──extract_sheaf()──▶ SheafStructure ──consistency_report()�
 **Spectrum (umbrella, `[embed]`), against analytic answers:**
 - one equivalence edge, agreeing values → `energy = 0`, `h0_dim = 1`; disagreeing → `energy = w·d²`
   (after normalization).
-- **the differentiator test:** a 3-cycle of equivalences, pairwise-satisfiable but with nontrivial
-  holonomy / no global assignment → one `h1_obstruction` localized to those three claims.
+- **the differentiator test:** a frustrated mixed cycle `A ≡ B`, `B ≡ C`, `C ⊣ A` (odd defeat count) —
+  pairwise-satisfiable but with no global assignment → one `h1_obstruction` localized to those three
+  claims; the balanced control (`C ≡ A` instead) yields none.
 - **defeat sign:** two equal-valued claims + a defeat edge → `defeat_energy = w·(2x)²` while an
   equivalence would give `0` — confirms antagonism, and confirms the equivalence/defeat split.
 - **monotonicity ("grows toward truth"):** move two equivalent claims' values closer → `energy`
@@ -210,7 +217,8 @@ Corpus ──extract_sheaf()──▶ SheafStructure ──consistency_report()�
 
 ## 9. Open questions for the plan stage
 
-- Exact H¹ localization algorithm (cycle-basis choice + harmonic representative) and its cost bound;
-  confirm it stays off the per-tick path.
+- H¹ localization is resolved as **signed-BFS frustration detection** (fundamental cycle per violating
+  back-edge), O(V+E) — confirm it stays off the per-tick path (it does: only the cheap energy + λ₂
+  headline runs live).
 - Status-multiplier defaults for PENDING equivalences (weight vs exclude).
 - Whether `export-consistency` reads a corpus JSON only, or also a live node snapshot.
