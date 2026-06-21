@@ -201,6 +201,23 @@ def _cmd_export_topology(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_export_consistency(args: argparse.Namespace) -> int:
+    corpus = load_corpus(args.corpus)
+    from polymer_protocol import extract_sheaf  # pure
+    try:
+        from .sheaf_spectrum import consistency_report  # lazy: base import stays numpy-free
+    except ImportError:
+        print(
+            "export-consistency needs the [embed] extra (numpy). "
+            "Install: pip install 'polymer-claims[embed]'",
+            file=sys.stderr,
+        )
+        return 1
+    report = consistency_report(extract_sheaf(corpus))
+    _write_or_print(report.model_dump_json(), args.out)
+    return 0
+
+
 def _cmd_export_timeline(args: argparse.Namespace) -> int:
     corpus = load_corpus(args.corpus)
     timeline = export_timeline(corpus, _ADAPTERS, _CTX, n_cycles=args.cycles)
@@ -423,6 +440,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p_topo.add_argument("corpus", help="path to a corpus JSON file")
     p_topo.add_argument("--out", default=None, help="write TopologyExport JSON here")
     p_topo.set_defaults(func=_cmd_export_topology)
+
+    p_cons = sub.add_parser("export-consistency", help="emit a ConsistencyReport (sheaf gauge) — needs [embed]")
+    p_cons.add_argument("corpus", help="path to a corpus JSON file")
+    p_cons.add_argument("--out", default=None, help="write ConsistencyReport JSON here")
+    p_cons.set_defaults(func=_cmd_export_consistency)
 
     p_tl = sub.add_parser(
         "export-timeline", help="emit a warm-started TopologyTimeline across N cycles"

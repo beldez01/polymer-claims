@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 
+import pytest
 from polymer_protocol import Corpus, TopologyExport, TopologyTimeline
 
 from polymer_claims.cli import main
@@ -150,3 +151,16 @@ def test_export_timeline_stdout_is_clean_json(capsys, tmp_path):
     assert rc == 0
     TopologyTimeline.model_validate_json(out.out)
     assert "frames:" in out.err
+
+
+# ---------------------------------------------------------------------------
+# export-consistency
+# ---------------------------------------------------------------------------
+def test_export_consistency_emits_report(tmp_path, capsys):
+    pytest.importorskip("numpy")
+    path = tmp_path / "corpus.json"
+    path.write_text(licensing_corpus().model_dump_json())
+    rc = main(["export-consistency", str(path)])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert "inconsistency_energy" in out and "h0_dim" in out
