@@ -148,3 +148,19 @@ def _digest_or_none(value: str | None) -> DigestSet | None:
 def _subject(claim) -> Subject:
     """in-toto subject for a licensed claim: name = claim.id, digest = canonical claim hash."""
     return Subject(name=claim.id, digest=DigestSet(sha256=_bare_hex(canonical_sha256(claim.model_dump(mode="json")))))
+
+
+def distinct_cohort_reps(licensing) -> tuple:
+    """One representative Satisfaction per distinct non-None dimnames_hash, deterministic
+    (ascending dimnames_hash, first occurrence). Umbrella-local mirror of grammar's private
+    `_distinct_cohort_reps` (parity-guarded in tests) to keep this slice umbrella-only."""
+    seen: set[str] = set()
+    reps = []
+    for s in licensing.satisfactions:
+        h = s.materialization.dimnames_hash
+        if h is None or h in seen:
+            continue
+        seen.add(h)
+        reps.append(s)
+    reps.sort(key=lambda s: s.materialization.dimnames_hash)
+    return tuple(reps)
