@@ -47,6 +47,15 @@ Provenance v1" means "the current v1.x Build Provenance shape," not v1.0 specifi
   No existing export, model, or command is touched. `Corpus` stays exactly 4 collections.
 - **Frozen models:** all new DTOs subclass `_Model` (frozen, `extra="forbid"`); collection fields are
   **tuples**, never `dict`/`list`.
+- **SLSA JSON maps as typed DTOs.** SLSA/in-toto have JSON *objects* with map-like values (`digest`,
+  `externalParameters`, `internalParameters`, `annotations`). We preserve the no-`dict` invariant by
+  modeling each as a **typed frozen DTO with fixed, optional fields** (we control exactly which keys we
+  emit), serialized with `exclude_none` so unset keys vanish. Concretely: `DigestSet{ sha256 }`;
+  `ExternalParameters{ claimId, patternId, licenseRoute, rivalSetClosure, targetFdr?, fdrTestIndex?,
+  fdrAlphaAllocated?, fdrEValue? }`; `InternalParameters{ independenceTier, severityProvenance?,
+  sharedCauseOverlap? }`; a single `Annotations{ role?, dimnamesHash?, semanticRunIds?,
+  rawImplementationHash?, independenceWitnessed? }` superset reused across descriptors. No open
+  `dict[str, Any]` fields anywhere.
 - **No clock.** Timestamps are deliberately omitted (SLSA marks them optional) so output is
   deterministic and the no-clock invariant holds.
 - **TDD:** failing test first; per-package gate `uv run pytest -q` + `uv run ruff check src tests`.
@@ -109,8 +118,9 @@ Statement:
 predicate:
   buildDefinition:
     buildType: "https://polymerclaims.org/recompute-gate/v1"
-    externalParameters:
-      claimId, pattern, licenseRoute, rivalSetClosure, criterion: "e-value/FDR (e-LOND)"
+    externalParameters:                               # scalar policy inputs (no claim-artifact parsing)
+      claimId, patternId, licenseRoute, rivalSetClosure,
+      targetFdr?, fdrTestIndex?, fdrAlphaAllocated?, fdrEValue?   # from the corpus fdr_ledger entry, when present
     internalParameters:                               # CLAIM-level only (single-valued)
       independenceTier,
       severityProvenance?, sharedCauseOverlap?        # ?-fields omitted (exclude_none) when None
@@ -126,7 +136,7 @@ predicate:
         annotations: { role: "apparatus", semanticRunIds: (<sorted tuple of run ids>) }  # see note
   runDetails:
     builder:
-      id: "https://polymerclaims.org/recompute-gate/v1"   # resolves to the build-type/security-model doc
+      id: "https://polymerclaims.org/recompute-gate/v1"   # stable id; INTENDED to resolve to the security-model doc
       builderDependencies:                                 # the air-gap witnesses (security-relevant; see note)
         - name: <credential_id_1>, digest:{ sha256:<implementation_hash> }, annotations:{role:"adapter"}
         - name: <credential_id_2>, digest:{ sha256:<implementation_hash> }, annotations:{role:"adapter"}
@@ -139,9 +149,17 @@ predicate:
   core security guarantee is **independence** (two air-gapped adapters, distinct owner + distinct
   `implementation_hash`, from `independent_credential_pair(registry, satisfaction.credential_ids)`).
   The adapters are therefore part of the gate's trusted boundary, which is why they belong in
-  `builderDependencies` rather than `resolvedDependencies` (workload inputs) or `byproducts`. This trust
-  boundary is documented at the `buildType` / `builder.id` URI
-  (`https://polymerclaims.org/recompute-gate/v1` resolves to the build-type + security-model doc).
+  `builderDependencies` rather than `resolvedDependencies` (workload inputs) or `byproducts`. In slice 1
+  the `buildType` / `builder.id` URI (`https://polymerclaims.org/recompute-gate/v1`) is treated as an
+  **opaque stable identifier** and is **intended to resolve** to a published build-type + security-model
+  doc; actually publishing that document is a tracked follow-up (§9), not a slice-1 deliverable — so the
+  spec does not claim the URL is live.
+- **externalParameters are scalars, not the claim artifact.** `claimId`, `patternId`, `licenseRoute`,
+  `rivalSetClosure` come from the claim/licensing; `targetFdr`, `fdrTestIndex`, `fdrAlphaAllocated`,
+  `fdrEValue` are pulled from the corpus `fdr_ledger` entry for this claim **when present** (omitted via
+  `exclude_none` otherwise). Surfacing these as scalars lets a downstream policy verifier check the FDR
+  budget without re-parsing the whole licensed-claim artifact. (Exact ledger field names are bound in the
+  plan; the builder reads the ledger entry already available in the in-memory `Corpus`.)
 - If **no** independent pair is recorded (legacy / empty `credential_ids`): `builderDependencies: ()`
   and an annotation `independenceWitnessed: false`. We never fabricate witnesses.
 - **Apparatus `semanticRunIds`** is a **sorted tuple** of every run id among the representatives sharing
@@ -188,10 +206,11 @@ One CLI call → one bundle JSON containing both the attestations and their comp
 
 - **Determinism:** sorted `attestations` (by `claim.id`), sorted `drsObjects` (by `id`), tuple
   collections, no clock/random. `resolvedDependencies` sort on a **full stable key** —
-  `(annotations.role, name, uri or "", digest.sha256 or "", first-of annotations.semanticRunIds or "")`
-  — so multiple `analysis-profile` entries (distinct profile hashes) can't tie. `builderDependencies`
-  sort by `(name, digest.sha256 or "")`. A test exports the same corpus twice and asserts byte-identical
-  output.
+  `(annotations.role or "", name, uri or "", digest.sha256 or "", semanticRunIds[0] if semanticRunIds else "")`
+  — so multiple `analysis-profile` entries (distinct profile hashes) can't tie. The final element is the
+  first id of the already-sorted `semanticRunIds` tuple, or `""` when that tuple is empty/absent.
+  `builderDependencies` sort by `(name, digest.sha256 or "")`. A test exports the same corpus twice and
+  asserts byte-identical output.
 - **No LICENSED claims** → empty bundle (`attestations: ()`, `drsObjects: ()`,
   `unresolvedDatasets: ()`), exit 0.
 - **`dimnames_hash` is None** (apparatus-only / `builtin::const` run) → the dataset dependency is
@@ -227,8 +246,11 @@ the repo's frozen-DTO convention. The typed route is preferred for consistency +
   (`buildDefinition.buildType`, `runDetails.builder.id`) are present — asserted structurally, no new
   schema dependency.
 - DRS object shape (`self_uri`, `checksums[].type == "sha-256"`, `access_methods[].access_url.url`).
-- **Cohort-rep parity** (#7): `distinct_cohort_reps` agrees with grammar's private `_distinct_cohort_reps`
-  on shared single- and multi-cohort fixtures, so the umbrella-local copy can't drift.
+- **Cohort-rep correctness** (#7): `distinct_cohort_reps` is verified primarily against **fixture-level
+  expected outputs** (hand-authored single- and multi-cohort licensings → expected representative tuples)
+  — this is the authoritative test and depends on no grammar internals. A **separate, explicitly-marked
+  guard** (`test_cohort_rep_parity_PRIVATE_GUARD`, commented "delete if grammar's `_distinct_cohort_reps`
+  moves/renames") cross-checks parity with the grammar private as a short-term drift alarm only.
 - **Apparatus run-id completeness** (#4): two representatives sharing a `profileHash` but with different
   `semanticRunId`s → the apparatus dep's `semanticRunIds` is the sorted tuple of both (none lost).
 - **Digest normalization** (#6): a credential whose `implementation_hash` is not a valid `sha256:` digest
@@ -259,3 +281,10 @@ Per-package gate: `uv run pytest -q` + `uv run ruff check src tests`.
 Signing, DSSE envelope, Sigstore/cosign, Rekor transparency log, a `[sigstore]` extra; WES / TRS /
 Workflow-Run RO-Crate; FAIR Signposting; Refget SeqCol. Slice 1 is the pure, content-addressed JSON
 shape that any of those can later wrap or sign.
+
+**Tracked follow-ups (not slice-1 deliverables):**
+- **Publish the build-type / security-model doc** at `https://polymerclaims.org/recompute-gate/v1`
+  (the URI is emitted as an opaque stable id in slice 1; the human-readable doc describing the
+  recompute-gate build type + independence security model is published later).
+- **Direct-verifier export mode** (`--format ndjson` / one-Statement-per-file, then DSSE) so a standard
+  in-toto/SLSA verifier can ingest individual Statements without the Polymer bundle envelope.
