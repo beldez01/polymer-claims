@@ -11,10 +11,12 @@
 ## Current state (2026-06-21)
 
 `main` GREEN — **281 umbrella + 396 grammar + 404 protocol + 2 isolation**, ruff
-clean, viewer `tsc` clean. grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**Sheaf
-consistency gauge shipped 2026-06-21**; §E common-cause slice — earn REPLICATED on low shared-cause overlap
+clean, viewer `tsc` clean (full `scripts/check-all.sh` printed **ALL GREEN** incl. `next build` on the merge
+— network was available that run). grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**Sheaf
+consistency gauge shipped + merged to `main` 2026-06-21 — `fe1214d`, `--no-ff`, pushed to origin
+(`main == origin/main`), feature branch deleted**; §E common-cause slice — earn REPLICATED on low shared-cause overlap
 — shipped 2026-06-19, merged; Phase D slice 2 + slice 1 merged 2026-06-19; see NEXT.) **Viewer-build
-caveat:** `npm run typecheck` passes; the `next build` step of `scripts/check-all.sh` currently fails *only*
+caveat:** `npm run typecheck` passes; the `next build` step of `scripts/check-all.sh` can fail *only*
 because the sandbox cannot fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not
 a code defect — the build passed when network was available). All pytest suites + ruff + isolation + viewer
 typecheck are green.
