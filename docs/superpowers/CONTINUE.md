@@ -10,7 +10,7 @@
 
 ## Current state (2026-06-21)
 
-`main` GREEN — **285 umbrella + 396 grammar + 404 protocol + 2 isolation**, ruff
+`main` GREEN — **316 umbrella + 396 grammar + 404 protocol + 2 isolation**, ruff
 clean, viewer `tsc` clean (full `scripts/check-all.sh` printed **ALL GREEN** incl. `next build` on the merge
 — network was available that run). grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**Sheaf
 consistency gauge shipped + merged to `main` 2026-06-21 — `fe1214d`, `--no-ff`, pushed to origin
