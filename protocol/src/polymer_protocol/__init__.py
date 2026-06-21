@@ -93,7 +93,11 @@ from .timeline import (
 )
 from .register import register_hypotheses, register_selected
 from .sheaf import (
+    ClaimTension,
+    ConsistencyHeadline,
+    ConsistencyReport,
     DataQualityFlag,
+    Obstruction,
     SheafEdge,
     SheafStructure,
     SheafVertex,
@@ -203,7 +207,11 @@ __all__ = [
     "SchedulerWeights",
     "next_action",
     # ── sheaf consistency gauge (pure, numpy-free structure) ─────────────
+    "ClaimTension",
+    "ConsistencyHeadline",
+    "ConsistencyReport",
     "DataQualityFlag",
+    "Obstruction",
     "SheafEdge",
     "SheafStructure",
     "SheafVertex",

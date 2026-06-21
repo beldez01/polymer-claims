@@ -42,6 +42,33 @@ class SheafStructure(_Model):
     flags: tuple[DataQualityFlag, ...] = ()
 
 
+class ClaimTension(_Model):
+    claim_id: str
+    tension: float
+
+
+class Obstruction(_Model):
+    claim_ids: tuple[str, ...]
+    edges: tuple[tuple[str, str], ...]
+    magnitude: float
+
+
+class ConsistencyHeadline(_Model):
+    inconsistency_energy: float
+    spectral_gap: float
+
+
+class ConsistencyReport(_Model):
+    inconsistency_energy: float
+    equivalence_energy: float
+    defeat_energy: float
+    spectral_gap: float
+    h0_dim: int
+    h1_obstructions: tuple[Obstruction, ...] = ()
+    per_claim_tension: tuple[ClaimTension, ...] = ()
+    flags: tuple[DataQualityFlag, ...] = ()
+
+
 def _quantity_leaf(claim):
     # Take the FIRST QuantityLeaf encountered (deterministic, since leaves is an ordered tuple).
     # The grammar allows multiple quantity leaves per claim, but for the scalar stalk we
