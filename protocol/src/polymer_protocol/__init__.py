@@ -92,6 +92,13 @@ from .timeline import (
     n_licensed,
 )
 from .register import register_hypotheses, register_selected
+from .sheaf import (
+    DataQualityFlag,
+    SheafEdge,
+    SheafStructure,
+    SheafVertex,
+    extract_sheaf,
+)
 from .verify import verify_stage
 
 # Public API. Grouped by stability/role (audit #12, no-refactor sectioning — the names are
@@ -195,6 +202,12 @@ __all__ = [
     "SchedulerState",
     "SchedulerWeights",
     "next_action",
+    # ── sheaf consistency gauge (pure, numpy-free structure) ─────────────
+    "DataQualityFlag",
+    "SheafEdge",
+    "SheafStructure",
+    "SheafVertex",
+    "extract_sheaf",
     # ── topology / timeline export (the viewer data contract) ─────────────
     "CONTRACT_VERSION",
     "export_topology",
