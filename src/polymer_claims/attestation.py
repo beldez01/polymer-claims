@@ -345,28 +345,44 @@ def _statement(claim, ledger, contract_index, registry) -> tuple[Statement, tupl
     return statement, drs_objects, unresolved
 
 
-def build_attestation_bundle(corpus, *, contract_index, registry=None) -> AttestationBundle:
-    """Deterministic in-toto/SLSA attestation bundle + DRS object docs for a corpus's LICENSED claims.
+class AttestationRecord(_Model):
+    statement: Statement
+    drs_objects: tuple[DrsObject, ...] = ()
+    unresolved: tuple[str, ...] = ()
 
-    Pure: `contract_index` (dimnames_hash -> SEContractRef) and `registry` (AdapterRegistry | None)
-    are injected; no IO/clock/random."""
-    statements = []
-    drs: dict = {}
-    unresolved: set[str] = set()
+
+def build_attestation_records(corpus, *, contract_index, registry=None) -> tuple[AttestationRecord, ...]:
+    """One record (statement + its DRS objects + unresolved dimnames hashes) per LICENSED claim,
+    sorted by claim id. Pure; contract_index + registry injected."""
     licensed = sorted(
         (c for c in corpus.claims if c.status == Status.LICENSED and c.licensing is not None),
         key=lambda c: c.id,
     )
+    records: list[AttestationRecord] = []
     for claim in licensed:
-        statement, drs_objects, claim_unresolved = _statement(
-            claim, corpus.fdr_ledger, contract_index, registry
-        )
-        statements.append(statement)
-        for obj in drs_objects:
+        statement, drs_objects, unresolved = _statement(claim, corpus.fdr_ledger, contract_index, registry)
+        records.append(AttestationRecord(statement=statement, drs_objects=drs_objects, unresolved=unresolved))
+    return tuple(records)
+
+
+def build_attestation_statements(corpus, *, contract_index, registry=None) -> tuple[Statement, ...]:
+    """Projection: just the in-toto Statements (the DSSE export's input)."""
+    return tuple(r.statement for r in build_attestation_records(
+        corpus, contract_index=contract_index, registry=registry))
+
+
+def build_attestation_bundle(corpus, *, contract_index, registry=None) -> AttestationBundle:
+    """Deterministic in-toto/SLSA attestation bundle + DRS object docs for a corpus's LICENSED claims.
+    Pure: contract_index + registry injected; no IO/clock/random."""
+    records = build_attestation_records(corpus, contract_index=contract_index, registry=registry)
+    drs: dict = {}
+    unresolved: set[str] = set()
+    for rec in records:
+        for obj in rec.drs_objects:
             drs[obj.id] = obj
-        unresolved.update(claim_unresolved)
+        unresolved.update(rec.unresolved)
     return AttestationBundle(
-        attestations=tuple(statements),
+        attestations=tuple(r.statement for r in records),
         drs_objects=tuple(drs[k] for k in sorted(drs)),
         unresolved_datasets=tuple(sorted(unresolved)),
     )
