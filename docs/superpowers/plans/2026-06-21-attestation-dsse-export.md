@@ -48,7 +48,7 @@
 - Consumes: existing `_statement`, `Status`, `_Model`, `Statement`, `DrsObject`, `AttestationBundle`.
 - Produces: `AttestationRecord(_Model)`{`statement: Statement`, `drs_objects: tuple[DrsObject,...]=()`, `unresolved: tuple[str,...]=()`}; `build_attestation_records(corpus, *, contract_index, registry=None) -> tuple[AttestationRecord,...]`; `build_attestation_statements(corpus, *, contract_index, registry=None) -> tuple[Statement,...]`. `build_attestation_bundle` keeps its exact signature + output.
 
-- [ ] **Step 1: Capture the real byte-golden (pre-refactor) and commit it**
+- [ ] **Step 1: Capture the real byte-golden (pre-refactor)** — staged now, committed in Step 6 with the rest of the task
 
 Run (writes the *current* bundle JSON, no trailing newline, to the golden file):
 
@@ -67,13 +67,12 @@ This golden is the byte-identical baseline; the refactor must reproduce it exact
 
 - [ ] **Step 2: Write the failing tests**
 
-Append to `tests/attestation/test_build_bundle.py`:
+Append to `tests/attestation/test_build_bundle.py`. **Import the new names INSIDE each test** (not at
+module top) — otherwise a top-level import of not-yet-defined names aborts pytest *collection* for the
+whole module and the golden test can't run pre-refactor:
 
 ```python
-from pathlib import Path
-from polymer_claims.attestation import (
-    AttestationRecord, build_attestation_records, build_attestation_statements,
-)
+from pathlib import Path                      # module-level: stdlib only, safe before the refactor
 
 _GOLDEN = Path(__file__).parent / "_golden_bundle.json"
 
@@ -84,10 +83,12 @@ def _golden_corpus():
     return corpus_with(L("c2"), L("c1"))
 
 def test_bundle_matches_captured_golden():
+    # uses only build_attestation_bundle (already imported at the top of this file) — passes pre-refactor
     out = build_attestation_bundle(_golden_corpus(), contract_index={}).model_dump_json(by_alias=True, exclude_none=True)
     assert out == _GOLDEN.read_text()      # byte-identical to the pre-refactor capture
 
 def test_records_carry_statement_drs_and_unresolved():
+    from polymer_claims.attestation import AttestationRecord, build_attestation_records   # in-body: fails until Task 1 impl
     records = build_attestation_records(_golden_corpus(), contract_index={})
     assert len(records) == 2
     r = records[0]
@@ -96,6 +97,7 @@ def test_records_carry_statement_drs_and_unresolved():
     assert isinstance(r.drs_objects, tuple) and isinstance(r.unresolved, tuple)
 
 def test_statements_projection_equals_records_statements():
+    from polymer_claims.attestation import build_attestation_records, build_attestation_statements  # in-body
     corpus = _golden_corpus()
     assert build_attestation_statements(corpus, contract_index={}) == tuple(
         r.statement for r in build_attestation_records(corpus, contract_index={}))
@@ -104,7 +106,7 @@ def test_statements_projection_equals_records_statements():
 - [ ] **Step 3: Run tests to verify they fail**
 
 Run: `uv run --project . pytest tests/attestation/test_build_bundle.py -q`
-Expected: `test_bundle_matches_captured_golden` PASSES (current code matches its own golden); the two new ones FAIL with `ImportError` (`AttestationRecord`/`build_attestation_records`/`build_attestation_statements` undefined) — that is the RED for the new work.
+Expected: collection succeeds (the new-name imports are in-body). `test_bundle_matches_captured_golden` PASSES (current code matches its own golden, proving the baseline); the two new tests FAIL with `ImportError` at their in-body import (`AttestationRecord`/`build_attestation_records`/`build_attestation_statements` undefined) — that is the RED for the new work.
 
 - [ ] **Step 4: Implement the records extraction**
 
