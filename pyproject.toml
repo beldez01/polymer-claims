@@ -23,6 +23,7 @@ Repository = "https://github.com/beldez01/polymer-claims"
 serve = ["fastapi>=0.110", "uvicorn>=0.27", "sse-starlette>=2"]
 llm = ["anthropic>=0.40"]
 embed = ["numpy>=1.26"]
+calibrate = ["numpy>=1.26"]
 
 [project.scripts]
 polymer-claims = "polymer_claims.cli:main"
