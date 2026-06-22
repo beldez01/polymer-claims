@@ -7,12 +7,33 @@ from __future__ import annotations
 
 import hashlib
 import json
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 
-from polymer_protocol.calibration import GeneratingModelParams
+from polymer_grammar import Comparator, FDRLedger, MaterializationContext, Status
+from polymer_protocol.calibration import (
+    CalibrationLedger,
+    CalibrationTarget,
+    GeneratingModelParams,
+    ResolutionKind,
+    ResolutionRecord,
+    ResolutionVerdict,
+)
+from polymer_protocol.corpus import Corpus
+
+from .contracts import using_contract_root
+from .evidence import evidence_map
+from .materialization import materialization_map
+from .methyl_adapters import (
+    RegionLmCoefAdapter,
+    RegionMeanDiffAdapter,
+    methyl_independent_registry,
+    region_delta_beta_claim,
+)
+from .node import NodeRunner
 
 
 @dataclass(frozen=True)
@@ -87,3 +108,99 @@ def synthetic_cohort(*, model: GeneratingModelParams, batch_id: str, seed: int,
     uid = f"synthetic_{digest}@1"
     write_synthetic_contract(root, uid, samples=samples, probes=all_probes, betas=betas, groups=groups)
     return SyntheticBatch(batch_id, uid, Path(root), tuple(regions), groups)
+
+
+# ---------------------------------------------------------------------------
+# Task 6: end-to-end harness -- runs synthetic batches through the REAL gate
+# ---------------------------------------------------------------------------
+
+_ADAPTERS = (RegionMeanDiffAdapter(), RegionLmCoefAdapter())
+
+
+def run_batch(
+    *, model: GeneratingModelParams, batch_id: str, seed: int
+) -> tuple[ResolutionRecord, ...]:
+    """Generate a synthetic cohort, drive the REAL gate, emit DEFINITIONAL ResolutionRecords.
+
+    One record per LICENSED claim. LICENSED null region -> verdict=FAILED; LICENSED true region ->
+    verdict=UPHELD. Only licensed claims appear (calibration measures the reliability of earned
+    standing). The contract cache is cleared after each batch to avoid cross-batch cache collisions
+    (the lru_cache key includes root, so collisions are impossible in practice, but clearing is safe).
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        batch = synthetic_cohort(model=model, batch_id=batch_id, seed=seed, root=tmp)
+        claims = tuple(
+            region_delta_beta_claim(
+                reg.region_id,
+                ref=f"se:{batch.contract_uid}",
+                region_probes=reg.probes,
+                group_col="Sample_Group",
+                level_a="control",
+                level_b="case",
+                comparator=Comparator.GT,
+                threshold=model.tau,
+            )
+            for reg in batch.regions
+        )
+        truth_of = {reg.region_id: reg.constructed_truth for reg in batch.regions}
+        corpus = Corpus(claims=claims, fdr_ledger=FDRLedger(target_fdr=model.target_fdr))
+        base_ctx = MaterializationContext(
+            id="cal", api_version="v1", data_version=batch.contract_uid
+        )
+
+        with using_contract_root(batch.root):
+            mats = materialization_map(corpus, base_ctx)
+            ev = evidence_map(corpus)
+            # adapter_registry flows through **run_cycle_kwargs into run_cycle; it is NOT a named
+            # kwarg of NodeRunner.__init__. evalue_gate=True but we provide _static_evidence so
+            # tick() uses ev directly rather than recomputing it.
+            runner = NodeRunner(
+                corpus,
+                adapters=_ADAPTERS,
+                ctx=base_ctx,
+                evalue_gate=True,
+                materializations=mats,
+                evidence=ev,
+                adapter_registry=methyl_independent_registry(),
+            )
+            runner.tick()
+            final = runner.corpus
+
+        recs: list[ResolutionRecord] = []
+        for c in final.claims:
+            if c.status != Status.LICENSED:
+                continue
+            truth = truth_of[c.id]
+            recs.append(ResolutionRecord(
+                subject_claim_id=c.id,
+                license_epoch=0,
+                resolution_kind=ResolutionKind.DEFINITIONAL,
+                calibration_target=CalibrationTarget.REALIZED_FDR,
+                verdict=ResolutionVerdict.UPHELD if truth else ResolutionVerdict.FAILED,
+                stated_q=model.target_fdr,
+                observed_at_cycle=0,
+                constructed_truth=truth,
+                model_id=model.model_id,
+                batch_id=batch_id,
+            ))
+        return tuple(recs)
+
+
+def run_calibration(
+    *, model: GeneratingModelParams, n_batches: int, base_seed: int
+) -> CalibrationLedger:
+    """Run `n_batches` synthetic batches through the REAL gate and aggregate into a CalibrationLedger.
+
+    Each batch gets a unique batch_id and seed derived from base_seed + i so that batches are
+    independent but fully reproducible. The ledger records the generating model for the summary's
+    n_generated accounting.
+    """
+    records: list[ResolutionRecord] = []
+    for i in range(n_batches):
+        bid = f"{model.model_id}-{i}"
+        records.extend(run_batch(model=model, batch_id=bid, seed=base_seed + i))
+    return CalibrationLedger(
+        records=tuple(records),
+        generating_models=(model,),
+        default_target_q=model.target_fdr,
+    )
