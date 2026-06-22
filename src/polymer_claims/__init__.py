@@ -40,6 +40,7 @@ from polymer_claims.attestation import (
     build_certificate,
     certificate_dsse_envelope,
     dsse_envelope,
+    render_certificate_text,
     resolve_contract_index,
 )
 
@@ -63,6 +64,7 @@ __all__ = [
     "certificate_dsse_envelope",
     "content_hash",
     "dsse_envelope",
+    "render_certificate_text",
     "load_contract",
     "load_profile",
     "next_action",

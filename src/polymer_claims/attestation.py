@@ -511,3 +511,55 @@ def certificate_dsse_envelope(cert: Certificate) -> DsseEnvelope:
         payload_type=_CERTIFICATE_MEDIA_TYPE,
         payload=base64.b64encode(raw).decode("ascii"),
     )
+
+
+def render_certificate_text(cert: Certificate) -> str:
+    """Human-legible text rendering of a Certificate with the no-laundering invariant.
+
+    The headline q line shows ONLY the definitional realized FDR (mean per-batch FDP).
+    q_anchored / q_attested appear ONLY under the separate "Warrant stability
+    (field calibration ...)" heading — never as the headline. If cert.calibration is
+    None (ledger=None at build time), a standing-only render is emitted with no
+    calibration block."""
+    lines = [f"Polymer Certificate — claim {cert.statement.subject[0].name}"]
+    rep = cert.calibration
+    if rep is None:
+        lines.append("(standing-only — no calibration ledger supplied)")
+        lines.append("")
+        lines.append(cert.interpretation)
+        return "\n".join(lines)
+    d = rep.definitional
+    lines.append(f"Corpus target q: {rep.target_q}")
+    lines.append("Calibration evidence:")
+    # HEADLINE: definitional realized FDR ONLY (the only tier that feeds_headline_q:
+    # kind=DEFINITIONAL, target=REALIZED_FDR — recomputed from kind/target, never a stored bool)
+    if d.realized_rate is None:
+        lines.append("  DEFINITIONAL: no batches yet")
+    else:
+        ci = f"[{d.ci_low:.3f}, {d.ci_high:.3f}]" if d.ci_low is not None else "n/a"
+        lines.append(
+            f"  DEFINITIONAL: {d.n_batches} mixed batches, {d.n_total} licensed;"
+            f" {d.n_failed} false licenses"
+        )
+        lines.append(
+            f"                -> realized FDR (mean per-batch FDP) {d.realized_rate:.3f},"
+            f" 95% CI {ci}"
+            f" (pooled false fraction {d.pooled_rate:.3f})"
+        )
+    # FIELD CALIBRATION: anchored/attested tiers — never the headline q
+    lines.append(
+        "Warrant stability (field calibration — survival under pressure, NOT truth):"
+    )
+    a = rep.anchored
+    if a.n_total:
+        lines.append(
+            f"  ANCHORED: {a.n_total} epochs resolved under pressure; {a.n_failed} failed"
+            f" -> warrant-failure rate {a.realized_rate:.3f}; {a.n_superseded} superseded;"
+            f" {a.n_unresolved} unresolved (span: {rep.observation_span_cycles} cycles)"
+        )
+    else:
+        lines.append("  ANCHORED: no resolved epochs yet")
+    lines.append(f"  ATTESTED: {rep.attested.n_total} attested events")
+    lines.append("")
+    lines.append(f"Interpretation: {cert.interpretation}")
+    return "\n".join(lines)
