@@ -333,6 +333,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+calibrate = [
+    { name = "numpy" },
+]
 embed = [
     { name = "numpy" },
 ]
@@ -360,6 +363,7 @@ dev = [
 requires-dist = [
     { name = "anthropic", marker = "extra == 'llm'", specifier = ">=0.40" },
     { name = "fastapi", marker = "extra == 'serve'", specifier = ">=0.110" },
+    { name = "numpy", marker = "extra == 'calibrate'", specifier = ">=1.26" },
     { name = "numpy", marker = "extra == 'embed'", specifier = ">=1.26" },
     { name = "polymer-grammar", editable = "grammar" },
     { name = "polymer-protocol", editable = "protocol" },
@@ -367,7 +371,7 @@ requires-dist = [
     { name = "sse-starlette", marker = "extra == 'serve'", specifier = ">=2" },
     { name = "uvicorn", marker = "extra == 'serve'", specifier = ">=0.27" },
 ]
-provides-extras = ["serve", "llm", "embed"]
+provides-extras = ["serve", "llm", "embed", "calibrate"]
 
 [package.metadata.requires-dev]
 dev = [
