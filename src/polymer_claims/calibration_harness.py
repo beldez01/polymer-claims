@@ -57,7 +57,7 @@ def _beta_ab(mean: float, dispersion: float) -> tuple[float, float]:
     return mean * dispersion, (1 - mean) * dispersion
 
 
-def write_synthetic_contract(root, uid, *, samples, probes, betas, groups) -> None:
+def write_synthetic_contract(root: Path | str, uid, *, samples, probes, betas, groups) -> None:
     """betas: np.ndarray [n_probes, n_samples] in [0,1]; groups: {sample_id: 'case'|'control'}."""
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
@@ -79,7 +79,7 @@ def write_synthetic_contract(root, uid, *, samples, probes, betas, groups) -> No
 
 
 def synthetic_cohort(*, model: GeneratingModelParams, batch_id: str, seed: int,
-                     root) -> SyntheticBatch:
+                     root: Path | str) -> SyntheticBatch:
     rng = np.random.default_rng(seed)
     n = model.n_per_group
     samples = [f"S{j:03d}" for j in range(2 * n)]

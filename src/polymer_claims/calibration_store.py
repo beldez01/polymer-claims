@@ -35,13 +35,30 @@ def append_records(path, records) -> None:
             fh.write(r.model_dump_json(exclude_none=True) + "\n")
 
 
+def dump_models(path, models) -> None:
+    """Write generating models to a sidecar file alongside the JSONL ledger.
+
+    Writes a JSON array of GeneratingModelParams dicts to `<path>.models.json`.
+    If models is empty, the sidecar is not written (nothing to persist)."""
+    if not models:
+        return
+    sidecar = Path(str(path) + ".models.json")
+    sidecar.parent.mkdir(parents=True, exist_ok=True)
+    sidecar.write_text(
+        json.dumps([m.model_dump(mode="json") for m in models])
+    )
+
+
 def load_ledger(
     path, *, generating_models: tuple[GeneratingModelParams, ...] = ()
 ) -> CalibrationLedger:
     """Read the JSONL and fold events to the latest verdict per (subject_claim_id, license_epoch).
 
     Latest line wins (definitional append-only semantics). First-seen order is preserved so the
-    ledger has a stable deterministic ordering even as new records accumulate."""
+    ledger has a stable deterministic ordering even as new records accumulate.
+
+    If `generating_models` is not explicitly supplied and a sidecar `<path>.models.json` exists,
+    models are auto-loaded from it so `certify` can show n_generated without extra caller plumbing."""
     path = Path(path)
     latest: dict[tuple[str, int], ResolutionRecord] = {}
     order: list[tuple[str, int]] = []
@@ -54,6 +71,13 @@ def load_ledger(
             if key not in latest:
                 order.append(key)
             latest[key] = r  # latest event wins
+    # Auto-load generating_models from sidecar when caller did not supply explicit ones
+    if not generating_models:
+        sidecar = Path(str(path) + ".models.json")
+        if sidecar.is_file():
+            import json as _json
+            raw = _json.loads(sidecar.read_text())
+            generating_models = tuple(GeneratingModelParams(**d) for d in raw)
     return CalibrationLedger(
         records=tuple(latest[k] for k in order),
         generating_models=generating_models,

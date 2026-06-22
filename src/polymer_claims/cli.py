@@ -239,7 +239,7 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
 
 def _cmd_calibrate(args: argparse.Namespace) -> int:
     from .calibration_harness import run_calibration
-    from .calibration_store import append_records
+    from .calibration_store import append_records, dump_models
     from polymer_protocol.calibration import GeneratingModelParams
     model = GeneratingModelParams(
         model_id="cli",
@@ -256,6 +256,7 @@ def _cmd_calibrate(args: argparse.Namespace) -> int:
     ledger = run_calibration(model=model, n_batches=args.batches, base_seed=args.seed)
     if args.out:
         append_records(args.out, ledger.records)
+        dump_models(args.out, ledger.generating_models)
     else:
         for r in ledger.records:
             sys.stdout.write(r.model_dump_json(exclude_none=True) + "\n")

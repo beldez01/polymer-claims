@@ -50,7 +50,8 @@ def _model(**kw):
 # ---------------------------------------------------------------------------
 
 def test_all_true_batch_has_no_false_licenses():
-    recs = run_batch(model=_model(fraction_true=1.0, n_generated=8), batch_id="t", seed=0)
+    recs = run_batch(model=_model(fraction_true=1.0, n_generated=8, effect_size=0.40, n_per_group=40), batch_id="t", seed=0)
+    assert len(recs) >= 1, "all-true batch licensed 0 claims — test is vacuous"
     # every record is DEFINITIONAL; a false license would be verdict=FAILED on a true region -> impossible
     assert all(r.resolution_kind == ResolutionKind.DEFINITIONAL for r in recs)
     assert all(r.verdict != ResolutionVerdict.FAILED for r in recs)

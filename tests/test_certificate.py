@@ -2,6 +2,7 @@
 import base64
 import json
 
+import pytest
 from polymer_protocol.calibration import CalibrationLedger
 
 from polymer_claims.attestation import (
@@ -79,8 +80,5 @@ def test_existing_attestation_bundle_byte_identical():
 
 def test_build_certificate_unknown_claim_raises():
     corpus = licensed_corpus()
-    try:
+    with pytest.raises(ValueError):
         build_certificate(corpus, "nonexistent-id", target_q=0.05)
-        assert False, "expected ValueError"
-    except ValueError:
-        pass

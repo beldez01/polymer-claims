@@ -7,6 +7,7 @@ is the only IO. Design: docs/superpowers/specs/2026-06-21-standards-skin-attesta
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import re
 from collections.abc import Iterable
@@ -21,6 +22,12 @@ from polymer_claims._hashing import canonical_sha256
 from polymer_claims.contracts import _DIR as _CONTRACTS_DIR
 from polymer_claims.contracts import load_contract
 from polymer_protocol import independent_credential_pair
+from polymer_protocol.calibration import (
+    CalibrationLedger,
+    CalibrationReport,
+    GeneratingModelParams,
+    calibration_summary,
+)
 
 _STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
 _PREDICATE_TYPE = "https://slsa.dev/provenance/v1"
@@ -436,15 +443,6 @@ def resolve_contract_index(corpus, *, extra: Iterable = ()) -> dict:
 # Certificate DTO + builder + DSSE envelope (Task 8)
 # New public symbols only — existing DSSE/Statement/bundle code is untouched.
 # ---------------------------------------------------------------------------
-import hashlib  # noqa: E402 — already available in stdlib; placed here to keep additions together
-
-from polymer_protocol.calibration import (  # noqa: E402
-    CalibrationLedger,
-    CalibrationReport,
-    GeneratingModelParams,
-    calibration_summary,
-)
-
 _CERTIFICATE_MEDIA_TYPE = "application/vnd.polymer.certificate+json"
 _INTERPRETATION = (
     "Definitional calibration validates the gate under known constructed truth (realized FDR). "

@@ -61,3 +61,37 @@ def test_empty_tier_has_none_rate():
     rep = calibration_summary(CalibrationLedger(records=()), target_q=0.05)
     assert rep.definitional.realized_rate is None
     assert rep.attested.n_total == 0
+
+
+def _a_q(cid, verdict, cyc, q):
+    """ANCHORED record with an explicit stated_q."""
+    return ResolutionRecord(
+        subject_claim_id=cid, license_epoch=0, resolution_kind=A, calibration_target=WS,
+        verdict=verdict, stated_q=q, observed_at_cycle=cyc, pressure_kind=PressureKind.DEFEAT,
+    )
+
+
+def test_anchored_stat_scoped_to_target_q():
+    """A report for one target_q must NOT count anchored records for a different q."""
+    recs = [
+        _a_q("c1", FL, 1, 0.05),
+        _a_q("c2", UP, 2, 0.05),
+        _a_q("c3", FL, 3, 0.10),   # different q — must be excluded from target_q=0.05 report
+        _a_q("c4", UP, 4, 0.10),   # different q — must be excluded
+    ]
+    rep = calibration_summary(CalibrationLedger(records=tuple(recs)), target_q=0.05)
+    # Only the two q=0.05 records count
+    assert rep.anchored.n_total == 2
+    assert rep.anchored.n_failed == 1
+    # observation_span_cycles must also reflect only q=0.05 records (cycles 1 and 2)
+    assert rep.observation_span_cycles == 1   # max(2) - min(1)
+
+
+def test_single_batch_ci_is_none():
+    """A single-batch definitional stat cannot yield a meaningful 95% CI."""
+    recs = [_d("a1", "batch-only", True), _d("a2", "batch-only", False)]
+    rep = calibration_summary(CalibrationLedger(records=tuple(recs)), target_q=0.05)
+    assert rep.definitional.n_batches == 1
+    assert rep.definitional.ci_low is None
+    assert rep.definitional.ci_high is None
+    assert rep.definitional.ci_method is None

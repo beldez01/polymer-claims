@@ -193,18 +193,24 @@ def _definitional_stat(records, target_q, models) -> TierStat:
         by_batch[r.batch_id].append(r.verdict == ResolutionVerdict.FAILED)
     fdps = [sum(b) / len(b) for b in by_batch.values()]  # licensed_b == len(b) > 0 here
     realized = sum(fdps) / len(fdps)
-    lo, hi = _normal_ci(fdps)
+    if len(by_batch) == 1:
+        # A single batch cannot yield a meaningful 95% CI
+        lo, hi, ci_method = None, None, None
+    else:
+        lo, hi = _normal_ci(fdps)
+        ci_method = "normal_0.95"
     return TierStat(
         n_total=n_total, n_failed=n_failed,
         realized_rate=realized, pooled_rate=n_failed / n_total,
-        ci_low=lo, ci_high=hi, ci_method="normal_0.95",
+        ci_low=lo, ci_high=hi, ci_method=ci_method,
         n_batches=len(by_batch),
         n_generated=n_generated or None,
     )
 
 
-def _anchored_stat(records: tuple[ResolutionRecord, ...]) -> TierStat:
-    recs = [r for r in records if r.resolution_kind == ResolutionKind.ANCHORED]
+def _anchored_stat(records: tuple[ResolutionRecord, ...], target_q: float) -> TierStat:
+    recs = [r for r in records
+            if r.resolution_kind == ResolutionKind.ANCHORED and r.stated_q == target_q]
     n_failed = sum(1 for r in recs if r.verdict == ResolutionVerdict.FAILED)
     n_upheld = sum(1 for r in recs if r.verdict == ResolutionVerdict.UPHELD)
     n_unresolved = sum(1 for r in recs if r.verdict == ResolutionVerdict.UNRESOLVED)
@@ -218,8 +224,9 @@ def _anchored_stat(records: tuple[ResolutionRecord, ...]) -> TierStat:
     )
 
 
-def _attested_stat(records: tuple[ResolutionRecord, ...]) -> TierStat:
-    recs = [r for r in records if r.resolution_kind == ResolutionKind.ATTESTED]
+def _attested_stat(records: tuple[ResolutionRecord, ...], target_q: float) -> TierStat:
+    recs = [r for r in records
+            if r.resolution_kind == ResolutionKind.ATTESTED and r.stated_q == target_q]
     n_failed = sum(1 for r in recs if r.verdict == ResolutionVerdict.FAILED)
     denom = sum(1 for r in recs if r.verdict in (ResolutionVerdict.FAILED, ResolutionVerdict.UPHELD))
     return TierStat(n_total=denom, n_failed=n_failed,
@@ -229,14 +236,15 @@ def _attested_stat(records: tuple[ResolutionRecord, ...]) -> TierStat:
 def calibration_summary(ledger: CalibrationLedger, *, target_q: float) -> CalibrationReport:
     """Pure. A report summarizes ONE target_q (FDPs are not averaged across e-LOND targets)."""
     recs = ledger.records
-    cycles = [r.observed_at_cycle for r in recs if r.resolution_kind == ResolutionKind.ANCHORED]
+    cycles = [r.observed_at_cycle for r in recs
+              if r.resolution_kind == ResolutionKind.ANCHORED and r.stated_q == target_q]
     span = (max(cycles) - min(cycles)) if cycles else None
     return CalibrationReport(
         target_q=target_q,
         observation_span_cycles=span,
         definitional=_definitional_stat(recs, target_q, ledger.generating_models),
-        anchored=_anchored_stat(recs),
-        attested=_attested_stat(recs),
+        anchored=_anchored_stat(recs, target_q),
+        attested=_attested_stat(recs, target_q),
     )
 
 
@@ -247,13 +255,6 @@ class PressureContext(_Model):
     cause: dict[str, PressureKind] = Field(default_factory=dict)    # claim_id -> pressure event this cycle
     survived: frozenset[str] = Field(default_factory=frozenset)     # claim_ids whose pressure was SURVIVED
     superseded: frozenset[str] = Field(default_factory=frozenset)   # drift-reopened then re-licensed
-
-
-def _status_of(corpus: Corpus, cid: str):
-    for c in corpus.claims:
-        if c.id == cid:
-            return c.status
-    return None
 
 
 def anchored_resolutions(

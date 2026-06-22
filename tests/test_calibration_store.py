@@ -6,6 +6,7 @@ from polymer_grammar import FDRLedger, Status
 from polymer_protocol import Corpus
 from polymer_protocol.calibration import (
     CalibrationTarget,
+    GeneratingModelParams,
     PressureKind,
     ResolutionKind,
     ResolutionRecord,
@@ -282,3 +283,73 @@ def test_node_runner_calibration_on_writes_file(tmp_path):
             if line.strip():
                 record = ResolutionRecord.model_validate_json(line)
                 assert record.resolution_kind == ResolutionKind.ANCHORED
+
+
+# ── Fix 1: dump_models / auto-load sidecar ────────────────────────────────────
+
+
+def _make_model(model_id="test-model", n_generated=42, target_fdr=0.05):
+    return GeneratingModelParams(
+        model_id=model_id,
+        n_per_group=30,
+        n_probes_per_region=6,
+        effect_size=0.30,
+        dispersion=25.0,
+        fraction_true=0.5,
+        tau=0.10,
+        target_fdr=target_fdr,
+        n_generated=n_generated,
+        seed_set=(0,),
+    )
+
+
+def test_dump_models_creates_sidecar(tmp_path):
+    """dump_models writes a .models.json sidecar alongside the JSONL."""
+    from polymer_claims.calibration_store import dump_models
+
+    p = tmp_path / "ledger.jsonl"
+    model = _make_model()
+    dump_models(p, (model,))
+    sidecar = tmp_path / "ledger.jsonl.models.json"
+    assert sidecar.exists(), "sidecar should be created by dump_models"
+
+
+def test_load_ledger_auto_loads_sidecar(tmp_path):
+    """load_ledger auto-loads generating_models from sidecar when caller omits them."""
+    from polymer_claims.calibration_store import append_records, dump_models, load_ledger
+
+    p = tmp_path / "ledger.jsonl"
+    model = _make_model(n_generated=99)
+    # Write records (even empty is fine — we care about model round-trip)
+    append_records(p, [_anchored("c1", 0, ResolutionVerdict.UNRESOLVED, 1)])
+    dump_models(p, (model,))
+
+    loaded = load_ledger(p)  # no explicit generating_models
+    assert len(loaded.generating_models) >= 1, "generating_models should be non-empty after sidecar load"
+    m = loaded.generating_models[0]
+    assert m.model_id == "test-model"
+    assert m.n_generated == 99
+
+
+def test_load_ledger_explicit_overrides_sidecar(tmp_path):
+    """Explicit generating_models= arg takes priority over the sidecar."""
+    from polymer_claims.calibration_store import append_records, dump_models, load_ledger
+
+    p = tmp_path / "ledger.jsonl"
+    sidecar_model = _make_model(model_id="from-sidecar")
+    explicit_model = _make_model(model_id="explicit")
+    append_records(p, [_anchored("c1", 0, ResolutionVerdict.UNRESOLVED, 1)])
+    dump_models(p, (sidecar_model,))
+
+    loaded = load_ledger(p, generating_models=(explicit_model,))
+    assert loaded.generating_models[0].model_id == "explicit"
+
+
+def test_dump_models_no_op_for_empty(tmp_path):
+    """dump_models does NOT create a sidecar when models is empty."""
+    from polymer_claims.calibration_store import dump_models
+
+    p = tmp_path / "ledger.jsonl"
+    dump_models(p, ())
+    sidecar = tmp_path / "ledger.jsonl.models.json"
+    assert not sidecar.exists(), "no sidecar should be created for empty models"
