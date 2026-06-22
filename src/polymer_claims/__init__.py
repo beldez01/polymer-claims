@@ -30,7 +30,13 @@ from polymer_claims.contracts import (
 )
 from polymer_claims.attestation import (
     AttestationBundle,
+    AttestationRecord,
+    DsseEnvelope,
+    DsseSignature,
     build_attestation_bundle,
+    build_attestation_records,
+    build_attestation_statements,
+    dsse_envelope,
     resolve_contract_index,
 )
 
@@ -38,13 +44,19 @@ __all__ = [
     "AccessMethod",
     "AnalysisProfile",
     "AttestationBundle",
+    "AttestationRecord",
     "Checksum",
     "Claim",
     "Corpus",
+    "DsseEnvelope",
+    "DsseSignature",
     "SEContractRef",
     "__version__",
     "build_attestation_bundle",
+    "build_attestation_records",
+    "build_attestation_statements",
     "content_hash",
+    "dsse_envelope",
     "load_contract",
     "load_profile",
     "next_action",

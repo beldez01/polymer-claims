@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from polymer_grammar import Status
 from polymer_grammar.licensing import IndependenceTier
 
@@ -90,6 +92,19 @@ def test_public_api_exports():
     assert "AttestationBundle" in pc.__all__
     assert "resolve_contract_index" in pc.__all__
 
+    # arc 2 slice 2 exports
+    _new_names = [
+        "AttestationRecord",
+        "build_attestation_records",
+        "build_attestation_statements",
+        "DsseEnvelope",
+        "DsseSignature",
+        "dsse_envelope",
+    ]
+    for name in _new_names:
+        assert hasattr(pc, name), f"polymer_claims missing attribute: {name}"
+        assert name in pc.__all__, f"polymer_claims.__all__ missing: {name}"
+
 
 def test_non_sha256_profile_hashes_deterministic_order_and_raw_annotation():
     """Two apparatus deps with distinct non-sha256 profile hashes must sort deterministically
@@ -111,3 +126,36 @@ def test_non_sha256_profile_hashes_deterministic_order_and_raw_annotation():
     assert set(raw_hashes) == {"p1", "p2"}
     # Each apparatus dep should have no sha256 digest (non-sha256 input)
     assert all(d.digest is None for d in apparatus)
+
+
+_GOLDEN = Path(__file__).parent / "_golden_bundle.json"
+
+
+def _golden_corpus():
+    def L(cid):
+        return licensed_claim(cid, licensing(sat(mc(
+            dimnames_hash="sha256:" + "a" * 64, profile_hash="sha256:" + "b" * 64, semantic_run_id="r1"))))
+    return corpus_with(L("c2"), L("c1"))
+
+
+def test_bundle_matches_captured_golden():
+    # uses only build_attestation_bundle (already imported at the top of this file) — passes pre-refactor
+    out = build_attestation_bundle(_golden_corpus(), contract_index={}).model_dump_json(by_alias=True, exclude_none=True)
+    assert out == _GOLDEN.read_text()      # byte-identical to the pre-refactor capture
+
+
+def test_records_carry_statement_drs_and_unresolved():
+    from polymer_claims.attestation import AttestationRecord, build_attestation_records   # in-body: fails until Task 1 impl
+    records = build_attestation_records(_golden_corpus(), contract_index={})
+    assert len(records) == 2
+    r = records[0]
+    assert isinstance(r, AttestationRecord)
+    assert r.statement.subject[0].name == "c1"            # sorted by claim id
+    assert isinstance(r.drs_objects, tuple) and isinstance(r.unresolved, tuple)
+
+
+def test_statements_projection_equals_records_statements():
+    from polymer_claims.attestation import build_attestation_records, build_attestation_statements  # in-body
+    corpus = _golden_corpus()
+    assert build_attestation_statements(corpus, contract_index={}) == tuple(
+        r.statement for r in build_attestation_records(corpus, contract_index={}))

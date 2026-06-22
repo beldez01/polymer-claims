@@ -10,11 +10,11 @@
 
 ## Current state (2026-06-21)
 
-`main` GREEN — **316 umbrella + 396 grammar + 404 protocol + 2 isolation**, ruff
+`main` GREEN — **327 umbrella + 396 grammar + 404 protocol + 2 isolation**, ruff
 clean, viewer `tsc` clean (full `scripts/check-all.sh` printed **ALL GREEN** incl. `next build` on the merge
-— network was available that run). grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**Sheaf
-consistency gauge shipped + merged to `main` 2026-06-21 — `fe1214d`, `--no-ff`, pushed to origin
-(`main == origin/main`), feature branch deleted**; §E common-cause slice — earn REPLICATED on low shared-cause overlap
+— network was available that run). grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**Attestation
+DSSE export — arc 2, slice 2 — shipped 2026-06-21**; sheaf consistency gauge shipped + merged to `main` 2026-06-21 — `fe1214d`, `--no-ff`, pushed to origin
+(`main == origin/main`), feature branch deleted; §E common-cause slice — earn REPLICATED on low shared-cause overlap
 — shipped 2026-06-19, merged; Phase D slice 2 + slice 1 merged 2026-06-19; see NEXT.) **Viewer-build
 caveat:** `npm run typecheck` passes; the `next build` step of `scripts/check-all.sh` can fail *only*
 because the sandbox cannot fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not
@@ -78,7 +78,13 @@ design.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first): **Standards-skin attestation export — North-Star arc 2, slice 1**
+**Recently shipped** (most recent first): **Attestation DSSE export — North-Star arc 2, slice 2**
+(2026-06-21) — `--format dsse` NDJSON of unsigned DSSE envelopes (`DsseEnvelope`, `signatures: []`);
+records-based refactor (`AttestationRecord` + `build_attestation_records`; bundle output byte-identical,
+captured golden); `build_attestation_statements` projection; public API extended (`AttestationRecord`,
+`build_attestation_records`, `build_attestation_statements`, `DsseEnvelope`, `DsseSignature`, `dsse_envelope`);
+stdlib-only/deterministic/additive. Deferred: real signing (Sigstore/Rekor/DSSE PAE) = slice 3.
+spec+plan `docs/superpowers/{specs,plans}/2026-06-21-attestation-dsse-export*`. · **Standards-skin attestation export — North-Star arc 2, slice 1**
 (2026-06-21) — `export-attestation <corpus>` emits one deterministic **in-toto Statement v1 / SLSA Provenance
 v1** attestation per LICENSED claim **+ GA4GH DRS** object docs, built from the content-address we already
 compute (`dimnames_hash`/`profile_hash`/`semantic_run_id`) with the air-gap credential pair as the SLSA
@@ -304,6 +310,8 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   **Deferred** (spec §10): rich layer in sample mode, λ₂-on-frame (Lanczos), tension in protocol export,
   hyperbolic/Lorentz layout, instrument→gate.
 - ✅ **Adapter-independence hardening** (`d3be2bb`, 2026-06-20) — byte-derived `implementation_hash` from adapter bytecode; licensed `Satisfaction` records the credential-witness pair that justified the air gap; §E `shared_cause_factors` activated on bundled SE-Contracts.
+- ✅ **Standards-skin attestation export — arc 2, slice 1** (2026-06-21) — `export-attestation <corpus>` → deterministic in-toto Statement v1 / SLSA Provenance v1 + GA4GH DRS per LICENSED claim; keyed by existing content-addresses (`dimnames_hash`/`profile_hash`/`semantic_run_id`); air-gap credential pair = SLSA `builderDependencies`; pure umbrella module `attestation.py`; stdlib-only, no signing/network; additive/byte-identical off; 31 attestation tests. spec+plan `docs/superpowers/{specs,plans}/2026-06-21-standards-skin-attestation*`.
+- ✅ **Attestation DSSE export — arc 2, slice 2** (2026-06-21) — `--format dsse` NDJSON of unsigned DSSE envelopes (`DsseEnvelope`, `signatures: []`); records-based refactor (`AttestationRecord` + `build_attestation_records`; bundle byte-identical, captured golden); `build_attestation_statements` projection; six new public names exported (`AttestationRecord`, `build_attestation_records`, `build_attestation_statements`, `DsseEnvelope`, `DsseSignature`, `dsse_envelope`); stdlib-only/deterministic/additive; umbrella test count → 327. Deferred: real signing (Sigstore/Rekor/DSSE PAE) = slice 3. spec+plan `docs/superpowers/{specs,plans}/2026-06-21-attestation-dsse-export*`.
 
 ## Invariants / working agreements (don't relearn)
 
