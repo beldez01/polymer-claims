@@ -103,6 +103,45 @@ The corpus's defeat and equivalence edges form a **cellular sheaf over the claim
 
 `export-attestation` re-expresses a LICENSED run in the trust standards that already exist, so a third party can verify it **without trusting our service**. **Slice 1** emits, per LICENSED claim, an **in-toto Statement v1** subject with a **SLSA Provenance v1** predicate that casts the recomputation gate as the builder — the air-gap credential pair are the SLSA `builderDependencies`, and the resolved datasets are **GA4GH DRS** objects keyed by the content-address the gate already computes (`dimnames_hash`/`profile_hash`/`semantic_run_id`). The serializer is pure (frozen `_Model` DTOs, stdlib `json`/`hashlib`; `resolve_contract_index` is the only IO); the default bundle is additive. **Slice 2** adds `--format dsse`: each Statement is wrapped in a **DSSE-shaped envelope** with empty `signatures` and emitted as NDJSON — **signing-ready but not trust-valid** (decode `payload` for the bare Statement; a DSSE signature verifier treats it as unsigned). Real signing (Sigstore/cosign/Rekor + the DSSE PAE) is **slice 3**, deferred. This is the first seam of the North-Star §4 standards arc (#3, in-toto/SLSA) — the adoption moat: "point your pipeline at us," not "rewrite for us."
 
+## 5c. Calibration Ledger And Certificate
+
+`q` is the corpus's headline integrity metric — the expected false-license rate. This layer makes
+it *validated, not asserted*, and emits it as a shareable **certificate**. Calibration is an
+**instrument, not a gate**: it measures the gate's reliability and never changes a claim's status,
+and the ledger is a separate meta-structure (the `Corpus` stays four collections).
+
+The calibration ledger records resolutions in three **warrant tiers**, each measuring a different
+thing and reported separately (never pooled):
+
+- **DEFINITIONAL** — realized false-discovery rate against *constructed* ground truth. A synthetic
+  harness (`calibration_harness.py`, behind the `[calibrate]` numpy extra) generates Beta-distributed
+  cohorts with known per-region truth, writes them as SE-Contract files, and runs them through the
+  **real gate** (the betting e-value, the two-adapter air-gap, and the e-LOND ledger — reached via a
+  scoped contract-root contextvar so the unmodified adapters resolve the synthetic contracts). The
+  headline `q` is the **realized FDR = mean per-batch FDP** over *mixed* batches (the Monte-Carlo
+  estimate of `E[FDP] ≤ q`); the pooled false fraction is a secondary view, and an all-null batch is
+  only a control. This is the one tier that feeds the headline `q`.
+- **ANCHORED** — warrant survival: how often LICENSED claims survive the corpus's own continued
+  pressure (defeat, drift). The umbrella `calibration_store.py` taps `NodeRunner` (a gated
+  `calibration_path` hook, byte-identical when off), allocates a `license_epoch` per claim
+  (idempotent across ticks and restarts), and records resolutions to an append-only JSONL event log
+  folded per `(claim_id, license_epoch)`. This measures stability under pressure, **not** truth.
+- **ATTESTED** — disagreement against external attested events; schema and report slot only for now
+  (no ingestion source yet).
+
+The anti-laundering rule is enforced in code: `feeds_headline_q` is a computed property, true only
+for DEFINITIONAL realized-FDR, and the certificate renderer surfaces only that as *the* headline
+`q` — ANCHORED/ATTESTED appear under a distinct field-calibration heading.
+
+The **certificate** (`certify` CLI; `Certificate` / `build_certificate` /
+`certificate_dsse_envelope` in `attestation.py`) is a single-claim artifact composing the existing
+in-toto/SLSA Statement with the calibration block (the three tiers + the disclosed generating-model
++ a ledger-snapshot digest), wrapped in a DSSE-shaped envelope so the calibration evidence sits
+inside the signed payload. Existing `export-attestation` output stays byte-identical (new public
+names only). This is the first realisation of `q` as a *typed reliability statement over warrant
+classes* — definitional calibration where truth is constructible, field calibration where only
+continued pressure is available.
+
 ## 6. Independence And Shared Causes
 
 The system distinguishes reproducibility from error-independent replication.
@@ -161,7 +200,8 @@ not expose machine-readable per-sample IDH status.
 The umbrella package provides:
 
 - CLI: `version`, `validate`, `ingest tcga-laml`, `run-cycle`, `loop`,
-  `export-topology`, `export-timeline`, `export-consistency`, `export-attestation`, `serve`;
+  `export-topology`, `export-timeline`, `export-consistency`, `export-attestation`,
+  `calibrate`, `certify`, `serve`;
 - `NodeRunner`, which owns clock, loop state, layout choice, and live corpus state;
 - FastAPI SSE server behind `[serve]`;
 - optional `[llm]` generation adapters and `[embed]` spectral layout support.
@@ -195,6 +235,11 @@ Viewer nodes surface `independence_tier`, `severity_provenance`, and
   work.
 - A real second methylation cohort remains skipped until valid per-sample genotype labels
   are available.
+- The DEFINITIONAL realized-FDR is validated against a *synthetic* generating model, named on the
+  certificate as a disclosed assumption (calibration is an instrument, not a gate). Deferred:
+  ATTESTED ingestion, an exposure-weighted hazard model for the ANCHORED warrant-survival rate, and
+  real cryptographic signing of the certificate (Sigstore/Rekor/DSSE PAE — attestation arc-2 slice
+  3). The normal-approx CI over the per-batch FDPs is descriptive, not a validity proof.
 
 ## 12. References
 
@@ -203,5 +248,6 @@ Viewer nodes surface `independence_tier`, `severity_provenance`, and
 - Terminology: `GLOSSARY.md`
 - Forward roadmap: `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`
 - Phase 2 north star: `docs/superpowers/2026-06-12-phase-2-north-star.md`
+- Calibration ledger + certificate: `docs/superpowers/specs/2026-06-22-calibration-ledger-and-certificate-design.md` (+ the matching plan)
 - Current plans/specs: `docs/superpowers/plans/` and `docs/superpowers/specs/`
 - Historical plans/specs: `docs/superpowers/archive/`

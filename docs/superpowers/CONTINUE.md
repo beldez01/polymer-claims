@@ -10,9 +10,9 @@
 
 ## Current state (2026-06-22)
 
-`main` GREEN — **327 umbrella + 396 grammar + 404 protocol + 2 isolation** (HEAD `b4d3801`, pushed to origin — `main == origin/main`), ruff clean, viewer `tsc` clean (full `scripts/check-all.sh` printed **ALL GREEN** incl. `next build` when network is available). grammar/protocol pure + numpy-free; **Corpus = 4 collections**.
+`main` GREEN — **366 umbrella + 396 grammar + 420 protocol + 2 isolation** (1184 tests; HEAD `9e54684`, pushed to origin — `main == origin/main`), ruff clean, viewer `tsc` + `next build` clean (full `scripts/check-all.sh` printed **ALL GREEN**, no font-fetch block this run). grammar/protocol pure + numpy-free; **Corpus = 4 collections**.
 
-**Recently shipped (newest first):** Attestation DSSE export (arc 2 slice 2 — `export-attestation --format dsse`, NDJSON of unsigned DSSE envelopes) · standards-skin attestation slice 1 (`export-attestation` bundle — in-toto Statement v1 / SLSA Provenance v1 + GA4GH DRS) · Sheaf gauge live viz (one opt-in "consistency overlay" toggle: energy HUD, tension halos, animated H¹ frustration-cycle overlay, obstruction panel; new throttled `GET /consistency` route) · Sheaf consistency gauge · §E common-cause REPLICATED + Phase D slices 1+2 (2026-06-19). Details in *Recently shipped* / the Done checklist below.
+**Recently shipped (newest first):** **Calibration ledger + certificate** (`q` validated not asserted — warrant-tiered DEFINITIONAL realized-FDR through the real gate / ANCHORED warrant-survival / ATTESTED stub; single-claim attestable `certify` certificate; instrument not a gate; merged `9e54684`) · Attestation DSSE export (arc 2 slice 2 — `export-attestation --format dsse`, NDJSON of unsigned DSSE envelopes) · standards-skin attestation slice 1 (`export-attestation` bundle — in-toto Statement v1 / SLSA Provenance v1 + GA4GH DRS) · Sheaf gauge live viz (one opt-in "consistency overlay" toggle: energy HUD, tension halos, animated H¹ frustration-cycle overlay, obstruction panel; new throttled `GET /consistency` route) · Sheaf consistency gauge · §E common-cause REPLICATED + Phase D slices 1+2 (2026-06-19). Details in *Recently shipped* / the Done checklist below.
 
 **Viewer-build caveat:** `npm run typecheck` passes; the `next build` step of `scripts/check-all.sh` can fail *only* because the sandbox cannot fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not a code defect — the build passes when network is available). All pytest suites + ruff + isolation + viewer typecheck are green.
 
@@ -71,7 +71,22 @@ design.
 
 ## ▶ NEXT (concrete plan)
 
-**Recently shipped** (most recent first): **Attestation DSSE export — North-Star arc 2, slice 2**
+**Recently shipped** (most recent first): **Calibration ledger + certificate — closes the
+build-path critical-path proof** (2026-06-22, merged `9e54684`) — makes the corpus headline `q`
+*validated, not asserted*, and emits it as a shareable certificate. Warrant-tiered ledger (pure
+`protocol/calibration.py`): **DEFINITIONAL** = realized FDR (mean per-batch FDP over *mixed*
+batches) by running Beta-distributed synthetic data through the **real gate** behind a scoped
+contract-root contextvar — the only tier that feeds the headline `q`; **ANCHORED** = warrant
+survival from the corpus's own defeat/drift events (event-identity per `license_epoch`, JSONL event
+log + `EpochAllocator` + a gated byte-identical-off `NodeRunner` hook); **ATTESTED** = schema stub.
+No-laundering is enforced (`feeds_headline_q` computed property; only DEFINITIONAL realized-FDR is
+the headline). Certificate = in-toto/SLSA Statement **+** calibration block inside a signed DSSE
+payload (`Certificate`/`build_certificate`/`certificate_dsse_envelope`; `certify`/`calibrate` CLIs;
+new `[calibrate]` numpy extra). **Instrument, not a gate** — no claim status changes, Corpus stays 4;
+existing `export-attestation` byte-identical. Subagent-driven 10-task TDD build, whole-branch
+reviewed; check-all.sh ALL GREEN (1184 tests). Verified end-to-end: 114 licensed across 12 synthetic
+batches, realized FDR 0.0000 (conservative gate). spec+plan
+`docs/superpowers/{specs,plans}/2026-06-22-calibration-ledger-and-certificate*`. · **Attestation DSSE export — North-Star arc 2, slice 2**
 (2026-06-21) — `--format dsse` NDJSON of unsigned DSSE envelopes (`DsseEnvelope`, `signatures: []`);
 records-based refactor (`AttestationRecord` + `build_attestation_records`; bundle output byte-identical,
 captured golden); `build_attestation_statements` projection; public API extended (`AttestationRecord`,
@@ -190,7 +205,7 @@ arc-2 slice 3 — real signing (Sigstore/cosign/Rekor + the DSSE PAE) on top of 
 combination is **largely a mirage** — Phase 2.2 already caught its sound core; don't build a generic
 combination.
 
-**Candidate next moves:** arc-2 slice 3 (real signing — Sigstore/cosign/Rekor/DSSE PAE); arc-3 deepening (hyperbolic/Lorentz layout, instrument→gate); **Linchpin Layer C — the Variant Adjudication Engine wedge** (untouched, highest-leverage demonstrable artifact). Real-2nd-cohort §2E REPLICATED stays data-blocked (needs a real `idh_status.tsv`).
+**Candidate next moves:** With the **certificate shipped (2026-06-22)**, the build-path critical-path proof is *closed* — a real claim, a real independence check, a validated (not asserted) `q`, emitted as a shareable certificate. The natural next is build-path **step 4 — one legible wedge claim**: the **Linchpin Layer C Variant Adjudication Engine** (untouched, highest-leverage demonstrable artifact) or the AML epistemic twin. **Calibration follow-ups (non-blocking):** ATTESTED ingestion (no external source yet); an exposure-weighted hazard model for `q_anchored`; a real-claim `q`-calibration *resolution* loop (DEFINITIONAL is validated on a synthetic generating model — a disclosed assumption). Also open: arc-2 slice 3 (real signing — Sigstore/cosign/Rekor/DSSE PAE, now atop both the unsigned DSSE attestation export *and* the certificate); arc-3 deepening (hyperbolic/Lorentz layout, instrument→gate). Real-2nd-cohort §2E REPLICATED stays data-blocked (needs a real `idh_status.tsv`).
 
 Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 `superpowers:subagent-driven-development` → merge `--no-ff` → update this file + memory.
@@ -306,6 +321,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ **Adapter-independence hardening** (`d3be2bb`, 2026-06-20) — byte-derived `implementation_hash` from adapter bytecode; licensed `Satisfaction` records the credential-witness pair that justified the air gap; §E `shared_cause_factors` activated on bundled SE-Contracts.
 - ✅ **Standards-skin attestation export — arc 2, slice 1** (2026-06-21) — `export-attestation <corpus>` → deterministic in-toto Statement v1 / SLSA Provenance v1 + GA4GH DRS per LICENSED claim; keyed by existing content-addresses (`dimnames_hash`/`profile_hash`/`semantic_run_id`); air-gap credential pair = SLSA `builderDependencies`; pure umbrella module `attestation.py`; stdlib-only, no signing/network; additive/byte-identical off; 31 attestation tests. spec+plan `docs/superpowers/{specs,plans}/2026-06-21-standards-skin-attestation*`.
 - ✅ **Attestation DSSE export — arc 2, slice 2** (2026-06-21) — `--format dsse` NDJSON of unsigned DSSE envelopes (`DsseEnvelope`, `signatures: []`); records-based refactor (`AttestationRecord` + `build_attestation_records`; bundle byte-identical, captured golden); `build_attestation_statements` projection; six new public names exported (`AttestationRecord`, `build_attestation_records`, `build_attestation_statements`, `DsseEnvelope`, `DsseSignature`, `dsse_envelope`); stdlib-only/deterministic/additive; umbrella test count → 327. Deferred: real signing (Sigstore/Rekor/DSSE PAE) = slice 3. spec+plan `docs/superpowers/{specs,plans}/2026-06-21-attestation-dsse-export*`.
+- ✅ **Calibration ledger + certificate** (2026-06-22, merged `9e54684`) — `q` *validated, not asserted*, closing the build-path critical-path proof's last open piece. Warrant-tiered ledger (pure `protocol/calibration.py` — `ResolutionRecord`/`CalibrationLedger`/`calibration_summary`/`anchored_resolutions`): **DEFINITIONAL** realized FDR (mean per-batch FDP over mixed batches) by driving Beta-distributed synthetic data through the **real gate** (betting e-value + air-gap + e-LOND, reached via a scoped contract-root contextvar in `contracts/__init__.py`); **ANCHORED** warrant survival from defeat/drift events (event-identity per `license_epoch`); **ATTESTED** stub. No-laundering: `feeds_headline_q` computed property, only DEFINITIONAL realized-FDR is the headline. Impure umbrella: `calibration_harness.py` (`[calibrate]` numpy extra), `calibration_store.py` (JSONL event log + `EpochAllocator` + ANCHORED tap), gated `NodeRunner` `calibration_path` hook (byte-identical off). Certificate: `attestation.py` `Certificate`/`build_certificate`/`certificate_dsse_envelope` (Statement + calibration block in the signed DSSE payload) + `certify`/`calibrate` CLIs; `export-attestation` byte-identical. Instrument, not a gate; Corpus stays 4. Subagent-driven 10-task TDD build (whole-branch reviewed; one mid-build regression — the contextvar default capturing `_DIR` at import — caught+fixed). check-all.sh ALL GREEN (1184 tests). Deferred: ATTESTED ingestion, `q_anchored` hazard model, real signing. spec+plan `docs/superpowers/{specs,plans}/2026-06-22-calibration-ledger-and-certificate*`.
 
 ## Invariants / working agreements (don't relearn)
 
