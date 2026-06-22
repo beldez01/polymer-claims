@@ -6,6 +6,7 @@ is the only IO. Design: docs/superpowers/specs/2026-06-21-standards-skin-attesta
 """
 from __future__ import annotations
 
+import base64
 import json
 import re
 from collections.abc import Iterable
@@ -105,6 +106,27 @@ class Statement(_Model):
     subject: tuple[Subject, ...]
     predicate_type: str = Field(default=_PREDICATE_TYPE, alias="predicateType")
     predicate: SlsaPredicate
+
+
+_INTOTO_MEDIA_TYPE = "application/vnd.in-toto+json"
+
+
+class DsseSignature(_Model):
+    sig: str
+    keyid: str | None = None          # DSSE: keyid is OPTIONAL
+
+
+class DsseEnvelope(_Model):
+    payload_type: str = Field(default=_INTOTO_MEDIA_TYPE, alias="payloadType")
+    payload: str                      # standard base64 of the Statement JSON
+    signatures: tuple[DsseSignature, ...] = ()   # empty = unsigned, signing-ready (NOT trust-valid)
+
+
+def dsse_envelope(statement: Statement) -> DsseEnvelope:
+    """Wrap one in-toto Statement in an unsigned DSSE-shaped envelope. Pure; stdlib base64+json.
+    payload = standard base64 of the standalone Statement serialization (round-trips to the Statement)."""
+    raw = statement.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
+    return DsseEnvelope(payload=base64.b64encode(raw).decode("ascii"))
 
 
 # --- GA4GH DRS object (snake_case field names match the DRS schema) -------------------------------
