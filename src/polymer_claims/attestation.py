@@ -430,3 +430,84 @@ def resolve_contract_index(corpus, *, extra: Iterable = ()) -> dict:
     for ref in extra:
         index[ref.dimnames_hash] = ref
     return index
+
+
+# ---------------------------------------------------------------------------
+# Certificate DTO + builder + DSSE envelope (Task 8)
+# New public symbols only — existing DSSE/Statement/bundle code is untouched.
+# ---------------------------------------------------------------------------
+import hashlib  # noqa: E402 — already available in stdlib; placed here to keep additions together
+
+from polymer_protocol.calibration import (  # noqa: E402
+    CalibrationLedger,
+    CalibrationReport,
+    GeneratingModelParams,
+    calibration_summary,
+)
+
+_CERTIFICATE_MEDIA_TYPE = "application/vnd.polymer.certificate+json"
+_INTERPRETATION = (
+    "Definitional calibration validates the gate under known constructed truth (realized FDR). "
+    "Anchored/attested calibration measures warrant stability under future pressure, not truth."
+)
+
+
+class Certificate(_Model):
+    """Attestation bundle for a single LICENSED claim: in-toto Statement + optional calibration evidence."""
+
+    statement: Statement
+    calibration: CalibrationReport | None = None
+    generating_models: tuple[GeneratingModelParams, ...] = ()
+    ledger_digest: str | None = None
+    interpretation: str = _INTERPRETATION
+
+
+def build_certificate(
+    corpus,
+    claim_id: str,
+    *,
+    ledger: CalibrationLedger | None = None,
+    target_q: float,
+    contract_index=None,
+) -> Certificate:
+    """Build a Certificate for `claim_id` in `corpus`.
+
+    Finds the in-toto Statement whose subject.name == claim_id. If a CalibrationLedger is
+    supplied, attaches calibration_summary(ledger, target_q=target_q), the ledger's
+    generating_models, and a sha256 hex digest of the ledger's canonical JSON representation.
+    Raises ValueError if no LICENSED statement is found for claim_id."""
+    index = contract_index if contract_index is not None else resolve_contract_index(corpus)
+    statements = build_attestation_statements(corpus, contract_index=index)
+    stmt = next(
+        (s for s in statements if any(sub.name == claim_id for sub in s.subject)),
+        None,
+    )
+    if stmt is None:
+        raise ValueError(f"no LICENSED claim {claim_id!r} to certify")
+    report: CalibrationReport | None = None
+    digest: str | None = None
+    models: tuple[GeneratingModelParams, ...] = ()
+    if ledger is not None:
+        report = calibration_summary(ledger, target_q=target_q)
+        models = ledger.generating_models
+        raw = ledger.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
+        digest = hashlib.sha256(raw).hexdigest()
+    return Certificate(
+        statement=stmt,
+        calibration=report,
+        generating_models=models,
+        ledger_digest=digest,
+    )
+
+
+def certificate_dsse_envelope(cert: Certificate) -> DsseEnvelope:
+    """Wrap a full Certificate (Statement + calibration block + ledger digest) in a DSSE-shaped
+    envelope with payload_type='application/vnd.polymer.certificate+json'.
+
+    The calibration evidence is INSIDE the signed bytes. Mirrors dsse_envelope but uses a
+    distinct payloadType — existing dsse_envelope is not modified."""
+    raw = cert.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
+    return DsseEnvelope(
+        payload_type=_CERTIFICATE_MEDIA_TYPE,
+        payload=base64.b64encode(raw).decode("ascii"),
+    )
