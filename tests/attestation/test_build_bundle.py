@@ -92,6 +92,19 @@ def test_public_api_exports():
     assert "AttestationBundle" in pc.__all__
     assert "resolve_contract_index" in pc.__all__
 
+    # arc 2 slice 2 exports
+    _new_names = [
+        "AttestationRecord",
+        "build_attestation_records",
+        "build_attestation_statements",
+        "DsseEnvelope",
+        "DsseSignature",
+        "dsse_envelope",
+    ]
+    for name in _new_names:
+        assert hasattr(pc, name), f"polymer_claims missing attribute: {name}"
+        assert name in pc.__all__, f"polymer_claims.__all__ missing: {name}"
+
 
 def test_non_sha256_profile_hashes_deterministic_order_and_raw_annotation():
     """Two apparatus deps with distinct non-sha256 profile hashes must sort deterministically
