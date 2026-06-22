@@ -321,6 +321,13 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
+    # Calibration accrual (off by default → byte-identical): when --calibration is set, forward
+    # the ledger path into the runner so each tick records ANCHORED warrant-survival resolutions.
+    cal_kwargs: dict = {}
+    if getattr(args, "calibration", None):
+        cal_kwargs["calibration_path"] = args.calibration
+        if getattr(args, "calibration_epoch", None):
+            cal_kwargs["calibration_epoch_path"] = args.calibration_epoch
     if getattr(args, "tcga_laml", False):
         from .methyl_ndmp import NDmpOlsCoefAdapter, NDmpTTestAdapter, ndmp_independent_registry
         from .analysis_profile import profile_oracle_registry
@@ -341,6 +348,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             evidence=evidence_map(corpus),
             layout=args.layout,
             **seed_kwargs,
+            **cal_kwargs,
         )
         app = create_app(runner, interval=args.interval, origins=args.origins or None)
         uvicorn.run(app, host=args.host, port=args.port)
@@ -372,6 +380,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             proposers=(proposer,),
             layout=args.layout,
             **seed_kwargs,
+            **cal_kwargs,
         )
         app = create_app(runner, interval=args.interval, origins=args.origins or None)
         uvicorn.run(app, host=args.host, port=args.port)
@@ -421,6 +430,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             profiles=(CANONICAL_EPICV2_V1, CANONICAL_HM450_V1),
             layout=args.layout,
             budget=2.5,
+            **cal_kwargs,
         )
         app = create_app(runner, interval=args.interval, origins=args.origins or None)
         uvicorn.run(app, host=args.host, port=args.port)
@@ -446,6 +456,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             max_frames=args.max_frames,
             layout=args.layout,
             **seed_kwargs,
+            **cal_kwargs,
         )
     else:
         from .seed import default_seed_corpus
@@ -457,7 +468,8 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         # seed's `kwargs["budget"]` is run_cycle's SELECT budget and flows
         # through `**kwargs` to spread licensing progressively across frames.
         runner = NodeRunner.from_seed(
-            corpus, scheduler_budget=args.budget, max_frames=args.max_frames, layout=args.layout, **kwargs
+            corpus, scheduler_budget=args.budget, max_frames=args.max_frames, layout=args.layout,
+            **kwargs, **cal_kwargs,
         )
     app = create_app(runner, interval=args.interval, origins=args.origins or None)
     uvicorn.run(app, host=args.host, port=args.port)
@@ -546,6 +558,17 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_serve.add_argument(
         "--origins", nargs="*", default=None, help="extra CORS origins"
+    )
+    p_serve.add_argument(
+        "--calibration",
+        default=None,
+        help="write a calibration ledger here (append-only JSONL of ANCHORED warrant-survival "
+        "records) — enables live calibration accrual on the running node; off by default",
+    )
+    p_serve.add_argument(
+        "--calibration-epoch",
+        default=None,
+        help="epoch-state JSON path (default: epoch_state.json beside --calibration)",
     )
     p_serve.add_argument("--llm", action="store_true", help="drive GENERATE with a real LLM agent (needs the [llm] extra + ANTHROPIC_API_KEY)")
     p_serve.add_argument("--real-data", action="store_true", help="LLM proposes REAL-DATA mean_diff plans; node runs the local execution adapters + apparatus oracle (needs [llm] + ANTHROPIC_API_KEY)")
