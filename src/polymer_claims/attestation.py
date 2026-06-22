@@ -7,6 +7,7 @@ is the only IO. Design: docs/superpowers/specs/2026-06-21-standards-skin-attesta
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import re
 from collections.abc import Iterable
@@ -21,6 +22,12 @@ from polymer_claims._hashing import canonical_sha256
 from polymer_claims.contracts import _DIR as _CONTRACTS_DIR
 from polymer_claims.contracts import load_contract
 from polymer_protocol import independent_credential_pair
+from polymer_protocol.calibration import (
+    CalibrationLedger,
+    CalibrationReport,
+    GeneratingModelParams,
+    calibration_summary,
+)
 
 _STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
 _PREDICATE_TYPE = "https://slsa.dev/provenance/v1"
@@ -430,3 +437,127 @@ def resolve_contract_index(corpus, *, extra: Iterable = ()) -> dict:
     for ref in extra:
         index[ref.dimnames_hash] = ref
     return index
+
+
+# ---------------------------------------------------------------------------
+# Certificate DTO + builder + DSSE envelope (Task 8)
+# New public symbols only — existing DSSE/Statement/bundle code is untouched.
+# ---------------------------------------------------------------------------
+_CERTIFICATE_MEDIA_TYPE = "application/vnd.polymer.certificate+json"
+_INTERPRETATION = (
+    "Definitional calibration validates the gate under known constructed truth (realized FDR). "
+    "Anchored/attested calibration measures warrant stability under future pressure, not truth."
+)
+
+
+class Certificate(_Model):
+    """Attestation bundle for a single LICENSED claim: in-toto Statement + optional calibration evidence."""
+
+    statement: Statement
+    calibration: CalibrationReport | None = None
+    generating_models: tuple[GeneratingModelParams, ...] = ()
+    ledger_digest: str | None = None
+    interpretation: str = _INTERPRETATION
+
+
+def build_certificate(
+    corpus,
+    claim_id: str,
+    *,
+    ledger: CalibrationLedger | None = None,
+    target_q: float,
+    contract_index=None,
+) -> Certificate:
+    """Build a Certificate for `claim_id` in `corpus`.
+
+    Finds the in-toto Statement whose subject.name == claim_id. If a CalibrationLedger is
+    supplied, attaches calibration_summary(ledger, target_q=target_q), the ledger's
+    generating_models, and a sha256 hex digest of the ledger's canonical JSON representation.
+    Raises ValueError if no LICENSED statement is found for claim_id."""
+    index = contract_index if contract_index is not None else resolve_contract_index(corpus)
+    statements = build_attestation_statements(corpus, contract_index=index)
+    stmt = next(
+        (s for s in statements if any(sub.name == claim_id for sub in s.subject)),
+        None,
+    )
+    if stmt is None:
+        raise ValueError(f"no LICENSED claim {claim_id!r} to certify")
+    report: CalibrationReport | None = None
+    digest: str | None = None
+    models: tuple[GeneratingModelParams, ...] = ()
+    if ledger is not None:
+        report = calibration_summary(ledger, target_q=target_q)
+        models = ledger.generating_models
+        raw = ledger.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
+        digest = hashlib.sha256(raw).hexdigest()
+    return Certificate(
+        statement=stmt,
+        calibration=report,
+        generating_models=models,
+        ledger_digest=digest,
+    )
+
+
+def certificate_dsse_envelope(cert: Certificate) -> DsseEnvelope:
+    """Wrap a full Certificate (Statement + calibration block + ledger digest) in a DSSE-shaped
+    envelope with payload_type='application/vnd.polymer.certificate+json'.
+
+    The calibration evidence is INSIDE the signed bytes. Mirrors dsse_envelope but uses a
+    distinct payloadType — existing dsse_envelope is not modified."""
+    raw = cert.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
+    return DsseEnvelope(
+        payload_type=_CERTIFICATE_MEDIA_TYPE,
+        payload=base64.b64encode(raw).decode("ascii"),
+    )
+
+
+def render_certificate_text(cert: Certificate) -> str:
+    """Human-legible text rendering of a Certificate with the no-laundering invariant.
+
+    The headline q line shows ONLY the definitional realized FDR (mean per-batch FDP).
+    q_anchored / q_attested appear ONLY under the separate "Warrant stability
+    (field calibration ...)" heading — never as the headline. If cert.calibration is
+    None (ledger=None at build time), a standing-only render is emitted with no
+    calibration block."""
+    lines = [f"Polymer Certificate — claim {cert.statement.subject[0].name}"]
+    rep = cert.calibration
+    if rep is None:
+        lines.append("(standing-only — no calibration ledger supplied)")
+        lines.append("")
+        lines.append(cert.interpretation)
+        return "\n".join(lines)
+    d = rep.definitional
+    lines.append(f"Corpus target q: {rep.target_q}")
+    lines.append("Calibration evidence:")
+    # HEADLINE: definitional realized FDR ONLY (the only tier that feeds_headline_q:
+    # kind=DEFINITIONAL, target=REALIZED_FDR — recomputed from kind/target, never a stored bool)
+    if d.realized_rate is None:
+        lines.append("  DEFINITIONAL: no batches yet")
+    else:
+        ci = f"[{d.ci_low:.3f}, {d.ci_high:.3f}]" if d.ci_low is not None else "n/a"
+        lines.append(
+            f"  DEFINITIONAL: {d.n_batches} mixed batches, {d.n_total} licensed;"
+            f" {d.n_failed} false licenses"
+        )
+        lines.append(
+            f"                -> realized FDR (mean per-batch FDP) {d.realized_rate:.3f},"
+            f" 95% CI {ci}"
+            f" (pooled false fraction {d.pooled_rate:.3f})"
+        )
+    # FIELD CALIBRATION: anchored/attested tiers — never the headline q
+    lines.append(
+        "Warrant stability (field calibration — survival under pressure, NOT truth):"
+    )
+    a = rep.anchored
+    if a.n_total:
+        lines.append(
+            f"  ANCHORED: {a.n_total} epochs resolved under pressure; {a.n_failed} failed"
+            f" -> warrant-failure rate {a.realized_rate:.3f}; {a.n_superseded} superseded;"
+            f" {a.n_unresolved} unresolved (span: {rep.observation_span_cycles} cycles)"
+        )
+    else:
+        lines.append("  ANCHORED: no resolved epochs yet")
+    lines.append(f"  ATTESTED: {rep.attested.n_total} attested events")
+    lines.append("")
+    lines.append(f"Interpretation: {cert.interpretation}")
+    return "\n".join(lines)
