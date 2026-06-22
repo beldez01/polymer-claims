@@ -11,9 +11,10 @@ import math
 from collections import defaultdict
 from enum import Enum
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 
 from .base import _Model
+from .corpus import Corpus
 
 
 class ResolutionKind(str, Enum):
@@ -237,3 +238,44 @@ def calibration_summary(ledger: CalibrationLedger, *, target_q: float) -> Calibr
         anchored=_anchored_stat(recs),
         attested=_attested_stat(recs),
     )
+
+
+class PressureContext(_Model):
+    """Cause info the impure caller supplies (a snapshot diff cannot recover cause; spec finding 6)."""
+
+    epoch: dict[str, int] = Field(default_factory=dict)         # claim_id -> its current license_epoch
+    cause: dict[str, PressureKind] = Field(default_factory=dict)    # claim_id -> pressure event this cycle
+    survived: frozenset[str] = Field(default_factory=frozenset)     # claim_ids whose pressure was SURVIVED
+    superseded: frozenset[str] = Field(default_factory=frozenset)   # drift-reopened then re-licensed
+
+
+def _status_of(corpus: Corpus, cid: str):
+    for c in corpus.claims:
+        if c.id == cid:
+            return c.status
+    return None
+
+
+def anchored_resolutions(
+    prev: Corpus, curr: Corpus, cycle: int, pressure: PressureContext
+) -> tuple[ResolutionRecord, ...]:
+    """Pure. Emit ANCHORED resolving records for claims that met a named pressure event this cycle.
+    Issuance (`unresolved`) records are emitted by the store at license time, not here."""
+    out: list[ResolutionRecord] = []
+    for cid, kind in pressure.cause.items():
+        epoch = pressure.epoch.get(cid, 0)
+        if cid in pressure.superseded:
+            verdict = ResolutionVerdict.SUPERSEDED
+        elif cid in pressure.survived:
+            verdict = ResolutionVerdict.UPHELD
+        else:
+            # a pressure event that moved the claim out of LICENSED is a failure
+            verdict = ResolutionVerdict.FAILED
+        out.append(ResolutionRecord(
+            subject_claim_id=cid, license_epoch=epoch,
+            resolution_kind=ResolutionKind.ANCHORED,
+            calibration_target=CalibrationTarget.WARRANT_SURVIVAL,
+            verdict=verdict, stated_q=curr.fdr_ledger.target_fdr, observed_at_cycle=cycle,
+            pressure_kind=kind,
+        ))
+    return tuple(out)
