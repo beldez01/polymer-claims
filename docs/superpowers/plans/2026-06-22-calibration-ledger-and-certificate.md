@@ -393,14 +393,17 @@ def _normal_ci(values: list[float]) -> tuple[float, float] | tuple[None, None]:
     return (max(0.0, mean - half), min(1.0, mean + half))
 
 
-def _definitional_stat(records: tuple[ResolutionRecord, ...], target_q: float) -> TierStat:
+def _definitional_stat(records, target_q, models) -> TierStat:
+    # n_generated comes from the generating models for THIS target_q (records only capture LICENSED
+    # claims; the withheld ones live only in the model's n_generated count).
+    n_generated = sum(m.n_generated for m in models if m.target_fdr == target_q)
     recs = [r for r in records
             if r.resolution_kind == ResolutionKind.DEFINITIONAL and r.stated_q == target_q]
     n_total = len(recs)
     n_failed = sum(1 for r in recs if r.verdict == ResolutionVerdict.FAILED)
     if n_total == 0:
         return TierStat(n_total=0, n_failed=0, realized_rate=None, n_batches=0,
-                        n_generated=0)
+                        n_generated=n_generated)
     by_batch: dict[str, list[bool]] = defaultdict(list)
     for r in recs:
         by_batch[r.batch_id].append(r.verdict == ResolutionVerdict.FAILED)
@@ -412,7 +415,7 @@ def _definitional_stat(records: tuple[ResolutionRecord, ...], target_q: float) -
         realized_rate=realized, pooled_rate=n_failed / n_total,
         ci_low=lo, ci_high=hi, ci_method="normal_0.95",
         n_batches=len(by_batch),
-        n_generated=sum(m.n_generated for m in ()),  # overwritten by caller if models present
+        n_generated=n_generated or None,
     )
 
 
@@ -447,13 +450,13 @@ def calibration_summary(ledger: CalibrationLedger, *, target_q: float) -> Calibr
     return CalibrationReport(
         target_q=target_q,
         observation_span_cycles=span,
-        definitional=_definitional_stat(recs, target_q),
+        definitional=_definitional_stat(recs, target_q, ledger.generating_models),
         anchored=_anchored_stat(recs),
         attested=_attested_stat(recs),
     )
 ```
 
-> Note: the `n_generated=sum(... for _ in ())` line yields `0`; the harness (Task 6) records `n_generated` on the ledger's `GeneratingModelParams` and the certificate (Task 8) surfaces the disclosed count. Keep the summary's `n_generated` derived only from records it can see; do not invent a count here.
+> Note: `n_generated` is the count of synthetic claims the harness *produced* for this `target_q` (licensed + withheld). Records only capture LICENSED claims, so the count comes from the matching `GeneratingModelParams.n_generated`. If no models are recorded (e.g. an ANCHORED-only ledger), it is `None`.
 
 - [ ] **Step 4: Run test to verify it passes**
 
