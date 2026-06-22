@@ -269,6 +269,10 @@ def test_node_runner_calibration_on_writes_file(tmp_path):
     for _ in range(10):
         runner.tick()
 
+    # The epoch state file MUST exist after ticks (EpochAllocator writes it on every allocate())
+    # This confirms the calibration hook actually fired.
+    assert epoch_path.exists(), "EpochAllocator should write epoch_state.json on first tick"
+
     # The calibration file should exist (written during ticks)
     # Even if no anchored events fired, the file should be created if calibration is enabled
     # (or not exist if there truly were no pressure events — either is valid).

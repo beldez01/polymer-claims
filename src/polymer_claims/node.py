@@ -16,6 +16,7 @@ No web/HTTP here — a streaming server is a later task.
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Literal
 
 from polymer_grammar import IdentityAdapter, MaterializationContext, ReferenceAdapter
@@ -103,11 +104,11 @@ class NodeRunner:
         # Calibration hook (gated): when calibration_path is set, each tick that
         # produces a prev/curr pair calls observe_anchored + append_records.
         # calibration_path=None (default) → byte-identical, no file written.
-        self._calibration_path = None if calibration_path is None else __import__("pathlib").Path(calibration_path)
+        self._calibration_path = None if calibration_path is None else Path(calibration_path)
         self._calibration_epoch_path = (
             (self._calibration_path.parent / "epoch_state.json")
             if self._calibration_path is not None and calibration_epoch_path is None
-            else (None if calibration_epoch_path is None else __import__("pathlib").Path(calibration_epoch_path))
+            else (None if calibration_epoch_path is None else Path(calibration_epoch_path))
         )
         self._epoch_allocator = None  # lazily created when calibration_path is set
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
