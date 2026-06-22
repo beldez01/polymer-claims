@@ -237,6 +237,49 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_calibrate(args: argparse.Namespace) -> int:
+    from .calibration_harness import run_calibration
+    from .calibration_store import append_records
+    from polymer_protocol.calibration import GeneratingModelParams
+    model = GeneratingModelParams(
+        model_id="cli",
+        n_per_group=args.n_per_group,
+        n_probes_per_region=args.probes,
+        effect_size=args.effect_size,
+        dispersion=args.dispersion,
+        fraction_true=args.fraction_true,
+        tau=args.tau,
+        target_fdr=args.q,
+        n_generated=args.n,
+        seed_set=(args.seed,),
+    )
+    ledger = run_calibration(model=model, n_batches=args.batches, base_seed=args.seed)
+    if args.out:
+        append_records(args.out, ledger.records)
+    else:
+        for r in ledger.records:
+            sys.stdout.write(r.model_dump_json(exclude_none=True) + "\n")
+    return 0
+
+
+def _cmd_certify(args: argparse.Namespace) -> int:
+    from .attestation import build_certificate, render_certificate_text, certificate_dsse_envelope
+    corpus = load_corpus(args.corpus)
+    ledger = None
+    if args.calibration:
+        from .calibration_store import load_ledger
+        ledger = load_ledger(args.calibration)
+    cert = build_certificate(corpus, args.claim_id, ledger=ledger, target_q=args.q)
+    if args.format == "json":
+        out = cert.model_dump_json(by_alias=True, exclude_none=True)
+    elif args.format == "dsse":
+        out = certificate_dsse_envelope(cert).model_dump_json(by_alias=True, exclude_none=True)
+    else:
+        out = render_certificate_text(cert)
+    sys.stdout.write(out + "\n")
+    return 0
+
+
 def _cmd_export_timeline(args: argparse.Namespace) -> int:
     corpus = load_corpus(args.corpus)
     timeline = export_timeline(corpus, _ADAPTERS, _CTX, n_cycles=args.cycles)
@@ -526,6 +569,29 @@ def _build_parser() -> argparse.ArgumentParser:
     p_att.add_argument("--format", choices=("bundle", "dsse"), default="bundle",
                        help="bundle (default Polymer AttestationBundle) or dsse (NDJSON of unsigned DSSE envelopes)")
     p_att.set_defaults(func=_cmd_export_attestation)
+
+    p_cal = sub.add_parser("calibrate", help="run the synthetic DEFINITIONAL calibration harness")
+    p_cal.add_argument("--synthetic", action="store_true", help="(only mode this slice)")
+    p_cal.add_argument("--batches", type=int, default=12)
+    p_cal.add_argument("--n", type=int, default=40, help="regions (claims) per batch")
+    p_cal.add_argument("--q", type=float, default=0.05)
+    p_cal.add_argument("--fraction-true", dest="fraction_true", type=float, default=0.6)
+    p_cal.add_argument("--effect-size", dest="effect_size", type=float, default=0.30)
+    p_cal.add_argument("--dispersion", type=float, default=25.0)
+    p_cal.add_argument("--tau", type=float, default=0.10)
+    p_cal.add_argument("--n-per-group", dest="n_per_group", type=int, default=40)
+    p_cal.add_argument("--probes", type=int, default=6)
+    p_cal.add_argument("--seed", type=int, default=0)
+    p_cal.add_argument("--out", default=None, help="write the ledger JSONL here (else stdout)")
+    p_cal.set_defaults(func=_cmd_calibrate)
+
+    p_cert = sub.add_parser("certify", help="emit a single-claim certificate (standing + calibrated q)")
+    p_cert.add_argument("claim_id")
+    p_cert.add_argument("--corpus", required=True, help="path to a corpus JSON file")
+    p_cert.add_argument("--calibration", default=None, help="path to a calibration ledger JSONL")
+    p_cert.add_argument("--q", type=float, default=0.05)
+    p_cert.add_argument("--format", choices=("text", "json", "dsse"), default="text")
+    p_cert.set_defaults(func=_cmd_certify)
 
     return parser
 
