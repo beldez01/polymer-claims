@@ -235,6 +235,15 @@ git commit -m "$(printf 'feat(calibration): ResolutionRecord + warrant-tier enum
 
 Key rules (from spec §4.4): a report summarizes **one** `target_q` — DEFINITIONAL records enter the FDR only when `stated_q == target_q`. DEFINITIONAL headline `realized_rate = mean over batches of FDP_b` (`FDP_b = failed_b / licensed_b`, `0` when `licensed_b == 0`), grouped by `batch_id`; `pooled_rate = Σfailed / Σlicensed`. ANCHORED `realized_rate = n_failed / (n_failed + n_upheld)`, `n_unresolved` reported alongside, `n_superseded` reported separately and **excluded** from the denominator. Pooling across tiers is structurally impossible (three separate `TierStat` fields).
 
+**Two planning notes (review findings 2, 5):**
+- **`target_q` is a required keyword-only arg of `calibration_summary` — no default.** The pure
+  function never falls back to `ledger.default_target_q`; only the *caller* (the CLI / `build_certificate`)
+  resolves a default from `default_target_q`. This keeps the pure API unambiguous.
+- **The normal-approx CI over ~12 batches is descriptive, not a validity proof.** With small N and
+  bounded/skewed per-batch FDPs the interval is rough; it is fine for the report-only certificate but
+  is *not* a statistical guarantee. If the CI is ever put in an external-facing claim, increase N
+  (and reconsider the interval method). Carried as a deferred item in the spec §10.
+
 - [ ] **Step 1: Write the failing test**
 
 ```python
@@ -672,6 +681,18 @@ def test_default_root_unchanged():
     # a bundled fixture still resolves with no contextvar set (byte-identical behavior)
     ref = load_contract("se:groupdiff_epicv2_demo@1")
     assert ref.contract_uid == "groupdiff_epicv2_demo@1"
+
+
+def test_temp_root_shadows_a_bundled_uid_then_resets_byte_identical(tmp_path):
+    # Highest-risk seam: a temp root holding the SAME uid as a bundled contract must NOT alias the
+    # cached bundled one, and after the context exits the bundled resolution must be byte-identical.
+    bundled_before = load_contract("se:groupdiff_epicv2_demo@1")
+    _write_min_contract(tmp_path, "groupdiff_epicv2_demo@1", "cgSHADOW")  # same uid, different content
+    with using_contract_root(tmp_path):
+        shadow = load_contract("se:groupdiff_epicv2_demo@1")
+    assert shadow.dimnames_hash != bundled_before.dimnames_hash      # temp shadowed the bundled
+    bundled_after = load_contract("se:groupdiff_epicv2_demo@1")       # context reset
+    assert bundled_after.dimnames_hash == bundled_before.dimnames_hash  # bundled byte-identical again
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -1054,25 +1075,49 @@ git add src/polymer_claims/calibration_harness.py tests/test_calibration_harness
 git commit -m "$(printf 'feat(calibration): end-to-end harness over the real gate -> DEFINITIONAL records\n\nCo-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>')"
 ```
 
-- [ ] **Step 6: Add the mixed-batch FDR envelope test (the calibration pass-bar)**
+- [ ] **Step 6: Add the mixed-batch FDR envelope test + the all-null control (the calibration pass-bar)**
+
+The tolerance is a **pinned, a-priori constant — not a knob to raise until green** (review finding 1). Define it once at module top with its rationale:
 
 ```python
-# append to tests/test_calibration_harness_run.py
+# tests/test_calibration_harness_run.py — module constants, fixed BEFORE running
+N_BATCHES = 12          # spec N≈12
+CAL_FDR_TOLERANCE = 0.02  # absolute margin on mean per-batch FDP.
+# Rationale (pinned a priori): a calibrated e-LOND gate has E[FDP] <= q = 0.05. The Monte-Carlo
+# standard error of the mean of N=12 per-batch FDPs (each a proportion near q) is ~sqrt(q(1-q)/m)/sqrt(N)
+# for batch licensed-count m~tens, i.e. on the order of 0.01-0.015; 0.02 is ~1.5 SE of slack. This
+# absorbs finite-N noise WITHOUT admitting a gate whose mean FDP is materially above q (e.g. 0.10
+# would fail). It is fixed here and MUST NOT be raised to make a red test pass — a persistent breach
+# is a real miscalibration finding to investigate (Phase A: "honest failure is an acceptable outcome").
+```
+
+```python
 from polymer_protocol.calibration import calibration_summary
 from polymer_claims.calibration_harness import run_calibration
 
 
 def test_mixed_batch_realized_fdr_consistent_with_target():
     model = _model(fraction_true=0.6, n_generated=40, effect_size=0.30, n_per_group=40)
-    ledger = run_calibration(model=model, n_batches=10, base_seed=100)
+    ledger = run_calibration(model=model, n_batches=N_BATCHES, base_seed=100)
     rep = calibration_summary(ledger, target_q=model.target_fdr)
-    # deterministic (fixed seeds). Pass-rule: mean per-batch FDP <= q + tolerance (spec §8 bar 2).
     assert rep.definitional.realized_rate is not None
-    assert rep.definitional.realized_rate <= model.target_fdr + 0.05  # tolerance margin
+    # deterministic (fixed seeds). Pass-rule (spec §8 bar 2): mean per-batch FDP <= q + pinned tolerance.
+    assert rep.definitional.realized_rate <= model.target_fdr + CAL_FDR_TOLERANCE
+
+
+def test_all_null_control_licenses_are_bounded():
+    # all-null: every license is false. This is a CONTROL of per-comparison false-positive behavior,
+    # NOT the headline FDR. Fixed seed -> deterministic count -> assert a conservative pinned bound.
+    model = _model(fraction_true=0.0, n_generated=40, n_per_group=40)
+    recs = run_batch(model=model, batch_id="null", seed=200)
+    # K: a conservative a-priori bound. Under H0 the per-claim type-I rate is governed by the e-LOND
+    # threshold; for 40 null regions at q=0.05 we expect very few licenses. K is pinned, not tuned.
+    K = 4
+    assert len(recs) <= K, f"all-null licensed {len(recs)} > pinned bound {K} — investigate the gate"
 ```
 
-Run: `uv run pytest tests/test_calibration_harness_run.py::test_mixed_batch_realized_fdr_consistent_with_target -q`
-Expected: PASS. (If it fails because realized FDR ≫ q, that is a real signal the synthetic gate is miscalibrated under these params — investigate before loosening tolerance; do NOT tune to pass.) Commit.
+Run: `uv run pytest tests/test_calibration_harness_run.py -q`
+Expected: PASS. (If the mixed test fails because realized FDR ≫ q, or the control licenses > K, that is a **real** signal the synthetic gate is miscalibrated under these params — investigate; do NOT loosen the constants to pass.) Commit.
 
 ---
 

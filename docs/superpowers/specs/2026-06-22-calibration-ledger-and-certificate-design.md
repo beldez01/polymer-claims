@@ -545,6 +545,11 @@ Gate: per-package `uv run pytest -q` + `uv run ruff check src tests`; full `scri
   first-class link if attested events become corpus claims.
 - Hazard/survival model for `q_anchored` (exposure-weighted) — replaces the raw-ratio +
   span caveat.
+- **Stronger DEFINITIONAL uncertainty.** The normal-approx CI over N≈12 per-batch FDPs is
+  *descriptive*, not a validity proof (small N, bounded/skewed FDPs). It is adequate for the
+  report-only certificate; before any external-facing `q` claim, increase N and/or use a better
+  interval (e.g. bootstrap over batches). Calibration is an instrument, so this is a sharpening, not
+  a correctness gap.
 - **`upheld` observability (scope note).** `failed`/`superseded` resolutions are directly
   observable (a license moves out of LICENSED with a known cause). `upheld` requires observing a
   *survived* pressure event (a defeat attempt that fired but was grounded back IN, a drift
