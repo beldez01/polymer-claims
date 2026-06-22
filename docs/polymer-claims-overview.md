@@ -121,8 +121,7 @@ What the system *produces*:
 - **A governed discovery stream + the integrity metric `q`** — every license is an entry in the
   online FDR ledger; the corpus can state honestly "we expect ≤ `q` of LICENSED claims to be false."
 - **Content-addressed, attestable licenses** — each records its full address: dataset `dimnames_hash`
-  + apparatus `profile_hash` + a `semantic_run_id`, so a license is reproducible and (on the
-  roadmap) third-party verifiable.
+  + apparatus `profile_hash` + a `semantic_run_id`, so a license is reproducible and — via `export-attestation` (in-toto/SLSA bundle, unsigned DSSE) — **attestable today**; full trust-validity (Sigstore/Rekor signing) is slice 3.
 - **Topology / timeline exports** — `TopologyExport` (nodes/edges/clusters + a deterministic 3-D
   layout) and `TopologyTimeline` (warm-started frames + per-frame stats): the protocol↔viewer
   contract, streamed over SSE.
@@ -171,12 +170,12 @@ standards-native, and alive**, in three arcs:
 2. **The standards skin (the adoption moat)** — re-express the content-address / apparatus / run
    model as the standards that already exist (GA4GH DRS/WES/TRS, Workflow Run RO-Crate,
    in-toto/SLSA/Sigstore). The strategic inversion: **don't integrate the world's data and compute —
-   integrate *trust over* them**, so adoption is "point your pipeline at us," not "rewrite for us."
+   integrate *trust over* them**, so adoption is "point your pipeline at us," not "rewrite for us." *Slices 1–2 are built:* `export-attestation` emits an in-toto Statement v1 / SLSA Provenance v1 bundle keyed by the DRS content-address; `--format dsse` wraps each Statement in an unsigned DSSE envelope (signing-ready, not yet trust-valid). Real signing (Sigstore/Rekor) is slice 3.
 3. **The living universe (the vision)** — hyperbolic geometry for the embedding (knowledge is
    hierarchical), the local-compute **agent protocol** ("deploy an agent to examine a region,
    re-execute, post verification/attack events"), a credence layer, and — the long horizon — a
    **sheaf-cohomology consistency gauge** that turns "grows toward truth" into a number that falls as
-   independent recomputations bring claims into harmony. *The first piece of this is built:* a cellular sheaf over the claims graph computes Robinson inconsistency energy, `dim H⁰`, and `H¹` frustration obstructions, available via `export-consistency` and as a live headline on every `TopologyExport`. It is an instrument, not a gate.
+   independent recomputations bring claims into harmony. *The first piece of this is built:* a cellular sheaf over the claims graph computes Robinson inconsistency energy, `dim H⁰`, and `H¹` frustration obstructions, available via `export-consistency` and as a live headline on every `TopologyExport`. It is an instrument, not a gate. *The viewer overlay is also built:* a throttled `GET /consistency` route feeds a live consistency overlay — energy HUD, per-claim tension halos (nonnegative edge-share), and an animated H¹ frustration-cycle overlay with an obstruction panel.
 
 ---
 

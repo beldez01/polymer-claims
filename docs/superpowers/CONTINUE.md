@@ -8,20 +8,13 @@
 
 ---
 
-## Current state (2026-06-21)
+## Current state (2026-06-22)
 
-`main` GREEN — **327 umbrella + 396 grammar + 404 protocol + 2 isolation**, ruff
-clean, viewer `tsc` clean (full `scripts/check-all.sh` printed **ALL GREEN** incl. `next build` on the merge
-— network was available that run). grammar/protocol pure + numpy-free; **Corpus = 4 collections**. (**Attestation
-DSSE export — arc 2, slice 2 — shipped 2026-06-21**; sheaf consistency gauge shipped + merged to `main` 2026-06-21 — `fe1214d`, `--no-ff`, pushed to origin
-(`main == origin/main`), feature branch deleted; §E common-cause slice — earn REPLICATED on low shared-cause overlap
-— shipped 2026-06-19, merged; Phase D slice 2 + slice 1 merged 2026-06-19; see NEXT.) **Viewer-build
-caveat:** `npm run typecheck` passes; the `next build` step of `scripts/check-all.sh` can fail *only*
-because the sandbox cannot fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not
-a code defect — the build passed when network was available). All pytest suites + ruff + isolation + viewer
-typecheck are green. (**North-Star arc 2 — standards-skin attestation export, slice 1 — shipped 2026-06-21**:
-`export-attestation` CLI; new umbrella module `attestation.py` + 31 attestation tests; additive/umbrella-only;
-see *Recently shipped*.)
+`main` GREEN — **327 umbrella + 396 grammar + 404 protocol + 2 isolation** (HEAD `b4d3801`, pushed to origin — `main == origin/main`), ruff clean, viewer `tsc` clean (full `scripts/check-all.sh` printed **ALL GREEN** incl. `next build` when network is available). grammar/protocol pure + numpy-free; **Corpus = 4 collections**.
+
+**Recently shipped (newest first):** Attestation DSSE export (arc 2 slice 2 — `export-attestation --format dsse`, NDJSON of unsigned DSSE envelopes) · standards-skin attestation slice 1 (`export-attestation` bundle — in-toto Statement v1 / SLSA Provenance v1 + GA4GH DRS) · Sheaf gauge live viz (one opt-in "consistency overlay" toggle: energy HUD, tension halos, animated H¹ frustration-cycle overlay, obstruction panel; new throttled `GET /consistency` route) · Sheaf consistency gauge · §E common-cause REPLICATED + Phase D slices 1+2 (2026-06-19). Details in *Recently shipped* / the Done checklist below.
+
+**Viewer-build caveat:** `npm run typecheck` passes; the `next build` step of `scripts/check-all.sh` can fail *only* because the sandbox cannot fetch Inter/JetBrains Mono from Google Fonts at build time (a network block, not a code defect — the build passes when network is available). All pytest suites + ruff + isolation + viewer typecheck are green.
 
 **Repo reconciled to a single trunk (2026-06-19).** The git tangle is gone: ~9 stacked feature branches
 were fast-forwarded into `main` (zero divergence, nothing lost), all stale local + remote branches
@@ -95,7 +88,7 @@ recompute gate re-expressed as the GA4GH/in-toto/SLSA trust fabric (north-star �
 `docs/superpowers/{specs,plans}/2026-06-21-standards-skin-attestation*`. Deferred (later slices):
 signing/DSSE/Sigstore/Rekor, `--format ndjson` direct-verifier export, publishing the recompute-gate
 build-type/security-model doc at the `builder.id` URI, WES/TRS/RO-Crate, FAIR Signposting, Refget SeqCol. ·
-**Sheaf consistency gauge** (2026-06-21) — cellular sheaf over the
+**Sheaf gauge live viz** (2026-06-21) — one opt-in "consistency overlay" toggle: falling energy HUD + sparkline, per-claim tension halos, animated H¹ frustration-cycle overlay, obstruction panel; new throttled `GET /consistency` route; backend corrections P1 energy-only per-frame headline (`ConsistencyHeadline.spectral_gap` now `float | None`) + P3 nonnegative edge-share `per_claim_tension`. spec+plan `docs/superpowers/{specs,plans}/2026-06-21-sheaf-viewer-viz*`. · **Sheaf consistency gauge** (2026-06-21) — cellular sheaf over the
 claims graph; inconsistency energy (consistency radius) + dim H⁰ + localized H¹ frustration obstructions;
 `export-consistency` CLI + cheap live headline on the topology frame; instrument not a gate; pure protocol
 extractor + numpy spectrum behind `[embed]`. spec+plan `docs/superpowers/{specs,plans}/2026-06-21-sheaf-consistency-gauge*`.
@@ -193,10 +186,11 @@ Other safe slices (the historical decision menu is archived at `docs/superpowers
    it (tiny; the enum value is reserved). Optional/legibility.
 
 **Deferred / blocked-on-external (supervised):** Python/R hash parity (needs the R side);
-standards-skin attestation JSON (in-toto/SLSA/DRS
-serialization — the safe first slice of the north-star "standards" arc). Literal per-attack e-value
+arc-2 slice 3 — real signing (Sigstore/cosign/Rekor + the DSSE PAE) on top of the shipped unsigned DSSE export — deferred (no external service/keys yet). Literal per-attack e-value
 combination is **largely a mirage** — Phase 2.2 already caught its sound core; don't build a generic
 combination.
+
+**Candidate next moves:** arc-2 slice 3 (real signing — Sigstore/cosign/Rekor/DSSE PAE); arc-3 deepening (hyperbolic/Lorentz layout, instrument→gate); **Linchpin Layer C — the Variant Adjudication Engine wedge** (untouched, highest-leverage demonstrable artifact). Real-2nd-cohort §2E REPLICATED stays data-blocked (needs a real `idh_status.tsv`).
 
 Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 `superpowers:subagent-driven-development` → merge `--no-ff` → update this file + memory.
@@ -344,6 +338,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - **Memory:** `project_polymer_claims_knowledge_protocol` (full phase history + follow-ups)
 - **Deep design source:**
   `~/Desktop/Research/topics/epistemic-claim-foundations/generative-protocol/_FINAL_knowledge_generation_protocol.md`
+- **Foundations (framing):** `docs/superpowers/foundations/MAP.md` (one-page shape) · `docs/superpowers/foundations/epistemology.md` (why the gate isn't circular) · `docs/superpowers/foundations/scaled-infrastructure.md` (unicorn-scale sketch).
 
 ## Open follow-ups (tracked, non-blocking)
 

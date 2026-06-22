@@ -1,6 +1,6 @@
 # Polymer Claims — Canonical Specification
 
-> Current state of record for `main` as of 2026-06-21. This document states what the
+> Current state of record for `main` as of 2026-06-22. This document states what the
 > system is, not the phase history. Use `docs/superpowers/CONTINUE.md` for the live
 > build log and next work; use the dated specs/plans for design rationale.
 
@@ -97,7 +97,11 @@ LICENSED iff adapter-agreement and SATISFIED and grounded and live e-LOND discov
 
 ## 5a. Sheaf consistency gauge
 
-The corpus's defeat and equivalence edges form a **cellular sheaf over the claims graph**: a scalar-ℝ stalk on each Quantity-leaf claim, equivalence edges encoding agreement (sign `+1`), and defeat edges encoding antagonism (sign `−1`, generalising the signed-Laplacian embedding). `protocol/sheaf.py` extracts a pure, numpy-free `SheafStructure`; umbrella-side `polymer_claims/sheaf_spectrum.py` (behind `[embed]`) computes the **Robinson inconsistency energy** (normalized squared edge tension — a distance-to-consensus that falls as recomputation harmonizes claims), `dim H⁰` (consistent components), and signed-BFS-localised `H¹` frustration obstructions (contradiction cycles no pairwise check sees). This is an **instrument, not a gate** — no claim status changes. A cheap `ConsistencyHeadline` (energy + spectral gap λ₂) attaches to every `TopologyExport` as `TopologyExport.consistency` when numpy is present; the full `ConsistencyReport` is available via the `export-consistency` CLI. Cross-unit equivalences are flagged as `DataQualityFlag`s rather than silently dropped. First concrete realisation of the North-Star §3 sheaf-cohomology global-consistency gauge / linchpin A3 (Reproducibility Observatory).
+The corpus's defeat and equivalence edges form a **cellular sheaf over the claims graph**: a scalar-ℝ stalk on each Quantity-leaf claim, equivalence edges encoding agreement (sign `+1`), and defeat edges encoding antagonism (sign `−1`, generalising the signed-Laplacian embedding). `protocol/sheaf.py` extracts a pure, numpy-free `SheafStructure`; umbrella-side `polymer_claims/sheaf_spectrum.py` (behind `[embed]`) computes the **Robinson inconsistency energy** (normalized squared edge tension — a distance-to-consensus that falls as recomputation harmonizes claims), `dim H⁰` (consistent components), and signed-BFS-localised `H¹` frustration obstructions (contradiction cycles no pairwise check sees). This is an **instrument, not a gate** — no claim status changes. A cheap `ConsistencyHeadline` (energy + spectral gap λ₂) attaches to every `TopologyExport` as `TopologyExport.consistency` when numpy is present; the full `ConsistencyReport` is available via the `export-consistency` CLI. Cross-unit equivalences are flagged as `DataQualityFlag`s rather than silently dropped. First concrete realisation of the North-Star §3 sheaf-cohomology global-consistency gauge / linchpin A3 (Reproducibility Observatory). The viewer exposes a live **consistency overlay** (one opt-in toggle) driven by a throttled `GET /consistency` route on the local server: an energy HUD + sparkline, per-claim **tension halos**, and an animated **H¹ frustration-cycle overlay** with an obstruction panel. Two precision corrections back this: the per-frame `ConsistencyHeadline` carries **energy only** (P1 — λ₂ is computed only in the on-demand `ConsistencyReport`, never on the tick path), and `per_claim_tension` is a **nonnegative edge-share** attribution (P3 — a valid opacity), not the signed Rayleigh diagonal.
+
+## 5b. Standards-skin attestation (arc 2)
+
+`export-attestation` re-expresses a LICENSED run in the trust standards that already exist, so a third party can verify it **without trusting our service**. **Slice 1** emits, per LICENSED claim, an **in-toto Statement v1** subject with a **SLSA Provenance v1** predicate that casts the recomputation gate as the builder — the air-gap credential pair are the SLSA `builderDependencies`, and the resolved datasets are **GA4GH DRS** objects keyed by the content-address the gate already computes (`dimnames_hash`/`profile_hash`/`semantic_run_id`). The serializer is pure (frozen `_Model` DTOs, stdlib `json`/`hashlib`; `resolve_contract_index` is the only IO); the default bundle is additive. **Slice 2** adds `--format dsse`: each Statement is wrapped in a **DSSE-shaped envelope** with empty `signatures` and emitted as NDJSON — **signing-ready but not trust-valid** (decode `payload` for the bare Statement; a DSSE signature verifier treats it as unsigned). Real signing (Sigstore/cosign/Rekor + the DSSE PAE) is **slice 3**, deferred. This is the first seam of the North-Star §4 standards arc (#3, in-toto/SLSA) — the adoption moat: "point your pipeline at us," not "rewrite for us."
 
 ## 6. Independence And Shared Causes
 
@@ -157,7 +161,7 @@ not expose machine-readable per-sample IDH status.
 The umbrella package provides:
 
 - CLI: `version`, `validate`, `ingest tcga-laml`, `run-cycle`, `loop`,
-  `export-topology`, `export-timeline`, `export-consistency`, `serve`;
+  `export-topology`, `export-timeline`, `export-consistency`, `export-attestation`, `serve`;
 - `NodeRunner`, which owns clock, loop state, layout choice, and live corpus state;
 - FastAPI SSE server behind `[serve]`;
 - optional `[llm]` generation adapters and `[embed]` spectral layout support.
@@ -176,7 +180,7 @@ The viewer is a standalone Next/React Three Fiber app. It supports:
 - spectral live layout via signed-Laplacian eigenmap with per-frame Procrustes alignment.
 
 Viewer nodes surface `independence_tier`, `severity_provenance`, and
-`shared_cause_overlap` when present. `TopologyExport.consistency` carries a `ConsistencyHeadline` (inconsistency energy + spectral gap) when `[embed]` is installed; `None` otherwise.
+`shared_cause_overlap` when present. `TopologyExport.consistency` carries a `ConsistencyHeadline` (inconsistency energy + spectral gap) when `[embed]` is installed; `None` otherwise. When the local server exposes `GET /consistency`, the viewer renders the live consistency overlay (energy HUD, tension halos, H¹ frustration-cycle overlay + obstruction panel).
 
 ## 11. Current Caveats
 
