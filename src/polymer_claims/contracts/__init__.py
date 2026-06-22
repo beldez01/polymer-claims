@@ -50,7 +50,7 @@ class SEContractRef(_Frozen):
 
 
 _DIR = Path(__file__).parent
-_contract_root: contextvars.ContextVar[Path] = contextvars.ContextVar("_contract_root", default=_DIR)
+_contract_root: contextvars.ContextVar[Path | None] = contextvars.ContextVar("_contract_root", default=None)
 
 
 @contextmanager
@@ -73,7 +73,10 @@ def _resolve_uid(ref: str) -> str:
 def load_contract(ref: str) -> SEContractRef:
     """Resolve a DataHandle.ref to a content-addressed SEContractRef. Resolves under the scoped
     contract root (a contextvar, default the bundled dir). Unknown ref -> FileNotFoundError."""
-    return _load_contract(_resolve_uid(ref), _contract_root.get())
+    root = _contract_root.get()
+    if root is None:
+        root = _DIR
+    return _load_contract(_resolve_uid(ref), root)
 
 
 @lru_cache(maxsize=None)
