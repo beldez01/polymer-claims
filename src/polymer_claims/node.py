@@ -74,6 +74,8 @@ class NodeRunner:
         evidence: dict[str, float] | None = None,
         replications: dict | None = None,
         replication_bindings: dict[str, str] | None = None,
+        calibration_path=None,
+        calibration_epoch_path=None,
         **run_cycle_kwargs,
     ) -> None:
         self.corpus = corpus
@@ -98,6 +100,16 @@ class NodeRunner:
         self._static_evidence = evidence
         self._static_replications = replications
         self.replication_bindings = replication_bindings
+        # Calibration hook (gated): when calibration_path is set, each tick that
+        # produces a prev/curr pair calls observe_anchored + append_records.
+        # calibration_path=None (default) → byte-identical, no file written.
+        self._calibration_path = None if calibration_path is None else __import__("pathlib").Path(calibration_path)
+        self._calibration_epoch_path = (
+            (self._calibration_path.parent / "epoch_state.json")
+            if self._calibration_path is not None and calibration_epoch_path is None
+            else (None if calibration_epoch_path is None else __import__("pathlib").Path(calibration_epoch_path))
+        )
+        self._epoch_allocator = None  # lazily created when calibration_path is set
         self._proposers_available = bool(run_cycle_kwargs.get("proposers"))
         self.frame_index = 0
         self.prev_positions: dict[str, tuple] = {}
@@ -147,6 +159,8 @@ class NodeRunner:
         evidence: dict[str, float] | None = None,
         replications: dict | None = None,
         replication_bindings: dict[str, str] | None = None,
+        calibration_path=None,
+        calibration_epoch_path=None,
         **run_cycle_kwargs,
     ) -> "NodeRunner":
         return cls(
@@ -164,6 +178,8 @@ class NodeRunner:
             evidence=evidence,
             replications=replications,
             replication_bindings=replication_bindings,
+            calibration_path=calibration_path,
+            calibration_epoch_path=calibration_epoch_path,
             **run_cycle_kwargs,
         )
 
@@ -177,8 +193,26 @@ class NodeRunner:
         self.current = next(iter(m.values()), self.ctx)
         return self.current
 
+    def _calibration_hook(self, prev_corpus: Corpus, cycle: int) -> None:
+        """Observe ANCHORED pressure events and append records to the calibration JSONL.
+
+        Called only when self._calibration_path is set (gated). When calibration is off
+        (self._calibration_path is None) this method is never called — byte-identical."""
+        from .calibration_store import EpochAllocator, append_records, observe_anchored
+
+        if self._epoch_allocator is None:
+            self._epoch_allocator = EpochAllocator(self._calibration_epoch_path)
+        records = observe_anchored(
+            prev_corpus, self.corpus, cycle,
+            allocator=self._epoch_allocator,
+            last_drift=self.last_drift,
+        )
+        if records:
+            append_records(self._calibration_path, records)
+
     def tick(self) -> TimelineFrame:
         """Advance one scheduler-driven step; emit and accumulate a frame."""
+        prev_corpus = self.corpus  # snapshot before action (for calibration diff)
         state = SchedulerState(
             corpus=self.corpus,
             ledger=self.ledger,
@@ -240,6 +274,13 @@ class NodeRunner:
             n_added = 0
 
         self.frame_index += 1
+
+        # Calibration hook — gated: only fires when calibration_path was supplied.
+        # When off (calibration_path=None), this block is a no-op and the method is
+        # never called, preserving byte-identical behaviour.
+        if self._calibration_path is not None:
+            self._calibration_hook(prev_corpus, self.frame_index)
+
         topo = self._layout_topology(self.corpus)
         licensed_now = n_licensed(self.corpus)
         n_newly_licensed = max(0, licensed_now - self._licensed_prev)
