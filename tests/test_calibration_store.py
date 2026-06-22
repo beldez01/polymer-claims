@@ -234,6 +234,73 @@ def test_observe_anchored_no_pressure_no_records(tmp_path):
     assert records == ()
 
 
+def test_observe_anchored_drift_survival_emits_upheld(tmp_path):
+    """A claim still LICENSED through a DRIFT tick (not in last_drift.drifted) → UPHELD/drift."""
+    from polymer_claims.calibration_store import EpochAllocator, observe_anchored
+
+    state = tmp_path / "epoch.json"
+    lic = licensing(sat(mc(semantic_run_id="run-survive")))
+    corpus = corpus_with(licensed_claim("c-survive", lic))  # prev == curr: still LICENSED
+
+    alloc = EpochAllocator(state)
+    records = observe_anchored(
+        corpus, corpus, cycle=7, allocator=alloc, last_drift=None, drift_ran=True
+    )
+    assert len(records) == 1
+    assert records[0].verdict == ResolutionVerdict.UPHELD
+    assert records[0].pressure_kind == PressureKind.DRIFT
+    assert records[0].subject_claim_id == "c-survive"
+    assert records[0].observed_at_cycle == 7
+
+
+def test_observe_anchored_no_drift_tick_no_upheld(tmp_path):
+    """Without a DRIFT tick (drift_ran=False), a stable LICENSED claim emits nothing — a
+    mere persistence is NOT a survival event (q_anchored can't drift with tick frequency)."""
+    from polymer_claims.calibration_store import EpochAllocator, observe_anchored
+
+    state = tmp_path / "epoch.json"
+    lic = licensing(sat(mc(semantic_run_id="run-idle")))
+    corpus = corpus_with(licensed_claim("c-idle", lic))
+    alloc = EpochAllocator(state)
+    records = observe_anchored(
+        corpus, corpus, cycle=2, allocator=alloc, last_drift=None, drift_ran=False
+    )
+    assert records == ()
+
+
+def test_observe_anchored_drift_mixed_failed_and_upheld(tmp_path):
+    """On a DRIFT tick: the drifted claim (→PENDING, in last_drift.drifted) FAILS; a retained
+    claim is UPHELD. The survived set excludes drifted claims."""
+    from polymer_grammar import Status as S
+    from polymer_protocol.drift import DriftFinding, DriftRecord
+    from tests.conftest import make_claim
+
+    from polymer_claims.calibration_store import EpochAllocator, observe_anchored
+
+    state = tmp_path / "epoch.json"
+    drifted = licensed_claim("c-drift", licensing(sat(mc(semantic_run_id="run-a"))))
+    survived = licensed_claim("c-keep", licensing(sat(mc(semantic_run_id="run-b"))))
+    prev = corpus_with(drifted, survived)
+
+    reopened = make_claim("c-drift", status=S.PENDING)  # drifted → reopened to PENDING
+    curr = corpus_with(reopened, survived)  # c-keep still LICENSED
+
+    last_drift = DriftRecord(
+        current=mc(semantic_run_id="run-cur"),
+        examined=2,
+        drifted=(DriftFinding(claim_id="c-drift", re_executable=True, licensed_versions=()),),
+    )
+    alloc = EpochAllocator(state)
+    records = observe_anchored(
+        prev, curr, cycle=5, allocator=alloc, last_drift=last_drift, drift_ran=True
+    )
+    by_id = {r.subject_claim_id: r for r in records}
+    assert by_id["c-drift"].verdict == ResolutionVerdict.FAILED
+    assert by_id["c-drift"].pressure_kind == PressureKind.DRIFT
+    assert by_id["c-keep"].verdict == ResolutionVerdict.UPHELD
+    assert by_id["c-keep"].pressure_kind == PressureKind.DRIFT
+
+
 # ── NodeRunner hook (gated, byte-identical when calibration_path=None) ────────
 
 
