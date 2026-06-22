@@ -219,10 +219,20 @@ def _cmd_export_consistency(args: argparse.Namespace) -> int:
 
 
 def _cmd_export_attestation(args: argparse.Namespace) -> int:
-    from .attestation import build_attestation_bundle, resolve_contract_index
-
+    from .attestation import (
+        build_attestation_bundle, build_attestation_statements, dsse_envelope, resolve_contract_index,
+    )
     corpus = load_corpus(args.corpus)
-    bundle = build_attestation_bundle(corpus, contract_index=resolve_contract_index(corpus))
+    index = resolve_contract_index(corpus)
+    if args.format == "dsse":
+        envelopes = [dsse_envelope(s) for s in build_attestation_statements(corpus, contract_index=index)]
+        output = "".join(e.model_dump_json(by_alias=True, exclude_none=True) + "\n" for e in envelopes)
+        if args.out:
+            Path(args.out).write_text(output)
+        else:
+            sys.stdout.write(output)        # exact string — NOT print() (no extra newline; empty => nothing)
+        return 0
+    bundle = build_attestation_bundle(corpus, contract_index=index)
     _write_or_print(bundle.model_dump_json(by_alias=True, exclude_none=True), args.out)
     return 0
 
@@ -513,6 +523,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_att.add_argument("corpus", help="path to a corpus JSON file")
     p_att.add_argument("--out", default=None, help="write the attestation bundle JSON here")
+    p_att.add_argument("--format", choices=("bundle", "dsse"), default="bundle",
+                       help="bundle (default Polymer AttestationBundle) or dsse (NDJSON of unsigned DSSE envelopes)")
     p_att.set_defaults(func=_cmd_export_attestation)
 
     return parser
