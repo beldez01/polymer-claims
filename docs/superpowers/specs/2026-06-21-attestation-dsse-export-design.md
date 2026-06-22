@@ -1,4 +1,4 @@
-# Attestation DSSE + Verifier Export — Design
+# Attestation DSSE (Unsigned, Signing-Ready) Export — Design
 
 **Date:** 2026-06-21 · **Status:** Design (approved in brainstorm; revised after spec audit; pre-plan)
 **Builds on:** `docs/superpowers/specs/2026-06-21-standards-skin-attestation-design.md` (slice 1, merged —
@@ -15,16 +15,20 @@ This is **North-Star arc 2, slice 2**: re-emit those Statements as DSSE-shaped, 
 
 ## 1. Goal & non-goals
 
-**Goal.** Produce the standard envelope shape that signing and standard tooling expect, wrapping slice 1's
-**unchanged** Statements, in a one-per-line NDJSON stream. This is the dependency-free plumbing that
-makes the Statements (a) decodable/inspectable as bare in-toto Statements and (b) ready for slice 3 to
-sign — *without* claiming any cryptographic trust this slice.
+**Goal.** Produce a **DSSE-shaped unsigned envelope** (the standard `payloadType`/`payload`/`signatures`
+field layout) wrapping slice 1's **unchanged** Statements, in a one-per-line NDJSON stream. This is the
+dependency-free plumbing that makes the Statements (a) decodable/inspectable as bare in-toto Statements
+and (b) ready for slice 3 to sign — *without* claiming any cryptographic trust this slice.
 
 **Honest scope of the artifact (per the [DSSE spec](https://github.com/secure-systems-lab/dsse/blob/master/envelope.md)):**
-DSSE defines the envelope *around signatures*. An envelope with `signatures: []` is **structurally
-useful** (carries the payload + payloadType, is the exact thing slice 3 will sign) but is **not a
-trust-valid attestation** — a DSSE signature verifier should treat it as unsigned/unverified. What a
-consumer can do today: base64-decode `payload` to recover the bare in-toto Statement and inspect it.
+DSSE defines the envelope *around signatures* (the formal protobuf requires `signatures` length ≥ 1).
+An envelope with `signatures: []` is **structurally useful** — it carries the exact
+`payloadType`/`payload` pair that slice 3 will sign via the DSSE **PAE** (Pre-Authentication Encoding;
+DSSE signs the PAE over those two fields, **not** the serialized JSON envelope) — but it is **not a
+trust-valid attestation**: a DSSE signature verifier treats it as unsigned, and a strict signed-DSSE
+loader may reject empty `signatures` at schema level. What a consumer can do today: base64-decode
+`payload` to recover the bare in-toto Statement and inspect it. This artifact targets inspection +
+slice-3 signing, not ingestion by a strict signed-DSSE verifier.
 
 **Non-goals (this slice).**
 - **No signing / no trust claim.** No signatures, keys, DSSE PAE, Sigstore/cosign, Rekor, or `[sigstore]`
@@ -99,10 +103,15 @@ Extend `export-attestation` in `src/polymer_claims/cli.py`:
 - Add `--format {bundle,dsse}` (default `bundle`).
 - `bundle` → unchanged: `build_attestation_bundle(...).model_dump_json(by_alias=True, exclude_none=True)`.
 - `dsse` → `build_attestation_statements(corpus, contract_index=resolve_contract_index(corpus))`, map
-  `dsse_envelope` over them, and emit **NDJSON**: each envelope
-  `.model_dump_json(by_alias=True, exclude_none=True)` joined by `\n` (one DSSE envelope per LICENSED
-  claim, in the same deterministic order the bundle uses). Written via the existing `_write_or_print`.
-- `--out` behaves as today (write to file or stdout).
+  `dsse_envelope` over them, and build **NDJSON**:
+  `output = "".join(env.model_dump_json(by_alias=True, exclude_none=True) + "\n" for env in envelopes)`
+  — one DSSE envelope per LICENSED claim, each line newline-terminated (including the last), in the same
+  deterministic order the bundle uses.
+- **Write `output` byte-identically to stdout and `--out`** — the `dsse` path writes the exact string
+  (`sys.stdout.write(output)` / `Path.write_text(output)`), **not** via `print()` (which appends an extra
+  newline and would make stdout differ from the file). This makes determinism mode-independent.
+- **Zero LICENSED claims → `output == ""`:** emit nothing — no blank line to stdout, an empty `--out`
+  file. (Do not `print("")`.)
 
 ## 6. Testing
 
@@ -118,7 +127,10 @@ Extend `export-attestation` in `src/polymer_claims/cli.py`:
 - **CLI `--format dsse`:** NDJSON line count == number of LICENSED claims; each line parses as a DSSE
   envelope; order matches the bundle's `subject`/claim order; `--format bundle` (and no `--format`) is
   byte-identical to current output.
-- **Determinism:** same corpus → identical NDJSON across runs.
+- **Determinism:** same corpus → identical NDJSON across runs, and `--format dsse` to stdout vs `--out`
+  are **byte-identical** (no `print()`-added trailing-newline divergence).
+- **Empty case:** a corpus with zero LICENSED claims → `--format dsse` emits **nothing** (no blank line
+  to stdout; an empty `--out` file).
 - **Dependency guard:** `attestation.py` introduces **no new third-party import** beyond the existing
   `pydantic` + stdlib (the new code uses stdlib `base64`/`json` only).
 
