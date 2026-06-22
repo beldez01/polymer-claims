@@ -194,8 +194,11 @@ class NodeRunner:
         self.current = next(iter(m.values()), self.ctx)
         return self.current
 
-    def _calibration_hook(self, prev_corpus: Corpus, cycle: int) -> None:
+    def _calibration_hook(self, prev_corpus: Corpus, cycle: int, *, drift_ran: bool = False) -> None:
         """Observe ANCHORED pressure events and append records to the calibration JSONL.
+
+        `drift_ran` says this tick executed a DRIFT pass — it lets the tap record UPHELD
+        (survived) warrant-survival for claims that stayed LICENSED through the re-check.
 
         Called only when self._calibration_path is set (gated). When calibration is off
         (self._calibration_path is None) this method is never called — byte-identical."""
@@ -207,6 +210,7 @@ class NodeRunner:
             prev_corpus, self.corpus, cycle,
             allocator=self._epoch_allocator,
             last_drift=self.last_drift,
+            drift_ran=drift_ran,
         )
         if records:
             append_records(self._calibration_path, records)
@@ -280,7 +284,8 @@ class NodeRunner:
         # When off (calibration_path=None), this block is a no-op and the method is
         # never called, preserving byte-identical behaviour.
         if self._calibration_path is not None:
-            self._calibration_hook(prev_corpus, self.frame_index)
+            drift_ran = action is not None and action.kind == ActionKind.DRIFT
+            self._calibration_hook(prev_corpus, self.frame_index, drift_ran=drift_ran)
 
         topo = self._layout_topology(self.corpus)
         licensed_now = n_licensed(self.corpus)

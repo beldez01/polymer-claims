@@ -149,18 +149,27 @@ def observe_anchored(
     *,
     allocator: EpochAllocator,
     last_drift=None,
+    drift_ran: bool = False,
 ) -> tuple[ResolutionRecord, ...]:
     """Build a PressureContext from prev→curr corpus snapshot diff and emit ANCHORED records.
 
-    Cause classification:
-      LICENSED → REJECTED               → PressureKind.DEFEAT
-      LICENSED → PENDING (in last_drift.drifted) → PressureKind.DRIFT
+    Cause classification (a claim LICENSED in `prev`):
+      → REJECTED                                  → DEFEAT  (failed)
+      → PENDING and in `last_drift.drifted`        → DRIFT   (failed)
+      → still LICENSED, `drift_ran`, not drifted   → DRIFT   (UPHELD — survived a drift re-check)
+
+    `drift_ran` says a DRIFT pass executed this tick (the caller knows the tick's action). A drift
+    pass scans the whole LICENSED set, so a claim LICENSED in `prev` that is still LICENSED in `curr`
+    and absent from `last_drift.drifted` was *examined and survived* → an UPHELD warrant-survival
+    event. Mere persistence on a non-drift tick is NOT a survival event (so `q_anchored` cannot
+    drift with tick frequency). The per-(claim, epoch) fold collapses repeated survivals to one.
 
     Epochs are captured from the PRE-transition (prev) licensed set so the epoch is always
     the epoch the claim held when it was under pressure — not a potentially-bumped post-tick value.
     """
     epoch_map = allocator.allocate(prev)  # epochs as of the PRE-transition LICENSED set
     cause: dict[str, PressureKind] = {}
+    survived: set[str] = set()
 
     prev_licensed = {c.id for c in prev.claims if c.status == Status.LICENSED}
     by_id = {c.id: c for c in curr.claims}
@@ -174,6 +183,9 @@ def observe_anchored(
             cause[cid] = PressureKind.DEFEAT
         elif c.status == Status.PENDING and cid in drift_ids:
             cause[cid] = PressureKind.DRIFT
+        elif drift_ran and c.status == Status.LICENSED and cid not in drift_ids:
+            cause[cid] = PressureKind.DRIFT  # a drift re-check fired and the license was RETAINED
+            survived.add(cid)
 
-    pc = PressureContext(epoch=epoch_map, cause=cause)
+    pc = PressureContext(epoch=epoch_map, cause=cause, survived=frozenset(survived))
     return anchored_resolutions(prev, curr, cycle, pc)
