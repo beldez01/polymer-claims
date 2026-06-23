@@ -143,6 +143,8 @@ class TierStat(_Model):
     n_failed: int
     n_unresolved: int = 0   # anchored/attested only
     n_superseded: int = 0   # anchored only — terminal, excluded from the failure denominator
+    n_resolvable: int = 0       # attested only — resolvability split
+    n_unresolvable: int = 0     # attested only
     realized_rate: float | None = None
     pooled_rate: float | None = None     # DEFINITIONAL secondary: Σfailed/Σlicensed
     ci_low: float | None = None
@@ -266,8 +268,15 @@ def _attested_stat(records: tuple[ResolutionRecord, ...], target_q: float) -> Ti
             if r.resolution_kind == ResolutionKind.ATTESTED and r.stated_q == target_q]
     n_failed = sum(1 for r in recs if r.verdict == ResolutionVerdict.FAILED)
     denom = sum(1 for r in recs if r.verdict in (ResolutionVerdict.FAILED, ResolutionVerdict.UPHELD))
+    # resolvability split is counted over the SAME resolved denominator as q_attested
+    # (FAILED+UPHELD only) so the two numbers are reconcilable.
+    resolved = [r for r in recs
+                if r.verdict in (ResolutionVerdict.FAILED, ResolutionVerdict.UPHELD)]
+    n_resolvable = sum(1 for r in resolved if r.resolvability == Resolvability.RESOLVABLE)
+    n_unresolvable = sum(1 for r in resolved if r.resolvability == Resolvability.UNRESOLVABLE)
     return TierStat(n_total=denom, n_failed=n_failed,
-                    realized_rate=(n_failed / denom if denom else None))
+                    realized_rate=(n_failed / denom if denom else None),
+                    n_resolvable=n_resolvable, n_unresolvable=n_unresolvable)
 
 
 def calibration_summary(ledger: CalibrationLedger, *, target_q: float) -> CalibrationReport:
