@@ -61,6 +61,7 @@ class ResolutionRecord(_Model):
     verdict: ResolutionVerdict
     stated_q: float
     observed_at_cycle: int
+    exposure_start_cycle: int | None = None  # anchored — cycle the epoch was licensed (for the hazard rate)
     # present-only-when-kind (additive/optional):
     constructed_truth: bool | None = None   # definitional — known ground truth
     model_id: str | None = None             # definitional — which GeneratingModelParams
@@ -141,6 +142,8 @@ class TierStat(_Model):
     ci_method: str | None = None         # "normal_0.95" (definitional) | "wilson_0.95" (anchored)
     n_batches: int | None = None         # DEFINITIONAL
     n_generated: int | None = None       # DEFINITIONAL
+    hazard_rate: float | None = None          # ANCHORED — failures per claim-cycle of exposure
+    total_exposure_cycles: int | None = None  # ANCHORED — Σ(observed − exposure_start) over exposed records
 
 
 class CalibrationReport(_Model):
@@ -217,10 +220,20 @@ def _anchored_stat(records: tuple[ResolutionRecord, ...], target_q: float) -> Ti
     n_superseded = sum(1 for r in recs if r.verdict == ResolutionVerdict.SUPERSEDED)
     denom = n_failed + n_upheld
     lo, hi = _wilson_ci(n_failed, denom)
+    # Exposure-weighted hazard: failures per claim-cycle of observed exposure, over resolved
+    # records that carry an exposure clock (older ledgers without one are simply excluded).
+    exposed = [r for r in recs
+               if r.verdict in (ResolutionVerdict.FAILED, ResolutionVerdict.UPHELD)
+               and r.exposure_start_cycle is not None]
+    total_exposure = sum(max(0, r.observed_at_cycle - r.exposure_start_cycle) for r in exposed)
+    n_failed_exposed = sum(1 for r in exposed if r.verdict == ResolutionVerdict.FAILED)
+    hazard = (n_failed_exposed / total_exposure) if total_exposure > 0 else None
     return TierStat(
         n_total=denom, n_failed=n_failed, n_unresolved=n_unresolved, n_superseded=n_superseded,
         realized_rate=(n_failed / denom if denom else None),
         ci_low=lo, ci_high=hi, ci_method=("wilson_0.95" if denom else None),
+        hazard_rate=hazard,
+        total_exposure_cycles=(total_exposure if exposed else None),
     )
 
 
@@ -255,6 +268,7 @@ class PressureContext(_Model):
     cause: dict[str, PressureKind] = Field(default_factory=dict)    # claim_id -> pressure event this cycle
     survived: frozenset[str] = Field(default_factory=frozenset)     # claim_ids whose pressure was SURVIVED
     superseded: frozenset[str] = Field(default_factory=frozenset)   # drift-reopened then re-licensed
+    exposure_start: dict[str, int] = Field(default_factory=dict)    # claim_id -> cycle its epoch was licensed
 
 
 def anchored_resolutions(
@@ -278,5 +292,6 @@ def anchored_resolutions(
             calibration_target=CalibrationTarget.WARRANT_SURVIVAL,
             verdict=verdict, stated_q=curr.fdr_ledger.target_fdr, observed_at_cycle=cycle,
             pressure_kind=kind,
+            exposure_start_cycle=pressure.exposure_start.get(cid),
         ))
     return tuple(out)
