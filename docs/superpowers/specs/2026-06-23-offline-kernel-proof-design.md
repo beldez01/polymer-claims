@@ -9,8 +9,9 @@ spot-verification found.
 
 > **One line.** Guarantee the n-DMP gate **pipeline** re-runs offline, deterministically, with
 > **zero real TCGA bytes in git** — via a fully synthetic, realistic-shaped contract fixture run
-> through the *real* gate — while keeping the *real* genome-wide proof reproducible through a
-> hardened, documented retrieval recipe.
+> through the *real* gate — and document the *real* genome-wide `@2` proof as a local-only/runbook
+> path. Fresh-checkout reproduction of the real numbers is explicitly **deferred to roadmap H0.1b**,
+> not delivered here.
 
 ---
 
@@ -75,7 +76,7 @@ test (CI guard) ───┘        (kernel_proof.py, new)            │  deter
 | `verify-kernel` subcommand | `src/polymer_claims/cli.py` | Prints tier / n_dmps / e-value; rc 0 iff LICENSED @ REPRODUCED |
 | Friendlier offline error | `src/polymer_claims/cli.py` (`_cmd_ingest`) | Catch `urllib.error.URLError` → message pointing to `verify-kernel` + runbook |
 | Gate test | `tests/test_kernel_proof_synthetic.py` (new) | Asserts LICENSED, REPRODUCED, pinned n_dmps |
-| Retrieval runbook | `docs/superpowers/2026-06-23-kernel-proof-runbook.md` (new) | Real path (manifest→fetch→run_gate) + synthetic offline path |
+| Retrieval runbook | `docs/superpowers/2026-06-23-kernel-proof-runbook.md` (new) | Current real `@2` path = local-only Xena matrix + cBioPortal genotyping via `build_contract_xena.py`/`run_gate.py` (untracked); deprecated `@1` = `ingest tcga-laml`; + the synthetic offline `verify-kernel` path |
 
 ## 3. The synthetic generator (`build_synthetic_contract`)
 

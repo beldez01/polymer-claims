@@ -138,7 +138,8 @@ H0.1 reproducible kernel proof  ──▶  H1.A1 real signing  ──▶  H1.A2 
         └─ parallel deepening when capacity allows: H1.B1→B2 credence engines, H1.B4 defeat wiring, H1.C calibration completeness
 ```
 
-**Immediate next action:** H0.1 (pin Phase-A data) — it's small, it's the foundation everything
-cites, and the spot-verification proved it's currently broken offline. Then confirm the α-vs-β fork
-before committing the H1 sprint order. Each H1+ slice gets its own brainstorm → spec → plan →
+**Immediate next action:** H0.1 (synthetic offline pipeline proof) — it's small, it's the foundation
+everything cites, and the spot-verification proved the gate is currently not reproducible offline.
+Pinning the *real* Phase-A `@2` data into a fresh-checkout-runnable artifact is the separate H0.1b
+residual. Then confirm the α-vs-β fork before committing the H1 sprint order. Each H1+ slice gets its own brainstorm → spec → plan →
 subagent-driven build, the same loop that shipped the calibration and ATTESTED slices.

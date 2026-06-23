@@ -369,12 +369,15 @@ In `src/polymer_claims/cli.py`, add near the other `_cmd_*` functions:
 def _cmd_verify_kernel(args: argparse.Namespace) -> int:
     try:
         from .kernel_proof import run_synthetic_kernel_proof
-    except ImportError as exc:  # the gate adapters import numpy, which the base install may lack
-        print(
-            f"verify-kernel needs numpy (the n-DMP gate adapters): install it with "
-            f"`pip install 'polymer-claims[calibrate]'`  ({exc})",
-            file=sys.stderr,
-        )
+    except ModuleNotFoundError as exc:
+        if exc.name == "numpy":   # base install may lack numpy (the n-DMP gate adapters use it)
+            print(
+                "verify-kernel needs numpy (the n-DMP gate adapters): install it with "
+                "`pip install 'polymer-claims[calibrate]'`",
+                file=sys.stderr,
+            )
+        else:  # a real internal import bug — don't mislabel it as a missing optional dep
+            print(f"verify-kernel import failed: {exc}", file=sys.stderr)
         return 1
 
     r = run_synthetic_kernel_proof()
@@ -430,7 +433,6 @@ Append to `tests/test_cli_verify_kernel.py`:
 
 ```python
 import urllib.error
-import pytest
 from polymer_claims.cli import main
 
 
@@ -585,3 +587,10 @@ Expected: all pass.
 - **Med — roadmap H0.1 scope:** roadmap H0.1 reworded to this plan's synthetic-proof scope + new **H0.1b** residual for real `@2` artifact reproduction.
 - **Med — interpreter consistency:** runbook script commands use `.venv/bin/python` (not bare `python`).
 - **Low:** final-verification wording fixed (absent/untracked, not "gitignored"); stray EOF fence removed.
+
+**Third feedback pass (2026-06-23):**
+- **Med — roadmap tail:** "Immediate next action" now reads H0.1 (synthetic pipeline proof); "pin Phase-A data" points to H0.1b.
+- **Med — spec overclaim:** spec one-liner reworded — real `@2` fresh-checkout reproduction is deferred to H0.1b, not delivered here.
+- **Low — spec runbook table row:** updated to the local-only `@2` Xena+cBioPortal path (matches §6), not the deprecated manifest→fetch→run_gate `@1` summary.
+- **Low — CLI import handling:** `_cmd_verify_kernel` catches `ModuleNotFoundError` and only emits the numpy hint when `exc.name == "numpy"`; other import failures print a generic message (no false install hint).
+- **Low — test hygiene:** dropped the unused `import pytest` from the offline-error test.
