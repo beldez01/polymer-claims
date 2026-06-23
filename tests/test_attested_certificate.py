@@ -26,8 +26,7 @@ def test_certificate_shows_q_attested_and_resolvability_split():
     ))
     cert = build_certificate(corpus, "c1", ledger=led, target_q=0.05)
     text = render_certificate_text(cert)
-    assert "q_attested" in text
-    assert "0.500" in text                      # 1 failed / 2 (failed+upheld)
+    assert "q_attested 0.500" in text            # 1 failed / 2 (failed+upheld); full token pin
     assert "1 resolvable" in text and "1 unresolvable" in text
     assert "never" in text.lower()              # disclosure present
 

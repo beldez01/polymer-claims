@@ -40,7 +40,10 @@ def _fold_key(r: ResolutionRecord):
 
 
 def append_records(path, records) -> None:
-    """Append ResolutionRecord objects to a JSONL file (append-only; atomic per-line)."""
+    """Append ResolutionRecord objects to a JSONL file (append-only; atomic per-line).
+
+    Note: raw JSONL line count is NOT the record count. Re-ingesting the same determination
+    appends a duplicate line; ``load_ledger`` folds to one record per fold key at read time."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a") as fh:

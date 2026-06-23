@@ -1,7 +1,16 @@
 import pytest
+from polymer_grammar import GenerationMode
+from polymer_grammar.claim import Status
+from polymer_protocol.calibration import (
+    ResolutionKind, CalibrationTarget, ResolutionVerdict, Resolvability,
+    ResolutionRecord,
+)
 from polymer_claims.attested_ingest import (
     Resolution, parse_resolutions, validate_against_corpus,
+    attested_event_claim, inject_attested_event,
+    build_attested_record, ingest,
 )
+from polymer_claims.calibration_store import append_records, load_ledger
 from tests.attestation._fixtures import licensed_claim, licensing, corpus_with, mc, sat
 
 
@@ -39,11 +48,6 @@ def test_parse_rejects_negative_epoch():
         parse_resolutions(text)
 
 
-from polymer_grammar import GenerationMode
-from polymer_grammar.claim import Status
-from polymer_claims.attested_ingest import attested_event_claim, inject_attested_event
-
-
 def _res(**kw):
     base = dict(subject_claim_id="c1", verdict="failed", attestation_ref="doi:10.1056/x")
     base.update(kw)
@@ -77,12 +81,6 @@ def test_inject_appends_without_relicensing(licensing_corpus_fixture):
 
 
 # ── Task 7: build_attested_record + ingest ────────────────────────────────────
-
-from polymer_protocol.calibration import (
-    ResolutionKind, CalibrationTarget, ResolutionVerdict, Resolvability,
-)
-from polymer_claims.calibration_store import load_ledger   # load_ledger lives in the umbrella store
-from polymer_claims.attested_ingest import build_attested_record, ingest
 
 
 def test_record_links_event_claim_and_maps_verdict(licensing_corpus_fixture):
@@ -150,9 +148,6 @@ def test_reingest_same_resolution_is_idempotent(licensing_corpus_fixture, tmp_pa
 
 # ── Task 7, review fix: both-None discriminator invariant ─────────────────────
 
-from polymer_claims.calibration_store import append_records
-from polymer_protocol.calibration import ResolutionRecord
-
 
 def test_fold_collapses_source_and_ref_less_attested_records(tmp_path):
     """Documents and locks the accepted behavior: ATTESTED records where both
@@ -187,3 +182,15 @@ def test_fold_collapses_source_and_ref_less_attested_records(tmp_path):
     led = load_ledger(ledger_path)
     # Both records share discriminator=None → they collapse; latest (UPHELD) wins.
     assert len(led.records) == 1
+
+
+# ── parse_resolutions error branch coverage ───────────────────────────────────
+
+def test_parse_rejects_non_json():
+    with pytest.raises(ValueError):
+        parse_resolutions("not json at all")
+
+
+def test_parse_rejects_non_array():
+    with pytest.raises(ValueError):
+        parse_resolutions('{"subject_claim_id": "c1"}')
