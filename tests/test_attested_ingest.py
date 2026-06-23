@@ -145,3 +145,45 @@ def test_reingest_same_resolution_is_idempotent(licensing_corpus_fixture, tmp_pa
     ingest(out1, [_res()], ledger_path)                # run again, same determination
     led = load_ledger(ledger_path)
     assert len(led.records) == 1                       # content-addressed id folds to one
+    assert len({r.source_claim_id for r in led.records}) == 1  # single content-addressed event
+
+
+# ── Task 7, review fix: both-None discriminator invariant ─────────────────────
+
+from polymer_claims.calibration_store import append_records
+from polymer_protocol.calibration import ResolutionRecord
+
+
+def test_fold_collapses_source_and_ref_less_attested_records(tmp_path):
+    """Documents and locks the accepted behavior: ATTESTED records where both
+    source_claim_id and attestation_ref are None share a None discriminator and
+    therefore collapse to a single ledger entry (latest verdict wins).  This is
+    accepted behavior because source-less attestations carry no event identity —
+    there is nothing to distinguish them with, so folding is correct."""
+    ledger_path = tmp_path / "calib.jsonl"
+    rec_failed = ResolutionRecord(
+        subject_claim_id="c1",
+        license_epoch=0,
+        resolution_kind=ResolutionKind.ATTESTED,
+        calibration_target=CalibrationTarget.EXTERNAL_DISAGREEMENT,
+        verdict=ResolutionVerdict.FAILED,
+        stated_q=0.05,
+        observed_at_cycle=0,
+        source_claim_id=None,
+        attestation_ref=None,
+    )
+    rec_upheld = ResolutionRecord(
+        subject_claim_id="c1",
+        license_epoch=0,
+        resolution_kind=ResolutionKind.ATTESTED,
+        calibration_target=CalibrationTarget.EXTERNAL_DISAGREEMENT,
+        verdict=ResolutionVerdict.UPHELD,
+        stated_q=0.05,
+        observed_at_cycle=0,
+        source_claim_id=None,
+        attestation_ref=None,
+    )
+    append_records(ledger_path, [rec_failed, rec_upheld])
+    led = load_ledger(ledger_path)
+    # Both records share discriminator=None → they collapse; latest (UPHELD) wins.
+    assert len(led.records) == 1

@@ -65,7 +65,15 @@ def dump_models(path, models) -> None:
 def load_ledger(
     path, *, generating_models: tuple[GeneratingModelParams, ...] = ()
 ) -> CalibrationLedger:
-    """Read the JSONL and fold events to the latest verdict per (subject_claim_id, license_epoch).
+    """Read the JSONL and fold events to the latest verdict per fold key.
+
+    Fold identity by tier:
+      - ATTESTED: ``(subject_claim_id, license_epoch, "attested", discriminator)`` where
+        ``discriminator = source_claim_id or attestation_ref``.  Each distinct external
+        determination on the same claim/epoch gets its own slot, so multiple sources coexist.
+        If both are None the discriminator is None and such records collapse to one (accepted
+        behavior — source-less attestations carry no event identity).
+      - DEFINITIONAL / ANCHORED: ``(subject_claim_id, license_epoch)`` — latest verdict wins.
 
     Latest line wins (definitional append-only semantics). First-seen order is preserved so the
     ledger has a stable deterministic ordering even as new records accumulate.
