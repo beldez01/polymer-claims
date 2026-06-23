@@ -11,6 +11,15 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from polymer_grammar import GenerationMode, Provenance
+from polymer_grammar.claim import Claim, Status
+from polymer_grammar.leaf import PropositionLeaf
+from polymer_grammar.pattern import PatternRef
+
+from ._hashing import canonical_sha256
+
+_ATTEST_PATTERN = PatternRef(id="external-attestation", version="v1")
+
 
 class Resolution(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)  # match the repo's immutable-DTO convention
@@ -51,3 +60,44 @@ def validate_against_corpus(res: Resolution, corpus) -> None:
             f"subject_claim_id {res.subject_claim_id!r} carries no licensing record "
             "(calibration is about earned standing)"
         )
+
+
+def attested_event_claim(res: Resolution) -> Claim:
+    """A defeasible-CAPABLE corpus claim asserting an external authority's determination. CONJECTURED
+    and licensing=None => non-LICENSED by construction (the gate never licenses a conjecture, and we
+    never call verify on it). It is corpus content that CAN be attacked through the defeat graph, but
+    this slice does NOT auto-wire defeat edges between contradictory attestations (deferred — §11).
+    Content-addressed id for determinism + idempotency."""
+    digest = canonical_sha256({
+        "subject": res.subject_claim_id,
+        "verdict": res.verdict,
+        "ref": res.attestation_ref,
+        "epoch": res.license_epoch,
+    }).split(":", 1)[1][:16]
+    cid = f"attest-{digest}"
+    data = (f"external authority {res.attestation_ref} determined that LICENSED claim "
+            f"{res.subject_claim_id} is {res.verdict}")
+    return Claim(
+        id=cid,
+        title=f"Attestation: {res.subject_claim_id} {res.verdict}",
+        pattern=_ATTEST_PATTERN,
+        leaves=(PropositionLeaf(
+            data=data,
+            warrant="external authority testimony (defeasible, not an oracle)",
+            warrant_type="expert_judgment",
+        ),),
+        status=Status.CONJECTURED,
+        provenance=Provenance(
+            generated_by=GenerationMode.EXTERNAL_ATTESTATION,
+            method=res.attestation_ref,
+            search_cardinality=1,
+        ),
+    )
+
+
+def inject_attested_event(corpus, claim: Claim):
+    """Append the attested-event claim to corpus.claims (no cycle run; no other claim touched).
+    Idempotent: if the content-addressed id is already present, return the corpus unchanged."""
+    if claim.id in corpus.by_id():
+        return corpus
+    return corpus.model_copy(update={"claims": (*corpus.claims, claim)})
