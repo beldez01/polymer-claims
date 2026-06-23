@@ -27,6 +27,7 @@ from polymer_claims.bionemo.adapters import BioNeMoNIMAdapter
 from polymer_claims.bionemo.apparatus import BioNeMoApparatus, build_materialization_context
 from polymer_claims.bionemo.client import NimClient, NimRequest, NimResponse
 from polymer_claims.bionemo.registry import bionemo_credential
+from polymer_claims.attestation import build_certificate  # noqa: E402
 
 import sys
 
@@ -102,6 +103,14 @@ def run_plumbing(cache_dir):
 
     corpus = Corpus(claims=(_claim(),), fdr_ledger=FDRLedger(target_fdr=0.05))
     return run_cycle(corpus, (bionemo, corroborator), ctx, adapter_registry=registry)
+
+
+def certify_plumbing(cache_dir):
+    """Run the plumbing loop, then build a single-claim certificate. Statements are
+    reconstructed on-demand from the LICENSED claim's licensing field (run_cycle does not
+    store them), so a plain corpus is all build_certificate needs."""
+    result = run_plumbing(cache_dir=cache_dir)
+    return build_certificate(result.corpus, _CLAIM_ID, ledger=None, target_q=0.05)
 
 
 if __name__ == "__main__":  # pragma: no cover
