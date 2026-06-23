@@ -467,6 +467,7 @@ def build_certificate(
     ledger: CalibrationLedger | None = None,
     target_q: float,
     contract_index=None,
+    registry=None,
 ) -> Certificate:
     """Build a Certificate for `claim_id` in `corpus`.
 
@@ -475,7 +476,7 @@ def build_certificate(
     generating_models, and a sha256 hex digest of the ledger's canonical JSON representation.
     Raises ValueError if no LICENSED statement is found for claim_id."""
     index = contract_index if contract_index is not None else resolve_contract_index(corpus)
-    statements = build_attestation_statements(corpus, contract_index=index)
+    statements = build_attestation_statements(corpus, contract_index=index, registry=registry)
     stmt = next(
         (s for s in statements if any(sub.name == claim_id for sub in s.subject)),
         None,

@@ -42,8 +42,12 @@ _ORACLE_ID = "bionemo-plumbing@v1"
 _CASSETTE = Path(__file__).with_name("cassette.json")
 
 
+def _load_cassette() -> dict:
+    return json.loads(_CASSETTE.read_text())
+
+
 def _cassette_transport(req: NimRequest, api_key: str) -> NimResponse:
-    rec = json.loads(_CASSETTE.read_text())
+    rec = _load_cassette()
     return NimResponse(status=rec["status"], body=rec["body"], model_version=rec["model_version"])
 
 
@@ -70,8 +74,23 @@ def _claim(oracle_ref=None) -> Claim:
     )
 
 
+def _plumbing_adapter_registry() -> AdapterRegistry:
+    """Shared helper: build the AdapterRegistry used by both run_plumbing and certify_plumbing.
+    NVIDIA credential + synthetic corroborator credential (independently owned — air-gap)."""
+    return AdapterRegistry(
+        credentials=(
+            bionemo_credential(BioNeMoNIMAdapter, identity="bionemo-nim"),
+            bionemo_credential(
+                SyntheticCorroboratorAdapter,
+                identity="synthetic-corroborator",
+                owner="polymer-claims-test",
+            ),
+        )
+    )
+
+
 def run_plumbing(cache_dir, *, with_oracle: bool = False):
-    cassette = json.loads(_CASSETTE.read_text())
+    cassette = _load_cassette()
     score = cassette["body"]["out"]["score"]
 
     apparatus = BioNeMoApparatus(
@@ -93,16 +112,7 @@ def run_plumbing(cache_dir, *, with_oracle: bool = False):
     )
     corroborator = SyntheticCorroboratorAdapter(impl=_IMPL, value=score)
 
-    registry = AdapterRegistry(
-        credentials=(
-            bionemo_credential(BioNeMoNIMAdapter, identity="bionemo-nim"),
-            bionemo_credential(
-                SyntheticCorroboratorAdapter,
-                identity="synthetic-corroborator",
-                owner="polymer-claims-test",
-            ),
-        )
-    )
+    registry = _plumbing_adapter_registry()
 
     oracle_ref = _ORACLE_ID if with_oracle else None
     corpus = Corpus(claims=(_claim(oracle_ref=oracle_ref),), fdr_ledger=FDRLedger(target_fdr=0.05))
@@ -113,9 +123,11 @@ def run_plumbing(cache_dir, *, with_oracle: bool = False):
 def certify_plumbing(cache_dir):
     """Run the plumbing loop, then build a single-claim certificate. Statements are
     reconstructed on-demand from the LICENSED claim's licensing field (run_cycle does not
-    store them), so a plain corpus is all build_certificate needs."""
+    store them). The same registry used at license time is forwarded so the certificate
+    witnesses air-gap independence (independence_witnessed=True)."""
     result = run_plumbing(cache_dir=cache_dir)
-    return build_certificate(result.corpus, _CLAIM_ID, ledger=None, target_q=0.05)
+    registry = _plumbing_adapter_registry()
+    return build_certificate(result.corpus, _CLAIM_ID, ledger=None, target_q=0.05, registry=registry)
 
 
 if __name__ == "__main__":  # pragma: no cover

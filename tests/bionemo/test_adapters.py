@@ -38,3 +38,30 @@ def test_adapter_raises_on_unhandled_impl(tmp_path):
     )
     with pytest.raises(ValueError, match="cannot execute impl"):
         adapter.execute(_node(impl="stats::mean_diff"), (), _ctx())
+
+
+def test_adapter_raises_when_node_has_no_data_handle(tmp_path):
+    """A node with no DataHandle input must raise ValueError."""
+    node_no_handle = OperationNode(
+        id="n0",
+        impl="bionemo::plumbing",
+        inputs=(),  # no inputs at all — no DataHandle
+        produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
+    )
+    adapter = BioNeMoNIMAdapter(
+        _client(tmp_path, 0.12), impl="bionemo::plumbing", endpoint="https://x/fold",
+        value_path=("out", "score"), substrate={"seq1": {"sequence": "MAAA"}},
+    )
+    with pytest.raises(ValueError, match="no DataHandle input"):
+        adapter.execute(node_no_handle, (), _ctx())
+
+
+def test_adapter_raises_when_substrate_missing_ref(tmp_path):
+    """A substrate that doesn't contain the DataHandle's ref must raise ValueError."""
+    adapter = BioNeMoNIMAdapter(
+        _client(tmp_path, 0.12), impl="bionemo::plumbing", endpoint="https://x/fold",
+        value_path=("out", "score"),
+        substrate={},  # empty — ref "seq1" is absent
+    )
+    with pytest.raises(ValueError, match="substrate missing ref"):
+        adapter.execute(_node(), (), _ctx())
