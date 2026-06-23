@@ -18,12 +18,25 @@ from polymer_protocol.calibration import (
     GeneratingModelParams,
     PressureContext,
     PressureKind,
+    ResolutionKind,
     ResolutionRecord,
     anchored_resolutions,
 )
 
 
 # ── JSONL event log ────────────────────────────────────────────────────────────
+
+
+def _fold_key(r: ResolutionRecord):
+    # ATTESTED is an event-level tier: distinct external determinations on the same claim/epoch
+    # must coexist, keyed by a per-event discriminator. This ingester always sets source_claim_id,
+    # but the pure model keeps it optional (set iff the event is a corpus claim), so fall back to
+    # attestation_ref for source-less records. DEFINITIONAL/ANCHORED keep the original
+    # (subject_claim_id, license_epoch) identity (latest verdict wins).
+    if r.resolution_kind == ResolutionKind.ATTESTED:
+        discriminator = r.source_claim_id or r.attestation_ref
+        return (r.subject_claim_id, r.license_epoch, "attested", discriminator)
+    return (r.subject_claim_id, r.license_epoch)
 
 
 def append_records(path, records) -> None:
@@ -60,14 +73,14 @@ def load_ledger(
     If `generating_models` is not explicitly supplied and a sidecar `<path>.models.json` exists,
     models are auto-loaded from it so `certify` can show n_generated without extra caller plumbing."""
     path = Path(path)
-    latest: dict[tuple[str, int], ResolutionRecord] = {}
-    order: list[tuple[str, int]] = []
+    latest: dict[tuple, ResolutionRecord] = {}
+    order: list[tuple] = []
     if path.is_file():
         for line in path.read_text().splitlines():
             if not line.strip():
                 continue
             r = ResolutionRecord.model_validate_json(line)
-            key = (r.subject_claim_id, r.license_epoch)
+            key = _fold_key(r)
             if key not in latest:
                 order.append(key)
             latest[key] = r  # latest event wins

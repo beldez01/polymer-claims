@@ -16,7 +16,15 @@ from polymer_grammar.claim import Claim, Status
 from polymer_grammar.leaf import PropositionLeaf
 from polymer_grammar.pattern import PatternRef
 
+from polymer_protocol.calibration import (
+    CalibrationTarget, Resolvability, ResolutionKind, ResolutionRecord, ResolutionVerdict,
+    resolvability_prior,
+)
+
 from ._hashing import canonical_sha256
+from .calibration_store import append_records
+
+_VERDICT = {"upheld": ResolutionVerdict.UPHELD, "failed": ResolutionVerdict.FAILED}
 
 _ATTEST_PATTERN = PatternRef(id="external-attestation", version="v1")
 
@@ -101,3 +109,42 @@ def inject_attested_event(corpus, claim: Claim):
     if claim.id in corpus.by_id():
         return corpus
     return corpus.model_copy(update={"claims": (*corpus.claims, claim)})
+
+
+def build_attested_record(res: Resolution, subject_claim, event_claim, *, stated_q: float,
+                          ) -> ResolutionRecord:
+    """ATTESTED record. Resolvability is operator value if declared, else the structural prior
+    over the SUBJECT claim (never the event claim). observed_at_cycle defaults to 0 (richer
+    cycle resolution is deferred — spec §11)."""
+    if res.resolvability is not None:
+        resolvability = Resolvability(res.resolvability)
+    else:
+        resolvability = resolvability_prior(subject_claim)
+    return ResolutionRecord(
+        subject_claim_id=res.subject_claim_id,
+        license_epoch=res.license_epoch,
+        resolution_kind=ResolutionKind.ATTESTED,
+        calibration_target=CalibrationTarget.EXTERNAL_DISAGREEMENT,
+        verdict=_VERDICT[res.verdict],
+        stated_q=stated_q,
+        observed_at_cycle=res.observed_at_cycle or 0,
+        attestation_ref=res.attestation_ref,
+        source_claim_id=event_claim.id,
+        resolvability=resolvability,
+    )
+
+
+def ingest(corpus, resolutions: list[Resolution], ledger_path):
+    """Per row: validate, build + inject the event claim, build the ATTESTED record, append to the
+    ledger. Returns the updated corpus. Deterministic; no cycle run; no network."""
+    stated_q = corpus.fdr_ledger.target_fdr
+    records = []
+    for res in resolutions:
+        validate_against_corpus(res, corpus)
+        subject = corpus.by_id()[res.subject_claim_id]
+        event = attested_event_claim(res)
+        corpus = inject_attested_event(corpus, event)
+        records.append(build_attested_record(res, subject, event, stated_q=stated_q))
+    if records:
+        append_records(ledger_path, records)
+    return corpus

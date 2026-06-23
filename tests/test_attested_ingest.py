@@ -74,3 +74,74 @@ def test_inject_appends_without_relicensing(licensing_corpus_fixture):
     # no other claim's status changed (instrument, not a gate)
     assert {k: out.by_id()[k].status for k in before} == before
     assert len(out.claims) == len(corpus.claims) + 1
+
+
+# ── Task 7: build_attested_record + ingest ────────────────────────────────────
+
+from polymer_protocol.calibration import (
+    ResolutionKind, CalibrationTarget, ResolutionVerdict, Resolvability,
+)
+from polymer_claims.calibration_store import load_ledger   # load_ledger lives in the umbrella store
+from polymer_claims.attested_ingest import build_attested_record, ingest
+
+
+def test_record_links_event_claim_and_maps_verdict(licensing_corpus_fixture):
+    corpus = licensing_corpus_fixture
+    subject = corpus.by_id()["c1"]
+    res = _res(verdict="failed")
+    event = attested_event_claim(res)
+    rec = build_attested_record(res, subject, event, stated_q=corpus.fdr_ledger.target_fdr)
+    assert rec.resolution_kind == ResolutionKind.ATTESTED
+    assert rec.calibration_target == CalibrationTarget.EXTERNAL_DISAGREEMENT
+    assert rec.verdict == ResolutionVerdict.FAILED
+    assert rec.source_claim_id == event.id
+    assert rec.attestation_ref == "doi:10.1056/x"
+    assert rec.feeds_headline_q is False
+
+
+def test_resolvability_override_beats_prior(licensing_corpus_fixture):
+    corpus = licensing_corpus_fixture
+    subject = corpus.by_id()["c1"]                       # LICENSED claim, plan may be None
+    res = _res(resolvability="resolvable")
+    rec = build_attested_record(res, subject, attested_event_claim(res),
+                                stated_q=corpus.fdr_ledger.target_fdr)
+    assert rec.resolvability is Resolvability.RESOLVABLE  # operator wins regardless of prior
+
+
+def test_ingest_appends_to_ledger_and_corpus(licensing_corpus_fixture, tmp_path):
+    corpus = licensing_corpus_fixture
+    ledger_path = tmp_path / "calib.jsonl"
+    out = ingest(corpus, [_res()], ledger_path)
+    # event claim now in corpus
+    assert any(c.id.startswith("attest-") for c in out.claims)
+    # one ATTESTED record in the ledger, linked to the event claim
+    led = load_ledger(ledger_path)
+    assert len(led.records) == 1
+    rec = led.records[0]
+    assert rec.resolution_kind == ResolutionKind.ATTESTED
+    assert rec.source_claim_id in out.by_id()
+
+
+# ── Task 7, Step 5: multi-source + idempotency (fold-key bug) ─────────────────
+
+def test_two_sources_same_claim_both_survive(licensing_corpus_fixture, tmp_path):
+    corpus = licensing_corpus_fixture
+    ledger_path = tmp_path / "calib.jsonl"
+    # two DIFFERENT external sources assess the same claim/epoch -> two distinct events
+    rows = [
+        _res(attestation_ref="doi:source-A", verdict="failed"),
+        _res(attestation_ref="doi:source-B", verdict="upheld"),
+    ]
+    ingest(corpus, rows, ledger_path)
+    led = load_ledger(ledger_path)
+    assert len(led.records) == 2                       # neither folds away
+    assert len({r.source_claim_id for r in led.records}) == 2
+
+
+def test_reingest_same_resolution_is_idempotent(licensing_corpus_fixture, tmp_path):
+    corpus = licensing_corpus_fixture
+    ledger_path = tmp_path / "calib.jsonl"
+    out1 = ingest(corpus, [_res()], ledger_path)
+    ingest(out1, [_res()], ledger_path)                # run again, same determination
+    led = load_ledger(ledger_path)
+    assert len(led.records) == 1                       # content-addressed id folds to one
