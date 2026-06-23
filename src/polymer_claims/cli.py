@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import urllib.error
 from collections import Counter
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _dist_version
@@ -96,7 +97,16 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
     from .ingest.tcga_laml import ingest_tcga_laml
     try:
         print(ingest_tcga_laml(args.data_dir))
-    except Exception as exc:  # noqa: BLE001 — surface fetch/parse failures to the user
+    except urllib.error.URLError as exc:
+        print(
+            "GDC unreachable — could not fetch the real TCGA-LAML data "
+            f"({exc.reason if hasattr(exc, 'reason') else exc}).\n"
+            "  • For an offline pipeline check, run: polymer-claims verify-kernel\n"
+            "  • To reproduce the REAL proof, see docs/superpowers/2026-06-23-kernel-proof-runbook.md",
+            file=sys.stderr,
+        )
+        return 1
+    except Exception as exc:  # noqa: BLE001 — surface any other ingest error to the user
         print(f"ingest failed: {exc}", file=sys.stderr)
         return 1
     return 0
