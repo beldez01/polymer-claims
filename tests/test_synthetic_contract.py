@@ -5,8 +5,10 @@ from polymer_claims.ingest.synthetic import build_synthetic_contract, N_PROBES, 
 
 
 def test_generator_is_deterministic(tmp_path):
-    a = tmp_path / "a"; b = tmp_path / "b"
-    build_synthetic_contract(a); build_synthetic_contract(b)
+    a = tmp_path / "a"
+    b = tmp_path / "b"
+    build_synthetic_contract(a)
+    build_synthetic_contract(b)
     ta = (a / "tcga_laml_idh_synth.betas.tsv").read_bytes()
     tb = (b / "tcga_laml_idh_synth.betas.tsv").read_bytes()
     assert ta == tb and len(ta) > 0          # same seed -> identical betas TSV bytes

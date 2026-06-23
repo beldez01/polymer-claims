@@ -72,7 +72,9 @@ def run_synthetic_kernel_proof() -> KernelProofResult:
                 materializations=materialization_map(corpus, base, profiles=(CANONICAL_HM450_V1,)),
                 evidence={_CLAIM_ID: evalue},
             )
-            c = next(x for x in result.corpus.claims if x.id == _CLAIM_ID)
+            c = next((x for x in result.corpus.claims if x.id == _CLAIM_ID), None)
+            if c is None:
+                raise RuntimeError(f"claim {_CLAIM_ID!r} missing from cycle result")
             tier = c.licensing.independence_tier if c.licensing is not None else None
         clear_contract_cache()   # leave no temp-rooted cache entry behind
     return KernelProofResult(

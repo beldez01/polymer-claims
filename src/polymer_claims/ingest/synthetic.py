@@ -40,6 +40,7 @@ def build_synthetic_contract(out_dir, *, seed: int = SYNTH_SEED) -> str:
         probe = f"cgSYN{p:06d}"
         row_meta[probe] = {"chr": f"chr{(p % 22) + 1}", "pos": (p + 1) * 100}
         planted = p < N_DM
+        # drawn for every probe (even planted, where it's unused) to keep the RNG stream — and the pinned n-DMP count — stable if N_DM changes
         base_mu = rng.uniform(0.2, 0.8)
         col: dict[str, float] = {}
         for s in sample_ids:

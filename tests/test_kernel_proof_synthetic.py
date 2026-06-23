@@ -9,6 +9,7 @@ def test_synthetic_kernel_proof_licenses_at_reproduced():
     assert r.independence_tier.name == "REPRODUCED"     # two independent legs agreed
     assert r.n_dmps >= r.k                               # clears the pre-registered null floor
     assert r.n_probes == 3000 and r.k == 150
+    assert r.e_value > 1e10
 
 
 def test_synthetic_kernel_proof_n_dmps_is_pinned():
