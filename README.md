@@ -11,7 +11,7 @@ toward truth, a local node that runs it, and a 3D viewer that renders the live u
 |---|---|---|
 | `grammar/` | **The v1.3 grammar** (`polymer_grammar`) — the active claim IR. A five-layer grammar derived from first principles (see Direction below). | **Active** — all 8 layer-phases merged |
 | `protocol/` | **The v1.3 protocol** (`polymer_protocol`) — the runtime over the grammar: the `run_cycle` flywheel + 3 daemons + the `next_action` scheduler + topology/timeline exports. | **Active** — all 5 sub-projects + daemons + scheduler merged; sheaf consistency gauge + adapter-independence hardening merged |
-| `src/polymer_claims/` | **The umbrella distribution** (`polymer-claims`) — the CLI over the complete runtime + the live local node (`serve`, behind the optional `[serve]` extra). | **Active** — `pip install polymer-claims` → local node works. New CLI: `export-consistency` (sheaf gauge, `[embed]`), `ingest tcga-laml` + `serve --tcga-laml` (real TCGA-LAML n-DMP), `export-attestation` (in-toto/SLSA/DRS bundle + `--format dsse` DSSE NDJSON; arc 2 slices 1+2), `calibrate` + `certify` (warrant-tiered `q`-calibration ledger + a single-claim attestable certificate; 2026-06-22) |
+| `src/polymer_claims/` | **The umbrella distribution** (`polymer-claims`) — the CLI over the complete runtime + the live local node (`serve`, behind the optional `[serve]` extra). | **Active** — `pip install polymer-claims` → local node works. New CLI: `export-consistency` (sheaf gauge, `[embed]`), `ingest tcga-laml` + `serve --tcga-laml` (real TCGA-LAML n-DMP), `export-attestation` (in-toto/SLSA/DRS bundle + `--format dsse` DSSE NDJSON; arc 2 slices 1+2), `calibrate` + `certify` (warrant-tiered `q`-calibration ledger + a single-claim attestable certificate; 2026-06-22), `ingest-attested` (the credence layer — external determinations enter the ledger as the defeasible ATTESTED tier feeding `q_attested`, never the headline `q`; 2026-06-23) |
 | `viewer/` | **The claims-universe 3D viewer** (Next 16 + React Three Fiber). Plays a sample timeline or streams a live node. Live layout is the signed-Laplacian spectral eigenmap, Procrustes-aligned (`serve --layout spectral`, default; `--layout force` for the legacy force-directed). | **Active** — `tsc`+`build` clean; sheaf-consistency viewer overlay added |
 | `docs/superpowers/` | The canonical spec (`polymer-claims-canonical-spec.md`), `CONTINUE.md` resume primer, and `archive/` of shipped per-feature design docs (specs + plans). | Active |
 
@@ -281,3 +281,9 @@ validated, v1.2 was moved out of the repository (preserved locally, pending even
 - **v1.2 PyPI publish** (`polymer-formalclaim`) and the API IR-dedup are deferred indefinitely in
   favor of the v1.3 rebuild. Revival instructions live in v1.2's own README (preserved with the
   v1.2 tree outside the repo) if v1.2 is ever reactivated.
+- **Credence-layer scoring engines** (next after ATTESTED ingestion, 2026-06-23): proper scoring
+  for *resolvable* attested claims (log-score vs a baseline) and surrogate/peer-prediction for
+  *unresolvable* ones over graph-neighbours; live external feeds (ClinVar/trial registries)
+  replacing the file drop; markets only where claims genuinely resolve; defeat-edge auto-wiring
+  between contradictory attestations. This slice records the resolvability typing but builds
+  neither engine.
