@@ -487,6 +487,20 @@ def build_certificate(
     models: tuple[GeneratingModelParams, ...] = ()
     if ledger is not None:
         report = calibration_summary(ledger, target_q=target_q)
+        # Upgrade the DEFINITIONAL interval to a percentile bootstrap over the per-batch FDPs — more
+        # honest than the normal-approx over few batches; deterministic (seeded), umbrella-side so
+        # protocol stays pure. Only when ≥2 batches (a single batch has no interval).
+        from polymer_protocol.calibration import definitional_batch_fdps
+
+        from .calibration_stats import bootstrap_mean_ci
+        fdps = definitional_batch_fdps(ledger.records, target_q)
+        if len(fdps) >= 2:
+            lo, hi = bootstrap_mean_ci(fdps)
+            report = report.model_copy(update={
+                "definitional": report.definitional.model_copy(
+                    update={"ci_low": lo, "ci_high": hi, "ci_method": "bootstrap_0.95"}
+                )
+            })
         models = ledger.generating_models
         raw = ledger.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
         digest = hashlib.sha256(raw).hexdigest()

@@ -596,7 +596,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p_cal = sub.add_parser("calibrate", help="run the synthetic DEFINITIONAL calibration harness")
     p_cal.add_argument("--synthetic", action="store_true", help="(only mode this slice)")
-    p_cal.add_argument("--batches", type=int, default=12)
+    p_cal.add_argument("--batches", type=int, default=30,
+                       help="number of mixed synthetic batches (more → a tighter, more reliable CI)")
     p_cal.add_argument("--n", type=int, default=40, help="regions (claims) per batch")
     p_cal.add_argument("--q", type=float, default=0.05)
     p_cal.add_argument("--fraction-true", dest="fraction_true", type=float, default=0.6)
