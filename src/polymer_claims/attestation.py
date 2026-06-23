@@ -555,6 +555,11 @@ def render_certificate_text(cert: Certificate) -> str:
             f" -> warrant-failure rate {a.realized_rate:.3f}; {a.n_superseded} superseded;"
             f" {a.n_unresolved} unresolved (span: {rep.observation_span_cycles} cycles)"
         )
+        if a.hazard_rate is not None:
+            lines.append(
+                f"            exposure-weighted hazard {a.hazard_rate:.4g} failures/claim-cycle"
+                f" over {a.total_exposure_cycles} exposure-cycles"
+            )
     else:
         lines.append("  ANCHORED: no resolved epochs yet")
     lines.append(f"  ATTESTED: {rep.attested.n_total} attested events")

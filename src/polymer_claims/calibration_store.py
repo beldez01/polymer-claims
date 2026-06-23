@@ -118,8 +118,12 @@ class EpochAllocator:
         n_sats = len(lic.satisfactions) if lic else 0
         return f"{claim.id}|{n_sats}"
 
-    def allocate(self, corpus) -> dict[str, int]:
-        """Return {claim_id: epoch} for currently-LICENSED claims; bump on new identity key."""
+    def allocate(self, corpus, cycle: int | None = None) -> dict[str, int]:
+        """Return {claim_id: epoch} for currently-LICENSED claims; bump on new identity key.
+
+        `cycle` (when supplied) records the exposure clock — the cycle an epoch was first observed
+        LICENSED — so the hazard rate can measure survival time. A same-identity epoch keeps its
+        original start; a new/bumped epoch starts a fresh clock at `cycle`."""
         out: dict[str, int] = {}
         for c in corpus.claims:
             if c.status != Status.LICENSED:
@@ -127,16 +131,22 @@ class EpochAllocator:
             ident = self._identity(c)
             prev = self._state.get(c.id)
             if prev is None:
-                epoch = 0
+                epoch, start = 0, cycle
             elif prev["identity"] == ident:
-                epoch = prev["epoch"]        # same identity -> same epoch (idempotent)
+                epoch = prev["epoch"]                       # same identity -> same epoch (idempotent)
+                start = prev.get("start_cycle", cycle)      # keep the original exposure clock
             else:
-                epoch = prev["epoch"] + 1   # re-licensed under a changed identity
-            self._state[c.id] = {"epoch": epoch, "identity": ident}
+                epoch, start = prev["epoch"] + 1, cycle     # re-licensed -> a fresh exposure clock
+            self._state[c.id] = {"epoch": epoch, "identity": ident, "start_cycle": start}
             out[c.id] = epoch
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.write_text(json.dumps(self._state, sort_keys=True))
         return out
+
+    def start_cycle_of(self, claim_id: str) -> int | None:
+        """The cycle the claim's current epoch was first observed LICENSED (its exposure start)."""
+        s = self._state.get(claim_id)
+        return s.get("start_cycle") if s else None
 
 
 # ── ANCHORED tap ───────────────────────────────────────────────────────────────
@@ -167,7 +177,7 @@ def observe_anchored(
     Epochs are captured from the PRE-transition (prev) licensed set so the epoch is always
     the epoch the claim held when it was under pressure — not a potentially-bumped post-tick value.
     """
-    epoch_map = allocator.allocate(prev)  # epochs as of the PRE-transition LICENSED set
+    epoch_map = allocator.allocate(prev, cycle)  # epochs + exposure clocks for the PRE-transition set
     cause: dict[str, PressureKind] = {}
     survived: set[str] = set()
 
@@ -187,5 +197,10 @@ def observe_anchored(
             cause[cid] = PressureKind.DRIFT  # a drift re-check fired and the license was RETAINED
             survived.add(cid)
 
-    pc = PressureContext(epoch=epoch_map, cause=cause, survived=frozenset(survived))
+    exposure_start = {
+        cid: s for cid in cause if (s := allocator.start_cycle_of(cid)) is not None
+    }
+    pc = PressureContext(
+        epoch=epoch_map, cause=cause, survived=frozenset(survived), exposure_start=exposure_start
+    )
     return anchored_resolutions(prev, curr, cycle, pc)

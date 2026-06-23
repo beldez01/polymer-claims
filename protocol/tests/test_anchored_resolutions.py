@@ -42,3 +42,14 @@ def test_drift_clean_survival_emits_upheld():
     pc = PressureContext(epoch={"c1": 0}, cause={"c1": PressureKind.DRIFT}, survived={"c1"})
     (rec,) = anchored_resolutions(prev, curr, cycle=4, pressure=pc)
     assert rec.verdict == ResolutionVerdict.UPHELD and rec.pressure_kind == PressureKind.DRIFT
+
+
+def test_anchored_resolutions_sets_exposure_start_cycle():
+    # the exposure clock (the cycle the epoch was licensed) is threaded via PressureContext
+    prev = _corpus(licensed_claim("c1"))
+    curr = _corpus(rejected_claim("c1", RejectionReason.DEFEAT_GROUNDED_OUT))
+    pc = PressureContext(
+        epoch={"c1": 0}, cause={"c1": PressureKind.DEFEAT}, exposure_start={"c1": 4}
+    )
+    (rec,) = anchored_resolutions(prev, curr, cycle=10, pressure=pc)
+    assert rec.exposure_start_cycle == 4  # survival time would be observed(10) - start(4) = 6

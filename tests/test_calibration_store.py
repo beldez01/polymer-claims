@@ -301,6 +301,37 @@ def test_observe_anchored_drift_mixed_failed_and_upheld(tmp_path):
     assert by_id["c-keep"].pressure_kind == PressureKind.DRIFT
 
 
+def test_epoch_allocator_records_and_keeps_start_cycle(tmp_path):
+    """allocate(cycle=…) stamps the exposure clock when an epoch opens and keeps it stable."""
+    from polymer_claims.calibration_store import EpochAllocator
+
+    state = tmp_path / "epoch.json"
+    corpus = corpus_with(licensed_claim("c1", licensing(sat(mc(semantic_run_id="run-x")))))
+    alloc = EpochAllocator(state)
+    alloc.allocate(corpus, cycle=5)
+    assert alloc.start_cycle_of("c1") == 5
+    alloc.allocate(corpus, cycle=20)  # same identity → original clock retained
+    assert alloc.start_cycle_of("c1") == 5
+    # survives a fresh process (reload): start_cycle persisted
+    assert EpochAllocator(state).start_cycle_of("c1") == 5
+
+
+def test_observe_anchored_threads_exposure_start(tmp_path):
+    """A record carries the epoch's exposure-start cycle so the hazard can use survival time."""
+    from polymer_claims.calibration_store import EpochAllocator, observe_anchored
+
+    state = tmp_path / "epoch.json"
+    corpus = corpus_with(licensed_claim("c1", licensing(sat(mc(semantic_run_id="run-x")))))
+    alloc = EpochAllocator(state)
+    alloc.allocate(corpus, cycle=2)  # exposure starts at cycle 2 (a prior tick)
+    records = observe_anchored(
+        corpus, corpus, cycle=8, allocator=alloc, last_drift=None, drift_ran=True
+    )
+    assert len(records) == 1
+    assert records[0].exposure_start_cycle == 2   # survival time would be observed(8) - start(2) = 6
+    assert records[0].observed_at_cycle == 8
+
+
 # ── NodeRunner hook (gated, byte-identical when calibration_path=None) ────────
 
 

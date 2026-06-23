@@ -95,3 +95,31 @@ def test_single_batch_ci_is_none():
     assert rep.definitional.ci_low is None
     assert rep.definitional.ci_high is None
     assert rep.definitional.ci_method is None
+
+
+def _a_exp(cid, verdict, observed, start):
+    return ResolutionRecord(
+        subject_claim_id=cid, license_epoch=0, resolution_kind=A, calibration_target=WS,
+        verdict=verdict, stated_q=0.05, observed_at_cycle=observed,
+        pressure_kind=PressureKind.DEFEAT, exposure_start_cycle=start,
+    )
+
+
+def test_anchored_hazard_rate_is_failures_per_exposure_cycle():
+    # 2 failed (exposure 10 each) + 1 upheld (exposure 30) → hazard = 2 / (10+10+30) = 0.04
+    recs = [
+        _a_exp("f1", FL, observed=10, start=0),
+        _a_exp("f2", FL, observed=20, start=10),
+        _a_exp("u1", UP, observed=30, start=0),
+    ]
+    rep = calibration_summary(CalibrationLedger(records=tuple(recs)), target_q=0.05)
+    assert rep.anchored.total_exposure_cycles == 50
+    assert math.isclose(rep.anchored.hazard_rate, 2 / 50, rel_tol=1e-9)
+
+
+def test_anchored_hazard_none_without_exposure():
+    # records lacking exposure_start_cycle (old ledgers) → no hazard, but the rate still computes
+    recs = [_a("f1", FL, 5), _a("u1", UP, 9)]
+    rep = calibration_summary(CalibrationLedger(records=tuple(recs)), target_q=0.05)
+    assert rep.anchored.hazard_rate is None
+    assert rep.anchored.realized_rate == 0.5  # 1 failed / 2 resolved still works
