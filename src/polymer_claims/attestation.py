@@ -576,7 +576,20 @@ def render_certificate_text(cert: Certificate) -> str:
             )
     else:
         lines.append("  ANCHORED: no resolved epochs yet")
-    lines.append(f"  ATTESTED: {rep.attested.n_total} attested events")
+    at = rep.attested
+    if at.n_total:
+        lines.append(
+            f"  ATTESTED: {at.n_total} external determinations; {at.n_failed} disagreed"
+            f" -> q_attested {at.realized_rate:.3f}"
+            f" ({at.n_resolvable} resolvable / {at.n_unresolvable} unresolvable)"
+        )
+        lines.append(
+            "            (external testimony recorded as defeasible corpus claims —"
+            " never truth, never the headline q)"
+        )
+    else:
+        # byte-identical to the pre-slice zero output (honors the "additive when unused" invariant)
+        lines.append(f"  ATTESTED: {at.n_total} attested events")
     lines.append("")
     lines.append(f"Interpretation: {cert.interpretation}")
     return "\n".join(lines)
