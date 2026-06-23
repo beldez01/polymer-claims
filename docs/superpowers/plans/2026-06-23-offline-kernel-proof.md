@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- **Nothing real committed.** Fixture is fully synthetic; the synthetic output contract is gitignored (Task 1 adds the ignore rule). The real-data path stays manifest + script only.
+- **Nothing real committed, nothing synthetic written to the source tree.** Fixture is fully synthetic and is built only into a temp dir scoped by `using_contract_root` (runner) or `tmp_path` (tests) — never `src/polymer_claims/contracts/`. The real-data path stays manifest + script only.
 - **Reuse the real gate, do not fork it.** Use the existing `build_contract`, `n_dmps_claim`, `ndmp_independent_registry`, `NDmpTTestAdapter`, `NDmpOlsCoefAdapter`, `run_cycle`. No changes to grammar/protocol, the gate, the adapters, the FDR/e-value math, or the contract format.
 - **Distinct uid:** synthetic contract uses `uid_stem="tcga_laml_idh_synth"` → ref `se:tcga_laml_idh_synth@1`. Never collides with the gitignored real `se:tcga_laml_idh@1`/`@2`.
 - **Determinism:** fixed RNG seed `SYNTH_SEED = 20260623`; `build_contract` writes betas at 4-decimal precision → stable n-DMP count. The proof test pins the exact count after the first green run.
@@ -26,10 +26,9 @@
 | File | Change | Responsibility |
 |---|---|---|
 | `src/polymer_claims/ingest/synthetic.py` | Create | `build_synthetic_contract` — deterministic synthetic HM450 inputs → existing `build_contract` |
-| `src/polymer_claims/kernel_proof.py` | Create | `run_synthetic_kernel_proof` + `KernelProofResult` — build fixture → run real gate → result |
-| `src/polymer_claims/cli.py` | Modify | `verify-kernel` subcommand; friendlier offline error in `_cmd_ingest` |
-| `.gitignore` | Modify | Ignore the synthetic output contract |
-| `docs/superpowers/2026-06-23-kernel-proof-runbook.md` | Create | Real-proof retrieval recipe + offline synthetic path |
+| `src/polymer_claims/kernel_proof.py` | Create | `run_synthetic_kernel_proof` + `KernelProofResult` — build fixture into a temp dir scoped by `using_contract_root` → run real gate → result (no source-tree writes) |
+| `src/polymer_claims/cli.py` | Modify | `verify-kernel` subcommand (friendly missing-numpy error); friendlier GDC-offline error in `_cmd_ingest` |
+| `docs/superpowers/2026-06-23-kernel-proof-runbook.md` | Create | Real-proof (`@2` Xena+cBioPortal) recipe + offline synthetic path |
 | `tests/test_synthetic_contract.py` | Create | Generator determinism + loadable contract |
 | `tests/test_kernel_proof_synthetic.py` | Create | LICENSED @ REPRODUCED, pinned n-DMP count |
 | `tests/test_cli_verify_kernel.py` | Create | CLI smoke + offline-error message |
@@ -40,21 +39,20 @@
 
 **Files:**
 - Create: `src/polymer_claims/ingest/synthetic.py`
-- Modify: `.gitignore`
 - Test: `tests/test_synthetic_contract.py`
 
 **Interfaces:**
-- Consumes: the existing `polymer_claims.ingest.transform.build_contract(out_dir, *, uid_stem, betas, row_meta, groups, clinical, sample_ids) -> str` and `polymer_claims.contracts.load_contract` / `clear_contract_cache`.
-- Produces: `build_synthetic_contract(out_dir, *, seed: int = 20260623) -> str` — writes `tcga_laml_idh_synth.json` + `.betas.tsv` into `out_dir` and returns the uid `"tcga_laml_idh_synth@1"`. Module constants `SYNTH_SEED=20260623`, `N_SAMPLES=40`, `N_PROBES=3000`, `N_DM=150`.
+- Consumes: the existing `polymer_claims.ingest.transform.build_contract(out_dir, *, uid_stem, betas, row_meta, groups, clinical, sample_ids) -> str` and `polymer_claims.contracts.{using_contract_root, clear_contract_cache, load_contract}`.
+- Produces: `build_synthetic_contract(out_dir, *, seed: int = 20260623) -> str` — writes `tcga_laml_idh_synth.json` + `.betas.tsv` into the caller-provided `out_dir` (always a temp dir / `tmp_path` — never the source tree) and returns the uid `"tcga_laml_idh_synth@1"`. Module constants `SYNTH_SEED=20260623`, `N_SAMPLES=40`, `N_PROBES=3000`, `N_DM=150`.
 
 - [ ] **Step 1: Write the failing tests**
 
 Create `tests/test_synthetic_contract.py`:
 
 ```python
-from pathlib import Path
+import json
 
-from polymer_claims import contracts as _contracts
+from polymer_claims.contracts import clear_contract_cache, load_contract, using_contract_root
 from polymer_claims.ingest.synthetic import build_synthetic_contract, N_PROBES, N_SAMPLES
 
 
@@ -66,14 +64,21 @@ def test_generator_is_deterministic(tmp_path):
     assert ta == tb and len(ta) > 0          # same seed -> identical betas TSV bytes
 
 
-def test_contract_loads_with_expected_shape(tmp_path):
+def test_contract_resolves_through_the_real_loader(tmp_path):
+    # Exercise the actual load_contract path (not just the manifest JSON), scoped to tmp_path.
     uid = build_synthetic_contract(tmp_path)
     assert uid == "tcga_laml_idh_synth@1"
-    import json
+    with using_contract_root(tmp_path):
+        clear_contract_cache()
+        se = load_contract("se:tcga_laml_idh_synth@1")
+    assert se.contract_uid == "tcga_laml_idh_synth@1"
+
+
+def test_manifest_has_expected_shape(tmp_path):
+    build_synthetic_contract(tmp_path)
     manifest = json.loads((tmp_path / "tcga_laml_idh_synth.json").read_text())
     assert manifest["dim"] == [N_PROBES, N_SAMPLES]     # all autosomal probes survive QC
-    groups = {c["Sample_Group"] for c in manifest["col_data"]}
-    assert groups == {"WT", "IDH_mut"}
+    assert {c["Sample_Group"] for c in manifest["col_data"]} == {"WT", "IDH_mut"}
     assert all(not r["chr"].endswith(("X", "Y")) for r in manifest["row_data"])  # autosomal only
 ```
 
@@ -147,24 +152,17 @@ def build_synthetic_contract(out_dir, *, seed: int = SYNTH_SEED) -> str:
     )
 ```
 
-- [ ] **Step 4: Add the gitignore rule**
-
-Append to `.gitignore` (next to the existing `src/polymer_claims/contracts/tcga_laml_idh.*` rules):
-
-```
-# synthetic offline kernel-proof contract (regenerated deterministically on demand)
-src/polymer_claims/contracts/tcga_laml_idh_synth.*
-```
-
-- [ ] **Step 5: Run tests to verify they pass**
+- [ ] **Step 4: Run tests to verify they pass**
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && /Users/zbb2/Desktop/polymer-claims/.venv/bin/python -m pytest tests/test_synthetic_contract.py -v`
-Expected: PASS (2 passed).
+Expected: PASS (3 passed).
 
-- [ ] **Step 6: Commit**
+> No gitignore rule is needed: the generator only ever writes to a caller-provided temp dir (`tmp_path` in tests, a `TemporaryDirectory` in the runner — Task 2). Nothing lands in `src/polymer_claims/contracts/`.
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/polymer_claims/ingest/synthetic.py tests/test_synthetic_contract.py .gitignore
+git add src/polymer_claims/ingest/synthetic.py tests/test_synthetic_contract.py
 git commit -m "feat(ingest): deterministic synthetic HM450 contract generator
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
@@ -212,18 +210,20 @@ Create `src/polymer_claims/kernel_proof.py` (mirrors `data/tcga_laml/run_gate.py
 ```python
 """Offline kernel proof: build the synthetic HM450 fixture, run the REAL n-DMP gate, return the
 outcome. Shared by the verify-kernel CLI and the CI guard test. No network; deterministic.
-See docs/superpowers/specs/2026-06-23-offline-kernel-proof-design.md."""
+Builds into a TemporaryDirectory scoped by using_contract_root — nothing is written to the source
+tree. See docs/superpowers/specs/2026-06-23-offline-kernel-proof-design.md."""
 from __future__ import annotations
 
 import math
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
 from polymer_grammar import FDRLedger, MaterializationContext, Status
 from polymer_protocol import Corpus, run_cycle
 
-from polymer_claims import contracts as _contracts
 from polymer_claims.analysis_profile import profile_oracle_id, profile_oracle_registry
+from polymer_claims.contracts import clear_contract_cache, using_contract_root
 from polymer_claims.evidence import count_enrichment_evalue
 from polymer_claims.ingest.synthetic import build_synthetic_contract
 from polymer_claims.materialization import materialization_map
@@ -254,33 +254,37 @@ class KernelProofResult:
 
 
 def run_synthetic_kernel_proof() -> KernelProofResult:
-    """Build the synthetic contract into the package contracts dir, run the real gate, return result."""
-    build_synthetic_contract(Path(_contracts.__file__).parent)
-    _contracts.clear_contract_cache()
+    """Build the synthetic contract into a temp dir, run the real gate scoped to it, return result.
+    Writes nothing to the source tree; the temp contract is discarded on exit."""
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        build_synthetic_contract(root)
+        with using_contract_root(root):
+            clear_contract_cache()   # don't resolve a stale cached entry for this uid
+            n_probes = len(_all_probe_ids(_REF))
+            k = math.ceil(_ALPHA * n_probes)
+            claim = n_dmps_claim(
+                _CLAIM_ID, ref=_REF,
+                group_col="Sample_Group", level_a="WT", level_b="IDH_mut",
+                alpha=_ALPHA, k=k, oracle_ref=profile_oracle_id(CANONICAL_HM450_V1),
+            )
+            node = claim.evaluation_plan.graph.nodes[0]
+            ind = dmp_indicators(node)
+            n_dmps = int(sum(ind))
+            evalue = count_enrichment_evalue(ind, p0=_ALPHA)
 
-    n_probes = len(_all_probe_ids(_REF))
-    k = math.ceil(_ALPHA * n_probes)
-    claim = n_dmps_claim(
-        _CLAIM_ID, ref=_REF,
-        group_col="Sample_Group", level_a="WT", level_b="IDH_mut",
-        alpha=_ALPHA, k=k, oracle_ref=profile_oracle_id(CANONICAL_HM450_V1),
-    )
-    node = claim.evaluation_plan.graph.nodes[0]
-    ind = dmp_indicators(node)
-    n_dmps = int(sum(ind))
-    evalue = count_enrichment_evalue(ind, p0=_ALPHA)
-
-    base = MaterializationContext(id="M", api_version="v1", data_version="d1")
-    corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
-    result = run_cycle(
-        corpus, (NDmpTTestAdapter(), NDmpOlsCoefAdapter()), base,
-        adapter_registry=ndmp_independent_registry(),
-        oracles=profile_oracle_registry((CANONICAL_HM450_V1, "recomputable_public")),
-        materializations=materialization_map(corpus, base, profiles=(CANONICAL_HM450_V1,)),
-        evidence={_CLAIM_ID: evalue},
-    )
-    c = next(x for x in result.corpus.claims if x.id == _CLAIM_ID)
-    tier = c.licensing.independence_tier if c.licensing is not None else None
+            base = MaterializationContext(id="M", api_version="v1", data_version="d1")
+            corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
+            result = run_cycle(
+                corpus, (NDmpTTestAdapter(), NDmpOlsCoefAdapter()), base,
+                adapter_registry=ndmp_independent_registry(),
+                oracles=profile_oracle_registry((CANONICAL_HM450_V1, "recomputable_public")),
+                materializations=materialization_map(corpus, base, profiles=(CANONICAL_HM450_V1,)),
+                evidence={_CLAIM_ID: evalue},
+            )
+            c = next(x for x in result.corpus.claims if x.id == _CLAIM_ID)
+            tier = c.licensing.independence_tier if c.licensing is not None else None
+        clear_contract_cache()   # leave no temp-rooted cache entry behind
     return KernelProofResult(
         status=c.status, independence_tier=tier, n_dmps=n_dmps, e_value=evalue,
         n_probes=n_probes, k=k, licensed=(c.status is Status.LICENSED),
@@ -297,7 +301,7 @@ Expected: PASS. If it does NOT license (tier None / not REPRODUCED, or `n_dmps <
 The count is deterministic (fixed seed + 4-decimal betas). Read the observed value:
 
 Run: `cd /Users/zbb2/Desktop/polymer-claims && /Users/zbb2/Desktop/polymer-claims/.venv/bin/python -c "from polymer_claims.kernel_proof import run_synthetic_kernel_proof as r; x=r(); print('PINNED_N_DMPS', x.n_dmps)"`
-Note the printed integer `<PINNED>`. Append a pinning assertion to the test in `tests/test_kernel_proof_synthetic.py`:
+Note the printed integer `<PINNED>` (scratch validation of this fixture shape gave **≈295** — expect a number in that neighbourhood; if it's wildly different, something diverged). Append a pinning assertion to the test in `tests/test_kernel_proof_synthetic.py`:
 
 ```python
 def test_synthetic_kernel_proof_n_dmps_is_pinned():
@@ -363,7 +367,15 @@ In `src/polymer_claims/cli.py`, add near the other `_cmd_*` functions:
 
 ```python
 def _cmd_verify_kernel(args: argparse.Namespace) -> int:
-    from .kernel_proof import run_synthetic_kernel_proof
+    try:
+        from .kernel_proof import run_synthetic_kernel_proof
+    except ImportError as exc:  # the gate adapters import numpy, which the base install may lack
+        print(
+            f"verify-kernel needs numpy (the n-DMP gate adapters): install it with "
+            f"`pip install 'polymer-claims[calibrate]'`  ({exc})",
+            file=sys.stderr,
+        )
+        return 1
 
     r = run_synthetic_kernel_proof()
     tier = r.independence_tier.name if r.independence_tier is not None else "NONE"
@@ -471,12 +483,14 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 
 - [ ] **Step 4: Write the runbook**
 
-Create `docs/superpowers/2026-06-23-kernel-proof-runbook.md`:
+Create `docs/superpowers/2026-06-23-kernel-proof-runbook.md` (note: the plan shows this with a
+**four-backtick** outer fence so the inner triple-backtick command blocks render correctly — write
+the file's actual content without the outer fence):
 
-```markdown
+````markdown
 # Kernel Proof — Reproduction Runbook
 
-Two ways to reproduce the n-DMP kernel proof. They prove different things — read which is which.
+Two ways to reproduce the n-DMP kernel proof. They prove **different things** — read which is which.
 
 ## Offline (synthetic) — pipeline integrity, no network, seconds
 
@@ -488,26 +502,36 @@ Builds a fully synthetic, deterministic HM450-shaped contract (`se:tcga_laml_idh
 it through the **real** n-DMP gate (two independent legs + e-LOND + oracle). Expect
 `LICENSED @ REPRODUCED`. This proves the gate **pipeline** reproduces deterministically offline. It
 does **NOT** reproduce the real biology — no real TCGA data is involved (nothing real is committed).
-Guarded in CI by `tests/test_kernel_proof_synthetic.py`.
+Guarded in CI by `tests/test_kernel_proof_synthetic.py`. (Needs numpy — the gate adapters use it;
+`pip install 'polymer-claims[calibrate]'` if a base install lacks it.)
 
-## Real proof — the genome-wide TCGA-LAML claim (needs the data)
+## Real proof — the current genome-wide TCGA-LAML claim (`se:tcga_laml_idh@2`)
 
-The pinned recipe is committed (`src/polymer_claims/ingest/tcga_laml_manifest.json`, UUID + MD5 per
-file); the data it fetches stays gitignored. Requires GDC reachability (or a pre-populated cache dir).
+The **current** earned proof is `se:tcga_laml_idh@2` (the 2026-06-18 source swap): IDH-mut/WT calls
+come from **cBioPortal `laml_tcga_pub` genotyping** (committed at `data/tcga_laml/cbioportal/`,
+IDH-mut n=36) and betas come from a **local Xena `TCGA-LAML.methylation450` matrix** (~633 MB, NOT
+in the repo — TCGA data-use terms + size). It is built by the local, gitignored
+`data/tcga_laml/build_contract_xena.py`, then run through the genome-wide gate by
+`data/tcga_laml/run_gate.py` (`REF = "se:tcga_laml_idh@2"`):
 
 ```
-# 1. Fetch + build the real SE-contract (cache-first; re-runs are offline once cached)
-polymer-claims ingest tcga-laml --data-dir <local-cache-dir>
-#    -> builds se:tcga_laml_idh@1 from real TCGA-LAML HM450 (IDH-mut vs WT)
+# 1. Point build_contract_xena.py at your local Xena methylation450 matrix, then:
+python data/tcga_laml/build_contract_xena.py     # -> builds se:tcga_laml_idh@2 into contracts/ (gitignored)
 
-# 2. Run the genome-wide gate (see data/tcga_laml/run_gate.py — local, gitignored)
-#    -> licenses the n-DMP claim at REPRODUCED on real data; emits the honest q + certificate
+# 2. Run the genome-wide gate on the real contract:
+python data/tcga_laml/run_gate.py                 # -> LICENSED @ REPRODUCED on real data; honest q
 ```
 
-If GDC is unreachable, `ingest tcga-laml` now prints an actionable message pointing back here and to
-`verify-kernel`. The real betas are hundreds of MB and TCGA has data-use terms — they are
-intentionally never committed.
-```
+The cBioPortal genotyping is committed (`data/tcga_laml/cbioportal/`, see its `SOURCE.txt` —
+commit-pinned); the Xena beta matrix is the only piece you must supply locally.
+
+> **Deprecated path — do not confuse it with the current proof.** `polymer-claims ingest tcga-laml`
+> fetches the GDC open-access masked-WXS MAFs and builds the **older** `se:tcga_laml_idh@1`. That MAF
+> source **undercalled IDH (n=10)** and was superseded by the cBioPortal `@2` genotyping above. The
+> committed `tcga_laml_manifest.json` (UUID + MD5) pins that `@1` recipe for reference only; the data
+> it fetches stays gitignored and it requires GDC reachability. When GDC is unreachable, `ingest
+> tcga-laml` now prints an actionable message pointing here and to `verify-kernel`.
+````
 
 - [ ] **Step 5: Run the test to verify it passes**
 
@@ -542,4 +566,12 @@ Expected: all pass.
 - **Determinism / pinned count:** the n-DMP count is unknown a priori; Task 2 writes the knowable assertions first (LICENSED, REPRODUCED, `n_dmps >= k`) then pins the exact value from the observed deterministic run (Step 5) — honest TDD, not a placeholder.
 - **Reuse:** the runner and generator add zero gate logic; they orchestrate existing functions whose signatures were read from the real code (`n_dmps_claim`, `ndmp_independent_registry`, `build_contract`, `dmp_indicators`, `_all_probe_ids`, `count_enrichment_evalue`, `materialization_map`, `profile_oracle_*`, `CANONICAL_HM450_V1`).
 - **Independence-tier coupling:** `KernelProofResult.independence_tier` holds the raw licensing enum; tests/CLI use `.name == "REPRODUCED"` so no fragile import path is assumed.
+
+**Review feedback applied (2026-06-23):**
+- **High — stale runbook:** Task 4's runbook now centers the **current `se:tcga_laml_idh@2`** proof (Xena betas + committed cBioPortal genotyping, IDH-mut n=36, via `build_contract_xena.py` + `run_gate.py`) and explicitly labels `ingest tcga-laml` as the **deprecated `@1`** GDC/MAF path (undercalled IDH n=10). Spec §6 updated to match.
+- **Med — source-tree pollution:** the runner now builds into a `TemporaryDirectory` scoped by `using_contract_root` (no writes to `src/.../contracts/`); the gitignore step was dropped as moot. Spec §4/§6 updated.
+- **Med — base install lacks numpy:** `_cmd_verify_kernel` catches `ImportError` and points to `pip install 'polymer-claims[calibrate]'`.
+- **Med — loader not exercised:** Task 1's test now resolves the contract through the real `load_contract` under `using_contract_root(tmp_path)`, not by reading the manifest JSON.
+- **Low — nested fence:** the runbook block uses a four-backtick outer fence so inner command blocks render.
+- **Low — scratch-validated:** reviewer's run of this fixture shape gave n_dmps≈295, e≈3.86e20, LICENSED @ REPRODUCED — quantitative assumptions sound; Step 5 notes the expected ≈295.
 ```

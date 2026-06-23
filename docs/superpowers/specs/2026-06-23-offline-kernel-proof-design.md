@@ -59,7 +59,7 @@ verify-kernel CLI ─┐
 test (CI guard) ───┘        (kernel_proof.py, new)            │  deterministic, stdlib random + fixed seed
                                                               │  → calls EXISTING build_contract(uid_stem="tcga_laml_idh_synth")
                                                               ▼
-                                                    se:tcga_laml_idh_synth@1  (synthetic contract, gitignored output)
+                                                    se:tcga_laml_idh_synth@1  (built into a temp dir, scoped by using_contract_root)
                                                               │
                                                               ▼  EXISTING gate, unchanged
                               n_dmps_claim → run_cycle(ndmp_independent_registry: t-test + OLS legs)
@@ -73,7 +73,7 @@ test (CI guard) ───┘        (kernel_proof.py, new)            │  deter
 | `build_synthetic_contract(out_dir, *, seed=...) -> str` (returns uid) | `src/polymer_claims/ingest/synthetic.py` (new) | Synthesizes betas/row_meta/groups/clinical/sample_ids, calls existing `build_contract` |
 | `run_synthetic_kernel_proof() -> KernelProofResult` | `src/polymer_claims/kernel_proof.py` (new) | Builds fixture → runs real gate → returns result dataclass. Shared by CLI + test (DRY) |
 | `verify-kernel` subcommand | `src/polymer_claims/cli.py` | Prints tier / n_dmps / e-value; rc 0 iff LICENSED @ REPRODUCED |
-| Friendlier offline error | `src/polymer_claims/ingest/tcga_laml.py` (or `gdc_fetch.py`) | Catch `URLError`/`HTTPError` → message pointing to `verify-kernel` + runbook |
+| Friendlier offline error | `src/polymer_claims/cli.py` (`_cmd_ingest`) | Catch `urllib.error.URLError` → message pointing to `verify-kernel` + runbook |
 | Gate test | `tests/test_kernel_proof_synthetic.py` (new) | Asserts LICENSED, REPRODUCED, pinned n_dmps |
 | Retrieval runbook | `docs/superpowers/2026-06-23-kernel-proof-runbook.md` (new) | Real path (manifest→fetch→run_gate) + synthetic offline path |
 
@@ -103,11 +103,12 @@ the final count) is **pinned by the test after the first green run**, not assert
 
 Mirrors `data/tcga_laml/run_gate.py` but committed, offline, and synthetic. Returns a small
 `KernelProofResult` dataclass: `status: Status`, `independence_tier`, `n_dmps: int`, `e_value:
-float`, `n_probes: int`, `k: int`. Builds the synthetic contract into the package `contracts/` dir
-(same place `load_contract` reads; the output stays gitignored via the existing
-`contracts/tcga_laml_idh_synth.*` ignore rule — see §6), clears the contract cache, constructs the
-`n_dmps_claim` with the real oracle/profile (`CANONICAL_HM450_V1`), and runs one `run_cycle` with
-`ndmp_independent_registry`. Pure orchestration over existing pieces; no new gate logic.
+float`, `n_probes: int`, `k: int`. Builds the synthetic contract into a `TemporaryDirectory` scoped
+by the existing `using_contract_root(tmpdir)` contextmanager (so `load_contract` and the adapters
+that resolve betas through it all read from the temp dir) — **nothing is written to the source
+tree**. Clears the contract cache, constructs the `n_dmps_claim` with the real oracle/profile
+(`CANONICAL_HM450_V1`), and runs one `run_cycle` with `ndmp_independent_registry`. Pure
+orchestration over existing pieces; no new gate logic.
 
 ## 5. CLI — `verify-kernel`
 
@@ -124,19 +125,22 @@ as a smoke check). No flags needed. Lazy-imports the runner (keeps base CLI impo
 
 ## 6. Retrieval runbook + offline error + gitignore
 
-- **Runbook** (`docs/superpowers/2026-06-23-kernel-proof-runbook.md`): (a) **Real proof** — the
-  committed `tcga_laml_manifest.json` pins UUID+MD5; `polymer-claims ingest tcga-laml --data-dir
-  <cache>` fetches (cache-first) + builds `se:tcga_laml_idh@1`; then the region-split / gate scripts
-  reproduce the genome-wide numbers. Note the data stays gitignored and requires GDC reachability (or
-  a pre-populated cache dir). (b) **Offline proof** — `polymer-claims verify-kernel` runs the
-  synthetic pipeline proof with no network. State plainly which is which.
-- **Friendlier offline error:** wrap the real fetch so `urllib.error.URLError`/`HTTPError` surfaces
-  as a single actionable line ("GDC unreachable — for an offline pipeline check run
-  `polymer-claims verify-kernel`; to reproduce the real proof see the runbook") rather than a raw
-  404 traceback. Behavior on success path unchanged.
-- **Gitignore:** add `src/polymer_claims/contracts/tcga_laml_idh_synth.*` so the synthetic *output*
-  contract (manifest + betas TSV) is never committed either — the generator is committed, its output
-  is regenerated on demand (deterministic), keeping git clean.
+- **Runbook** (`docs/superpowers/2026-06-23-kernel-proof-runbook.md`): (a) **Real proof — the
+  CURRENT `se:tcga_laml_idh@2`** (2026-06-18 source swap): IDH-mut/WT from committed cBioPortal
+  `laml_tcga_pub` genotyping (`data/tcga_laml/cbioportal/`, n=36) + a local Xena
+  `TCGA-LAML.methylation450` matrix (~633 MB, not in repo); built by the local, gitignored
+  `data/tcga_laml/build_contract_xena.py` and run through the gate by `data/tcga_laml/run_gate.py`
+  (`REF="se:tcga_laml_idh@2"`). Explicitly mark `polymer-claims ingest tcga-laml` as the **deprecated
+  `@1`** GDC/MAF path (undercalled IDH at n=10; the committed `tcga_laml_manifest.json` pins it for
+  reference only). (b) **Offline proof** — `polymer-claims verify-kernel` runs the synthetic pipeline
+  proof with no network. State plainly which is which.
+- **Friendlier offline error:** in `_cmd_ingest`, catch `urllib.error.URLError` (covers the 404
+  `HTTPError` subclass) and surface a single actionable line pointing to `verify-kernel` + the
+  runbook, rather than a raw traceback. Success path unchanged.
+- **No source-tree writes / no gitignore needed:** the synthetic contract is only ever built into a
+  temp dir (runner: `TemporaryDirectory` + `using_contract_root`; tests: `tmp_path`), so nothing
+  lands in `src/polymer_claims/contracts/` and no ignore rule is required. The generator is
+  committed; its output is regenerated deterministically on demand.
 
 ## 7. Testing (TDD)
 
