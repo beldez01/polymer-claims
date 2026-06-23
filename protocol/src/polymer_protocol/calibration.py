@@ -36,6 +36,11 @@ class ResolutionVerdict(str, Enum):
     SUPERSEDED = "superseded"
 
 
+class Resolvability(str, Enum):
+    RESOLVABLE = "resolvable"
+    UNRESOLVABLE = "unresolvable"
+
+
 class PressureKind(str, Enum):
     DEFEAT = "defeat"
     DRIFT = "drift"
@@ -69,6 +74,7 @@ class ResolutionRecord(_Model):
     pressure_kind: PressureKind | None = None   # anchored — the survived/failed pressure event
     attestation_ref: str | None = None      # attested — external reference
     source_claim_id: str | None = None      # attested — set iff the event is itself a corpus claim
+    resolvability: Resolvability | None = None  # attested — operator-declared or structural prior
 
     @property
     def feeds_headline_q(self) -> bool:
@@ -99,6 +105,8 @@ class ResolutionRecord(_Model):
             raise ValueError("attestation_ref is valid only when resolution_kind=attested")
         if self.source_claim_id is not None and not att:
             raise ValueError("source_claim_id is valid only when resolution_kind=attested")
+        if self.resolvability is not None and not att:
+            raise ValueError("resolvability is valid only when resolution_kind=attested")
         # definitional needs a batch_id (the per-batch FDP fold depends on it)
         if defn and self.batch_id is None:
             raise ValueError("definitional records require a batch_id")
