@@ -508,22 +508,27 @@ Guarded in CI by `tests/test_kernel_proof_synthetic.py`. (Needs numpy — the ga
 ## Real proof — the current genome-wide TCGA-LAML claim (`se:tcga_laml_idh@2`)
 
 The **current** earned proof is `se:tcga_laml_idh@2` (the 2026-06-18 source swap): IDH-mut/WT calls
-come from **cBioPortal `laml_tcga_pub` genotyping** (committed at `data/tcga_laml/cbioportal/`,
-IDH-mut n=36) and betas come from a **local Xena `TCGA-LAML.methylation450` matrix** (~633 MB, NOT
-in the repo — TCGA data-use terms + size). It is built by the local, gitignored
-`data/tcga_laml/build_contract_xena.py`, then run through the genome-wide gate by
-`data/tcga_laml/run_gate.py` (`REF = "se:tcga_laml_idh@2"`):
+come from **cBioPortal `laml_tcga_pub` genotyping** (IDH-mut n=36) and betas come from a local Xena
+`TCGA-LAML.methylation450` matrix (~633 MB).
+
+**These inputs and the build/gate scripts are LOCAL-ONLY and are NOT in a fresh checkout.** All of
+`data/tcga_laml/` — the cBioPortal files, `build_contract_xena.py`, and `run_gate.py` — is
+gitignored by design (TCGA data-use terms + size; the scripts also hardcode a local Xena path). The
+real `@2` proof therefore reproduces only in a working tree that already holds them. To reconstruct
+from scratch: re-fetch the cBioPortal `laml_tcga_pub` mutations (pin the commit + `HGVSp_Short`
+protein-change column as the original `cbioportal/SOURCE.txt` records), supply the Xena
+methylation450 matrix locally, then:
 
 ```
-# 1. Point build_contract_xena.py at your local Xena methylation450 matrix, then:
-python data/tcga_laml/build_contract_xena.py     # -> builds se:tcga_laml_idh@2 into contracts/ (gitignored)
-
-# 2. Run the genome-wide gate on the real contract:
-python data/tcga_laml/run_gate.py                 # -> LICENSED @ REPRODUCED on real data; honest q
+# only in a tree that has the local-only data/tcga_laml/ scripts + a local Xena matrix:
+.venv/bin/python data/tcga_laml/build_contract_xena.py   # -> se:tcga_laml_idh@2 into contracts/ (untracked)
+.venv/bin/python data/tcga_laml/run_gate.py              # -> LICENSED @ REPRODUCED on real data; honest q
 ```
 
-The cBioPortal genotyping is committed (`data/tcga_laml/cbioportal/`, see its `SOURCE.txt` —
-commit-pinned); the Xena beta matrix is the only piece you must supply locally.
+For a reproduction that works from a **fresh checkout with no real data**, use the offline synthetic
+proof above (`polymer-claims verify-kernel`) — that is the committed, CI-guarded reproducibility this
+slice delivers. Turning the *real* `@2` data into a retrievable, fresh-checkout-runnable artifact is
+tracked as roadmap **H0.1b** and is out of scope here.
 
 > **Deprecated path — do not confuse it with the current proof.** `polymer-claims ingest tcga-laml`
 > fetches the GDC open-access masked-WXS MAFs and builds the **older** `se:tcga_laml_idh@1`. That MAF
@@ -558,20 +563,25 @@ Expected: all pass.
 
 - [ ] **CLI end-to-end:** `... -m polymer_claims.cli verify-kernel` prints `LICENSED @ REPRODUCED` and returns 0.
 - [ ] **Lint:** `ruff check src/polymer_claims/ingest/synthetic.py src/polymer_claims/kernel_proof.py src/polymer_claims/cli.py` → clean.
-- [ ] **Nothing real / no stray commits:** `git status` shows no `tcga_laml_idh_synth.*` contract files staged (gitignored); only the intended source/test/doc files were committed.
+- [ ] **Nothing real / no stray commits:** `git status` shows no `tcga_laml_idh_synth.*` contract files anywhere (they are only ever written to temp dirs — absent/untracked, never in `src/.../contracts/`); only the intended source/test/doc files were committed.
 
 ## Self-Review Notes (planner)
 
-- **Spec coverage:** §3 generator → Task 1; §4 runner → Task 2; §5 CLI → Task 3; §6 runbook + offline error + gitignore → Tasks 1 (ignore) + 4 (error + runbook); §7 testing → tests in each task; §8 invariants → Global Constraints + Final Verification.
+- **Spec coverage:** §3 generator → Task 1; §4 runner → Task 2; §5 CLI → Task 3; §6 runbook + offline error → Task 4 (no gitignore rule needed — synthetic output only ever goes to temp dirs); §7 testing → tests in each task; §8 invariants → Global Constraints + Final Verification.
 - **Determinism / pinned count:** the n-DMP count is unknown a priori; Task 2 writes the knowable assertions first (LICENSED, REPRODUCED, `n_dmps >= k`) then pins the exact value from the observed deterministic run (Step 5) — honest TDD, not a placeholder.
 - **Reuse:** the runner and generator add zero gate logic; they orchestrate existing functions whose signatures were read from the real code (`n_dmps_claim`, `ndmp_independent_registry`, `build_contract`, `dmp_indicators`, `_all_probe_ids`, `count_enrichment_evalue`, `materialization_map`, `profile_oracle_*`, `CANONICAL_HM450_V1`).
 - **Independence-tier coupling:** `KernelProofResult.independence_tier` holds the raw licensing enum; tests/CLI use `.name == "REPRODUCED"` so no fragile import path is assumed.
 
 **Review feedback applied (2026-06-23):**
-- **High — stale runbook:** Task 4's runbook now centers the **current `se:tcga_laml_idh@2`** proof (Xena betas + committed cBioPortal genotyping, IDH-mut n=36, via `build_contract_xena.py` + `run_gate.py`) and explicitly labels `ingest tcga-laml` as the **deprecated `@1`** GDC/MAF path (undercalled IDH n=10). Spec §6 updated to match.
+- **High — stale runbook:** Task 4's runbook now centers the **current `se:tcga_laml_idh@2`** proof (Xena betas + cBioPortal genotyping, IDH-mut n=36) and is honest that `data/tcga_laml/` (cBio files + `build_contract_xena.py` + `run_gate.py`) is **local-only / untracked** — fresh checkouts use `verify-kernel`; real-data hardening is roadmap H0.1b. `ingest tcga-laml` labeled the **deprecated `@1`** path. Spec §6 updated.
 - **Med — source-tree pollution:** the runner now builds into a `TemporaryDirectory` scoped by `using_contract_root` (no writes to `src/.../contracts/`); the gitignore step was dropped as moot. Spec §4/§6 updated.
 - **Med — base install lacks numpy:** `_cmd_verify_kernel` catches `ImportError` and points to `pip install 'polymer-claims[calibrate]'`.
 - **Med — loader not exercised:** Task 1's test now resolves the contract through the real `load_contract` under `using_contract_root(tmp_path)`, not by reading the manifest JSON.
 - **Low — nested fence:** the runbook block uses a four-backtick outer fence so inner command blocks render.
 - **Low — scratch-validated:** reviewer's run of this fixture shape gave n_dmps≈295, e≈3.86e20, LICENSED @ REPRODUCED — quantitative assumptions sound; Step 5 notes the expected ≈295.
-```
+
+**Second feedback pass (2026-06-23):**
+- **High — runbook depended on untracked files:** confirmed nothing under `data/tcga_laml/` is tracked; runbook rewritten to mark the cBioPortal files + scripts **local-only / untracked**, fresh checkouts use `verify-kernel`, real-data hardening deferred to roadmap **H0.1b**.
+- **Med — roadmap H0.1 scope:** roadmap H0.1 reworded to this plan's synthetic-proof scope + new **H0.1b** residual for real `@2` artifact reproduction.
+- **Med — interpreter consistency:** runbook script commands use `.venv/bin/python` (not bare `python`).
+- **Low:** final-verification wording fixed (absent/untracked, not "gitignored"); stray EOF fence removed.

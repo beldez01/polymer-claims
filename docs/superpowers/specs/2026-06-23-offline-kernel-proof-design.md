@@ -126,14 +126,16 @@ as a smoke check). No flags needed. Lazy-imports the runner (keeps base CLI impo
 ## 6. Retrieval runbook + offline error + gitignore
 
 - **Runbook** (`docs/superpowers/2026-06-23-kernel-proof-runbook.md`): (a) **Real proof — the
-  CURRENT `se:tcga_laml_idh@2`** (2026-06-18 source swap): IDH-mut/WT from committed cBioPortal
-  `laml_tcga_pub` genotyping (`data/tcga_laml/cbioportal/`, n=36) + a local Xena
-  `TCGA-LAML.methylation450` matrix (~633 MB, not in repo); built by the local, gitignored
-  `data/tcga_laml/build_contract_xena.py` and run through the gate by `data/tcga_laml/run_gate.py`
-  (`REF="se:tcga_laml_idh@2"`). Explicitly mark `polymer-claims ingest tcga-laml` as the **deprecated
-  `@1`** GDC/MAF path (undercalled IDH at n=10; the committed `tcga_laml_manifest.json` pins it for
-  reference only). (b) **Offline proof** — `polymer-claims verify-kernel` runs the synthetic pipeline
-  proof with no network. State plainly which is which.
+  CURRENT `se:tcga_laml_idh@2`** (2026-06-18 source swap): IDH-mut/WT from cBioPortal
+  `laml_tcga_pub` genotyping (n=36) + a local Xena `TCGA-LAML.methylation450` matrix (~633 MB). Be
+  honest that **all of `data/tcga_laml/` is local-only / gitignored / untracked** — the cBioPortal
+  inputs, `build_contract_xena.py`, and `run_gate.py` are NOT in a fresh checkout; the real `@2`
+  proof reproduces only in a working tree that has them (use `.venv/bin/python` for those script
+  commands). Mark `polymer-claims ingest tcga-laml` as the **deprecated `@1`** GDC/MAF path
+  (undercalled IDH at n=10; `tcga_laml_manifest.json` pins it for reference only). Genuinely
+  reproducing the real `@2` from a fresh checkout is roadmap **H0.1b**, out of scope here.
+  (b) **Offline proof** — `polymer-claims verify-kernel` runs the synthetic pipeline proof with no
+  network. State plainly which is which.
 - **Friendlier offline error:** in `_cmd_ingest`, catch `urllib.error.URLError` (covers the 404
   `HTTPError` subclass) and surface a single actionable line pointing to `verify-kernel` + the
   runbook, rather than a raw traceback. Success path unchanged.

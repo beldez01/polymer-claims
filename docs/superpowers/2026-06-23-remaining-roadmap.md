@@ -43,11 +43,22 @@ parallel deepening once the wedge is reproducible and signable.
 
 These are cheap, unblock everything downstream, and close gaps the spot-verification surfaced.
 
-- [ ] **H0.1 — Pin the Phase-A kernel proof for offline reproduction.** Cache the TCGA-LAML HM450
-  beta matrix (or a content-addressed fixture / downsampled real subset) into the repo or a
-  retrievable artifact, and make `ingest tcga-laml` prefer the cached matrix over the live GDC call
-  when `--data-dir` has it. *Why:* a non-reproducible proof is worse than no proof; this is the
-  foundation everything else cites. *Size:* S–M (mostly data plumbing + a fixture).
+- [ ] **H0.1 — Offline-reproducible kernel *pipeline* proof (synthetic).** Spec'd + planned
+  (`specs/2026-06-23-offline-kernel-proof-design.md`, `plans/2026-06-23-offline-kernel-proof.md`).
+  A fully synthetic, deterministic HM450-shaped fixture run through the **real** n-DMP gate, guarded
+  by a committed test and a `verify-kernel` CLI, plus a hardened retrieval runbook. *Why:* gives a
+  fresh checkout a deterministic, offline `LICENSED @ REPRODUCED` proof of the gate pipeline — closes
+  the "nothing reproduces offline" gap. *Note:* this proves **pipeline integrity, not the real
+  biology** (nothing real committed). *Size:* S–M.
+- [ ] **H0.1b — Real `@2` data: retrievable, fresh-checkout-runnable artifact.** The *real* proof
+  (`se:tcga_laml_idh@2`: local Xena methylation450 matrix + cBioPortal `laml_tcga_pub` genotyping)
+  currently depends on **local-only, gitignored** files under `data/tcga_laml/`
+  (`build_contract_xena.py`, `run_gate.py`, the cBioPortal inputs) — not in a fresh checkout. Make
+  the real proof reproducible from clean: commit the cBioPortal genotyping inputs + a parameterized
+  (non-hardcoded-path) build/gate script via explicit `.gitignore` exceptions, and provide a
+  retrievable/cached Xena artifact recipe. *Why:* H0.1 reproduces the pipeline; H0.1b reproduces the
+  actual headline numbers. *Size:* M (data governance + script de-hardcoding). *Residual split out of
+  H0.1 so the synthetic slice is not mistaken for closing real-data offline reproducibility.*
 - [ ] **H0.2 — `ingest-attested` write-time idempotency (optional).** Today re-ingest appends a
   duplicate JSONL line; `load_ledger` folds it away on read. Add an opt-in "skip if `source_claim_id`
   already on disk" to stop unbounded file growth. *Size:* S. *(Low priority — read-time semantics
