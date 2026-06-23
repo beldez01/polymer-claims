@@ -28,6 +28,7 @@ from polymer_claims.bionemo.apparatus import BioNeMoApparatus, build_materializa
 from polymer_claims.bionemo.client import NimClient, NimRequest, NimResponse
 from polymer_claims.bionemo.registry import bionemo_credential
 from polymer_claims.attestation import build_certificate  # noqa: E402
+from polymer_claims.bionemo.oracle import bionemo_oracle_registry  # noqa: E402
 
 import sys
 
@@ -37,6 +38,7 @@ from tests.fixtures.synthetic_corroborator import SyntheticCorroboratorAdapter  
 
 _IMPL = "bionemo::plumbing"
 _CLAIM_ID = "bionemo-plumbing-1"
+_ORACLE_ID = "bionemo-plumbing@v1"
 _CASSETTE = Path(__file__).with_name("cassette.json")
 
 
@@ -45,12 +47,13 @@ def _cassette_transport(req: NimRequest, api_key: str) -> NimResponse:
     return NimResponse(status=rec["status"], body=rec["body"], model_version=rec["model_version"])
 
 
-def _claim() -> Claim:
+def _claim(oracle_ref=None) -> Claim:
     node = OperationNode(
         id="n0",
         impl=_IMPL,
         inputs=(DataHandle(ref="seq1"),),
         produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
+        oracle_ref=oracle_ref,
     )
     plan = EvaluationPlan(
         graph=ComputeGraph(nodes=(node,), terminal="n0"),
@@ -67,7 +70,7 @@ def _claim() -> Claim:
     )
 
 
-def run_plumbing(cache_dir):
+def run_plumbing(cache_dir, *, with_oracle: bool = False):
     cassette = json.loads(_CASSETTE.read_text())
     score = cassette["body"]["out"]["score"]
 
@@ -101,8 +104,10 @@ def run_plumbing(cache_dir):
         )
     )
 
-    corpus = Corpus(claims=(_claim(),), fdr_ledger=FDRLedger(target_fdr=0.05))
-    return run_cycle(corpus, (bionemo, corroborator), ctx, adapter_registry=registry)
+    oracle_ref = _ORACLE_ID if with_oracle else None
+    corpus = Corpus(claims=(_claim(oracle_ref=oracle_ref),), fdr_ledger=FDRLedger(target_fdr=0.05))
+    oracles = bionemo_oracle_registry(oracle_id=_ORACLE_ID) if with_oracle else None
+    return run_cycle(corpus, (bionemo, corroborator), ctx, oracles=oracles, adapter_registry=registry)
 
 
 def certify_plumbing(cache_dir):
