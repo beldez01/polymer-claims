@@ -278,6 +278,30 @@ def _cmd_ingest_attested(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_verify_kernel(args: argparse.Namespace) -> int:
+    try:
+        from .kernel_proof import run_synthetic_kernel_proof
+    except ModuleNotFoundError as exc:
+        if exc.name == "numpy":   # base install may lack numpy (the n-DMP gate adapters use it)
+            print(
+                "verify-kernel needs numpy (the n-DMP gate adapters): install it with "
+                "`pip install 'polymer-claims[calibrate]'`",
+                file=sys.stderr,
+            )
+        else:  # a real internal import bug — don't mislabel it as a missing optional dep
+            print(f"verify-kernel import failed: {exc}", file=sys.stderr)
+        return 1
+
+    r = run_synthetic_kernel_proof()
+    tier = r.independence_tier.name if r.independence_tier is not None else "NONE"
+    ok = r.licensed and tier == "REPRODUCED"
+    print(f"kernel proof (synthetic, offline): {'LICENSED @ ' + tier if r.licensed else 'NOT LICENSED'}")
+    print(f"  n_probes={r.n_probes}  null-floor k={r.k}  n_dmps={r.n_dmps}  e_value={r.e_value:.3e}")
+    print("  (synthetic fixture — proves pipeline integrity, NOT the real biology; "
+          "see docs/superpowers/2026-06-23-kernel-proof-runbook.md for the real proof)")
+    return 0 if ok else 1
+
+
 def _cmd_certify(args: argparse.Namespace) -> int:
     from .attestation import build_certificate, render_certificate_text, certificate_dsse_envelope
     corpus = load_corpus(args.corpus)
@@ -640,6 +664,10 @@ def _build_parser() -> argparse.ArgumentParser:
     p_cert.add_argument("--q", type=float, default=0.05)
     p_cert.add_argument("--format", choices=("text", "json", "dsse"), default="text")
     p_cert.set_defaults(func=_cmd_certify)
+
+    p_vk = sub.add_parser("verify-kernel",
+                          help="run the synthetic n-DMP kernel proof offline (pipeline integrity check)")
+    p_vk.set_defaults(func=_cmd_verify_kernel)
 
     return parser
 
