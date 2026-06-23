@@ -263,6 +263,21 @@ def _cmd_calibrate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_ingest_attested(args: argparse.Namespace) -> int:
+    from .attested_ingest import ingest, parse_resolutions
+
+    corpus = load_corpus(args.corpus)
+    try:
+        resolutions = parse_resolutions(Path(args.resolutions).read_text())
+        out_corpus = ingest(corpus, resolutions, args.calibration)
+    except ValueError as exc:
+        print(f"ingest-attested failed: {exc}", file=sys.stderr)
+        return 1
+    _write_or_print(dump_corpus(out_corpus), args.out)
+    print(f"ingested {len(resolutions)} attestation(s)", file=sys.stderr)
+    return 0
+
+
 def _cmd_certify(args: argparse.Namespace) -> int:
     from .attestation import build_certificate, render_certificate_text, certificate_dsse_envelope
     corpus = load_corpus(args.corpus)
@@ -609,6 +624,14 @@ def _build_parser() -> argparse.ArgumentParser:
     p_cal.add_argument("--seed", type=int, default=0)
     p_cal.add_argument("--out", default=None, help="write the ledger JSONL here (else stdout)")
     p_cal.set_defaults(func=_cmd_calibrate)
+
+    p_ing = sub.add_parser("ingest-attested",
+                           help="ingest external determinations as ATTESTED calibration records")
+    p_ing.add_argument("--corpus", required=True, help="path to the corpus JSON")
+    p_ing.add_argument("--resolutions", required=True, help="path to the resolutions JSON array")
+    p_ing.add_argument("--calibration", required=True, help="path to the calibration JSONL ledger")
+    p_ing.add_argument("--out", help="write updated corpus here (default: stdout)")
+    p_ing.set_defaults(func=_cmd_ingest_attested)
 
     p_cert = sub.add_parser("certify", help="emit a single-claim certificate (standing + calibrated q)")
     p_cert.add_argument("claim_id")
