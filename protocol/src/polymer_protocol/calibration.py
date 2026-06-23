@@ -36,6 +36,11 @@ class ResolutionVerdict(str, Enum):
     SUPERSEDED = "superseded"
 
 
+class Resolvability(str, Enum):
+    RESOLVABLE = "resolvable"
+    UNRESOLVABLE = "unresolvable"
+
+
 class PressureKind(str, Enum):
     DEFEAT = "defeat"
     DRIFT = "drift"
@@ -69,6 +74,7 @@ class ResolutionRecord(_Model):
     pressure_kind: PressureKind | None = None   # anchored — the survived/failed pressure event
     attestation_ref: str | None = None      # attested — external reference
     source_claim_id: str | None = None      # attested — set iff the event is itself a corpus claim
+    resolvability: Resolvability | None = None  # attested — operator-declared or structural prior
 
     @property
     def feeds_headline_q(self) -> bool:
@@ -99,6 +105,8 @@ class ResolutionRecord(_Model):
             raise ValueError("attestation_ref is valid only when resolution_kind=attested")
         if self.source_claim_id is not None and not att:
             raise ValueError("source_claim_id is valid only when resolution_kind=attested")
+        if self.resolvability is not None and not att:
+            raise ValueError("resolvability is valid only when resolution_kind=attested")
         # definitional needs a batch_id (the per-batch FDP fold depends on it)
         if defn and self.batch_id is None:
             raise ValueError("definitional records require a batch_id")
@@ -135,6 +143,8 @@ class TierStat(_Model):
     n_failed: int
     n_unresolved: int = 0   # anchored/attested only
     n_superseded: int = 0   # anchored only — terminal, excluded from the failure denominator
+    n_resolvable: int = 0       # attested only — resolvability split
+    n_unresolvable: int = 0     # attested only
     realized_rate: float | None = None
     pooled_rate: float | None = None     # DEFINITIONAL secondary: Σfailed/Σlicensed
     ci_low: float | None = None
@@ -219,6 +229,14 @@ def _definitional_stat(records, target_q, models) -> TierStat:
     )
 
 
+def resolvability_prior(claim) -> Resolvability:
+    """Structural fallback prior (NOT a definition of resolvability): a recomputable test
+    (evaluation_plan present) means a definitive determination is at least possible. An explicit
+    operator value always wins over this prior. See spec §1.1 (recomputability ≠ resolvability)."""
+    return (Resolvability.RESOLVABLE if claim.evaluation_plan is not None
+            else Resolvability.UNRESOLVABLE)
+
+
 def _anchored_stat(records: tuple[ResolutionRecord, ...], target_q: float) -> TierStat:
     recs = [r for r in records
             if r.resolution_kind == ResolutionKind.ANCHORED and r.stated_q == target_q]
@@ -250,8 +268,15 @@ def _attested_stat(records: tuple[ResolutionRecord, ...], target_q: float) -> Ti
             if r.resolution_kind == ResolutionKind.ATTESTED and r.stated_q == target_q]
     n_failed = sum(1 for r in recs if r.verdict == ResolutionVerdict.FAILED)
     denom = sum(1 for r in recs if r.verdict in (ResolutionVerdict.FAILED, ResolutionVerdict.UPHELD))
+    # resolvability split is counted over the SAME resolved denominator as q_attested
+    # (FAILED+UPHELD only) so the two numbers are reconcilable.
+    resolved = [r for r in recs
+                if r.verdict in (ResolutionVerdict.FAILED, ResolutionVerdict.UPHELD)]
+    n_resolvable = sum(1 for r in resolved if r.resolvability == Resolvability.RESOLVABLE)
+    n_unresolvable = sum(1 for r in resolved if r.resolvability == Resolvability.UNRESOLVABLE)
     return TierStat(n_total=denom, n_failed=n_failed,
-                    realized_rate=(n_failed / denom if denom else None))
+                    realized_rate=(n_failed / denom if denom else None),
+                    n_resolvable=n_resolvable, n_unresolvable=n_unresolvable)
 
 
 def calibration_summary(ledger: CalibrationLedger, *, target_q: float) -> CalibrationReport:

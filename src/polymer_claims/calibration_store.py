@@ -18,6 +18,7 @@ from polymer_protocol.calibration import (
     GeneratingModelParams,
     PressureContext,
     PressureKind,
+    ResolutionKind,
     ResolutionRecord,
     anchored_resolutions,
 )
@@ -26,8 +27,23 @@ from polymer_protocol.calibration import (
 # ── JSONL event log ────────────────────────────────────────────────────────────
 
 
+def _fold_key(r: ResolutionRecord):
+    # ATTESTED is an event-level tier: distinct external determinations on the same claim/epoch
+    # must coexist, keyed by a per-event discriminator. This ingester always sets source_claim_id,
+    # but the pure model keeps it optional (set iff the event is a corpus claim), so fall back to
+    # attestation_ref for source-less records. DEFINITIONAL/ANCHORED keep the original
+    # (subject_claim_id, license_epoch) identity (latest verdict wins).
+    if r.resolution_kind == ResolutionKind.ATTESTED:
+        discriminator = r.source_claim_id or r.attestation_ref
+        return (r.subject_claim_id, r.license_epoch, "attested", discriminator)
+    return (r.subject_claim_id, r.license_epoch)
+
+
 def append_records(path, records) -> None:
-    """Append ResolutionRecord objects to a JSONL file (append-only; atomic per-line)."""
+    """Append ResolutionRecord objects to a JSONL file (append-only; atomic per-line).
+
+    Note: raw JSONL line count is NOT the record count. Re-ingesting the same determination
+    appends a duplicate line; ``load_ledger`` folds to one record per fold key at read time."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a") as fh:
@@ -52,7 +68,15 @@ def dump_models(path, models) -> None:
 def load_ledger(
     path, *, generating_models: tuple[GeneratingModelParams, ...] = ()
 ) -> CalibrationLedger:
-    """Read the JSONL and fold events to the latest verdict per (subject_claim_id, license_epoch).
+    """Read the JSONL and fold events to the latest verdict per fold key.
+
+    Fold identity by tier:
+      - ATTESTED: ``(subject_claim_id, license_epoch, "attested", discriminator)`` where
+        ``discriminator = source_claim_id or attestation_ref``.  Each distinct external
+        determination on the same claim/epoch gets its own slot, so multiple sources coexist.
+        If both are None the discriminator is None and such records collapse to one (accepted
+        behavior — source-less attestations carry no event identity).
+      - DEFINITIONAL / ANCHORED: ``(subject_claim_id, license_epoch)`` — latest verdict wins.
 
     Latest line wins (definitional append-only semantics). First-seen order is preserved so the
     ledger has a stable deterministic ordering even as new records accumulate.
@@ -60,14 +84,14 @@ def load_ledger(
     If `generating_models` is not explicitly supplied and a sidecar `<path>.models.json` exists,
     models are auto-loaded from it so `certify` can show n_generated without extra caller plumbing."""
     path = Path(path)
-    latest: dict[tuple[str, int], ResolutionRecord] = {}
-    order: list[tuple[str, int]] = []
+    latest: dict[tuple, ResolutionRecord] = {}
+    order: list[tuple] = []
     if path.is_file():
         for line in path.read_text().splitlines():
             if not line.strip():
                 continue
             r = ResolutionRecord.model_validate_json(line)
-            key = (r.subject_claim_id, r.license_epoch)
+            key = _fold_key(r)
             if key not in latest:
                 order.append(key)
             latest[key] = r  # latest event wins

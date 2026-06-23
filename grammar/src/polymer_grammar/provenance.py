@@ -21,6 +21,7 @@ class GenerationMode(str, Enum):
     LITERATURE_EXTRACTED = "literature_extracted"
     MIGRATED = "migrated"
     IMPORTED = "imported"
+    EXTERNAL_ATTESTATION = "external_attestation"
 
 
 class Provenance(_Model):
