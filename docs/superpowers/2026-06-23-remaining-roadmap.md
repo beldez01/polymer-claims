@@ -101,13 +101,15 @@ The ATTESTED ingestion slice records *resolvability typing* but builds neither s
 - [ ] **H1.C1 — `q_anchored` Kaplan–Meier hazard curve** (deferred follow-up). *Size:* S–M.
 - [ ] **H1.C2 — Real-claim `q`-resolution loop.** DEFINITIONAL FDR is validated on the *synthetic*
   model only; close the loop on at least one real claim's eventual resolution. *Size:* M, and
-  partly gated on H0.1 + H1.A2 (needs real, resolvable claims).
+  partly gated on **H0.1b** + H1.A2 (needs real, resolvable claims — H0.1's synthetic proof does not
+  supply real data).
 
 ## Horizon 2 — Layer C consolidated (the wedge as a product)
 
 - [ ] Pick and prove **one legible wedge claim** end-to-end (AML variant engine / biomarker ledger /
   AML disease-twin per linchpin §3C) — the "prove it where you're unmatched" deliverable. Depends on
-  H0.1 (reproducible), H1.A1 (signed cert), H1.A2 (replication or a replicable claim).
+  H0.1 (reproducible pipeline) and, **if the wedge cites actual TCGA-LAML `@2` numbers, on H0.1b**
+  (real-data reproducibility); plus H1.A1 (signed cert) and H1.A2 (replication or a replicable claim).
 - [ ] Package it as the spreadable artifact: a public, signed, calibrated certificate for a claim
   that matters to a real audience.
 

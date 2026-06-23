@@ -6,7 +6,7 @@
 
 **Architecture:** A deterministic stdlib generator synthesizes the inputs the *existing* `build_contract` consumes (betas/row_meta/groups/clinical/sample_ids) under a distinct uid `tcga_laml_idh_synth`; a thin runner builds that contract and runs the *existing* `n_dmps_claim` through `run_cycle` with the *existing* two-independent-adapter registry, returning a result the test asserts on and the CLI prints. Nothing real is committed; the gate/adapters/contract format are untouched.
 
-**Tech Stack:** Python 3, stdlib `random` (generator — no numpy), the existing methylation gate (numpy-backed adapters), pydantic models, argparse CLI, pytest. Interpreter for all commands: `/Users/zbb2/Desktop/polymer-claims/.venv/bin/python` (`python` alone is NOT on PATH).
+**Tech Stack:** Python 3, stdlib `random` (generator — no numpy), the existing methylation gate (numpy-backed adapters), pydantic models, argparse CLI, pytest. Interpreter for the implementer's commands (run from the repo root): `/Users/zbb2/Desktop/polymer-claims/.venv/bin/python` (`python` alone is NOT on PATH). The shipped *runbook* uses the repo-root-relative form `.venv/bin/python` (correct for a portable doc); both denote the same interpreter.
 
 ## Global Constraints
 
@@ -102,7 +102,6 @@ docs/superpowers/specs/2026-06-23-offline-kernel-proof-design.md.
 from __future__ import annotations
 
 import random
-from pathlib import Path
 
 from polymer_claims.ingest.transform import build_contract
 
@@ -577,7 +576,7 @@ Expected: all pass.
 **Review feedback applied (2026-06-23):**
 - **High — stale runbook:** Task 4's runbook now centers the **current `se:tcga_laml_idh@2`** proof (Xena betas + cBioPortal genotyping, IDH-mut n=36) and is honest that `data/tcga_laml/` (cBio files + `build_contract_xena.py` + `run_gate.py`) is **local-only / untracked** — fresh checkouts use `verify-kernel`; real-data hardening is roadmap H0.1b. `ingest tcga-laml` labeled the **deprecated `@1`** path. Spec §6 updated.
 - **Med — source-tree pollution:** the runner now builds into a `TemporaryDirectory` scoped by `using_contract_root` (no writes to `src/.../contracts/`); the gitignore step was dropped as moot. Spec §4/§6 updated.
-- **Med — base install lacks numpy:** `_cmd_verify_kernel` catches `ImportError` and points to `pip install 'polymer-claims[calibrate]'`.
+- **Med — base install lacks numpy:** `_cmd_verify_kernel` catches `ModuleNotFoundError` and emits the `pip install 'polymer-claims[calibrate]'` hint only when `exc.name == "numpy"` (other import failures get a generic message — see the third-pass note).
 - **Med — loader not exercised:** Task 1's test now resolves the contract through the real `load_contract` under `using_contract_root(tmp_path)`, not by reading the manifest JSON.
 - **Low — nested fence:** the runbook block uses a four-backtick outer fence so inner command blocks render.
 - **Low — scratch-validated:** reviewer's run of this fixture shape gave n_dmps≈295, e≈3.86e20, LICENSED @ REPRODUCED — quantitative assumptions sound; Step 5 notes the expected ≈295.
@@ -594,3 +593,9 @@ Expected: all pass.
 - **Low — spec runbook table row:** updated to the local-only `@2` Xena+cBioPortal path (matches §6), not the deprecated manifest→fetch→run_gate `@1` summary.
 - **Low — CLI import handling:** `_cmd_verify_kernel` catches `ModuleNotFoundError` and only emits the numpy hint when `exc.name == "numpy"`; other import failures print a generic message (no false install hint).
 - **Low — test hygiene:** dropped the unused `import pytest` from the offline-error test.
+
+**Fourth feedback pass (2026-06-23):**
+- **Med — lint:** dropped the unused `from pathlib import Path` in the generator snippet (the plan's own ruff gate would have failed it).
+- **Med — roadmap deps:** H1.C2 (real-claim q-loop) and the H2 wedge now depend on **H0.1b** for real-data needs, not just H0.1 (which delivers only the synthetic pipeline proof).
+- **Low — interpreter:** Tech Stack note clarifies implementer commands use the absolute venv path from repo root; the shipped runbook uses the repo-root-relative `.venv/bin/python` (same interpreter).
+- **Low:** corrected the stale "catches ImportError" note (now `ModuleNotFoundError` + `exc.name=="numpy"`); spec §8 invariant says "temp output" not "gitignored output".

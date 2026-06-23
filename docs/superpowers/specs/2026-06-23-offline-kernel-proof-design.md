@@ -162,7 +162,7 @@ as a smoke check). No flags needed. Lazy-imports the runner (keeps base CLI impo
 ## 8. Invariants
 
 Additive; the real gate/adapters/contract format are untouched. No real TCGA bytes enter git (synth
-fixture + gitignored output). Determinism: fixed seed + 4-decimal β rounding → pinned n-DMP count.
+fixture + temp output, never written to the source tree). Determinism: fixed seed + 4-decimal β rounding → pinned n-DMP count.
 The synthetic ref (`…_synth@1`) never collides with the real ref. grammar/protocol unchanged. The
 `verify-kernel` proof is honestly labeled "pipeline integrity, not the real biology."
 
