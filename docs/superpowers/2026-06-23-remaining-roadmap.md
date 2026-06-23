@@ -134,7 +134,7 @@ publish.
 ## Recommended critical path (Path α)
 
 ```
-H0.1 reproducible kernel proof  ──▶  H1.A1 real signing  ──▶  H1.A2 real 2nd-cohort / replicable claim  ──▶  H2 wedge claim shipped
+H0.1 reproducible kernel pipeline proof  ──▶  H1.A1 real signing  ──▶  H1.A2 real 2nd-cohort / replicable claim  ──▶  H2 wedge claim shipped
         (foundation)                  (verifiable cert)         (data sourcing — start now, long lead)        (the deliverable)
 
         └─ parallel deepening when capacity allows: H1.B1→B2 credence engines, H1.B4 defeat wiring, H1.C calibration completeness

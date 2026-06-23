@@ -564,7 +564,7 @@ Expected: all pass.
 
 - [ ] **CLI end-to-end:** `... -m polymer_claims.cli verify-kernel` prints `LICENSED @ REPRODUCED` and returns 0.
 - [ ] **Lint:** `ruff check src/polymer_claims/ingest/synthetic.py src/polymer_claims/kernel_proof.py src/polymer_claims/cli.py` → clean.
-- [ ] **Nothing real / no stray commits:** `git status` shows no `tcga_laml_idh_synth.*` contract files anywhere (they are only ever written to temp dirs — absent/untracked, never in `src/.../contracts/`); only the intended source/test/doc files were committed.
+- [ ] **Nothing real / no stray commits:** `git status --short` shows no `tcga_laml_idh_synth.*` contract files anywhere (they are only ever written to temp dirs — never in `src/.../contracts/`) and no unintended files *from this slice*. (Pre-existing untracked items like `docs/superpowers/2026-06-21-build-path-and-grounding-recommendations.md` and `docs/superpowers/foundations/` are not ours — ignore them.)
 
 ## Self-Review Notes (planner)
 

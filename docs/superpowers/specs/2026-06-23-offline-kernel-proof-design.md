@@ -84,10 +84,10 @@ Deterministic, stdlib-only (`random.Random(seed)`); **no numpy in the generator*
 adapters may use numpy — that is unchanged and fine). Produces the five inputs `build_contract`
 consumes:
 
-- **Samples:** `N_SAMPLES = 40` — `sample_ids` like `SYN-0001…SYN-0040`; `groups` = 20 `WT` + 20
+- **Samples:** `N_SAMPLES = 40` — `sample_ids` `SYN-0000…SYN-0039` (0-based, matching `range(N_SAMPLES)`); `groups` = 20 `WT` + 20
   `IDH_mut` (`Sample_Group` levels exactly `"WT"` / `"IDH_mut"`, matching the gate's
   `level_a="WT", level_b="IDH_mut"`). `clinical` = plausible Age (int) + Sex (`"male"`/`"female"`).
-- **Probes:** `N_PROBES = 3000` synthetic ids `cgSYN000001…`; `row_meta[p] = {"chr": <autosome>,
+- **Probes:** `N_PROBES = 3000` synthetic ids `cgSYN000000…` (0-based, matching `range(N_PROBES)`); `row_meta[p] = {"chr": <autosome>,
   "pos": <int>}` — **autosomal only** (chr1–22) so the genome-wide sex-chrom QC filter keeps them.
 - **Signal:** `N_DM = 150` probes get a planted differential: `WT ~ N(0.30, 0.03)`,
   `IDH_mut ~ N(0.60, 0.03)` (Δβ ≈ 0.30, clearly separable). The other 2850 are null:
