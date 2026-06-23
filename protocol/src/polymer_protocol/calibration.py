@@ -180,6 +180,17 @@ def _normal_ci(values: list[float]) -> tuple[float, float] | tuple[None, None]:
     return (max(0.0, mean - half), min(1.0, mean + half))
 
 
+def definitional_batch_fdps(records, target_q) -> list[float]:
+    """The per-batch false-discovery proportions for the DEFINITIONAL tier at `target_q`
+    (FDP_b = failed_b / licensed_b). Pure; the basis for both the mean (realized FDR) and any
+    interval (normal-approx here, or an umbrella-side bootstrap). One entry per batch_id."""
+    by_batch: dict[str, list[bool]] = defaultdict(list)
+    for r in records:
+        if r.resolution_kind == ResolutionKind.DEFINITIONAL and r.stated_q == target_q:
+            by_batch[r.batch_id].append(r.verdict == ResolutionVerdict.FAILED)
+    return [sum(b) / len(b) for b in by_batch.values()]  # licensed_b == len(b) > 0 here
+
+
 def _definitional_stat(records, target_q, models) -> TierStat:
     # n_generated comes from the generating models for THIS target_q (records only capture LICENSED
     # claims; the withheld ones live only in the model's n_generated count).
@@ -191,12 +202,9 @@ def _definitional_stat(records, target_q, models) -> TierStat:
     if n_total == 0:
         return TierStat(n_total=0, n_failed=0, realized_rate=None, n_batches=0,
                         n_generated=n_generated)
-    by_batch: dict[str, list[bool]] = defaultdict(list)
-    for r in recs:
-        by_batch[r.batch_id].append(r.verdict == ResolutionVerdict.FAILED)
-    fdps = [sum(b) / len(b) for b in by_batch.values()]  # licensed_b == len(b) > 0 here
+    fdps = definitional_batch_fdps(records, target_q)
     realized = sum(fdps) / len(fdps)
-    if len(by_batch) == 1:
+    if len(fdps) == 1:
         # A single batch cannot yield a meaningful 95% CI
         lo, hi, ci_method = None, None, None
     else:
@@ -206,7 +214,7 @@ def _definitional_stat(records, target_q, models) -> TierStat:
         n_total=n_total, n_failed=n_failed,
         realized_rate=realized, pooled_rate=n_failed / n_total,
         ci_low=lo, ci_high=hi, ci_method=ci_method,
-        n_batches=len(by_batch),
+        n_batches=len(fdps),
         n_generated=n_generated or None,
     )
 

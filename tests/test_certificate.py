@@ -82,3 +82,31 @@ def test_build_certificate_unknown_claim_raises():
     corpus = licensed_corpus()
     with pytest.raises(ValueError):
         build_certificate(corpus, "nonexistent-id", target_q=0.05)
+
+
+def test_build_certificate_uses_bootstrap_ci_for_multibatch_definitional():
+    from polymer_protocol.calibration import (
+        CalibrationTarget,
+        ResolutionKind,
+        ResolutionRecord,
+        ResolutionVerdict,
+    )
+
+    corpus = licensed_corpus()
+    cid = next(c.id for c in corpus.claims if c.status.value == "licensed")
+
+    def _d(rid, batch, failed):
+        return ResolutionRecord(
+            subject_claim_id=rid, license_epoch=0, resolution_kind=ResolutionKind.DEFINITIONAL,
+            calibration_target=CalibrationTarget.REALIZED_FDR,
+            verdict=ResolutionVerdict.FAILED if failed else ResolutionVerdict.UPHELD,
+            stated_q=0.05, observed_at_cycle=0, constructed_truth=not failed,
+            model_id="m", batch_id=batch,
+        )
+
+    # two batches → the DEFINITIONAL CI is the deterministic bootstrap, not the normal-approx
+    recs = (_d("a0", "A", True), _d("a1", "A", False), _d("b0", "B", False), _d("b1", "B", False))
+    cert = build_certificate(corpus, cid, ledger=CalibrationLedger(records=recs), target_q=0.05)
+    assert cert.calibration.definitional.ci_method == "bootstrap_0.95"
+    assert cert.calibration.definitional.ci_low is not None
+    assert cert.calibration.definitional.ci_high is not None
