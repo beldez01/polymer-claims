@@ -227,6 +227,14 @@ def _definitional_stat(records, target_q, models) -> TierStat:
     )
 
 
+def resolvability_prior(claim) -> Resolvability:
+    """Structural fallback prior (NOT a definition of resolvability): a recomputable test
+    (evaluation_plan present) means a definitive determination is at least possible. An explicit
+    operator value always wins over this prior. See spec §1.1 (recomputability ≠ resolvability)."""
+    return (Resolvability.RESOLVABLE if claim.evaluation_plan is not None
+            else Resolvability.UNRESOLVABLE)
+
+
 def _anchored_stat(records: tuple[ResolutionRecord, ...], target_q: float) -> TierStat:
     recs = [r for r in records
             if r.resolution_kind == ResolutionKind.ANCHORED and r.stated_q == target_q]
