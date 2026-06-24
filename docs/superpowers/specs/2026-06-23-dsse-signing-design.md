@@ -71,7 +71,7 @@ dependency. This is the one piece both signing and verification share.
 | `sign_envelope(env: DsseEnvelope, private_key, *, keyid: str \| None = None) -> DsseEnvelope` | needs `cryptography` | decode `env.payload` → body; `pae(env.payload_type, body)`; ed25519-sign; return a NEW envelope with `signatures=(DsseSignature(sig=b64(rawsig), keyid=keyid or keyid_for(pub)),)`. **Single-signer by design: replaces any existing signatures** (multi-signer policy deferred, §9). `keyid` is informational, not trust-bearing. |
 | `verify_envelope(env: DsseEnvelope, public_key) -> bool` | needs `cryptography` | recompute PAE; True iff ≥1 signature verifies (and ≥1 present). **Malformed input (bad base64 in payload/sig) returns False, never raises.** `keyid` is ignored — verification is by the supplied `public_key` only (§9). |
 | `generate_keypair() -> (private_key, public_key)` | needs `cryptography` | fresh ed25519 keypair |
-| `load_private_key(path) -> private_key` / `load_public_key(path) -> public_key` | needs `cryptography` | parse PEM (PKCS8 private / SubjectPublicKeyInfo public) |
+| `load_private_key(data: bytes) -> private_key` / `load_public_key(data: bytes) -> public_key` | needs `cryptography` | parse PEM bytes (PKCS8 private / SubjectPublicKeyInfo public); the CLI reads the file and passes the bytes |
 | `serialize_private_pem(k) -> bytes` / `serialize_public_pem(k) -> bytes` | needs `cryptography` | PEM bytes for `keygen` |
 
 The `cryptography` import is module-local-guarded so importing `signing` for `pae` alone (or in a

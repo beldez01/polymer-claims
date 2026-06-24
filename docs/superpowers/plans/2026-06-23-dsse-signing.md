@@ -16,7 +16,7 @@
 - **PAE format (DSSE spec):** `PAE(type, body) = b"DSSEv1" SP LEN(type) SP type SP LEN(body) SP body`, single ASCII spaces, `LEN` = ASCII-decimal byte length, `type` UTF-8, `body` raw bytes.
 - **Determinism.** ed25519 (RFC 8032) signatures are deterministic; tests round-trip (no committed private keys). Keys generated in-test.
 - **PEM formats:** private = PKCS8/`NoEncryption`; public = `SubjectPublicKeyInfo`. `keyid` = first 16 hex of `sha256(public-key DER SubjectPublicKeyInfo)`. `keyid` is informational, not trust-bearing; verification is by the supplied `--pub-key`.
-- **Operator-error & robustness:** `--key`/`--keyid` are rejected (rc 1) on a non-`dsse` format, not silently ignored. `verify-dsse` treats malformed input (bad JSON, non-envelope, bad PEM, bad base64) as a failed verification (rc 1) — never a traceback. `verify_envelope` returns `False` (not raises) on malformed base64. The private key is created with `0o600` from the start (`os.open`, not write-then-chmod).
+- **Operator-error & robustness:** `--key`/`--keyid` are rejected (rc 1) on a non-`dsse` format, not silently ignored. `verify-dsse` treats malformed input (bad JSON, non-envelope, bad PEM, bad base64) as a failed verification (rc 1) — never a traceback. `verify_envelope` returns `False` (not raises) on malformed base64. A malformed/unreadable **private** key (in `certify`/`export-attestation --key`) is also rc 1, never a traceback. The private key is written atomically at mode `0o600` (0600 temp file in the same dir → `os.replace`), which guarantees 0600 even when `--force`-overwriting an existing 0644 file and avoids writing through a symlink at the target path.
 - **Single-signer by design:** `sign_envelope` replaces any existing signatures (multi-signer deferred). Current producers emit unsigned envelopes, so this is non-destructive in practice.
 - Every commit message ends with the `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>` trailer.
 
@@ -239,7 +239,8 @@ def test_pae_binds_certificate_payload_type():
     signed = sign_envelope(env, priv)
     assert signed.payload_type == "application/vnd.polymer.certificate+json"
     assert verify_envelope(signed, pub) is True
-    swapped = signed.model_copy(update={"payloadType": "application/vnd.in-toto+json"})
+    # NOTE: model_copy(update=...) uses FIELD names, not aliases — must be payload_type, not payloadType
+    swapped = signed.model_copy(update={"payload_type": "application/vnd.in-toto+json"})
     assert verify_envelope(swapped, pub) is False
 
 
@@ -509,13 +510,29 @@ def _cmd_keygen(args: argparse.Namespace) -> int:
     if (key.exists() or pub.exists()) and not args.force:
         print(f"refusing to overwrite existing {key} / {pub} — use --force", file=sys.stderr)
         return 1
-    # create the PRIVATE key with 0600 from the start (not write-then-chmod, which leaks via umask)
-    fd = os.open(str(key), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "wb") as fh:
-        fh.write(serialize_private_pem(priv_k))
+    _write_private_key_pem(key, serialize_private_pem(priv_k))   # 0600, atomic, no symlink follow
     pub.write_bytes(serialize_public_pem(pub_k))
     print(f"wrote {key} (private, 0600) + {pub} (public)", file=sys.stderr)
     return 0
+
+
+def _write_private_key_pem(path: Path, data: bytes) -> None:
+    """Write a private key with mode 0600, atomically: create a 0600 temp file in the same dir, write,
+    then os.replace over the target. This guarantees 0600 even when overwriting an existing 0644 file
+    (os.replace swaps in the temp's inode/mode) and avoids writing through a symlink at `path`."""
+    import tempfile
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=".key-", suffix=".tmp")  # mkstemp => 0600
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(data)
+        os.replace(tmp, str(path))      # atomic; final file carries the temp's 0600 mode
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def _cmd_verify_dsse(args: argparse.Namespace) -> int:
@@ -649,6 +666,28 @@ def test_key_rejected_on_non_dsse_format(tmp_path, capsys):
     assert main(["export-attestation", str(cp), "--format", "bundle", "--key", str(key)]) == 1
 
 
+def test_malformed_private_key_is_rc1_not_traceback(tmp_path, capsys):
+    cp = _corpus_path(tmp_path)
+    bad = tmp_path / "bad.key"
+    bad.write_text("-----BEGIN PRIVATE KEY-----\nnope\n-----END PRIVATE KEY-----\n")
+    assert main(["certify", "c1", "--corpus", str(cp), "--format", "dsse", "--key", str(bad)]) == 1
+    assert main(["export-attestation", str(cp), "--format", "dsse", "--key", str(bad)]) == 1
+    # an unreadable (missing) key path is also rc 1, not a traceback
+    missing = tmp_path / "nope.key"
+    assert main(["certify", "c1", "--corpus", str(cp), "--format", "dsse", "--key", str(missing)]) == 1
+    assert "Traceback" not in capsys.readouterr().err
+
+
+def test_keygen_force_resets_private_key_to_0600(tmp_path):
+    import os
+    import stat
+    key, pub = tmp_path / "k.key", tmp_path / "k.pub"
+    key.write_text("stale")
+    key.chmod(0o644)                                   # pre-existing world-readable file
+    assert main(["keygen", "--key", str(key), "--pub-key", str(pub), "--force"]) == 0
+    assert stat.S_IMODE(os.stat(key).st_mode) == 0o600  # overwrite must restore 0600
+
+
 def test_certify_dsse_signed_then_verify(tmp_path, capsys):
     cp = _corpus_path(tmp_path)
     key, pub = tmp_path / "k.key", tmp_path / "k.pub"
@@ -700,9 +739,16 @@ Then replace the `elif args.format == "dsse":` branch:
         if args.key:
             try:
                 from .signing import load_private_key, sign_envelope
-                env = sign_envelope(env, load_private_key(Path(args.key).read_bytes()), keyid=args.keyid)
             except ModuleNotFoundError as exc:
                 return _sign_dep_error(exc)
+            try:
+                priv = load_private_key(Path(args.key).read_bytes())
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
+                print(f"certify: cannot load private key {args.key}: {exc}", file=sys.stderr)
+                return 1
+            env = sign_envelope(env, priv, keyid=args.keyid)
         out = env.model_dump_json(by_alias=True, exclude_none=True)
 ```
 
@@ -722,10 +768,16 @@ Then replace the `if args.format == "dsse":` body that builds `envelopes`:
         if args.key:
             try:
                 from .signing import load_private_key, sign_envelope
-                priv = load_private_key(Path(args.key).read_bytes())
-                envelopes = [sign_envelope(e, priv) for e in envelopes]
             except ModuleNotFoundError as exc:
                 return _sign_dep_error(exc)
+            try:
+                priv = load_private_key(Path(args.key).read_bytes())
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
+                print(f"export-attestation: cannot load private key {args.key}: {exc}", file=sys.stderr)
+                return 1
+            envelopes = [sign_envelope(e, priv) for e in envelopes]
         output = "".join(e.model_dump_json(by_alias=True, exclude_none=True) + "\n" for e in envelopes)
         if args.out:
             Path(args.out).write_text(output)
@@ -773,7 +825,7 @@ Run: `cd /Users/zbb2/Desktop/polymer-claims && /Users/zbb2/Desktop/polymer-claim
 Expected: all pass.
 
 - [ ] **End-to-end:** `keygen` → `certify --format dsse --key` → `verify-dsse --pub-key` rc 0; tamper the saved envelope → `verify-dsse` rc 1.
-- [ ] **Backward-compat:** `certify --format dsse` and `export-attestation --format dsse` WITHOUT `--key` produce envelopes with empty `signatures` (unsigned, unchanged).
+- [ ] **Backward-compat:** `certify --format dsse` and `export-attestation --format dsse` WITHOUT `--key` produce output **byte-identical** to the pre-slice render (asserted directly by `test_certify_dsse_unsigned_is_byte_identical` and `test_export_attestation_dsse_unsigned_is_byte_identical`).
 - [ ] **No regressions in the broader CLI/attestation tests:** `pytest tests/test_cli.py tests/attestation/ -q`.
 - [ ] **Lint:** `ruff check src/polymer_claims/signing.py src/polymer_claims/cli.py tests/test_signing.py tests/test_cli_signing.py` → clean.
 - [ ] **No private keys committed:** `git status` shows no `.key`/`.pem` files staged (tests write them under `tmp_path`).
@@ -782,10 +834,17 @@ Expected: all pass.
 
 - **Spec coverage:** §2 PAE → Task 1; §3 signing module → Tasks 1–2; §4 CLI (keygen/verify-dsse) → Task 3, (`--key` on certify/export) → Task 4; §5 packaging → Task 2; §6 testing → tests in each task; §8 invariants → Global Constraints + Final Verification; §9 deferred → out of scope.
 - **Crypto-free base:** the `cryptography` import is only inside `_require_crypto()` (Task 1), re-raised friendly; `pae` is pure; the missing-dep path is tested (Task 2).
-- **Backward-compat:** Task 4 tests assert unsigned `signatures == []`; the signed branch is gated on `args.key` being truthy (default None).
+- **Backward-compat:** Task 4 tests assert the unsigned DSSE output is **byte-identical** to the direct pre-slice render (both `certify` and `export-attestation`); the signed branch is gated on `args.key` being truthy (default None).
 - **Determinism:** ed25519 round-trip tests need no committed keys; keys are generated in-test under `tmp_path`.
 - **Signatures cover the envelope bytes:** `sign_envelope`/`verify_envelope` both PAE over `base64.b64decode(env.payload)` — the same bytes — so a payload tamper is detected (tested).
 - **API pinned against the real lib:** ed25519 generate/sign/verify + PKCS8/SubjectPublicKeyInfo PEM + `InvalidSignature` are the actual `cryptography` API.
+
+**Second review pass applied (2026-06-23):**
+1. `test_pae_binds_certificate_payload_type` swaps via the **field name** `payload_type` (not the `payloadType` alias — `model_copy(update=...)` ignores aliases), so the tamper test actually flips the type.
+2. `certify`/`export-attestation --key` now catch `OSError`/`ValueError` on private-key read/parse → rc 1, no traceback; CLI test `test_malformed_private_key_is_rc1_not_traceback`.
+3/4. Private key written via 0600 temp-file → `os.replace` (atomic; guarantees 0600 even on `--force` overwrite of a 0644 file; no symlink-follow). Test `test_keygen_force_resets_private_key_to_0600`.
+5. Spec `load_private_key`/`load_public_key` signatures aligned to `(data: bytes)`.
+6. Final-verification + self-review "empty signatures" wording corrected to **byte-identical**.
 
 **Review feedback applied (2026-06-23):**
 1. `verify-dsse` parses single JSON (incl. pretty) OR NDJSON via `_parse_dsse_envelopes`; unparseable → rc 1.
