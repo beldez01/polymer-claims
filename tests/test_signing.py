@@ -1,5 +1,7 @@
 import base64
 
+import pytest
+
 from polymer_claims.attestation import DsseEnvelope
 from polymer_claims.signing import (
     generate_keypair, keyid_for, load_private_key, load_public_key,
@@ -8,7 +10,7 @@ from polymer_claims.signing import (
 
 
 def test_pae_basic_vector():
-    # PAE(type, body) = b"DSSEv1 " + len(type) + " " + type + " " + len(body) + " " + body
+    # PAE = b"DSSEv1 <len(type)> <type> <len(body)> <body>" with single ASCII spaces
     assert pae("X", b"YY") == b"DSSEv1 1 X 2 YY"
 
 
@@ -96,7 +98,6 @@ def test_malformed_signature_base64_is_false_not_raise():
 
 
 def test_non_ed25519_pem_is_rejected():
-    import pytest
     from cryptography.hazmat.primitives import serialization as _ser
     from cryptography.hazmat.primitives.asymmetric import rsa
     rsa_priv = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -123,7 +124,6 @@ def test_missing_cryptography_is_friendly(monkeypatch):
         return real_import(name, *a, **k)
 
     monkeypatch.setattr(builtins, "__import__", _no_crypto)
-    import pytest
     with pytest.raises(ModuleNotFoundError) as ei:
         signing.generate_keypair()
     assert ei.value.name == "cryptography"

@@ -780,7 +780,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p_att.add_argument("corpus", help="path to a corpus JSON file")
     p_att.add_argument("--out", default=None, help="write the attestation bundle JSON here")
     p_att.add_argument("--format", choices=("bundle", "dsse"), default="bundle",
-                       help="bundle (default Polymer AttestationBundle) or dsse (NDJSON of unsigned DSSE envelopes)")
+                       help="bundle (default) or dsse (NDJSON of DSSE envelopes; unsigned by default, use --key to sign)")
     p_att.add_argument("--key", default=None, help="ed25519 private key PEM; sign each DSSE envelope (dsse format only)")
     p_att.set_defaults(func=_cmd_export_attestation)
 

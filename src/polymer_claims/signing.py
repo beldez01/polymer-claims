@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import base64
 import hashlib
+from typing import TYPE_CHECKING
 
-from polymer_claims.attestation import DsseEnvelope, DsseSignature
+if TYPE_CHECKING:
+    from polymer_claims.attestation import DsseEnvelope
 
 
 def pae(payload_type: str, body: bytes) -> bytes:
@@ -28,7 +30,7 @@ def _require_crypto():
         from cryptography.exceptions import InvalidSignature
         from cryptography.hazmat.primitives import serialization
         from cryptography.hazmat.primitives.asymmetric import ed25519
-    except ModuleNotFoundError as exc:
+    except ImportError as exc:
         raise ModuleNotFoundError(
             "polymer-claims signing needs the [sign] extra: pip install 'polymer-claims[sign]'",
             name="cryptography",
@@ -58,6 +60,7 @@ def sign_envelope(env: DsseEnvelope, private_key, *, keyid: str | None = None) -
     body = base64.b64decode(env.payload)
     raw_sig = private_key.sign(pae(env.payload_type, body))
     kid = keyid if keyid is not None else keyid_for(private_key.public_key())
+    from polymer_claims.attestation import DsseSignature
     sig = DsseSignature(sig=base64.b64encode(raw_sig).decode("ascii"), keyid=kid)
     return env.model_copy(update={"signatures": (sig,)})
 
