@@ -14,6 +14,7 @@ adapters/oracles/red-teamers are a later `--plugin` surface (out of scope for v1
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import urllib.error
 from collections import Counter
@@ -229,6 +230,9 @@ def _cmd_export_consistency(args: argparse.Namespace) -> int:
 
 
 def _cmd_export_attestation(args: argparse.Namespace) -> int:
+    if args.key and args.format != "dsse":
+        print("export-attestation: --key applies only to --format dsse", file=sys.stderr)
+        return 1
     from .attestation import (
         build_attestation_bundle, build_attestation_statements, dsse_envelope, resolve_contract_index,
     )
@@ -236,6 +240,19 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
     index = resolve_contract_index(corpus)
     if args.format == "dsse":
         envelopes = [dsse_envelope(s) for s in build_attestation_statements(corpus, contract_index=index)]
+        if args.key:
+            try:
+                from .signing import load_private_key, sign_envelope
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            try:
+                priv = load_private_key(Path(args.key).read_bytes())
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
+                print(f"export-attestation: cannot load private key {args.key}: {exc}", file=sys.stderr)
+                return 1
+            envelopes = [sign_envelope(e, priv) for e in envelopes]
         output = "".join(e.model_dump_json(by_alias=True, exclude_none=True) + "\n" for e in envelopes)
         if args.out:
             Path(args.out).write_text(output)
@@ -312,7 +329,116 @@ def _cmd_verify_kernel(args: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
+def _sign_dep_error(exc: ModuleNotFoundError) -> int:
+    if getattr(exc, "name", None) == "cryptography":
+        print("signing needs the [sign] extra: pip install 'polymer-claims[sign]'", file=sys.stderr)
+    else:
+        print(f"signing import failed: {exc}", file=sys.stderr)
+    return 1
+
+
+def _parse_dsse_envelopes(text: str):
+    """Parse a single DSSE-envelope JSON (compact OR pretty-printed) or an NDJSON of envelopes.
+    Returns a list of DsseEnvelope, or None if the input is not parseable as either."""
+    from pydantic import ValidationError
+
+    from .attestation import DsseEnvelope
+    stripped = text.strip()
+    if not stripped:
+        return []
+    try:                                            # whole text = one envelope (handles pretty JSON)
+        return [DsseEnvelope.model_validate_json(stripped)]
+    except ValidationError:
+        pass
+    out = []                                        # else NDJSON: one compact envelope per line
+    for ln in stripped.splitlines():
+        if not ln.strip():
+            continue
+        try:
+            out.append(DsseEnvelope.model_validate_json(ln))
+        except ValidationError:
+            return None
+    return out
+
+
+def _atomic_write(path: Path, data: bytes, *, mode: int) -> None:
+    """Write `data` to `path` atomically at `mode`: a temp file in the same dir (chmod `mode`) then
+    os.replace. Guarantees the final mode even when overwriting a differently-permissioned file
+    (os.replace swaps in the temp's inode) and never writes through a symlink at `path`."""
+    import tempfile
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=".tmp-", suffix=".tmp")
+    try:
+        os.fchmod(fd, mode)
+        with os.fdopen(fd, "wb") as fh:
+            fh.write(data)
+        os.replace(tmp, str(path))
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+def _cmd_keygen(args: argparse.Namespace) -> int:
+    try:
+        from .signing import generate_keypair, serialize_private_pem, serialize_public_pem
+        priv_k, pub_k = generate_keypair()
+    except ModuleNotFoundError as exc:
+        return _sign_dep_error(exc)
+    key, pub = Path(args.key), Path(args.pub_key)
+    # best-effort pre-check (NOT a concurrency-safe lock; a racing writer between here and the
+    # writes below is possible — acceptable for a local CLI). --force skips it.
+    if (key.exists() or pub.exists()) and not args.force:
+        print(f"refusing to overwrite existing {key} / {pub} — use --force", file=sys.stderr)
+        return 1
+    try:
+        _atomic_write(key, serialize_private_pem(priv_k), mode=0o600)
+        _atomic_write(pub, serialize_public_pem(pub_k), mode=0o644)
+    except OSError as exc:
+        print(f"keygen: failed to write key files ({exc}); the key pair may be incomplete", file=sys.stderr)
+        return 1
+    print(f"wrote {key} (private, 0600) + {pub} (public)", file=sys.stderr)
+    return 0
+
+
+def _cmd_verify_dsse(args: argparse.Namespace) -> int:
+    try:
+        from .signing import load_public_key, verify_envelope
+    except ModuleNotFoundError as exc:
+        return _sign_dep_error(exc)
+    try:
+        public_key = load_public_key(Path(args.pub_key).read_bytes())
+    except ModuleNotFoundError as exc:
+        return _sign_dep_error(exc)
+    except (ValueError, OSError) as exc:            # malformed PEM / unreadable file -> rc 1, no traceback
+        print(f"verify-dsse: cannot load public key: {exc}", file=sys.stderr)
+        return 1
+    try:
+        text = Path(args.path).read_text()
+    except OSError as exc:
+        print(f"verify-dsse: cannot read {args.path}: {exc}", file=sys.stderr)
+        return 1
+    envelopes = _parse_dsse_envelopes(text)
+    if envelopes is None:
+        print("verify-dsse: input is not a valid DSSE envelope or NDJSON of envelopes", file=sys.stderr)
+        return 1
+    if not envelopes:
+        print("verify-dsse: no DSSE envelopes to verify", file=sys.stderr)
+        return 1
+    all_ok = True
+    for i, env in enumerate(envelopes):
+        ok = verify_envelope(env, public_key)
+        all_ok = all_ok and ok
+        print(f"  envelope[{i}]: {'VALID' if ok else 'INVALID'}", file=sys.stderr)
+    print(f"verify-dsse: {'all signatures valid' if all_ok else 'INVALID signature(s)'}", file=sys.stderr)
+    return 0 if all_ok else 1
+
+
 def _cmd_certify(args: argparse.Namespace) -> int:
+    if (args.key or args.keyid) and args.format != "dsse":
+        print("certify: --key/--keyid apply only to --format dsse", file=sys.stderr)
+        return 1
     from .attestation import build_certificate, render_certificate_text, certificate_dsse_envelope
     corpus = load_corpus(args.corpus)
     ledger = None
@@ -323,7 +449,21 @@ def _cmd_certify(args: argparse.Namespace) -> int:
     if args.format == "json":
         out = cert.model_dump_json(by_alias=True, exclude_none=True)
     elif args.format == "dsse":
-        out = certificate_dsse_envelope(cert).model_dump_json(by_alias=True, exclude_none=True)
+        env = certificate_dsse_envelope(cert)
+        if args.key:
+            try:
+                from .signing import load_private_key, sign_envelope
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            try:
+                priv = load_private_key(Path(args.key).read_bytes())
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
+                print(f"certify: cannot load private key {args.key}: {exc}", file=sys.stderr)
+                return 1
+            env = sign_envelope(env, priv, keyid=args.keyid)
+        out = env.model_dump_json(by_alias=True, exclude_none=True)
     else:
         out = render_certificate_text(cert)
     sys.stdout.write(out + "\n")
@@ -640,7 +780,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p_att.add_argument("corpus", help="path to a corpus JSON file")
     p_att.add_argument("--out", default=None, help="write the attestation bundle JSON here")
     p_att.add_argument("--format", choices=("bundle", "dsse"), default="bundle",
-                       help="bundle (default Polymer AttestationBundle) or dsse (NDJSON of unsigned DSSE envelopes)")
+                       help="bundle (default) or dsse (NDJSON of DSSE envelopes; unsigned by default, use --key to sign)")
+    p_att.add_argument("--key", default=None, help="ed25519 private key PEM; sign each DSSE envelope (dsse format only)")
     p_att.set_defaults(func=_cmd_export_attestation)
 
     p_cal = sub.add_parser("calibrate", help="run the synthetic DEFINITIONAL calibration harness")
@@ -673,11 +814,24 @@ def _build_parser() -> argparse.ArgumentParser:
     p_cert.add_argument("--calibration", default=None, help="path to a calibration ledger JSONL")
     p_cert.add_argument("--q", type=float, default=0.05)
     p_cert.add_argument("--format", choices=("text", "json", "dsse"), default="text")
+    p_cert.add_argument("--key", default=None, help="ed25519 private key PEM; sign the DSSE envelope (dsse format only)")
+    p_cert.add_argument("--keyid", default=None, help="override the DSSE signature keyid")
     p_cert.set_defaults(func=_cmd_certify)
 
     p_vk = sub.add_parser("verify-kernel",
                           help="run the synthetic n-DMP kernel proof offline (pipeline integrity check)")
     p_vk.set_defaults(func=_cmd_verify_kernel)
+
+    p_kg = sub.add_parser("keygen", help="generate an ed25519 keypair (PEM) for DSSE signing")
+    p_kg.add_argument("--key", required=True, help="output path for the private key PEM")
+    p_kg.add_argument("--pub-key", required=True, help="output path for the public key PEM")
+    p_kg.add_argument("--force", action="store_true", help="overwrite existing key files")
+    p_kg.set_defaults(func=_cmd_keygen)
+
+    p_vd = sub.add_parser("verify-dsse", help="verify a signed DSSE envelope (or NDJSON) against a public key")
+    p_vd.add_argument("path", help="path to a DSSE envelope JSON or NDJSON of envelopes")
+    p_vd.add_argument("--pub-key", required=True, help="path to the signer's public key PEM")
+    p_vd.set_defaults(func=_cmd_verify_dsse)
 
     return parser
 
