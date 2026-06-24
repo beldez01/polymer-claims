@@ -230,6 +230,9 @@ def _cmd_export_consistency(args: argparse.Namespace) -> int:
 
 
 def _cmd_export_attestation(args: argparse.Namespace) -> int:
+    if args.key and args.format != "dsse":
+        print("export-attestation: --key applies only to --format dsse", file=sys.stderr)
+        return 1
     from .attestation import (
         build_attestation_bundle, build_attestation_statements, dsse_envelope, resolve_contract_index,
     )
@@ -237,6 +240,19 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
     index = resolve_contract_index(corpus)
     if args.format == "dsse":
         envelopes = [dsse_envelope(s) for s in build_attestation_statements(corpus, contract_index=index)]
+        if args.key:
+            try:
+                from .signing import load_private_key, sign_envelope
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            try:
+                priv = load_private_key(Path(args.key).read_bytes())
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
+                print(f"export-attestation: cannot load private key {args.key}: {exc}", file=sys.stderr)
+                return 1
+            envelopes = [sign_envelope(e, priv) for e in envelopes]
         output = "".join(e.model_dump_json(by_alias=True, exclude_none=True) + "\n" for e in envelopes)
         if args.out:
             Path(args.out).write_text(output)
@@ -420,6 +436,9 @@ def _cmd_verify_dsse(args: argparse.Namespace) -> int:
 
 
 def _cmd_certify(args: argparse.Namespace) -> int:
+    if (args.key or args.keyid) and args.format != "dsse":
+        print("certify: --key/--keyid apply only to --format dsse", file=sys.stderr)
+        return 1
     from .attestation import build_certificate, render_certificate_text, certificate_dsse_envelope
     corpus = load_corpus(args.corpus)
     ledger = None
@@ -430,7 +449,21 @@ def _cmd_certify(args: argparse.Namespace) -> int:
     if args.format == "json":
         out = cert.model_dump_json(by_alias=True, exclude_none=True)
     elif args.format == "dsse":
-        out = certificate_dsse_envelope(cert).model_dump_json(by_alias=True, exclude_none=True)
+        env = certificate_dsse_envelope(cert)
+        if args.key:
+            try:
+                from .signing import load_private_key, sign_envelope
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            try:
+                priv = load_private_key(Path(args.key).read_bytes())
+            except ModuleNotFoundError as exc:
+                return _sign_dep_error(exc)
+            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
+                print(f"certify: cannot load private key {args.key}: {exc}", file=sys.stderr)
+                return 1
+            env = sign_envelope(env, priv, keyid=args.keyid)
+        out = env.model_dump_json(by_alias=True, exclude_none=True)
     else:
         out = render_certificate_text(cert)
     sys.stdout.write(out + "\n")
@@ -748,6 +781,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p_att.add_argument("--out", default=None, help="write the attestation bundle JSON here")
     p_att.add_argument("--format", choices=("bundle", "dsse"), default="bundle",
                        help="bundle (default Polymer AttestationBundle) or dsse (NDJSON of unsigned DSSE envelopes)")
+    p_att.add_argument("--key", default=None, help="ed25519 private key PEM; sign each DSSE envelope (dsse format only)")
     p_att.set_defaults(func=_cmd_export_attestation)
 
     p_cal = sub.add_parser("calibrate", help="run the synthetic DEFINITIONAL calibration harness")
@@ -780,6 +814,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p_cert.add_argument("--calibration", default=None, help="path to a calibration ledger JSONL")
     p_cert.add_argument("--q", type=float, default=0.05)
     p_cert.add_argument("--format", choices=("text", "json", "dsse"), default="text")
+    p_cert.add_argument("--key", default=None, help="ed25519 private key PEM; sign the DSSE envelope (dsse format only)")
+    p_cert.add_argument("--keyid", default=None, help="override the DSSE signature keyid")
     p_cert.set_defaults(func=_cmd_certify)
 
     p_vk = sub.add_parser("verify-kernel",
