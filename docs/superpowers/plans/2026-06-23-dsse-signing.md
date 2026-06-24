@@ -16,7 +16,7 @@
 - **PAE format (DSSE spec):** `PAE(type, body) = b"DSSEv1" SP LEN(type) SP type SP LEN(body) SP body`, single ASCII spaces, `LEN` = ASCII-decimal byte length, `type` UTF-8, `body` raw bytes.
 - **Determinism.** ed25519 (RFC 8032) signatures are deterministic; tests round-trip (no committed private keys). Keys generated in-test.
 - **PEM formats:** private = PKCS8/`NoEncryption`; public = `SubjectPublicKeyInfo`. `keyid` = first 16 hex of `sha256(public-key DER SubjectPublicKeyInfo)`. `keyid` is informational, not trust-bearing; verification is by the supplied `--pub-key`.
-- **Operator-error & robustness:** `--key`/`--keyid` are rejected (rc 1) on a non-`dsse` format, not silently ignored. `verify-dsse` treats malformed input (bad JSON, non-envelope, bad PEM, bad base64) as a failed verification (rc 1) — never a traceback. `verify_envelope` returns `False` (not raises) on malformed base64. A malformed/unreadable **private** key (in `certify`/`export-attestation --key`) is also rc 1, never a traceback. The private key is written atomically at mode `0o600` (0600 temp file in the same dir → `os.replace`), which guarantees 0600 even when `--force`-overwriting an existing 0644 file and avoids writing through a symlink at the target path.
+- **Operator-error & robustness:** `--key`/`--keyid` are rejected (rc 1) on a non-`dsse` format, not silently ignored. `verify-dsse` treats malformed input (bad JSON, non-envelope, bad PEM, bad base64) as a failed verification (rc 1) — never a traceback. `verify_envelope` returns `False` (not raises) on malformed base64. A malformed/unreadable **private** key (in `certify`/`export-attestation --key`) is also rc 1, never a traceback, as are `keygen` filesystem errors (bad parent dir / permission). **Ed25519-only:** the loaders reject a valid-but-wrong-type PEM (RSA/EC) with `ValueError`, handled as rc 1 by every caller. Both key files are written atomically at the right mode (0600 private / 0644 public) via a temp file in the same dir → `os.replace` — guarantees the mode even when `--force`-overwriting a differently-permissioned file and never writes through a symlink. The no-`--force` `exists()` check is a best-effort pre-check, not a concurrency-safe lock.
 - **Single-signer by design:** `sign_envelope` replaces any existing signatures (multi-signer deferred). Current producers emit unsigned envelopes, so this is non-destructive in practice.
 - Every commit message ends with the `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>` trailer.
 
@@ -258,6 +258,23 @@ def test_malformed_signature_base64_is_false_not_raise():
     assert verify_envelope(bad, pub) is False
 
 
+def test_non_ed25519_pem_is_rejected():
+    import pytest
+    from cryptography.hazmat.primitives import serialization as _ser
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    rsa_priv = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    priv_pem = rsa_priv.private_bytes(
+        _ser.Encoding.PEM, _ser.PrivateFormat.PKCS8, _ser.NoEncryption()
+    )
+    pub_pem = rsa_priv.public_key().public_bytes(
+        _ser.Encoding.PEM, _ser.PublicFormat.SubjectPublicKeyInfo
+    )
+    with pytest.raises(ValueError):
+        load_private_key(priv_pem)
+    with pytest.raises(ValueError):
+        load_public_key(pub_pem)
+
+
 def test_missing_cryptography_is_friendly(monkeypatch):
     import builtins
     import polymer_claims.signing as signing
@@ -331,7 +348,7 @@ def verify_envelope(env: DsseEnvelope, public_key) -> bool:
         try:
             public_key.verify(base64.b64decode(s.sig, validate=True), msg)
             return True
-        except (ValueError, InvalidSignature):
+        except (ValueError, TypeError, InvalidSignature):   # TypeError: a non-Ed25519 key reached here
             continue
     return False
 
@@ -353,14 +370,22 @@ def serialize_public_pem(public_key) -> bytes:
 
 
 def load_private_key(data: bytes):
-    _ed, serialization, _inv = _require_crypto()
-    return serialization.load_pem_private_key(data, password=None)
+    ed25519, serialization, _inv = _require_crypto()
+    key = serialization.load_pem_private_key(data, password=None)
+    if not isinstance(key, ed25519.Ed25519PrivateKey):   # this slice is Ed25519-only
+        raise ValueError(f"not an Ed25519 private key (got {type(key).__name__})")
+    return key
 
 
 def load_public_key(data: bytes):
-    _ed, serialization, _inv = _require_crypto()
-    return serialization.load_pem_public_key(data)
+    ed25519, serialization, _inv = _require_crypto()
+    key = serialization.load_pem_public_key(data)
+    if not isinstance(key, ed25519.Ed25519PublicKey):
+        raise ValueError(f"not an Ed25519 public key (got {type(key).__name__})")
+    return key
 ```
+
+> Enforcing Ed25519 at the load boundary means a valid-but-wrong-type PEM (RSA/EC) raises `ValueError` — handled exactly like a malformed PEM by every caller (certify/export `--key` → rc 1; `verify-dsse` → rc 1). `verify_envelope` also defensively catches `TypeError` for any non-Ed25519 key that bypasses the loader.
 
 - [ ] **Step 5: Run tests to verify they pass**
 
@@ -415,6 +440,13 @@ def test_keygen_refuses_overwrite_without_force(tmp_path, capsys):
     rc = main(["keygen", "--key", str(key), "--pub-key", str(pub)])
     assert rc == 1 and "force" in capsys.readouterr().err.lower()
     assert main(["keygen", "--key", str(key), "--pub-key", str(pub), "--force"]) == 0
+
+
+def test_keygen_filesystem_error_is_rc1_not_traceback(tmp_path, capsys):
+    # parent directory does not exist -> the atomic write raises OSError, caught -> rc 1
+    rc = main(["keygen", "--key", str(tmp_path / "nope" / "k.key"), "--pub-key", str(tmp_path / "k.pub")])
+    assert rc == 1
+    assert "Traceback" not in capsys.readouterr().err
 
 
 def test_verify_dsse_roundtrip(tmp_path):
@@ -507,26 +539,32 @@ def _cmd_keygen(args: argparse.Namespace) -> int:
     except ModuleNotFoundError as exc:
         return _sign_dep_error(exc)
     key, pub = Path(args.key), Path(args.pub_key)
+    # best-effort pre-check (NOT a concurrency-safe lock; a racing writer between here and the
+    # writes below is possible — acceptable for a local CLI). --force skips it.
     if (key.exists() or pub.exists()) and not args.force:
         print(f"refusing to overwrite existing {key} / {pub} — use --force", file=sys.stderr)
         return 1
-    _write_private_key_pem(key, serialize_private_pem(priv_k))   # 0600, atomic, no symlink follow
-    pub.write_bytes(serialize_public_pem(pub_k))
+    try:
+        _atomic_write(key, serialize_private_pem(priv_k), mode=0o600)
+        _atomic_write(pub, serialize_public_pem(pub_k), mode=0o644)
+    except OSError as exc:
+        print(f"keygen: failed to write key files ({exc}); the key pair may be incomplete", file=sys.stderr)
+        return 1
     print(f"wrote {key} (private, 0600) + {pub} (public)", file=sys.stderr)
     return 0
 
 
-def _write_private_key_pem(path: Path, data: bytes) -> None:
-    """Write a private key with mode 0600, atomically: create a 0600 temp file in the same dir, write,
-    then os.replace over the target. This guarantees 0600 even when overwriting an existing 0644 file
-    (os.replace swaps in the temp's inode/mode) and avoids writing through a symlink at `path`."""
+def _atomic_write(path: Path, data: bytes, *, mode: int) -> None:
+    """Write `data` to `path` atomically at `mode`: a temp file in the same dir (chmod `mode`) then
+    os.replace. Guarantees the final mode even when overwriting a differently-permissioned file
+    (os.replace swaps in the temp's inode) and never writes through a symlink at `path`."""
     import tempfile
-    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=".key-", suffix=".tmp")  # mkstemp => 0600
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=".tmp-", suffix=".tmp")
     try:
-        os.fchmod(fd, 0o600)
+        os.fchmod(fd, mode)
         with os.fdopen(fd, "wb") as fh:
             fh.write(data)
-        os.replace(tmp, str(path))      # atomic; final file carries the temp's 0600 mode
+        os.replace(tmp, str(path))
     except BaseException:
         try:
             os.unlink(tmp)
@@ -845,6 +883,12 @@ Expected: all pass.
 3/4. Private key written via 0600 temp-file → `os.replace` (atomic; guarantees 0600 even on `--force` overwrite of a 0644 file; no symlink-follow). Test `test_keygen_force_resets_private_key_to_0600`.
 5. Spec `load_private_key`/`load_public_key` signatures aligned to `(data: bytes)`.
 6. Final-verification + self-review "empty signatures" wording corrected to **byte-identical**.
+
+**Third review pass applied (2026-06-23):**
+1. `keygen` wraps both key writes in `try/except OSError` → rc 1 (bad dir / permission), no traceback; test `test_keygen_filesystem_error_is_rc1_not_traceback`.
+2. Both keys written via the shared atomic `_atomic_write` helper; on a write failure the command reports rc 1 (and notes a possibly-incomplete pair) instead of tracebacking.
+3. Loaders enforce **Ed25519** (`isinstance` check) → a valid RSA/EC PEM raises `ValueError`, handled as rc 1 everywhere; `verify_envelope` also catches `TypeError`. Test `test_non_ed25519_pem_is_rejected`.
+4. No-`--force` overwrite check documented as a best-effort pre-check (not a concurrency-safe lock).
 
 **Review feedback applied (2026-06-23):**
 1. `verify-dsse` parses single JSON (incl. pretty) OR NDJSON via `_parse_dsse_envelopes`; unparseable → rc 1.
