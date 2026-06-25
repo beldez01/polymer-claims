@@ -34,8 +34,11 @@ and the gate-result addresses (`n_dmps`, `e_value`, `profile_hash`, `semantic_ru
 committed pins in `src/polymer_claims/ingest/real_kernel_pins.json`. The ~633 MB matrix means this is
 **manual/opt-in, not CI** (CI guards the synthetic `verify-kernel` and the parity machinery).
 
-**Bootstrapping the pins (one-time, spec §6 — no self-fulfilling parity):** `real_kernel_pins.json`
-ships with sentinel values. Capture the real pins by running the script in **both** modes and diffing:
+**How the pins were captured / how to re-capture (spec §6 — no self-fulfilling parity):**
+`real_kernel_pins.json` now holds the **real pins** (captured + verified 2026-06-25; `verify-kernel
+--real` returns `LICENSED @ REPRODUCED`). They were produced — and should be re-produced if the inputs
+ever change (new Xena release, new cBioPortal commit) — by running the script in **both** modes and
+diffing (the new builder must reproduce the trusted `@2` addresses exactly before pins are committed):
 
 ```
 # 1. ground truth: addresses of the already-trusted @2 contract (no rebuild)
