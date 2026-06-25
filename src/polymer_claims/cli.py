@@ -306,19 +306,17 @@ def _cmd_ingest_attested(args: argparse.Namespace) -> int:
 
 
 def _cmd_verify_kernel(args: argparse.Namespace) -> int:
+    if getattr(args, "real", False):
+        return _verify_kernel_real(args)
     try:
         from .kernel_proof import run_synthetic_kernel_proof
     except ModuleNotFoundError as exc:
-        if exc.name == "numpy":   # base install may lack numpy (the n-DMP gate adapters use it)
-            print(
-                "verify-kernel needs numpy (the n-DMP gate adapters): install it with "
-                "`pip install 'polymer-claims[calibrate]'`",
-                file=sys.stderr,
-            )
-        else:  # a real internal import bug — don't mislabel it as a missing optional dep
+        if exc.name == "numpy":
+            print("verify-kernel needs numpy (the n-DMP gate adapters): install it with "
+                  "`pip install 'polymer-claims[calibrate]'`", file=sys.stderr)
+        else:
             print(f"verify-kernel import failed: {exc}", file=sys.stderr)
         return 1
-
     r = run_synthetic_kernel_proof()
     tier = r.independence_tier.name if r.independence_tier is not None else "NONE"
     ok = r.licensed and tier == "REPRODUCED"
@@ -326,6 +324,42 @@ def _cmd_verify_kernel(args: argparse.Namespace) -> int:
     print(f"  n_probes={r.n_probes}  null-floor k={r.k}  n_dmps={r.n_dmps}  e_value={r.e_value:.3e}")
     print("  (synthetic fixture — proves pipeline integrity, NOT the real biology; "
           "see docs/superpowers/2026-06-23-kernel-proof-runbook.md for the real proof)")
+    return 0 if ok else 1
+
+
+def _verify_kernel_real(args: argparse.Namespace) -> int:
+    import os
+    from pathlib import Path
+    try:
+        from .ingest._pinned import PinnedInputError
+        from .real_kernel_proof import ParityError, load_pins, run_real_kernel_proof
+    except ModuleNotFoundError as exc:
+        if exc.name == "numpy":
+            print("verify-kernel --real needs numpy (the n-DMP gate adapters): install it with "
+                  "`pip install 'polymer-claims[calibrate]'`", file=sys.stderr)
+        else:
+            print(f"verify-kernel --real import failed: {exc}", file=sys.stderr)
+        return 1
+    pins = load_pins()
+    cache_dir = Path(args.cache_dir) if args.cache_dir else (
+        Path(os.environ.get("XDG_CACHE_HOME", str(Path.home() / ".cache")))
+        / "polymer-claims" / "tcga_laml")
+    try:
+        r = run_real_kernel_proof(
+            Path(args.xena) if args.xena else None,
+            Path(args.cbioportal) if args.cbioportal else None,
+            pins=pins, cache_dir=cache_dir, allow_fetch=args.fetch)
+    except (PinnedInputError, ParityError, ValueError) as exc:
+        # PinnedInputError: input resolution/checksum; ParityError: a pin mismatch;
+        # ValueError: a builder self-check (controls / count-band / accounting) — all are clean failures.
+        print(f"verify-kernel --real FAILED: {exc}", file=sys.stderr)
+        return 1
+    tier = r.independence_tier.name if r.independence_tier is not None else "NONE"
+    ok = r.licensed and tier == "REPRODUCED"
+    print(f"kernel proof (REAL @2): {'LICENSED @ ' + tier if r.licensed else 'NOT LICENSED'}")
+    print(f"  n_probes={r.n_probes}  null-floor k={r.k}  n_dmps={r.n_dmps}  e_value={r.e_value:.3e}")
+    print("  proves the pinned real-data computation reproduces — NOT data veracity / independence "
+          "(that is roadmap H1.A2). See docs/superpowers/2026-06-23-kernel-proof-runbook.md")
     return 0 if ok else 1
 
 
@@ -819,7 +853,16 @@ def _build_parser() -> argparse.ArgumentParser:
     p_cert.set_defaults(func=_cmd_certify)
 
     p_vk = sub.add_parser("verify-kernel",
-                          help="run the synthetic n-DMP kernel proof offline (pipeline integrity check)")
+                          help="run the n-DMP kernel proof (synthetic offline by default; --real for the @2 parity gate)")
+    p_vk.add_argument("--real", action="store_true",
+                      help="run the REAL se:tcga_laml_idh@2 parity gate (needs the pinned Xena matrix + cBioPortal inputs)")
+    p_vk.add_argument("--xena", default=None,
+                      help="TCGA-LAML.methylation450.tsv.gz (file path, or a dir containing it)")
+    p_vk.add_argument("--cbioportal", default=None,
+                      help="dir holding data_mutations.txt + sequenced_samples.json")
+    p_vk.add_argument("--cache-dir", default=None, help="cache dir for resolved pinned inputs")
+    p_vk.add_argument("--fetch", action="store_true",
+                      help="opt-in: allow network download of pinned inputs (off by default)")
     p_vk.set_defaults(func=_cmd_verify_kernel)
 
     p_kg = sub.add_parser("keygen", help="generate an ed25519 keypair (PEM) for DSSE signing")
