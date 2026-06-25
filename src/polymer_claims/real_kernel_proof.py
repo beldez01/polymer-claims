@@ -5,23 +5,13 @@ pinned real-data computation reproduces — NOT data veracity (spec §0)."""
 from __future__ import annotations
 
 import json
-from importlib.resources import files
-
-
-def load_pins() -> dict:
-    """Load the committed reference pins (real_kernel_pins.json), via importlib.resources so an
-    installed package resolves it cleanly."""
-    return json.loads(
-        files("polymer_claims.ingest").joinpath("real_kernel_pins.json").read_text())
-
-
 import math
 import tempfile
 from dataclasses import dataclass
+from importlib.resources import files
 from pathlib import Path
 
 from polymer_grammar import FDRLedger, MaterializationContext, Status
-from polymer_grammar.licensing import IndependenceTier
 from polymer_protocol import Corpus, run_cycle
 
 from polymer_claims.analysis_profile import profile_oracle_id, profile_oracle_registry
@@ -39,6 +29,13 @@ from polymer_claims.profiles import CANONICAL_HM450_V1
 _REF = "se:tcga_laml_idh@2"
 _ALPHA = 0.05
 _CLAIM_ID = "tcga-laml-ndmp"
+
+
+def load_pins() -> dict:
+    """Load the committed reference pins (real_kernel_pins.json), via importlib.resources so an
+    installed package resolves it cleanly."""
+    return json.loads(
+        files("polymer_claims.ingest").joinpath("real_kernel_pins.json").read_text())
 
 
 class ParityError(RuntimeError):

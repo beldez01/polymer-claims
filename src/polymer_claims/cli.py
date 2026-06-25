@@ -311,10 +311,10 @@ def _cmd_verify_kernel(args: argparse.Namespace) -> int:
     try:
         from .kernel_proof import run_synthetic_kernel_proof
     except ModuleNotFoundError as exc:
-        if exc.name == "numpy":
+        if exc.name == "numpy":  # base install may lack numpy (the n-DMP gate adapters use it)
             print("verify-kernel needs numpy (the n-DMP gate adapters): install it with "
                   "`pip install 'polymer-claims[calibrate]'`", file=sys.stderr)
-        else:
+        else:  # a real internal import bug — don't mislabel it as a missing optional dep
             print(f"verify-kernel import failed: {exc}", file=sys.stderr)
         return 1
     r = run_synthetic_kernel_proof()
