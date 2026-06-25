@@ -74,7 +74,7 @@ assertion, never trusted decision logic.
    before use. **Three** pinned inputs, not two (audit #1): the Xena matrix, the cBioPortal
    **mutations** file (datahub commit-addressed), and the cBioPortal **sample list** (a cBioPortal
    **API** response, pinned separately by endpoint + sha — not covered by the mutations commit).
-4. **Data governance:** neither input committed; pins + a documented fetch recipe instead.
+4. **Data governance:** none of the three inputs committed; pins + a documented fetch recipe instead.
 5. **Module split:** a parameterized builder (`ingest/tcga_xena.py`) separate from the proof runner
    (`real_kernel_proof.py`); pins as a package data file loaded via `importlib.resources`.
 
@@ -89,8 +89,12 @@ nothing written to the source tree), run the **real, existing** n-DMP gate, retu
   (writes into `root`; Xena + cBioPortal are arguments). Streams the matrix (no full load), applies
   the active cBioPortal IDH-calling + drop-not-default-WT universe logic, writes
   `tcga_laml_idh.json` + `.betas.tsv` into `root`, returns the manifest, `group_digest`, and counts.
-  Preserves the existing hard self-checks (known IDH-mut controls present; `IDH_mut` count in
-  `[20,50]`; universe/drop accounting). The legacy `USE_MAF` path is **not** ported (it produced the
+  Preserves the existing hard self-checks (known IDH-mut controls present; universe/drop accounting),
+  with the `IDH_mut` **count-band check parameterized** — `idh_count_band: tuple[int,int] = (20,50)`,
+  the real-run default, **relaxable for the synthetic determinism fixture** (audit #4) so a small CI
+  stub need not manufacture 20+ IDH-mut cases. The band is fixed at `(20,50)` for the real run and
+  asserted; a builder caller never silently bypasses it. The legacy `USE_MAF` path is **not** ported
+  (it produced the
   superseded `@1`).
 - **`src/polymer_claims/real_kernel_proof.py`** (new, tracked) —
   `run_real_kernel_proof(xena_file, cbioportal_dir, *, pins) -> RealKernelProofResult`. Builds into a
@@ -263,8 +267,10 @@ the **exact comma-joined probe-id string** in the order `_all_probe_ids("se:tcga
 — not merely the probe *set*. The claim must be built with **`probes=None`** (never an explicit list)
 so this expansion is the single source of probe order. `_all_probe_ids` order derives from the
 contract's `row_data`, so the contract pin fixes it; the contract pin + `probes=None` + this fixed
-claim construction together determine `profile_hash` and `semantic_run_id`. (`k = ceil(0.05 *
-n_probes)` is also a param and is fixed by `n_probes`.)
+claim construction together determine `profile_hash` and `semantic_run_id`. **`k` is *not* part of
+`semantic_run_id`:** it is not a `node.param` — it sets the `SatisfactionCriterion.threshold`
+(`methyl_ndmp.py:246`). It is still pinned (`k = ceil(0.05 * n_probes)`, fixed by `n_probes`) because
+it drives the licensing decision and is part of gate parity — just not the materialization id.
 
 ## 5. Data flow
 
@@ -342,7 +348,7 @@ The 633 MB matrix **cannot run in CI** — stated honestly (same boundary the re
 
 - **CI-guarded (no big matrix):**
   - `real_kernel_pins.json` loads via `importlib.resources` and matches its schema.
-  - `_resolve_pinned_input` checksum logic: tiny fixture file with a known sha — pass case and
+  - `resolve_pinned_file` checksum logic: tiny fixture file with a known sha — pass case and
     tampered-byte refusal; `--fetch` absent → no network attempted.
   - CLI `--real` arg parsing; clean, actionable error when inputs are absent and `--fetch` not given.
   - **Builder determinism:** `build_real_contract` over a **tiny synthetic Xena-shaped TSV +
@@ -357,7 +363,9 @@ The 633 MB matrix **cannot run in CI** — stated honestly (same boundary the re
       list is **dropped**, never defaulted to WT (the `@1` dilution bug); a genotyped non-hotspot case
       is `WT`.
     - **drop accounting:** `len(universe) + len(dropped_ungenotyped) == len(beta_cases)`; the
-      known-IDH-mut control set is present; `IDH_mut` count lands in `[20,50]` on the stub.
+      known-IDH-mut control set is present. (The stub runs with a **relaxed `idh_count_band`** — it
+      need not reach 20 IDH-mut cases; the `(20,50)` band is exercised separately as a unit test of
+      the band check itself, and remains fixed for the real run.)
     - **separate-input wiring:** mutations file and API sample-list resolve independently (§4) and the
       sample list is *not* expected under the mutations commit.
   - Parity-failure messaging: deliberately perturbed expected-pins yield the correct named-field error
