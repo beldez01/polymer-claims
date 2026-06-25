@@ -20,11 +20,11 @@ the north-star (`2026-06-12-phase-2-north-star.md`), linchpin three-layer arc
 > `polymer-claims verify-kernel --real`** (merged to `main` `32670bb`) — a content-address-parity
 > gate that rebuilds the real `se:tcga_laml_idh@2` proof from three pinned inputs and re-runs the
 > real n-DMP gate to `LICENSED @ REPRODUCED`. The *real* proof is now re-runnable from a fresh
-> checkout once the (gitignored) inputs are supplied/fetched. **Residual:** the committed
-> `real_kernel_pins.json` still holds bootstrap sentinels — the one-time capture of the *real* pins
-> from the trusted `@2` tree (`scripts/bootstrap_real_kernel_pins.py`, acceptance criterion #5) is
-> pending; until then the real `--real` run can't pass against committed pins, but the synthetic
-> `verify-kernel` and all parity machinery are CI-green. **H1.A1 (real signing)** also shipped
+> checkout once the (gitignored) inputs are supplied/fetched. **Real pins captured + verified
+> (2026-06-25):** the two-mode bootstrap was run — the new builder reproduced the trusted `@2`
+> addresses *exactly* (clean diff, no self-fulfilling parity), the real pins are committed, and
+> `verify-kernel --real` returns **`LICENSED @ REPRODUCED`** end-to-end (n_probes=378,894,
+> n_dmps=115,405, e-value=∞, IDH-mut n=36). **H0.1b is fully closed.** **H1.A1 (real signing)** also shipped
 > (local ed25519 DSSE sign/verify + `keygen`/`verify-dsse` + `--key`); the Sigstore/cosign/**Rekor**
 > transparency-log layer remains open (see H1.A1 below).
 
@@ -64,7 +64,7 @@ These are cheap, unblock everything downstream, and close gaps the spot-verifica
   fresh checkout a deterministic, offline `LICENSED @ REPRODUCED` proof of the gate pipeline — closes
   the "nothing reproduces offline" gap. *Note:* this proves **pipeline integrity, not the real
   biology** (nothing real committed). *Size:* S–M.
-- [x] **H0.1b — Real `@2` data: retrievable, fresh-checkout-runnable artifact.** ✅ SHIPPED (code; merged `32670bb`) — `verify-kernel --real` rebuilds `@2` from three pinned inputs and asserts byte-level content-address parity + the real gate result. **Residual:** capture the real pins from the trusted tree (`scripts/bootstrap_real_kernel_pins.py`, acceptance criterion #5) — pending; committed pins are sentinels. Spec/plan: `docs/superpowers/{specs/2026-06-25-h01b-real-kernel-parity-design,plans/2026-06-25-h01b-real-kernel-parity}.md`. The *real* proof
+- [x] **H0.1b — Real `@2` data: retrievable, fresh-checkout-runnable artifact.** ✅ SHIPPED + VERIFIED (merged `32670bb`; real pins captured 2026-06-25) — `verify-kernel --real` rebuilds `@2` from three pinned inputs, asserts byte-level content-address parity + the real gate result, and returns `LICENSED @ REPRODUCED` against the committed real pins (the bootstrap diff was clean — no self-fulfilling parity). **Acceptance criterion #5 satisfied; no residual.** Spec/plan: `docs/superpowers/{specs/2026-06-25-h01b-real-kernel-parity-design,plans/2026-06-25-h01b-real-kernel-parity}.md`. The *real* proof
   (`se:tcga_laml_idh@2`: local Xena methylation450 matrix + cBioPortal `laml_tcga_pub` genotyping)
   currently depends on **local-only, gitignored** files under `data/tcga_laml/`
   (`build_contract_xena.py`, `run_gate.py`, the cBioPortal inputs) — not in a fresh checkout. Make
@@ -152,15 +152,15 @@ publish.
 H0.1 kernel pipeline proof  ──▶  H1.A1 signing  ──▶  H1.A2 real 2nd-cohort / replicable claim  ──▶  H2 wedge claim shipped
    ✅ SHIPPED          ✅ local ed25519 (Rekor open)    (data sourcing — start now, long lead)        (the deliverable)
         │
-        └─ H0.1b ✅ real-data parity gate SHIPPED (real-pins bootstrap pending)
+        └─ H0.1b ✅ real-data parity gate SHIPPED + VERIFIED (real pins committed; --real = LICENSED @ REPRODUCED)
         └─ parallel deepening when capacity allows: H1.B1→B2 credence engines, H1.B4 defeat wiring, H1.C calibration completeness
 ```
 
-**Immediate next action (updated 2026-06-25):** the cheap, code-only spine is done — H0.1, H0.1b, and
-the local-signing half of H1.A1 are shipped and merged. The two remaining gates to a demonstrable
-wedge are both non-trivial: **(a) run the H0.1b real-pins bootstrap** in the trusted `@2` tree
-(`scripts/bootstrap_real_kernel_pins.py`, acceptance criterion #5) so the *real* `--real` run passes
-against committed pins — a short local step Z must do where the data lives; and **(b) H1.A2 — source
-a real 2nd HM450 cohort** with machine-readable IDH status (long lead — start now). Optional
-parallel: finish H1.A1 (Sigstore/Rekor) for third-party verifiability. Each H1+ slice gets its own
-brainstorm → spec → plan → subagent-driven build, the same loop that shipped H0.1b.
+**Immediate next action (updated 2026-06-25):** the cheap, code-only spine is done *and verified* —
+H0.1, **H0.1b (real pins captured; `verify-kernel --real` = LICENSED @ REPRODUCED)**, and the
+local-signing half of H1.A1 are shipped and merged. The single remaining critical-path gate to a
+demonstrable wedge is **H1.A2 — source a real 2nd HM450 cohort** with machine-readable IDH status
+(long lead — start now; it's the gate to §2E REPLICATED and H2). Optional parallel code slices:
+finish **H1.A1 (Sigstore/Rekor)** for third-party verifiability, and the Track-B credence engines.
+Each H1+ slice gets its own brainstorm → spec → plan → subagent-driven build, the same loop that
+shipped H0.1b.
