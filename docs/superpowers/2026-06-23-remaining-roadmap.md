@@ -14,6 +14,20 @@ the north-star (`2026-06-12-phase-2-north-star.md`), linchpin three-layer arc
 > metadata/scripts but no HM450 beta matrices, and `ingest tcga-laml` calls the live GDC API
 > (404 in a network-constrained env). The proof was real when run; it is not currently re-runnable.
 
+> **STATUS UPDATE (2026-06-25) — reconciled after H0.1 / H0.1b / H1.A1 shipped.** The
+> reproducibility gap above is **closed in code**: H0.1 shipped `polymer-claims verify-kernel`
+> (synthetic, offline, CI-guarded — pipeline integrity), and **H0.1b shipped
+> `polymer-claims verify-kernel --real`** (merged to `main` `32670bb`) — a content-address-parity
+> gate that rebuilds the real `se:tcga_laml_idh@2` proof from three pinned inputs and re-runs the
+> real n-DMP gate to `LICENSED @ REPRODUCED`. The *real* proof is now re-runnable from a fresh
+> checkout once the (gitignored) inputs are supplied/fetched. **Residual:** the committed
+> `real_kernel_pins.json` still holds bootstrap sentinels — the one-time capture of the *real* pins
+> from the trusted `@2` tree (`scripts/bootstrap_real_kernel_pins.py`, acceptance criterion #5) is
+> pending; until then the real `--real` run can't pass against committed pins, but the synthetic
+> `verify-kernel` and all parity machinery are CI-green. **H1.A1 (real signing)** also shipped
+> (local ed25519 DSSE sign/verify + `keygen`/`verify-dsse` + `--key`); the Sigstore/cosign/**Rekor**
+> transparency-log layer remains open (see H1.A1 below).
+
 ---
 
 ## The one strategic fork
@@ -43,14 +57,14 @@ parallel deepening once the wedge is reproducible and signable.
 
 These are cheap, unblock everything downstream, and close gaps the spot-verification surfaced.
 
-- [ ] **H0.1 — Offline-reproducible kernel *pipeline* proof (synthetic).** Spec'd + planned
+- [x] **H0.1 — Offline-reproducible kernel *pipeline* proof (synthetic).** ✅ SHIPPED. Spec'd + planned
   (`specs/2026-06-23-offline-kernel-proof-design.md`, `plans/2026-06-23-offline-kernel-proof.md`).
   A fully synthetic, deterministic HM450-shaped fixture run through the **real** n-DMP gate, guarded
   by a committed test and a `verify-kernel` CLI, plus a hardened retrieval runbook. *Why:* gives a
   fresh checkout a deterministic, offline `LICENSED @ REPRODUCED` proof of the gate pipeline — closes
   the "nothing reproduces offline" gap. *Note:* this proves **pipeline integrity, not the real
   biology** (nothing real committed). *Size:* S–M.
-- [ ] **H0.1b — Real `@2` data: retrievable, fresh-checkout-runnable artifact.** The *real* proof
+- [x] **H0.1b — Real `@2` data: retrievable, fresh-checkout-runnable artifact.** ✅ SHIPPED (code; merged `32670bb`) — `verify-kernel --real` rebuilds `@2` from three pinned inputs and asserts byte-level content-address parity + the real gate result. **Residual:** capture the real pins from the trusted tree (`scripts/bootstrap_real_kernel_pins.py`, acceptance criterion #5) — pending; committed pins are sentinels. Spec/plan: `docs/superpowers/{specs/2026-06-25-h01b-real-kernel-parity-design,plans/2026-06-25-h01b-real-kernel-parity}.md`. The *real* proof
   (`se:tcga_laml_idh@2`: local Xena methylation450 matrix + cBioPortal `laml_tcga_pub` genotyping)
   currently depends on **local-only, gitignored** files under `data/tcga_laml/`
   (`build_contract_xena.py`, `run_gate.py`, the cBioPortal inputs) — not in a fresh checkout. Make
@@ -71,10 +85,11 @@ These are cheap, unblock everything downstream, and close gaps the spot-verifica
 
 ### Track A (spine) — make the wedge demonstrable
 
-- [ ] **H1.A1 — Arc-2 slice 3: real signing.** Sigstore/cosign/Rekor + DSSE PAE on top of the
-  unsigned DSSE certificate export we shipped. Turns `certify --format dsse` into an externally
-  verifiable artifact. *Why:* the wedge's whole pitch is "shareable, verifiable certificate";
-  unsigned bytes don't deliver that. Self-contained. *Size:* M. Needs brainstorm + spec.
+- [~] **H1.A1 — Arc-2 slice 3: real signing.** ✅ PARTIALLY SHIPPED — **local ed25519 DSSE signing**
+  merged (`feat/dsse-signing`): DSSE PAE, `keygen` / `verify-dsse` subcommands, opt-in `--key` on
+  `certify` + `export-attestation` (`[sign]` extra). Turns `certify --format dsse` into a locally
+  verifiable signed artifact. **Still open:** the **Sigstore/cosign/Rekor transparency-log** layer
+  (third-party verifiability without trusting the signer) — that's the remaining slice. *Size:* M.
 - [ ] **H1.A2 — Unblock §2E REPLICATED on a real 2nd cohort (data-blocked today).** The gating
   activity for a credible wedge is sourcing a second HM450 AML cohort with machine-readable IDH
   status (or pivoting the wedge claim to data we *can* replicate). This is sourcing/curation work,
@@ -134,14 +149,18 @@ publish.
 ## Recommended critical path (Path α)
 
 ```
-H0.1 reproducible kernel pipeline proof  ──▶  H1.A1 real signing  ──▶  H1.A2 real 2nd-cohort / replicable claim  ──▶  H2 wedge claim shipped
-        (foundation)                  (verifiable cert)         (data sourcing — start now, long lead)        (the deliverable)
-
+H0.1 kernel pipeline proof  ──▶  H1.A1 signing  ──▶  H1.A2 real 2nd-cohort / replicable claim  ──▶  H2 wedge claim shipped
+   ✅ SHIPPED          ✅ local ed25519 (Rekor open)    (data sourcing — start now, long lead)        (the deliverable)
+        │
+        └─ H0.1b ✅ real-data parity gate SHIPPED (real-pins bootstrap pending)
         └─ parallel deepening when capacity allows: H1.B1→B2 credence engines, H1.B4 defeat wiring, H1.C calibration completeness
 ```
 
-**Immediate next action:** H0.1 (synthetic offline pipeline proof) — it's small, it's the foundation
-everything cites, and the spot-verification proved the gate is currently not reproducible offline.
-Pinning the *real* Phase-A `@2` data into a fresh-checkout-runnable artifact is the separate H0.1b
-residual. Then confirm the α-vs-β fork before committing the H1 sprint order. Each H1+ slice gets its own brainstorm → spec → plan →
-subagent-driven build, the same loop that shipped the calibration and ATTESTED slices.
+**Immediate next action (updated 2026-06-25):** the cheap, code-only spine is done — H0.1, H0.1b, and
+the local-signing half of H1.A1 are shipped and merged. The two remaining gates to a demonstrable
+wedge are both non-trivial: **(a) run the H0.1b real-pins bootstrap** in the trusted `@2` tree
+(`scripts/bootstrap_real_kernel_pins.py`, acceptance criterion #5) so the *real* `--real` run passes
+against committed pins — a short local step Z must do where the data lives; and **(b) H1.A2 — source
+a real 2nd HM450 cohort** with machine-readable IDH status (long lead — start now). Optional
+parallel: finish H1.A1 (Sigstore/Rekor) for third-party verifiability. Each H1+ slice gets its own
+brainstorm → spec → plan → subagent-driven build, the same loop that shipped H0.1b.
