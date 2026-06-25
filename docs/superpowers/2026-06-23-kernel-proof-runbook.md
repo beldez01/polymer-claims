@@ -15,6 +15,45 @@ does **NOT** reproduce the real biology — no real TCGA data is involved (nothi
 Guarded in CI by `tests/test_kernel_proof_synthetic.py`. (Needs numpy — the gate adapters use it;
 `pip install 'polymer-claims[calibrate]'` if a base install lacks it.)
 
+## Real proof, fresh-checkout-runnable — `verify-kernel --real` (H0.1b)
+
+The real `se:tcga_laml_idh@2` proof now reproduces from a clean checkout once you supply the three
+pinned inputs. It proves **the pinned real-data computation reproduces** — NOT data veracity or
+independence (that is roadmap H1.A2).
+
+```
+# inputs are pinned by checksum and stay out of git. Supply locally (default) or fetch (opt-in):
+polymer-claims verify-kernel --real \
+    --xena /path/TCGA-LAML.methylation450.tsv.gz \
+    --cbioportal /path/dir_with_data_mutations.txt_and_sequenced_samples.json
+# add --fetch to download the pinned inputs into the cache instead of supplying them.
+```
+
+Expect `LICENSED @ REPRODUCED`. The gate verifies the rebuilt contract's byte-level `contract_checksum`
+and the gate-result addresses (`n_dmps`, `e_value`, `profile_hash`, `semantic_run_id`) against the
+committed pins in `src/polymer_claims/ingest/real_kernel_pins.json`. The ~633 MB matrix means this is
+**manual/opt-in, not CI** (CI guards the synthetic `verify-kernel` and the parity machinery).
+
+**Bootstrapping the pins (one-time, spec §6 — no self-fulfilling parity):** `real_kernel_pins.json`
+ships with sentinel values. Capture the real pins by running the script in **both** modes and diffing:
+
+```
+# 1. ground truth: addresses of the already-trusted @2 contract (no rebuild)
+.venv/bin/python scripts/bootstrap_real_kernel_pins.py --from-existing \
+    --contract-root src/polymer_claims/contracts | python -c 'import sys,json; print(json.dumps(json.load(sys.stdin)["expected"],sort_keys=True))' > trusted_expected.json
+# 2. NEW-builder rebuild from the real inputs -> full pins
+.venv/bin/python scripts/bootstrap_real_kernel_pins.py \
+    --xena /path/TCGA-LAML.methylation450.tsv.gz --cbioportal /path/cbio \
+    --commit 86690e1ed9752b1dcd50b5657f5f05eafa4b6b78 > rebuilt_pins.json
+# 3. the new builder must reproduce the trusted addresses EXACTLY:
+python -c 'import sys,json; print(json.dumps(json.load(open("rebuilt_pins.json"))["expected"],sort_keys=True))' > rebuilt_expected.json
+diff trusted_expected.json rebuilt_expected.json && echo "PARITY OK — safe to commit pins"
+```
+
+Only if the diff is empty, write `rebuilt_pins.json` to
+`src/polymer_claims/ingest/real_kernel_pins.json` and commit. A non-empty diff means the new builder
+is not faithful to the earned proof — fix the builder, never the pins.
+
 ## Real proof — the current genome-wide TCGA-LAML claim (`se:tcga_laml_idh@2`)
 
 The **current** earned proof is `se:tcga_laml_idh@2` (the 2026-06-18 source swap): IDH-mut/WT calls
@@ -30,15 +69,19 @@ protein-change column as the original `cbioportal/SOURCE.txt` records), supply t
 methylation450 matrix locally, then:
 
 ```
+# SUPERSEDED by `verify-kernel --real` (see section above). Left for historical reference only.
 # only in a tree that has the local-only data/tcga_laml/ scripts + a local Xena matrix:
 .venv/bin/python data/tcga_laml/build_contract_xena.py   # -> se:tcga_laml_idh@2 into contracts/ (untracked)
 .venv/bin/python data/tcga_laml/run_gate.py              # -> LICENSED @ REPRODUCED on real data; honest q
 ```
 
+> **Superseded by `verify-kernel --real` (H0.1b).** The hardcoded `build_contract_xena.py` /
+> `run_gate.py` path above requires local-only scripts and a gitignored Xena path; it is no longer the
+> recommended reproduction path. Use `polymer-claims verify-kernel --real` (section above) instead.
+
 For a reproduction that works from a **fresh checkout with no real data**, use the offline synthetic
 proof above (`polymer-claims verify-kernel`) — that is the committed, CI-guarded reproducibility this
-slice delivers. Turning the *real* `@2` data into a retrievable, fresh-checkout-runnable artifact is
-tracked as roadmap **H0.1b** and is out of scope here.
+slice delivers.
 
 > **Deprecated path — do not confuse it with the current proof.** `polymer-claims ingest tcga-laml`
 > fetches the GDC open-access masked-WXS MAFs and builds the **older** `se:tcga_laml_idh@1`. That MAF
