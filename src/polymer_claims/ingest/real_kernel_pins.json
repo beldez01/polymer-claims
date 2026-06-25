@@ -1,38 +1,38 @@
 {
-  "_bootstrap": "Sentinel pins. Capture real values from the trusted @2 tree via scripts/bootstrap_real_kernel_pins.py (spec §6) and commit before the real gate can pass. CI does NOT use these values.",
+  "_bootstrap": "REAL pins, captured 2026-06-25 from the trusted se:tcga_laml_idh@2 artifact via scripts/bootstrap_real_kernel_pins.py and verified: the new build_real_contract reproduced these exact addresses (two-mode no-self-fulfilling-parity diff was clean). CI does NOT use these (it uses synthetic test pins); they gate `verify-kernel --real` against the real inputs.",
   "contract_uid": "tcga_laml_idh@2",
   "inputs": {
     "xena": {
       "filename": "TCGA-LAML.methylation450.tsv.gz",
-      "sha256": "TODO_BOOTSTRAP",
-      "bytes": 0,
+      "sha256": "b0ec5910cc9ca629340fc374e2e543e2d526fb22a0ff49034d9899ccafea74da",
+      "bytes": 663582724,
       "url": "https://gdc-hub.s3.us-east-1.amazonaws.com/download/TCGA-LAML.methylation450.tsv.gz"
     },
     "cbio_mutations": {
       "commit": "86690e1ed9752b1dcd50b5657f5f05eafa4b6b78",
       "url": "https://raw.githubusercontent.com/cBioPortal/datahub/86690e1ed9752b1dcd50b5657f5f05eafa4b6b78/public/laml_tcga_pub/data_mutations.txt",
       "filename": "data_mutations.txt",
-      "sha256": "TODO_BOOTSTRAP"
+      "sha256": "2b6c6524fcb5974ea2b4850550591f5d0aa654ea27303126855795a6e45334f0"
     },
     "cbio_sequenced": {
       "api_endpoint": "https://www.cbioportal.org/api/sample-lists/laml_tcga_pub_sequenced/sample-ids",
       "filename": "sequenced_samples.json",
-      "sha256": "TODO_BOOTSTRAP"
+      "sha256": "367e656c6493612682a8a12550ac54e74253d5dd27feaabe3c6535ff2b771ac8"
     }
   },
   "expected": {
     "contract_uid": "tcga_laml_idh@2",
-    "contract_checksum": "TODO_BOOTSTRAP",
-    "canonical_checksum": "TODO_BOOTSTRAP",
-    "dimnames_hash": "TODO_BOOTSTRAP",
-    "group_digest": "TODO_BOOTSTRAP",
-    "idh_mut_n": 0,
-    "wt_n": 0,
-    "n_probes": 0,
-    "n_dmps": 0,
+    "contract_checksum": "504fa3307feec466a5860987e7d3aa5ffc163e85ef6fd64498132421d3968ccb",
+    "canonical_checksum": "sha256:df4c827389ecc9b779964d6f2ecfcce613b9d9541c1ef98cb912a8f635e329d9",
+    "dimnames_hash": "sha256:53500d08e41d04dd0058174be34f9e890aae7681a00c89385eedbc6ed536bec3",
+    "group_digest": "264d17ac897e1622d7a0cf36eed69dfb26842aa61d53227ddaacc717b7e10d51",
+    "idh_mut_n": 36,
+    "wt_n": 158,
+    "n_probes": 378894,
+    "n_dmps": 115405,
     "e_value": "inf",
-    "profile_hash": "TODO_BOOTSTRAP",
-    "semantic_run_id": "TODO_BOOTSTRAP",
+    "profile_hash": "sha256:09921465dcc114df8a1ecb1fa8ea7e7af754ec77fb2fcf8bd70d31b086123aa4",
+    "semantic_run_id": "sha256:6151c263b575fcd449c2bc533fe562c8d40bdae77210dbd9e5717128d74b3e43",
     "status": "licensed",
     "independence_tier": "reproduced"
   }
