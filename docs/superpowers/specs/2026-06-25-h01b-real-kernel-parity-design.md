@@ -9,7 +9,7 @@ the real `@2` **headline numbers** reproduce from pinned inputs. On the confirme
 critical path: a wedge that cites real TCGA-LAML `@2` numbers depends on this.
 
 > **One line.** Make the real `se:tcga_laml_idh@2` proof a **content-address-parity kernel check**
-> (`verify-kernel --real`): supply (or, opt-in, fetch) the two pinned external inputs, rebuild the
+> (`verify-kernel --real`): supply (or, opt-in, fetch) the three pinned external inputs, rebuild the
 > contract through the **de-hardcoded** builder, assert the rebuilt content-addresses match
 > **committed reference pins captured from the previously trusted `@2` run**, run the **real** n-DMP
 > gate, and require `LICENSED @ REPRODUCED`. It proves *the pinned real-data computation reproduces*
@@ -48,9 +48,10 @@ assertion, never trusted decision logic.
 
 ## 1. Hard constraints (load-bearing)
 
-- **No TCGA-derived bytes in git.** Both external inputs (Xena matrix; cBioPortal genotyping bundle)
-  stay out of the repo. Only the **pins** (checksums, URLs, the cBioPortal commit, expected
-  content-addresses) are committed. (Decision: "keep gitignored, document fetch" — both inputs.)
+- **No TCGA-derived bytes in git.** All three external inputs (Xena matrix; cBioPortal **mutations**
+  file; cBioPortal **sample-list** API response) stay out of the repo. Only the **pins** (checksums,
+  URLs/endpoint, the mutations commit, expected content-addresses) are committed. (Decision: "keep
+  gitignored, document fetch" — all inputs.)
 - **Fetch is opt-in.** Default behavior resolves inputs from a **local path or cache only**. Network
   retrieval requires an explicit `--fetch` flag. Rationale: a 633 MB governed artifact must not be
   fetched by surprise; network-by-default is wrong for CI, user surprise, and data-use clarity.
@@ -83,7 +84,7 @@ Mirrors `kernel_proof.py`: build a contract into a **temp contract root** (`usin
 nothing written to the source tree), run the **real, existing** n-DMP gate, return a result.
 
 - **`src/polymer_claims/ingest/tcga_xena.py`** (new, tracked) —
-  `build_real_contract(root: Path, xena_path: Path, cbioportal_dir: Path) -> RealBuildResult`.
+  `build_real_contract(root: Path, xena_file: Path, cbioportal_dir: Path) -> RealBuildResult`.
   The **de-hardcoded** port of `data/tcga_laml/build_contract_xena.py`: all absolute paths removed
   (writes into `root`; Xena + cBioPortal are arguments). Streams the matrix (no full load), applies
   the active cBioPortal IDH-calling + drop-not-default-WT universe logic, writes
@@ -92,7 +93,7 @@ nothing written to the source tree), run the **real, existing** n-DMP gate, retu
   `[20,50]`; universe/drop accounting). The legacy `USE_MAF` path is **not** ported (it produced the
   superseded `@1`).
 - **`src/polymer_claims/real_kernel_proof.py`** (new, tracked) —
-  `run_real_kernel_proof(xena_path, cbioportal_dir, *, pins) -> RealKernelProofResult`. Builds into a
+  `run_real_kernel_proof(xena_file, cbioportal_dir, *, pins) -> RealKernelProofResult`. Builds into a
   temp root, computes content-addresses via `load_contract`, **asserts parity vs `pins`**, runs the
   gate (reusing `n_dmps_claim`, `dmp_indicators`, `count_enrichment_evalue`, `NDmpTTestAdapter`,
   `NDmpOlsCoefAdapter`, `ndmp_independent_registry`, `run_cycle` — all already exist), and returns
@@ -101,13 +102,18 @@ nothing written to the source tree), run the **real, existing** n-DMP gate, retu
 - **`src/polymer_claims/ingest/real_kernel_pins.json`** (new, tracked — the only new committed data) —
   loaded via `importlib.resources`. Holds the pins (§4).
 - **`src/polymer_claims/ingest/_pinned.py`** (new helper module) —
-  `resolve_pinned_file(filename, *, local_dir, url, sha256, cache_dir, allow_fetch) -> Path`, **per
+  `resolve_pinned_file(filename, *, local, url, sha256, cache_dir, allow_fetch) -> Path`, **per
   file**. The Xena matrix is one call; the cBioPortal mutations file and the API-sourced sample list
   are one call each (each pinned by its own sha — and the sample list by its API endpoint, §4). The
   resolver semantics (audit #6) are explicit:
-  - **Resolution order:** `local_dir/filename` if present → `cache_dir/filename` if present → (only
+  - **`local` accepts a file OR a directory:** if `local` is a file, use it directly; if a directory,
+    use `local/filename`. (Resolves the file-vs-dir ambiguity for both flags.)
+  - **CLI flags:** `--xena PATH` is the **matrix file** (or a dir containing
+    `TCGA-LAML.methylation450.tsv.gz`); `--cbioportal PATH` is the **directory** holding
+    `data_mutations.txt` and `sequenced_samples.json`. Builder signature mirrors this:
+    `build_real_contract(root, xena_file, cbioportal_dir)`.
+  - **Resolution order:** the `local` file/dir if present → `cache_dir/filename` if present → (only
     when `allow_fetch`) download from `url`/`api_endpoint` into `cache_dir`.
-  - **`--xena` / `--cbioportal`** are directories; the file under each is `dir/<pinned filename>`.
   - **Default cache:** `cache_dir` defaults to `$XDG_CACHE_HOME/polymer-claims/tcga_laml/` (fallback
     `~/.cache/polymer-claims/tcga_laml/`); `--cache-dir` overrides.
   - **Download is atomic:** write to `cache_dir/<filename>.part-<n>`, verify SHA-256, then
@@ -145,8 +151,8 @@ new builder.
   },
   "expected": {
     "contract_uid":      "tcga_laml_idh@2",                            // strict: version identity (see §4.3)
-    "contract_checksum": "<sha256(manifest_bytes + betas_bytes)>",     // PRIMARY GATE — byte-level (see §4.1)
-    "canonical_checksum":"<canonical_sha256(logical contract)>",       // STABLE fallback gate (see §4.1)
+    "contract_checksum": "<sha256(manifest_bytes + betas_bytes)>",     // PRIMARY GATE — byte-level, required (see §4.1)
+    "canonical_checksum":"<canonical_sha256(logical contract)>",       // DIAGNOSTIC logical checksum, not a gate (see §4.1)
     "dimnames_hash":     "<canonical_sha256(feature_ids|sample_ids)>", // diagnostic: rows/cols
     "group_digest":      "<sha256 of label vector>",                   // diagnostic: labels
     "idh_mut_n": <int>, "wt_n": <int>, "n_probes": <int>,              // diagnostic: shape
@@ -181,12 +187,30 @@ reproduce the *exact bytes* of the trusted `@2` artifact:
   → reformat floats).
 
 Because byte-parity is brittle to incidental serialization changes, the pins also carry a
-**`canonical_checksum`** = `canonical_sha256` over a *logical* normal form of the contract
-(`{uid, dim, feature_ids (sorted), [(sample_id, label) sorted], betas rounded to a fixed decimals}`).
-The gate asserts **`contract_checksum` (byte-level) as primary**; if it fails but `canonical_checksum`
-matches, the error message says *"logical content reproduced but serialization differs — the builder
-is not byte-faithful"* (a builder bug, distinct from a data-divergence bug). `canonical_sha256`
-already exists (`polymer_claims._hashing`).
+**`canonical_checksum`** — a **diagnostic logical checksum, not a gate**. It is `canonical_sha256`
+(`polymer_claims._hashing`, already exists) over this **exact** normal form:
+
+```python
+canonical_sha256({
+    "uid": manifest["uid"],                                  # "tcga_laml_idh@2"
+    "dim": [n_probes, n_samples],
+    "features": sorted(feature_ids),                         # probe ids, ascending
+    "samples": sorted([[sample_id, label] for ...],          # ascending by sample_id
+                      key=lambda r: r[0]),                    # label = Sample_Group (WT|IDH_mut)
+    "betas": { sample_id: [round(float(b), 6) for b in column] },  # keyed by sample_id, probe order = sorted features
+})
+```
+
+Fixed schema decisions (so this is not left to implementer taste): **6 decimal places**; betas keyed
+by `sample_id` with each value list in **sorted-feature order**; clinical metadata, `group_digest`,
+and original row/column *ordering* are **excluded** (the byte-level `contract_checksum` already
+covers serialization and ordering — this normal form deliberately abstracts them away). **Missing
+betas:** the `@2` build drops any probe with an NA across selected samples, so the matrix is dense and
+no sentinel is needed; if a NaN is ever encountered the builder aborts (it cannot occur in a
+parity-passing build). The byte-level `contract_checksum` is the **required** gate; `canonical_checksum`
+is computed only to label a `contract_checksum` failure as *"logical content reproduced but bytes
+differ → builder not byte-faithful"* (a builder bug) vs. *"logical content itself diverged"* (a data
+bug). It never licenses on its own.
 
 The localized hashes (`dimnames_hash`, `group_digest`, counts) are retained for "which dimension
 diverged" diagnostics, not as the primary check.
@@ -232,9 +256,15 @@ the materialization pin opaquely. The spec fixes the canonical claim constructio
 | adapters | `(NDmpTTestAdapter(), NDmpOlsCoefAdapter())`, `ndmp_independent_registry()` |
 | oracles | `profile_oracle_registry((CANONICAL_HM450_V1, "recomputable_public"))` |
 
-Probe **ordering** enters `semantic_run_id` via `dimnames_hash` (in `input_signature`) and via `k`
-(through `n_probes`); pinning the contract fixes the probe set/order, so the contract pin + this fixed
-claim construction together determine `profile_hash` and `semantic_run_id`.
+Probe **ordering** enters `semantic_run_id` **directly through `param_signature`**: `n_dmps_claim`
+with `probes=None` expands to `_all_probe_ids(ref)` and stores `("probes", ",".join(probes))` as a
+node param (`methyl_ndmp.py:225-234`), and `semantic_run_id` hashes `node.params`. So the pin requires
+the **exact comma-joined probe-id string** in the order `_all_probe_ids("se:tcga_laml_idh@2")` yields
+— not merely the probe *set*. The claim must be built with **`probes=None`** (never an explicit list)
+so this expansion is the single source of probe order. `_all_probe_ids` order derives from the
+contract's `row_data`, so the contract pin fixes it; the contract pin + `probes=None` + this fixed
+claim construction together determine `profile_hash` and `semantic_run_id`. (`k = ceil(0.05 *
+n_probes)` is also a param and is fixed by `n_probes`.)
 
 ## 5. Data flow
 
@@ -242,8 +272,9 @@ claim construction together determine `profile_hash` and `semantic_run_id`.
 verify-kernel --real [--xena PATH] [--cbioportal PATH] [--cache-dir PATH] [--fetch]
   │
   ├─ load pins (importlib.resources)
-  ├─ resolve+verify Xena matrix       (local→cache→[--fetch]→url; sha256 == pin, else ABORT)
-  ├─ resolve+verify cBioPortal bundle  (local→cache→[--fetch]→url; sha256 == pin, commit pinned)
+  ├─ resolve+verify Xena matrix              (local→cache→[--fetch]→url; sha256 == pin, else ABORT)
+  ├─ resolve+verify cBioPortal mutations file (local→cache→[--fetch]→datahub url@commit; sha256 == pin)
+  ├─ resolve+verify cBioPortal sample-list response (local→cache→[--fetch]→API endpoint; sha256 == pin)
   │
   ├─ build_real_contract(temp_root, xena, cbio)      → manifest, group_digest, counts  (uid == @2)
   ├─ load_contract("se:tcga_laml_idh@2")             → contract_uid, dimnames_hash,
