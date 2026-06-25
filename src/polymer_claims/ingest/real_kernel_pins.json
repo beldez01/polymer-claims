@@ -1,0 +1,39 @@
+{
+  "_bootstrap": "Sentinel pins. Capture real values from the trusted @2 tree via scripts/bootstrap_real_kernel_pins.py (spec §6) and commit before the real gate can pass. CI does NOT use these values.",
+  "contract_uid": "tcga_laml_idh@2",
+  "inputs": {
+    "xena": {
+      "filename": "TCGA-LAML.methylation450.tsv.gz",
+      "sha256": "TODO_BOOTSTRAP",
+      "bytes": 0,
+      "url": "https://gdc-hub.s3.us-east-1.amazonaws.com/download/TCGA-LAML.methylation450.tsv.gz"
+    },
+    "cbio_mutations": {
+      "commit": "86690e1ed9752b1dcd50b5657f5f05eafa4b6b78",
+      "url": "https://raw.githubusercontent.com/cBioPortal/datahub/86690e1ed9752b1dcd50b5657f5f05eafa4b6b78/public/laml_tcga_pub/data_mutations.txt",
+      "filename": "data_mutations.txt",
+      "sha256": "TODO_BOOTSTRAP"
+    },
+    "cbio_sequenced": {
+      "api_endpoint": "https://www.cbioportal.org/api/sample-lists/laml_tcga_pub_sequenced/sample-ids",
+      "filename": "sequenced_samples.json",
+      "sha256": "TODO_BOOTSTRAP"
+    }
+  },
+  "expected": {
+    "contract_uid": "tcga_laml_idh@2",
+    "contract_checksum": "TODO_BOOTSTRAP",
+    "canonical_checksum": "TODO_BOOTSTRAP",
+    "dimnames_hash": "TODO_BOOTSTRAP",
+    "group_digest": "TODO_BOOTSTRAP",
+    "idh_mut_n": 0,
+    "wt_n": 0,
+    "n_probes": 0,
+    "n_dmps": 0,
+    "e_value": "inf",
+    "profile_hash": "TODO_BOOTSTRAP",
+    "semantic_run_id": "TODO_BOOTSTRAP",
+    "status": "licensed",
+    "independence_tier": "reproduced"
+  }
+}
