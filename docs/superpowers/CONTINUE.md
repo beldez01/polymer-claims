@@ -8,6 +8,18 @@
 
 ---
 
+## Current state (2026-06-25)
+
+> **UPDATE 2026-06-25 — shipped since the 2026-06-22 snapshot below (newest first), all merged to `main` and pushed (`main == origin/main`, HEAD `32670bb`):**
+> - **H0.1b — real-data kernel parity gate `verify-kernel --real`** (merged `32670bb`). Rebuilds the real `se:tcga_laml_idh@2` proof from three pinned external inputs (Xena matrix; cBioPortal mutations file @ datahub commit; cBioPortal sample-list API response) via a de-hardcoded builder (`ingest/tcga_xena.py`), asserts **byte-level `contract_checksum` parity** (+ a diagnostic `canonical_checksum`) and gate-result parity vs committed pins, runs the real n-DMP gate, requires `LICENSED @ REPRODUCED`. New: `ingest/_pinned.py` (opt-in-fetch resolver), `real_kernel_proof.py` (runner), `ingest/real_kernel_pins.json` (pins — currently **bootstrap sentinels**), `scripts/bootstrap_real_kernel_pins.py` (two-mode no-self-fulfilling-parity capture). Proves the *pinned computation* reproduces — **not** data veracity (that's H1.A2). Built via subagent-driven TDD (6 tasks + whole-branch review, ruff clean, 26 feature tests green). Spec/plan: `docs/superpowers/{specs/2026-06-25-h01b-real-kernel-parity-design,plans/2026-06-25-h01b-real-kernel-parity}.md`. **Residual: run the real-pins bootstrap in the trusted `@2` tree (acceptance criterion #5) — pending.**
+> - **H0.1 — offline synthetic kernel proof `verify-kernel`** (CI-guarded `test_kernel_proof_synthetic.py`). Deterministic HM450-shaped fixture through the *real* n-DMP gate → `LICENSED @ REPRODUCED`; proves pipeline integrity offline (no real bytes). Runbook: `docs/superpowers/2026-06-23-kernel-proof-runbook.md`.
+> - **H1.A1 — real DSSE signing (local ed25519)** (`feat/dsse-signing`). DSSE PAE + `keygen`/`verify-dsse` + opt-in `--key` on `certify`/`export-attestation` (`[sign]` extra). **Real signing is no longer "deferred."** Still open: Sigstore/cosign/**Rekor** transparency-log layer.
+> - **BioNeMo evidence-adapter (Phase 1)** (`feat/bionemo-evidence-adapter`). Worked example where a cached NIM run licenses a claim offline; oracle-dossier bound; air-gap independence witnessed.
+>
+> **▶ Next:** (a) run the H0.1b real-pins bootstrap (short, local, in the data tree); (b) **H1.A2 — source a real 2nd HM450 cohort** with machine-readable IDH status (long lead — the gate to §2E REPLICATED and a shippable wedge, H2); optional parallel: finish H1.A1 (Sigstore/Rekor) and the credence engines (Track B). See `docs/superpowers/2026-06-23-remaining-roadmap.md` (reconciled 2026-06-25).
+>
+> The 2026-06-22 snapshot below is retained for detail on everything shipped up to the calibration roadmap.
+
 ## Current state (2026-06-22)
 
 `main` GREEN — **378 umbrella + 396 grammar + 423 protocol + 2 isolation** (1199 tests; HEAD `176544d`, pushed to origin — `main == origin/main`), ruff clean; full protocol + umbrella suites green. grammar/protocol pure + numpy-free; **Corpus = 4 collections**.
@@ -70,6 +82,8 @@ design.
   cohort** (`epicv2_casectrl_demo_b`) — still exercised, not earned, until a real 2nd cohort is swapped in.
 
 ## ▶ NEXT (concrete plan)
+
+> **SUPERSEDED (2026-06-25) — historical.** This section reflects the 2026-06-22 plan. Since then H0.1, H0.1b, and the local-signing half of H1.A1 shipped; "real signing deferred" and the signing-as-next-move notes below are **out of date** (see the **UPDATE 2026-06-25** block at the top of this file). Current priorities: (a) run the H0.1b real-pins bootstrap; (b) H1.A2 real 2nd cohort. Authoritative forward plan: `docs/superpowers/2026-06-23-remaining-roadmap.md` (reconciled 2026-06-25).
 
 **Recently shipped** (most recent first): **Calibration ledger + certificate — closes the
 build-path critical-path proof** (2026-06-22, merged `9e54684`) — makes the corpus headline `q`
