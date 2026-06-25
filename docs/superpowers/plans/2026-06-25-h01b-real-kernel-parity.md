@@ -118,6 +118,7 @@ from __future__ import annotations
 import hashlib
 import os
 import shutil
+import tempfile
 import urllib.request
 from pathlib import Path
 
@@ -182,7 +183,10 @@ def resolve_pinned_file(
             f"--xena/--cbioportal, or pass --fetch to download from {url!r}.")
 
     cache_dir.mkdir(parents=True, exist_ok=True)
-    tmp = cache_dir / f"{filename}.part"
+    # unique temp name so concurrent runs don't trample each other (spec §3: atomic .part-<n>)
+    fd, tmp_name = tempfile.mkstemp(prefix=f"{filename}.part-", dir=cache_dir)
+    os.close(fd)
+    tmp = Path(tmp_name)
     with urllib.request.urlopen(url) as resp, open(tmp, "wb") as out:  # noqa: S310 (pinned + sha-verified)
         shutil.copyfileobj(resp, out)
     _verify(tmp, sha256, filename, cleanup_on_fail=True)
@@ -212,7 +216,8 @@ git commit -m "feat(ingest): pinned-input resolver (local/cache/opt-in fetch + s
 
 **Interfaces:**
 - Consumes: `polymer_claims.ingest.transform.case_id`, `_is_idh_hotspot`; `polymer_claims._hashing.canonical_sha256`; `polymer_claims.contracts.{load_contract, using_contract_root, clear_contract_cache}`.
-- Produces: `RealBuildResult` (frozen dataclass: `uid, idh_mut_n, wt_n, n_probes, group_digest, idh_call_source, dropped_ungenotyped_n`); `build_real_contract(root, xena_file, cbioportal_dir, *, idh_call_source, idh_count_band=(20,50), required_idh_mut_controls=_REAL_IDH_MUT_CONTROLS) -> RealBuildResult`; `compute_canonical_checksum(root: Path) -> str`; `STEM = "tcga_laml_idh"`; `_REAL_IDH_MUT_CONTROLS: frozenset[str]`.
+- Produces: `RealBuildResult` (frozen dataclass: `uid, idh_mut_n, wt_n, n_probes, group_digest, idh_call_source, dropped_ungenotyped_n`); `build_real_contract(root, xena_file, *, mutations_file, sequenced_file, idh_call_source, idh_count_band=(20,50), required_idh_mut_controls=_REAL_IDH_MUT_CONTROLS) -> RealBuildResult`; `compute_canonical_checksum(root: Path) -> str`; `STEM = "tcga_laml_idh"`; `_REAL_IDH_MUT_CONTROLS: frozenset[str]`.
+- **Design note (audit #1):** the builder takes **explicit `mutations_file` / `sequenced_file` paths**, not a directory. This lets the runner resolve each cBioPortal input independently (one may be local, one freshly fetched into cache) and pass the two concrete paths — no risk of reading from a directory missing one file.
 
 This is a byte-faithful, de-hardcoded port of `data/tcga_laml/build_contract_xena.py` (absolute paths
 removed; `idh_call_source` and the count-band/controls passed in instead of read from `SOURCE.txt`).
@@ -256,10 +261,18 @@ def _make_fixture(root: Path, *, n_probes=60, n_dm=20):
 _KW = dict(idh_call_source="cbioportal:laml_tcga_pub@testcommit",
            idh_count_band=(1, 50), required_idh_mut_controls=frozenset())
 
+def _build(out, xena, cbio, **overrides):
+    """Call build_real_contract with explicit cBioPortal file paths + the synthetic-test defaults."""
+    return build_real_contract(
+        out, xena,
+        mutations_file=cbio / "data_mutations.txt",
+        sequenced_file=cbio / "sequenced_samples.json",
+        **{**_KW, **overrides})
+
 def test_builds_at2_contract_that_loads(tmp_path):
     xena, cbio = _make_fixture(tmp_path)
     out = tmp_path / "contracts"
-    r = build_real_contract(out, xena, cbio, **_KW)
+    r = _build(out, xena, cbio)
     assert isinstance(r, RealBuildResult)
     assert r.uid == "tcga_laml_idh@2"
     assert r.idh_mut_n == 3 and r.wt_n == 5 and r.n_probes == 60
@@ -274,7 +287,7 @@ def test_ungenotyped_case_dropped_not_defaulted_wt(tmp_path):
     # drop one case from the sequenced list -> it must be dropped from the universe, not called WT
     seq = json.loads((cbio / "sequenced_samples.json").read_text())
     (cbio / "sequenced_samples.json").write_text(json.dumps(seq[:-1]))
-    r = build_real_contract(tmp_path / "c", xena, cbio, **_KW)
+    r = _build(tmp_path / "c", xena, cbio)
     assert r.idh_mut_n + r.wt_n == 7          # 8 beta cases - 1 ungenotyped
     assert r.dropped_ungenotyped_n == 1
 
@@ -283,27 +296,24 @@ def test_non_hotspot_variant_is_wt(tmp_path):
     (cbio / "data_mutations.txt").write_text(
         "Hugo_Symbol\tTumor_Sample_Barcode\tHGVSp_Short\n"
         "TP53\tTCGA-AB-2800-03A\tp.R175H\n")     # not an IDH hotspot
-    r = build_real_contract(tmp_path / "c", xena, cbio, **_KW)
+    # idh_mut_n will be 0, so the band must allow 0 (override the _KW (1,50) default)
+    r = _build(tmp_path / "c", xena, cbio, idh_count_band=(0, 50))
     assert r.idh_mut_n == 0
 
 def test_count_band_violation_aborts(tmp_path):
     xena, cbio = _make_fixture(tmp_path)
     with pytest.raises(ValueError, match="outside band"):
-        build_real_contract(tmp_path / "c", xena, cbio,
-                            idh_call_source="x@y", idh_count_band=(20, 50),
-                            required_idh_mut_controls=frozenset())
+        _build(tmp_path / "c", xena, cbio, idh_count_band=(20, 50))
 
 def test_missing_control_aborts(tmp_path):
     xena, cbio = _make_fixture(tmp_path)
     with pytest.raises(ValueError, match="controls not called"):
-        build_real_contract(tmp_path / "c", xena, cbio,
-                            idh_call_source="x@y", idh_count_band=(1, 50),
-                            required_idh_mut_controls=frozenset({"TCGA-ZZ-9999"}))
+        _build(tmp_path / "c", xena, cbio, required_idh_mut_controls=frozenset({"TCGA-ZZ-9999"}))
 
 def test_builder_is_deterministic(tmp_path):
     xena, cbio = _make_fixture(tmp_path)
-    r1 = build_real_contract(tmp_path / "a", xena, cbio, **_KW)
-    r2 = build_real_contract(tmp_path / "b", xena, cbio, **_KW)
+    r1 = _build(tmp_path / "a", xena, cbio)
+    r2 = _build(tmp_path / "b", xena, cbio)
     b1 = (tmp_path / "a" / f"{STEM}.json").read_bytes() + (tmp_path / "a" / f"{STEM}.betas.tsv").read_bytes()
     b2 = (tmp_path / "b" / f"{STEM}.json").read_bytes() + (tmp_path / "b" / f"{STEM}.betas.tsv").read_bytes()
     assert b1 == b2                                # byte-identical
@@ -370,13 +380,13 @@ def _cbio_idh_mut_cases(path: Path) -> set[str]:
 
 
 def build_real_contract(
-    root: Path, xena_file: Path, cbioportal_dir: Path, *,
+    root: Path, xena_file: Path, *,
+    mutations_file: Path, sequenced_file: Path,
     idh_call_source: str,
     idh_count_band: tuple[int, int] = (20, 50),
     required_idh_mut_controls: frozenset[str] = _REAL_IDH_MUT_CONTROLS,
 ) -> RealBuildResult:
     root = Path(root); root.mkdir(parents=True, exist_ok=True)
-    cbio = Path(cbioportal_dir)
 
     # 1. matrix header -> one aliquot column per case (first occurrence).
     with gzip.open(xena_file, "rt") as fh:
@@ -387,8 +397,8 @@ def build_real_contract(
     beta_cases = list(case_to_col)
 
     # 2. IDH calls + intersection universe (drop-not-default WT).
-    idh_mut_cases = _cbio_idh_mut_cases(cbio / "data_mutations.txt")
-    genotyped = {case_id(s) for s in json.loads((cbio / "sequenced_samples.json").read_text())}
+    idh_mut_cases = _cbio_idh_mut_cases(Path(mutations_file))
+    genotyped = {case_id(s) for s in json.loads(Path(sequenced_file).read_text())}
     universe = [c for c in beta_cases if c in genotyped]
     dropped = [c for c in beta_cases if c not in genotyped]
     groups = {c: ("IDH_mut" if c in idh_mut_cases else "WT") for c in universe}
@@ -493,7 +503,7 @@ git commit -m "feat(ingest): de-hardcoded real @2 contract builder + diagnostic 
 - Create: `src/polymer_claims/ingest/real_kernel_pins.json`
 - Create: `src/polymer_claims/real_kernel_proof.py` (stub: `load_pins` only this task; runner added in Task 4)
 - Test: `tests/test_real_kernel_pins.py`
-- Modify: `pyproject.toml` (ensure the JSON ships as package data)
+- Modify (only if the wheel check fails): `pyproject.toml` — Hatchling ships package data files by default, so normally no change is needed (see Step 3).
 
 **Interfaces:**
 - Produces: `polymer_claims.real_kernel_proof.load_pins() -> dict`.
@@ -594,10 +604,19 @@ def load_pins() -> dict:
         files("polymer_claims.ingest").joinpath("real_kernel_pins.json").read_text())
 ```
 
-Confirm packaging includes the JSON. Inspect `pyproject.toml`; if it uses setuptools with
-`package-data`/`include-package-data`, ensure `*.json` under `polymer_claims.ingest` is included. If a
-`[tool.setuptools.package-data]` table exists, add `"polymer_claims.ingest" = ["*.json"]`; if
-`include-package-data = true` with the file tracked in git, no change is needed.
+Confirm packaging includes the JSON. This repo uses **Hatchling** (`pyproject.toml` →
+`build-backend = "hatchling.build"`, `[tool.hatch.build.targets.wheel] packages = ["src/polymer_claims"]`).
+Hatchling includes **all** files under a selected package directory by default (not just `*.py`) — the
+repo already relies on this for `src/polymer_claims/contracts/*.json`, so `ingest/real_kernel_pins.json`
+ships automatically with **no pyproject change**. Verify rather than assume:
+
+```bash
+.venv/bin/python -m build --wheel 2>/dev/null && \
+  unzip -l dist/polymer_claims-*.whl | grep real_kernel_pins.json
+```
+Expected: the JSON appears in the wheel listing. (If `build` is unavailable, `uv build --wheel` works too.)
+If it is somehow absent, add `[tool.hatch.build.targets.wheel.force-include]` with
+`"src/polymer_claims/ingest/real_kernel_pins.json" = "polymer_claims/ingest/real_kernel_pins.json"`.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -607,7 +626,8 @@ Expected: PASS (1 passed)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/polymer_claims/ingest/real_kernel_pins.json src/polymer_claims/real_kernel_proof.py tests/test_real_kernel_pins.py pyproject.toml
+git add src/polymer_claims/ingest/real_kernel_pins.json src/polymer_claims/real_kernel_proof.py tests/test_real_kernel_pins.py
+git add pyproject.toml 2>/dev/null || true   # only if the wheel check required a force-include
 git commit -m "feat(repro): real_kernel_pins.json (bootstrap sentinels) + load_pins via importlib.resources"
 ```
 
@@ -647,7 +667,8 @@ def _capture_pins(tmp_path) -> tuple[dict, Path, Path]:
     from polymer_claims.ingest.tcga_xena import build_real_contract, compute_canonical_checksum
     xena, cbio = _make_fixture(tmp_path)
     out = tmp_path / "cap"
-    r = build_real_contract(out, xena, cbio, **_KW)
+    r = build_real_contract(out, xena, mutations_file=cbio / "data_mutations.txt",
+                            sequenced_file=cbio / "sequenced_samples.json", **_KW)
     with using_contract_root(out):
         clear_contract_cache()
         ref = load_contract("se:tcga_laml_idh@2")
@@ -833,27 +854,29 @@ def run_real_kernel_proof(
 ) -> RealKernelProofResult:
     inp = pins["inputs"]
     cache_dir = Path(cache_dir)
+    # resolve each input independently and keep the concrete returned paths (audit #1): a local dir
+    # missing one file + --fetch retrieving the other must not silently read the wrong directory.
     xena = resolve_pinned_file(
         inp["xena"]["filename"], local=xena_file, url=inp["xena"].get("url"),
         sha256=inp["xena"]["sha256"], cache_dir=cache_dir, allow_fetch=allow_fetch)
-    resolve_pinned_file(
+    mutations_file = resolve_pinned_file(
         inp["cbio_mutations"]["filename"], local=cbioportal_dir, url=inp["cbio_mutations"].get("url"),
         sha256=inp["cbio_mutations"]["sha256"], cache_dir=cache_dir, allow_fetch=allow_fetch)
-    resolve_pinned_file(
+    sequenced_file = resolve_pinned_file(
         inp["cbio_sequenced"]["filename"], local=cbioportal_dir,
         url=inp["cbio_sequenced"].get("api_endpoint"), sha256=inp["cbio_sequenced"]["sha256"],
         cache_dir=cache_dir, allow_fetch=allow_fetch)
-    cbio_dir = cbioportal_dir if cbioportal_dir is not None else cache_dir
     idh_call_source = f"cbioportal:laml_tcga_pub@{inp['cbio_mutations']['commit']}"
     exp = pins["expected"]
 
-    build_kw = {"idh_call_source": idh_call_source, "idh_count_band": idh_count_band}
+    build_kw = {"mutations_file": mutations_file, "sequenced_file": sequenced_file,
+                "idh_call_source": idh_call_source, "idh_count_band": idh_count_band}
     if required_idh_mut_controls is not None:
         build_kw["required_idh_mut_controls"] = required_idh_mut_controls
 
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
-        rbr = build_real_contract(root, xena, cbio_dir, **build_kw)
+        rbr = build_real_contract(root, xena, **build_kw)
         with using_contract_root(root):
             clear_contract_cache()
             ref = load_contract(_REF)
@@ -1015,7 +1038,9 @@ def _verify_kernel_real(args: argparse.Namespace) -> int:
             Path(args.xena) if args.xena else None,
             Path(args.cbioportal) if args.cbioportal else None,
             pins=pins, cache_dir=cache_dir, allow_fetch=args.fetch)
-    except (PinnedInputError, ParityError) as exc:
+    except (PinnedInputError, ParityError, ValueError) as exc:
+        # PinnedInputError: input resolution/checksum; ParityError: a pin mismatch;
+        # ValueError: a builder self-check (controls / count-band / accounting) — all are clean failures.
         print(f"verify-kernel --real FAILED: {exc}", file=sys.stderr)
         return 1
     tier = r.independence_tier.name if r.independence_tier is not None else "NONE"
@@ -1061,14 +1086,21 @@ script minting its own ground truth).
 
 ```python
 # scripts/bootstrap_real_kernel_pins.py
-"""Capture real_kernel_pins.json from the trusted @2 inputs (spec §6). LOCAL-ONLY: run in a tree that
-holds the real Xena matrix + cBioPortal inputs. Prints the pins JSON to stdout; review against the
-previously trusted @2 artifact, then write it to src/polymer_claims/ingest/real_kernel_pins.json and
-commit. Usage:
+"""Capture/compare real_kernel_pins.json content-addresses (spec §6). LOCAL-ONLY: run in a tree that
+holds the real Xena matrix + cBioPortal inputs and the trusted local @2 contract.
+
+Two modes, used together to AVOID self-fulfilling parity:
+  --from-existing : read the addresses of the ALREADY-TRUSTED @2 contract (no rebuild) -> the ground
+                    truth to compare against. Prints the `expected` block only.
+  (rebuild)       : rebuild @2 with the NEW builder from the supplied inputs -> the full pins.
+
+Procedure: run BOTH, diff their `expected` blocks; only if identical, write the rebuild output to
+src/polymer_claims/ingest/real_kernel_pins.json and commit. Usage:
+  .venv/bin/python scripts/bootstrap_real_kernel_pins.py --from-existing \
+      --contract-root src/polymer_claims/contracts > trusted_expected.json
   .venv/bin/python scripts/bootstrap_real_kernel_pins.py \
-      --xena /path/TCGA-LAML.methylation450.tsv.gz \
-      --cbioportal /path/cbioportal_dir \
-      --commit 86690e1ed9752b1dcd50b5657f5f05eafa4b6b78
+      --xena /path/TCGA-LAML.methylation450.tsv.gz --cbioportal /path/cbio \
+      --commit 86690e1ed9752b1dcd50b5657f5f05eafa4b6b78 > rebuilt_pins.json
 """
 from __future__ import annotations
 
@@ -1080,7 +1112,7 @@ import tempfile
 from pathlib import Path
 
 from polymer_claims.contracts import clear_contract_cache, load_contract, using_contract_root
-from polymer_claims.ingest.tcga_xena import build_real_contract, compute_canonical_checksum
+from polymer_claims.ingest.tcga_xena import STEM, build_real_contract, compute_canonical_checksum
 from polymer_claims.real_kernel_proof import _build_claim_and_run_gate
 
 
@@ -1092,25 +1124,57 @@ def _sha(path: Path) -> str:
     return h.hexdigest()
 
 
+def _expected_block(contract_root: Path) -> dict:
+    """Compute the `expected` content-addresses from a contract root holding the @2 artifact."""
+    manifest = json.loads((contract_root / f"{STEM}.json").read_text())
+    meta = manifest["metadata"]
+    with using_contract_root(contract_root):
+        clear_contract_cache()
+        ref = load_contract("se:tcga_laml_idh@2")
+        canonical = compute_canonical_checksum(contract_root)
+        gate = _build_claim_and_run_gate()
+    clear_contract_cache()
+    return {
+        "contract_uid": ref.contract_uid,
+        "contract_checksum": ref.checksums[0].checksum,
+        "canonical_checksum": canonical,
+        "dimnames_hash": ref.dimnames_hash,
+        "group_digest": meta["group_digest"],
+        "idh_mut_n": meta["idh_mut_n"], "wt_n": meta["wt_n"], "n_probes": manifest["dim"][0],
+        "n_dmps": gate["n_dmps"],
+        "e_value": "inf" if math.isinf(gate["e_value"]) else repr(gate["e_value"]),
+        "profile_hash": gate["profile_hash"], "semantic_run_id": gate["semantic_run_id"],
+        "status": gate["status"], "independence_tier": gate["independence_tier"],
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--xena", required=True, type=Path)
-    ap.add_argument("--cbioportal", required=True, type=Path)
-    ap.add_argument("--commit", required=True)
+    ap.add_argument("--from-existing", action="store_true",
+                    help="read the already-trusted @2 contract (no rebuild); print the expected block")
+    ap.add_argument("--contract-root", type=Path, default=Path("src/polymer_claims/contracts"))
+    ap.add_argument("--xena", type=Path)
+    ap.add_argument("--cbioportal", type=Path)
+    ap.add_argument("--commit")
     ap.add_argument("--xena-url", default="https://gdc-hub.s3.us-east-1.amazonaws.com/download/TCGA-LAML.methylation450.tsv.gz")
     ap.add_argument("--api-endpoint", default="https://www.cbioportal.org/api/sample-lists/laml_tcga_pub_sequenced/sample-ids")
     args = ap.parse_args()
 
+    if args.from_existing:
+        print(json.dumps({"expected": _expected_block(args.contract_root)}, indent=2))
+        return 0
+
+    if not (args.xena and args.cbioportal and args.commit):
+        ap.error("rebuild mode needs --xena, --cbioportal, and --commit")
     idh_call_source = f"cbioportal:laml_tcga_pub@{args.commit}"
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
-        rbr = build_real_contract(root, args.xena, args.cbioportal, idh_call_source=idh_call_source)
-        with using_contract_root(root):
-            clear_contract_cache()
-            ref = load_contract("se:tcga_laml_idh@2")
-            canonical = compute_canonical_checksum(root)
-            gate = _build_claim_and_run_gate()
-        clear_contract_cache()
+        build_real_contract(
+            root, args.xena,
+            mutations_file=args.cbioportal / "data_mutations.txt",
+            sequenced_file=args.cbioportal / "sequenced_samples.json",
+            idh_call_source=idh_call_source)
+        expected = _expected_block(root)
 
     pins = {
         "contract_uid": "tcga_laml_idh@2",
@@ -1124,18 +1188,7 @@ def main() -> int:
             "cbio_sequenced": {"api_endpoint": args.api_endpoint, "filename": "sequenced_samples.json",
                                "sha256": _sha(args.cbioportal / "sequenced_samples.json")},
         },
-        "expected": {
-            "contract_uid": ref.contract_uid,
-            "contract_checksum": ref.checksums[0].checksum,
-            "canonical_checksum": canonical,
-            "dimnames_hash": ref.dimnames_hash,
-            "group_digest": rbr.group_digest,
-            "idh_mut_n": rbr.idh_mut_n, "wt_n": rbr.wt_n, "n_probes": rbr.n_probes,
-            "n_dmps": gate["n_dmps"],
-            "e_value": "inf" if math.isinf(gate["e_value"]) else repr(gate["e_value"]),
-            "profile_hash": gate["profile_hash"], "semantic_run_id": gate["semantic_run_id"],
-            "status": gate["status"], "independence_tier": gate["independence_tier"],
-        },
+        "expected": expected,
     }
     print(json.dumps(pins, indent=2))
     return 0
@@ -1170,19 +1223,40 @@ and the gate-result addresses (`n_dmps`, `e_value`, `profile_hash`, `semantic_ru
 committed pins in `src/polymer_claims/ingest/real_kernel_pins.json`. The ~633 MB matrix means this is
 **manual/opt-in, not CI** (CI guards the synthetic `verify-kernel` and the parity machinery).
 
-**Bootstrapping the pins (one-time, spec §6):** `real_kernel_pins.json` ships with sentinel values.
-To capture the real pins from the trusted inputs, run
-`scripts/bootstrap_real_kernel_pins.py --xena … --cbioportal … --commit 86690e1…`, confirm the emitted
-addresses match the previously trusted `@2` artifact, then write the output to the pins file and commit.
+**Bootstrapping the pins (one-time, spec §6 — no self-fulfilling parity):** `real_kernel_pins.json`
+ships with sentinel values. Capture the real pins by running the script in **both** modes and diffing:
+
+```
+# 1. ground truth: addresses of the already-trusted @2 contract (no rebuild)
+.venv/bin/python scripts/bootstrap_real_kernel_pins.py --from-existing \
+    --contract-root src/polymer_claims/contracts | python -c 'import sys,json; print(json.dumps(json.load(sys.stdin)["expected"],sort_keys=True))' > trusted_expected.json
+# 2. NEW-builder rebuild from the real inputs -> full pins
+.venv/bin/python scripts/bootstrap_real_kernel_pins.py \
+    --xena /path/TCGA-LAML.methylation450.tsv.gz --cbioportal /path/cbio \
+    --commit 86690e1ed9752b1dcd50b5657f5f05eafa4b6b78 > rebuilt_pins.json
+# 3. the new builder must reproduce the trusted addresses EXACTLY:
+python -c 'import sys,json; print(json.dumps(json.load(open("rebuilt_pins.json"))["expected"],sort_keys=True))' > rebuilt_expected.json
+diff trusted_expected.json rebuilt_expected.json && echo "PARITY OK — safe to commit pins"
+```
+
+Only if the diff is empty, write `rebuilt_pins.json` to
+`src/polymer_claims/ingest/real_kernel_pins.json` and commit. A non-empty diff means the new builder
+is not faithful to the earned proof — fix the builder, never the pins.
 ```
 
 (Leave the deprecated `ingest tcga-laml` note in place; mark the old hardcoded `build_contract_xena.py`
 / `run_gate.py` paragraph as superseded by `verify-kernel --real`.)
 
-- [ ] **Step 3: Verify the runbook renders and the script imports**
+- [ ] **Step 3: Smoke-test the script (real import + arg parsing, no real data needed)**
 
-Run: `.venv/bin/python -c "import ast; ast.parse(open('scripts/bootstrap_real_kernel_pins.py').read()); print('ok')"`
-Expected: `ok`
+Run: `.venv/bin/python scripts/bootstrap_real_kernel_pins.py --help`
+Expected: argparse usage text listing `--from-existing`, `--contract-root`, `--xena`, `--cbioportal`,
+`--commit` — exit 0. (This actually imports the module — catching import errors `ast.parse` would
+miss — and exercises the parser.)
+
+Then confirm the rebuild-mode guard fires without inputs:
+Run: `.venv/bin/python scripts/bootstrap_real_kernel_pins.py; echo "exit=$?"`
+Expected: an error mentioning `--xena, --cbioportal, and --commit` and a non-zero exit.
 
 - [ ] **Step 4: Run the full suite**
 
@@ -1211,7 +1285,9 @@ is a deliberate spec-defined bootstrap artifact (§6) filled in Task 6, not a pl
 shows complete code/commands.
 
 **Type consistency:** `resolve_pinned_file` signature identical across T1/T4/T6. `build_real_contract`
-signature (`idh_call_source` kw, `idh_count_band`, `required_idh_mut_controls`) consistent T2/T4/T6.
+takes explicit `mutations_file` / `sequenced_file` (keyword-only) plus `idh_call_source`,
+`idh_count_band`, `required_idh_mut_controls` — consistent across T2 (impl + `_build` helper), T4
+(runner passes the resolved paths), and T6 (bootstrap + `_expected_block`).
 `RealBuildResult` fields used in T4/T6 match T2. `_build_claim_and_run_gate` return keys
 (`n_dmps, e_value, status, independence_tier, profile_hash, semantic_run_id, status_enum, tier_enum,
 n_probes, k`) consistent T4/T6. Pins schema identical T3/T4/T6. Enum pins lowercase `.value`
