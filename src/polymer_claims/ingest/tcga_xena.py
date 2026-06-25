@@ -55,7 +55,8 @@ def build_real_contract(
     idh_count_band: tuple[int, int] = (20, 50),
     required_idh_mut_controls: frozenset[str] = _REAL_IDH_MUT_CONTROLS,
 ) -> RealBuildResult:
-    root = Path(root); root.mkdir(parents=True, exist_ok=True)
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
 
     # 1. matrix header -> one aliquot column per case (first occurrence).
     with gzip.open(xena_file, "rt") as fh:
