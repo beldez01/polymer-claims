@@ -96,6 +96,10 @@ These are cheap, unblock everything downstream, and close gaps the spot-verifica
   `verify-bundle`, and `--transparency-log` on `certify`/`export-attestation`. Still open: the
   NETWORKED public-Rekor backend (`--rekor-url`, reserved+erroring today) and consistency proofs —
   what add public non-repudiation + verified append-only-ness.
+  **UPDATE (2026-06-26):** the networked Rekor backend is fully **designed and build-ready** but
+  **intentionally TABLED** (`specs/2026-06-26-networked-rekor-backend-design.md`, status DEFERRED) —
+  public non-repudiation isn't needed before there's real first-use/wedge work to anchor. Resume that
+  spec via `writing-plans` when a claim is actually being shared externally. Do first-use work first.
 - [ ] **H1.A2 — Unblock §2E REPLICATED on a real 2nd cohort (data-blocked today).** The gating
   activity for a credible wedge is sourcing a second HM450 AML cohort with machine-readable IDH
   status (or pivoting the wedge claim to data we *can* replicate). This is sourcing/curation work,
