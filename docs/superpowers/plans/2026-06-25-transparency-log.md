@@ -307,9 +307,12 @@ git commit -m "feat(transparency): RFC-6962 Merkle math + canonical entry bytes"
 
 **Checkpoint string format (exact):**
 ```
-<origin>\n<tree_size>\n<base64std(root_hash)>\nTimestamp: <rfc3339>\n— <origin> <base64std(keyhint4 || ed25519_sig)>\n
+<origin>\n<tree_size>\n<base64std(root_hash)>\nTimestamp: <rfc3339>\n\n— <origin> <base64std(keyhint4 || ed25519_sig)>\n
 ```
-The **signed bytes** are the body = the first four lines (through the `Timestamp:` line's `\n`), i.e. everything before the `— ` signature line. `keyhint4` = `sha256(origin.encode() + b"\n" + pubkey_DER)[:4]`.
+The **signed bytes** are the C2SP note body = the four content lines **plus the trailing blank line**
+(i.e. everything up to and *including* the `\n\n` that terminates the body — the blank line is
+mandatory and part of the signed bytes); the `— ` signature line follows. `keyhint4` =
+`sha256(origin.encode() + b"\n" + pubkey_DER)[:4]`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -390,6 +393,16 @@ def test_verify_never_raises_on_malformed():
         assert T.verify_checkpoint(junk, pub) is False
 
 
+def test_verify_rejects_body_without_c2sp_blank_line():
+    # A note whose body lacks the mandatory blank line MUST be rejected even if the signature over
+    # that (shorter) body is itself valid — C2SP requires the blank-line-terminated body.
+    priv, pub = signing.generate_keypair()
+    body = f"{ORIGIN}\n3\n{base64.b64encode(ROOT).decode('ascii')}\nTimestamp: {TS}\n"  # single \n, no blank
+    blob = base64.b64encode(T._keyhint(ORIGIN, pub) + priv.sign(body.encode("utf-8"))).decode("ascii")
+    note = f"{body}— {ORIGIN} {blob}\n"
+    assert T.verify_checkpoint(note, pub) is False
+
+
 def test_signing_is_deterministic_for_fixed_key_and_inputs():
     priv, _ = signing.generate_keypair()
     a = T.sign_checkpoint(ORIGIN, 3, ROOT, TS, priv)
@@ -444,8 +457,8 @@ def sign_checkpoint(origin: str, tree_size: int, root_hash: bytes, timestamp: st
 
 def parse_checkpoint(note: str) -> CheckpointFields:
     lines = note.splitlines()
-    if len(lines) < 5 or not lines[3].startswith("Timestamp: "):
-        raise ValueError("malformed checkpoint note")
+    if len(lines) < 5 or not lines[3].startswith("Timestamp: ") or lines[4] != "":
+        raise ValueError("malformed checkpoint note (expected C2SP blank-line-terminated body)")
     return CheckpointFields(
         origin=lines[0],
         tree_size=int(lines[1]),
@@ -463,7 +476,10 @@ def verify_checkpoint(note: str, log_public_key) -> bool:
         idx = note.index("\n" + _SIG_PREFIX)
     except ValueError:
         return False
-    body = note[: idx + 1].encode("utf-8")  # include the blank line that terminates the body (C2SP)
+    body_str = note[: idx + 1]
+    if not body_str.endswith("\n\n"):        # C2SP: a blank line MUST terminate the signed body
+        return False
+    body = body_str.encode("utf-8")
     origin = note.split("\n", 1)[0]          # origin is the first body line (itself signed)
     expected_hint = _keyhint(origin, log_public_key)
     sig_block = note[idx + 1:]
@@ -1457,7 +1473,7 @@ Run: `grep -rn "verify-bundle\|transparency-log\|polymer.bundle" README.md ARCHI
 Expected: the new lines appear in each file.
 
 ```bash
-git add docs/ README.md
+git add docs/ README.md ARCHITECTURE_CURRENT.md
 git commit -m "docs: reconcile for local transparency-log layer (verify-bundle, --transparency-log)"
 ```
 
