@@ -241,11 +241,14 @@ class LocalInclusionLog:
         leaves = self._load_leaves()
         index = len(leaves)
         leaves.append(entry_bytes)
-        with self._path.open("a") as fh:
-            fh.write(base64.b64encode(entry_bytes).decode("ascii") + "\n")
+        # Compute + sign FIRST (all in-memory), then append the line LAST as the commit point: if
+        # sign_checkpoint fails or the process dies before the write, no orphan line is persisted and
+        # the index cannot drift on reopen.
         root = merkle_root(leaves)
         proof = inclusion_proof(leaves, index)
         checkpoint = sign_checkpoint(self._origin, len(leaves), root, self._clock(), self._key)
+        with self._path.open("a") as fh:
+            fh.write(base64.b64encode(entry_bytes).decode("ascii") + "\n")
         return LogEntry(
             log_index=index,
             inclusion_proof=[h.hex() for h in proof],
