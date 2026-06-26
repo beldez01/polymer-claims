@@ -14,6 +14,7 @@ adapters/oracles/red-teamers are a later `--plugin` surface (out of scope for v1
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import urllib.error
@@ -233,6 +234,9 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
     if args.key and args.format != "dsse":
         print("export-attestation: --key applies only to --format dsse", file=sys.stderr)
         return 1
+    if (args.transparency_log or args.rekor_url) and not args.key:
+        print("export-attestation: --transparency-log/--rekor-url require --key (and --format dsse)", file=sys.stderr)
+        return 1
     from .attestation import (
         build_attestation_bundle, build_attestation_statements, dsse_envelope, resolve_contract_index,
     )
@@ -253,6 +257,26 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
                 print(f"export-attestation: cannot load private key {args.key}: {exc}", file=sys.stderr)
                 return 1
             envelopes = [sign_envelope(e, priv) for e in envelopes]
+            if args.rekor_url:
+                print("export-attestation: networked Rekor backend (--rekor-url) is not implemented yet; see spec §7", file=sys.stderr)
+                return 1
+            if args.transparency_log:
+                from .transparency import canonical_entry_bytes
+                from .bundle import build_bundle
+                opened = _open_local_log(args)
+                if isinstance(opened, int):
+                    return opened
+                log, log_pub = opened
+                bundles = []
+                for e in envelopes:
+                    entry = log.submit(canonical_entry_bytes(e))
+                    bundles.append(build_bundle(e, priv.public_key(), entry, log_pub))
+                output = "".join(json.dumps(b, separators=(",", ":")) + "\n" for b in bundles)
+                if args.out:
+                    Path(args.out).write_text(output)
+                else:
+                    sys.stdout.write(output)
+                return 0
         output = "".join(e.model_dump_json(by_alias=True, exclude_none=True) + "\n" for e in envelopes)
         if args.out:
             Path(args.out).write_text(output)
@@ -361,6 +385,89 @@ def _verify_kernel_real(args: argparse.Namespace) -> int:
     print("  proves the pinned real-data computation reproduces — NOT data veracity / independence "
           "(that is roadmap H1.A2). See docs/superpowers/2026-06-23-kernel-proof-runbook.md")
     return 0 if ok else 1
+
+
+def _open_local_log(args):
+    """Return (LocalInclusionLog, log_public_key) or an int rc on error. Auto-generates DIR/log.key."""
+    from datetime import datetime, timezone
+    from .transparency import LocalInclusionLog
+    from .signing import generate_keypair, serialize_private_pem, load_private_key
+    log_dir = Path(args.log_dir)
+    key_path = Path(args.log_key) if args.log_key else log_dir / "log.key"
+    try:
+        if key_path.exists():
+            priv = load_private_key(key_path.read_bytes())
+        else:
+            log_dir.mkdir(parents=True, exist_ok=True)
+            priv, _ = generate_keypair()
+            _atomic_write(key_path, serialize_private_pem(priv), mode=0o600)
+            print(f"transparency-log: generated log key {key_path}", file=sys.stderr)
+    except (OSError, ValueError) as exc:
+        print(f"transparency-log: cannot open log key {key_path}: {exc}", file=sys.stderr)
+        return 1
+    clock = lambda: datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")  # noqa: E731
+    return LocalInclusionLog(log_dir, priv, clock=clock), priv.public_key()
+
+
+def _cmd_verify_bundle(args: argparse.Namespace) -> int:
+    try:
+        from .bundle import verify_bundle, TrustStatus
+        from .signing import load_public_key, _require_crypto
+        _require_crypto()   # surface the friendly [sign] hint up front (verify_bundle would otherwise
+                            # swallow a missing-crypto error as INVALID via its broad except)
+    except ModuleNotFoundError as exc:
+        return _sign_dep_error(exc)
+    sig_key = log_key = None
+    try:
+        if args.pub_key:
+            sig_key = load_public_key(Path(args.pub_key).read_bytes())
+        if args.log_pub_key:
+            log_key = load_public_key(Path(args.log_pub_key).read_bytes())
+    except ModuleNotFoundError as exc:
+        return _sign_dep_error(exc)
+    except (OSError, ValueError) as exc:
+        print(f"verify-bundle: cannot load public key: {exc}", file=sys.stderr)
+        return 1
+    try:
+        text = Path(args.path).read_text()
+    except OSError as exc:
+        print(f"verify-bundle: cannot read {args.path}: {exc}", file=sys.stderr)
+        return 1
+    bundles = []
+    for line in text.splitlines():
+        line = line.strip()
+        if line:
+            try:
+                bundles.append(json.loads(line))
+            except json.JSONDecodeError:
+                bundles = None
+                break
+    if bundles is None:                              # maybe a single multi-line JSON object
+        try:
+            bundles = [json.loads(text)]
+        except json.JSONDecodeError:
+            print("verify-bundle: input is not a bundle JSON or NDJSON of bundles", file=sys.stderr)
+            return 1
+    if not bundles:
+        print("verify-bundle: no bundles to verify", file=sys.stderr)
+        return 1
+    any_invalid = any_untrusted = False
+    for i, b in enumerate(bundles):
+        r = verify_bundle(b, signing_trust_key=sig_key, log_trust_key=log_key)
+        if r.status == TrustStatus.INVALID:
+            any_invalid = True
+        elif r.status == TrustStatus.STRUCTURALLY_VALID_UNTRUSTED:
+            any_untrusted = True
+        detail = "" if r.status == TrustStatus.TRUSTED_VALID else f" ({r.reason})"
+        print(f"  bundle[{i}]: {r.status.value.upper()}{detail}", file=sys.stderr)
+    if any_invalid:
+        print("verify-bundle: INVALID bundle(s)", file=sys.stderr)
+        return 1
+    if any_untrusted:
+        print("verify-bundle: structurally valid but UNTRUSTED (pin --pub-key/--log-pub-key for rc 0)", file=sys.stderr)
+        return 2
+    print("verify-bundle: all bundles TRUSTED_VALID", file=sys.stderr)
+    return 0
 
 
 def _sign_dep_error(exc: ModuleNotFoundError) -> int:
@@ -473,6 +580,9 @@ def _cmd_certify(args: argparse.Namespace) -> int:
     if (args.key or args.keyid) and args.format != "dsse":
         print("certify: --key/--keyid apply only to --format dsse", file=sys.stderr)
         return 1
+    if (args.transparency_log or args.rekor_url) and not args.key:
+        print("certify: --transparency-log/--rekor-url require --key (and --format dsse)", file=sys.stderr)
+        return 1
     from .attestation import build_certificate, render_certificate_text, certificate_dsse_envelope
     corpus = load_corpus(args.corpus)
     ledger = None
@@ -496,7 +606,27 @@ def _cmd_certify(args: argparse.Namespace) -> int:
             except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
                 print(f"certify: cannot load private key {args.key}: {exc}", file=sys.stderr)
                 return 1
+            if args.transparency_log and args.keyid is not None:
+                from .signing import keyid_for
+                if args.keyid != keyid_for(priv.public_key()):
+                    print("certify: --keyid conflicts with --transparency-log — a bundle requires the "
+                          "derived keyid (it must equal the signing key's keyid); omit --keyid", file=sys.stderr)
+                    return 1
             env = sign_envelope(env, priv, keyid=args.keyid)
+            if args.rekor_url:
+                print("certify: networked Rekor backend (--rekor-url) is not implemented yet; see spec §7", file=sys.stderr)
+                return 1
+            if args.transparency_log:
+                from .transparency import canonical_entry_bytes
+                from .bundle import build_bundle
+                opened = _open_local_log(args)
+                if isinstance(opened, int):
+                    return opened
+                log, log_pub = opened
+                entry = log.submit(canonical_entry_bytes(env))
+                bundle = build_bundle(env, priv.public_key(), entry, log_pub)
+                sys.stdout.write(json.dumps(bundle, indent=2) + "\n")
+                return 0
         out = env.model_dump_json(by_alias=True, exclude_none=True)
     else:
         out = render_certificate_text(cert)
@@ -702,6 +832,18 @@ def _cmd_serve(args: argparse.Namespace) -> int:
 # ---------------------------------------------------------------------------
 # parser
 # ---------------------------------------------------------------------------
+def _add_transparency_flags(parser):
+    """Shared --transparency-log family for certify + export-attestation (call after each is created)."""
+    parser.add_argument("--transparency-log", action="store_true",
+                        help="append the signed DSSE envelope to a local Merkle inclusion log and emit a Polymer bundle (needs --key, --format dsse)")
+    parser.add_argument("--log-dir", default="./.polymer-tlog",
+                        help="local transparency-log directory (default ./.polymer-tlog)")
+    parser.add_argument("--log-key", default=None,
+                        help="ed25519 private key PEM for the log (default <log-dir>/log.key, auto-generated)")
+    parser.add_argument("--rekor-url", default=None,
+                        help="RESERVED: networked Rekor backend is not implemented yet (see spec §7)")
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="polymer-claims",
@@ -816,6 +958,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p_att.add_argument("--format", choices=("bundle", "dsse"), default="bundle",
                        help="bundle (default) or dsse (NDJSON of DSSE envelopes; unsigned by default, use --key to sign)")
     p_att.add_argument("--key", default=None, help="ed25519 private key PEM; sign each DSSE envelope (dsse format only)")
+    _add_transparency_flags(p_att)
     p_att.set_defaults(func=_cmd_export_attestation)
 
     p_cal = sub.add_parser("calibrate", help="run the synthetic DEFINITIONAL calibration harness")
@@ -850,6 +993,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p_cert.add_argument("--format", choices=("text", "json", "dsse"), default="text")
     p_cert.add_argument("--key", default=None, help="ed25519 private key PEM; sign the DSSE envelope (dsse format only)")
     p_cert.add_argument("--keyid", default=None, help="override the DSSE signature keyid")
+    _add_transparency_flags(p_cert)
     p_cert.set_defaults(func=_cmd_certify)
 
     p_vk = sub.add_parser("verify-kernel",
@@ -875,6 +1019,13 @@ def _build_parser() -> argparse.ArgumentParser:
     p_vd.add_argument("path", help="path to a DSSE envelope JSON or NDJSON of envelopes")
     p_vd.add_argument("--pub-key", required=True, help="path to the signer's public key PEM")
     p_vd.set_defaults(func=_cmd_verify_dsse)
+
+    p_vb = sub.add_parser("verify-bundle",
+                          help="verify a Polymer bundle (or NDJSON of bundles) offline; rc 0 needs BOTH keys pinned")
+    p_vb.add_argument("path", help="path to a bundle JSON or NDJSON of bundles")
+    p_vb.add_argument("--pub-key", default=None, help="pin the signer's public key PEM (both --pub-key AND --log-pub-key required for rc 0)")
+    p_vb.add_argument("--log-pub-key", default=None, help="pin the log's public key PEM (both --pub-key AND --log-pub-key required for rc 0)")
+    p_vb.set_defaults(func=_cmd_verify_bundle)
 
     return parser
 
