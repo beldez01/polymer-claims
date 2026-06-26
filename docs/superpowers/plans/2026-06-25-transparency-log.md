@@ -58,6 +58,7 @@ Create `tests/test_transparency_merkle.py`:
 ```python
 import base64
 import hashlib
+import json
 
 import pytest
 
@@ -131,11 +132,28 @@ def test_verify_inclusion_rejects_wrong_index_size_root_and_malformed():
     proof = T.inclusion_proof(leaves, 2)
     leaf = T.leaf_hash(leaves[2])
     assert T.verify_inclusion(leaf, 3, 6, proof, root) is False          # wrong index
-    assert T.verify_inclusion(leaf, 2, 7, proof, root) is False          # wrong tree_size
+    # A 6-leaf proof (length 3) is structurally inconsistent with a much larger tree -> rejected.
+    # (Adjacent sizes like 7 can ALIAS for some indices — same audit path — so size alone is not the
+    # guarantee; root binding is, since (tree_size, root) are signed together in the checkpoint.)
+    assert T.verify_inclusion(leaf, 2, 100, proof, root) is False        # wrong tree_size (length mismatch)
     assert T.verify_inclusion(leaf, 2, 6, proof, bytes(32)) is False     # wrong root
     assert T.verify_inclusion(leaf, 2, 6, proof + [bytes(32)], root) is False  # over-long
     assert T.verify_inclusion(leaf, 2, 6, [], root) is False             # truncated
     assert T.verify_inclusion(leaf, -1, 6, proof, root) is False         # bad index, no raise
+
+
+def test_inclusion_adjacent_size_aliasing_is_expected_rfc6962_behavior():
+    # Documented invariant (NOT a bug): for some indices, a proof from a size-n tree verifies under
+    # size n+1 with the SAME root, because the audit path aliases. Size alone is not the guarantee —
+    # (tree_size, root) are signed together in the checkpoint, so the ROOT binds. Pinned so a future
+    # "fix" that tries to reject adjacent sizes breaks this test instead of silently diverging from RFC-6962.
+    leaves = [bytes([i]) for i in range(6)]
+    root = T.merkle_root(leaves)
+    proof = T.inclusion_proof(leaves, 2)
+    leaf = T.leaf_hash(leaves[2])
+    assert T.verify_inclusion(leaf, 2, 7, proof, root) is True            # aliases — expected
+    # but the SAME proof against the REAL 7-leaf root is rejected (root binding is the guarantee):
+    assert T.verify_inclusion(leaf, 2, 7, proof, T.merkle_root([bytes([i]) for i in range(7)])) is False
 
 
 def test_canonical_entry_bytes_is_sorted_compact_json_of_signed_envelope():
@@ -145,7 +163,6 @@ def test_canonical_entry_bytes_is_sorted_compact_json_of_signed_envelope():
         signatures=(DsseSignature(sig="QUJD", keyid="abcd1234"),),
     )
     out = T.canonical_entry_bytes(env)
-    import json
     parsed = json.loads(out)
     assert parsed == {
         "payloadType": "application/vnd.polymer.certificate+json",
@@ -669,11 +686,14 @@ class LocalInclusionLog:
         leaves = self._load_leaves()
         index = len(leaves)
         leaves.append(entry_bytes)
-        with self._path.open("a") as fh:
-            fh.write(base64.b64encode(entry_bytes).decode("ascii") + "\n")
+        # Compute + sign FIRST (all in-memory), then append the line LAST as the commit point: if
+        # sign_checkpoint fails or the process dies before the write, no orphan line is persisted and
+        # the index cannot drift on reopen.
         root = merkle_root(leaves)
         proof = inclusion_proof(leaves, index)
         checkpoint = sign_checkpoint(self._origin, len(leaves), root, self._clock(), self._key)
+        with self._path.open("a") as fh:
+            fh.write(base64.b64encode(entry_bytes).decode("ascii") + "\n")
         return LogEntry(
             log_index=index,
             inclusion_proof=[h.hex() for h in proof],
