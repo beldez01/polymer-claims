@@ -11,7 +11,8 @@ import base64
 import hashlib
 import json
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, Callable, Protocol
 
 if TYPE_CHECKING:
     from polymer_claims.attestation import DsseEnvelope
@@ -183,3 +184,73 @@ def verify_checkpoint(note: str, log_public_key) -> bool:
         except (ValueError, IndexError, TypeError, InvalidSignature):
             continue
     return False
+
+
+# --- Log layer (LocalInclusionLog) ---------------------------------------------------------------
+
+LOCAL_KIND_VERSION = "polymer-inclusion/0.1"
+
+
+@dataclass(frozen=True)
+class LogEntry:
+    log_index: int
+    inclusion_proof: list[str]      # hex sibling hashes
+    checkpoint: str                 # C2SP signed-note string (state AFTER this entry)
+    log_id: str
+    integrated_time: str | None
+    kind_version: str
+
+
+class TransparencyLog(Protocol):
+    def submit(self, entry_bytes: bytes) -> LogEntry: ...
+
+    @property
+    def public_key_pem(self) -> bytes: ...
+
+
+class LocalInclusionLog:
+    """Append-only Merkle inclusion log backed by entries.jsonl (base64 lines). Single-process,
+    single-writer; no consistency proofs (not verified-append-only). The clock callable returns an
+    RFC-3339 UTC string (injected for determinism)."""
+
+    def __init__(self, log_dir, log_private_key, *, origin: str = "polymer-claims-local-log",
+                 clock: Callable[[], str]):
+        self._dir = Path(log_dir)
+        self._dir.mkdir(parents=True, exist_ok=True)
+        self._path = self._dir / "entries.jsonl"
+        self._key = log_private_key
+        self._origin = origin
+        self._clock = clock
+
+    def _load_leaves(self) -> list[bytes]:
+        if not self._path.exists():
+            return []
+        leaves = []
+        for line in self._path.read_text().splitlines():
+            if line:
+                leaves.append(base64.b64decode(line, validate=True))
+        return leaves
+
+    @property
+    def public_key_pem(self) -> bytes:
+        from polymer_claims.signing import serialize_public_pem
+        return serialize_public_pem(self._key.public_key())
+
+    def submit(self, entry_bytes: bytes) -> LogEntry:
+        from polymer_claims.signing import keyid_for
+        leaves = self._load_leaves()
+        index = len(leaves)
+        leaves.append(entry_bytes)
+        with self._path.open("a") as fh:
+            fh.write(base64.b64encode(entry_bytes).decode("ascii") + "\n")
+        root = merkle_root(leaves)
+        proof = inclusion_proof(leaves, index)
+        checkpoint = sign_checkpoint(self._origin, len(leaves), root, self._clock(), self._key)
+        return LogEntry(
+            log_index=index,
+            inclusion_proof=[h.hex() for h in proof],
+            checkpoint=checkpoint,
+            log_id=keyid_for(self._key.public_key()),
+            integrated_time=None,
+            kind_version=LOCAL_KIND_VERSION,
+        )
