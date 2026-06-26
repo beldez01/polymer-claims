@@ -154,9 +154,12 @@ def parse_checkpoint(note: str) -> CheckpointFields:
 
 def verify_checkpoint(note: str, log_public_key) -> bool:
     """True iff >=1 signature line verifies over the note body against log_public_key AND carries the
-    expected 4-byte keyhint for that key/origin. Never raises."""
+    expected 4-byte keyhint for that key/origin. Never raises on malformed input."""
     from polymer_claims.signing import _require_crypto
     _ed, _ser, InvalidSignature = _require_crypto()
+    # Missing crypto intentionally raises ModuleNotFoundError(name="cryptography") here (mirrors
+    # signing.verify_envelope) so the CLI surfaces the friendly [sign] install hint; "never raises"
+    # is scoped to malformed INPUT (handled below), not a missing dependency.
     try:
         idx = note.index("\n" + _SIG_PREFIX)
     except ValueError:
