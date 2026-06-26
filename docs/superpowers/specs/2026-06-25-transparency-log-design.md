@@ -1,18 +1,27 @@
 # Transparency-Log Signing + Offline-Verifiable Bundle (local-first, network-ready) — Design Spec
 
-**Status:** Design / approved for planning. v0.1
+**Status:** Design / approved for planning. v0.2
 **Date:** 2026-06-25
 **Author:** Z. Belden (brainstormed with Claude)
 **Roadmap:** H1.A1 (Arc-2 slice 3 — real signing), the still-open half. The local ed25519 DSSE
 signing of `specs/2026-06-23-dsse-signing-design.md` shipped; this is its deferred §9 successor
-("H1.A1b") — the **transparency-log + Sigstore-compatible bundle** layer, scoped local-first.
+("H1.A1b") — the **transparency-log + offline-verifiable bundle** layer, scoped local-first.
 
-> **One line.** Append each signed DSSE envelope to an **append-only RFC-6962 Merkle transparency
-> log**, return a **signed inclusion proof + checkpoint**, and wrap envelope + proof + checkpoint into
-> a **Sigstore-compatible bundle** that anyone can verify **fully offline**. v1 backs the log with a
-> local `LocalTransparencyLog`; a networked `RekorTransparencyLog` is a later additive drop-in behind
-> the same `TransparencyLog` interface. The bundle format and verifier are backend-agnostic, so the
-> network upgrade changes no format and no verification code.
+> **Revision note (v0.2).** Hardened after external review against the RFC-6962 and Sigstore/Rekor
+> specs. Key corrections: this is a **Polymer bundle (Sigstore-*inspired*), not Sigstore-wire-compatible**
+> (§4.4); the checkpoint uses the **C2SP signed-note format** (§3.3); `verify_bundle` reports a **trust
+> status** and the CLI requires a **pinned trust root** for success (§4.3, §5); v1 is a **Merkle
+> *inclusion* log** (append-only-ness needs consistency proofs, deferred) (§0.1, §11); and §7's seam
+> guarantee is the **`submit` interface**, with the bundle/verifier extending *additively* for Rekor's
+> richer entry fields — not "zero change" (§7).
+
+> **One line.** Append each signed DSSE envelope to a local **RFC-6962 Merkle inclusion log**, return a
+> **C2SP-format signed checkpoint + inclusion proof**, and wrap envelope + proof + checkpoint into a
+> **Polymer bundle** (Sigstore-inspired in shape, not Sigstore-wire-compatible — §4.4) that verifies
+> **fully offline against pinned keys**. v1 backs the log with a local `LocalInclusionLog`; a networked
+> `RekorTransparencyLog` is a later additive backend behind the same `TransparencyLog` interface. The
+> `TransparencyLog.submit` *interface* is the stable seam; `bundle.py`/`verify_bundle` extend
+> *additively* to carry Rekor's richer entry fields when that backend lands (§7).
 
 ---
 
@@ -21,29 +30,40 @@ signing of `specs/2026-06-23-dsse-signing-design.md` shipped; this is its deferr
 `signing.py` already does local ed25519 DSSE-PAE signing: `pae`, `sign_envelope(env, priv, *, keyid)`,
 `verify_envelope(env, pub) -> bool`, `generate_keypair`, `keyid_for`, the PEM (de)serializers, all
 crypto behind `_require_crypto()` (the `[sign]` extra; `cryptography>=42`). The CLI already has
-`keygen` and `verify-dsse`, and `--key` on `certify`/`export-attestation`. **None of that changes.**
-This slice adds a layer *on top of* a signed envelope.
+`keygen` and `verify-dsse` (which correctly **requires** `--pub-key`), and `--key` on
+`certify`/`export-attestation`. **None of that changes.** This slice adds a layer *on top of* a signed
+envelope.
 
 **Brainstorm decisions (2026-06-25), locked:**
-1. **Trust model — key-based + transparency log + offline-verifiable bundle.** Keep the shipped
-   operator ed25519 key as the signing identity. A log entry adds tamper-evidence, an inclusion proof,
-   and a signed timestamp. It is **NOT** identity-bound (no Fulcio/OIDC — deferred §9).
-2. **Implementation — minimal in-house.** `urllib` + `cryptography` + stdlib `hashlib` only. RFC-6962
-   Merkle math and checkpoint verification written here; no heavy deps, no `sigstore`/`cosign` binary,
-   no `rekor-cli`.
-3. **Scope — local-first with an explicit network seam.** v1 ships a **local append-only Merkle log**
-   + bundle + offline inclusion verification, all behind a `TransparencyLog` protocol. A networked
-   public-Rekor backend is the *next* slice this seam enables (§7); v1 writes no network code.
+1. **Trust model — key-based + inclusion log + offline-verifiable bundle.** Keep the shipped operator
+   ed25519 key as the signing identity. A log entry adds tamper-evidence, an inclusion proof, and a
+   signed timestamp. It is **NOT** identity-bound (no Fulcio/OIDC — deferred §11).
+2. **Implementation — minimal in-house.** `urllib` (network slice only) + `cryptography` + stdlib
+   `hashlib` only. RFC-6962 Merkle math, the C2SP checkpoint, and verification are written here; no
+   heavy deps, no `sigstore`/`cosign`/`rekor-cli` binary.
+3. **Scope — local-first with an explicit network seam.** v1 ships a **local Merkle inclusion log** +
+   bundle + offline verification, all behind a `TransparencyLog` protocol. A networked public-Rekor
+   backend is the *next* slice this seam enables (§7); v1 writes no network code.
 
 ### 0.1 The honest boundary (state it in docs and CLI help)
 
-A local log delivers **tamper-evidence** (any edit to a logged entry breaks the Merkle root),
-**inclusion proofs** (cryptographic proof an envelope is in a log of a given size), **signed
-timestamps** (the checkpoint is signed by the log key), and a **fully offline-verifiable bundle**.
-It does **NOT** deliver **public non-repudiation** — that requires a *public, independently-operated,
-append-only* log (real Rekor), because a local log's operator could rewrite history before anyone
-witnessed it. v1 ships all the machinery and verification; public non-repudiation arrives with the
-networked backend (§7). The CLI and bundle must not overstate this.
+A local inclusion log delivers **tamper-evidence** (any edit to a logged entry breaks the signed
+Merkle root), **inclusion proofs** (cryptographic proof an envelope is a member of a tree of a given
+size whose root the log operator signed), **signed timestamps** (the C2SP checkpoint is signed by the
+log key), and a **fully offline-verifiable bundle**.
+
+It does **NOT** deliver:
+- **Append-only-ness.** An inclusion proof proves membership in *one* signed root; it does not prove a
+  later root *extends* an earlier one. RFC-6962's append-only property requires **consistency proofs**
+  between observed checkpoints (deferred, §11). v1 is therefore precisely a *Merkle inclusion log*, not
+  a verified-append-only transparency log.
+- **Public non-repudiation.** That requires a *public, independently-operated, witnessed* log (real
+  Rekor) — a local operator could rewrite history before anyone witnessed a checkpoint.
+- **Sigstore wire-compatibility.** The bundle is Sigstore-*inspired*, not byte-compatible with upstream
+  Sigstore/`cosign` tooling (§4.4).
+
+v1 ships all the local machinery + offline verification; the three properties above arrive with the
+networked backend + consistency proofs + witnessing (§7, §11). The CLI and bundle must not overstate.
 
 ## 1. Hard constraints (load-bearing)
 
@@ -53,18 +73,20 @@ networked backend (§7). The CLI and bundle must not overstate this.
 - **Base install stays crypto-free.** All crypto stays behind the existing `[sign]` extra via the
   existing `_require_crypto()`. A missing dep surfaces the same friendly
   `pip install 'polymer-claims[sign]'` message, never a traceback.
-- **Offline & deterministic in v1.** No network code path exists in v1. Merkle hashing is pure
-  stdlib `hashlib`; verification is pure given the bundle bytes + the log's public key. The only
-  non-determinism is the checkpoint timestamp and the per-run log key, both **injected** (a clock
-  callable and an explicit key path) so tests are fully deterministic.
+- **Offline & deterministic in v1.** No network code path exists in v1. Merkle hashing is pure stdlib
+  `hashlib`; verification is pure given the bundle bytes + pinned keys. The only non-determinism is the
+  checkpoint timestamp and the per-run log key, both **injected** (a clock callable and an explicit key
+  path) so tests are fully deterministic.
 - **Sign/verify exactly the logged bytes.** The Merkle leaf is computed over the **canonical envelope
   bytes** (§3.1) — the same bytes a verifier reconstructs — so there is no re-serialization drift
   between submit-time and verify-time.
-- **`verify_bundle` never raises on malformed input.** Mirroring `verify_envelope`: any structural
-  defect, bad base64, short proof, or signature failure returns a negative structured result, not an
-  exception.
-- **No private keys in git.** The log key is an operator-supplied/`keygen`-generated PEM, same policy
-  as the signing key; tests generate ephemeral keys in-process.
+- **Verification is trust-gated and never raises on malformed input.** Mirroring `verify_envelope` and
+  the `verify-dsse --pub-key` requirement: any structural defect, bad base64, short proof, or signature
+  failure yields a negative/`INVALID` structured result (never an exception); and a bundle that is only
+  internally consistent against its *own* embedded keys is reported `STRUCTURALLY_VALID_UNTRUSTED`, not
+  trusted (§4.3).
+- **No private keys in git.** The log key is operator-supplied/`keygen`-generated PEM, same policy as
+  the signing key; tests generate ephemeral keys in-process.
 
 ## 2. RFC-6962 Merkle mechanics (the math, pinned)
 
@@ -91,16 +113,16 @@ stored in the proof (RFC-6962 algorithm), so a forged direction cannot be smuggl
 
 ## 3. New module `src/polymer_claims/transparency.py`
 
-Pure-stdlib Merkle math + a log-key-signed checkpoint + the log interface and its local backend.
+Pure-stdlib Merkle math + a C2SP signed checkpoint + the log interface and its local backend.
 
 ### 3.1 Canonical entry bytes
 
 `canonical_entry_bytes(env: DsseEnvelope) -> bytes` — the exact bytes that become a Merkle leaf.
 Defined as `json.dumps({"payloadType":…, "payload":…, "signatures":[{"sig":…,"keyid":…}, …]},
-sort_keys=True, separators=(",",":")).encode("utf-8")` — a deterministic canonical JSON of the
-**signed** envelope (signatures included; an envelope must be signed before it is logged). Both
-submit and verify derive the leaf from this single function. (Rationale: stable, re-derivable from the
-bundle's embedded envelope; independent of pydantic's field order / alias rendering.)
+sort_keys=True, separators=(",",":")).encode("utf-8")` — deterministic canonical JSON of the **signed**
+envelope (signatures included; an envelope must be signed before it is logged). Both submit and verify
+derive the leaf from this single function. (Rationale: stable, re-derivable from the bundle's embedded
+envelope; independent of pydantic's field order / alias rendering.)
 
 ### 3.2 Merkle functions (pure)
 
@@ -112,25 +134,34 @@ bundle's embedded envelope; independent of pydantic's field order / alias render
 | `inclusion_proof(leaves: list[bytes], index: int) -> list[bytes]` | sibling hashes leaf→root |
 | `verify_inclusion(leaf: bytes, index: int, tree_size: int, proof: list[bytes], root: bytes) -> bool` | recompute root, compare; **never raises** |
 
-### 3.3 Checkpoint (signed log state)
+### 3.3 Checkpoint — C2SP signed-note format
 
-```python
-@dataclass(frozen=True)
-class Checkpoint:
-    origin: str          # log identifier, e.g. "polymer-claims-local-log"
-    tree_size: int
-    root_hash: str       # hex sha256
-    timestamp: str       # RFC-3339 UTC, injected clock
-    signature: str       # b64 ed25519 over canonical_checkpoint_bytes (excl. signature)
-    key_hint: str        # keyid_for(log_pubkey) — informational
+The checkpoint is the C2SP/`transparency-dev` **signed note** that Rekor's `InclusionProof.Checkpoint`
+uses, so the local checkpoint is the *same artifact shape* a networked log produces. It is a text
+envelope: a body (the signed bytes) and one or more signature lines.
+
+```
+<origin>                       # e.g. "polymer-claims-local-log"
+<tree_size>                    # decimal
+<base64(root_hash bytes)>      # standard base64 of the 32-byte SHA-256 root
+                               # (blank line terminates the note body)
+— <key-name> <base64( keyhint[4] || ed25519_sig )>
 ```
 
-- `canonical_checkpoint_bytes(cp_without_sig) -> bytes` — deterministic JSON of the unsigned fields
-  (a note-style text body would also work; canonical JSON keeps it consistent with §3.1).
-- `sign_checkpoint(unsigned, log_private_key) -> Checkpoint` and
-  `verify_checkpoint(cp, log_public_key) -> bool` reuse `signing.pae`-style ed25519 directly via
-  `signing._require_crypto()` (the checkpoint is signed over `canonical_checkpoint_bytes`, no PAE
-  wrapper needed — it is not a DSSE envelope). `verify_checkpoint` never raises.
+- The **signed bytes** are the note body: the three lines + trailing newline, up to and including the
+  blank line (C2SP rule). `key-name` is the origin; `keyhint` is the first 4 bytes of
+  `sha256(key-name "\n" || pubkey-DER)` (C2SP Ed25519 note-key hint).
+- Functions (signed via `signing._require_crypto()` ed25519 directly — a checkpoint note is **not** a
+  DSSE envelope, so no PAE wrapper):
+  - `format_checkpoint_body(origin, tree_size, root_hash: bytes) -> str`
+  - `sign_checkpoint(origin, tree_size, root_hash, log_private_key) -> str` → full note string.
+  - `verify_checkpoint(note: str, log_public_key) -> bool` → parse, verify ≥1 signature line over the
+    body against the key; **never raises**.
+  - `parse_checkpoint(note: str) -> CheckpointFields(origin, tree_size, root_hash: bytes)` for the
+    inclusion check; raises only inside `verify_*`-guarded callers, which catch and return False.
+- The injected clock (§3.5) supplies the timestamp; v1 records it as an additional note body line
+  (`Timestamp: <RFC-3339>`) below the root, per C2SP's "extension lines" allowance, kept inside the
+  signed body so the timestamp is signed.
 
 ### 3.4 `LogEntry` and the `TransparencyLog` protocol
 
@@ -139,7 +170,11 @@ class Checkpoint:
 class LogEntry:
     log_index: int
     inclusion_proof: list[str]   # hex sibling hashes
-    checkpoint: Checkpoint       # signed state AFTER this entry was appended
+    checkpoint: str              # C2SP signed-note string, state AFTER this entry was appended
+    # Forward-compat fields (populated by the networked backend; local backend sets defaults):
+    log_id: str                  # keyid of the log key (local) / Rekor logId (networked)
+    integrated_time: str | None  # None for local v1; Rekor integratedTime when networked
+    kind_version: str            # "polymer-inclusion/0.1" (local) / "dsse/0.0.1" etc. (Rekor)
 
 class TransparencyLog(Protocol):
     def submit(self, entry_bytes: bytes) -> LogEntry: ...
@@ -147,95 +182,133 @@ class TransparencyLog(Protocol):
     def public_key_pem(self) -> bytes: ...   # the key a verifier pins to check checkpoints
 ```
 
-`submit` is the **only** method that differs between local and networked backends.
+`submit` is the **only** method that differs between local and networked backends. The forward-compat
+fields are present from v1 (local defaults) so the bundle shape does not change when Rekor populates
+them; the heavier Rekor-only field `canonicalized_body` is named as an extension point in §7, not
+modeled in v1.
 
-### 3.5 `LocalTransparencyLog`
+### 3.5 `LocalInclusionLog`
 
 - Constructed with `(log_dir: Path, log_private_key, *, origin="polymer-claims-local-log",
   clock: Callable[[], str])`. The clock returns an RFC-3339 UTC string; production passes a real-UTC
   lambda, tests pass a fixed stub.
 - Storage: append-only `log_dir/entries.jsonl`, one canonical-entry-bytes record per line (base64),
   index = line number. The tree is the full set of leaves; `submit` appends, recomputes the root over
-  all leaves, builds the inclusion proof for the new index, signs a fresh `Checkpoint`, returns
-  `LogEntry`. (v1 recomputes from all leaves on each submit — simple and correct; the log is small.
-  Incremental/cached tree state is a YAGNI optimization, not in scope.)
+  all leaves, builds the inclusion proof for the new index, signs a fresh checkpoint note, returns
+  `LogEntry` (`log_id=keyid_for(log pub)`, `integrated_time=None`, `kind_version="polymer-inclusion/0.1"`).
+  (v1 recomputes from all leaves on each submit — simple and correct; the log is small. Incremental
+  tree state is a YAGNI optimization, not in scope.)
 - Concurrency: single-process, single-writer assumption (documented). No file locking in v1.
+- **Not** a verified-append-only log: it emits no consistency proofs (§11). The name says *inclusion*.
 
 ## 4. New module `src/polymer_claims/bundle.py`
 
-The Sigstore-compatible bundle and its offline verifier.
+The Polymer bundle and its trust-gated offline verifier.
 
-### 4.1 `SigstoreBundle` shape
-
-A JSON object shaped after the Sigstore bundle (`dev.sigstore.bundle`) so the future Rekor backend
-populates the *same* fields:
+### 4.1 `PolymerBundle` shape (Sigstore-inspired)
 
 ```jsonc
 {
-  "mediaType": "application/vnd.dev.sigstore.bundle+json;version=0.3",
+  "mediaType": "application/vnd.polymer.bundle.v0.1+json",   // Polymer type — NOT a Sigstore type (§4.4)
+  "$schemaNote": "Sigstore-inspired layout; not wire-compatible with dev.sigstore.bundle. See spec §4.4.",
   "verificationMaterial": {
-    "publicKey": { "rawBytes": "<b64 DER SubjectPublicKeyInfo of the SIGNING key>",
-                   "keyid": "<keyid_for(signing pub)>" },
-    "tlogEntries": [ {
+    "signingKey": { "rawBytesDER": "<b64 DER SubjectPublicKeyInfo of the SIGNING key>",
+                    "keyHint": "<keyid_for(signing pub) — equals the DSSE signature keyid (§4.2)>" },
+    "logKey":     { "rawBytesDER": "<b64 DER of the LOG key>",
+                    "keyHint": "<keyid_for(log pub)>" },          // local log's pinned trust root
+    "inclusion": {
         "logIndex": <int>,
-        "logId": "<keyid_for(log pubkey)>",
-        "inclusionProof": { "logIndex": <int>, "rootHash": "<hex>", "treeSize": <int>,
-                            "hashes": ["<hex>", …], "checkpoint": { …Checkpoint… } }
-    } ],
-    "logPublicKey": { "rawBytes": "<b64 DER of the LOG key>" }   // pinned trust root for v1's local log
+        "logId": "<keyHint of the log key>",
+        "kindVersion": "polymer-inclusion/0.1",
+        "integratedTime": null,                                  // populated by the networked backend
+        "treeSize": <int>,
+        "rootHashHex": "<hex>",
+        "hashesHex": ["<hex>", …],
+        "checkpoint": "<C2SP signed-note string (§3.3)>"
+    }
   },
   "dsseEnvelope": { "payloadType": …, "payload": …, "signatures": [ {"sig":…, "keyid":…} ] }
 }
 ```
 
-> Forward-compat note recorded in the spec: the only field a real-Rekor bundle drops is
-> `logPublicKey` (a public Rekor's key is pinned out-of-band, not embedded). v1 embeds the local log
-> key because the local log *is* the trust root the operator distributes. `verify_bundle` takes the
-> trust-root key as a parameter (defaulting to the embedded `logPublicKey` for the local case), so the
-> networked case supplies a pinned key instead with no format change. This is captured as a golden
-> shape test (§6) so the drop-in is verified now.
+> The shape is deliberately Sigstore-*adjacent* (a `verificationMaterial` block, an inclusion entry
+> with `logIndex`/`logId`/`kindVersion`/`integratedTime`, a checkpoint note, a `dsseEnvelope`) so the
+> mental model and the future migration are clean. It is **not** the `dev.sigstore.bundle` protobuf
+> JSON (§4.4). The local bundle embeds `logKey` because the local log *is* the trust root the operator
+> distributes; a networked bundle drops it (Rekor's key is pinned out-of-band) — `verify_bundle` takes
+> the log trust key as a parameter, so that drop is not a verifier change.
 
 ### 4.2 Functions
 
 | Function | Responsibility |
 |---|---|
-| `build_bundle(env: DsseEnvelope, signing_public_key, log_entry: LogEntry, log_public_key) -> dict` | assemble the bundle dict above |
-| `verify_bundle(bundle: dict, *, signing_public_key=None, log_trust_key=None) -> BundleVerification` | the offline 3-check verifier (§4.3); **never raises** |
+| `build_bundle(env, signing_public_key, log_entry: LogEntry, log_public_key) -> dict` | assemble §4.1. **Enforces (§ finding-6):** the envelope must carry exactly one signature whose `keyid == keyid_for(signing_public_key)`; otherwise raise `ValueError` (refuse to build a bundle whose DSSE key hint disagrees with its verification material). Sets `signingKey.keyHint` to that matching keyid. |
+| `verify_bundle(bundle, *, signing_trust_key=None, log_trust_key=None) -> BundleVerification` | the trust-gated offline verifier (§4.3); **never raises** |
 
-`signing_public_key` defaults to the embedded `verificationMaterial.publicKey` (verify against the
-key the bundle claims); callers may pass an expected key to pin it. `log_trust_key` defaults to the
-embedded `logPublicKey`; the networked case passes a pinned Rekor key.
+`signing_trust_key` / `log_trust_key` are the **pinned** trust roots. When omitted, verification still
+runs against the bundle's *embedded* keys but the result is capped at `STRUCTURALLY_VALID_UNTRUSTED`
+(§4.3) — internal consistency is proven, trust is not.
 
-### 4.3 `BundleVerification` result
+### 4.3 `BundleVerification` result — trust status, not a bare bool
 
 ```python
+class TrustStatus(str, Enum):
+    TRUSTED_VALID = "trusted_valid"                          # all checks pass AND ≥1 supplied trust root matched
+    STRUCTURALLY_VALID_UNTRUSTED = "structurally_valid_untrusted"  # all checks pass vs embedded keys, no pin given
+    INVALID = "invalid"                                      # a check failed
+
 @dataclass(frozen=True)
 class BundleVerification:
-    ok: bool
-    envelope_signature_ok: bool   # DSSE sig verifies against signing key
-    inclusion_ok: bool            # leaf+proof recompute to checkpoint root_hash, at logIndex/treeSize
-    checkpoint_signature_ok: bool # checkpoint signed by log_trust_key
-    reason: str                   # first failing check, human-readable; "" when ok
+    status: TrustStatus
+    envelope_signature_ok: bool   # DSSE sig verifies against the signing key used
+    inclusion_ok: bool            # leaf+proof recompute to the checkpoint root at logIndex/treeSize
+    checkpoint_signature_ok: bool # checkpoint note signed by the log key used
+    signing_key_pinned: bool      # a signing_trust_key was supplied AND matched the embedded/used key
+    log_key_pinned: bool          # a log_trust_key was supplied AND matched the embedded/used key
+    reason: str                   # first failing/limiting condition, human-readable; "" when TRUSTED_VALID
 ```
 
-`ok == (envelope_signature_ok and inclusion_ok and checkpoint_signature_ok)`. Each sub-check is
-independently reported so a tampered field names *which* check failed.
+Rules: if any `*_ok` is false → `INVALID`. Else if at least one of `signing_key_pinned` /
+`log_key_pinned` is true (a supplied pin matched) → `TRUSTED_VALID`. Else →
+`STRUCTURALLY_VALID_UNTRUSTED`. A supplied trust key that does **not** match the bundle's key →
+`INVALID` (key mismatch), never silently downgraded. Each sub-check is independently reported so a
+tampered field names *which* check failed.
+
+### 4.4 Relationship to Sigstore (honesty section)
+
+This bundle is **inspired by** the Sigstore bundle / Rekor `TransparencyLogEntry` mental model but is
+**not** wire-compatible, and the spec does not claim it is:
+
+- The media type is a **Polymer** type (`application/vnd.polymer.bundle.v0.1+json`), not
+  `application/vnd.dev.sigstore.bundle.v0.3+json`.
+- Sigstore's `verificationMaterial.publicKey` is a `PublicKeyIdentifier` *hint*; raw key material uses a
+  different proto shape with `keyDetails`. We carry raw DER under a Polymer field name on purpose.
+- A real Rekor `TransparencyLogEntry` additionally carries `kindVersion`, `integratedTime`, `logId` as
+  key-id bytes, and a `canonicalizedBody`. v1 adopts the cheap, stable subset
+  (`kindVersion`/`integratedTime`/`logId`/checkpoint-note) and names `canonicalizedBody` as an
+  extension point (§7). The C2SP checkpoint note (§3.3) *is* the Rekor checkpoint shape.
+
+Upstream `cosign`/`sigstore` interop is explicitly deferred (§11). Calling this "Sigstore-compatible"
+would be false; we call it "Sigstore-inspired."
 
 ## 5. CLI changes (`src/polymer_claims/cli.py`)
 
 - **`certify CLAIM --format dsse --key K [--keyid ID] --transparency-log [--log-dir DIR]
   [--log-key LK]`** — when `--transparency-log` is given (requires `--key`), after signing: open/create
-  the `LocalTransparencyLog` at `--log-dir` (default `./.polymer-tlog`) with `--log-key` (default
-  `DIR/log.key`, auto-`keygen`'d on first use and reported), submit the canonical envelope bytes, build
-  the bundle, and emit the **bundle** JSON instead of the bare envelope. Without the flag: unchanged.
+  the `LocalInclusionLog` at `--log-dir` (default `./.polymer-tlog`) with `--log-key` (default
+  `DIR/log.key`, auto-`keygen`'d on first use and its path + pubkey keyHint reported to stderr), submit
+  the canonical envelope bytes, build the bundle, and emit the **bundle** JSON instead of the bare
+  envelope. Without the flag: unchanged.
 - **`export-attestation … --format dsse --key K --transparency-log [--log-dir DIR] [--log-key LK]`** —
   same, logging EACH envelope and emitting one bundle per NDJSON line.
 - **`verify-bundle PATH [--pub-key SIGNING.pub] [--log-pub-key LOG.pub]`** (new subcommand) — read a
-  bundle JSON *or* NDJSON of bundles; run `verify_bundle` on each (pinning the signing/log keys if
-  provided, else using the embedded keys); print a one-line per-bundle verdict naming the failing
-  check to stderr; return `0` iff every bundle's `ok` is true, else `1`.
-- **`--rekor-url URL`** is **reserved/parsed but documented as not-yet-implemented in v1** (errors with
-  a clear "networked Rekor backend is not implemented yet; see spec §7" message). It exists so the flag
+  bundle JSON *or* NDJSON of bundles; run `verify_bundle` pinning whichever keys are supplied. **Exit
+  codes:** `0` iff every bundle is `TRUSTED_VALID`; `1` if any is `INVALID`; `2` if any is
+  `STRUCTURALLY_VALID_UNTRUSTED` (no pin supplied — structurally fine but **not** trusted). Print a
+  one-line per-bundle verdict naming the status and any failing check to stderr. This mirrors
+  `verify-dsse`'s "you must supply the key you trust" stance: **rc 0 requires a pinned trust root.**
+- **`--rekor-url URL`** is **reserved/parsed but documented as not-implemented in v1** (errors with a
+  clear "networked Rekor backend is not implemented yet; see spec §7" message). It exists so the flag
   surface is stable for the network slice.
 
 All new paths guard the `cryptography` import with the existing friendly `[sign]` message.
@@ -246,48 +319,61 @@ All new paths guard the `cryptography` import with the existing friendly `[sign]
   `leaf_hash`/`node_hash` against hand-computed `SHA256(0x00||·)` / `SHA256(0x01||·||·)`;
   `inclusion_proof` + `verify_inclusion` round-trip for **every** leaf index in trees of size 1..9
   (covers the odd-split edge cases).
-- **Inclusion adversarial:** flip one proof hash → False; wrong index → False; wrong tree_size →
-  False; wrong root → False; truncated/over-long proof → False (never raises).
-- **Checkpoint:** `sign_checkpoint` → `verify_checkpoint` True; one-byte tamper of any signed field →
-  False; verification with a different log key → False; malformed checkpoint → False (never raises).
-- **Local log:** `submit` thrice → indices 0,1,2; each returned `LogEntry` verifies
-  (`verify_inclusion` against its checkpoint root) and the checkpoint verifies against the log pubkey;
-  reopening the log dir and submitting again continues the indices and grows the root.
-- **Determinism:** fixed log key + fixed clock stub → identical checkpoint bytes/signature across runs.
-- **Bundle round-trip:** `build_bundle` → `verify_bundle` `ok=True` with all three sub-flags true;
-  then mutate each of {a payload byte, a signature byte, a proof hash, the checkpoint signature, the
-  embedded signing key, the embedded log key} → `ok=False` with the *correct* sub-flag false and a
-  matching `reason`.
-- **Bundle key-pinning:** `verify_bundle` with an explicit wrong `signing_public_key` → False; with
-  the right one → True; same for `log_trust_key` (proves the networked drop-in: trust key supplied
-  externally, format unchanged).
-- **Forward-compat golden:** assert the built bundle JSON contains exactly the Sigstore-shaped keys
-  §4.1 lists (a structural golden), so the network slice can populate the same shape without a format
-  change.
-- **CLI:** `certify --format dsse --key --transparency-log` emits a bundle whose `verify-bundle`
-  returns 0; flipping a byte of the saved bundle → `verify-bundle` returns 1 and names the check;
-  `export-attestation … --transparency-log` emits one verifiable bundle per line; `--rekor-url`
-  errors with the documented not-implemented message; **backward-compat:** without
-  `--transparency-log`, `certify`/`export-attestation` output is byte-identical to today.
+- **Inclusion adversarial:** flip one proof hash → False; wrong index → False; wrong tree_size → False;
+  wrong root → False; truncated/over-long proof → False (never raises).
+- **C2SP checkpoint:** `sign_checkpoint` → `verify_checkpoint` True; the signed body matches the C2SP
+  layout (origin/size/b64-root/timestamp lines + blank line); one-byte tamper of any body line → False;
+  a corrupted signature line → False; verification with a different log key → False; malformed note →
+  False (never raises). `parse_checkpoint` recovers `(origin, tree_size, root_hash)`.
+- **Local log:** `submit` thrice → indices 0,1,2; each `LogEntry` verifies (`verify_inclusion` against
+  its checkpoint's parsed root) and the checkpoint verifies against the log pubkey; reopening the log
+  dir and submitting again continues the indices and grows the root; `log_id`/`kind_version` set,
+  `integrated_time is None`.
+- **Determinism:** fixed log key + fixed clock stub → identical checkpoint note/signature across runs.
+- **`build_bundle` keyid enforcement (finding 6):** an envelope whose signature `keyid` ≠
+  `keyid_for(signing pub)` → `build_bundle` raises `ValueError`; a matching one → `signingKey.keyHint`
+  equals that keyid.
+- **Bundle round-trip + trust status (finding 2):**
+  - `build_bundle` → `verify_bundle(signing_trust_key=sig_pub, log_trust_key=log_pub)` →
+    `TRUSTED_VALID`, all sub-flags true, both `*_pinned` true.
+  - `verify_bundle` with **no** pins → `STRUCTURALLY_VALID_UNTRUSTED` (not trusted), all `*_ok` true.
+  - a supplied trust key that does **not** match → `INVALID` (key mismatch), not a silent downgrade.
+  - mutate each of {a payload byte, a signature byte, a proof hash, a checkpoint body byte, the
+    checkpoint signature, the embedded signing key, the embedded log key} → `INVALID` with the correct
+    sub-flag false and a matching `reason`.
+- **CLI:** `certify --format dsse --key --transparency-log` emits a bundle; `verify-bundle --pub-key
+  --log-pub-key` returns `0`; `verify-bundle` with **no** key returns `2` (untrusted); flipping a byte
+  of the saved bundle → `verify-bundle` returns `1` and names the check; `export-attestation …
+  --transparency-log` emits one verifiable bundle per line; `--rekor-url` errors with the documented
+  not-implemented message; **backward-compat:** without `--transparency-log`, `certify`/
+  `export-attestation` output is byte-identical to today.
+- **Bundle shape golden:** assert the built bundle JSON contains exactly the Polymer-shaped keys §4.1
+  lists (structural golden) — so the network slice can populate the same shape and the §4.4 honesty
+  boundary is enforced (asserts the media type is the Polymer type, **not** a Sigstore one).
 - **Missing-dep:** the friendly `[sign]` path (forcing the guarded import to raise
   `ModuleNotFoundError(name="cryptography")`).
 
-## 7. The network seam (the "expand later" guarantee)
+## 7. The network seam (the "expand later" guarantee — scoped honestly)
 
-`TransparencyLog.submit` is the single abstraction boundary. A later, additive slice adds
-`RekorTransparencyLog(rekor_url, *, pinned_log_key)`:
+`TransparencyLog.submit` is the single **interface** boundary, and it is the stable seam. A later,
+additive slice adds `RekorTransparencyLog(rekor_url, *, pinned_log_key)`:
 
-- `submit(entry_bytes)` POSTs a `dsse`/`intoto`-type entry to Rekor v1 over `urllib`, parses Rekor's
-  returned `logIndex`, inclusion proof, and signed entry timestamp / checkpoint into the **same**
-  `LogEntry`.
-- The pinned Rekor public key replaces the local log key as `log_trust_key`; `logPublicKey` is dropped
-  from the bundle (pinned out-of-band).
-- **`bundle.py` and `verify_bundle` do not change** — same fields, same three checks, key supplied
-  externally. CLI wires `--rekor-url` to select this backend.
+- `submit(entry_bytes)` POSTs a `dsse`/`intoto`-type entry to Rekor v1 over `urllib`, and parses
+  Rekor's `logIndex`, inclusion proof, `integratedTime`, `logId`, `kindVersion`, the C2SP checkpoint,
+  and `canonicalizedBody` into a `LogEntry`. The forward-compat fields (§3.4) are already in `LogEntry`;
+  `canonicalizedBody` is added then as a new optional field (additive).
+- The pinned Rekor public key replaces the local log key as `log_trust_key`; `logKey` is dropped from
+  the bundle (pinned out-of-band).
 
-What this buys that local cannot: public non-repudiation (an independent, witnessed, append-only log).
-Recorded so the boundary is honest and the upgrade path is concrete. **In scope for v1: only the seam
-(the `TransparencyLog` protocol + `LocalTransparencyLog`), not the Rekor backend.**
+**What is guaranteed vs. not:** the `submit` interface and the three verification checks (DSSE sig /
+inclusion / checkpoint-sig) are stable; `verify_bundle`'s *logic* does not change. The bundle JSON and
+`verify_bundle` will gain *additive* fields (`canonicalizedBody`, populated `integratedTime`) — this is
+deliberately **not** claimed as "zero change to bundle.py," only "no change to the verification model
+and no breaking change to the format." What the networked slice buys that local cannot: append-only
+verification (consistency proofs), witnessing, and public non-repudiation.
+
+**In scope for v1: only the seam** (the `TransparencyLog` protocol + `LocalInclusionLog` + the
+forward-compat `LogEntry` fields), **not** the Rekor backend.
 
 ## 8. Packaging
 
@@ -303,35 +389,38 @@ keygen ──▶ signing key (operator identity)        keygen ──▶ log key
 certify --format dsse --key K --transparency-log ─┐
                                                   │ sign_envelope (existing)
                                                   ▼
-                                  canonical_entry_bytes ──▶ LocalTransparencyLog.submit
+                                  canonical_entry_bytes ──▶ LocalInclusionLog.submit
                                                   │            (append leaf, recompute root,
-                                                  │             inclusion_proof, sign Checkpoint)
+                                                  │             inclusion_proof, sign C2SP checkpoint)
                                                   ▼
-                                            LogEntry ──▶ build_bundle ──▶ SigstoreBundle JSON
+                                            LogEntry ──▶ build_bundle (keyid-enforced) ──▶ PolymerBundle JSON
 
-verify-bundle bundle.json ──▶ verify_bundle:
+verify-bundle bundle.json --pub-key S.pub --log-pub-key L.pub ──▶ verify_bundle:
    (1) DSSE sig vs signing key   (2) leaf+proof ⇒ checkpoint root   (3) checkpoint sig vs log key
-   ──▶ rc 0 (all ok) / 1 (names failing check)
+   + trust gate (pinned key matched?) ──▶ rc 0 TRUSTED_VALID / 2 UNTRUSTED / 1 INVALID
 ```
 
 ## 10. Invariants
 
-Additive; no-flag output byte-identical; `signing.py`/`attestation.py`/grammar/protocol untouched;
-base install crypto-free; leaf computed over the same canonical bytes submit and verify both derive;
-Merkle math is RFC-6962-exact and pure-stdlib; `verify_inclusion`/`verify_checkpoint`/`verify_bundle`
-never raise; clock + keys injected for determinism; no private keys committed; the bundle format and
-verifier are backend-agnostic so the networked-Rekor slice is purely additive.
+Additive; no-flag output byte-identical; `signing.py`/`attestation.py`/grammar/protocol untouched; base
+install crypto-free; leaf computed over the same canonical bytes submit and verify both derive; Merkle
+math is RFC-6962-exact and pure-stdlib; checkpoint is a C2SP signed note; verification never raises and
+is **trust-gated** (rc 0 needs a pinned root); `build_bundle` enforces DSSE-keyid ↔ verification-material
+agreement; clock + keys injected for determinism; no private keys committed; the `submit` interface and
+three-check model are the stable seam, with the bundle extending additively for the networked backend.
 
 ## 11. Deferred (documented, → later slices)
 
+- **Consistency proofs** (RFC-6962 §2.1.2) + **witnessed/gossiped checkpoints** — what turns the v1
+  *inclusion* log into a verified *append-only* transparency log. Required before any "append-only"
+  claim.
 - **Networked public Rekor backend** (`RekorTransparencyLog`, `--rekor-url` wired, pinned-key trust
-  root) — the *next* slice this seam enables; delivers public non-repudiation.
+  root, `canonicalizedBody`) — the *next* slice this seam enables; delivers public non-repudiation.
+- **Sigstore wire-compatibility & `cosign`/`rekor-cli` interop** — emitting/consuming the real
+  `dev.sigstore.bundle` protobuf JSON (correct media type, `PublicKey` proto with `keyDetails`, full
+  `TransparencyLogEntry`) and round-tripping with upstream tools.
 - **Fulcio / OIDC keyless identity binding** — identity-bound signing (no long-lived key). Needs
   interactive auth + network; opposes offline ethos for v1.
-- **`cosign`/`rekor-cli` binary interop** — verifying our bundles with the upstream tools and vice
-  versa.
-- **Consistency proofs** (RFC-6962 §2.1.2, proving log append-only-ness between two checkpoints) and
-  **witness/gossip** — strengthen a networked log; not needed for v1's single-operator local log.
 - **Incremental/cached Merkle tree state**, file locking / multi-writer concurrency — perf/robustness,
   YAGNI for v1's small single-process log.
 - **Multi-signer envelopes / key rotation / trust policy** — inherited from the signing spec §9.
@@ -346,5 +435,7 @@ verifier are backend-agnostic so the networked-Rekor slice is purely additive.
   `_cmd_verify_dsse`, `_build_parser`.
 - `docs/superpowers/specs/2026-06-23-dsse-signing-design.md` — the shipped local-signing predecessor
   and its §9 deferral that this spec discharges (local-first).
-- RFC 6962 §2.1 (Merkle Tree Hash, inclusion proofs, test vectors).
-- Sigstore bundle format `dev.sigstore.bundle` (the JSON shape §4.1 targets for forward-compat).
+- RFC 6962 §2.1 (Merkle Tree Hash, inclusion + consistency proofs, test vectors).
+- C2SP / `transparency-dev` checkpoint (signed-note) format — the checkpoint shape §3.3 adopts.
+- Sigstore bundle (`dev.sigstore.bundle` v0.3) and Rekor `TransparencyLogEntry` / `InclusionProof` —
+  the mental model §4.1 is *inspired by* and the §4.4 honesty boundary measures against.
