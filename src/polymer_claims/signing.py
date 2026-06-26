@@ -123,3 +123,11 @@ def load_public_key(data: bytes):
     if not isinstance(key, ed25519.Ed25519PublicKey):
         raise ValueError(f"not an Ed25519 public key (got {type(key).__name__})")
     return key
+
+
+def load_public_der(data: bytes):
+    ed25519, serialization, _inv = _require_crypto()
+    key = serialization.load_der_public_key(data)
+    if not isinstance(key, ed25519.Ed25519PublicKey):
+        raise ValueError(f"not an Ed25519 public key (got {type(key).__name__})")
+    return key
