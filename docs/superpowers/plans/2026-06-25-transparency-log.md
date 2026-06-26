@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.11+, stdlib (`hashlib`, `base64`, `json`, `pathlib`), `cryptography>=42` (existing `[sign]` extra, ed25519), pydantic v2 (existing `DsseEnvelope`/`DsseSignature`), pytest, Hatchling.
 
-**Spec:** `docs/superpowers/specs/2026-06-25-transparency-log-design.md` (v0.2).
+**Spec:** `docs/superpowers/specs/2026-06-25-transparency-log-design.md` (v0.3).
 
 ## Global Constraints
 
@@ -16,7 +16,7 @@
 - **Base install stays crypto-free.** All `cryptography` use goes through `signing._require_crypto()`; a missing dep surfaces `ModuleNotFoundError(name="cryptography")` → the friendly `pip install 'polymer-claims[sign]'` message via the existing `_sign_dep_error`, never a traceback. `pae`/Merkle math/`canonical_entry_bytes` stay import-free (stdlib only).
 - **No new dependencies.** Reuse the `[sign]` extra (`cryptography>=42`) and stdlib only. No `sigstore`/`cosign`/`rekor-cli`.
 - **Verification never raises** on malformed input (`verify_inclusion`, `verify_checkpoint`, `verify_bundle`) — return a negative/`INVALID` structured result.
-- **Trust-gated success.** `verify-bundle` rc 0 requires a pinned trust root that MATCHES; a supplied pin that mismatches the bundle is `INVALID` (never silently downgraded); no pin → `STRUCTURALLY_VALID_UNTRUSTED` (rc 2).
+- **Trust-gated success.** `verify-bundle` rc 0 requires BOTH pinned keys (`--pub-key` AND `--log-pub-key`) that MATCH the bundle; a supplied pin that mismatches is `INVALID` (never silently downgraded); fewer than both pinned (but otherwise valid) → `STRUCTURALLY_VALID_UNTRUSTED` (rc 2).
 - **Determinism.** Clock and keys are injected (a `clock: Callable[[], str]` and explicit key paths); tests use fixed stubs and ephemeral in-process keys. No private keys committed.
 - **Polymer media type, NOT a Sigstore type:** `application/vnd.polymer.bundle.v0.1+json`. The bundle is Sigstore-*inspired*, not wire-compatible (spec §4.4).
 - **Hashing is RFC-6962-exact:** `leaf_hash = sha256(0x00 || entry)`, `node_hash = sha256(0x01 || left || right)`, split `k` = largest power of two strictly less than `n`.
@@ -374,6 +374,16 @@ def test_verify_fails_with_wrong_key():
     assert T.verify_checkpoint(note, other_pub) is False
 
 
+def test_verify_fails_on_keyhint_mismatch():
+    # Keep the real signature bytes but corrupt the 4-byte keyhint -> must be rejected.
+    priv, pub = signing.generate_keypair()
+    note = T.sign_checkpoint(ORIGIN, 3, ROOT, TS, priv)
+    head, blob_b64 = note.rstrip("\n").rsplit(" ", 1)
+    blob = base64.b64decode(blob_b64, validate=True)
+    forged = head + " " + base64.b64encode(b"\xff\xff\xff\xff" + blob[4:]).decode("ascii") + "\n"
+    assert T.verify_checkpoint(forged, pub) is False
+
+
 def test_verify_never_raises_on_malformed():
     _, pub = signing.generate_keypair()
     for junk in ["", "not a checkpoint", "a\nb\nc\n", "— only sig\n"]:
@@ -445,21 +455,26 @@ def parse_checkpoint(note: str) -> CheckpointFields:
 
 
 def verify_checkpoint(note: str, log_public_key) -> bool:
-    """True iff >=1 signature line verifies over the note body against log_public_key. Never raises."""
+    """True iff >=1 signature line verifies over the note body against log_public_key AND carries the
+    expected 4-byte keyhint for that key/origin. Never raises."""
     from polymer_claims.signing import _require_crypto
     _ed, _ser, InvalidSignature = _require_crypto()
     try:
         idx = note.index("\n" + _SIG_PREFIX)
     except ValueError:
         return False
-    body = note[: idx + 1].encode("utf-8")  # include the newline that terminates the last body line
+    body = note[: idx + 1].encode("utf-8")  # include the blank line that terminates the body (C2SP)
+    origin = note.split("\n", 1)[0]          # origin is the first body line (itself signed)
+    expected_hint = _keyhint(origin, log_public_key)
     sig_block = note[idx + 1:]
     for line in sig_block.splitlines():
         if not line.startswith(_SIG_PREFIX):
             continue
         try:
             blob = base64.b64decode(line.rsplit(" ", 1)[1], validate=True)
-            log_public_key.verify(blob[4:], body)  # strip the 4-byte keyhint
+            if blob[:4] != expected_hint:    # keyhint must match this key/origin
+                continue
+            log_public_key.verify(blob[4:], body)  # remaining bytes are the ed25519 signature
             return True
         except (ValueError, IndexError, TypeError, InvalidSignature):
             continue
@@ -1052,49 +1067,37 @@ git commit -m "feat(bundle): keyid-enforced build_bundle + trust-gated verify_bu
 
 Create `tests/test_cli_transparency.py`:
 
+Run the CLI in-process via `main([...])` + `capsys` and build the corpus with the SAME fixture helper
+`tests/test_cli_signing.py` uses (`_corpus_path` over `tests.attestation._fixtures`; claim id is
+`"c1"`). Do NOT use a static `tests/data/*.json` file or subprocess.
+
 ```python
+import base64
 import json
-import subprocess
-import sys
-from pathlib import Path
 
 import pytest
 
+from polymer_claims.cli import main
+from tests.attestation._fixtures import corpus_with, licensed_claim, licensing, mc, sat
+
 pytest.importorskip("cryptography")
 
-REPO = Path(__file__).resolve().parents[1]
-PY = str(REPO / ".venv" / "bin" / "python")
-CORPUS = str(REPO / "tests" / "data" / "corpus_min.json")  # see Step 1b if this fixture is absent
 
-
-def _run(*args, **kw):
-    return subprocess.run([PY, "-m", "polymer_claims.cli", *args], capture_output=True, text=True, **kw)
+def _corpus_path(tmp_path):
+    corpus = corpus_with(licensed_claim("c1", licensing(sat(mc()))))
+    p = tmp_path / "corpus.json"
+    p.write_text(corpus.model_dump_json())
+    return p
 
 
 def _keys(tmp_path):
     k, p = tmp_path / "s.key", tmp_path / "s.pub"
-    assert _run("keygen", "--key", str(k), "--pub-key", str(p)).returncode == 0
+    assert main(["keygen", "--key", str(k), "--pub-key", str(p)]) == 0
     return k, p
 
 
-def test_certify_transparency_log_emits_verifiable_bundle(tmp_path):
-    sk, sp = _keys(tmp_path)
-    logdir = tmp_path / "tlog"
-    r = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk),
-             "--transparency-log", "--log-dir", str(logdir))
-    assert r.returncode == 0, r.stderr
-    bundle = json.loads(r.stdout)
-    assert bundle["mediaType"] == "application/vnd.polymer.bundle.v0.1+json"
-    bpath = tmp_path / "b.json"
-    bpath.write_text(r.stdout)
-    logpub = tmp_path / "log.pub"  # derive the log pub from the auto-generated log key
-    # the log key was written to logdir/log.key; export its public half via keygen-free path:
-    lp = _run("verify-bundle", str(bpath), "--pub-key", str(sp), "--log-pub-key", str(_logpub(logdir, tmp_path)))
-    assert lp.returncode == 0, lp.stderr
-
-
-def _logpub(logdir: Path, tmp_path: Path) -> Path:
-    # The auto-generated private log key is at logdir/log.key; produce its public PEM for pinning.
+def _log_pub_pem(logdir, tmp_path):
+    # Auto-generated private log key is at logdir/log.key; write its public PEM for pinning.
     from polymer_claims import signing
     priv = signing.load_private_key((logdir / "log.key").read_bytes())
     out = tmp_path / "auto-log.pub"
@@ -1102,64 +1105,92 @@ def _logpub(logdir: Path, tmp_path: Path) -> Path:
     return out
 
 
-def test_verify_bundle_untrusted_without_keys_returns_2(tmp_path):
-    sk, _ = _keys(tmp_path)
-    logdir = tmp_path / "tlog"
-    r = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk),
-             "--transparency-log", "--log-dir", str(logdir))
-    bpath = tmp_path / "b.json"
-    bpath.write_text(r.stdout)
-    assert _run("verify-bundle", str(bpath)).returncode == 2
+def _certify_bundle(tmp_path, capsys, sk, logdir, *extra):
+    capsys.readouterr()  # clear prior stderr/stdout (e.g. keygen)
+    rc = main(["certify", "c1", "--corpus", str(_corpus_path(tmp_path)), "--format", "dsse",
+               "--key", str(sk), "--transparency-log", "--log-dir", str(logdir), *extra])
+    return rc, capsys.readouterr()
 
 
-def test_verify_bundle_tampered_returns_1(tmp_path):
+def test_certify_transparency_log_emits_verifiable_bundle(tmp_path, capsys):
     sk, sp = _keys(tmp_path)
     logdir = tmp_path / "tlog"
-    r = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk),
-             "--transparency-log", "--log-dir", str(logdir))
-    bundle = json.loads(r.stdout)
-    bundle["dsseEnvelope"]["payload"] = "dGFtcGVyZWQ="  # base64("tampered")
+    rc, cap = _certify_bundle(tmp_path, capsys, sk, logdir)
+    assert rc == 0, cap.err
+    bundle = json.loads(cap.out)
+    assert bundle["mediaType"] == "application/vnd.polymer.bundle.v0.1+json"
+    bpath = tmp_path / "b.json"
+    bpath.write_text(cap.out)
+    logpub = _log_pub_pem(logdir, tmp_path)
+    assert main(["verify-bundle", str(bpath), "--pub-key", str(sp), "--log-pub-key", str(logpub)]) == 0
+
+
+def test_verify_bundle_untrusted_without_both_keys_returns_2(tmp_path, capsys):
+    sk, sp = _keys(tmp_path)
+    logdir = tmp_path / "tlog"
+    rc, cap = _certify_bundle(tmp_path, capsys, sk, logdir)
+    bpath = tmp_path / "b.json"
+    bpath.write_text(cap.out)
+    assert main(["verify-bundle", str(bpath)]) == 2                         # no pins
+    assert main(["verify-bundle", str(bpath), "--pub-key", str(sp)]) == 2   # only one pin -> still untrusted
+
+
+def test_verify_bundle_tampered_returns_1(tmp_path, capsys):
+    sk, sp = _keys(tmp_path)
+    logdir = tmp_path / "tlog"
+    rc, cap = _certify_bundle(tmp_path, capsys, sk, logdir)
+    bundle = json.loads(cap.out)
+    bundle["dsseEnvelope"]["payload"] = base64.b64encode(b"tampered").decode("ascii")
     bpath = tmp_path / "b.json"
     bpath.write_text(json.dumps(bundle))
-    assert _run("verify-bundle", str(bpath), "--pub-key", str(sp),
-                "--log-pub-key", str(_logpub(logdir, tmp_path))).returncode == 1
+    logpub = _log_pub_pem(logdir, tmp_path)
+    assert main(["verify-bundle", str(bpath), "--pub-key", str(sp), "--log-pub-key", str(logpub)]) == 1
 
 
-def test_rekor_url_is_reserved_not_implemented(tmp_path):
+def test_rekor_url_is_reserved_not_implemented(tmp_path, capsys):
     sk, _ = _keys(tmp_path)
-    r = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk),
-             "--transparency-log", "--rekor-url", "https://rekor.sigstore.dev",
-             "--log-dir", str(tmp_path / "tlog"))
-    assert r.returncode == 1
-    assert "not implemented" in r.stderr.lower()
+    rc, cap = _certify_bundle(tmp_path, capsys, sk, tmp_path / "tlog",
+                              "--rekor-url", "https://rekor.sigstore.dev")
+    assert rc == 1
+    assert "not implemented" in cap.err.lower()
 
 
-def test_certify_without_flag_still_emits_a_bare_verifiable_envelope(tmp_path):
+def test_certify_keyid_conflicts_with_transparency_log(tmp_path, capsys):
+    sk, _ = _keys(tmp_path)
+    rc, cap = _certify_bundle(tmp_path, capsys, sk, tmp_path / "tlog", "--keyid", "deadbeef")
+    assert rc == 1
+    assert "keyid" in cap.err.lower()
+
+
+def test_certify_without_flag_still_emits_a_bare_verifiable_envelope(tmp_path, capsys):
     # No-regression: with --transparency-log OFF, certify --format dsse must still produce the SAME
     # kind of artifact as before this slice — a bare signed DSSE envelope that verify-dsse accepts,
     # NOT a bundle. (Mirrors the verify-dsse round-trip pattern in tests/test_cli_signing.py.)
     sk, sp = _keys(tmp_path)
-    r = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk))
-    assert r.returncode == 0, r.stderr
-    env = json.loads(r.stdout)
+    cp = _corpus_path(tmp_path)
+    capsys.readouterr()
+    assert main(["certify", "c1", "--corpus", str(cp), "--format", "dsse", "--key", str(sk)]) == 0
+    out = capsys.readouterr().out
+    env = json.loads(out)
     assert "mediaType" not in env                                  # NOT a bundle
     assert set(env) >= {"payloadType", "payload", "signatures"}    # a DSSE envelope
     p = tmp_path / "env.json"
-    p.write_text(r.stdout)
-    assert _run("verify-dsse", str(p), "--pub-key", str(sp)).returncode == 0  # still valid + verifiable
+    p.write_text(out)
+    assert main(["verify-dsse", str(p), "--pub-key", str(sp)]) == 0  # still valid + verifiable
     # determinism is unchanged too (ed25519 + deterministic render)
-    r2 = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk))
-    assert r2.stdout == r.stdout
+    capsys.readouterr()
+    assert main(["certify", "c1", "--corpus", str(cp), "--format", "dsse", "--key", str(sk)]) == 0
+    assert capsys.readouterr().out == out
 ```
 
-> **Step 1b (fixture):** if `tests/data/corpus_min.json` does not exist, reuse whatever single-claim
-> corpus fixture the existing `tests/test_cli_signing.py` uses for `certify --format dsse` (grep it for
-> `--corpus`) and set `CORPUS` / the claim id (`C1`) to match. Do NOT invent a new corpus.
+> **Fixture note:** confirm the `tests.attestation._fixtures` import names (`corpus_with`,
+> `licensed_claim`, `licensing`, `mc`, `sat`) and the claim id `"c1"` against the top of
+> `tests/test_cli_signing.py` before running — reuse exactly what it imports; do NOT invent a corpus.
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
 Run: `.venv/bin/pytest tests/test_cli_transparency.py -q`
-Expected: FAIL — `certify: unrecognized arguments: --transparency-log`.
+Expected: FAIL — `certify: unrecognized arguments: --transparency-log` (the new flags/subcommand do not exist yet).
 
 - [ ] **Step 3: Add the `verify-bundle` parser + flags on certify/export-attestation**
 
@@ -1226,7 +1257,9 @@ def _open_local_log(args):
 def _cmd_verify_bundle(args: argparse.Namespace) -> int:
     try:
         from .bundle import verify_bundle, TrustStatus
-        from .signing import load_public_key
+        from .signing import load_public_key, _require_crypto
+        _require_crypto()   # surface the friendly [sign] hint up front (verify_bundle would otherwise
+                            # swallow a missing-crypto error as INVALID via its broad except)
     except ModuleNotFoundError as exc:
         return _sign_dep_error(exc)
     sig_key = log_key = None
@@ -1355,7 +1388,7 @@ Ensure `import json` is present at the top of `cli.py` (it almost certainly is; 
 - [ ] **Step 5: Run the tests to verify they pass**
 
 Run: `.venv/bin/pytest tests/test_cli_transparency.py -q`
-Expected: PASS. If `corpus_min.json` was substituted in Step 1b, the claim id and corpus path match the existing signing test's fixture.
+Expected: PASS (the corpus is built in-process via the shared `tests.attestation._fixtures` helper, claim id `"c1"`).
 
 - [ ] **Step 6: Run the full suite + lint**
 
@@ -1376,7 +1409,7 @@ git commit -m "feat(cli): --transparency-log on certify/export-attestation + ver
 **Files:**
 - Modify: `docs/superpowers/specs/2026-06-25-transparency-log-design.md` (status line)
 - Modify: `docs/superpowers/2026-06-23-remaining-roadmap.md` (H1.A1 entry)
-- Modify: `README.md` and `docs/superpowers/ARCHITECTURE_CURRENT.md` (CLI command lists)
+- Modify: `README.md` and `ARCHITECTURE_CURRENT.md` (repo root — CLI command lists)
 - Modify: `docs/superpowers/CONTINUE.md` (add a dated update block)
 
 **Interfaces:** none (docs only). No test cycle — the deliverable is reconciled docs; verify by `grep`.
@@ -1384,8 +1417,8 @@ git commit -m "feat(cli): --transparency-log on certify/export-attestation + ver
 - [ ] **Step 1: Flip the spec status to shipped**
 
 In `docs/superpowers/specs/2026-06-25-transparency-log-design.md`, change the status line from
-`**Status:** Design / approved for planning. v0.2` to
-`**Status:** SHIPPED (local-first). v0.2 — implemented on branch feat/transparency-log; networked Rekor backend deferred (§7).`
+`**Status:** Design / approved for planning. v0.3` to
+`**Status:** SHIPPED (local-first). v0.3 — implemented on branch feat/transparency-log; networked Rekor backend deferred (§7).`
 
 - [ ] **Step 2: Update the roadmap H1.A1 entry**
 
@@ -1403,11 +1436,11 @@ In `docs/superpowers/2026-06-23-remaining-roadmap.md`, in the H1.A1 bullet, appe
 
 - [ ] **Step 3: Update the README + ARCHITECTURE CLI lists**
 
-In `README.md` and `docs/superpowers/ARCHITECTURE_CURRENT.md`, find the CLI command list that already
-includes `keygen` / `verify-dsse` and add one line each:
+In `README.md` and `ARCHITECTURE_CURRENT.md` (both at the repo root), find the CLI command list that
+already includes `keygen` / `verify-dsse` and add one line each:
 
 ```
-- `verify-bundle PATH [--pub-key] [--log-pub-key]` — verify a Polymer bundle offline (rc 0 needs a pinned key)
+- `verify-bundle PATH [--pub-key] [--log-pub-key]` — verify a Polymer bundle offline (rc 0 needs BOTH --pub-key and --log-pub-key)
 ```
 and note that `certify`/`export-attestation` gained `--transparency-log` (emits a Polymer bundle: signed DSSE + Merkle inclusion proof + signed checkpoint). Match each file's existing list style.
 
@@ -1420,7 +1453,7 @@ next open slice = networked Rekor backend. Match the file's existing block forma
 
 - [ ] **Step 5: Verify and commit**
 
-Run: `grep -rn "verify-bundle\|transparency-log\|polymer.bundle" README.md docs/superpowers/ARCHITECTURE_CURRENT.md docs/superpowers/2026-06-23-remaining-roadmap.md`
+Run: `grep -rn "verify-bundle\|transparency-log\|polymer.bundle" README.md ARCHITECTURE_CURRENT.md docs/superpowers/2026-06-23-remaining-roadmap.md`
 Expected: the new lines appear in each file.
 
 ```bash
