@@ -102,6 +102,13 @@ def serialize_public_pem(public_key) -> bytes:
     )
 
 
+def serialize_public_der(public_key) -> bytes:
+    _ed, serialization, _inv = _require_crypto()
+    return public_key.public_bytes(
+        serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+
 def load_private_key(data: bytes):
     ed25519, serialization, _inv = _require_crypto()
     key = serialization.load_pem_private_key(data, password=None)
