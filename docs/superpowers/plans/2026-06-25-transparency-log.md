@@ -1018,15 +1018,13 @@ def verify_bundle(bundle: dict, *, signing_trust_key=None, log_trust_key=None) -
         return _fail(f"key load failed: {exc}", signing_key_pinned=signing_key_pinned,
                      log_key_pinned=log_key_pinned)
 
-    # (1) DSSE signature over the envelope.
-    env_ok = signing.verify_envelope(env, signing_pub)
-    # (2) Inclusion metadata is semantically authenticated against the log key + accepted for local.
-    metadata_ok = False
-    # (3) Inclusion proof recomputes to the checkpoint root at logIndex/treeSize.
-    inclusion_ok = False
-    # (4) Checkpoint signature vs the log key.
-    ckpt_ok = False
+    # All four verification gates run inside ONE guard so any malformed input -> INVALID, never an
+    # exception. All flags are pre-initialized False, so a gate that never executes (early raise)
+    # stays False and the failure-attribution cascade below names the first failing gate.
+    #   (1) DSSE signature  (2) inclusion metadata  (3) inclusion proof  (4) checkpoint signature
+    env_ok = metadata_ok = inclusion_ok = ckpt_ok = False
     try:
+        env_ok = signing.verify_envelope(env, signing_pub)
         metadata_ok = (
             inc.get("logId") == signing.keyid_for(log_pub)         # logId binds to the actual log key
             and inc.get("kindVersion") == T.LOCAL_KIND_VERSION      # accepted kind for a local bundle
@@ -1041,8 +1039,8 @@ def verify_bundle(bundle: dict, *, signing_trust_key=None, log_trust_key=None) -
             and T.verify_inclusion(leaf, inc["logIndex"], inc["treeSize"], proof, fields.root_hash)
         )
         ckpt_ok = T.verify_checkpoint(inc["checkpoint"], log_pub)
-    except Exception:                              # noqa: BLE001
-        inclusion_ok = False
+    except Exception:                              # noqa: BLE001 - any malformed input -> INVALID
+        pass
 
     if not (env_ok and metadata_ok and inclusion_ok and ckpt_ok):
         if not env_ok:
