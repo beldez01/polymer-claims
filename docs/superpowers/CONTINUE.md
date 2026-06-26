@@ -8,6 +8,10 @@
 
 ---
 
+## Current state (2026-06-25 — transparency-log layer shipped)
+
+> **UPDATE 2026-06-25 — H1.A1 local transparency layer shipped (`feat/transparency-log`):** a local RFC-6962 Merkle inclusion log + C2SP signed checkpoint + a trust-gated, offline-verifiable Polymer bundle (Sigstore-INSPIRED, not wire-compatible), behind a `TransparencyLog` seam. New CLI: `verify-bundle PATH [--pub-key] [--log-pub-key]` (rc 0 needs BOTH pinned keys) and `--transparency-log` on `certify`/`export-attestation`. **Honest boundary:** the local log delivers tamper-evidence, Merkle inclusion proofs, signed timestamps, and fully offline-verifiable bundles — but NOT public non-repudiation and NOT verified append-only-ness (consistency proofs are deferred). Those properties land when the NETWORKED backend ships. Still open: the networked public-Rekor backend (`--rekor-url` is reserved and errors today) and consistency proofs. The spec (`docs/superpowers/specs/2026-06-25-transparency-log-design.md`) is now marked SHIPPED (local-first) v0.3. Next open slice = networked Rekor backend + consistency proofs.
+
 ## Current state (2026-06-25)
 
 > **UPDATE 2026-06-25 — shipped since the 2026-06-22 snapshot below (newest first), all merged to `main` and pushed (`main == origin/main`, HEAD `32670bb`):**
