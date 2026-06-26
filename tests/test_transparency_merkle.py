@@ -73,7 +73,10 @@ def test_verify_inclusion_rejects_wrong_index_size_root_and_malformed():
     proof = T.inclusion_proof(leaves, 2)
     leaf = T.leaf_hash(leaves[2])
     assert T.verify_inclusion(leaf, 3, 6, proof, root) is False          # wrong index
-    assert T.verify_inclusion(leaf, 2, 7, proof, root) is False          # wrong tree_size
+    # A 6-leaf proof (length 3) is structurally inconsistent with a much larger tree -> rejected.
+    # (Adjacent sizes like 7 can ALIAS for some indices — same audit path — so size alone is not the
+    # guarantee; root binding is, since (tree_size, root) are signed together in the checkpoint.)
+    assert T.verify_inclusion(leaf, 2, 100, proof, root) is False        # wrong tree_size (length mismatch)
     assert T.verify_inclusion(leaf, 2, 6, proof, bytes(32)) is False     # wrong root
     assert T.verify_inclusion(leaf, 2, 6, proof + [bytes(32)], root) is False  # over-long
     assert T.verify_inclusion(leaf, 2, 6, [], root) is False             # truncated
