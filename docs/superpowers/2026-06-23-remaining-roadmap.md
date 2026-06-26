@@ -90,6 +90,12 @@ These are cheap, unblock everything downstream, and close gaps the spot-verifica
   `certify` + `export-attestation` (`[sign]` extra). Turns `certify --format dsse` into a locally
   verifiable signed artifact. **Still open:** the **Sigstore/cosign/Rekor transparency-log** layer
   (third-party verifiability without trusting the signer) — that's the remaining slice. *Size:* M.
+  **UPDATE (2026-06-25):** the LOCAL transparency layer shipped (feat/transparency-log) — a local
+  RFC-6962 Merkle inclusion log + C2SP signed checkpoint + a trust-gated, offline-verifiable Polymer
+  bundle (Sigstore-INSPIRED, not wire-compatible), behind a `TransparencyLog` seam. New CLI:
+  `verify-bundle`, and `--transparency-log` on `certify`/`export-attestation`. Still open: the
+  NETWORKED public-Rekor backend (`--rekor-url`, reserved+erroring today) and consistency proofs —
+  what add public non-repudiation + verified append-only-ness.
 - [ ] **H1.A2 — Unblock §2E REPLICATED on a real 2nd cohort (data-blocked today).** The gating
   activity for a credible wedge is sourcing a second HM450 AML cohort with machine-readable IDH
   status (or pivoting the wedge claim to data we *can* replicate). This is sourcing/curation work,

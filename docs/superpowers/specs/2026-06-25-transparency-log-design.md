@@ -1,6 +1,6 @@
 # Transparency-Log Signing + Offline-Verifiable Bundle (local-first, network-ready) — Design Spec
 
-**Status:** Design / approved for planning. v0.3
+**Status:** SHIPPED (local-first). v0.3 — implemented on branch feat/transparency-log; networked Rekor backend deferred (§7).
 **Date:** 2026-06-25
 **Author:** Z. Belden (brainstormed with Claude)
 **Roadmap:** H1.A1 (Arc-2 slice 3 — real signing), the still-open half. The local ed25519 DSSE
