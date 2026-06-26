@@ -1,0 +1,104 @@
+"""Local RFC-6962 Merkle inclusion log + C2SP signed checkpoint for Polymer bundles.
+
+Merkle math and `canonical_entry_bytes` are pure stdlib (no crypto). The checkpoint signing/verify
+and the local log reuse `signing._require_crypto()` so the base install stays crypto-free. v1 is a
+Merkle *inclusion* log (no consistency proofs -> no verified append-only-ness); see
+docs/superpowers/specs/2026-06-25-transparency-log-design.md.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from polymer_claims.attestation import DsseEnvelope
+
+
+# --- canonical leaf bytes -------------------------------------------------------------------------
+def canonical_entry_bytes(env: DsseEnvelope) -> bytes:
+    """Deterministic canonical JSON of the SIGNED envelope — the bytes that become a Merkle leaf.
+    Both submit and verify derive the leaf from this single function (no re-serialization drift)."""
+    obj = {
+        "payloadType": env.payload_type,
+        "payload": env.payload,
+        "signatures": [{"sig": s.sig, "keyid": s.keyid} for s in env.signatures],
+    }
+    return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+# --- RFC-6962 Merkle tree hash (SHA-256, domain-separated) ----------------------------------------
+def leaf_hash(entry: bytes) -> bytes:
+    return hashlib.sha256(b"\x00" + entry).digest()
+
+
+def node_hash(left: bytes, right: bytes) -> bytes:
+    return hashlib.sha256(b"\x01" + left + right).digest()
+
+
+def _largest_pow2_below(n: int) -> int:
+    """Largest power of two strictly less than n (n >= 2)."""
+    k = 1
+    while k << 1 < n:
+        k <<= 1
+    return k
+
+
+def _root_of_hashes(hashes: list[bytes]) -> bytes:
+    n = len(hashes)
+    if n == 1:
+        return hashes[0]
+    k = _largest_pow2_below(n)
+    return node_hash(_root_of_hashes(hashes[:k]), _root_of_hashes(hashes[k:]))
+
+
+def merkle_root(leaves: list[bytes]) -> bytes:
+    if not leaves:
+        raise ValueError("merkle_root requires at least one leaf (empty tree unused in v1)")
+    return _root_of_hashes([leaf_hash(d) for d in leaves])
+
+
+def _proof_from_hashes(hashes: list[bytes], index: int) -> list[bytes]:
+    n = len(hashes)
+    if n == 1:
+        return []
+    k = _largest_pow2_below(n)
+    if index < k:
+        return _proof_from_hashes(hashes[:k], index) + [_root_of_hashes(hashes[k:])]
+    return _proof_from_hashes(hashes[k:], index - k) + [_root_of_hashes(hashes[:k])]
+
+
+def inclusion_proof(leaves: list[bytes], index: int) -> list[bytes]:
+    if not 0 <= index < len(leaves):
+        raise ValueError(f"index {index} out of range for {len(leaves)} leaves")
+    return _proof_from_hashes([leaf_hash(d) for d in leaves], index)
+
+
+def verify_inclusion(leaf: bytes, index: int, tree_size: int, proof: list[bytes], root: bytes) -> bool:
+    """Recompute the root from (leaf, index, tree_size, proof) per RFC-6962 §2.1.1 and compare.
+    Direction at each step is derived from index/size arithmetic (not stored in the proof). Never
+    raises: any structural problem returns False."""
+    try:
+        if not 0 <= index < tree_size:
+            return False
+        fn = index
+        sn = tree_size - 1        # canonical RFC-6962 audit-path algorithm uses tree_size - 1
+        h = leaf
+        for sibling in proof:
+            if sn == 0:           # ran out of tree before the proof was exhausted
+                return False
+            if (fn & 1) or (fn == sn):
+                h = node_hash(sibling, h)
+                if not (fn & 1):
+                    while True:
+                        fn >>= 1
+                        sn >>= 1
+                        if (fn & 1) or fn == 0:
+                            break
+            else:
+                h = node_hash(h, sibling)
+            fn >>= 1
+            sn >>= 1
+        return sn == 0 and h == root
+    except Exception:
+        return False
