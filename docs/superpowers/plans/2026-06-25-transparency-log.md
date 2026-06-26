@@ -330,14 +330,14 @@ ROOT = bytes(range(32))
 TS = "2026-06-25T00:00:00Z"
 
 
-def test_body_layout_is_origin_size_b64root_timestamp():
+def test_body_layout_is_origin_size_b64root_timestamp_then_blank_line():
     body = T.format_checkpoint_body(ORIGIN, 3, ROOT, TS)
     lines = body.split("\n")
     assert lines[0] == ORIGIN
     assert lines[1] == "3"
     assert lines[2] == base64.b64encode(ROOT).decode("ascii")
     assert lines[3] == f"Timestamp: {TS}"
-    assert body.endswith("\n") and not body.endswith("\n\n")
+    assert body.endswith("\n\n")  # C2SP: a blank line terminates the signed body
 
 
 def test_sign_then_verify_round_trip_and_parse():
@@ -411,15 +411,15 @@ class CheckpointFields:
 
 
 def format_checkpoint_body(origin: str, tree_size: int, root_hash: bytes, timestamp: str) -> str:
-    """The signed note body: origin / tree_size / base64(root) / Timestamp lines, newline-terminated."""
+    """The signed C2SP note body: origin / tree_size / base64(root) / Timestamp lines, then a blank
+    line that terminates the body (C2SP rule). The trailing blank line IS part of the signed bytes."""
     b64root = base64.b64encode(root_hash).decode("ascii")
-    return f"{origin}\n{tree_size}\n{b64root}\nTimestamp: {timestamp}\n"
+    return f"{origin}\n{tree_size}\n{b64root}\nTimestamp: {timestamp}\n\n"
 
 
 def _keyhint(origin: str, public_key) -> bytes:
     from polymer_claims.signing import serialize_public_der
-    return hashlib.sha256(origin.encode("utf-8") + b"\n" + serialize_public_der(public_key))[:4] \
-        if False else hashlib.sha256(origin.encode("utf-8") + b"\n" + serialize_public_der(public_key)).digest()[:4]
+    return hashlib.sha256(origin.encode("utf-8") + b"\n" + serialize_public_der(public_key)).digest()[:4]
 
 
 def sign_checkpoint(origin: str, tree_size: int, root_hash: bytes, timestamp: str, log_private_key) -> str:
@@ -466,24 +466,19 @@ def verify_checkpoint(note: str, log_public_key) -> bool:
     return False
 ```
 
-> Note: `_keyhint` is written plainly — replace the awkward ternary above with the direct form when implementing:
-> ```python
-> def _keyhint(origin: str, public_key) -> bytes:
->     from polymer_claims.signing import serialize_public_der
->     return hashlib.sha256(origin.encode("utf-8") + b"\n" + serialize_public_der(public_key)).digest()[:4]
-> ```
-> `serialize_public_der` is added to `signing.py` in Task 4; until then this import fails only at call time. To keep Task 2 self-contained and green, **add `serialize_public_der` to `signing.py` now as part of this task** (it is a 3-line helper; Task 4 will rely on it too):
-> ```python
-> def serialize_public_der(public_key) -> bytes:
->     _ed, serialization, _inv = _require_crypto()
->     return public_key.public_bytes(
->         serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo
->     )
-> ```
+> `_keyhint` depends on `serialize_public_der`, added to `signing.py` in Step 4 below — add that helper as part of this task so Task 2 is self-contained and green (Task 4 also relies on it).
 
 - [ ] **Step 4: Add `serialize_public_der` to signing.py**
 
-Add the `serialize_public_der` helper (shown above) to `src/polymer_claims/signing.py`, right after `serialize_public_pem`. Use the clean (non-ternary) `_keyhint` form in `transparency.py`.
+Add this helper to `src/polymer_claims/signing.py`, right after `serialize_public_pem`:
+
+```python
+def serialize_public_der(public_key) -> bytes:
+    _ed, serialization, _inv = _require_crypto()
+    return public_key.public_bytes(
+        serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+```
 
 - [ ] **Step 5: Run the tests to verify they pass**
 
@@ -782,6 +777,17 @@ def test_verify_untrusted_without_pins(tmp_path):
     assert not r.signing_key_pinned and not r.log_key_pinned
 
 
+def test_verify_one_pin_is_not_trusted(tmp_path):
+    # Either pin alone leaves the OTHER key merely bundle-embedded -> not a trusted bundle.
+    b, sig_pub, log_pub = _make_signed_bundle(tmp_path)
+    r_sig_only = B.verify_bundle(b, signing_trust_key=sig_pub)
+    r_log_only = B.verify_bundle(b, log_trust_key=log_pub)
+    assert r_sig_only.status == B.TrustStatus.STRUCTURALLY_VALID_UNTRUSTED
+    assert r_log_only.status == B.TrustStatus.STRUCTURALLY_VALID_UNTRUSTED
+    assert r_sig_only.signing_key_pinned and not r_sig_only.log_key_pinned
+    assert r_log_only.log_key_pinned and not r_log_only.signing_key_pinned
+
+
 def test_verify_invalid_when_pinned_key_mismatches(tmp_path):
     b, _, log_pub = _make_signed_bundle(tmp_path)
     _, wrong_pub = signing.generate_keypair()
@@ -791,11 +797,20 @@ def test_verify_invalid_when_pinned_key_mismatches(tmp_path):
 
 
 @pytest.mark.parametrize("mutation", ["payload", "signature", "proof", "ckpt_body", "ckpt_sig",
-                                      "signing_key", "log_key"])
+                                      "signing_key", "log_key", "media_type", "log_id",
+                                      "kind_version", "integrated_time"])
 def test_verify_invalid_on_each_tamper(tmp_path, mutation):
     b, sig_pub, log_pub = _make_signed_bundle(tmp_path)
     b = copy.deepcopy(b)
-    if mutation == "payload":
+    if mutation == "media_type":
+        b["mediaType"] = "application/vnd.dev.sigstore.bundle.v0.3+json"
+    elif mutation == "log_id":
+        b["verificationMaterial"]["inclusion"]["logId"] = "deadbeefdeadbeef"
+    elif mutation == "kind_version":
+        b["verificationMaterial"]["inclusion"]["kindVersion"] = "dsse/0.0.1"
+    elif mutation == "integrated_time":
+        b["verificationMaterial"]["inclusion"]["integratedTime"] = "2026-06-25T00:00:00Z"
+    elif mutation == "payload":
         b["dsseEnvelope"]["payload"] = base64.b64encode(b"tampered").decode("ascii")
     elif mutation == "signature":
         s = b["dsseEnvelope"]["signatures"][0]["sig"]
@@ -923,6 +938,8 @@ def _fail(reason: str, **flags) -> BundleVerification:
 def verify_bundle(bundle: dict, *, signing_trust_key=None, log_trust_key=None) -> BundleVerification:
     """Trust-gated offline verifier. Never raises. rc-mapping is the CLI's job; this returns status."""
     try:
+        if not isinstance(bundle, dict) or bundle.get("mediaType") != MEDIA_TYPE:
+            return _fail(f"wrong or missing mediaType (expected {MEDIA_TYPE})")
         vm = bundle["verificationMaterial"]
         inc = vm["inclusion"]
         env = DsseEnvelope.model_validate(bundle["dsseEnvelope"])
@@ -952,10 +969,18 @@ def verify_bundle(bundle: dict, *, signing_trust_key=None, log_trust_key=None) -
 
     # (1) DSSE signature over the envelope.
     env_ok = signing.verify_envelope(env, signing_pub)
-    # (2) Inclusion proof recomputes to the checkpoint root at logIndex/treeSize.
+    # (2) Inclusion metadata is semantically authenticated against the log key + accepted for local.
+    metadata_ok = False
+    # (3) Inclusion proof recomputes to the checkpoint root at logIndex/treeSize.
     inclusion_ok = False
+    # (4) Checkpoint signature vs the log key.
     ckpt_ok = False
     try:
+        metadata_ok = (
+            inc.get("logId") == signing.keyid_for(log_pub)         # logId binds to the actual log key
+            and inc.get("kindVersion") == T.LOCAL_KIND_VERSION      # accepted kind for a local bundle
+            and inc.get("integratedTime") is None                   # local v1 has no integrated time
+        )
         fields = T.parse_checkpoint(inc["checkpoint"])
         leaf = T.leaf_hash(T.canonical_entry_bytes(env))
         proof = [bytes.fromhex(h) for h in inc["hashesHex"]]
@@ -964,21 +989,30 @@ def verify_bundle(bundle: dict, *, signing_trust_key=None, log_trust_key=None) -
             and fields.tree_size == inc["treeSize"]
             and T.verify_inclusion(leaf, inc["logIndex"], inc["treeSize"], proof, fields.root_hash)
         )
-        # (3) Checkpoint signature vs the log key.
         ckpt_ok = T.verify_checkpoint(inc["checkpoint"], log_pub)
     except Exception:                              # noqa: BLE001
         inclusion_ok = False
 
-    if not (env_ok and inclusion_ok and ckpt_ok):
-        failing = "envelope signature" if not env_ok else "inclusion proof" if not inclusion_ok else "checkpoint signature"
+    if not (env_ok and metadata_ok and inclusion_ok and ckpt_ok):
+        if not env_ok:
+            failing = "envelope signature"
+        elif not metadata_ok:
+            failing = "inclusion metadata (logId/kindVersion/integratedTime)"
+        elif not inclusion_ok:
+            failing = "inclusion proof"
+        else:
+            failing = "checkpoint signature"
         return BundleVerification(
             status=TrustStatus.INVALID, envelope_signature_ok=env_ok, inclusion_ok=inclusion_ok,
             checkpoint_signature_ok=ckpt_ok, signing_key_pinned=signing_key_pinned,
             log_key_pinned=log_key_pinned, reason=f"{failing} verification failed",
         )
-    status = TrustStatus.TRUSTED_VALID if (signing_key_pinned or log_key_pinned) \
+    # TRUSTED_VALID requires BOTH the signer identity AND the log trust root to be pinned and matched;
+    # one alone leaves the other merely bundle-embedded (not trusted).
+    status = TrustStatus.TRUSTED_VALID if (signing_key_pinned and log_key_pinned) \
         else TrustStatus.STRUCTURALLY_VALID_UNTRUSTED
-    reason = "" if status == TrustStatus.TRUSTED_VALID else "no trust root pinned (structurally valid only)"
+    reason = "" if status == TrustStatus.TRUSTED_VALID \
+        else "both --pub-key and --log-pub-key must be pinned for trust (structurally valid only)"
     return BundleVerification(
         status=status, envelope_signature_ok=True, inclusion_ok=True, checkpoint_signature_ok=True,
         signing_key_pinned=signing_key_pinned, log_key_pinned=log_key_pinned, reason=reason,
@@ -1100,12 +1134,22 @@ def test_rekor_url_is_reserved_not_implemented(tmp_path):
     assert "not implemented" in r.stderr.lower()
 
 
-def test_certify_without_flag_is_byte_identical(tmp_path):
-    sk, _ = _keys(tmp_path)
-    a = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk))
-    b = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk))
-    assert a.returncode == 0 and a.stdout == b.stdout
-    assert "mediaType" not in a.stdout  # bare envelope, not a bundle
+def test_certify_without_flag_still_emits_a_bare_verifiable_envelope(tmp_path):
+    # No-regression: with --transparency-log OFF, certify --format dsse must still produce the SAME
+    # kind of artifact as before this slice — a bare signed DSSE envelope that verify-dsse accepts,
+    # NOT a bundle. (Mirrors the verify-dsse round-trip pattern in tests/test_cli_signing.py.)
+    sk, sp = _keys(tmp_path)
+    r = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk))
+    assert r.returncode == 0, r.stderr
+    env = json.loads(r.stdout)
+    assert "mediaType" not in env                                  # NOT a bundle
+    assert set(env) >= {"payloadType", "payload", "signatures"}    # a DSSE envelope
+    p = tmp_path / "env.json"
+    p.write_text(r.stdout)
+    assert _run("verify-dsse", str(p), "--pub-key", str(sp)).returncode == 0  # still valid + verifiable
+    # determinism is unchanged too (ed25519 + deterministic render)
+    r2 = _run("certify", "C1", "--corpus", CORPUS, "--format", "dsse", "--key", str(sk))
+    assert r2.stdout == r.stdout
 ```
 
 > **Step 1b (fixture):** if `tests/data/corpus_min.json` does not exist, reuse whatever single-claim
@@ -1119,31 +1163,36 @@ Expected: FAIL — `certify: unrecognized arguments: --transparency-log`.
 
 - [ ] **Step 3: Add the `verify-bundle` parser + flags on certify/export-attestation**
 
-In `src/polymer_claims/cli.py` `_build_parser`, add to the `certify` parser (after its `--keyid` line) and the `export-attestation` parser the shared flags:
+In `src/polymer_claims/cli.py`, add a module-level helper (next to `_build_parser`). `p_cert` and
+`p_att` are created at different points in `_build_parser`, so do NOT reference both from one loop —
+call the helper immediately after each parser is created (right before its `set_defaults`):
 
 ```python
-    # --- on p_cert AND p_att (add to both) ---
-    for _p in (p_cert, p_att):
-        _p.add_argument("--transparency-log", action="store_true",
+def _add_transparency_flags(parser):
+    """Shared --transparency-log family for certify + export-attestation (call after each is created)."""
+    parser.add_argument("--transparency-log", action="store_true",
                         help="append the signed DSSE envelope to a local Merkle inclusion log and emit a Polymer bundle (needs --key, --format dsse)")
-        _p.add_argument("--log-dir", default="./.polymer-tlog",
+    parser.add_argument("--log-dir", default="./.polymer-tlog",
                         help="local transparency-log directory (default ./.polymer-tlog)")
-        _p.add_argument("--log-key", default=None,
+    parser.add_argument("--log-key", default=None,
                         help="ed25519 private key PEM for the log (default <log-dir>/log.key, auto-generated)")
-        _p.add_argument("--rekor-url", default=None,
+    parser.add_argument("--rekor-url", default=None,
                         help="RESERVED: networked Rekor backend is not implemented yet (see spec §7)")
 ```
 
-Place this `for` loop after both `p_cert` and `p_att` are defined (i.e., after `p_att.set_defaults(...)`).
+Then, in `_build_parser`, call `_add_transparency_flags(p_cert)` immediately after the `certify`
+parser's existing `--keyid` argument (before `p_cert.set_defaults(...)`), and
+`_add_transparency_flags(p_att)` immediately after the `export-attestation` parser's last argument
+(before `p_att.set_defaults(...)`). This avoids referencing `p_cert` before it is assigned.
 
 Add the new subcommand near `verify-dsse`:
 
 ```python
     p_vb = sub.add_parser("verify-bundle",
-                          help="verify a Polymer bundle (or NDJSON of bundles) offline; rc 0 needs a pinned key")
+                          help="verify a Polymer bundle (or NDJSON of bundles) offline; rc 0 needs BOTH keys pinned")
     p_vb.add_argument("path", help="path to a bundle JSON or NDJSON of bundles")
-    p_vb.add_argument("--pub-key", default=None, help="pin the signer's public key PEM (required for rc 0)")
-    p_vb.add_argument("--log-pub-key", default=None, help="pin the log's public key PEM (required for rc 0)")
+    p_vb.add_argument("--pub-key", default=None, help="pin the signer's public key PEM (both --pub-key AND --log-pub-key required for rc 0)")
+    p_vb.add_argument("--log-pub-key", default=None, help="pin the log's public key PEM (both --pub-key AND --log-pub-key required for rc 0)")
     p_vb.set_defaults(func=_cmd_verify_bundle)
 ```
 
@@ -1236,6 +1285,12 @@ def _cmd_verify_bundle(args: argparse.Namespace) -> int:
 Now wire the signing branches. In `_cmd_certify`, replace the `--format dsse` branch's tail so that after `env = sign_envelope(env, priv, keyid=args.keyid)` it optionally logs:
 
 ```python
+            if args.transparency_log and args.keyid is not None:
+                from .signing import keyid_for
+                if args.keyid != keyid_for(priv.public_key()):
+                    print("certify: --keyid conflicts with --transparency-log — a bundle requires the "
+                          "derived keyid (it must equal the signing key's keyid); omit --keyid", file=sys.stderr)
+                    return 1
             env = sign_envelope(env, priv, keyid=args.keyid)
             if args.rekor_url:
                 print("certify: networked Rekor backend (--rekor-url) is not implemented yet; see spec §7", file=sys.stderr)
@@ -1380,11 +1435,15 @@ git commit -m "docs: reconcile for local transparency-log layer (verify-bundle, 
 **1. Spec coverage:**
 - §2 RFC-6962 math → Task 1 ✓. §3.1 canonical bytes → Task 1 ✓. §3.3 C2SP checkpoint → Task 2 ✓.
   §3.4 LogEntry/protocol + §3.5 LocalInclusionLog → Task 3 ✓. §4.1 bundle shape + §4.2 build/verify +
-  §4.3 TrustStatus → Task 4 ✓. §4.4 honesty (Polymer media type, not Sigstore) → Task 4 shape test ✓.
-  §5 CLI (flags, verify-bundle rc 0/1/2, reserved --rekor-url, byte-identical-when-off) → Task 5 ✓.
-  Finding-6 keyid enforcement → Task 4 `build_bundle` + test ✓. §7 seam (forward-compat LogEntry
-  fields) → Task 3 ✓. §0.1/§11 honest-boundary wording → Task 6 docs ✓. §8 packaging (no new deps) →
-  no pyproject change needed (reuses `[sign]`); confirmed.
+  §4.3 TrustStatus (TRUSTED_VALID needs BOTH pins; media-type gate; inclusion-metadata authentication
+  of logId/kindVersion/integratedTime) → Task 4 `verify_bundle` + tamper tests ✓. §4.4 honesty
+  (Polymer media type, not Sigstore) → Task 4 shape test ✓. §5 CLI (flags via `_add_transparency_flags`
+  called per-parser, verify-bundle rc 0 needs BOTH keys / 1 / 2, `--keyid`-conflict rejection,
+  reserved --rekor-url, no-regression via verify-dsse round-trip) → Task 5 ✓. Finding-6 keyid
+  enforcement → Task 4 `build_bundle` + Task 5 CLI guard + tests ✓. C2SP blank-line-terminated signed
+  body → Task 2 ✓. §7 seam (forward-compat LogEntry fields) → Task 3 ✓. §0.1/§11 honest-boundary
+  wording → Task 6 docs ✓. §8 packaging (no new deps) → no pyproject change needed (reuses `[sign]`);
+  confirmed.
 **2. Placeholder scan:** No TBD/TODO. The only conditional content is Task 5 Step 1b (corpus fixture),
   which gives an explicit resolution rule (reuse the existing signing test's fixture) rather than a
   placeholder; and the Task 2 `_keyhint` note, which shows the exact clean form to use.

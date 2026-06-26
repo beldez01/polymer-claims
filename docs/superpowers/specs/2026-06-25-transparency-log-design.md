@@ -1,6 +1,6 @@
 # Transparency-Log Signing + Offline-Verifiable Bundle (local-first, network-ready) — Design Spec
 
-**Status:** Design / approved for planning. v0.2
+**Status:** Design / approved for planning. v0.3
 **Date:** 2026-06-25
 **Author:** Z. Belden (brainstormed with Claude)
 **Roadmap:** H1.A1 (Arc-2 slice 3 — real signing), the still-open half. The local ed25519 DSSE
@@ -10,10 +10,16 @@ signing of `specs/2026-06-23-dsse-signing-design.md` shipped; this is its deferr
 > **Revision note (v0.2).** Hardened after external review against the RFC-6962 and Sigstore/Rekor
 > specs. Key corrections: this is a **Polymer bundle (Sigstore-*inspired*), not Sigstore-wire-compatible**
 > (§4.4); the checkpoint uses the **C2SP signed-note format** (§3.3); `verify_bundle` reports a **trust
-> status** and the CLI requires a **pinned trust root** for success (§4.3, §5); v1 is a **Merkle
-> *inclusion* log** (append-only-ness needs consistency proofs, deferred) (§0.1, §11); and §7's seam
-> guarantee is the **`submit` interface**, with the bundle/verifier extending *additively* for Rekor's
-> richer entry fields — not "zero change" (§7).
+> status**; v1 is a **Merkle *inclusion* log** (append-only-ness needs consistency proofs, deferred)
+> (§0.1, §11); and §7's seam guarantee is the **`submit` interface**, with the bundle/verifier extending
+> *additively* for Rekor's richer entry fields — not "zero change" (§7).
+>
+> **Revision note (v0.3).** Second review pass hardened the verifier's trust model: `TRUSTED_VALID`
+> now requires **both** trust roots pinned (`--pub-key` AND `--log-pub-key`) — one alone leaves the
+> other key merely bundle-embedded (§4.3, §5); `verify_bundle` adds a **media-type gate** and
+> **semantic authentication of inclusion metadata** (`logId == keyid_for(log key)`, accepted
+> `kindVersion`, `integratedTime is None` for local) (§4.2). With `--transparency-log`, a conflicting
+> custom `--keyid` is rejected up front (§5).
 
 > **One line.** Append each signed DSSE envelope to a local **RFC-6962 Merkle inclusion log**, return a
 > **C2SP-format signed checkpoint + inclusion proof**, and wrap envelope + proof + checkpoint into a
@@ -245,6 +251,14 @@ The Polymer bundle and its trust-gated offline verifier.
 | `build_bundle(env, signing_public_key, log_entry: LogEntry, log_public_key) -> dict` | assemble §4.1. **Enforces (§ finding-6):** the envelope must carry exactly one signature whose `keyid == keyid_for(signing_public_key)`; otherwise raise `ValueError` (refuse to build a bundle whose DSSE key hint disagrees with its verification material). Sets `signingKey.keyHint` to that matching keyid. |
 | `verify_bundle(bundle, *, signing_trust_key=None, log_trust_key=None) -> BundleVerification` | the trust-gated offline verifier (§4.3); **never raises** |
 
+`verify_bundle` performs, in order: (0) **media-type gate** — reject unless `bundle["mediaType"] ==
+MEDIA_TYPE` (do not validate a structurally-similar object carrying another format label); (1) DSSE
+signature over the envelope; (2) **inclusion-metadata authentication** — `inclusion.logId ==
+keyid_for(log key)`, `kindVersion` is an accepted local value (`polymer-inclusion/0.1`), and
+`integratedTime is None` for a local bundle (these fields are unsigned, so the verifier authenticates
+them semantically rather than trusting them blindly); (3) inclusion proof recomputes to the checkpoint
+root at `logIndex`/`treeSize`; (4) checkpoint signature vs the log key.
+
 `signing_trust_key` / `log_trust_key` are the **pinned** trust roots. When omitted, verification still
 runs against the bundle's *embedded* keys but the result is capped at `STRUCTURALLY_VALID_UNTRUSTED`
 (§4.3) — internal consistency is proven, trust is not.
@@ -253,8 +267,8 @@ runs against the bundle's *embedded* keys but the result is capped at `STRUCTURA
 
 ```python
 class TrustStatus(str, Enum):
-    TRUSTED_VALID = "trusted_valid"                          # all checks pass AND ≥1 supplied trust root matched
-    STRUCTURALLY_VALID_UNTRUSTED = "structurally_valid_untrusted"  # all checks pass vs embedded keys, no pin given
+    TRUSTED_VALID = "trusted_valid"                          # all checks pass AND BOTH trust roots pinned + matched
+    STRUCTURALLY_VALID_UNTRUSTED = "structurally_valid_untrusted"  # all checks pass vs embedded keys, not both pinned
     INVALID = "invalid"                                      # a check failed
 
 @dataclass(frozen=True)
@@ -268,11 +282,13 @@ class BundleVerification:
     reason: str                   # first failing/limiting condition, human-readable; "" when TRUSTED_VALID
 ```
 
-Rules: if any `*_ok` is false → `INVALID`. Else if at least one of `signing_key_pinned` /
-`log_key_pinned` is true (a supplied pin matched) → `TRUSTED_VALID`. Else →
-`STRUCTURALLY_VALID_UNTRUSTED`. A supplied trust key that does **not** match the bundle's key →
-`INVALID` (key mismatch), never silently downgraded. Each sub-check is independently reported so a
-tampered field names *which* check failed.
+Rules: if the media-type gate, any `*_ok`, or the inclusion-metadata check fails → `INVALID`. Else if
+**both** `signing_key_pinned` AND `log_key_pinned` are true → `TRUSTED_VALID`. Else →
+`STRUCTURALLY_VALID_UNTRUSTED`. **Both** trust roots are required for trust: one pin alone leaves the
+*other* key merely bundle-embedded, so the bundle is not fully trustworthy (only `STRUCTURALLY_VALID_
+UNTRUSTED`). A supplied trust key that does **not** match the bundle's key → `INVALID` (key mismatch),
+never silently downgraded. Each sub-check is independently reported so a tampered field names *which*
+check failed.
 
 ### 4.4 Relationship to Sigstore (honesty section)
 
@@ -303,10 +319,11 @@ would be false; we call it "Sigstore-inspired."
   same, logging EACH envelope and emitting one bundle per NDJSON line.
 - **`verify-bundle PATH [--pub-key SIGNING.pub] [--log-pub-key LOG.pub]`** (new subcommand) — read a
   bundle JSON *or* NDJSON of bundles; run `verify_bundle` pinning whichever keys are supplied. **Exit
-  codes:** `0` iff every bundle is `TRUSTED_VALID`; `1` if any is `INVALID`; `2` if any is
-  `STRUCTURALLY_VALID_UNTRUSTED` (no pin supplied — structurally fine but **not** trusted). Print a
-  one-line per-bundle verdict naming the status and any failing check to stderr. This mirrors
-  `verify-dsse`'s "you must supply the key you trust" stance: **rc 0 requires a pinned trust root.**
+  codes:** `0` iff every bundle is `TRUSTED_VALID`; `1` if any is `INVALID`; `2` if none INVALID but any
+  is `STRUCTURALLY_VALID_UNTRUSTED` (not both keys pinned — structurally fine but **not** trusted;
+  INVALID dominates). Print a one-line per-bundle verdict naming the status and any failing check to
+  stderr. This mirrors `verify-dsse`'s "you must supply the key you trust" stance: **rc 0 requires BOTH
+  `--pub-key` AND `--log-pub-key` pinned** (the signer identity *and* the log trust root).
 - **`--rekor-url URL`** is **reserved/parsed but documented as not-implemented in v1** (errors with a
   clear "networked Rekor backend is not implemented yet; see spec §7" message). It exists so the flag
   surface is stable for the network slice.
