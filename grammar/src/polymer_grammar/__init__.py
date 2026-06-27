@@ -169,6 +169,12 @@ from .representation import (
     meets_meta_tier_bar,
 )
 from .commitment import commitment_hash
+from .capability import (
+    CapabilityCell, CapabilityRegistry, ParamCodec, SubjectRequirement, SubjectKind,
+    OracleRequirement, DataRefKind, ConformanceResult, ConformanceReason, ConformanceWarning,
+    CapabilityParamError, build_evaluation_plan, validate_claim_shape, validate_claim_conformance,
+    criterion_target_ok, data_ref_ok,
+)
 
 __all__ = [
     "AXES",
@@ -319,6 +325,22 @@ __all__ = [
     "classify",
     "RevisionDiscovery",
     "commitment_hash",
+    "CapabilityCell",
+    "CapabilityRegistry",
+    "ParamCodec",
+    "SubjectRequirement",
+    "SubjectKind",
+    "OracleRequirement",
+    "DataRefKind",
+    "ConformanceResult",
+    "ConformanceReason",
+    "ConformanceWarning",
+    "CapabilityParamError",
+    "build_evaluation_plan",
+    "validate_claim_shape",
+    "validate_claim_conformance",
+    "criterion_target_ok",
+    "data_ref_ok",
     "CONFIRMATORY_SEVERITY_CEILING",
     "SHARED_CAUSE_TAU",
     "SeverityProvenance",

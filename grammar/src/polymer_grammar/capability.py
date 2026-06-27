@@ -208,3 +208,124 @@ class ConformanceResult(_Model):
 
 class CapabilityParamError(ValueError):
     """Raised by build_evaluation_plan on programmer misuse (bad params/comparator/oracle/data_ref)."""
+
+
+from .operations import (  # noqa: E402
+    ComputeGraph, DataHandle, EvaluationPlan, OperationNode, SatisfactionCriterion,
+)
+from .claim import Claim  # noqa: E402
+
+
+def _dedup(items):
+    seen, out = set(), []
+    for x in items:
+        if x not in seen:
+            seen.add(x)
+            out.append(x)
+    return tuple(out)
+
+
+def criterion_target_ok(target: str, criterion: SatisfactionCriterion) -> bool:
+    has_threshold = criterion.threshold is not None
+    has_ref = criterion.reference_leaf_index is not None
+    if target == "threshold":
+        return has_threshold and not has_ref
+    if target == "reference_leaf":
+        return has_ref and not has_threshold
+    return has_threshold ^ has_ref  # "either": exactly one
+
+
+def build_evaluation_plan(
+    cell: CapabilityCell, *, params: dict[str, str], data_ref: str,
+    criterion: SatisfactionCriterion, oracle_ref: str | None = None,
+) -> EvaluationPlan:
+    schema = {p.name: p for p in cell.param_schema}
+    missing = [p.name for p in cell.param_schema if p.required and p.name not in params]
+    if missing:
+        raise CapabilityParamError(f"missing required params: {missing}")
+    unknown = [k for k in params if k not in schema]
+    if unknown:
+        raise CapabilityParamError(f"unknown params: {unknown}")
+    for k, v in params.items():
+        if not schema[k].is_canonical(v):
+            raise CapabilityParamError(f"param {k!r}={v!r} not canonical for codec {schema[k].codec}")
+    if criterion.comparator not in cell.allowed_comparators:
+        raise CapabilityParamError(f"comparator {criterion.comparator} not allowed")
+    if not criterion_target_ok(cell.criterion_target, criterion):
+        raise CapabilityParamError("criterion target shape not allowed")
+    if not data_ref_ok(cell.data_ref_kind, data_ref):
+        raise CapabilityParamError(f"data_ref {data_ref!r} invalid for {cell.data_ref_kind}")
+    resolved = oracle_ref if oracle_ref is not None else cell.oracle.default_oracle_id
+    if cell.oracle.required and resolved is None:
+        raise CapabilityParamError("oracle required but none resolved")
+    ordered = tuple((p.name, params[p.name]) for p in cell.param_schema if p.name in params)
+    node = OperationNode(id="n0", impl=cell.operation_impl, inputs=(DataHandle(ref=data_ref),),
+                         params=ordered, oracle_ref=resolved, produces=cell.produced)
+    return EvaluationPlan(graph=ComputeGraph(nodes=(node,), terminal="n0"), criterion=criterion)
+
+
+def _subject_reasons(req: SubjectRequirement, subject):
+    if req.mode == "forbidden":
+        return [ConformanceReason.SUBJECT_FORBIDDEN_PRESENT] if subject is not None else []
+    if subject is None:
+        return [ConformanceReason.SUBJECT_REQUIRED_MISSING] if req.mode == "required" else []
+    if req.kind is not None and subject.kind != req.kind:
+        return [ConformanceReason.SUBJECT_KIND_MISMATCH]
+    return []
+
+
+def validate_claim_shape(claim: Claim, cell: CapabilityCell) -> ConformanceResult:
+    reasons: list[ConformanceReason] = []
+    plan = claim.evaluation_plan
+    node = None
+    if plan is None or len(plan.graph.nodes) != 1:
+        reasons.append(ConformanceReason.GRAPH_SHAPE_MISMATCH)
+    else:
+        node = plan.graph.nodes[0]
+        if node.id != "n0" or plan.graph.terminal != node.id:
+            reasons.append(ConformanceReason.GRAPH_SHAPE_MISMATCH)
+    # claim-level checks (independent of the node)
+    if claim.pattern != cell.pattern:
+        reasons.append(ConformanceReason.PATTERN_MISMATCH)
+    if tuple(leaf.kind for leaf in claim.leaves) != tuple(cell.claim_leaf_kinds):
+        reasons.append(ConformanceReason.LEAF_SHAPE_MISMATCH)
+    reasons.extend(_subject_reasons(cell.subject, claim.subject))
+    if plan is not None:
+        if not criterion_target_ok(cell.criterion_target, plan.criterion):
+            reasons.append(ConformanceReason.CRITERION_TARGET_MISMATCH)
+        if plan.criterion.comparator not in cell.allowed_comparators:
+            reasons.append(ConformanceReason.COMPARATOR_NOT_ALLOWED)
+    # node-dependent checks
+    if node is not None:
+        data_input = (node.inputs[0]
+                      if len(node.inputs) == 1 and isinstance(node.inputs[0], DataHandle) else None)
+        if data_input is None:
+            reasons.append(ConformanceReason.GRAPH_SHAPE_MISMATCH)
+        if node.impl != cell.operation_impl:
+            reasons.append(ConformanceReason.OPERATION_IMPL_MISMATCH)
+        if node.produces != cell.produced:
+            reasons.append(ConformanceReason.OUTPUT_TYPE_MISMATCH)
+        keys = [k for k, _ in node.params]
+        schema = {p.name: p for p in cell.param_schema}
+        if len(keys) != len(set(keys)):
+            reasons.append(ConformanceReason.PARAM_DUPLICATE)
+        if any(p.required and p.name not in keys for p in cell.param_schema):
+            reasons.append(ConformanceReason.PARAM_MISSING)
+        for k, v in node.params:
+            if k not in schema:
+                reasons.append(ConformanceReason.PARAM_UNKNOWN)
+            elif not schema[k].is_canonical(v):
+                reasons.append(ConformanceReason.PARAM_MALFORMED)
+        if data_input is not None and not data_ref_ok(cell.data_ref_kind, data_input.ref):
+            reasons.append(ConformanceReason.DATA_REF_KIND_MISMATCH)
+        if cell.oracle.required and node.oracle_ref is None:
+            reasons.append(ConformanceReason.ORACLE_REQUIRED_MISSING)
+    return ConformanceResult(reasons=_dedup(reasons))
+
+
+def validate_claim_conformance(claim, registry, capability_id, capability_version) -> ConformanceResult:
+    cell = registry.resolve(capability_id, capability_version)
+    if cell is None:
+        return ConformanceResult(reasons=(ConformanceReason.CAPABILITY_NOT_REGISTERED,),
+                                 detail=f"{capability_id}@{capability_version} not registered")
+    return validate_claim_shape(claim, cell)
