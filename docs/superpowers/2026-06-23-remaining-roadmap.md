@@ -174,3 +174,65 @@ demonstrable wedge is **H1.A2 — source a real 2nd HM450 cohort** with machine-
 finish **H1.A1 (Sigstore/Rekor)** for third-party verifiability, and the Track-B credence engines.
 Each H1+ slice gets its own brainstorm → spec → plan → subagent-driven build, the same loop that
 shipped H0.1b.
+
+---
+
+## Vision-derived additions (2026-06-27)
+
+Surfaced by reconciling `docs/superpowers/vision.md` against the shipped system. These are **net-new
+primitives the vision names that the codebase does not yet have as first-class objects** — slotted into
+the existing horizon vocabulary. **None are data-blocked** (unlike H1.A2), so they are pure-build and
+can run in parallel with the wedge's cohort sourcing.
+
+### V1 — Capability cell + Capability Registry (the spine) *(highest leverage)*
+
+> **Scope honesty:** V1 delivers capability **description, discovery, and conformance reporting** —
+> *not* closed-world enforcement. Unregistered claims still execute and license exactly as before; the
+> conformance check is advisory (unwired). Enforcement (refusing non-conformant claims at the gate) is
+> a deliberately separate later slice. V1 is the highest-value *non-data-blocked parallel* build — it
+> does **not** outrank the wedge (H1.A2 → H2), which stays the critical path.
+
+- [ ] **V1.1 — Formalize the capability cell.** A first-class, versioned object unifying what is today
+  scattered across a claim pattern + `impl` string (`stats::mean_diff`, `methyl::region_delta_beta`,
+  `n_dmps`) + execution adapters + SE-Contract + oracle dossier + agreement/licensing rule + typed
+  outputs + resource limits + schema/capability versions. *Why:* it is the vision's organizing spine —
+  agent-first **closed-world execution** means agents compile proposals into *registered* cells, not
+  arbitrary computations. *Size:* M–L. *Rhythm:* brainstorm → spec → plan → subagent build.
+- [ ] **V1.2 — Capability Registry.** Register the three existing reductions as the first cells; the
+  registry is "what Polymer knows how to claim and evaluate." Pairs with the existing **adapter trust
+  registry** and a future **claim registry** to form the three-registry product surface. *Size:* M.
+
+### V2 — Menu expansion (prove generalization on ONE first, then fan out)
+
+- [ ] **V2.0 — One genuinely new / external capability as the generalization test.** Before designing
+  three more internal cells, register **one** capability that is genuinely new or backed by an
+  **external adapter** (not a re-expression of an existing reduction). The point is to discover where
+  the V1 abstraction does *not* fit — three internally-designed cells could merely reproduce the
+  assumptions baked into the three existing reductions. What this slice teaches gates the fan-out below.
+  *Size:* M.
+- [ ] **V2.1 — Enrichment analysis** capability — candidate (gated on V2.0).
+- [ ] **V2.2 — Fixed-protocol classifier evaluation** capability — candidate (gated on V2.0).
+- [ ] **V2.3 — Feature–phenotype association** capability — candidate (gated on V2.0).
+
+  *Discipline (vision §"Start Narrow"):* a capability is real only with schema + fixtures + typed
+  outputs + comparison rule + ≥1 adapter + verifiable artifacts; expand the core IR only when ≥2
+  capabilities need the same abstraction. *Size:* S–M each. (Two-group numerical = `mean_diff` ✓;
+  DMP/region = `region_delta_beta`/`n_dmps` ✓.)
+
+### V3 — Verification ladder rung 6 + explicit operational states
+
+- [ ] **V3.1 — Temporal reproducibility as an earned tier/state.** Partly realized
+  (`verify-kernel --real` pinned inputs + the drift daemon); make "rerunnable later under pinned or
+  explicitly migrated infrastructure" an explicit *standing*, not just a proof script. *Size:* M.
+- [ ] **V3.2 — Explicit operational states.** Add the vision's missing lifecycle states —
+  **resource-exceeded**, **migrated**, **untrusted** — to the status vocabulary. *Size:* S–M.
+
+### V4 — Claim registry product surface *(later — needs the wedge first)*
+
+- [ ] The signed, machine-readable **claim registry** as a published surface (vs. today's in-repo
+  corpus + attestation/signing). Gated on H2 (a real shareable claim worth publishing). *Size:* M–L.
+
+> **Where these sit vs. the critical path:** the wedge (H1.A2 → H2) stays the spine. **V1** is the
+> highest-leverage *parallel* build — it productizes what already exists and unblocks closed-world
+> agent execution + clean menu growth, with no dependency on cohort data. Recommended pull order when
+> capacity allows: **V1 → V2 → V3**, with V4 after the wedge.

@@ -71,6 +71,19 @@ adapters into the `--llm` path is a small tracked follow-up.) To tune cost vs. a
 increase agent cadence (and API spend); the agent runs alongside the seed proposers, so the
 universe stays lively even on the throttle's quiet ticks.
 
+**Independent-evidence adapters:** beyond the bundled stdlib pair, a **BioNeMo evidence-adapter**
+(Phase 1) shows an external model surface (a cached NVIDIA NIM run) licensing a claim **offline** —
+oracle-dossier bound, air-gap independence witnessed — so the recompute gate spans a real
+third-party apparatus, not just in-package code.
+
+**Verifiable certificates (honest boundary):** `certify`/`export-attestation --transparency-log`
+emit an offline-verifiable Polymer bundle (signed DSSE + Merkle inclusion proof + signed
+checkpoint; Sigstore-**inspired**, not wire-compatible). The local layer delivers tamper-evidence,
+inclusion proofs, and signed timestamps — but **not** public non-repudiation or verified
+append-only-ness. Those land with the networked Rekor backend, which is **designed but
+intentionally tabled** (`--rekor-url` is reserved and errors today) until a claim is actually being
+shared externally.
+
 **Sample mode vs live mode:** with no connection the viewer plays a precomputed
 `viewer/public/sample-timeline.json` (sample mode); clicking **Connect** switches to **live
 mode**, streaming frames from the running node as the corpus actually generates, licenses, and
@@ -252,8 +265,8 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 
 | Subdir | Package | Status |
 |---|---|---|
-| `grammar/` | `polymer_grammar` | ✅ Complete — all 8 layer-phases + the air-gapped evaluator — 396 tests |
-| `protocol/` | `polymer_protocol` | ✅ Complete — 5 sub-projects (assessment spine · oracle dossier · SELECT · GENERATE) + 3 daemons (DRIFT / ORACLE-VALIDATION / RED-TEAM) + the `next_action` scheduler — 404 tests |
+| `grammar/` | `polymer_grammar` | ✅ Complete — all 8 layer-phases + the air-gapped evaluator — 398 tests |
+| `protocol/` | `polymer_protocol` | ✅ Complete — 5 sub-projects (assessment spine · oracle dossier · SELECT · GENERATE) + 3 daemons (DRIFT / ORACLE-VALIDATION / RED-TEAM) + the `next_action` scheduler — 430 tests |
 
 ---
 

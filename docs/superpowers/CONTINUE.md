@@ -8,6 +8,75 @@
 
 ---
 
+## Current state (2026-06-26) — authoritative snapshot
+
+> **This is the single current-state summary.** The dated blocks further down are **historical**
+> (kept for build detail); when they disagree with this section, *this* section wins. Full shipped
+> history is in the **Done checklist** below + `git log`; the forward plan is
+> `docs/superpowers/2026-06-23-remaining-roadmap.md` (Path α — wedge-first).
+
+**Where it stands.** `main` is a single trunk (2 commits ahead of `origin` at this snapshot), ruff
+clean, all suites green: **umbrella 531 · grammar 398 · protocol 430** (+ the grammar isolation
+guard). `grammar/` + `protocol/` stay pure + numpy-free; **Corpus = exactly 4 collections**; numpy
+lives behind the umbrella `[embed]` extra.
+
+**Shipped this week (newest first):**
+- **Local transparency-log layer (H1.A1, 2026-06-25)** — RFC-6962 Merkle inclusion log + C2SP signed
+  checkpoint + a trust-gated, offline-verifiable Polymer bundle (Sigstore-INSPIRED, not
+  wire-compatible), behind a `TransparencyLog` seam. CLI `verify-bundle PATH [--pub-key]
+  [--log-pub-key]` (rc 0 needs BOTH pinned keys) + `--transparency-log` on
+  `certify`/`export-attestation`. **Honest boundary:** tamper-evidence + inclusion proofs + signed
+  timestamps, but NOT public non-repudiation and NOT verified append-only-ness. The **networked Rekor
+  backend** is DESIGNED but **intentionally tabled** (`--rekor-url` reserved + errors; spec
+  `specs/2026-06-26-networked-rekor-backend-design.md`, status DEFERRED — do first-use work first).
+- **Real signing (H1.A1, 2026-06-25)** — local ed25519 DSSE (`keygen`/`verify-dsse`, opt-in `--key`,
+  `[sign]` extra). Real signing is no longer deferred.
+- **Kernel proof (H0.1 / H0.1b, 2026-06-25)** — `verify-kernel` (synthetic, offline, CI-guarded —
+  proves pipeline integrity) + `verify-kernel --real` (rebuilds `se:tcga_laml_idh@2` from 3 pinned
+  inputs, byte-level `contract_checksum` parity, real n-DMP gate → `LICENSED @ REPRODUCED`; real pins
+  captured + verified). **H0.1b fully closed.**
+- **BioNeMo evidence-adapter (Phase 1)** — a cached NVIDIA NIM run licenses a claim offline;
+  oracle-dossier bound; air-gap independence witnessed.
+- **(≤2026-06-22, also current)** calibration ledger + certificate (`q` validated not asserted;
+  `certify`/`calibrate`), ATTESTED ingestion (`ingest-attested`), attestation export
+  (in-toto/SLSA/DRS, `--format dsse`), sheaf consistency gauge + viewer overlay, §E common-cause,
+  pre-registration ledger.
+
+**Standing caveats (carry forward — the honest limits):**
+- **n-DMP / REPRODUCED is EARNED** on a real TCGA-LAML HM450 cohort (IDH-mut vs WT; e-value → ∞; IDH
+  source = cBioPortal complete genotyping `tcga_laml_idh@2`, IDH-mut n=36; n_dmps=115,405). Real betas
+  local-only, gitignored.
+- **Region-Δβ is PENDING (FDR-withheld, NOT refuted):** held-out betting e-value 5.672 < the e-LOND
+  first-test threshold 32.90 (τ fixed at 0.10 — no tuning). A comparable 2nd real cohort would license
+  it at §2E REPLICATED.
+- **REPLICATED is still synthetic** — earning it on real data is **data-access-gated** (no open HM450
+  AML cohort exposes machine-readable IDH; the binding machinery already works).
+- Python/R hash parity deferred (needs an R serializer); adapter owner/trust provenance still
+  operator-authored (implementation hashes are byte-derived).
+
+## ▶ NEXT (concrete plan)
+
+The single remaining **critical-path** gate is **H1.A2 — source a real 2nd HM450 cohort** with
+machine-readable IDH status (long lead; it's the gate to §2E REPLICATED and a shippable wedge, H2).
+Optional parallel, non-blocking code: finish **H1.A1** (Sigstore/cosign/Rekor — currently tabled by
+choice), the **Track B credence engines** (proper/surrogate scoring atop the ATTESTED typing), and —
+newly tracked — the **vision-derived capability-cell spine (V1)**: formalize a first-class, versioned
+**capability** object + registry (the three existing reductions become the first cells). It's the
+highest-leverage *non-data-blocked* build and the precondition for agent-first closed-world execution.
+Authoritative forward plan: `docs/superpowers/2026-06-23-remaining-roadmap.md` (see *Vision-derived
+additions*); product vision: `docs/superpowers/vision.md`.
+
+Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
+`superpowers:subagent-driven-development` → merge `--no-ff` → update this file + memory.
+
+---
+
+## ⤵ Historical state snapshots
+
+> Everything below until the **Done — checklist** is **superseded by *Current state (2026-06-26)*
+> above** — retained for the dated build narrative. The `## Done`, `## Invariants`,
+> `## Reference pointers`, and `## Open follow-ups` sections at the bottom remain current reference.
+
 ## Current state (2026-06-25 — transparency-log layer shipped)
 
 > **UPDATE 2026-06-25 — H1.A1 local transparency layer shipped (`feat/transparency-log`):** a local RFC-6962 Merkle inclusion log + C2SP signed checkpoint + a trust-gated, offline-verifiable Polymer bundle (Sigstore-INSPIRED, not wire-compatible), behind a `TransparencyLog` seam. New CLI: `verify-bundle PATH [--pub-key] [--log-pub-key]` (rc 0 needs BOTH pinned keys) and `--transparency-log` on `certify`/`export-attestation`. **Honest boundary:** the local log delivers tamper-evidence, Merkle inclusion proofs, signed timestamps, and fully offline-verifiable bundles — but NOT public non-repudiation and NOT verified append-only-ness (consistency proofs are deferred). Those properties land when the NETWORKED backend ships. Still open: the networked public-Rekor backend (`--rekor-url` is reserved and errors today) and consistency proofs. The spec (`docs/superpowers/specs/2026-06-25-transparency-log-design.md`) is now marked SHIPPED (local-first) v0.3. Next open slice = networked Rekor backend + consistency proofs.
@@ -85,7 +154,7 @@ design.
   contract-backed runs). The REPLICATED demo runs on a **2nd synthetic
   cohort** (`epicv2_casectrl_demo_b`) — still exercised, not earned, until a real 2nd cohort is swapped in.
 
-## ▶ NEXT (concrete plan)
+### ▶ NEXT — historical (2026-06-22 plan, superseded)
 
 > **SUPERSEDED (2026-06-25) — historical.** This section reflects the 2026-06-22 plan. Since then H0.1, H0.1b, and the local-signing half of H1.A1 shipped; "real signing deferred" and the signing-as-next-move notes below are **out of date** (see the **UPDATE 2026-06-25** block at the top of this file). Current priorities: (a) run the H0.1b real-pins bootstrap; (b) H1.A2 real 2nd cohort. Authoritative forward plan: `docs/superpowers/2026-06-23-remaining-roadmap.md` (reconciled 2026-06-25).
 
@@ -363,6 +432,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 
 ## Reference pointers
 
+- **Product vision:** `docs/superpowers/vision.md` (external-facing thesis — capability-cell spine, three registries, closed-world agent execution, verification ladder; reconciled to current state 2026-06-27).
 - **Forward roadmap:** `docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md` (three-arc linchpin; authoritative) · `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md` (autonomous-loop; partly leapfrogged — sheaf gauge opened arc-3) · historical decision menu (archived): `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`
 - **Phase-2 north star:** `docs/superpowers/2026-06-12-phase-2-north-star.md`
 - **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`

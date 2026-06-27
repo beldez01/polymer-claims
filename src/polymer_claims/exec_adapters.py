@@ -17,17 +17,13 @@ from polymer_grammar import (
     CategoricalLeaf,
     Claim,
     Comparator,
-    ComputeGraph,
     DataHandle,
-    EvaluationPlan,
     ExecValue,
     GenerationMode,
     MaterializationContext,
-    MeasurementBasis,
     OperationNode,
     PatternRef,
     PendingReason,
-    ProducedLeafSpec,
     Provenance,
     SatisfactionCriterion,
     Status,
@@ -135,23 +131,14 @@ def mean_diff_claim(
     exercise the oracle cap on a single claim. (In Phase 2b the LLM emits these.)
     `oracle_ref` defaults to `_APPARATUS_ORACLE` (dose_response apparatus) so existing callers
     are byte-unchanged; pass `profile_oracle_id(profile)` to bind a profile-as-apparatus."""
-    node = OperationNode(
-        id="n0",
-        impl="stats::mean_diff",
-        inputs=(DataHandle(ref=ref),),
-        params=(
-            ("value_col", value_col),
-            ("group_col", group_col),
-            ("group_a", group_a),
-            ("group_b", group_b),
-        ),
-        oracle_ref=oracle_ref,
-        produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
-    )
-    plan = EvaluationPlan(
-        graph=ComputeGraph(nodes=(node,), terminal="n0"),
-        criterion=SatisfactionCriterion(comparator=comparator, threshold=threshold),
-    )
+    from .capabilities import MEAN_DIFF_CELL
+    from polymer_grammar.capability import build_evaluation_plan
+
+    plan = build_evaluation_plan(
+        MEAN_DIFF_CELL,
+        params={"value_col": value_col, "group_col": group_col, "group_a": group_a, "group_b": group_b},
+        data_ref=ref, criterion=SatisfactionCriterion(comparator=comparator, threshold=threshold),
+        oracle_ref=oracle_ref)
     provenance = None
     if rationale is not None:
         provenance = Provenance(

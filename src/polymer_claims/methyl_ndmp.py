@@ -16,16 +16,11 @@ from polymer_grammar import (
     CategoricalLeaf,
     Claim,
     Comparator,
-    ComputeGraph,
-    DataHandle,
-    EvaluationPlan,
     ExecValue,
     GenomicRegion,
-    MeasurementBasis,
     OperationNode,
     PatternRef,
     PendingReason,
-    ProducedLeafSpec,
     SatisfactionCriterion,
     Status,
     StrengthVector,
@@ -226,24 +221,15 @@ def n_dmps_claim(
         probes = _all_probe_ids(ref)
     if oracle_ref is None:
         oracle_ref = profile_oracle_id(CANONICAL_EPICV2_V1)
-    node = OperationNode(
-        id="n0",
-        impl=_NDMP_IMPL,
-        inputs=(DataHandle(ref=ref),),
-        params=(
-            ("probes", ",".join(probes)),
-            ("group_col", group_col),
-            ("level_a", level_a),
-            ("level_b", level_b),
-            ("alpha", str(alpha)),
-        ),
-        oracle_ref=oracle_ref,
-        produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
-    )
-    plan = EvaluationPlan(
-        graph=ComputeGraph(nodes=(node,), terminal="n0"),
-        criterion=SatisfactionCriterion(comparator=comparator, threshold=float(k)),
-    )
+    from .capabilities import N_DMPS_CELL
+    from polymer_grammar.capability import build_evaluation_plan
+
+    plan = build_evaluation_plan(
+        N_DMPS_CELL,
+        params={"probes": ",".join(probes), "group_col": group_col,
+                "level_a": level_a, "level_b": level_b, "alpha": str(alpha)},
+        data_ref=ref, criterion=SatisfactionCriterion(comparator=comparator, threshold=float(k)),
+        oracle_ref=oracle_ref)
     chrom, start, end = region or ("chr1", 1_000_000, 1_004_800)
     subject = GenomicRegion(
         id=f"{chrom}:{start}-{end}", display=f"{chrom}:{start:,}-{end:,}",

@@ -17,16 +17,12 @@ from polymer_grammar import (
     CategoricalLeaf,
     Claim,
     Comparator,
-    ComputeGraph,
     DataHandle,
-    EvaluationPlan,
     ExecValue,
     GenomicRegion,
-    MeasurementBasis,
     OperationNode,
     PatternRef,
     PendingReason,
-    ProducedLeafSpec,
     SatisfactionCriterion,
     Status,
     StrengthVector,
@@ -144,23 +140,15 @@ def region_delta_beta_claim(
     `with_subject=False` only to probe the out-of-domain precondition."""
     if oracle_ref is None:
         oracle_ref = profile_oracle_id(CANONICAL_EPICV2_V1)
-    node = OperationNode(
-        id="n0",
-        impl=_IMPL,
-        inputs=(DataHandle(ref=ref),),
-        params=(
-            ("region_probes", ",".join(region_probes)),
-            ("group_col", group_col),
-            ("level_a", level_a),
-            ("level_b", level_b),
-        ),
-        oracle_ref=oracle_ref,
-        produces=ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED),
-    )
-    plan = EvaluationPlan(
-        graph=ComputeGraph(nodes=(node,), terminal="n0"),
-        criterion=SatisfactionCriterion(comparator=comparator, threshold=threshold),
-    )
+    from .capabilities import REGION_DELTA_BETA_CELL
+    from polymer_grammar.capability import build_evaluation_plan
+
+    plan = build_evaluation_plan(
+        REGION_DELTA_BETA_CELL,
+        params={"region_probes": ",".join(region_probes), "group_col": group_col,
+                "level_a": level_a, "level_b": level_b},
+        data_ref=ref, criterion=SatisfactionCriterion(comparator=comparator, threshold=threshold),
+        oracle_ref=oracle_ref)
     subject = None
     if with_subject:
         chrom, start, end = region

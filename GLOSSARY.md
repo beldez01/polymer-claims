@@ -29,10 +29,14 @@ See `ARCHITECTURE_CURRENT.md` for how the active pieces fit together.
 - **flywheel** — the generate → select → execute → verify → integrate loop that grows the corpus.
 - **air gap** — the evaluator's "writer ≠ verifier" rule: a `Satisfaction` is minted only when ≥2 *distinct adapter identities* agree. Independence is enforced by the **adapter trust registry** (trusted ∧ different owner ∧ different `implementation_hash`); cross-cohort independence is the §2E **REPLICATED** tier. Local registries derive implementation hashes from adapter bytecode, and licensed satisfactions record the credential identities that justified the registry-independent pair. Owner/trust metadata remains operator-authored.
 - **adapter** — an injected implementation that resolves data and runs a node's computation. Pure reference adapters ship in-package; real ones live outside.
+- **BioNeMo evidence-adapter** — the first *external-model* evidence adapter (Phase 1, 2026-06-25): a cached **NVIDIA NIM** run that licenses a claim **offline**, oracle-dossier bound, witnessing air-gap independence against an in-package leg. Proves the recompute gate can span a real third-party apparatus under the same air-gap/oracle discipline — not a new gate.
 - **oracle** — a credibility dossier for a measurement apparatus; its validation tier *caps* a claim's empirical strength axes.
 - **daemon** — a standing maintenance pass: DRIFT (re-examine LICENSED claims as the world moves), ORACLE-VALIDATION (decay failing oracles), RED-TEAM (attack the corpus's representation). Pure, caller-scheduled.
 - **scheduler / next_action** — the recommend-only budget scheduler that value-ranks the next action (RUN_CYCLE vs a daemon pass) under a shared budget.
 - **FDR ledger** — the online false-discovery-rate controller (LOND) over the open-ended test stream.
+- **betting e-value** — the native evidence atom (Waudby-Smith-Ramdas): a non-negative wealth statistic from a betting process against the null, where `E[e] ≤ 1` under H₀. A license needs `e` to clear the e-LOND discovery threshold; *replicated* across distinct cohorts the e-values **multiply** (`e₁·e₂`) as one test.
+- **e-LOND** — the FDR ledger's online process: LOND adapted to **e-values**, giving FDR control under **arbitrary dependence**. The first-test discovery threshold is `1/α₁` (e.g. 32.90 at q=0.05, γ₁=6/π²); an `e` below it stays **PENDING** (FDR-withheld), not refuted.
+- **4-way VERIFY gate** — the licensing predicate: `LICENSED ⇔ adapter-agreement (air-gap) ∧ SATISFIED ∧ grounded (defeat graph) ∧ live e-LOND discovery`. A successful defeat **de-licenses through the ledger and refunds** the discovery (`FDRTest.retracted` tombstone).
 
 ## Sheaf gauge
 
@@ -63,6 +67,31 @@ See `ARCHITECTURE_CURRENT.md` for how the active pieces fit together.
 - **attested-event claim** — the defeasible corpus claim each resolution becomes: a CONJECTURED `PropositionLeaf` asserting *"external authority `<ref>` determined LICENSED claim `<id>` is `<verdict>`"*, with `EXTERNAL_ATTESTATION` provenance and a content-addressed id (`attest-<16 hex of sha256 over subject+verdict+ref+epoch>`). **Non-LICENSED by construction** — CONJECTURED + `licensing=None`, never run through verify, so the gate can never license it. The ATTESTED record's `source_claim_id` points at it; this is what makes the external determination attackable through the defeat graph rather than an oracle.
 - **resolvability (resolvable / unresolvable)** — the credence-layer typing of an attested record: *resolvable* claims will admit proper scoring against a baseline, *unresolvable* ones fall to surrogate/peer-prediction (both engines deferred — this slice only records the typing). **Operator-declared and authoritative**; when absent, falls back to `resolvability_prior(subject_claim)` = resolvable iff the subject carries an `evaluation_plan` (a recomputable test exists). A *prior*, not a definition — recomputability ≠ credence-sense resolvability. Read from the **subject** claim, never the attested-event claim. The `q_attested` certificate line shows the `N resolvable / N unresolvable` split over the same `failed+upheld` denominator.
 - **event-level ledger fold identity** — `load_ledger` folds ATTESTED records on `(subject_claim_id, license_epoch, "attested", source_claim_id or attestation_ref)` so distinct external determinations on the same claim/epoch **coexist** (and re-ingesting the same one stays idempotent), while DEFINITIONAL/ANCHORED keep their `(subject_claim_id, license_epoch)` latest-wins identity. Source-less attested records (both keys `None`) carry no event identity and fold together — a documented, accepted invariant.
+
+## Transparency log & signing
+
+- **DSSE signing** — local **ed25519** signing of attestation/certificate envelopes via the **DSSE PAE** (pre-authentication encoding). CLIs `keygen` / `verify-dsse`; opt-in `--key` on `certify`/`export-attestation`; `[sign]` extra. With `--key` the envelope's `signatures` are populated and locally verifiable; "real signing" is no longer deferred. The Sigstore/cosign third-party layer is the transparency log (below).
+- **transparency log (`TransparencyLog`)** — the seam over an append-only inclusion log. The shipped implementation is **`LocalInclusionLog`** (2026-06-25): an **RFC-6962 Merkle** tree of `LogEntry` records with inclusion proofs, plus a **C2SP signed checkpoint** (signed tree head). Local-first and **Sigstore-inspired, NOT wire-compatible**.
+- **Polymer bundle** — the offline-verifiable artifact `build_bundle`/`verify_bundle` produce: a signed DSSE envelope + a Merkle inclusion proof + a signed checkpoint, gated by **`TrustStatus`** (rc 0 requires BOTH a pinned signer key and a pinned log key). CLI `verify-bundle PATH [--pub-key] [--log-pub-key]`; emitted by `certify`/`export-attestation --transparency-log`.
+- **honest boundary (local vs networked)** — the local log delivers **tamper-evidence**, **inclusion proofs**, and **signed timestamps**, but **NOT public non-repudiation** and **NOT verified append-only-ness** (**consistency proofs** are deferred). Those properties require the **networked Rekor backend** — **designed but intentionally tabled** (`--rekor-url` is reserved and **errors today**) until a claim is shared externally.
+
+## Kernel proof
+
+- **kernel proof (`verify-kernel`)** — an offline, CI-guarded proof that the gate **pipeline** is intact: a deterministic HM450-shaped *synthetic* fixture run through the **real** n-DMP gate to `LICENSED @ REPRODUCED` (H0.1). Proves pipeline integrity, **not** real biology.
+- **`verify-kernel --real`** — the real-data parity gate (H0.1b): rebuilds the real `se:tcga_laml_idh@2` proof from three **pinned inputs** (Xena matrix; cBioPortal mutations @ datahub commit; sample-list API response) and asserts byte-level parity + the real gate result (`LICENSED @ REPRODUCED`; n_probes=378,894, n_dmps=115,405, e=∞, IDH-mut n=36). Proves the *pinned computation* reproduces — not data veracity.
+- **contract_checksum vs canonical_checksum** — `contract_checksum` is the **byte-level** content-address asserted for parity; `canonical_checksum` is a secondary **diagnostic** address. Parity = the rebuilt proof matches the committed `contract_checksum` exactly.
+
+## Independence & common cause (§E)
+
+- **shared_cause_factors** — `MaterializationContext.shared_cause_factors`: an operator-asserted set of factors a run's error could share with another (the flat proxy for a per-implementation causal DAG). Recorded as `Licensing.shared_cause_overlap`.
+- **shared_cause_jaccard / SHARED_CAUSE_TAU** — pairwise Jaccard overlap of two runs' factor sets, thresholded at `SHARED_CAUSE_TAU = 0.5`. **REPLICATED** requires distinct `dimnames_hash` **AND** every pairwise Jaccard < τ — else REPRODUCED, with the e-value product withheld.
+- **cohorts_error_independent** — the umbrella predicate `build_replication_inputs` gates the `e₁·e₂` product on: distinct datasets + sub-τ shared-cause overlap. The first concrete form of **screening-off** (Reichenbach) — error-decorrelation, not just reproduction.
+
+## Pre-registration & severity provenance
+
+- **commitment_hash / register_test / resolve_test** — pre-registration: a hypothesis commits *before* it sees data. `register_test` **charges + locks** the e-LOND α-slot at registration (strict, **no refund**); `resolve_test` settles it. Closes the §5a multiplicity leak — an agent fishing N hypotheses pays all N slots.
+- **HYPOTHESIS_ALTERED** — the terminal `RejectionReason` a verify **match-gate** stamps when a resolved test's plan no longer matches its registered `commitment_hash` (post-hoc plan change → rejected, no reinstatement).
+- **SeverityProvenance (CONFIRMATORY / HELD_OUT)** — whether a test's motivating prior was established on cohorts overlapping the test cohort. **CONFIRMATORY** (overlap) caps the `severity` axis and strict-mode withholds; **HELD_OUT** is clean. Also drives a data-blind SELECT ranking penalty.
 
 ## External / product
 
