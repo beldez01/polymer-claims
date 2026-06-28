@@ -23,6 +23,12 @@ def _gamma(j: int) -> float:
     return (6.0 / math.pi**2) / (j * j)
 
 
+def _next_alpha(ledger: FDRLedger) -> tuple[int, float]:
+    """The 1-based position t and e-LOND level α_t = target_fdr · γ_t · (D_{t-1}+1) for the next test."""
+    t = ledger.n_tests + 1
+    return t, ledger.target_fdr * _gamma(t) * (ledger.n_discoveries + 1)
+
+
 class FDRTest(_Model):
     index: int                            # 1-based position in the test stream
     claim_id: str
@@ -55,8 +61,7 @@ def process_test(ledger: FDRLedger, claim_id: str, e_value: float) -> FDRLedger:
     """One e-LOND step. The new test gets level α_t = target_fdr · γ_t · (D_{t-1}+1) where t is its
     1-based position and D_{t-1} is the discoveries recorded so far. It is a DISCOVERY iff
     e_value ≥ 1/α_t. Returns a NEW ledger with the test appended (append-only, immutable)."""
-    t = ledger.n_tests + 1
-    alpha = ledger.target_fdr * _gamma(t) * (ledger.n_discoveries + 1)
+    t, alpha = _next_alpha(ledger)
     entry = FDRTest(
         index=t, claim_id=claim_id, e_value=e_value,
         alpha_allocated=alpha, discovery=e_value >= 1.0 / alpha,
@@ -107,8 +112,7 @@ def register_test(ledger: FDRLedger, claim_id: str, commitment_hash: str) -> FDR
     """Pre-registration: advance the e-LOND stream and LOCK α_t for `claim_id` BEFORE its e-value
     exists. Appends a pending FDRTest (e_value=None, discovery=False). Strict: the slot is consumed
     even if the hypothesis is never resolved. Returns a NEW ledger (append-only)."""
-    t = ledger.n_tests + 1
-    alpha = ledger.target_fdr * _gamma(t) * (ledger.n_discoveries + 1)
+    t, alpha = _next_alpha(ledger)
     entry = FDRTest(
         index=t, claim_id=claim_id, e_value=None, alpha_allocated=alpha,
         discovery=False, commitment_hash=commitment_hash,

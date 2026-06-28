@@ -66,3 +66,11 @@ def corpus_with(*claims: Claim, fdr_ledger: FDRLedger | None = None) -> Corpus:
         claims=tuple(claims),
         fdr_ledger=fdr_ledger or FDRLedger(target_fdr=0.05),
     )
+
+
+def corpus_path(tmp_path):
+    """Write a one-LICENSED-claim corpus to <tmp_path>/corpus.json and return the path."""
+    corpus = corpus_with(licensed_claim("c1", licensing(sat(mc()))))
+    p = tmp_path / "corpus.json"
+    p.write_text(corpus.model_dump_json())
+    return p

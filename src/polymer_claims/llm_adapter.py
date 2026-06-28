@@ -97,7 +97,10 @@ class LLMGenerationAdapter:
         existing_ids = set(corpus.by_id().keys())
         out: list[Proposal] = []
         seen: set[str] = set()
-        for p in obj.get("proposals", []):
+        proposals = obj.get("proposals")
+        if not isinstance(proposals, list):
+            return ()  # absent/null/non-list -> no proposals (degrade, don't crash)
+        for p in proposals:
             try:
                 claim = self._build_claim(p)
             except (KeyError, ValueError, TypeError):
@@ -262,7 +265,10 @@ class MeanDiffGenerationAdapter:
         existing_ids = set(corpus.by_id().keys())
         out: list[Proposal] = []
         seen: set[str] = set()
-        for p in obj.get("proposals", []):
+        proposals = obj.get("proposals")
+        if not isinstance(proposals, list):
+            return ()  # absent/null/non-list -> no proposals (degrade, don't crash)
+        for p in proposals:
             try:
                 claim = self._build_claim(p)
             except (KeyError, ValueError, TypeError):
@@ -405,7 +411,10 @@ class MethylGenerationAdapter:
         existing_ids = set(corpus.by_id().keys())
         out: list[Proposal] = []
         seen: set[str] = set()
-        for p in obj.get("proposals", []):
+        proposals = obj.get("proposals")
+        if not isinstance(proposals, list):
+            return ()  # absent/null/non-list -> no proposals (degrade, don't crash)
+        for p in proposals:
             try:
                 claim = self._build_claim(p)
             except (KeyError, ValueError, TypeError, FileNotFoundError):
@@ -515,7 +524,6 @@ class MethylGenerationAdapter:
         from .contracts import load_contract
 
         se = load_contract(ref)
-        import json
         from pathlib import Path
 
         betas_path = Path(se.access_methods[0].access_url)

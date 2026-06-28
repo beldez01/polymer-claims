@@ -143,46 +143,10 @@ class NodeRunner:
             self.current = self.ctx
 
     @classmethod
-    def from_seed(
-        cls,
-        corpus: Corpus,
-        *,
-        adapters=_ADAPTERS,
-        ctx: MaterializationContext = _CTX,
-        config: SchedulerConfig | None = None,
-        scheduler_budget: float = 1e9,
-        max_frames: int | None = 10000,
-        content_address: bool = False,
-        profiles: tuple = (CANONICAL_EPICV2_V1,),
-        evalue_gate: bool = False,
-        layout: Literal["spectral", "force"] = "spectral",
-        materializations: dict[str, MaterializationContext] | None = None,
-        evidence: dict[str, float] | None = None,
-        replications: dict | None = None,
-        replication_bindings: dict[str, str] | None = None,
-        calibration_path=None,
-        calibration_epoch_path=None,
-        **run_cycle_kwargs,
-    ) -> "NodeRunner":
-        return cls(
-            corpus,
-            adapters=adapters,
-            ctx=ctx,
-            config=config,
-            scheduler_budget=scheduler_budget,
-            max_frames=max_frames,
-            content_address=content_address,
-            profiles=profiles,
-            evalue_gate=evalue_gate,
-            layout=layout,
-            materializations=materializations,
-            evidence=evidence,
-            replications=replications,
-            replication_bindings=replication_bindings,
-            calibration_path=calibration_path,
-            calibration_epoch_path=calibration_epoch_path,
-            **run_cycle_kwargs,
-        )
+    def from_seed(cls, corpus: Corpus, **kwargs) -> "NodeRunner":
+        """Construct a NodeRunner from a seed corpus. Pure pass-through to __init__
+        (every keyword and default is __init__'s own; see its signature)."""
+        return cls(corpus, **kwargs)
 
     def refresh_world(self) -> MaterializationContext:
         """Re-read the live SE-Contracts/profile and recompute the current-world content-address.

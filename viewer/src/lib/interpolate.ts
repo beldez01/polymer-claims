@@ -65,6 +65,36 @@ export interface InterpFrame {
   consistency?: ConsistencyHeadline | null;
 }
 
+/**
+ * Lift a raw static-export node into the InterpNode shape with no animation
+ * (prevStatus = status, full scale/opacity). Shared by the scene components'
+ * no-timeline fallback path so the field map lives in exactly one place.
+ */
+export function staticInterpNode(n: TopologyNode): InterpNode {
+  return {
+    id: n.id,
+    status: n.status,
+    prevStatus: n.status,
+    statusT: 1,
+    pattern_id: n.pattern_id,
+    subject_kind: n.subject_kind,
+    strength: n.strength,
+    is_representation_revision: n.is_representation_revision,
+    fdr_tested: n.fdr_tested ?? false,
+    fdr_discovery: n.fdr_discovery ?? false,
+    fdr_retracted: n.fdr_retracted ?? false,
+    fdr_index: n.fdr_index ?? null,
+    fdr_e_value: n.fdr_e_value ?? null,
+    fdr_alpha_allocated: n.fdr_alpha_allocated ?? null,
+    independence_tier: n.independence_tier ?? null,
+    severity_provenance: n.severity_provenance ?? null,
+    shared_cause_overlap: n.shared_cause_overlap ?? null,
+    position: n.position,
+    scale: 1,
+    opacity: 1,
+  };
+}
+
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }

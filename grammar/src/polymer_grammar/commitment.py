@@ -1,4 +1,3 @@
-# grammar/src/polymer_grammar/commitment.py
 """Hypothesis content-hash for the pre-registration ledger (Phase D). A claim's COMMITMENT is its
 `evaluation_plan` — the region/graph + criterion (comparator+threshold) + group levels. Pure: stdlib
 only; deterministic because models are frozen with tuple collections (canonical JSON)."""

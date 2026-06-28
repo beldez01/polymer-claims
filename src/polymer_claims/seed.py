@@ -119,8 +119,6 @@ def revision_proposer(
 
 def default_seed_corpus() -> tuple[Corpus, dict]:
     """Build the built-in evolving seed corpus + the run_cycle kwargs that animate it."""
-    claims: list[Claim] = []
-
     # ~6 PENDING-with-plan claims across the 3 patterns. Distinct ascending plan values keep
     # canonicalize from collapsing them; strength=None exempts them from the BH bar (they license
     # when selected). The sentinel `"C03"` sits late so its licensing (and the representation-
@@ -133,8 +131,7 @@ def default_seed_corpus() -> tuple[Corpus, dict]:
         ("C01", P_DOSE, 0.014),
         (_SENTINEL, P_DOSE, 0.015),
     ]
-    for cid, pat, val in specs:
-        claims.append(pending(cid, pat, val))
+    claims: list[Claim] = [pending(cid, pat, val) for cid, pat, val in specs]
 
     # A POSITIVE-conclusion planless claim — rival_generation elaborates new CONJECTURED nodes
     # off it in the early frames (and converges, so growth is finite).

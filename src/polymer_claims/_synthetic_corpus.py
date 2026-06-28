@@ -22,7 +22,10 @@ EVIDENCE_FOR / REBUT DefeatEdges so every claim touches ≥2 cluster-mates.
 
 Cross-cluster edges
 -------------------
-Zero — clusters must be separable.
+Three weak UNDERCUT edges, one per cluster pair, between peripheral claims (never the
+equivalence or polar pairs). They make the graph a single weakly-connected component so
+the lattice can't trivially separate the clusters — dense intra vs a few weak inter is the
+canonical spectral-clustering scenario the eigenmap must resolve.
 """
 from __future__ import annotations
 

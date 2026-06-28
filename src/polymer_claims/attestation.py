@@ -343,11 +343,12 @@ def _builder(licensing, registry):
 
 
 def _dep_sort_key(d) -> tuple:
-    role = d.annotations.role if d.annotations and d.annotations.role else ""
+    ann = d.annotations
+    role = ann.role if ann and ann.role else ""
     sha = d.digest.sha256 if d.digest else ""
-    rids = d.annotations.semantic_run_ids if d.annotations else None
+    rids = ann.semantic_run_ids if ann else None
     first_rid = rids[0] if rids else ""
-    raw_ph = d.annotations.raw_profile_hash if d.annotations else None
+    raw_ph = ann.raw_profile_hash if ann else None
     return (role, d.name, d.uri or "", sha, first_rid, raw_ph or "")
 
 
@@ -440,8 +441,7 @@ def resolve_contract_index(corpus, *, extra: Iterable = ()) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Certificate DTO + builder + DSSE envelope (Task 8)
-# New public symbols only — existing DSSE/Statement/bundle code is untouched.
+# Certificate DTO + builder + DSSE envelope.
 # ---------------------------------------------------------------------------
 _CERTIFICATE_MEDIA_TYPE = "application/vnd.polymer.certificate+json"
 _INTERPRETATION = (

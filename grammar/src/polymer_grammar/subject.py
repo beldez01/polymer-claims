@@ -3,7 +3,7 @@
 A discriminated union of 10 variant kinds (faithful to the v1.2 SubjectRef), mirroring the
 leaf.Leaf sum-type pattern. Adapted to v1.3 discipline: frozen, extra="forbid", and NO dict
 fields anywhere (lists→tuples; free-dict escapes → JSON string / tuple-of-pairs / dropped) so
-the whole Subject tree is hashable for content-addressing. Imports nothing from polymer_formalclaim.
+the whole Subject tree is hashable for content-addressing. Imports nothing from polymer_protocol/polymer_claims.
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ class GenomicRegion(_SubjectBase):
     strand: Literal["+", "-", "."] = "."
 
     @model_validator(mode="after")
-    def _start_le_end(self) -> "GenomicRegion":
+    def _start_le_end(self) -> GenomicRegion:
         if self.start > self.end:
             raise ValueError(f"GenomicRegion start ({self.start}) > end ({self.end})")
         return self
@@ -56,7 +56,7 @@ class VariantVRS(_SubjectBase):
     hgvs: str | None = None
 
     @model_validator(mode="after")
-    def _id_has_vrs_prefix(self) -> "VariantVRS":
+    def _id_has_vrs_prefix(self) -> VariantVRS:
         if not (self.id.startswith("ga4gh:VA.") or self.id.startswith("ga4gh:VCL.")):
             raise ValueError(
                 f"VariantVRS.id must start with 'ga4gh:VA.' or 'ga4gh:VCL.', got {self.id!r}"
@@ -92,7 +92,7 @@ class GeneOrProtein(_SubjectBase):
     assembly_context: str | None = None
 
     @model_validator(mode="after")
-    def _at_least_one_canonical_id(self) -> "GeneOrProtein":
+    def _at_least_one_canonical_id(self) -> GeneOrProtein:
         ids = self.identifiers
         if not (ids.hgnc or ids.ensembl_gene or ids.uniprot):
             raise ValueError(
@@ -114,7 +114,7 @@ class PhenopacketRef(_SubjectBase):
     inline_json: str | None = None   # v1.2 inline:dict -> canonical JSON string (hashable)
 
     @model_validator(mode="after")
-    def _retrieval_consistent(self) -> "PhenopacketRef":
+    def _retrieval_consistent(self) -> PhenopacketRef:
         if self.retrieval.mode == "reference" and not self.retrieval.uri:
             raise ValueError("PhenopacketRef.retrieval.mode='reference' requires retrieval.uri")
         if self.retrieval.mode == "inline" and self.inline_json is None:
@@ -165,7 +165,7 @@ class LiteralSubject(_SubjectBase):
 
 class CompositeSubject(_SubjectBase):
     kind: Literal["composite"] = "composite"
-    parts: tuple["Subject", ...] = Field(min_length=2)
+    parts: tuple[Subject, ...] = Field(min_length=2)
     relation: Literal[
         "co_occurrence", "conditional", "causal_hypothesis",
         "temporal_sequence", "correlational",

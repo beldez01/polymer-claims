@@ -1,7 +1,7 @@
 """§5a literature-shared-cause: did the hypothesis's motivating prior share a cohort with the
 test data? If so the "severe test" is closer to confirmation — annotate CONFIRMATORY and cap the
 `severity` strength axis (the precise axis the shared-cause leak corrupts). Pure, stdlib only;
-imports nothing from polymer_formalclaim. First concrete edge of north-star §E's common-cause DAG.
+imports nothing from polymer_protocol/polymer_claims. First concrete edge of north-star §E's common-cause DAG.
 """
 from __future__ import annotations
 

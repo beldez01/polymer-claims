@@ -4,7 +4,7 @@ Represents how an oracle (API endpoint / R routine / assay) was validated, and c
 EMPIRICAL strength axes of any claim it grounds by the oracle's validation tier. The grammar
 ships the IR + the pure capping math; the protocol decides policy (resolution + the
 LICENSED-seam cap). The tier is about the APPARATUS, never the claim's literature precedent.
-Imports nothing from polymer_formalclaim.
+Imports nothing from polymer_protocol/polymer_claims.
 """
 from __future__ import annotations
 

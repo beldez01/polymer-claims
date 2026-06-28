@@ -164,10 +164,12 @@ def run_real_kernel_proof(
             gate = _build_claim_and_run_gate()
             _assert("n_dmps", exp["n_dmps"], gate["n_dmps"])
             _assert_evalue(exp["e_value"], gate["e_value"])
-            _assert("profile_hash", exp["profile_hash"], gate["profile_hash"])
-            _assert("semantic_run_id", exp["semantic_run_id"], gate["semantic_run_id"])
+            # Check status/tier first: on a non-licensing rebuild profile_hash/semantic_run_id
+            # come back None, so asserting them first masks the actionable status divergence.
             _assert("status", exp["status"], gate["status"])
             _assert("independence_tier", exp["independence_tier"], gate["independence_tier"])
+            _assert("profile_hash", exp["profile_hash"], gate["profile_hash"])
+            _assert("semantic_run_id", exp["semantic_run_id"], gate["semantic_run_id"])
         clear_contract_cache()
 
     return RealKernelProofResult(

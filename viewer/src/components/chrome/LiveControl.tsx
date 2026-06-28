@@ -2,12 +2,8 @@
 
 import { useState } from 'react';
 import { COLOR, FONT_FAMILY_MONO } from '@/config/theme';
+import { pad } from '@/lib/format';
 import { useViewer } from '@/store';
-
-/** zero-pad a frame index to a stable 2-digit mono width. */
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
 
 /**
  * Live-node control — an inline D2 instrument cluster that lives in the header

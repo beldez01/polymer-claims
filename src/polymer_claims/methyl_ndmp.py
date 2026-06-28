@@ -143,7 +143,7 @@ def _n_dmps(pvalues: dict[str, float], alpha: float) -> int:
 
 def dmp_indicators(node: OperationNode) -> list[int]:
     """Per-probe DMP indicators (1 iff p < alpha) using the pooled-t leg — the e-value's view."""
-    alpha = float(dict(node.params)["alpha"])
+    alpha = _alpha(node)
     pvals = _per_probe_pvalues(node, leg=_pooled_t)
     return [1 if v < alpha else 0 for v in pvals.values()]
 
@@ -164,9 +164,10 @@ def _ols_t(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
     mse = float(resid @ resid) / df
     xtx_inv = np.linalg.inv(X.T @ X)
     se = math.sqrt(mse * float(xtx_inv[1, 1]))
-    # coef[1] == mean(b) - mean(a) for two-group OLS, so this mirrors _pooled_t's degenerate guard
     if se == 0.0:
-        return (0.0 if coef[1] == 0.0 else math.inf), df
+        # se==0: degenerate. Mirror _pooled_t exactly (compare group means, not the
+        # BLAS-reconstructed coef[1]) so the two legs never disagree on a constant probe.
+        return (0.0 if a.mean() == b.mean() else math.inf), df
     return (float(coef[1]) / se, df)
 
 

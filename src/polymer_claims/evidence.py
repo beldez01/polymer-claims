@@ -37,7 +37,7 @@ def _capital(a: np.ndarray, b: np.ndarray, theta0: float, seed: int) -> float:
     lam_max = _C / (1.0 + abs(theta0))                        # positivity cap (Eq.25)
     e, s, s2, cnt = 1.0, 0.0, 0.0, 0
     for i in range(n):
-        if cnt > 0:                                           # estimates use ONLY points 1..i-1
+        if cnt > 0:                                           # estimates use ONLY prior points 0..i-1
             mu = s / cnt
             var = max(s2 / cnt - mu * mu, 0.0)
         else:

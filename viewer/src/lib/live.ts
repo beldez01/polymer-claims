@@ -19,9 +19,13 @@ export type ConsistencyResponse =
   | ({ available: true } & ConsistencyReport);
 
 export async function fetchConsistency(baseUrl: string): Promise<ConsistencyResponse> {
-  const res = await fetch(baseUrl.replace(/\/$/, '') + '/consistency');
-  if (!res.ok) return { available: false };
-  return (await res.json()) as ConsistencyResponse;
+  try {
+    const res = await fetch(normalize(baseUrl) + '/consistency');
+    if (!res.ok) return { available: false };
+    return (await res.json()) as ConsistencyResponse;
+  } catch {
+    return { available: false }; // network error → unavailable, never an unhandled rejection
+  }
 }
 
 /** strip a trailing slash so `${base}/stream` is well-formed. */

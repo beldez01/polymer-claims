@@ -1,14 +1,10 @@
 'use client';
 
 import { COLOR, FONT_FAMILY_MONO } from '@/config/theme';
+import { pad } from '@/lib/format';
 import { useViewer } from '@/store';
 
 const SPEEDS = [0.5, 1, 2] as const;
-
-/** zero-pad a frame index to a stable 2-digit mono width. */
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
 
 export default function TransportBar() {
   const timeline = useViewer((s) => s.timeline);

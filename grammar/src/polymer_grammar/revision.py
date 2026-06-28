@@ -5,7 +5,7 @@ closure (`entails` edges), inconsistency is `incompatible_with`. Entrenchment is
 order from StrengthVector (severity, evidence_against_null) + Status. Consistency
 restoration incises the least-entrenched member of each conflict, surfacing robust vs
 underdetermined retractions (mirroring blame.py). After any edit, the monotone status
-recompute reuses defeat.grounded_extension. Imports nothing from polymer_formalclaim.
+recompute reuses defeat.grounded_extension. Imports nothing from polymer_protocol/polymer_claims.
 """
 from __future__ import annotations
 
@@ -191,6 +191,17 @@ def _result(
     )
 
 
+def _normalize(
+    claims: Iterable[Claim], edges: Iterable[DefeatEdge], prior_in: frozenset[str] | None
+) -> tuple[tuple[Claim, ...], tuple[DefeatEdge, ...], frozenset[str]]:
+    """Materialize the claim/edge iterables to tuples and default prior_in to the current in-set."""
+    claims = tuple(claims)
+    edges = tuple(edges)
+    if prior_in is None:
+        prior_in = _in_set(claims, edges)
+    return claims, edges, prior_in
+
+
 def restore_consistency(
     claims: Iterable[Claim], edges: Iterable[DefeatEdge], *, prior_in: frozenset[str] | None = None
 ) -> RevisionResult:
@@ -198,10 +209,7 @@ def restore_consistency(
     the least-entrenched member of each conflict. No claim is privileged. When a conflict's
     members are entrenchment-EQUAL/INCOMPARABLE, both are underdetermined.
     """
-    claims = tuple(claims)
-    edges = tuple(edges)
-    if prior_in is None:
-        prior_in = _in_set(claims, edges)
+    claims, edges, prior_in = _normalize(claims, edges, prior_in)
     definite: set[str] = set()
     ambiguous: set[str] = set()
     for a, b in _conflicts(claims):
@@ -230,10 +238,7 @@ def expand(claims: Iterable[Claim], edges: Iterable[DefeatEdge], new_claim: Clai
     """AGM expansion: add `new_claim` and recompute. Does NOT restore consistency
     (expansion may yield an inconsistent set — use revise/restore_consistency for that).
     """
-    claims = tuple(claims)
-    edges = tuple(edges)
-    if prior_in is None:
-        prior_in = _in_set(claims, edges)
+    claims, edges, prior_in = _normalize(claims, edges, prior_in)
     return _result(claims + (new_claim,), edges, None, prior_in)
 
 
@@ -241,10 +246,7 @@ def contract(claims: Iterable[Claim], edges: Iterable[DefeatEdge], target_id: st
     """AGM contraction: remove `target` and every claim whose conclusion entails target's
     conclusion (single-premise entailment ⇒ all entailers must go — deterministic).
     """
-    claims = tuple(claims)
-    edges = tuple(edges)
-    if prior_in is None:
-        prior_in = _in_set(claims, edges)
+    claims, edges, prior_in = _normalize(claims, edges, prior_in)
     target = next((c for c in claims if c.id == target_id), None)
     if target is None or target.conclusion is None:
         verdict = RetractionVerdict(
@@ -274,10 +276,7 @@ def revise(claims: Iterable[Claim], edges: Iterable[DefeatEdge], new_claim: Clai
     independently conflicts with p, so all must go — deterministic; entrenchment is not
     consulted, and `new_claim` is never a retraction target).
     """
-    claims = tuple(claims)
-    edges = tuple(edges)
-    if prior_in is None:
-        prior_in = _in_set(claims, edges)
+    claims, edges, prior_in = _normalize(claims, edges, prior_in)
     np_hash = new_claim.conclusion.content_hash if new_claim.conclusion is not None else None
     incompatible_targets = set()
     if new_claim.conclusion is not None:

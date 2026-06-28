@@ -43,3 +43,15 @@ class RejectionReason(str, Enum):
     REFUTED = "refuted"                           # the data refuted it (terminal)
     ROBUSTLY_BLAMED = "robustly_blamed"           # Duhem robust blame (terminal; reserved, not yet wired)
     HYPOTHESIS_ALTERED = "hypothesis_altered"     # plan changed after pre-registration (terminal)
+
+
+def check_pending_reason(status: Status, pending_reason: PendingReason | None) -> None:
+    """Enforce the PENDING iff pending_reason invariant; raises ValueError on violation.
+    Shared by Claim and EquivalenceClaim."""
+    if status == Status.PENDING and pending_reason is None:
+        raise ValueError("status=PENDING requires a `pending_reason`")
+    if status != Status.PENDING and pending_reason is not None:
+        raise ValueError(
+            f"`pending_reason` is only valid when status=PENDING; "
+            f"got status={status.value}"
+        )

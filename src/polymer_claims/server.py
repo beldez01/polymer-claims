@@ -45,13 +45,9 @@ def _sse_event(json_str: str) -> bytes:
     return f"event: frame\ndata: {json_str}\n\n".encode()
 
 
-def _frame_obj(frame) -> dict:
+def _obj(model) -> dict:
     # round-trip through the model's own JSON so JSONResponse serializes a plain
     # dict (avoids double-encoding the pydantic model as an escaped string).
-    return json.loads(frame.model_dump_json())
-
-
-def _obj(model) -> dict:
     return json.loads(model.model_dump_json())
 
 
@@ -132,7 +128,7 @@ def create_app(
     @app.get("/state")
     async def state() -> JSONResponse:
         # current (latest) frame as JSON
-        return JSONResponse(content=_frame_obj(runner.frames[-1]))
+        return JSONResponse(content=_obj(runner.frames[-1]))
 
     @app.get("/timeline")
     async def timeline() -> JSONResponse:
@@ -168,7 +164,7 @@ def create_app(
     @app.post("/step")
     async def step() -> JSONResponse:
         frame = await _do_tick()
-        return JSONResponse(content=_frame_obj(frame))
+        return JSONResponse(content=_obj(frame))
 
     @app.post("/refresh")
     async def refresh() -> JSONResponse:

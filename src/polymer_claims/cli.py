@@ -1,12 +1,7 @@
 """`polymer-claims` console-script CLI — a thin shell over the COMPLETE runtime.
 
-Commands:
-  version          print the three component versions
-  validate FILE    validate a claim JSON through the grammar
-  run-cycle FILE   run ONE run_cycle over a corpus with the reference adapters
-  loop FILE        drive the #5d budget-governed scheduler until the budget exhausts
-  export-topology  emit a TopologyExport for a corpus
-  export-timeline  emit a warm-started TopologyTimeline across N run_cycle iterations
+Run `polymer-claims --help` for the full, authoritative command list (the subparsers in
+`_build_parser` are the single source of truth — kept here rather than a hand-maintained copy).
 
 The CLI injects the two deterministic reference adapters by default; real
 adapters/oracles/red-teamers are a later `--plugin` surface (out of scope for v1).
@@ -59,6 +54,12 @@ def _component_version(dist_name: str, fallback: str) -> str:
 
 def _status_counts(corpus: Corpus) -> Counter:
     return Counter(c.status.value for c in corpus.claims)
+
+
+def _status_summary(corpus: Corpus) -> str:
+    """`status=count` pairs, sorted; `(none)` for an empty corpus."""
+    counts = _status_counts(corpus)
+    return ", ".join(f"{k}={v}" for k, v in sorted(counts.items())) or "(none)"
 
 
 def _write_or_print(text: str, out: str | None) -> None:
@@ -117,7 +118,6 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 def _build_llm_proposer(model: str):
     """Lazy-build a bridge_proposer over a real Anthropic-backed LLMGenerationAdapter.
     Raises RuntimeError with an install/key hint if the [llm] extra or the API key is missing."""
-    import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("set ANTHROPIC_API_KEY to use --llm")
     from polymer_protocol import bridge_proposer  # local import keeps top-level clean
@@ -129,7 +129,6 @@ def _build_llm_proposer(model: str):
 def _build_real_data_proposer(model: str):
     """Lazy-build a bridge_proposer over a MeanDiffGenerationAdapter (real-data generation).
     Raises RuntimeError with a key/extra hint if [llm] or ANTHROPIC_API_KEY is missing."""
-    import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("set ANTHROPIC_API_KEY to use --real-data")
     from polymer_protocol import bridge_proposer
@@ -141,7 +140,6 @@ def _build_real_data_proposer(model: str):
 def _build_methyl_proposer(model: str):
     """Lazy-build a bridge_proposer over a MethylGenerationAdapter (Phase B).
     Raises RuntimeError with a key/extra hint if [llm] or ANTHROPIC_API_KEY is missing."""
-    import os
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError("set ANTHROPIC_API_KEY to use --methyl-data")
     from polymer_protocol import bridge_proposer
@@ -159,11 +157,8 @@ def _cmd_run_cycle(args: argparse.Namespace) -> int:
         except RuntimeError as exc:
             print(str(exc), file=sys.stderr)
             return 1
-    result = run_cycle(corpus, _ADAPTERS, _CTX, proposers=proposers) if proposers \
-        else run_cycle(corpus, _ADAPTERS, _CTX)
-    counts = _status_counts(result.corpus)
-    summary = ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
-    print(f"status: {summary or '(none)'}", file=sys.stderr)
+    result = run_cycle(corpus, _ADAPTERS, _CTX, proposers=proposers)
+    print(f"status: {_status_summary(result.corpus)}", file=sys.stderr)
     print(f"frontier: {len(result.frontier)}", file=sys.stderr)
     _write_or_print(dump_corpus(result.corpus), args.out)
     return 0
@@ -198,9 +193,7 @@ def _cmd_loop(args: argparse.Namespace) -> int:
     print(f"steps: {len(trace)}", file=sys.stderr)
     for line in trace:
         print(f"  {line}", file=sys.stderr)
-    counts = _status_counts(corpus)
-    summary = ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
-    print(f"final status: {summary or '(none)'}", file=sys.stderr)
+    print(f"final status: {_status_summary(corpus)}", file=sys.stderr)
     print(f"budget remaining: {remaining}", file=sys.stderr)
     _write_or_print(dump_corpus(corpus), args.out)
     return 0
@@ -352,8 +345,6 @@ def _cmd_verify_kernel(args: argparse.Namespace) -> int:
 
 
 def _verify_kernel_real(args: argparse.Namespace) -> int:
-    import os
-    from pathlib import Path
     try:
         from .ingest._pinned import PinnedInputError
         from .real_kernel_proof import ParityError, load_pins, run_real_kernel_proof

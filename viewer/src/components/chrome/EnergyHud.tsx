@@ -35,9 +35,13 @@ function Sparkline({ values, accentColor }: { values: number[]; accentColor: str
   const max = Math.max(...values);
   const range = max - min || 1;
 
+  let lastX = 0;
+  let lastY = 0;
   const pts = values.map((v, i) => {
     const x = (i / (values.length - 1)) * SPARK_W;
     const y = SPARK_H - ((v - min) / range) * (SPARK_H - 3) - 1;
+    lastX = x;
+    lastY = y;
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   });
 
@@ -70,14 +74,7 @@ function Sparkline({ values, accentColor }: { values: number[]; accentColor: str
         opacity={0.85}
       />
       {/* current-frame dot */}
-      {pts.length > 0 && (
-        <circle
-          cx={parseFloat(pts[pts.length - 1].split(',')[0])}
-          cy={parseFloat(pts[pts.length - 1].split(',')[1])}
-          r={2}
-          fill={accentColor}
-        />
-      )}
+      <circle cx={lastX} cy={lastY} r={2} fill={accentColor} />
     </svg>
   );
 }

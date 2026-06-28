@@ -39,8 +39,13 @@ def _fold_key(r: ResolutionRecord):
     return (r.subject_claim_id, r.license_epoch)
 
 
+def _sidecar_path(path) -> Path:
+    """The generating-models sidecar that lives alongside a JSONL ledger."""
+    return Path(str(path) + ".models.json")
+
+
 def append_records(path, records) -> None:
-    """Append ResolutionRecord objects to a JSONL file (append-only; atomic per-line).
+    """Append ResolutionRecord objects to a JSONL file (append-only; one JSON object per line).
 
     Note: raw JSONL line count is NOT the record count. Re-ingesting the same determination
     appends a duplicate line; ``load_ledger`` folds to one record per fold key at read time."""
@@ -58,7 +63,7 @@ def dump_models(path, models) -> None:
     If models is empty, the sidecar is not written (nothing to persist)."""
     if not models:
         return
-    sidecar = Path(str(path) + ".models.json")
+    sidecar = _sidecar_path(path)
     sidecar.parent.mkdir(parents=True, exist_ok=True)
     sidecar.write_text(
         json.dumps([m.model_dump(mode="json") for m in models])
@@ -97,10 +102,9 @@ def load_ledger(
             latest[key] = r  # latest event wins
     # Auto-load generating_models from sidecar when caller did not supply explicit ones
     if not generating_models:
-        sidecar = Path(str(path) + ".models.json")
+        sidecar = _sidecar_path(path)
         if sidecar.is_file():
-            import json as _json
-            raw = _json.loads(sidecar.read_text())
+            raw = json.loads(sidecar.read_text())
             generating_models = tuple(GeneratingModelParams(**d) for d in raw)
     return CalibrationLedger(
         records=tuple(latest[k] for k in order),

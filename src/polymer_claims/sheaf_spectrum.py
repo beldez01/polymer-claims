@@ -8,8 +8,9 @@ docs/superpowers/specs/2026-06-21-sheaf-consistency-gauge-design.md.
 """
 from __future__ import annotations
 
-import numpy as np
 from collections import deque
+
+import numpy as np
 
 from polymer_protocol.sheaf import (
     ClaimTension,

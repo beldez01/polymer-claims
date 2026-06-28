@@ -21,7 +21,7 @@ from .proposition import Proposition
 from .provenance import Provenance
 from .representation import RepresentationRevision
 from .roles import CausalRoles
-from .status import PendingReason, RejectionReason, Status
+from .status import PendingReason, RejectionReason, Status, check_pending_reason
 from .subject import Subject
 from .strength import StrengthVector
 
@@ -46,18 +46,12 @@ class Claim(_Model):
     representation_revision: RepresentationRevision | None = None
 
     @model_validator(mode="after")
-    def _pending_reason_iff_pending(self) -> "Claim":
-        if self.status == Status.PENDING and self.pending_reason is None:
-            raise ValueError("status=PENDING requires a `pending_reason`")
-        if self.status != Status.PENDING and self.pending_reason is not None:
-            raise ValueError(
-                f"`pending_reason` is only valid when status=PENDING; "
-                f"got status={self.status.value}"
-            )
+    def _pending_reason_iff_pending(self) -> Claim:
+        check_pending_reason(self.status, self.pending_reason)
         return self
 
     @model_validator(mode="after")
-    def _rejection_reason_only_when_rejected(self) -> "Claim":
+    def _rejection_reason_only_when_rejected(self) -> Claim:
         # one-directional (rejection_reason => REJECTED): REJECTED need not carry a reason,
         # for back-compat with pre-field claims. Do NOT tighten into an iff.
         if self.rejection_reason is not None and self.status != Status.REJECTED:
@@ -68,7 +62,7 @@ class Claim(_Model):
         return self
 
     @model_validator(mode="after")
-    def _licensing_only_when_licensed(self) -> "Claim":
+    def _licensing_only_when_licensed(self) -> Claim:
         if self.licensing is not None and self.status != Status.LICENSED:
             raise ValueError(
                 f"`licensing` is only valid when status=LICENSED; "
@@ -77,7 +71,7 @@ class Claim(_Model):
         return self
 
     @model_validator(mode="after")
-    def _structural_only_on_equivalence(self) -> "Claim":
+    def _structural_only_on_equivalence(self) -> Claim:
         if self.status == Status.STRUCTURAL:
             raise ValueError(
                 "status=STRUCTURAL is valid only on an EquivalenceClaim "

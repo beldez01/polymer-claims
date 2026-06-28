@@ -17,6 +17,7 @@ from polymer_grammar import (
     RepresentationRevision,
     RevisionOperation,
     Status,
+    is_representation_revision,
 )
 
 from .corpus import Corpus, Proposal
@@ -33,7 +34,7 @@ class RepresentationRedTeamAdapter:
         for c in sorted(corpus.claims, key=lambda c: c.id):
             if c.id.startswith("gen-rt-"):
                 continue  # convergence: don't red-team own outputs
-            if c.representation_revision is not None:
+            if is_representation_revision(c):
                 continue  # convergence: don't red-team a representation-revision claim
             cid = _gen_id("rt", c.id)
             revision = RepresentationRevision(
@@ -49,5 +50,6 @@ class RepresentationRedTeamAdapter:
                 status=Status.CONJECTURED,
                 representation_revision=revision,
             )
+            # placeholder operator_id; bridge_proposer forces it to self.identity
             props.append(Proposal(operator_id="UNSET", claim=claim))
         return tuple(props)

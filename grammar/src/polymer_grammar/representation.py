@@ -33,7 +33,7 @@ class RevisionOperation(str, Enum):
 
 class PatternTarget(_Model):
     kind: Literal["pattern"] = "pattern"
-    patterns: tuple[PatternRef, ...]  # exactly 1 for add/deprecate; >=2 for merge
+    patterns: tuple[PatternRef, ...] = Field(min_length=1)  # exactly 1 for add/deprecate; >=2 for merge
 
 
 class OntologyTermTarget(_Model):
@@ -58,7 +58,7 @@ class RepresentationRevision(_Model):
     proposed_definition: str | None = None     # new pattern/term content as prose/JSON (NOT executable)
 
     @model_validator(mode="after")
-    def _operation_target_compatible(self) -> "RepresentationRevision":
+    def _operation_target_compatible(self) -> RepresentationRevision:
         op, tgt = self.operation, self.target
         if op == RevisionOperation.MERGE:
             if not (isinstance(tgt, PatternTarget) and len(tgt.patterns) >= 2):
@@ -97,6 +97,6 @@ def meets_meta_tier_bar(licensing: Licensing) -> bool:
     return qualitative or licensing.route == LicenseRoute.MDL_GATE
 
 
-def is_representation_revision(claim: "Claim") -> bool:
+def is_representation_revision(claim: Claim) -> bool:
     """True iff `claim` carries a representation_revision payload (i.e. is a meta-tier claim)."""
     return claim.representation_revision is not None

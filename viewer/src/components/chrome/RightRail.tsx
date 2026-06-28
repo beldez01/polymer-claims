@@ -621,22 +621,7 @@ export default function RightRail() {
       }}
     >
       {selectedId === null ? (
-        <>
-          <UniverseOverview />
-
-          {/* §03 obstructions — only when overlay is active */}
-          {overlayOn && (
-            <div style={{ marginTop: 20 }}>
-              <div
-                className="section-marker"
-                style={{ ...sectionMarker, marginBottom: 8 }}
-              >
-                §03 — H¹ OBSTRUCTIONS
-              </div>
-              <ObstructionPanel />
-            </div>
-          )}
-        </>
+        <UniverseOverview />
       ) : (
         <>
           <div
@@ -668,20 +653,20 @@ export default function RightRail() {
           </div>
 
           <NodePanel selectedId={selectedId} />
-
-          {/* §03 obstructions — only when overlay is active, shown below node panel */}
-          {overlayOn && (
-            <div style={{ marginTop: 20 }}>
-              <div
-                className="section-marker"
-                style={{ ...sectionMarker, marginBottom: 8 }}
-              >
-                §03 — H¹ OBSTRUCTIONS
-              </div>
-              <ObstructionPanel />
-            </div>
-          )}
         </>
+      )}
+
+      {/* §03 obstructions — only when overlay is active, shown last in both views */}
+      {overlayOn && (
+        <div style={{ marginTop: 20 }}>
+          <div
+            className="section-marker"
+            style={{ ...sectionMarker, marginBottom: 8 }}
+          >
+            §03 — H¹ OBSTRUCTIONS
+          </div>
+          <ObstructionPanel />
+        </div>
       )}
     </aside>
   );

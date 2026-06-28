@@ -4,7 +4,7 @@ Without `generated_by` the air-gap / no-self-licensing guarantee can't tell huma
 agent; without `search_cardinality` selection-aware significance correction (pricing the
 forking paths) is unrepresentable; `preregistration_hash` is the §4 anti-HARKing hash-lock.
 The grammar represents; the protocol computes the correction. Imports nothing from
-polymer_formalclaim.
+polymer_protocol/polymer_claims.
 """
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ class Provenance(_Model):
     prior_cohorts: tuple[str, ...] = ()
 
     @model_validator(mode="after")
-    def _agent_needs_id(self) -> "Provenance":
+    def _agent_needs_id(self) -> Provenance:
         if self.generated_by == GenerationMode.AGENT_GENERATED and self.agent_id is None:
             raise ValueError("generated_by=agent_generated requires an agent_id")
         return self

@@ -4,16 +4,9 @@ import json
 import pytest
 
 from polymer_claims.cli import main
-from tests.attestation._fixtures import corpus_with, licensed_claim, licensing, mc, sat
+from tests.attestation._fixtures import corpus_path as _corpus_path
 
 pytest.importorskip("cryptography")
-
-
-def _corpus_path(tmp_path):
-    corpus = corpus_with(licensed_claim("c1", licensing(sat(mc()))))
-    p = tmp_path / "corpus.json"
-    p.write_text(corpus.model_dump_json())
-    return p
 
 
 def _keys(tmp_path):

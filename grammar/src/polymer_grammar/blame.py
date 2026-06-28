@@ -8,32 +8,20 @@ intersection = robustly blamed, union = possibly blamed, difference = underdeter
 """
 from __future__ import annotations
 
-from pydantic import model_validator
+from pydantic import Field
 
 from .base import _Model
 from .status import PendingReason, Status
 
 
 class BlameAssignment(_Model):
-    targets: tuple[str, ...]  # claim ids OR auxiliary-assumption ids
+    targets: tuple[str, ...] = Field(min_length=1)  # claim ids OR auxiliary-assumption ids
     note: str | None = None
-
-    @model_validator(mode="after")
-    def _nonempty(self) -> "BlameAssignment":
-        if not self.targets:
-            raise ValueError("a BlameAssignment must name >=1 target")
-        return self
 
 
 class BlameSet(_Model):
     contradiction_id: str
-    assignments: tuple[BlameAssignment, ...]
-
-    @model_validator(mode="after")
-    def _has_assignment(self) -> "BlameSet":
-        if not self.assignments:
-            raise ValueError("a BlameSet must carry >=1 minimal blame-assignment")
-        return self
+    assignments: tuple[BlameAssignment, ...] = Field(min_length=1)
 
 
 class BlameVerdict(_Model):
@@ -46,9 +34,7 @@ def aggregate_blame(blame: BlameSet) -> BlameVerdict:
     """intersection -> robustly_blamed; union -> possibly_blamed; difference -> underdetermined."""
     sets = [frozenset(a.targets) for a in blame.assignments]
     union = frozenset().union(*sets)
-    intersection = sets[0]
-    for s in sets[1:]:
-        intersection = intersection & s
+    intersection = frozenset.intersection(*sets)
     return BlameVerdict(
         robustly_blamed=intersection,
         possibly_blamed=union,

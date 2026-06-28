@@ -1,4 +1,3 @@
-# src/polymer_claims/ingest/tcga_xena.py
 """De-hardcoded builder for the real se:tcga_laml_idh@2 SE-Contract: streams a local Xena
 methylation450 matrix + cBioPortal laml_tcga_pub genotyping into the contract format load_contract
 reads. Byte-faithful port of data/tcga_laml/build_contract_xena.py (absolute paths removed;

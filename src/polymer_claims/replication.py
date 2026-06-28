@@ -106,7 +106,7 @@ def build_replication_inputs(
                 api_version=base_ctx.api_version,
                 data_version=base_ctx.data_version,
                 dimnames_hash=contract_b.dimnames_hash,
-                shared_cause_factors=getattr(contract_b, "shared_cause_factors", ()),
+                shared_cause_factors=contract_b.shared_cause_factors,
             ),
         )
         replications[cid] = (sat_b,)
@@ -121,7 +121,7 @@ def build_replication_inputs(
                 api_version=base_ctx.api_version,
                 data_version=base_ctx.data_version,
                 dimnames_hash=contract_a.dimnames_hash,
-                shared_cause_factors=getattr(contract_a, "shared_cause_factors", ()),
+                shared_cause_factors=contract_a.shared_cause_factors,
             ),
         )
         if cohorts_error_independent((sat_a, sat_b)) is not False:

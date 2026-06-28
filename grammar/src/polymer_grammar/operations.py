@@ -6,7 +6,7 @@ versioned `impl` dispatch key plus typed inputs (DataHandles into a materializat
 NodeRefs to upstream outputs) and declares the TYPE of L0 Leaf it produces. The graph
 terminates in a SatisfactionCriterion (later task) that turns the terminal output into a
 3-valued verdict. The runtime that EXECUTES this lives in evaluate.py; this module ships only
-the frozen, content-addressed type. Imports nothing from polymer_formalclaim and no infra.
+the frozen, content-addressed type. Imports nothing from polymer_protocol/polymer_claims and no infra.
 """
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ class ProducedLeafSpec(_Model):
     dimension: Dimension | None = None
 
     @model_validator(mode="after")
-    def _basis_discipline(self) -> "ProducedLeafSpec":
+    def _basis_discipline(self) -> ProducedLeafSpec:
         if self.leaf_kind != "quantity":
             if self.unit is not None or self.measurement_basis is not None:
                 raise ValueError(
@@ -89,7 +89,7 @@ class ComputeGraph(_Model):
     terminal: str = Field(min_length=1)
 
     @model_validator(mode="after")
-    def _unique_ids(self) -> "ComputeGraph":
+    def _unique_ids(self) -> ComputeGraph:
         ids = [n.id for n in self.nodes]
         if len(ids) != len(set(ids)):
             dupes = sorted({i for i in ids if ids.count(i) > 1})
@@ -97,7 +97,7 @@ class ComputeGraph(_Model):
         return self
 
     @model_validator(mode="after")
-    def _refs_resolve(self) -> "ComputeGraph":
+    def _refs_resolve(self) -> ComputeGraph:
         ids = {n.id for n in self.nodes}
         for n in self.nodes:
             for inp in n.inputs:
@@ -110,7 +110,7 @@ class ComputeGraph(_Model):
         return self
 
     @model_validator(mode="after")
-    def _acyclic(self) -> "ComputeGraph":
+    def _acyclic(self) -> ComputeGraph:
         remaining = {n.id: self._deps(n) for n in self.nodes}
         seen: set[str] = set()
         progress = True
@@ -177,7 +177,7 @@ class SatisfactionCriterion(_Model):
     tolerance: float | None = None
 
     @model_validator(mode="after")
-    def _exactly_one_target(self) -> "SatisfactionCriterion":
+    def _exactly_one_target(self) -> SatisfactionCriterion:
         has_thr = self.threshold is not None
         has_ref = self.reference_leaf_index is not None
         if has_thr == has_ref:  # both set (True==True) or neither (False==False)
@@ -188,7 +188,7 @@ class SatisfactionCriterion(_Model):
         return self
 
     @model_validator(mode="after")
-    def _tolerance_iff_within_tol(self) -> "SatisfactionCriterion":
+    def _tolerance_iff_within_tol(self) -> SatisfactionCriterion:
         if self.comparator == Comparator.WITHIN_TOL and self.tolerance is None:
             raise ValueError("comparator=within_tol requires a `tolerance`")
         if self.comparator != Comparator.WITHIN_TOL and self.tolerance is not None:

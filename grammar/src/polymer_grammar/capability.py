@@ -10,7 +10,16 @@ from typing import Literal
 from pydantic import computed_field, model_validator
 
 from .base import _Model
-from .operations import Comparator, ProducedLeafSpec
+from .claim import Claim
+from .operations import (
+    Comparator,
+    ComputeGraph,
+    DataHandle,
+    EvaluationPlan,
+    OperationNode,
+    ProducedLeafSpec,
+    SatisfactionCriterion,
+)
 from .pattern import PatternRef
 
 _SE_CONTRACT_RE = re.compile(r"^se:[^:@\s]+@[0-9]+$")
@@ -28,7 +37,7 @@ class ParamCodec(_Model):
     choices: tuple[str, ...] | None = None
 
     @model_validator(mode="after")
-    def _check(self) -> "ParamCodec":
+    def _check(self) -> ParamCodec:
         if not self.name.strip():
             raise ValueError("ParamCodec.name must be nonempty")
         if self.codec == "enum":
@@ -86,7 +95,7 @@ class SubjectRequirement(_Model):
     kind: SubjectKind | None = None
 
     @model_validator(mode="after")
-    def _check(self) -> "SubjectRequirement":
+    def _check(self) -> SubjectRequirement:
         if self.mode == "forbidden" and self.kind is not None:
             raise ValueError("forbidden subject must not set a kind")
         return self
@@ -97,7 +106,7 @@ class OracleRequirement(_Model):
     required: bool = False
 
     @model_validator(mode="after")
-    def _check(self) -> "OracleRequirement":
+    def _check(self) -> OracleRequirement:
         if self.default_oracle_id is not None and not self.default_oracle_id.strip():
             raise ValueError("default_oracle_id must be nonempty when set")
         return self
@@ -125,7 +134,7 @@ class CapabilityCell(_Model):
         return f"{self.capability_id}@{self.capability_version}"
 
     @model_validator(mode="after")
-    def _check(self) -> "CapabilityCell":
+    def _check(self) -> CapabilityCell:
         for s in (self.capability_id, self.capability_version, self.operation_impl, self.title):
             if not s.strip():
                 raise ValueError("capability_id/version/operation_impl/title must be nonempty")
@@ -150,7 +159,7 @@ class CapabilityRegistry(_Model):
     cells: tuple[CapabilityCell, ...] = ()
 
     @model_validator(mode="after")
-    def _unique(self) -> "CapabilityRegistry":
+    def _unique(self) -> CapabilityRegistry:
         keys = [(c.capability_id, c.capability_version) for c in self.cells]
         if len(set(keys)) != len(keys):
             raise ValueError("duplicate (capability_id, capability_version)")
@@ -208,12 +217,6 @@ class ConformanceResult(_Model):
 
 class CapabilityParamError(ValueError):
     """Raised by build_evaluation_plan on programmer misuse (bad params/comparator/oracle/data_ref)."""
-
-
-from .operations import (  # noqa: E402
-    ComputeGraph, DataHandle, EvaluationPlan, OperationNode, SatisfactionCriterion,
-)
-from .claim import Claim  # noqa: E402
 
 
 def _dedup(items):

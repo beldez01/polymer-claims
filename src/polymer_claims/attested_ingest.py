@@ -57,9 +57,10 @@ def parse_resolutions(text: str) -> list[Resolution]:
         raise ValueError(f"invalid resolution row: {exc}") from exc
 
 
-def validate_against_corpus(res: Resolution, corpus) -> None:
-    """The subject must exist and carry a licensing record (earned standing). Distinguishing a
-    *historical* license at this epoch from the current one is deferred (needs the epoch ledger)."""
+def validate_against_corpus(res: Resolution, corpus) -> Claim:
+    """The subject must exist and carry a licensing record (earned standing); returns it.
+    Distinguishing a *historical* license at this epoch from the current one is deferred
+    (needs the epoch ledger)."""
     claim = corpus.by_id().get(res.subject_claim_id)
     if claim is None:
         raise ValueError(f"subject_claim_id {res.subject_claim_id!r} not in corpus")
@@ -68,6 +69,7 @@ def validate_against_corpus(res: Resolution, corpus) -> None:
             f"subject_claim_id {res.subject_claim_id!r} carries no licensing record "
             "(calibration is about earned standing)"
         )
+    return claim
 
 
 def attested_event_claim(res: Resolution) -> Claim:
@@ -140,8 +142,7 @@ def ingest(corpus, resolutions: list[Resolution], ledger_path):
     stated_q = corpus.fdr_ledger.target_fdr
     records = []
     for res in resolutions:
-        validate_against_corpus(res, corpus)
-        subject = corpus.by_id()[res.subject_claim_id]
+        subject = validate_against_corpus(res, corpus)
         event = attested_event_claim(res)
         corpus = inject_attested_event(corpus, event)
         records.append(build_attested_record(res, subject, event, stated_q=stated_q))

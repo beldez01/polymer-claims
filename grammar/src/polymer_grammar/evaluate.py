@@ -107,7 +107,7 @@ class Adapter(Protocol):
 
 
 def _params(node: OperationNode) -> dict[str, str]:
-    return {k: v for k, v in node.params}
+    return dict(node.params)
 
 
 class IdentityAdapter:
@@ -297,6 +297,7 @@ def evaluate(
 
     for nid in graph.topological_order:
         node = node_by_id[nid]
+        params = _params(node)
         upstream = tuple(
             outputs.get(inp.node_id, ExecValue(value=None))
             for inp in node.inputs
@@ -326,7 +327,7 @@ def evaluate(
                 node_id=nid,
                 impl=node.impl,
                 produced=produced,
-                drift=_drift(_params(node).get("expected"), out.value),
+                drift=_drift(params.get("expected"), out.value),
                 error=error,
             )
         )
