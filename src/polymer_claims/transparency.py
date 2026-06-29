@@ -92,12 +92,9 @@ def verify_inclusion(leaf: bytes, index: int, tree_size: int, proof: list[bytes]
                 return False
             if (fn & 1) or (fn == sn):
                 h = node_hash(sibling, h)
-                if not (fn & 1):
-                    while True:
-                        fn >>= 1
-                        sn >>= 1
-                        if (fn & 1) or fn == 0:
-                            break
+                while fn and not (fn & 1):    # advance past trailing right-child levels
+                    fn >>= 1
+                    sn >>= 1
             else:
                 h = node_hash(h, sibling)
             fn >>= 1

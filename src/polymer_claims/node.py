@@ -16,6 +16,7 @@ No web/HTTP here — a streaming server is a later task.
 from __future__ import annotations
 
 import logging
+from collections import deque
 from pathlib import Path
 from typing import Literal
 
@@ -130,9 +131,10 @@ class NodeRunner:
             n_added=0,
             n_newly_licensed=0,
         )
-        self.frames: list[TimelineFrame] = [TimelineFrame(topology=topo, stats=stats)]
-        if self.max_frames is not None and len(self.frames) > self.max_frames:
-            self.frames = self.frames[-self.max_frames:]
+        # deque(maxlen) auto-evicts oldest frames in O(1)/tick (maxlen=None = unbounded).
+        self.frames: deque[TimelineFrame] = deque(
+            [TimelineFrame(topology=topo, stats=stats)], maxlen=self.max_frames
+        )
         self.prev_positions = {n.id: n.position for n in topo.nodes}
         self._licensed_prev = n_licensed(corpus)
         self.last_drift: DriftRecord | None = None
@@ -265,9 +267,7 @@ class NodeRunner:
             n_newly_licensed=n_newly_licensed,
         )
         frame = TimelineFrame(topology=topo, stats=stats)
-        self.frames.append(frame)
-        if self.max_frames is not None and len(self.frames) > self.max_frames:
-            self.frames = self.frames[-self.max_frames:]
+        self.frames.append(frame)  # deque(maxlen) drops the oldest frame automatically
         self.prev_positions = {n.id: n.position for n in topo.nodes}
         return frame
 
@@ -304,16 +304,17 @@ class NodeRunner:
         - "force": today's EXACT warm-started Fruchterman-Reingold path. `self.prev_positions` is
           `{}` at frame 0, which `export_topology` treats identically to `seed_positions=None`, so
           this is byte-identical to the historical behaviour."""
-        if self.layout == "spectral":
+        # Latch the fallback: once the numpy/[embed] import has failed, don't re-attempt
+        # the spectral path every tick — go straight to force-directed.
+        if self.layout == "spectral" and not self._spectral_fallback_warned:
             try:
                 positions = self._spectral_positions(corpus)
             except ImportError:
-                if not self._spectral_fallback_warned:
-                    logger.warning(
-                        "spectral layout unavailable (numpy/[embed] missing); "
-                        "falling back to force-directed"
-                    )
-                    self._spectral_fallback_warned = True
+                logger.warning(
+                    "spectral layout unavailable (numpy/[embed] missing); "
+                    "falling back to force-directed"
+                )
+                self._spectral_fallback_warned = True
             else:
                 return self._attach_consistency(export_topology(
                     corpus, layout=Layout.FORCE_DIRECTED, positions=positions

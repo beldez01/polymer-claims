@@ -127,7 +127,7 @@ class LLMGenerationAdapter:
         value = float(p["value"])  # raises -> dropped
         threshold = float(p["threshold"])
         # FIRST PASS: opaque free-text justification, display only. None when absent/empty.
-        rationale = str(p["rationale"]).strip() if p.get("rationale") else None
+        rationale = str(p.get("rationale") or "").strip() or None  # whitespace-only -> None
         cid = _GEN_PREFIX + hashlib.sha256(
             f"{title}|{pattern_id}|{ontology_term}|{value}|{cmp_key}|{threshold}".encode()
         ).hexdigest()[:16]
@@ -300,7 +300,7 @@ class MeanDiffGenerationAdapter:
         data = load_dataset(self.dataset)  # unknown dataset -> raises -> dropped
         if value_col not in data or group_col not in data:
             raise ValueError("unknown column")
-        rationale = str(p["rationale"]).strip() if p.get("rationale") else None
+        rationale = str(p.get("rationale") or "").strip() or None  # whitespace-only -> None
         cid = _MD_PREFIX + hashlib.sha256(
             f"{title}|{value_col}|{group_col}|{group_a}|{group_b}|{cmp_key}|{threshold}".encode()
         ).hexdigest()[:16]
@@ -449,7 +449,7 @@ class MethylGenerationAdapter:
         if level_a == level_b:
             raise ValueError("levels must differ")
         self._validate_contract(ref, group_col, level_a, level_b)
-        rationale = str(p["rationale"]).strip() if p.get("rationale") else None
+        rationale = str(p.get("rationale") or "").strip() or None  # whitespace-only -> None
         return title, ref, group_col, level_a, level_b, _COMPARATORS[cmp_key], rationale
 
     def _build_region_claim(self, p: dict):

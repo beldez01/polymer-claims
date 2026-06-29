@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import hashlib
-import json
 from dataclasses import asdict, dataclass
 
 from polymer_grammar import MaterializationContext
+
+from .._hashing import canonical_sha256
 
 
 @dataclass(frozen=True)
@@ -19,8 +19,7 @@ class BioNeMoApparatus:
     payload_schema: tuple[str, ...]
 
     def content_hash(self) -> str:
-        canonical = json.dumps(asdict(self), sort_keys=True, separators=(",", ":"))
-        return "sha256:" + hashlib.sha256(canonical.encode()).hexdigest()
+        return canonical_sha256(asdict(self))
 
 
 def build_materialization_context(

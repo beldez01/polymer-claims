@@ -31,6 +31,8 @@ from .methyl_adapters import (
     _region_group_means,
 )
 
+# Abs-only arm of the evaluator air-gap (the grammar evaluator uses abs+rel tolerance). Safe here
+# because region Δβ is bounded near zero, so an absolute 1e-9 is the operative bound either way.
 _AGREE_TOL = 1e-9
 
 

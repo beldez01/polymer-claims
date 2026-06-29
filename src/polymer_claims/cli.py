@@ -69,6 +69,15 @@ def _write_or_print(text: str, out: str | None) -> None:
         print(text)
 
 
+def _emit(output: str, out: str | None) -> None:
+    """Write `output` verbatim to `out` (file) or stdout — NO trailing newline (unlike print();
+    an empty output writes nothing)."""
+    if out:
+        Path(out).write_text(output)
+    else:
+        sys.stdout.write(output)
+
+
 # ---------------------------------------------------------------------------
 # commands
 # ---------------------------------------------------------------------------
@@ -115,37 +124,28 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
-def _build_llm_proposer(model: str):
-    """Lazy-build a bridge_proposer over a real Anthropic-backed LLMGenerationAdapter.
-    Raises RuntimeError with an install/key hint if the [llm] extra or the API key is missing."""
+def _anthropic_proposer(adapter_cls, model: str, flag: str):
+    """Shared builder: require ANTHROPIC_API_KEY, then a bridge_proposer over an Anthropic-backed
+    adapter (`.anthropic` lazy-imports the [llm] extra and raises RuntimeError if it is missing)."""
     if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise RuntimeError("set ANTHROPIC_API_KEY to use --llm")
+        raise RuntimeError(f"set ANTHROPIC_API_KEY to use {flag}")
     from polymer_protocol import bridge_proposer  # local import keeps top-level clean
-    from .llm_adapter import LLMGenerationAdapter   # safe (no anthropic at import); .anthropic lazy-imports it
-    adapter = LLMGenerationAdapter.anthropic(model=model)   # raises RuntimeError if [llm] missing
-    return bridge_proposer((adapter,))
+    return bridge_proposer((adapter_cls.anthropic(model=model),))
+
+
+def _build_llm_proposer(model: str):
+    from .llm_adapter import LLMGenerationAdapter  # safe (no anthropic at import); .anthropic lazy-imports it
+    return _anthropic_proposer(LLMGenerationAdapter, model, "--llm")
 
 
 def _build_real_data_proposer(model: str):
-    """Lazy-build a bridge_proposer over a MeanDiffGenerationAdapter (real-data generation).
-    Raises RuntimeError with a key/extra hint if [llm] or ANTHROPIC_API_KEY is missing."""
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise RuntimeError("set ANTHROPIC_API_KEY to use --real-data")
-    from polymer_protocol import bridge_proposer
     from .llm_adapter import MeanDiffGenerationAdapter
-    adapter = MeanDiffGenerationAdapter.anthropic(model=model)   # raises RuntimeError if [llm] missing
-    return bridge_proposer((adapter,))
+    return _anthropic_proposer(MeanDiffGenerationAdapter, model, "--real-data")
 
 
 def _build_methyl_proposer(model: str):
-    """Lazy-build a bridge_proposer over a MethylGenerationAdapter (Phase B).
-    Raises RuntimeError with a key/extra hint if [llm] or ANTHROPIC_API_KEY is missing."""
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise RuntimeError("set ANTHROPIC_API_KEY to use --methyl-data")
-    from polymer_protocol import bridge_proposer
     from .llm_adapter import MethylGenerationAdapter
-    adapter = MethylGenerationAdapter.anthropic(model=model)
-    return bridge_proposer((adapter,))
+    return _anthropic_proposer(MethylGenerationAdapter, model, "--methyl-data")
 
 
 def _cmd_run_cycle(args: argparse.Namespace) -> int:
@@ -265,16 +265,10 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
                     entry = log.submit(canonical_entry_bytes(e))
                     bundles.append(build_bundle(e, priv.public_key(), entry, log_pub))
                 output = "".join(json.dumps(b, separators=(",", ":")) + "\n" for b in bundles)
-                if args.out:
-                    Path(args.out).write_text(output)
-                else:
-                    sys.stdout.write(output)
+                _emit(output, args.out)
                 return 0
         output = "".join(e.model_dump_json(by_alias=True, exclude_none=True) + "\n" for e in envelopes)
-        if args.out:
-            Path(args.out).write_text(output)
-        else:
-            sys.stdout.write(output)        # exact string — NOT print() (no extra newline; empty => nothing)
+        _emit(output, args.out)
         return 0
     bundle = build_attestation_bundle(corpus, contract_index=index)
     _write_or_print(bundle.model_dump_json(by_alias=True, exclude_none=True), args.out)
