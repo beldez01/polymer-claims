@@ -56,11 +56,11 @@ BASELINE_RULE_CONFIG: dict = {
 TAU: float = 0.1          # theta0 for the e-value test
 _P_POS: float = 0.5       # P(x0="1") — balanced classes
 _EPSILON: float = 0.05    # label noise probability
-_DGP_N: int = 200         # committed sample size (predeclared schedule: 200→400→800)
 _DGP_SEED: int = 42       # fixed sampling seed
 
 # Pre-declared schedule for n (never search: only escalate in order if LCB < 0.80)
 _N_SCHEDULE: tuple[int, ...] = (200, 400, 800)
+_DGP_N: int = _N_SCHEDULE[0]  # committed sample size — first predeclared schedule value
 
 # Canonical digest of all DGP parameters (includes rule configs + tau + n + seed)
 _DGP_DIGEST: str = canonical_sha256(

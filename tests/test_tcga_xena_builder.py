@@ -1,5 +1,6 @@
 # tests/test_tcga_xena_builder.py
-import gzip, json
+import gzip
+import json
 import pytest
 from pathlib import Path
 from polymer_claims.ingest.tcga_xena import (
@@ -24,7 +25,8 @@ def _make_fixture(root: Path, *, n_probes=60, n_dm=20):
                     v = 0.50
                 row.append(f"{v:.4f}")
             fh.write("\t".join(row) + "\n")
-    cbio = root / "cbio"; cbio.mkdir()
+    cbio = root / "cbio"
+    cbio.mkdir()
     (cbio / "data_mutations.txt").write_text(
         "Hugo_Symbol\tTumor_Sample_Barcode\tHGVSp_Short\n"
         + "".join(f"IDH1\t{c}-03A\tp.R132H\n" for c in idh_mut))

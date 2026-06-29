@@ -10,7 +10,7 @@ _BAND = (1, 50)
 
 def _capture_pins(tmp_path) -> tuple[dict, Path, Path]:
     """Build once via the runner's own machinery to capture truthful pins for this fixture."""
-    import hashlib, json
+    import hashlib
     from polymer_claims.contracts import load_contract, using_contract_root, clear_contract_cache
     from polymer_claims.ingest.tcga_xena import build_real_contract, compute_canonical_checksum
     xena, cbio = _make_fixture(tmp_path)

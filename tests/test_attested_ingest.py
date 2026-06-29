@@ -6,7 +6,7 @@ from polymer_protocol.calibration import (
     ResolutionRecord,
 )
 from polymer_claims.attested_ingest import (
-    Resolution, parse_resolutions, validate_against_corpus,
+    Resolution, parse_resolutions,
     attested_event_claim, inject_attested_event,
     build_attested_record, ingest,
 )
