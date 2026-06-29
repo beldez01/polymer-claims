@@ -645,6 +645,13 @@ def _import_server():
 _LOOPBACK = {"127.0.0.1", "localhost", "::1"}
 
 
+def _run_node(uvicorn, create_app, runner, args) -> int:
+    """The shared serve tail: wrap the runner in the SSE app and block on uvicorn."""
+    app = create_app(runner, interval=args.interval, origins=args.origins or None)
+    uvicorn.run(app, host=args.host, port=args.port)
+    return 0
+
+
 def _cmd_serve(args: argparse.Namespace) -> int:
     try:
         uvicorn, create_app = _import_server()
@@ -692,9 +699,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             **seed_kwargs,
             **cal_kwargs,
         )
-        app = create_app(runner, interval=args.interval, origins=args.origins or None)
-        uvicorn.run(app, host=args.host, port=args.port)
-        return 0
+        return _run_node(uvicorn, create_app, runner, args)
     if getattr(args, "real_data", False):
         try:
             proposer = _build_real_data_proposer(args.llm_model)
@@ -724,9 +729,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             **seed_kwargs,
             **cal_kwargs,
         )
-        app = create_app(runner, interval=args.interval, origins=args.origins or None)
-        uvicorn.run(app, host=args.host, port=args.port)
-        return 0
+        return _run_node(uvicorn, create_app, runner, args)
     if getattr(args, "methyl_data", False):
         try:
             proposer = _build_methyl_proposer(args.llm_model)
@@ -774,9 +777,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             budget=2.5,
             **cal_kwargs,
         )
-        app = create_app(runner, interval=args.interval, origins=args.origins or None)
-        uvicorn.run(app, host=args.host, port=args.port)
-        return 0
+        return _run_node(uvicorn, create_app, runner, args)
     llm_proposer = None
     if getattr(args, "llm", False):
         try:
@@ -813,9 +814,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             corpus, scheduler_budget=args.budget, max_frames=args.max_frames, layout=args.layout,
             **kwargs, **cal_kwargs,
         )
-    app = create_app(runner, interval=args.interval, origins=args.origins or None)
-    uvicorn.run(app, host=args.host, port=args.port)
-    return 0
+    return _run_node(uvicorn, create_app, runner, args)
 
 
 # ---------------------------------------------------------------------------
