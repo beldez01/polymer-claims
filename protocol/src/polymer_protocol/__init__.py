@@ -104,6 +104,12 @@ from .sheaf import (
     extract_sheaf,
 )
 from .verify import verify_stage
+from .evidence_executor import (
+    ExecutionFailure,
+    EvidenceExecution,
+    EvidenceExecutor,
+    EvidenceRuntime,
+)
 
 # Public API. Grouped by stability/role (audit #12, no-refactor sectioning — the names are
 # unchanged; the sections just signal which surfaces are stable contracts vs runtime
@@ -230,4 +236,9 @@ __all__ = [
     "FrameStats",
     "frame_stats",
     "n_licensed",
+    # ── V2.0 evidence-licensed execution ─────────────────────────────────
+    "ExecutionFailure",
+    "EvidenceExecution",
+    "EvidenceExecutor",
+    "EvidenceRuntime",
 ]
