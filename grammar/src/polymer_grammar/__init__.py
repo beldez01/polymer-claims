@@ -171,6 +171,12 @@ from .representation import (
 from .commitment import commitment_hash
 from .sampling import SamplingRegime
 from .evidence_policy import EvidencePolicy, EvidencePolicyRegistry
+from .verification_policy import (
+    EvidenceLicensingInfo,
+    EvidenceProvenance,
+    ExecutionContract,
+    VerificationPolicy,
+)
 from .executor_credential import (
     Component,
     ExecutorDescriptor,
@@ -353,6 +359,10 @@ __all__ = [
     "data_ref_ok",
     "EvidencePolicy",
     "EvidencePolicyRegistry",
+    "EvidenceLicensingInfo",
+    "EvidenceProvenance",
+    "ExecutionContract",
+    "VerificationPolicy",
     "Component",
     "ExecutorDescriptor",
     "ExecutorDescriptorRegistry",
