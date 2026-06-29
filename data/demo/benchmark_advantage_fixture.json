@@ -1,0 +1,2009 @@
+{
+  "examples": [
+    {
+      "example_id": "ex_0000",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0001",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0002",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0003",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0004",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0005",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0006",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0007",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0008",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0009",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0010",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0011",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0012",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0013",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0014",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0015",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0016",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0017",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0018",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0019",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0020",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0021",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0022",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0023",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0024",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0025",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0026",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0027",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0028",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0029",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0030",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0031",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0032",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0033",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0034",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0035",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0036",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0037",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0038",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0039",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0040",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0041",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0042",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0043",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0044",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0045",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0046",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0047",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0048",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0049",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0050",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0051",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0052",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0053",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0054",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0055",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0056",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0057",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0058",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0059",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0060",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0061",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0062",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0063",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0064",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0065",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0066",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0067",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0068",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0069",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0070",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0071",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0072",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0073",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0074",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0075",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0076",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0077",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0078",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0079",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0080",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0081",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0082",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0083",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0084",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0085",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0086",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0087",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0088",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0089",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0090",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0091",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0092",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0093",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0094",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0095",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0096",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0097",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0098",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0099",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0100",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0101",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0102",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0103",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0104",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0105",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0106",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0107",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0108",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0109",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0110",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0111",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0112",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0113",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0114",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0115",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0116",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0117",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0118",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0119",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0120",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0121",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0122",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0123",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0124",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0125",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0126",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0127",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0128",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0129",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0130",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0131",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0132",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0133",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0134",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0135",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0136",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0137",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0138",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0139",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0140",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0141",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0142",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0143",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0144",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0145",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0146",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0147",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0148",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0149",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0150",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0151",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0152",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0153",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0154",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0155",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0156",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0157",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0158",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0159",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0160",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0161",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0162",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0163",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0164",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0165",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0166",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0167",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0168",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0169",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0170",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0171",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0172",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0173",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0174",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0175",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0176",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0177",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0178",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0179",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0180",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0181",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0182",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0183",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0184",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0185",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0186",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0187",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0188",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0189",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0190",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0191",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0192",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0193",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0194",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0195",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0196",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0197",
+      "features": [
+        [
+          "x0",
+          "0"
+        ]
+      ],
+      "label": "neg"
+    },
+    {
+      "example_id": "ex_0198",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    },
+    {
+      "example_id": "ex_0199",
+      "features": [
+        [
+          "x0",
+          "1"
+        ]
+      ],
+      "label": "pos"
+    }
+  ],
+  "target_population": "synthetic-dgp-v1",
+  "sampling_regime": "iid_examples",
+  "version": "v1",
+  "sampling_seed": 42,
+  "dgp_digest": "sha256:4a0e49e154c9cf41c0e28ea75a12c9466d6bc353c63ebc8b3d94ad9d04b67a9e"
+}
