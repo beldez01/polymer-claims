@@ -29,6 +29,7 @@ import { COLOR } from '@/config/theme';
 import { useViewer } from '@/store';
 import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
 import { staticInterpNode, type InterpNode } from '@/lib/interpolate';
+import { BASE_RADIUS, ringPoints } from '@/lib/ring';
 import type { Vec3 } from '@/lib/topology';
 
 // ── constants ──────────────────────────────────────────────────────────────
@@ -47,9 +48,7 @@ const PULSE_PERIOD = 1.8;
  * Outline ring sits between the hover ring (r·1.7) and the FDR ring (r·2.25),
  * so obstruction membership is visually distinct from both.
  */
-const BASE_RADIUS = 0.28;
 const OBSTRUCTION_RING_FACTOR = 1.95;
-const RING_SEGMENTS = 48;
 
 // Opacity levels for focus dimming.
 const OPACITY_FOCUSED_LINE = 0.95;
@@ -58,15 +57,6 @@ const OPACITY_FOCUSED_RING = 0.85;
 const OPACITY_DIMMED_RING = 0.18;
 
 // ── helpers ────────────────────────────────────────────────────────────────
-
-function ringPoints(radius: number): [number, number, number][] {
-  const pts: [number, number, number][] = [];
-  for (let i = 0; i <= RING_SEGMENTS; i++) {
-    const a = (i / RING_SEGMENTS) * Math.PI * 2;
-    pts.push([Math.cos(a) * radius, Math.sin(a) * radius, 0]);
-  }
-  return pts;
-}
 
 /** Obstruction key — must match `obstructionKey` in RightRail.tsx. */
 function obKey(ob: { claim_ids: string[] }, index: number): string {
@@ -219,10 +209,9 @@ export default function Obstructions() {
   const phaseStep = PULSE_PERIOD / Math.max(obstructions.length, 1);
 
   // Determine which node ids belong to the focused obstruction (for ring emphasis).
-  const focusedMemberIds: Set<string> =
-    hasFocus && focusedObstruction !== null
-      ? (membersByKey.get(focusedObstruction) ?? new Set())
-      : new Set();
+  const focusedMemberIds: Set<string> = hasFocus
+    ? (membersByKey.get(focusedObstruction!) ?? new Set())
+    : new Set();
 
   return (
     <group>

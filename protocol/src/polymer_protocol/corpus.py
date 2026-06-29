@@ -17,6 +17,8 @@ from polymer_grammar import (
     DefeatEdge,
     EquivalenceClaim,
     FDRLedger,
+    Status,
+    StrengthVector,
     VerifiedEvaluation,
 )
 
@@ -39,6 +41,14 @@ class Corpus(_Model):
     def by_id(self) -> Mapping[str, Claim]:
         """Derived id → claim index (not a stored field). Read-only (matches the frozen discipline)."""
         return MappingProxyType({c.id: c for c in self.claims})
+
+    def strength_map(self) -> dict[str, StrengthVector | None]:
+        """Derived id → strength vector (the VAF defeat-resolution input)."""
+        return {c.id: c.strength for c in self.claims}
+
+    def licensed_ids(self) -> frozenset[str]:
+        """The ids of the currently-LICENSED claims (the VAF's accepted set)."""
+        return frozenset(c.id for c in self.claims if c.status == Status.LICENSED)
 
     @model_validator(mode="after")
     def _unique_claim_ids(self) -> "Corpus":

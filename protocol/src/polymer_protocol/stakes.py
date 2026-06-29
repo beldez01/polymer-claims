@@ -14,8 +14,7 @@ from .corpus import Corpus
 LICENSED_STAKE_WEIGHT = 2.0
 
 
-def dependency_cone(corpus: Corpus, claim_id: str) -> frozenset[str]:
-    by_id = corpus.by_id()
+def _dependency_cone(corpus: Corpus, claim_id: str, by_id: dict) -> frozenset[str]:
     # forward reachability over defeat edges (source -> target)
     out: dict[str, list[str]] = {}
     for e in corpus.defeat_edges:
@@ -39,10 +38,14 @@ def dependency_cone(corpus: Corpus, claim_id: str) -> frozenset[str]:
     return frozenset(reached)
 
 
+def dependency_cone(corpus: Corpus, claim_id: str) -> frozenset[str]:
+    return _dependency_cone(corpus, claim_id, corpus.by_id())
+
+
 def stakes(corpus: Corpus, claim_id: str) -> float:
     by_id = corpus.by_id()
     total = 0.0
-    for dep_id in dependency_cone(corpus, claim_id):
+    for dep_id in _dependency_cone(corpus, claim_id, by_id):
         dep = by_id.get(dep_id)
         if dep is not None and dep.status == Status.LICENSED:
             total += LICENSED_STAKE_WEIGHT

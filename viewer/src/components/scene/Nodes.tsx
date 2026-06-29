@@ -9,9 +9,7 @@ import { useViewer } from '@/store';
 import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
 import { staticInterpNode, type InterpNode } from '@/lib/interpolate';
 import type { StrengthVector } from '@/lib/topology';
-
-const BASE_RADIUS = 0.28;
-const RING_SEGMENTS = 48;
+import { BASE_RADIUS, ringPoints } from '@/lib/ring';
 
 function statusColor(status: string): string {
   return STATUS_COLOR[status] ?? COLOR.text.muted;
@@ -31,15 +29,6 @@ function crossfadeColor(from: string, to: string, t: number): string {
 function nodeRadius(strength: StrengthVector | null): number {
   const ean = strength ? strength[2] : 0.5;
   return BASE_RADIUS * (0.8 + 0.5 * ean);
-}
-
-function ringPoints(radius: number): [number, number, number][] {
-  const pts: [number, number, number][] = [];
-  for (let i = 0; i <= RING_SEGMENTS; i++) {
-    const a = (i / RING_SEGMENTS) * Math.PI * 2;
-    pts.push([Math.cos(a) * radius, Math.sin(a) * radius, 0]);
-  }
-  return pts;
 }
 
 // Tension halo disc radius — between node body and hover ring (r·1.7).

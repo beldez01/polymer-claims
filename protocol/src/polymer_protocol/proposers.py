@@ -62,30 +62,24 @@ def rival_generation(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposa
             transplanted = (
                 transplant_plan(c.evaluation_plan) if c.evaluation_plan is not None else None
             )
+            base = dict(
+                id=rid,
+                title=f"rival({d.value}) of {c.id}",
+                pattern=c.pattern,
+                leaves=c.leaves,
+                subject=c.subject,
+                conclusion=rival_concl,
+                provenance=_generated_by(corpus, RIVAL_OP),
+            )
             if transplanted is not None:
                 rival = Claim(
-                    id=rid,
-                    title=f"rival({d.value}) of {c.id}",
-                    pattern=c.pattern,
-                    leaves=c.leaves,
+                    **base,
                     status=Status.PENDING,
                     pending_reason=PendingReason.UNTESTED,
-                    subject=c.subject,
-                    conclusion=rival_concl,
                     evaluation_plan=transplanted,
-                    provenance=_generated_by(corpus, RIVAL_OP),
                 )
             else:
-                rival = Claim(
-                    id=rid,
-                    title=f"rival({d.value}) of {c.id}",
-                    pattern=c.pattern,
-                    leaves=c.leaves,
-                    status=Status.CONJECTURED,
-                    subject=c.subject,
-                    conclusion=rival_concl,
-                    provenance=_generated_by(corpus, RIVAL_OP),
-                )
+                rival = Claim(**base, status=Status.CONJECTURED)
             edge = DefeatEdge(source=rid, target=c.id, kind=DefeatEdgeKind.REBUT, provisional=True)
             proposals.append(Proposal(operator_id=RIVAL_OP, claim=rival, edges=(edge,)))
     return tuple(proposals)

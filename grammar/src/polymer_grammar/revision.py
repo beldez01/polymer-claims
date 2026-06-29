@@ -255,11 +255,29 @@ def contract(claims: Iterable[Claim], edges: Iterable[DefeatEdge], target_id: st
         )
         return _result(claims, edges, verdict, prior_in)
     target_hash = target.conclusion.content_hash
+    # A claim is retracted iff its conclusion ENTAILS the target's. Build the ENTAILS graph
+    # once and reverse-BFS from target_hash to collect every source hash that reaches it
+    # (incl. target_hash itself), instead of an O(n) per-claim entails_closure (O(n^2) total).
+    reverse: dict[str, set[str]] = defaultdict(set)
+    for c in claims:
+        if c.conclusion is None:
+            continue
+        src = c.conclusion.content_hash
+        for e in c.conclusion.neighborhood:
+            if e.kind == NeighborEdgeKind.ENTAILS:
+                reverse[e.target].add(src)
+    ancestors = {target_hash}
+    queue = deque([target_hash])
+    while queue:
+        node = queue.popleft()
+        for src in reverse.get(node, ()):
+            if src not in ancestors:
+                ancestors.add(src)
+                queue.append(src)
     retract = {
         c.id
         for c in claims
-        if c.conclusion is not None
-        and target_hash in entails_closure({c.conclusion.content_hash}, claims)
+        if c.conclusion is not None and c.conclusion.content_hash in ancestors
     }
     new_claims = tuple(c for c in claims if c.id not in retract)
     verdict = RetractionVerdict(

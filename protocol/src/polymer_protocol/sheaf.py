@@ -170,9 +170,9 @@ def extract_sheaf(
         u, v = sorted((eq.left, eq.right))
         edges.append(SheafEdge(kind="equivalence", u=u, v=v, weight=float(eq.severity), sign=1))
 
-    strength = {c.id: c.strength for c in corpus.claims}
-    licensed = frozenset(c.id for c in corpus.claims if c.status == Status.LICENSED)
-    eff = effective_defeats(corpus.defeat_edges, strength, licensed_ids=licensed)
+    eff = effective_defeats(
+        corpus.defeat_edges, corpus.strength_map(), licensed_ids=corpus.licensed_ids()
+    )
     latest = {t.claim_id: t for t in corpus.fdr_ledger.tests}   # last write wins = latest test per claim
     for src, tgt in sorted(eff):
         if src not in vmap or tgt not in vmap:
