@@ -74,11 +74,11 @@ class IndependenceTier(str, Enum):
 
 
 def _distinct_cohort_reps(
-    satisfactions: tuple["Satisfaction", ...]
-) -> list["Satisfaction"]:
+    satisfactions: tuple[Satisfaction, ...]
+) -> list[Satisfaction]:
     """One representative Satisfaction per distinct non-None dimnames_hash, deterministic
     (ascending dimnames_hash, first occurrence)."""
-    reps: dict[str, "Satisfaction"] = {}
+    reps: dict[str, Satisfaction] = {}
     for s in satisfactions:
         h = s.materialization.dimnames_hash
         if h is not None and h not in reps:
@@ -86,46 +86,50 @@ def _distinct_cohort_reps(
     return [reps[h] for h in sorted(reps)]
 
 
-def cohorts_error_independent(
-    satisfactions: tuple["Satisfaction", ...]
-) -> bool | None:
-    """§E: are the distinct cohorts' errors independent (low shared-cause overlap)?
-    None  -> not assessable: <2 distinct cohorts, OR any representative has empty factors
-             (partial adoption falls back to today's behavior — byte-identical when off).
-    True  -> every pairwise Jaccard < SHARED_CAUSE_TAU.
-    False -> some pair's Jaccard >= SHARED_CAUSE_TAU (the runs share too much cause)."""
+def _cohort_pairwise_jaccards(
+    satisfactions: tuple[Satisfaction, ...]
+) -> list[float] | None:
+    """The pairwise shared-cause Jaccards among distinct-cohort representatives, or None when
+    not assessable: <2 distinct cohorts, OR any representative has empty factors (partial
+    adoption falls back to today's behavior — byte-identical when off)."""
     reps = _distinct_cohort_reps(satisfactions)
     if len(reps) < 2:
         return None
     factors = [r.materialization.shared_cause_factors for r in reps]
     if any(not f for f in factors):
         return None
-    for i in range(len(factors)):
-        for j in range(i + 1, len(factors)):
-            if shared_cause_jaccard(factors[i], factors[j]) >= SHARED_CAUSE_TAU:
-                return False
-    return True
-
-
-def max_shared_cause_overlap(
-    satisfactions: tuple["Satisfaction", ...]
-) -> float | None:
-    """The max pairwise Jaccard among distinct-cohort representatives, or None when not
-    assessable (matches cohorts_error_independent's None cases). Recorded on the license."""
-    reps = _distinct_cohort_reps(satisfactions)
-    if len(reps) < 2:
-        return None
-    factors = [r.materialization.shared_cause_factors for r in reps]
-    if any(not f for f in factors):
-        return None
-    return max(
+    return [
         shared_cause_jaccard(factors[i], factors[j])
         for i in range(len(factors))
         for j in range(i + 1, len(factors))
-    )
+    ]
 
 
-def independence_tier_of(satisfactions: tuple["Satisfaction", ...]) -> IndependenceTier:
+def cohorts_error_independent(
+    satisfactions: tuple[Satisfaction, ...]
+) -> bool | None:
+    """§E: are the distinct cohorts' errors independent (low shared-cause overlap)?
+    None  -> not assessable (see _cohort_pairwise_jaccards).
+    True  -> every pairwise Jaccard < SHARED_CAUSE_TAU.
+    False -> some pair's Jaccard >= SHARED_CAUSE_TAU (the runs share too much cause)."""
+    jaccards = _cohort_pairwise_jaccards(satisfactions)
+    if jaccards is None:
+        return None
+    return all(j < SHARED_CAUSE_TAU for j in jaccards)
+
+
+def max_shared_cause_overlap(
+    satisfactions: tuple[Satisfaction, ...]
+) -> float | None:
+    """The max pairwise Jaccard among distinct-cohort representatives, or None when not
+    assessable (matches cohorts_error_independent's None cases). Recorded on the license."""
+    jaccards = _cohort_pairwise_jaccards(satisfactions)
+    if jaccards is None:
+        return None
+    return max(jaccards)
+
+
+def independence_tier_of(satisfactions: tuple[Satisfaction, ...]) -> IndependenceTier:
     """REPLICATED iff >=2 DISTINCT non-None dimnames_hash AND the cohorts are error-independent.
     cohorts_error_independent is None (factors absent / partial) => today's behavior (REPLICATED on
     distinct cohorts — byte-identical when off); False (high overlap) => REPRODUCED (the §E gate)."""
@@ -152,7 +156,7 @@ class Licensing(_Model):
     note: str | None = None
 
     @model_validator(mode="after")
-    def _all_satisfied(self) -> "Licensing":
+    def _all_satisfied(self) -> Licensing:
         if not self.satisfactions:
             raise ValueError("a Licensing record requires >=1 satisfaction")
         if any(s.verdict != SatisfactionVerdict.SATISFIED for s in self.satisfactions):
@@ -163,7 +167,7 @@ class Licensing(_Model):
         return self
 
     @model_validator(mode="after")
-    def _replication_needs_two_distinct_materializations(self) -> "Licensing":
+    def _replication_needs_two_distinct_materializations(self) -> Licensing:
         if self.route == LicenseRoute.REPLICATION:
             ids = {s.materialization.id for s in self.satisfactions}
             if len(ids) < 2:
@@ -174,7 +178,7 @@ class Licensing(_Model):
         return self
 
     @model_validator(mode="after")
-    def _replicated_tier_needs_two_distinct_cohorts(self) -> "Licensing":
+    def _replicated_tier_needs_two_distinct_cohorts(self) -> Licensing:
         if (
             self.independence_tier == IndependenceTier.REPLICATED
             and independence_tier_of(self.satisfactions) != IndependenceTier.REPLICATED
@@ -186,7 +190,7 @@ class Licensing(_Model):
         return self
 
     @model_validator(mode="after")
-    def _enumerated_closure_names_rivals(self) -> "Licensing":
+    def _enumerated_closure_names_rivals(self) -> Licensing:
         if (
             self.rival_set_closure == RivalSetClosure.ENUMERATED
             and not self.rivals_considered

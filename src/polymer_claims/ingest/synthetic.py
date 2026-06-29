@@ -2,8 +2,7 @@
 
 No real TCGA bytes — a realistic-shaped fixture (IDH-mut vs WT, a planted differential-methylation
 signal + null bulk) that licenses the n-DMP claim through the REAL gate. Stdlib-only generation
-(no numpy); reuses the existing build_contract verbatim. See
-docs/superpowers/specs/2026-06-23-offline-kernel-proof-design.md.
+(no numpy); reuses the existing build_contract verbatim.
 """
 from __future__ import annotations
 

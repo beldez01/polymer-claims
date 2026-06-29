@@ -2,7 +2,7 @@
 
 Umbrella-side, deterministic, stdlib-only. Pure builder (`build_attestation_bundle`) takes the
 resolved contract index + optional adapter registry as injected params; `resolve_contract_index`
-is the only IO. Design: docs/superpowers/specs/2026-06-21-standards-skin-attestation-design.md
+is the only IO. Design:
 """
 from __future__ import annotations
 
@@ -129,10 +129,16 @@ class DsseEnvelope(_Model):
     signatures: tuple[DsseSignature, ...] = ()   # empty = unsigned, signing-ready (NOT trust-valid)
 
 
+def _serialized_bytes(model) -> bytes:
+    """The shared byte-sensitive serialization idiom: by-alias, exclude-none, UTF-8. Used wherever
+    a Statement/ledger/certificate becomes a DSSE payload (the bytes must stay byte-identical)."""
+    return model.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
+
+
 def dsse_envelope(statement: Statement) -> DsseEnvelope:
     """Wrap one in-toto Statement in an unsigned DSSE-shaped envelope. Pure; stdlib base64+json.
     payload = standard base64 of the standalone Statement serialization (round-trips to the Statement)."""
-    raw = statement.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
+    raw = _serialized_bytes(statement)
     return DsseEnvelope(payload=base64.b64encode(raw).decode("ascii"))
 
 
@@ -250,12 +256,14 @@ def _drs_object(ref) -> DrsObject:
     )
 
 
-def _resolved_dependencies(licensing, contract_index):
+def _resolved_dependencies(licensing, contract_index, *, reps=None):
     """Return (deps, drs_objects, unresolved_dimnames_hashes) for one claim's licensing.
 
     One dataset dep per distinct dimnames_hash (cohort representatives), one apparatus dep per
-    distinct profile_hash (carrying the sorted tuple of that profile's semantic_run_ids)."""
-    reps = distinct_cohort_reps(licensing)
+    distinct profile_hash (carrying the sorted tuple of that profile's semantic_run_ids).
+    `reps` may be supplied to avoid recomputing distinct_cohort_reps (the caller already has it)."""
+    if reps is None:
+        reps = distinct_cohort_reps(licensing)
     deps: list = []
     drs: dict = {}
     unresolved: list[str] = []
@@ -343,20 +351,21 @@ def _builder(licensing, registry):
 
 
 def _dep_sort_key(d) -> tuple:
-    role = d.annotations.role if d.annotations and d.annotations.role else ""
+    ann = d.annotations
+    role = ann.role if ann and ann.role else ""
     sha = d.digest.sha256 if d.digest else ""
-    rids = d.annotations.semantic_run_ids if d.annotations else None
+    rids = ann.semantic_run_ids if ann else None
     first_rid = rids[0] if rids else ""
-    raw_ph = d.annotations.raw_profile_hash if d.annotations else None
+    raw_ph = ann.raw_profile_hash if ann else None
     return (role, d.name, d.uri or "", sha, first_rid, raw_ph or "")
 
 
 def _statement(claim, ledger, contract_index, registry) -> tuple[Statement, tuple[DrsObject, ...], tuple[str, ...]]:
     lic = claim.licensing
-    deps, drs_objects, unresolved = _resolved_dependencies(lic, contract_index)
+    reps = distinct_cohort_reps(lic)
+    deps, drs_objects, unresolved = _resolved_dependencies(lic, contract_index, reps=reps)
     deps = tuple(sorted(deps, key=_dep_sort_key))
     builder, witnessed = _builder(lic, registry)
-    reps = distinct_cohort_reps(lic)
     invocation_id = reps[0].materialization.semantic_run_id if reps else None
     metadata = RunMetadata(invocation_id=invocation_id) if invocation_id is not None else None
     statement = Statement(
@@ -440,8 +449,7 @@ def resolve_contract_index(corpus, *, extra: Iterable = ()) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Certificate DTO + builder + DSSE envelope (Task 8)
-# New public symbols only — existing DSSE/Statement/bundle code is untouched.
+# Certificate DTO + builder + DSSE envelope.
 # ---------------------------------------------------------------------------
 _CERTIFICATE_MEDIA_TYPE = "application/vnd.polymer.certificate+json"
 _INTERPRETATION = (
@@ -503,7 +511,7 @@ def build_certificate(
                 )
             })
         models = ledger.generating_models
-        raw = ledger.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
+        raw = _serialized_bytes(ledger)
         digest = hashlib.sha256(raw).hexdigest()
     return Certificate(
         statement=stmt,
@@ -519,7 +527,7 @@ def certificate_dsse_envelope(cert: Certificate) -> DsseEnvelope:
 
     The calibration evidence is INSIDE the signed bytes. Mirrors dsse_envelope but uses a
     distinct payloadType — existing dsse_envelope is not modified."""
-    raw = cert.model_dump_json(by_alias=True, exclude_none=True).encode("utf-8")
+    raw = _serialized_bytes(cert)
     return DsseEnvelope(
         payload_type=_CERTIFICATE_MEDIA_TYPE,
         payload=base64.b64encode(raw).decode("ascii"),

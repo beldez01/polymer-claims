@@ -166,7 +166,7 @@ def claim_detail(claim: Any) -> dict[str, Any]:
         "criterion_satisfied": criterion_satisfied,
         "strength": strength,
         "provenance": provenance,
-        # FIRST PASS: opaque free-text "why this claim was proposed", surfaced
+        # opaque free-text "why this claim was proposed", surfaced
         # top-level for prominent display (see Provenance.rationale).
         "rationale": claim.provenance.rationale if claim.provenance is not None else None,
         "rejection_reason": derive_rejection_reason(claim),

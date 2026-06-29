@@ -181,9 +181,9 @@ def verify_stage(
                 altered_ids.add(cid)                      # post-hoc change -> integrity violation
                 continue
             led = resolve_test(led, cid, ev_map[cid])
-            reg_decisions[cid] = led.tests[next(
-                i for i in range(len(led.tests) - 1, -1, -1) if led.tests[i].claim_id == cid
-            )].discovery
+            reg_decisions[cid] = next(
+                t for t in reversed(led.tests) if t.claim_id == cid
+            ).discovery
 
     # --- existing charge-at-verify path (unchanged) for NON-registered, NON-altered claims ---
     already_tested = {t.claim_id for t in led.tests if not t.retracted}

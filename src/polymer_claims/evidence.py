@@ -5,7 +5,7 @@ e-value for the severe-test composite one-sided null H0: (mu_B - mu_A) <= thresh
 region-mean betas bounded in [0,1]. Exactly valid from BOUNDEDNESS ALONE (Ville's inequality on a
 predictable-lambda test supermartingale) — no Gaussianity; variance-adaptive; finite at zero variance.
 `evidence_map` resolves each apparatus claim's per-sample betas (impure: load_contract via
-_region_group_means) and computes its e-value. See docs/superpowers/archive/specs/2026-06-12-phase-2-1-evalue-fdr-verify-design.md.
+_region_group_means) and computes its e-value.
 """
 from __future__ import annotations
 
@@ -25,19 +25,13 @@ _C = 0.9
 _SEEDS = (0, 1, 2, 3)
 
 
-def _capital(a: np.ndarray, b: np.ndarray, theta0: float, seed: int) -> float:
-    """One betting capital process e = prod_i (1 + lam_i * W_i) for H0: E[b-a] <= theta0.
-    lam_i is the predictable (PAST-ONLY) GRAPA plug-in, capped to keep factors positive."""
-    rng = np.random.default_rng(seed)
-    n = min(len(a), len(b))
-    ia = rng.permutation(len(a))[:n]
-    ib = rng.permutation(len(b))[:n]
-    w = np.clip(b[ib], 0.0, 1.0) - np.clip(a[ia], 0.0, 1.0)   # paired diffs in [-1, 1]
-    W = (w - theta0)[rng.permutation(n)]                      # shift: E[W] <= 0 under H0
-    lam_max = _C / (1.0 + abs(theta0))                        # positivity cap (Eq.25)
+def _grapa_capital(W: np.ndarray, lam_max: float) -> float:
+    """The shared GRAPA betting-capital process e = prod_i (1 + lam_i * W_i), where lam_i is the
+    predictable (PAST-ONLY) plug-in floored at 0 (one-sided) and capped at lam_max. Order-dependent
+    (the caller fixes W's order). Float ops are kept in their exact order to preserve results."""
     e, s, s2, cnt = 1.0, 0.0, 0.0, 0
-    for i in range(n):
-        if cnt > 0:                                           # estimates use ONLY points 1..i-1
+    for i in range(len(W)):
+        if cnt > 0:                                           # estimates use ONLY prior points 0..i-1
             mu = s / cnt
             var = max(s2 / cnt - mu * mu, 0.0)
         else:
@@ -50,6 +44,19 @@ def _capital(a: np.ndarray, b: np.ndarray, theta0: float, seed: int) -> float:
         s2 += float(W[i]) ** 2
         cnt += 1
     return e
+
+
+def _capital(a: np.ndarray, b: np.ndarray, theta0: float, seed: int) -> float:
+    """One betting capital process e = prod_i (1 + lam_i * W_i) for H0: E[b-a] <= theta0.
+    lam_i is the predictable (PAST-ONLY) GRAPA plug-in, capped to keep factors positive."""
+    rng = np.random.default_rng(seed)
+    n = min(len(a), len(b))
+    ia = rng.permutation(len(a))[:n]
+    ib = rng.permutation(len(b))[:n]
+    w = np.clip(b[ib], 0.0, 1.0) - np.clip(a[ia], 0.0, 1.0)   # paired diffs in [-1, 1]
+    W = (w - theta0)[rng.permutation(n)]                      # shift: E[W] <= 0 under H0
+    lam_max = _C / (1.0 + abs(theta0))                        # positivity cap (Eq.25)
+    return _grapa_capital(W, lam_max)
 
 
 def betting_evalue(
@@ -81,21 +88,7 @@ def _capital_onesample(x: np.ndarray, p0: float, seed: int) -> float:
     # shuffle observation order so the seed-average is over orderings (the betting process is order-dependent)
     W = (x - p0)[rng.permutation(n)]
     lam_max = _C / p0  # positivity: 1 + lam*(-p0) > 0 needs lam < 1/p0; _C<1 keeps factors >= 1-_C
-    e, s, s2, cnt = 1.0, 0.0, 0.0, 0
-    for i in range(n):
-        if cnt > 0:                                           # estimates use ONLY points 0..i-1
-            mu = s / cnt
-            var = max(s2 / cnt - mu * mu, 0.0)
-        else:
-            mu, var = 0.0, 0.25                               # padded variance-1/4 prior (WSR Eq.26)
-        denom = var + mu * mu
-        lam = mu / denom if denom > 0.0 else 0.0              # GRAPA fraction
-        lam = min(max(lam, 0.0), lam_max)                     # one-sided (>=0) + positivity cap
-        e *= 1.0 + lam * float(W[i])                          # capital update (WSR Eq.24)
-        s += float(W[i])
-        s2 += float(W[i]) ** 2
-        cnt += 1
-    return e
+    return _grapa_capital(W, lam_max)
 
 
 def count_enrichment_evalue(indicators, *, p0: float) -> float:
@@ -144,7 +137,9 @@ def evidence_map(corpus: Corpus) -> dict[str, float]:
             try:
                 indicators = dmp_indicators(node)
                 p0 = _alpha(node)
-            except (FileNotFoundError, KeyError, ValueError):
+                # inside the try (and catch ZeroDivisionError) so a bad p0 (e.g. alpha=0,
+                # which divides by zero in the e-value) skips the claim like other bad contracts
+                out[c.id] = count_enrichment_evalue(indicators, p0=p0)
+            except (FileNotFoundError, KeyError, ValueError, ZeroDivisionError):
                 continue
-            out[c.id] = count_enrichment_evalue(indicators, p0=p0)
     return out

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -21,6 +22,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .node import NodeRunner
+
+logger = logging.getLogger(__name__)
 
 # Per-subscriber SSE queue cap: drop-oldest beyond this many buffered frames so a
 # slow client can't grow an unbounded queue (memory leak).
@@ -45,13 +48,9 @@ def _sse_event(json_str: str) -> bytes:
     return f"event: frame\ndata: {json_str}\n\n".encode()
 
 
-def _frame_obj(frame) -> dict:
+def _obj(model) -> dict:
     # round-trip through the model's own JSON so JSONResponse serializes a plain
     # dict (avoids double-encoding the pydantic model as an escaped string).
-    return json.loads(frame.model_dump_json())
-
-
-def _obj(model) -> dict:
     return json.loads(model.model_dump_json())
 
 
@@ -87,7 +86,11 @@ def create_app(
         while True:
             await asyncio.sleep(interval)
             if runner.running:
-                await _do_tick()
+                try:
+                    await _do_tick()
+                except Exception:  # noqa: BLE001 — one bad tick must not kill the ticker
+                    # e.g. a transient LLM error or a numpy LinAlgError from the layout pass.
+                    logger.exception("tick failed; continuing")
 
     @asynccontextmanager
     async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -132,7 +135,7 @@ def create_app(
     @app.get("/state")
     async def state() -> JSONResponse:
         # current (latest) frame as JSON
-        return JSONResponse(content=_frame_obj(runner.frames[-1]))
+        return JSONResponse(content=_obj(runner.frames[-1]))
 
     @app.get("/timeline")
     async def timeline() -> JSONResponse:
@@ -168,7 +171,7 @@ def create_app(
     @app.post("/step")
     async def step() -> JSONResponse:
         frame = await _do_tick()
-        return JSONResponse(content=_frame_obj(frame))
+        return JSONResponse(content=_obj(frame))
 
     @app.post("/refresh")
     async def refresh() -> JSONResponse:
@@ -188,10 +191,14 @@ def create_app(
 
     async def _event_source() -> AsyncIterator[bytes]:
         q: asyncio.Queue = asyncio.Queue(maxsize=_SSE_QUEUE_MAX)
-        subscribers.add(q)
+        # Subscribe + snapshot the on-connect frame atomically w.r.t. ticks: tick() appends and
+        # publishes under `lock`, so doing both here closes the window where a new subscriber
+        # could read frames[-1]==K and then ALSO receive K via _publish (a duplicate initial frame).
+        async with lock:
+            subscribers.add(q)
+            initial = runner.frames[-1].model_dump_json()
         try:
-            # on connect: send the current frame immediately
-            yield _sse_event(runner.frames[-1].model_dump_json())
+            yield _sse_event(initial)
             while True:
                 try:
                     payload = await asyncio.wait_for(q.get(), timeout=15.0)

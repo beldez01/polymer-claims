@@ -1,12 +1,7 @@
 """`polymer-claims` console-script CLI — a thin shell over the COMPLETE runtime.
 
-Commands:
-  version          print the three component versions
-  validate FILE    validate a claim JSON through the grammar
-  run-cycle FILE   run ONE run_cycle over a corpus with the reference adapters
-  loop FILE        drive the #5d budget-governed scheduler until the budget exhausts
-  export-topology  emit a TopologyExport for a corpus
-  export-timeline  emit a warm-started TopologyTimeline across N run_cycle iterations
+Run `polymer-claims --help` for the full, authoritative command list (the subparsers in
+`_build_parser` are the single source of truth — kept here rather than a hand-maintained copy).
 
 The CLI injects the two deterministic reference adapters by default; real
 adapters/oracles/red-teamers are a later `--plugin` surface (out of scope for v1).
@@ -61,11 +56,26 @@ def _status_counts(corpus: Corpus) -> Counter:
     return Counter(c.status.value for c in corpus.claims)
 
 
+def _status_summary(corpus: Corpus) -> str:
+    """`status=count` pairs, sorted; `(none)` for an empty corpus."""
+    counts = _status_counts(corpus)
+    return ", ".join(f"{k}={v}" for k, v in sorted(counts.items())) or "(none)"
+
+
 def _write_or_print(text: str, out: str | None) -> None:
     if out:
         Path(out).write_text(text)
     else:
         print(text)
+
+
+def _emit(output: str, out: str | None) -> None:
+    """Write `output` verbatim to `out` (file) or stdout — NO trailing newline (unlike print();
+    an empty output writes nothing)."""
+    if out:
+        Path(out).write_text(output)
+    else:
+        sys.stdout.write(output)
 
 
 # ---------------------------------------------------------------------------
@@ -114,40 +124,28 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
-def _build_llm_proposer(model: str):
-    """Lazy-build a bridge_proposer over a real Anthropic-backed LLMGenerationAdapter.
-    Raises RuntimeError with an install/key hint if the [llm] extra or the API key is missing."""
-    import os
+def _anthropic_proposer(adapter_cls, model: str, flag: str):
+    """Shared builder: require ANTHROPIC_API_KEY, then a bridge_proposer over an Anthropic-backed
+    adapter (`.anthropic` lazy-imports the [llm] extra and raises RuntimeError if it is missing)."""
     if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise RuntimeError("set ANTHROPIC_API_KEY to use --llm")
+        raise RuntimeError(f"set ANTHROPIC_API_KEY to use {flag}")
     from polymer_protocol import bridge_proposer  # local import keeps top-level clean
-    from .llm_adapter import LLMGenerationAdapter   # safe (no anthropic at import); .anthropic lazy-imports it
-    adapter = LLMGenerationAdapter.anthropic(model=model)   # raises RuntimeError if [llm] missing
-    return bridge_proposer((adapter,))
+    return bridge_proposer((adapter_cls.anthropic(model=model),))
+
+
+def _build_llm_proposer(model: str):
+    from .llm_adapter import LLMGenerationAdapter  # safe (no anthropic at import); .anthropic lazy-imports it
+    return _anthropic_proposer(LLMGenerationAdapter, model, "--llm")
 
 
 def _build_real_data_proposer(model: str):
-    """Lazy-build a bridge_proposer over a MeanDiffGenerationAdapter (real-data generation).
-    Raises RuntimeError with a key/extra hint if [llm] or ANTHROPIC_API_KEY is missing."""
-    import os
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise RuntimeError("set ANTHROPIC_API_KEY to use --real-data")
-    from polymer_protocol import bridge_proposer
     from .llm_adapter import MeanDiffGenerationAdapter
-    adapter = MeanDiffGenerationAdapter.anthropic(model=model)   # raises RuntimeError if [llm] missing
-    return bridge_proposer((adapter,))
+    return _anthropic_proposer(MeanDiffGenerationAdapter, model, "--real-data")
 
 
 def _build_methyl_proposer(model: str):
-    """Lazy-build a bridge_proposer over a MethylGenerationAdapter (Phase B).
-    Raises RuntimeError with a key/extra hint if [llm] or ANTHROPIC_API_KEY is missing."""
-    import os
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise RuntimeError("set ANTHROPIC_API_KEY to use --methyl-data")
-    from polymer_protocol import bridge_proposer
     from .llm_adapter import MethylGenerationAdapter
-    adapter = MethylGenerationAdapter.anthropic(model=model)
-    return bridge_proposer((adapter,))
+    return _anthropic_proposer(MethylGenerationAdapter, model, "--methyl-data")
 
 
 def _cmd_run_cycle(args: argparse.Namespace) -> int:
@@ -159,11 +157,8 @@ def _cmd_run_cycle(args: argparse.Namespace) -> int:
         except RuntimeError as exc:
             print(str(exc), file=sys.stderr)
             return 1
-    result = run_cycle(corpus, _ADAPTERS, _CTX, proposers=proposers) if proposers \
-        else run_cycle(corpus, _ADAPTERS, _CTX)
-    counts = _status_counts(result.corpus)
-    summary = ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
-    print(f"status: {summary or '(none)'}", file=sys.stderr)
+    result = run_cycle(corpus, _ADAPTERS, _CTX, proposers=proposers)
+    print(f"status: {_status_summary(result.corpus)}", file=sys.stderr)
     print(f"frontier: {len(result.frontier)}", file=sys.stderr)
     _write_or_print(dump_corpus(result.corpus), args.out)
     return 0
@@ -188,8 +183,8 @@ def _cmd_loop(args: argparse.Namespace) -> int:
                 file=sys.stderr,
             )
             break
-        if action.estimated_cost > remaining:
-            break
+        # affordability is already enforced by next_action (it returns only actions with
+        # estimated_cost <= the budget it was passed), so no extra guard is needed here.
         result = run_cycle(corpus, _ADAPTERS, _CTX, ledger=state.ledger)
         corpus = result.corpus
         remaining -= action.estimated_cost
@@ -198,9 +193,7 @@ def _cmd_loop(args: argparse.Namespace) -> int:
     print(f"steps: {len(trace)}", file=sys.stderr)
     for line in trace:
         print(f"  {line}", file=sys.stderr)
-    counts = _status_counts(corpus)
-    summary = ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
-    print(f"final status: {summary or '(none)'}", file=sys.stderr)
+    print(f"final status: {_status_summary(corpus)}", file=sys.stderr)
     print(f"budget remaining: {remaining}", file=sys.stderr)
     _write_or_print(dump_corpus(corpus), args.out)
     return 0
@@ -245,17 +238,10 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
     if args.format == "dsse":
         envelopes = [dsse_envelope(s) for s in build_attestation_statements(corpus, contract_index=index)]
         if args.key:
-            try:
-                from .signing import load_private_key, sign_envelope
-            except ModuleNotFoundError as exc:
-                return _sign_dep_error(exc)
-            try:
-                priv = load_private_key(Path(args.key).read_bytes())
-            except ModuleNotFoundError as exc:
-                return _sign_dep_error(exc)
-            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
-                print(f"export-attestation: cannot load private key {args.key}: {exc}", file=sys.stderr)
-                return 1
+            priv = _load_private_key_or_rc(args.key, "export-attestation")
+            if isinstance(priv, int):
+                return priv
+            from .signing import sign_envelope
             envelopes = [sign_envelope(e, priv) for e in envelopes]
             if args.rekor_url:
                 print("export-attestation: networked Rekor backend (--rekor-url) is not implemented yet; see spec §7", file=sys.stderr)
@@ -272,16 +258,10 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
                     entry = log.submit(canonical_entry_bytes(e))
                     bundles.append(build_bundle(e, priv.public_key(), entry, log_pub))
                 output = "".join(json.dumps(b, separators=(",", ":")) + "\n" for b in bundles)
-                if args.out:
-                    Path(args.out).write_text(output)
-                else:
-                    sys.stdout.write(output)
+                _emit(output, args.out)
                 return 0
         output = "".join(e.model_dump_json(by_alias=True, exclude_none=True) + "\n" for e in envelopes)
-        if args.out:
-            Path(args.out).write_text(output)
-        else:
-            sys.stdout.write(output)        # exact string — NOT print() (no extra newline; empty => nothing)
+        _emit(output, args.out)
         return 0
     bundle = build_attestation_bundle(corpus, contract_index=index)
     _write_or_print(bundle.model_dump_json(by_alias=True, exclude_none=True), args.out)
@@ -289,6 +269,8 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
 
 
 def _cmd_calibrate(args: argparse.Namespace) -> int:
+    # `--synthetic` is currently informational (the only mode this slice); kept so tests can pass
+    # it and a future real-data mode can branch on it. Not read here.
     from .calibration_harness import run_calibration
     from .calibration_store import append_records, dump_models
     from polymer_protocol.calibration import GeneratingModelParams
@@ -352,8 +334,6 @@ def _cmd_verify_kernel(args: argparse.Namespace) -> int:
 
 
 def _verify_kernel_real(args: argparse.Namespace) -> int:
-    import os
-    from pathlib import Path
     try:
         from .ingest._pinned import PinnedInputError
         from .real_kernel_proof import ParityError, load_pins, run_real_kernel_proof
@@ -478,6 +458,22 @@ def _sign_dep_error(exc: ModuleNotFoundError) -> int:
     return 1
 
 
+def _load_private_key_or_rc(path: str, cmd: str):
+    """Load an ed25519 private key from `path`, or return an int rc on failure: the [sign] extra
+    missing -> _sign_dep_error; an unreadable/malformed PEM -> 1 with a `<cmd>:` message."""
+    try:
+        from .signing import load_private_key
+    except ModuleNotFoundError as exc:
+        return _sign_dep_error(exc)
+    try:
+        return load_private_key(Path(path).read_bytes())
+    except ModuleNotFoundError as exc:
+        return _sign_dep_error(exc)
+    except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
+        print(f"{cmd}: cannot load private key {path}: {exc}", file=sys.stderr)
+        return 1
+
+
 def _parse_dsse_envelopes(text: str):
     """Parse a single DSSE-envelope JSON (compact OR pretty-printed) or an NDJSON of envelopes.
     Returns a list of DsseEnvelope, or None if the input is not parseable as either."""
@@ -595,17 +591,10 @@ def _cmd_certify(args: argparse.Namespace) -> int:
     elif args.format == "dsse":
         env = certificate_dsse_envelope(cert)
         if args.key:
-            try:
-                from .signing import load_private_key, sign_envelope
-            except ModuleNotFoundError as exc:
-                return _sign_dep_error(exc)
-            try:
-                priv = load_private_key(Path(args.key).read_bytes())
-            except ModuleNotFoundError as exc:
-                return _sign_dep_error(exc)
-            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
-                print(f"certify: cannot load private key {args.key}: {exc}", file=sys.stderr)
-                return 1
+            priv = _load_private_key_or_rc(args.key, "certify")
+            if isinstance(priv, int):
+                return priv
+            from .signing import sign_envelope
             if args.transparency_log and args.keyid is not None:
                 from .signing import keyid_for
                 if args.keyid != keyid_for(priv.public_key()):
@@ -656,6 +645,13 @@ def _import_server():
 _LOOPBACK = {"127.0.0.1", "localhost", "::1"}
 
 
+def _run_node(uvicorn, create_app, runner, args) -> int:
+    """The shared serve tail: wrap the runner in the SSE app and block on uvicorn."""
+    app = create_app(runner, interval=args.interval, origins=args.origins or None)
+    uvicorn.run(app, host=args.host, port=args.port)
+    return 0
+
+
 def _cmd_serve(args: argparse.Namespace) -> int:
     try:
         uvicorn, create_app = _import_server()
@@ -703,9 +699,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             **seed_kwargs,
             **cal_kwargs,
         )
-        app = create_app(runner, interval=args.interval, origins=args.origins or None)
-        uvicorn.run(app, host=args.host, port=args.port)
-        return 0
+        return _run_node(uvicorn, create_app, runner, args)
     if getattr(args, "real_data", False):
         try:
             proposer = _build_real_data_proposer(args.llm_model)
@@ -735,9 +729,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             **seed_kwargs,
             **cal_kwargs,
         )
-        app = create_app(runner, interval=args.interval, origins=args.origins or None)
-        uvicorn.run(app, host=args.host, port=args.port)
-        return 0
+        return _run_node(uvicorn, create_app, runner, args)
     if getattr(args, "methyl_data", False):
         try:
             proposer = _build_methyl_proposer(args.llm_model)
@@ -785,9 +777,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             budget=2.5,
             **cal_kwargs,
         )
-        app = create_app(runner, interval=args.interval, origins=args.origins or None)
-        uvicorn.run(app, host=args.host, port=args.port)
-        return 0
+        return _run_node(uvicorn, create_app, runner, args)
     llm_proposer = None
     if getattr(args, "llm", False):
         try:
@@ -824,9 +814,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             corpus, scheduler_budget=args.budget, max_frames=args.max_frames, layout=args.layout,
             **kwargs, **cal_kwargs,
         )
-    app = create_app(runner, interval=args.interval, origins=args.origins or None)
-    uvicorn.run(app, host=args.host, port=args.port)
-    return 0
+    return _run_node(uvicorn, create_app, runner, args)
 
 
 # ---------------------------------------------------------------------------
@@ -935,10 +923,13 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="epoch-state JSON path (default: epoch_state.json beside --calibration)",
     )
-    p_serve.add_argument("--llm", action="store_true", help="drive GENERATE with a real LLM agent (needs the [llm] extra + ANTHROPIC_API_KEY)")
-    p_serve.add_argument("--real-data", action="store_true", help="LLM proposes REAL-DATA mean_diff plans; node runs the local execution adapters + apparatus oracle (needs [llm] + ANTHROPIC_API_KEY)")
-    p_serve.add_argument("--methyl-data", action="store_true", help="LLM proposes executable methylation claims over SE-Contracts; node runs methylation adapters + e-value gate (needs [llm] + ANTHROPIC_API_KEY)")
-    p_serve.add_argument("--tcga-laml", action="store_true", help="seed the live node with the REAL TCGA-LAML genome-wide n-DMP claim (ingest first; one-shot compute, then displays)")
+    # The serve mode flags are mutually exclusive — _cmd_serve dispatches on the FIRST one set, so
+    # passing more than one used to silently ignore the rest. argparse now rejects conflicting combos.
+    serve_mode = p_serve.add_mutually_exclusive_group()
+    serve_mode.add_argument("--llm", action="store_true", help="drive GENERATE with a real LLM agent (needs the [llm] extra + ANTHROPIC_API_KEY)")
+    serve_mode.add_argument("--real-data", action="store_true", help="LLM proposes REAL-DATA mean_diff plans; node runs the local execution adapters + apparatus oracle (needs [llm] + ANTHROPIC_API_KEY)")
+    serve_mode.add_argument("--methyl-data", action="store_true", help="LLM proposes executable methylation claims over SE-Contracts; node runs methylation adapters + e-value gate (needs [llm] + ANTHROPIC_API_KEY)")
+    serve_mode.add_argument("--tcga-laml", action="store_true", help="seed the live node with the REAL TCGA-LAML genome-wide n-DMP claim (ingest first; one-shot compute, then displays)")
     p_serve.add_argument("--llm-model", default="claude-sonnet-4-6", help="model for --llm")
     p_serve.add_argument("--llm-every", type=int, default=4, help="LLM proposes every Nth tick (throttle)")
     p_serve.add_argument(

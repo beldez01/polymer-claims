@@ -1,8 +1,7 @@
 """Local ed25519 DSSE-PAE signing for Polymer attestation/certificate envelopes.
 
 `pae` is pure stdlib. Everything cryptographic goes through `_require_crypto()` so the base install
-stays crypto-free — `cryptography` lives only in the [sign] extra. See
-docs/superpowers/specs/2026-06-23-dsse-signing-design.md.
+stays crypto-free — `cryptography` lives only in the [sign] extra.
 """
 from __future__ import annotations
 
@@ -57,7 +56,9 @@ def sign_envelope(env: DsseEnvelope, private_key, *, keyid: str | None = None) -
     bytes in the envelope's payload field. Single-signer by design: REPLACES any existing signatures
     (multi-signer trust policy is deferred, spec §9). `keyid` is an informational identifier, not
     trust-bearing (verification is by an explicitly-supplied public key)."""
-    body = base64.b64decode(env.payload)
+    # validate=True so the signer rejects (rather than silently strips) a malformed payload,
+    # matching verify_envelope — otherwise signer and verifier could disagree on the bytes.
+    body = base64.b64decode(env.payload, validate=True)
     raw_sig = private_key.sign(pae(env.payload_type, body))
     kid = keyid if keyid is not None else keyid_for(private_key.public_key())
     from polymer_claims.attestation import DsseSignature

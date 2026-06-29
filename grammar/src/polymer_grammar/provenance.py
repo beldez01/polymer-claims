@@ -4,7 +4,7 @@ Without `generated_by` the air-gap / no-self-licensing guarantee can't tell huma
 agent; without `search_cardinality` selection-aware significance correction (pricing the
 forking paths) is unrepresentable; `preregistration_hash` is the §4 anti-HARKing hash-lock.
 The grammar represents; the protocol computes the correction. Imports nothing from
-polymer_formalclaim.
+polymer_protocol/polymer_claims.
 """
 from __future__ import annotations
 
@@ -33,9 +33,8 @@ class Provenance(_Model):
     preregistration_hash: str | None = None      # hash-lock of the primary test (anti-HARKing)
     # FIRST-PASS rationale surface (2026-06): a free-text justification carried for
     # display only. NOT validated, NOT structured, NOT linked to the corpus claims it
-    # builds on. See docs/superpowers/notes/2026-06-08-rationale-followups.md for the
-    # rigorous extension (structured premises, cited-claim links, anti-hallucination
-    # validation, promotion out of Provenance metadata).
+    # builds on. A rigorous extension (structured premises, cited-claim links,
+    # anti-hallucination validation, promotion out of Provenance metadata) is future work.
     rationale: str | None = None   # FIRST PASS: opaque free-text "why this claim was proposed"
     # §5a literature-shared-cause: cohort identities (dimnames_hash namespace) that this
     # hypothesis's motivating prior was established on. Empty => no shared-cause info (inert).
@@ -43,7 +42,7 @@ class Provenance(_Model):
     prior_cohorts: tuple[str, ...] = ()
 
     @model_validator(mode="after")
-    def _agent_needs_id(self) -> "Provenance":
+    def _agent_needs_id(self) -> Provenance:
         if self.generated_by == GenerationMode.AGENT_GENERATED and self.agent_id is None:
             raise ValueError("generated_by=agent_generated requires an agent_id")
         return self

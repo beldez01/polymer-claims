@@ -58,7 +58,7 @@ parallel deepening once the wedge is reproducible and signable.
 These are cheap, unblock everything downstream, and close gaps the spot-verification surfaced.
 
 - [x] **H0.1 — Offline-reproducible kernel *pipeline* proof (synthetic).** ✅ SHIPPED. Spec'd + planned
-  (`specs/2026-06-23-offline-kernel-proof-design.md`, `plans/2026-06-23-offline-kernel-proof.md`).
+  (offline-kernel-proof design/plan — in git history).
   A fully synthetic, deterministic HM450-shaped fixture run through the **real** n-DMP gate, guarded
   by a committed test and a `verify-kernel` CLI, plus a hardened retrieval runbook. *Why:* gives a
   fresh checkout a deterministic, offline `LICENSED @ REPRODUCED` proof of the gate pipeline — closes

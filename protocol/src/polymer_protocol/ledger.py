@@ -50,10 +50,10 @@ class SelectionLedger(_Model):
         return self
 
     def outcome(self, claim_id: str) -> ClaimOutcome | None:
-        return {o.claim_id: o for o in self.outcomes}.get(claim_id)
+        return next((o for o in self.outcomes if o.claim_id == claim_id), None)
 
     def credit(self, operator_id: str) -> OperatorCredit | None:
-        return {c.operator_id: c for c in self.credits}.get(operator_id)
+        return next((c for c in self.credits if c.operator_id == operator_id), None)
 
 
 def operator_of(claim: Claim) -> str:

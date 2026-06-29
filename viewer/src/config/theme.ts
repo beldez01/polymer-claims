@@ -19,8 +19,6 @@ export const FONT_FAMILY_SANS =
 export const FONT_FAMILY_MONO =
   "var(--font-jetbrains-mono), 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
 
-export const FONT_FAMILY = FONT_FAMILY_SANS;
-
 // Modular scale anchored at 14px body, ratio ~1.25
 export const TYPE = {
   xs:    { fontSize: 11, lineHeight: 1.45, letterSpacing: '0.04em' },
@@ -129,7 +127,7 @@ export const STATUS_ORDER = [
 ] as const;
 
 // edge kind → color. The defeat family (rebut/undercut/undermine/reclassify/
-// reinterpret) all map to rose; equivalence neutral gray; entails blue.
+// reinterpret) all map to rose; evidence_for teal; equivalence neutral gray; entails blue.
 export const EDGE_COLOR: Record<string, string> = {
   // defeat family
   rebut:       '#BE123C',
@@ -137,6 +135,7 @@ export const EDGE_COLOR: Record<string, string> = {
   undermine:   '#BE123C',
   reclassify:  '#BE123C',
   reinterpret: '#BE123C',
+  // support
   evidence_for: '#08A097',
   // structural
   equivalence: '#A1A1AA',
@@ -165,8 +164,12 @@ const HEAT_STOPS: [number, number, number][] = [
   [0xbe, 0x12, 0x3c],
 ];
 
-function _lerpHeat(t: number): string {
-  const clamped = Math.max(0, Math.min(1, t));
+/**
+ * Map a normalised energy value (0 = min tension, 1 = max tension) to a heat
+ * colour: teal → amber → rose.  Values outside [0, 1] are clamped.
+ */
+export function tensionScale(t01: number): string {
+  const clamped = Math.max(0, Math.min(1, t01));
   // segment: 0→0.5 maps to stop 0→1; 0.5→1 maps to stop 1→2
   const seg = clamped < 0.5 ? 0 : 1;
   const local = clamped < 0.5 ? clamped / 0.5 : (clamped - 0.5) / 0.5;
@@ -176,14 +179,6 @@ function _lerpHeat(t: number): string {
   const g = Math.round(a[1] + (b[1] - a[1]) * local);
   const bv = Math.round(a[2] + (b[2] - a[2]) * local);
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${bv.toString(16).padStart(2, '0')}`;
-}
-
-/**
- * Map a normalised energy value (0 = min tension, 1 = max tension) to a heat
- * colour: teal → amber → rose.  Values outside [0, 1] are clamped.
- */
-export function tensionScale(t01: number): string {
-  return _lerpHeat(t01);
 }
 
 // the 6 strength axes, in canonical order (matches polymer_grammar.AXES)

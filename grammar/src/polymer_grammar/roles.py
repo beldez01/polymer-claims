@@ -33,13 +33,13 @@ class CausalRoles(_Model):
     instruments: tuple[str, ...] = ()
 
     @model_validator(mode="after")
-    def _predictor_outcome_distinct(self) -> "CausalRoles":
+    def _predictor_outcome_distinct(self) -> CausalRoles:
         if self.predictor == self.outcome:
             raise ValueError("predictor and outcome must be distinct variables")
         return self
 
     @model_validator(mode="after")
-    def _each_variable_has_one_role(self) -> "CausalRoles":
+    def _each_variable_has_one_role(self) -> CausalRoles:
         assignments = [self.predictor, self.outcome, *self.confounders,
                        *self.mediators, *self.colliders, *self.instruments]
         seen: set[str] = set()

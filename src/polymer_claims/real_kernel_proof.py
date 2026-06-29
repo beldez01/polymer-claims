@@ -11,20 +11,12 @@ from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 
-from polymer_grammar import FDRLedger, MaterializationContext, Status
-from polymer_protocol import Corpus, run_cycle
+from polymer_grammar import Status
 
-from polymer_claims.analysis_profile import profile_oracle_id, profile_oracle_registry
+from polymer_claims._ndmp_gate import run_ndmp_gate
 from polymer_claims.contracts import clear_contract_cache, load_contract, using_contract_root
-from polymer_claims.evidence import count_enrichment_evalue
 from polymer_claims.ingest._pinned import resolve_pinned_file
 from polymer_claims.ingest.tcga_xena import build_real_contract, compute_canonical_checksum
-from polymer_claims.materialization import materialization_map
-from polymer_claims.methyl_ndmp import (
-    NDmpOlsCoefAdapter, NDmpTTestAdapter, _all_probe_ids, dmp_indicators,
-    n_dmps_claim, ndmp_independent_registry,
-)
-from polymer_claims.profiles import CANONICAL_HM450_V1
 
 _REF = "se:tcga_laml_idh@2"
 _ALPHA = 0.05
@@ -71,35 +63,7 @@ def _assert_evalue(expected, observed: float) -> None:
 def _build_claim_and_run_gate() -> dict:
     """Fixed claim construction (spec §4.4) + the real gate, scoped to the active contract root.
     Returns the observed gate quantities. Probes default to ALL (_all_probe_ids) via probes=None."""
-    n_probes = len(_all_probe_ids(_REF))
-    k = math.ceil(_ALPHA * n_probes)
-    claim = n_dmps_claim(
-        _CLAIM_ID, ref=_REF, group_col="Sample_Group", level_a="WT", level_b="IDH_mut",
-        alpha=_ALPHA, k=k, oracle_ref=profile_oracle_id(CANONICAL_HM450_V1))
-    node = claim.evaluation_plan.graph.nodes[0]
-    ind = dmp_indicators(node)
-    n_dmps = int(sum(ind))
-    evalue = count_enrichment_evalue(ind, p0=_ALPHA)
-    base = MaterializationContext(id="M", api_version="v1", data_version="d1")
-    corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
-    result = run_cycle(
-        corpus, (NDmpTTestAdapter(), NDmpOlsCoefAdapter()), base,
-        adapter_registry=ndmp_independent_registry(),
-        oracles=profile_oracle_registry((CANONICAL_HM450_V1, "recomputable_public")),
-        materializations=materialization_map(corpus, base, profiles=(CANONICAL_HM450_V1,)),
-        evidence={_CLAIM_ID: evalue})
-    c = next(x for x in result.corpus.claims if x.id == _CLAIM_ID)
-    tier = c.licensing.independence_tier if c.licensing is not None else None
-    profile_hash = semantic_run_id = None
-    if c.licensing is not None and c.licensing.satisfactions:
-        m = c.licensing.satisfactions[0].materialization
-        profile_hash, semantic_run_id = m.profile_hash, m.semantic_run_id
-    return {
-        "n_probes": n_probes, "k": k, "n_dmps": n_dmps, "e_value": evalue,
-        "status_enum": c.status, "tier_enum": tier,
-        "status": c.status.value, "independence_tier": tier.value if tier is not None else None,
-        "profile_hash": profile_hash, "semantic_run_id": semantic_run_id,
-    }
+    return run_ndmp_gate(_REF, _CLAIM_ID, alpha=_ALPHA)
 
 
 def _run_gate_capture() -> dict:
@@ -164,10 +128,12 @@ def run_real_kernel_proof(
             gate = _build_claim_and_run_gate()
             _assert("n_dmps", exp["n_dmps"], gate["n_dmps"])
             _assert_evalue(exp["e_value"], gate["e_value"])
-            _assert("profile_hash", exp["profile_hash"], gate["profile_hash"])
-            _assert("semantic_run_id", exp["semantic_run_id"], gate["semantic_run_id"])
+            # Check status/tier first: on a non-licensing rebuild profile_hash/semantic_run_id
+            # come back None, so asserting them first masks the actionable status divergence.
             _assert("status", exp["status"], gate["status"])
             _assert("independence_tier", exp["independence_tier"], gate["independence_tier"])
+            _assert("profile_hash", exp["profile_hash"], gate["profile_hash"])
+            _assert("semantic_run_id", exp["semantic_run_id"], gate["semantic_run_id"])
         clear_contract_cache()
 
     return RealKernelProofResult(

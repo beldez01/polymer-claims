@@ -1,7 +1,7 @@
 # polymer-grammar
 
 The Polymer Claims **v1.3 grammar** — the next-generation claim IR derived from the
-foundations spec (`docs/superpowers/archive/specs/2026-05-31-unified-claim-foundations-spec.md`).
+foundations spec (in git history; per-feature design docs were consolidated out of the tree 2026-06-29).
 
 **This package is intentionally isolated from `formalclaim/` (the live v1.2 IR).** It does
 not import from, and is not imported by, `polymer_formalclaim`. The v1.2 schema stays

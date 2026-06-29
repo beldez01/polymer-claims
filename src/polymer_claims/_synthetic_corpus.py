@@ -22,7 +22,10 @@ EVIDENCE_FOR / REBUT DefeatEdges so every claim touches ≥2 cluster-mates.
 
 Cross-cluster edges
 -------------------
-Zero — clusters must be separable.
+Three weak UNDERCUT edges, one per cluster pair, between peripheral claims (never the
+equivalence or polar pairs). They make the graph a single weakly-connected component so
+the lattice can't trivially separate the clusters — dense intra vs a few weak inter is the
+canonical spectral-clustering scenario the eigenmap must resolve.
 """
 from __future__ import annotations
 
@@ -110,6 +113,48 @@ def _defeat(src: str, tgt: str, kind: DefeatEdgeKind) -> DefeatEdge:
     return DefeatEdge(source=src, target=tgt, kind=kind)
 
 
+def _entails_pair(
+    upstream_estimand: str, downstream_estimand: str, label: str
+) -> tuple[Proposition, Proposition]:
+    """An (upstream, downstream) proposition pair where upstream's conclusion ENTAILS downstream's.
+    Returns (upstream, downstream) — both POSITIVE; `label` is the entails-edge note."""
+    downstream = _simple_prop(downstream_estimand, Direction.POSITIVE)
+    upstream = _prop_with_entails(
+        upstream_estimand, Direction.POSITIVE, downstream.content_hash, label
+    )
+    return upstream, downstream
+
+
+def _satellite_cluster(idx: str, pattern, prefix: str):
+    """A satellite cluster (1 or 2): 8 claims c{idx}_0..7 with the same intra-cluster wiring —
+    two ENTAILS chains, four EVIDENCE_FOR, a REBUT/UNDERCUT pair, two bridge UNDERCUTs.
+    Returns (claims, defeat_edges); cluster 0 differs structurally and is built inline."""
+    p2, p3 = _entails_pair(f"{prefix}_upstream", f"{prefix}_downstream", f"c{idx}_2 => c{idx}_3")
+    p4, p5 = _entails_pair(f"{prefix}_branch", f"{prefix}_leaf", f"c{idx}_4 => c{idx}_5")
+    claims = [
+        _claim(f"c{idx}_0", pattern),
+        _claim(f"c{idx}_1", pattern),
+        _claim(f"c{idx}_2", pattern, conclusion=p2),
+        _claim(f"c{idx}_3", pattern, conclusion=p3),
+        _claim(f"c{idx}_4", pattern, conclusion=p4),
+        _claim(f"c{idx}_5", pattern, conclusion=p5),
+        _claim(f"c{idx}_6", pattern),
+        _claim(f"c{idx}_7", pattern),
+    ]
+    edges = [
+        _defeat(f"c{idx}_0", f"c{idx}_2", DefeatEdgeKind.EVIDENCE_FOR),
+        _defeat(f"c{idx}_1", f"c{idx}_3", DefeatEdgeKind.EVIDENCE_FOR),
+        _defeat(f"c{idx}_4", f"c{idx}_0", DefeatEdgeKind.EVIDENCE_FOR),
+        _defeat(f"c{idx}_5", f"c{idx}_1", DefeatEdgeKind.EVIDENCE_FOR),
+        _defeat(f"c{idx}_6", f"c{idx}_7", DefeatEdgeKind.REBUT),
+        _defeat(f"c{idx}_7", f"c{idx}_6", DefeatEdgeKind.UNDERCUT),
+        # bridge {c{idx}_6, c{idx}_7} into the c{idx}_0..c{idx}_5 body (else the cluster fragments)
+        _defeat(f"c{idx}_6", f"c{idx}_0", DefeatEdgeKind.UNDERCUT),
+        _defeat(f"c{idx}_7", f"c{idx}_1", DefeatEdgeKind.UNDERCUT),
+    ]
+    return claims, edges
+
+
 # ── Builder ────────────────────────────────────────────────────────────────────
 
 def planted_corpus() -> Corpus:
@@ -146,22 +191,12 @@ def planted_corpus() -> Corpus:
     prop_c0_2 = _simple_prop("synth_effect_polar", Direction.POSITIVE)
     prop_c0_3 = _simple_prop("synth_effect_polar", Direction.NEGATIVE)
 
-    # c0_4 and c0_5 for the entails chain: c0_4 ENTAILS c0_5
-    prop_c0_5 = _simple_prop("synth_effect_downstream", Direction.POSITIVE)
-    prop_c0_4 = _prop_with_entails(
-        "synth_effect_upstream",
-        Direction.POSITIVE,
-        prop_c0_5.content_hash,
-        "c0_4 => c0_5",
+    # c0_4 ENTAILS c0_5; c0_6 ENTAILS c0_7
+    prop_c0_4, prop_c0_5 = _entails_pair(
+        "synth_effect_upstream", "synth_effect_downstream", "c0_4 => c0_5"
     )
-
-    # c0_6 and c0_7 for the entails chain: c0_6 ENTAILS c0_7
-    prop_c0_7 = _simple_prop("synth_effect_leaf", Direction.POSITIVE)
-    prop_c0_6 = _prop_with_entails(
-        "synth_effect_branch",
-        Direction.POSITIVE,
-        prop_c0_7.content_hash,
-        "c0_6 => c0_7",
+    prop_c0_6, prop_c0_7 = _entails_pair(
+        "synth_effect_branch", "synth_effect_leaf", "c0_6 => c0_7"
     )
 
     claims += [
@@ -197,101 +232,16 @@ def planted_corpus() -> Corpus:
         )
     )
 
-    # ── Cluster 1 — synth_mediation ────────────────────────────────────────────
-    #
-    # Intra-cluster wiring:
-    #   c1_2.conclusion ENTAILS c1_3.conclusion
-    #   c1_4.conclusion ENTAILS c1_5.conclusion
-    #   EVIDENCE_FOR: c1_0→c1_2, c1_1→c1_3, c1_4→c1_0, c1_5→c1_1
-    #   REBUT: c1_6→c1_7
-    #   UNDERCUT: c1_7→c1_6 (bidirectional tension keeps both in the subgraph)
-    #   bridge: c1_6→c1_0, c1_7→c1_1 (so {c1_6,c1_7} join the c1_0..c1_5 body)
+    # ── Clusters 1 (synth_mediation) and 2 (synth_dose) — two identical satellites ──────────────
+    # Each: two ENTAILS chains, EVIDENCE_FOR c{i}_0→2 / 1→3 / 4→0 / 5→1, a REBUT/UNDERCUT 6↔7 pair,
+    # and bridge UNDERCUTs 6→0 / 7→1 so {6,7} join the body. See _satellite_cluster.
+    c1_claims, c1_edges = _satellite_cluster("1", _P_MEDIATION, "synth_mediation")
+    claims += c1_claims
+    defeat_edges += c1_edges
 
-    prop_c1_3 = _simple_prop("synth_mediation_downstream", Direction.POSITIVE)
-    prop_c1_2 = _prop_with_entails(
-        "synth_mediation_upstream",
-        Direction.POSITIVE,
-        prop_c1_3.content_hash,
-        "c1_2 => c1_3",
-    )
-    prop_c1_5 = _simple_prop("synth_mediation_leaf", Direction.POSITIVE)
-    prop_c1_4 = _prop_with_entails(
-        "synth_mediation_branch",
-        Direction.POSITIVE,
-        prop_c1_5.content_hash,
-        "c1_4 => c1_5",
-    )
-
-    claims += [
-        _claim("c1_0", _P_MEDIATION),
-        _claim("c1_1", _P_MEDIATION),
-        _claim("c1_2", _P_MEDIATION, conclusion=prop_c1_2),
-        _claim("c1_3", _P_MEDIATION, conclusion=prop_c1_3),
-        _claim("c1_4", _P_MEDIATION, conclusion=prop_c1_4),
-        _claim("c1_5", _P_MEDIATION, conclusion=prop_c1_5),
-        _claim("c1_6", _P_MEDIATION),
-        _claim("c1_7", _P_MEDIATION),
-    ]
-
-    defeat_edges += [
-        _defeat("c1_0", "c1_2", DefeatEdgeKind.EVIDENCE_FOR),
-        _defeat("c1_1", "c1_3", DefeatEdgeKind.EVIDENCE_FOR),
-        _defeat("c1_4", "c1_0", DefeatEdgeKind.EVIDENCE_FOR),
-        _defeat("c1_5", "c1_1", DefeatEdgeKind.EVIDENCE_FOR),
-        _defeat("c1_6", "c1_7", DefeatEdgeKind.REBUT),
-        _defeat("c1_7", "c1_6", DefeatEdgeKind.UNDERCUT),
-        # bridge {c1_6, c1_7} into the c1_0..c1_5 body (else c1 fragments)
-        _defeat("c1_6", "c1_0", DefeatEdgeKind.UNDERCUT),
-        _defeat("c1_7", "c1_1", DefeatEdgeKind.UNDERCUT),
-    ]
-
-    # ── Cluster 2 — synth_dose ────────────────────────────────────────────────
-    #
-    # Intra-cluster wiring:
-    #   c2_2.conclusion ENTAILS c2_3.conclusion
-    #   c2_4.conclusion ENTAILS c2_5.conclusion
-    #   EVIDENCE_FOR: c2_0→c2_2, c2_1→c2_3, c2_4→c2_0, c2_5→c2_1
-    #   REBUT: c2_6→c2_7
-    #   UNDERCUT: c2_7→c2_6
-    #   bridge: c2_6→c2_0, c2_7→c2_1 (so {c2_6,c2_7} join the c2_0..c2_5 body)
-
-    prop_c2_3 = _simple_prop("synth_dose_downstream", Direction.POSITIVE)
-    prop_c2_2 = _prop_with_entails(
-        "synth_dose_upstream",
-        Direction.POSITIVE,
-        prop_c2_3.content_hash,
-        "c2_2 => c2_3",
-    )
-    prop_c2_5 = _simple_prop("synth_dose_leaf", Direction.POSITIVE)
-    prop_c2_4 = _prop_with_entails(
-        "synth_dose_branch",
-        Direction.POSITIVE,
-        prop_c2_5.content_hash,
-        "c2_4 => c2_5",
-    )
-
-    claims += [
-        _claim("c2_0", _P_DOSE),
-        _claim("c2_1", _P_DOSE),
-        _claim("c2_2", _P_DOSE, conclusion=prop_c2_2),
-        _claim("c2_3", _P_DOSE, conclusion=prop_c2_3),
-        _claim("c2_4", _P_DOSE, conclusion=prop_c2_4),
-        _claim("c2_5", _P_DOSE, conclusion=prop_c2_5),
-        _claim("c2_6", _P_DOSE),
-        _claim("c2_7", _P_DOSE),
-    ]
-
-    defeat_edges += [
-        _defeat("c2_0", "c2_2", DefeatEdgeKind.EVIDENCE_FOR),
-        _defeat("c2_1", "c2_3", DefeatEdgeKind.EVIDENCE_FOR),
-        _defeat("c2_4", "c2_0", DefeatEdgeKind.EVIDENCE_FOR),
-        _defeat("c2_5", "c2_1", DefeatEdgeKind.EVIDENCE_FOR),
-        _defeat("c2_6", "c2_7", DefeatEdgeKind.REBUT),
-        _defeat("c2_7", "c2_6", DefeatEdgeKind.UNDERCUT),
-        # bridge {c2_6, c2_7} into the c2_0..c2_5 body (else c2 fragments)
-        _defeat("c2_6", "c2_0", DefeatEdgeKind.UNDERCUT),
-        _defeat("c2_7", "c2_1", DefeatEdgeKind.UNDERCUT),
-    ]
+    c2_claims, c2_edges = _satellite_cluster("2", _P_DOSE, "synth_dose")
+    claims += c2_claims
+    defeat_edges += c2_edges
 
     # ── Weak inter-cluster links ───────────────────────────────────────────────
     # Three weak UNDERCUT edges, one per cluster pair, between PERIPHERAL claims

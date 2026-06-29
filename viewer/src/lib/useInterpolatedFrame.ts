@@ -4,6 +4,15 @@ import { useMemo } from 'react';
 import type { TopologyTimeline } from '@/lib/timeline';
 import { interpolateFrame, type InterpFrame } from '@/lib/interpolate';
 
+// Module-level single-entry cache: ~7 scene components call this hook with the same
+// (timeline, frame) in one commit. The first computes; the rest reuse the cached object
+// (keeping the returned reference stable across callers within a frame). Keyed by
+// referential identity of `timeline` + value of `frame`; interpolateFrame is pure, so a
+// matching key always yields the same result.
+let _lastTimeline: TopologyTimeline | null = null;
+let _lastFrame = NaN;
+let _lastResult: InterpFrame | null = null;
+
 /**
  * Memoized interpolated-frame hook. Returns the blended `{ nodes, edges, stats,
  * layoutId }` between floor(frame) and ceil(frame). Memoized on (timeline,
@@ -16,6 +25,10 @@ export function useInterpolatedFrame(
 ): InterpFrame | null {
   return useMemo(() => {
     if (!timeline || timeline.frames.length === 0) return null;
-    return interpolateFrame(timeline, frame);
+    if (timeline === _lastTimeline && frame === _lastFrame) return _lastResult;
+    _lastTimeline = timeline;
+    _lastFrame = frame;
+    _lastResult = interpolateFrame(timeline, frame);
+    return _lastResult;
   }, [timeline, frame]);
 }

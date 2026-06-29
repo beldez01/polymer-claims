@@ -18,7 +18,6 @@ from pydantic import model_validator
 from polymer_grammar import (
     AXES,
     NeighborEdgeKind,
-    Status,
     effective_defeats,
     is_representation_revision,
 )
@@ -94,9 +93,7 @@ class TopologyExport(_Model):
 def _effective_set(corpus: Corpus) -> frozenset[tuple[str, str]]:
     """The post-VAF effective-defeat set — computed exactly as represent.py does, so the
     edge `effective` flags mirror the runtime's argumentation state."""
-    strength = {c.id: c.strength for c in corpus.claims}
-    licensed_ids = frozenset(c.id for c in corpus.claims if c.status == Status.LICENSED)
-    return effective_defeats(corpus.defeat_edges, strength, licensed_ids)
+    return effective_defeats(corpus.defeat_edges, corpus.strength_map(), corpus.licensed_ids())
 
 
 def _extract_nodes(

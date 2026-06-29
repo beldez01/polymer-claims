@@ -30,16 +30,16 @@ class StrengthVector(_Model):
     world_contact: float = Field(ge=0.0, le=1.0)
     explanatory_virtue: float = Field(ge=0.0, le=1.0)
 
-    def meet(self, other: "StrengthVector") -> "StrengthVector":
+    def meet(self, other: StrengthVector) -> StrengthVector:
         return StrengthVector(**{ax: min(getattr(self, ax), getattr(other, ax)) for ax in AXES})
 
-    def join(self, other: "StrengthVector") -> "StrengthVector":
+    def join(self, other: StrengthVector) -> StrengthVector:
         return StrengthVector(**{ax: max(getattr(self, ax), getattr(other, ax)) for ax in AXES})
 
-    def dominates(self, other: "StrengthVector") -> bool:
+    def dominates(self, other: StrengthVector) -> bool:
         return all(getattr(self, ax) >= getattr(other, ax) for ax in AXES)
 
-    def comparable(self, other: "StrengthVector") -> bool:
+    def comparable(self, other: StrengthVector) -> bool:
         return self.dominates(other) or other.dominates(self)
 
 

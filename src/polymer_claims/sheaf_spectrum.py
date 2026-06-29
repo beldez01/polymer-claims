@@ -3,13 +3,13 @@
 Computes the corpus inconsistency energy (Robinson consistency radius), the equivalence/defeat
 energy split, dim H⁰, the spectral gap λ₂, per-claim tension, and (Task 5) localized H¹
 frustration obstructions. NOT re-exported from polymer_claims.__init__ — base import stays
-numpy-free; import lazily. Behind the [embed] extra. Design:
-docs/superpowers/specs/2026-06-21-sheaf-consistency-gauge-design.md.
+numpy-free; import lazily. Behind the [embed] extra.
 """
 from __future__ import annotations
 
-import numpy as np
 from collections import deque
+
+import numpy as np
 
 from polymer_protocol.sheaf import (
     ClaimTension,
@@ -53,7 +53,7 @@ def _spectrum_core(structure: SheafStructure):
     n = len(structure.vertices)
     total_w = float(w.sum())
     if delta.shape[0] == 0 or total_w == 0.0:
-        return 0.0, 0.0, 0.0, 0.0, n, None, x, 0.0
+        return 0.0, 0.0, 0.0, 0.0, n, None, x, 0.0, None
     d = delta @ x
     per_edge = w * (d * d)
     raw = float(per_edge.sum())
@@ -66,7 +66,7 @@ def _spectrum_core(structure: SheafStructure):
     h0 = int(np.sum(evals < _ZERO_TOL))
     positive = evals[evals >= _ZERO_TOL]
     gap = float(positive.min()) if positive.size else 0.0
-    return raw / total_w, eq / total_w, df / total_w, gap, h0, L, x, total_w
+    return raw / total_w, eq / total_w, df / total_w, gap, h0, L, x, total_w, per_edge
 
 
 def _energy(structure: SheafStructure) -> float:
@@ -87,14 +87,14 @@ def consistency_headline(structure: SheafStructure) -> ConsistencyHeadline:
 
 
 def consistency_report(structure: SheafStructure) -> ConsistencyReport:
-    energy, eq, df, gap, h0, L, x, total_w = _spectrum_core(structure)
+    energy, eq, df, gap, h0, L, x, total_w, per_edge = _spectrum_core(structure)
     if L is None:  # empty/zero-weight
         return ConsistencyReport(
             inconsistency_energy=0.0, equivalence_energy=0.0, defeat_energy=0.0,
             spectral_gap=0.0, h0_dim=h0, h1_obstructions=(),
             per_claim_tension=(), flags=structure.flags,
         )
-    tensions = _edge_share_tension(structure, total_w)
+    tensions = _edge_share_tension(structure, total_w, per_edge)
     return ConsistencyReport(
         inconsistency_energy=round(energy, _ROUND),
         equivalence_energy=round(eq, _ROUND),
@@ -107,12 +107,9 @@ def consistency_report(structure: SheafStructure) -> ConsistencyReport:
     )
 
 
-def _edge_share_tension(structure: SheafStructure, total_w: float) -> tuple[ClaimTension, ...]:
-    """Nonnegative per-claim attribution: each edge's w·d² split half to each endpoint.
-    Sums to the inconsistency energy. Defensively skips self-loop / malformed edges."""
-    x, delta, w, _kinds = _coboundary(structure)
-    d = delta @ x
-    per_edge = w * (d * d)
+def _edge_share_tension(structure: SheafStructure, total_w: float, per_edge) -> tuple[ClaimTension, ...]:
+    """Nonnegative per-claim attribution: each edge's w·d² (passed in from _spectrum_core) split
+    half to each endpoint. Sums to the inconsistency energy. Defensively skips self-loop/malformed."""
     acc = {v.claim_id: 0.0 for v in structure.vertices}
     for k, e in enumerate(structure.edges):
         if e.u == e.v or e.u not in acc or e.v not in acc:

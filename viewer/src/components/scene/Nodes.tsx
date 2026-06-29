@@ -7,11 +7,9 @@ import { ThreeEvent } from '@react-three/fiber';
 import { COLOR, STATUS_COLOR, FONT_FAMILY_MONO, tensionScale } from '@/config/theme';
 import { useViewer } from '@/store';
 import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
-import type { InterpNode } from '@/lib/interpolate';
-import type { StrengthVector, Vec3 } from '@/lib/topology';
-
-const BASE_RADIUS = 0.28;
-const RING_SEGMENTS = 48;
+import { staticInterpNode, type InterpNode } from '@/lib/interpolate';
+import type { StrengthVector } from '@/lib/topology';
+import { BASE_RADIUS, ringPoints } from '@/lib/ring';
 
 function statusColor(status: string): string {
   return STATUS_COLOR[status] ?? COLOR.text.muted;
@@ -31,15 +29,6 @@ function crossfadeColor(from: string, to: string, t: number): string {
 function nodeRadius(strength: StrengthVector | null): number {
   const ean = strength ? strength[2] : 0.5;
   return BASE_RADIUS * (0.8 + 0.5 * ean);
-}
-
-function ringPoints(radius: number): [number, number, number][] {
-  const pts: [number, number, number][] = [];
-  for (let i = 0; i <= RING_SEGMENTS; i++) {
-    const a = (i / RING_SEGMENTS) * Math.PI * 2;
-    pts.push([Math.cos(a) * radius, Math.sin(a) * radius, 0]);
-  }
-  return pts;
 }
 
 // Tension halo disc radius — between node body and hover ring (r·1.7).
@@ -198,49 +187,6 @@ function NodeMesh({ node }: { node: InterpNode }) {
   );
 }
 
-/** Adapt a static export node into the InterpNode shape (no animation). */
-function staticNode(n: {
-  id: string;
-  status: string;
-  pattern_id: string;
-  subject_kind: string | null;
-  strength: StrengthVector | null;
-  is_representation_revision: boolean;
-  fdr_tested?: boolean;
-  fdr_discovery?: boolean;
-  fdr_retracted?: boolean;
-  fdr_index?: number | null;
-  fdr_e_value?: number | null;
-  fdr_alpha_allocated?: number | null;
-  independence_tier?: string | null;
-  severity_provenance?: string | null;
-  shared_cause_overlap?: number | null;
-  position: Vec3;
-}): InterpNode {
-  return {
-    id: n.id,
-    status: n.status,
-    prevStatus: n.status,
-    statusT: 1,
-    pattern_id: n.pattern_id,
-    subject_kind: n.subject_kind,
-    strength: n.strength,
-    is_representation_revision: n.is_representation_revision,
-    fdr_tested: n.fdr_tested ?? false,
-    fdr_discovery: n.fdr_discovery ?? false,
-    fdr_retracted: n.fdr_retracted ?? false,
-    fdr_index: n.fdr_index ?? null,
-    fdr_e_value: n.fdr_e_value ?? null,
-    fdr_alpha_allocated: n.fdr_alpha_allocated ?? null,
-    independence_tier: n.independence_tier ?? null,
-    severity_provenance: n.severity_provenance ?? null,
-    shared_cause_overlap: n.shared_cause_overlap ?? null,
-    position: n.position,
-    scale: 1,
-    opacity: 1,
-  };
-}
-
 export default function Nodes() {
   const data = useViewer((s) => s.data);
   const timeline = useViewer((s) => s.timeline);
@@ -252,7 +198,7 @@ export default function Nodes() {
   // Timeline drives the scene when loaded; else fall back to the static export.
   const nodes: InterpNode[] = useMemo(() => {
     if (interp) return interp.nodes;
-    if (data) return data.nodes.map(staticNode);
+    if (data) return data.nodes.map(staticInterpNode);
     return [];
   }, [interp, data]);
 

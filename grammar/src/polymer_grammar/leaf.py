@@ -37,7 +37,7 @@ class QuantityLeaf(_Model):
     dimension: Dimension | None = None
 
     @model_validator(mode="after")
-    def _basis_discipline(self) -> "QuantityLeaf":
+    def _basis_discipline(self) -> QuantityLeaf:
         if self.measurement_basis == MeasurementBasis.FUNDAMENTAL:
             return self
         if self.unit is not None:

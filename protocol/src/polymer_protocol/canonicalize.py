@@ -64,9 +64,9 @@ def canonicalize(corpus: Corpus) -> Corpus:
     for ids in buckets.values():
         if len(ids) < 2:
             continue
-        ids = sorted(ids)
-        rep = ids[0]
-        for other in ids[1:]:
+        sorted_ids = sorted(ids)
+        rep = sorted_ids[0]
+        for other in sorted_ids[1:]:
             if frozenset((rep, other)) in existing_pairs:
                 continue
             new_edges.append(

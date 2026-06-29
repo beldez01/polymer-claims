@@ -1,7 +1,7 @@
 import json
 
 from polymer_claims.cli import main
-from tests.attestation._fixtures import licensed_claim, licensing, corpus_with, mc, sat
+from tests.attestation._fixtures import corpus_path as _corpus_path
 
 
 def test_keygen_writes_pem_pair(tmp_path):
@@ -69,13 +69,6 @@ def test_verify_dsse_malformed_inputs_return_rc1_not_traceback(tmp_path, capsys)
     p.write_text('{"payload":"e30=","payloadType":"application/vnd.in-toto+json","signatures":[]}')
     assert main(["verify-dsse", str(p), "--pub-key", str(badpub)]) == 1
     assert "Traceback" not in capsys.readouterr().err
-
-
-def _corpus_path(tmp_path):
-    corpus = corpus_with(licensed_claim("c1", licensing(sat(mc()))))
-    p = tmp_path / "corpus.json"
-    p.write_text(corpus.model_dump_json())
-    return p
 
 
 def test_certify_dsse_unsigned_is_byte_identical(tmp_path, capsys):

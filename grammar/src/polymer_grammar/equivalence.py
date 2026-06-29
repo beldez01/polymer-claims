@@ -15,7 +15,7 @@ from typing import Iterable
 from pydantic import Field, model_validator
 
 from .base import _Model
-from .status import PendingReason, Status
+from .status import PendingReason, Status, check_pending_reason
 
 
 class EquivalenceClaim(_Model):
@@ -28,7 +28,7 @@ class EquivalenceClaim(_Model):
     note: str | None = None
 
     @model_validator(mode="after")
-    def _distinct_endpoints(self) -> "EquivalenceClaim":
+    def _distinct_endpoints(self) -> EquivalenceClaim:
         if self.left == self.right:
             raise ValueError(
                 "an EquivalenceClaim must relate two DISTINCT propositions"
@@ -36,14 +36,8 @@ class EquivalenceClaim(_Model):
         return self
 
     @model_validator(mode="after")
-    def _pending_reason_iff_pending(self) -> "EquivalenceClaim":
-        if self.status == Status.PENDING and self.pending_reason is None:
-            raise ValueError("status=PENDING requires a `pending_reason`")
-        if self.status != Status.PENDING and self.pending_reason is not None:
-            raise ValueError(
-                f"`pending_reason` is only valid when status=PENDING; "
-                f"got status={self.status.value}"
-            )
+    def _pending_reason_iff_pending(self) -> EquivalenceClaim:
+        check_pending_reason(self.status, self.pending_reason)
         return self
 
 

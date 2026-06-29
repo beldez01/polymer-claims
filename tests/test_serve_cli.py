@@ -12,6 +12,22 @@ def test_serve_help_registered():
     assert e.value.code == 0
 
 
+@pytest.mark.parametrize(
+    "combo",
+    [
+        ["--tcga-laml", "--real-data"],
+        ["--real-data", "--methyl-data"],
+        ["--llm", "--tcga-laml"],
+    ],
+)
+def test_serve_mode_flags_are_mutually_exclusive(combo, capsys):
+    # Conflicting mode flags must error (exit 2), not silently run the precedence winner.
+    with pytest.raises(SystemExit) as e:
+        main(["serve", *combo])
+    assert e.value.code == 2
+    assert "not allowed with argument" in capsys.readouterr().err
+
+
 def test_serve_missing_extra_prints_hint(monkeypatch, capsys):
     def boom():
         raise ImportError("no fastapi")

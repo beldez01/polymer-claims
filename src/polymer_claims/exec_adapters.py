@@ -50,7 +50,7 @@ _APPARATUS_ORACLE = "dose_response_apparatus"
 # subject to the #3a cardinality-scaled selective-inference bar, so in the live multi-claim
 # node it would never license. Live/generated claims therefore use strength=None (exempt →
 # they license). Earned-from-data strength — which legitimately clears the bar — is the
-# documented reconciliation (docs/superpowers/notes/2026-06-08-earned-strength-followup.md).
+# documented reconciliation.
 _PROVISIONAL_STRENGTH = StrengthVector(
     magnitude=0.8, certainty=0.7, evidence_against_null=0.8,
     severity=0.5, world_contact=0.9, explanatory_virtue=0.6,

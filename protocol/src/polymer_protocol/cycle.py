@@ -128,7 +128,12 @@ def run_cycle(
         adapter_registry=adapter_registry, evidence=evidence, replications=replications,
     )
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
-    n_trust_held = sum(1 for c in corpus.claims if c.pending_reason == PendingReason.ADAPTER_NOT_INDEPENDENT)
+    # Scope to THIS cycle's executed claims: a claim held for non-independence persists its
+    # pending_reason across later cycles, so an unscoped scan double-counts prior-cycle holds.
+    n_trust_held = sum(
+        1 for c in corpus.claims
+        if c.id in executed_ids and c.pending_reason == PendingReason.ADAPTER_NOT_INDEPENDENT
+    )
     audit.append(StageAudit(
         stage="verify_stage",
         note=f"{n_licensed} licensed" + (f", {n_trust_held} held (adapter not independent)" if n_trust_held else ""),

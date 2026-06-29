@@ -3,13 +3,11 @@ two-group pooled t-test p-value < alpha), as a second scalar reduction alongside
 independent legs compute the per-probe t two ways (manual pooled-t vs OLS-coef t) and AGREE on the
 integer count -> air-gap. Umbrella/impure (reads the contract via _load_betas). NOT re-exported from
 __init__ (base import stays numpy-free). The count's e-value (count_enrichment_evalue) lives in
-evidence.py. See docs/superpowers/specs/2026-06-14-n-dmps-at-fdr-design.md.
+evidence.py.
 """
 from __future__ import annotations
 
-import json
 import math
-from pathlib import Path
 
 import numpy as np
 from polymer_grammar import (
@@ -29,7 +27,7 @@ from polymer_protocol import AdapterCredential, AdapterRegistry
 
 from .adapter_identity import implementation_hash_for_adapter
 from .analysis_profile import profile_oracle_id
-from .contracts import load_contract
+from .contracts import load_contract, load_manifest
 from .methyl_adapters import _load_betas
 from .profiles import CANONICAL_EPICV2_V1
 
@@ -99,13 +97,6 @@ def _t_two_sided_p(t: float, df: int) -> float:
 
 # --- per-probe two-group test ---
 
-def _split(beta_row: dict[str, float], sample_ids, group_of, level_a, level_b):
-    a = np.array([beta_row[s] for s in sample_ids if group_of[s] == level_a], dtype=float)
-    b = np.array([beta_row[s] for s in sample_ids if group_of[s] == level_b], dtype=float)
-    if len(a) < 2 or len(b) < 2:
-        raise ValueError("need >=2 samples per group for a t-test")
-    return a, b
-
 
 def _pooled_t(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
     """Manual pooled (equal-variance) two-sample t-statistic + df. Leg A."""
@@ -127,11 +118,17 @@ def _per_probe_pvalues(node: OperationNode, *, leg) -> dict[str, float]:
     beta, sample_ids, group_of, p = _load_betas(node)
     probes = [s for s in p["probes"].split(",") if s]
     level_a, level_b = p["level_a"], p["level_b"]
+    # The group partition is the same for every probe — compute the sample-id lists once.
+    a_ids = [s for s in sample_ids if group_of[s] == level_a]
+    b_ids = [s for s in sample_ids if group_of[s] == level_b]
+    if len(a_ids) < 2 or len(b_ids) < 2:
+        raise ValueError("need >=2 samples per group for a t-test")
     out: dict[str, float] = {}
     for cg in probes:
         if cg not in beta:
             raise KeyError(f"probe {cg!r} not in contract")
-        a, b = _split(beta[cg], sample_ids, group_of, level_a, level_b)
+        a = np.array([beta[cg][s] for s in a_ids], dtype=float)
+        b = np.array([beta[cg][s] for s in b_ids], dtype=float)
         t, df = leg(a, b)
         out[cg] = 0.0 if math.isinf(t) else _t_two_sided_p(t, df)
     return out
@@ -143,7 +140,7 @@ def _n_dmps(pvalues: dict[str, float], alpha: float) -> int:
 
 def dmp_indicators(node: OperationNode) -> list[int]:
     """Per-probe DMP indicators (1 iff p < alpha) using the pooled-t leg — the e-value's view."""
-    alpha = float(dict(node.params)["alpha"])
+    alpha = _alpha(node)
     pvals = _per_probe_pvalues(node, leg=_pooled_t)
     return [1 if v < alpha else 0 for v in pvals.values()]
 
@@ -164,9 +161,10 @@ def _ols_t(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
     mse = float(resid @ resid) / df
     xtx_inv = np.linalg.inv(X.T @ X)
     se = math.sqrt(mse * float(xtx_inv[1, 1]))
-    # coef[1] == mean(b) - mean(a) for two-group OLS, so this mirrors _pooled_t's degenerate guard
     if se == 0.0:
-        return (0.0 if coef[1] == 0.0 else math.inf), df
+        # se==0: degenerate. Mirror _pooled_t exactly (compare group means, not the
+        # BLAS-reconstructed coef[1]) so the two legs never disagree on a constant probe.
+        return (0.0 if a.mean() == b.mean() else math.inf), df
     return (float(coef[1]) / se, df)
 
 
@@ -193,8 +191,7 @@ def _all_probe_ids(ref: str) -> tuple[str, ...]:
     """Read the contract manifest's row_data feature-ids (the full probe set).
     Lighter than _load_betas — reads only the JSON manifest row_data (no betas TSV / beta matrix)."""
     se = load_contract(ref)
-    betas_path = Path(se.access_methods[0].access_url)
-    manifest = json.loads((betas_path.parent / f"{se.contract_uid.split('@')[0]}.json").read_text())
+    manifest = load_manifest(se)
     return tuple(r["feature_id"] for r in manifest["row_data"])
 
 

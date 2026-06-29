@@ -1,26 +1,46 @@
 # ⟳ Polymer Claims — RESUME HERE
 
 > Hook-loaded continuity file (a SessionStart hook surfaces it). **Keep the *Current state* + *NEXT*
-> sections current at every phase boundary.** Detailed build history lives in git (`git log --oneline`),
-> the canonical spec (`docs/superpowers/polymer-claims-canonical-spec.md`), the per-slice plans
-> (`docs/superpowers/archive/plans/`), and the archived per-feature design specs (`docs/superpowers/archive/specs/`).
+> sections current at every phase boundary.** Detailed build history lives in git (`git log --oneline`)
+> and the canonical spec (`docs/superpowers/polymer-claims-canonical-spec.md`).
 > One-page architecture map: `ARCHITECTURE_CURRENT.md`. Reserved terminology: `GLOSSARY.md`.
+>
+> **Doc consolidation (2026-06-29):** the per-feature `specs/`, `plans/`, and the whole `archive/`
+> tree were culled — that shipped-feature design history now lives only in git. Inline
+> `docs/superpowers/{specs,plans,archive}/…-design.md` paths below are historical references
+> (find them via `git log`/`git show`); only `specs/` + `plans/` for *pending* work remain in-tree.
 
 ---
 
-## Current state (2026-06-26) — authoritative snapshot
+## Current state (2026-06-29) — authoritative snapshot
 
 > **This is the single current-state summary.** The dated blocks further down are **historical**
 > (kept for build detail); when they disagree with this section, *this* section wins. Full shipped
 > history is in the **Done checklist** below + `git log`; the forward plan is
 > `docs/superpowers/2026-06-23-remaining-roadmap.md` (Path α — wedge-first).
 
-**Where it stands.** `main` is a single trunk (2 commits ahead of `origin` at this snapshot), ruff
-clean, all suites green: **umbrella 531 · grammar 398 · protocol 430** (+ the grammar isolation
-guard). `grammar/` + `protocol/` stay pure + numpy-free; **Corpus = exactly 4 collections**; numpy
-lives behind the umbrella `[embed]` extra.
+**Where it stands.** `main` is a single trunk, ruff clean, all suites green:
+**umbrella 572 · grammar 427 · protocol 431** (+ the grammar isolation guard) + viewer `tsc`/build.
+`grammar/` + `protocol/` stay pure + numpy-free; **Corpus = exactly 4 collections**; numpy lives
+behind the umbrella `[embed]` extra. **The `beldez01` account flag is RESOLVED (2026-06-29)** —
+GitHub Actions / PyPI publish are unblocked (no CI workflow committed yet; `scripts/check-all.sh`
+remains the local gate until one mirroring it is added).
 
-**Shipped this week (newest first):**
+**Shipped (newest first):**
+- **Audit-driven cleanup + docs consolidation (2026-06-28→29).** A multi-agent tidiness/correctness
+  audit (`CLEANUP_AUDIT.md`) applied as ~110 verified changes: **2 real correctness fixes** — the MDL
+  meta-tier gate could be fooled by zero-structural-slot claims (a load-bearing pattern DEPRECATE
+  wrongly cleared the bar), and `anchored_resolutions` emitted records in non-deterministic order
+  (→ a non-deterministic signed certificate digest) — plus condensation/refactors across all packages
+  (the 3 LLM adapters unified onto `_GenerationAdapterBase`; `_ndmp_gate` shared by both kernel proofs;
+  `node` ring buffer → `deque(maxlen)`; serve mode-flags now mutually exclusive — argparse error vs
+  silent shadowing). **Docs culled −63k lines:** shipped per-feature specs/plans + the entire
+  `docs/superpowers/archive/` tree removed (history in git); `specs/`+`plans/` keep only the 2 pending
+  features; the two spectral docs merged to `docs/spectral-layout.md`.
+- **Capability Cell + Registry (V1, 2026-06-27, merge `b058d3c`).** First-class versioned
+  `CapabilityCell` + `CapabilityRegistry`; the three reductions registered as the first cells;
+  conformance is advisory (closed-world enforcement deliberately deferred).
+- **Local transparency-log layer (H1.A1, 2026-06-25)** — RFC-6962 Merkle inclusion log + C2SP signed
 - **Local transparency-log layer (H1.A1, 2026-06-25)** — RFC-6962 Merkle inclusion log + C2SP signed
   checkpoint + a trust-gated, offline-verifiable Polymer bundle (Sigstore-INSPIRED, not
   wire-compatible), behind a `TransparencyLog` seam. CLI `verify-bundle PATH [--pub-key]
@@ -59,10 +79,9 @@ lives behind the umbrella `[embed]` extra.
 The single remaining **critical-path** gate is **H1.A2 — source a real 2nd HM450 cohort** with
 machine-readable IDH status (long lead; it's the gate to §2E REPLICATED and a shippable wedge, H2).
 Optional parallel, non-blocking code: finish **H1.A1** (Sigstore/cosign/Rekor — currently tabled by
-choice), the **Track B credence engines** (proper/surrogate scoring atop the ATTESTED typing), and —
-newly tracked — the **vision-derived capability-cell spine (V1)**: formalize a first-class, versioned
-**capability** object + registry (the three existing reductions become the first cells). It's the
-highest-leverage *non-data-blocked* build and the precondition for agent-first closed-world execution.
+choice), the **Track B credence engines** (proper/surrogate scoring atop the ATTESTED typing), and the
+**capability-cell follow-ons** now that V1 shipped — **V2** (register one genuinely-new/external
+capability as the generalization test, then fan out) and eventually closed-world enforcement.
 Authoritative forward plan: `docs/superpowers/2026-06-23-remaining-roadmap.md` (see *Vision-derived
 additions*); product vision: `docs/superpowers/vision.md`.
 
@@ -278,7 +297,7 @@ already displays `independence_tier`. Phase B also has a small methylation data-
 (`methylation_asset_catalog`) that lists bundled SE-Contract fixtures and locally generated TCGA
 contracts when present; the methylation generator prompt is now metadata-driven rather than hardcoded.
 
-Other safe slices (the historical decision menu is archived at `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`):
+Other safe slices:
 
 1. **§2E follow-ups** — viewer tier display + live-node `replication_map` wiring are done. Remaining:
    bind a **real** second cohort when available so REPLICATED is earned, not only exercised.
@@ -320,7 +339,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   3D viewer (Next 16 / React Three Fiber; sample + live modes), verified in-browser
 - ✅ Real LLM generation adapter (`[llm]` extra) driving the live node (`serve --llm`)
 
-**External audit — CLOSED** (`docs/superpowers/archive/polymer-claims-audit.md`):
+**External audit — CLOSED:**
 - ✅ Tier A+B (`c662f1c`): bounded frame retention · tick-serialization lock · bounded SSE queues ·
   non-loopback bind guard · machine-clean JSON · `ARCHITECTURE_CURRENT.md` + `GLOSSARY.md` · v1.2 frozen
   banners
@@ -328,7 +347,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ Tier-C (`2b7ccb5`): viewer `CONTRACT_VERSION` + 6-axis strength validator · `run_cycle` output
   revalidation · packaging metadata
 
-**Credibility arc + CES** (`docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`):
+**Credibility arc + CES:**
 - ✅ M1 structural-equivalence status (`Status.STRUCTURAL` — no more false LICENSED on structural
   collapse) · earned-strength · relational graph embedding v1 (signed-Laplacian eigenmap, silhouette 0.62)
   · live spectral layout (`procrustes-embedding-alignment`) — eigenmap as the live `NodeRunner` default,
@@ -433,12 +452,10 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 ## Reference pointers
 
 - **Product vision:** `docs/superpowers/vision.md` (external-facing thesis — capability-cell spine, three registries, closed-world agent execution, verification ladder; reconciled to current state 2026-06-27).
-- **Forward roadmap:** `docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md` (three-arc linchpin; authoritative) · `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md` (autonomous-loop; partly leapfrogged — sheaf gauge opened arc-3) · historical decision menu (archived): `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`
+- **Forward roadmap:** `docs/superpowers/2026-06-23-remaining-roadmap.md` (authoritative) · `docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md` (the three-arc linchpin vision)
 - **Phase-2 north star:** `docs/superpowers/2026-06-12-phase-2-north-star.md`
-- **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`
 - **Architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`
-- **Spectral layout guides:** `docs/spectral-layout-how-to-use.md` (usage) ·
-  `docs/spectral-layout-how-it-works.md` (eigenmap + Procrustes math/theory)
+- **Spectral layout guide:** `docs/spectral-layout.md` (usage + eigenmap/Procrustes math)
 - **Memory:** `project_polymer_claims_knowledge_protocol` (full phase history + follow-ups)
 - **Deep design source:**
   `~/Desktop/Research/topics/epistemic-claim-foundations/generative-protocol/_FINAL_knowledge_generation_protocol.md`

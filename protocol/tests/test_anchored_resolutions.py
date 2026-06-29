@@ -53,3 +53,21 @@ def test_anchored_resolutions_sets_exposure_start_cycle():
     )
     (rec,) = anchored_resolutions(prev, curr, cycle=10, pressure=pc)
     assert rec.exposure_start_cycle == 4  # survival time would be observed(10) - start(4) = 6
+
+
+def test_anchored_resolutions_are_deterministically_ordered():
+    # The impure caller builds `cause` from a set comprehension, so its key/insertion
+    # order is PYTHONHASHSEED-dependent. The emitted records flow into the JSONL ledger
+    # and the signed certificate digest, so their order MUST be deterministic regardless
+    # of how `cause` was iterated. Insert the cause keys deliberately out of order.
+    ids = ["c3", "c1", "c2"]
+    prev = _corpus(*[licensed_claim(c) for c in ids])
+    curr = _corpus(*[licensed_claim(c) for c in ids])
+    pc = PressureContext(
+        epoch={c: 0 for c in ids},
+        cause={c: PressureKind.DRIFT for c in ids},  # inserted c3, c1, c2
+        survived=frozenset(ids),
+    )
+    got = [r.subject_claim_id for r in anchored_resolutions(prev, curr, cycle=1, pressure=pc)]
+    assert got == sorted(got), f"records not deterministically ordered: {got}"
+    assert got == ["c1", "c2", "c3"]

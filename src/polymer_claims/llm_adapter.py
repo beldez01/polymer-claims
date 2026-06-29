@@ -45,7 +45,79 @@ _METHYL_REGION_PREFIX = "gen-methyl-region-"
 _METHYL_NDMP_PREFIX = "gen-methyl-ndmp-"
 
 
-class LLMGenerationAdapter:
+class _GenerationAdapterBase:
+    """Shared GENERATE-adapter plumbing: propose / _parse / anthropic are identical across the
+    three concrete adapters. Subclasses override _build_prompt + _build_claim (and may widen
+    _DROP_EXCEPTIONS, the per-proposal errors that drop a malformed proposal instead of crashing)."""
+
+    _DROP_EXCEPTIONS: tuple = (KeyError, ValueError, TypeError)
+
+    def __init__(
+        self,
+        complete: Callable[[str], str],
+        *,
+        identity: str,
+        max_proposals: int = 5,
+    ) -> None:
+        self.complete = complete
+        self.identity = identity
+        self.max_proposals = max_proposals
+
+    def propose(self, corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
+        return self._parse(self.complete(self._build_prompt(corpus, frontier)), corpus)
+
+    def _parse(self, raw: str, corpus: Corpus) -> tuple[Proposal, ...]:
+        obj = _extract_json(raw)
+        if obj is None:
+            return ()
+        existing_ids = set(corpus.by_id().keys())
+        out: list[Proposal] = []
+        seen: set[str] = set()
+        proposals = obj.get("proposals")
+        if not isinstance(proposals, list):
+            return ()  # absent/null/non-list -> no proposals (degrade, don't crash)
+        for p in proposals:
+            try:
+                claim = self._build_claim(p)
+            except self._DROP_EXCEPTIONS:
+                continue
+            if claim.id in existing_ids or claim.id in seen:
+                continue  # convergence / dedup (own outputs already in corpus skipped here)
+            seen.add(claim.id)
+            out.append(Proposal(operator_id=self.identity, claim=claim))
+            if len(out) >= self.max_proposals:
+                break
+        return tuple(out)
+
+    @classmethod
+    def anthropic(cls, *, model: str = "claude-sonnet-4-6", api_key: str | None = None, **kw):
+        """Build an adapter backed by the Anthropic SDK (needs the [llm] extra). Lazy import."""
+        try:
+            import anthropic
+        except ModuleNotFoundError as e:  # pragma: no cover - exercised via CLI, not unit tests
+            raise RuntimeError(
+                "the LLM adapter needs the optional extra: pip install 'polymer-claims[llm]'"
+            ) from e
+        client = anthropic.Anthropic(api_key=api_key)
+
+        def complete(prompt: str) -> str:  # pragma: no cover - real network
+            msg = client.messages.create(
+                model=model,
+                max_tokens=2048,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return "".join(getattr(b, "text", "") for b in msg.content)
+
+        return cls(complete, **kw)
+
+    def _build_prompt(self, corpus: Corpus, frontier: tuple[str, ...]) -> str:
+        raise NotImplementedError
+
+    def _build_claim(self, p: dict) -> Claim:
+        raise NotImplementedError
+
+
+class LLMGenerationAdapter(_GenerationAdapterBase):
     """A GenerationAdapter whose proposals come from an injected `complete` (real model OUTSIDE
     the pure core). Maps a constrained DSL into executable PENDING+plan grammar Claims."""
 
@@ -57,14 +129,8 @@ class LLMGenerationAdapter:
         max_proposals: int = 5,
         allowed_patterns: tuple[str, ...] | None = None,
     ) -> None:
-        self.complete = complete
-        self.identity = identity
-        self.max_proposals = max_proposals
+        super().__init__(complete, identity=identity, max_proposals=max_proposals)
         self.allowed_patterns = allowed_patterns  # None => any non-empty pattern_id
-
-    def propose(self, corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
-        raw = self.complete(self._build_prompt(corpus, frontier))
-        return self._parse(raw, corpus)
 
     # --- pure helpers ---
     def _build_prompt(self, corpus: Corpus, frontier: tuple[str, ...]) -> str:
@@ -90,26 +156,6 @@ class LLMGenerationAdapter:
             f"Existing claims:\n{existing}\n\nUnresolved frontier: {front}\n"
         )
 
-    def _parse(self, raw: str, corpus: Corpus) -> tuple[Proposal, ...]:
-        obj = _extract_json(raw)
-        if obj is None:
-            return ()
-        existing_ids = set(corpus.by_id().keys())
-        out: list[Proposal] = []
-        seen: set[str] = set()
-        for p in obj.get("proposals", []):
-            try:
-                claim = self._build_claim(p)
-            except (KeyError, ValueError, TypeError):
-                continue
-            if claim.id in existing_ids or claim.id in seen:
-                continue  # convergence / dedup (own outputs already in corpus skipped here)
-            seen.add(claim.id)
-            out.append(Proposal(operator_id=self.identity, claim=claim))
-            if len(out) >= self.max_proposals:
-                break
-        return tuple(out)
-
     def _build_claim(self, p: dict) -> Claim:
         title = str(p["title"]).strip()
         pattern_id = str(p["pattern_id"]).strip()
@@ -124,7 +170,7 @@ class LLMGenerationAdapter:
         value = float(p["value"])  # raises -> dropped
         threshold = float(p["threshold"])
         # FIRST PASS: opaque free-text justification, display only. None when absent/empty.
-        rationale = str(p["rationale"]).strip() if p.get("rationale") else None
+        rationale = str(p.get("rationale") or "").strip() or None  # whitespace-only -> None
         cid = _GEN_PREFIX + hashlib.sha256(
             f"{title}|{pattern_id}|{ontology_term}|{value}|{cmp_key}|{threshold}".encode()
         ).hexdigest()[:16]
@@ -159,33 +205,6 @@ class LLMGenerationAdapter:
             ),
         )
 
-    @classmethod
-    def anthropic(
-        cls,
-        *,
-        model: str = "claude-sonnet-4-6",
-        api_key: str | None = None,
-        **kw,
-    ) -> "LLMGenerationAdapter":
-        """Build an adapter backed by the Anthropic SDK (needs the [llm] extra). Lazy import."""
-        try:
-            import anthropic
-        except ModuleNotFoundError as e:  # pragma: no cover - exercised via CLI, not unit tests
-            raise RuntimeError(
-                "the LLM adapter needs the optional extra: pip install 'polymer-claims[llm]'"
-            ) from e
-        client = anthropic.Anthropic(api_key=api_key)
-
-        def complete(prompt: str) -> str:  # pragma: no cover - real network
-            msg = client.messages.create(
-                model=model,
-                max_tokens=2048,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            return "".join(getattr(b, "text", "") for b in msg.content)
-
-        return cls(complete, **kw)
-
 
 def _extract_json(raw: str) -> dict | None:
     """Best-effort: parse the first {...} object, tolerating code fences / surrounding prose."""
@@ -207,7 +226,7 @@ def _extract_json(raw: str) -> dict | None:
     return obj if isinstance(obj, dict) else None
 
 
-class MeanDiffGenerationAdapter:
+class MeanDiffGenerationAdapter(_GenerationAdapterBase):
     """A GenerationAdapter that maps an injected model's DSL into a REAL-DATA
     `stats::mean_diff` Claim over a bundled dataset (Phase 2b). Mirrors
     LLMGenerationAdapter but targets the real-execution substrate, not builtin::const."""
@@ -220,13 +239,8 @@ class MeanDiffGenerationAdapter:
         max_proposals: int = 5,
         dataset: str = "dose_response",
     ) -> None:
-        self.complete = complete
-        self.identity = identity
-        self.max_proposals = max_proposals
+        super().__init__(complete, identity=identity, max_proposals=max_proposals)
         self.dataset = dataset
-
-    def propose(self, corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
-        return self._parse(self.complete(self._build_prompt(corpus, frontier)), corpus)
 
     def _build_prompt(self, corpus: Corpus, frontier: tuple[str, ...]) -> str:
         from .datasets import load_dataset
@@ -255,26 +269,6 @@ class MeanDiffGenerationAdapter:
             f"Existing claims:\n{existing}\n\nUnresolved frontier: {', '.join(frontier) or '(none)'}\n"
         )
 
-    def _parse(self, raw: str, corpus: Corpus) -> tuple[Proposal, ...]:
-        obj = _extract_json(raw)
-        if obj is None:
-            return ()
-        existing_ids = set(corpus.by_id().keys())
-        out: list[Proposal] = []
-        seen: set[str] = set()
-        for p in obj.get("proposals", []):
-            try:
-                claim = self._build_claim(p)
-            except (KeyError, ValueError, TypeError):
-                continue
-            if claim.id in existing_ids or claim.id in seen:
-                continue
-            seen.add(claim.id)
-            out.append(Proposal(operator_id=self.identity, claim=claim))
-            if len(out) >= self.max_proposals:
-                break
-        return tuple(out)
-
     def _build_claim(self, p: dict):
         from .datasets import load_dataset
         from .exec_adapters import mean_diff_claim
@@ -294,7 +288,7 @@ class MeanDiffGenerationAdapter:
         data = load_dataset(self.dataset)  # unknown dataset -> raises -> dropped
         if value_col not in data or group_col not in data:
             raise ValueError("unknown column")
-        rationale = str(p["rationale"]).strip() if p.get("rationale") else None
+        rationale = str(p.get("rationale") or "").strip() or None  # whitespace-only -> None
         cid = _MD_PREFIX + hashlib.sha256(
             f"{title}|{value_col}|{group_col}|{group_a}|{group_b}|{cmp_key}|{threshold}".encode()
         ).hexdigest()[:16]
@@ -311,39 +305,15 @@ class MeanDiffGenerationAdapter:
             rationale=rationale,
         )
 
-    @classmethod
-    def anthropic(
-        cls,
-        *,
-        model: str = "claude-sonnet-4-6",
-        api_key: str | None = None,
-        **kw,
-    ) -> "MeanDiffGenerationAdapter":
-        """Build a real-data adapter backed by the Anthropic SDK (needs the [llm] extra)."""
-        try:
-            import anthropic
-        except ModuleNotFoundError as e:  # pragma: no cover - exercised via CLI, not unit tests
-            raise RuntimeError(
-                "the LLM adapter needs the optional extra: pip install 'polymer-claims[llm]'"
-            ) from e
-        client = anthropic.Anthropic(api_key=api_key)
 
-        def complete(prompt: str) -> str:  # pragma: no cover - real network
-            msg = client.messages.create(
-                model=model,
-                max_tokens=2048,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            return "".join(getattr(b, "text", "") for b in msg.content)
-
-        return cls(complete, **kw)
-
-
-class MethylGenerationAdapter:
+class MethylGenerationAdapter(_GenerationAdapterBase):
     """A GenerationAdapter that maps an injected model's constrained DSL into executable
     methylation claims over SE-Contracts. This is Phase B's first slice: the agent can propose
     `region_delta_beta` and `n_dmps` claims, while the existing independent methylation legs and
     e-value/FDR gate decide whether anything licenses."""
+
+    # a missing asset/dataset file should drop the proposal, not crash the generation step
+    _DROP_EXCEPTIONS = (KeyError, ValueError, TypeError, FileNotFoundError)
 
     def __init__(
         self,
@@ -354,17 +324,12 @@ class MethylGenerationAdapter:
         refs: tuple[str, ...] | None = None,
         assets: tuple | None = None,
     ) -> None:
-        self.complete = complete
-        self.identity = identity
-        self.max_proposals = max_proposals
+        super().__init__(complete, identity=identity, max_proposals=max_proposals)
         if assets is None:
             from .assets import methylation_asset_catalog
             assets = methylation_asset_catalog()
         self.assets = assets
         self.refs = refs if refs is not None else tuple(a.ref for a in assets)
-
-    def propose(self, corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
-        return self._parse(self.complete(self._build_prompt(corpus, frontier)), corpus)
 
     def _build_prompt(self, corpus: Corpus, frontier: tuple[str, ...]) -> str:
         lines = [
@@ -398,26 +363,6 @@ class MethylGenerationAdapter:
             f"Existing claims:\n{existing}\n\nUnresolved frontier: {', '.join(frontier) or '(none)'}\n"
         )
 
-    def _parse(self, raw: str, corpus: Corpus) -> tuple[Proposal, ...]:
-        obj = _extract_json(raw)
-        if obj is None:
-            return ()
-        existing_ids = set(corpus.by_id().keys())
-        out: list[Proposal] = []
-        seen: set[str] = set()
-        for p in obj.get("proposals", []):
-            try:
-                claim = self._build_claim(p)
-            except (KeyError, ValueError, TypeError, FileNotFoundError):
-                continue
-            if claim.id in existing_ids or claim.id in seen:
-                continue
-            seen.add(claim.id)
-            out.append(Proposal(operator_id=self.identity, claim=claim))
-            if len(out) >= self.max_proposals:
-                break
-        return tuple(out)
-
     def _build_claim(self, p: dict):
         kind = str(p["kind"]).strip()
         if kind == "region_delta_beta":
@@ -440,7 +385,7 @@ class MethylGenerationAdapter:
         if level_a == level_b:
             raise ValueError("levels must differ")
         self._validate_contract(ref, group_col, level_a, level_b)
-        rationale = str(p["rationale"]).strip() if p.get("rationale") else None
+        rationale = str(p.get("rationale") or "").strip() or None  # whitespace-only -> None
         return title, ref, group_col, level_a, level_b, _COMPARATORS[cmp_key], rationale
 
     def _build_region_claim(self, p: dict):
@@ -515,7 +460,6 @@ class MethylGenerationAdapter:
         from .contracts import load_contract
 
         se = load_contract(ref)
-        import json
         from pathlib import Path
 
         betas_path = Path(se.access_methods[0].access_url)
@@ -532,30 +476,3 @@ class MethylGenerationAdapter:
         missing = [p for p in probes if p not in available]
         if missing:
             raise ValueError("unknown region probe")
-
-    @classmethod
-    def anthropic(
-        cls,
-        *,
-        model: str = "claude-sonnet-4-6",
-        api_key: str | None = None,
-        **kw,
-    ) -> "MethylGenerationAdapter":
-        """Build a methylation adapter backed by the Anthropic SDK (needs the [llm] extra)."""
-        try:
-            import anthropic
-        except ModuleNotFoundError as e:  # pragma: no cover - exercised via CLI, not unit tests
-            raise RuntimeError(
-                "the methylation LLM adapter needs the optional extra: pip install 'polymer-claims[llm]'"
-            ) from e
-        client = anthropic.Anthropic(api_key=api_key)
-
-        def complete(prompt: str) -> str:  # pragma: no cover - real network
-            msg = client.messages.create(
-                model=model,
-                max_tokens=2048,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            return "".join(getattr(b, "text", "") for b in msg.content)
-
-        return cls(complete, **kw)

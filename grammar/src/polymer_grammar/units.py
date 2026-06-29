@@ -27,20 +27,20 @@ class Dimension(_Model):
         return tuple(sorted((b, e) for b, e in acc.items() if e != 0))
 
     @classmethod
-    def base(cls, name: str) -> "Dimension":
+    def base(cls, name: str) -> Dimension:
         return cls(exponents=((name, 1),))
 
     @property
     def is_dimensionless(self) -> bool:
         return not self.exponents
 
-    def __mul__(self, other: "Dimension") -> "Dimension":
+    def __mul__(self, other: Dimension) -> Dimension:
         return Dimension(exponents=self.exponents + other.exponents)
 
-    def __truediv__(self, other: "Dimension") -> "Dimension":
+    def __truediv__(self, other: Dimension) -> Dimension:
         return self * (other ** -1)
 
-    def __pow__(self, n: int) -> "Dimension":
+    def __pow__(self, n: int) -> Dimension:
         return Dimension(exponents=tuple((b, e * n) for b, e in self.exponents))
 
 

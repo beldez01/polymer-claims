@@ -3,16 +3,16 @@
 Merkle math and `canonical_entry_bytes` are pure stdlib (no crypto). The checkpoint signing/verify
 and the local log reuse `signing._require_crypto()` so the base install stays crypto-free. v1 is a
 Merkle *inclusion* log (no consistency proofs -> no verified append-only-ness); see
-docs/superpowers/specs/2026-06-25-transparency-log-design.md.
 """
 from __future__ import annotations
 
 import base64
 import hashlib
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Protocol
+
+from ._hashing import canonical_dumps
 
 if TYPE_CHECKING:
     from polymer_claims.attestation import DsseEnvelope
@@ -27,7 +27,7 @@ def canonical_entry_bytes(env: DsseEnvelope) -> bytes:
         "payload": env.payload,
         "signatures": [{"sig": s.sig, "keyid": s.keyid} for s in env.signatures],
     }
-    return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return canonical_dumps(obj).encode("utf-8")
 
 
 # --- RFC-6962 Merkle tree hash (SHA-256, domain-separated) ----------------------------------------
@@ -92,12 +92,9 @@ def verify_inclusion(leaf: bytes, index: int, tree_size: int, proof: list[bytes]
                 return False
             if (fn & 1) or (fn == sn):
                 h = node_hash(sibling, h)
-                if not (fn & 1):
-                    while True:
-                        fn >>= 1
-                        sn >>= 1
-                        if (fn & 1) or fn == 0:
-                            break
+                while fn and not (fn & 1):    # advance past trailing right-child levels
+                    fn >>= 1
+                    sn >>= 1
             else:
                 h = node_hash(h, sibling)
             fn >>= 1

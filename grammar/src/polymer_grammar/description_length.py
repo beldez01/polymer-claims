@@ -161,9 +161,14 @@ def _corpus_code_length(claims: Iterable[Claim], schema: Schema) -> float:
                 total += _GENERIC_TERM_BITS
             else:
                 total += -math.log2(term_counts[term] / total_term_slots)
-        # fixed per-slot fill (inflated for generic-pointed claims)
-        fill = _GENERIC_FILL_BITS if c.pattern.id == _GENERIC_PATTERN_ID else _FILL_BITS
-        total += fill * _n_structural_slots(c)
+        # fixed per-slot fill. A claim repointed to the synthetic generic pattern by a
+        # load-bearing DEPRECATE is priced at the inflated _GENERIC_FILL_BITS, floored at one
+        # slot: a categorical/existence-only (zero-slot) claim must still incur the penalty,
+        # else deprecating a load-bearing slotless pattern would be wrongly accepted.
+        if c.pattern.id == _GENERIC_PATTERN_ID:
+            total += _GENERIC_FILL_BITS * max(_n_structural_slots(c), 1)
+        else:
+            total += _FILL_BITS * _n_structural_slots(c)
     return total
 
 

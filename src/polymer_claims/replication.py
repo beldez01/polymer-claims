@@ -6,7 +6,6 @@ count as a replication. Returns the extra (cohort-B) Satisfaction to append to t
 the PRODUCT e-value e1*e2 (valid: independent data -> independent e-values for the shared null). The
 grammar/protocol stay ignorant of cohort B — verify receives a finished `replications=` map, mirroring
 CES-3 `materializations=` / Phase-2.1 `evidence=`. Umbrella/impure; numpy only via methyl_adapters.
-See docs/superpowers/specs/2026-06-14-2e-tiered-independence-design.md.
 """
 from __future__ import annotations
 
@@ -31,6 +30,8 @@ from .methyl_adapters import (
     _region_group_means,
 )
 
+# Abs-only arm of the evaluator air-gap (the grammar evaluator uses abs+rel tolerance). Safe here
+# because region Δβ is bounded near zero, so an absolute 1e-9 is the operative bound either way.
 _AGREE_TOL = 1e-9
 
 
@@ -106,7 +107,7 @@ def build_replication_inputs(
                 api_version=base_ctx.api_version,
                 data_version=base_ctx.data_version,
                 dimnames_hash=contract_b.dimnames_hash,
-                shared_cause_factors=getattr(contract_b, "shared_cause_factors", ()),
+                shared_cause_factors=contract_b.shared_cause_factors,
             ),
         )
         replications[cid] = (sat_b,)
@@ -121,7 +122,7 @@ def build_replication_inputs(
                 api_version=base_ctx.api_version,
                 data_version=base_ctx.data_version,
                 dimnames_hash=contract_a.dimnames_hash,
-                shared_cause_factors=getattr(contract_a, "shared_cause_factors", ()),
+                shared_cause_factors=contract_a.shared_cause_factors,
             ),
         )
         if cohorts_error_independent((sat_a, sat_b)) is not False:

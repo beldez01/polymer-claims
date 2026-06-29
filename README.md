@@ -180,7 +180,7 @@ All green, ruff clean. `grammar/` imports nothing from the legacy `polymer_forma
 ### Where the design lives
 
 - **Canonical spec (current state of record):** `docs/superpowers/polymer-claims-canonical-spec.md` — the single authoritative spec; consolidates the per-feature design docs.
-- **Original foundations spec (archived):** `docs/superpowers/archive/specs/2026-05-31-unified-claim-foundations-spec.md` · **Schema overview (HTML):** `docs/superpowers/archive/specs/2026-05-31-claim-schema-overview.html`
+- **Original foundations spec + schema overview:** in git history (the per-feature design docs were consolidated out of the tree 2026-06-29; the live contract is `GLOSSARY.md` + `ARCHITECTURE_CURRENT.md`).
 - **Per-feature design rationale + plans (with Progress Logs):** `docs/superpowers/archive/specs/` and `docs/superpowers/archive/plans/` (shipped per-slice specs and their plans are archived together)
 - **Resume primer (kept current):** `docs/superpowers/CONTINUE.md`
 
@@ -260,7 +260,7 @@ main lane would never pick. The hardening is OFF by default (`reserve_fraction=0
 > credit economy then governs). Executable frontier-attack defense and real model adapters live behind
 > the seam.
 
-- **Design spec:** `docs/superpowers/archive/specs/2026-06-02-protocol-spine-design.md`
+- **Design spec:** in git history (`docs/superpowers/` per-feature specs were consolidated out of the tree 2026-06-29).
 - **Tests:** `cd protocol && uv run pytest -q`
 
 | Subdir | Package | Status |

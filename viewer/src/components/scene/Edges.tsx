@@ -5,7 +5,7 @@ import { Line } from '@react-three/drei';
 import { EDGE_COLOR, COLOR } from '@/config/theme';
 import { useViewer, edgeBucket } from '@/store';
 import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
-import type { InterpEdge, InterpNode } from '@/lib/interpolate';
+import { staticInterpNode, type InterpEdge, type InterpNode } from '@/lib/interpolate';
 import type { Vec3 } from '@/lib/topology';
 
 function edgeColor(kind: string): string {
@@ -24,30 +24,7 @@ export default function Edges() {
   // edge endpoints track the same animated positions + status filtering.
   const nodes: InterpNode[] = useMemo(() => {
     if (interp) return interp.nodes;
-    if (data) {
-      return data.nodes.map((n) => ({
-        id: n.id,
-        status: n.status,
-        prevStatus: n.status,
-        statusT: 1,
-        pattern_id: n.pattern_id,
-        subject_kind: n.subject_kind,
-        strength: n.strength,
-        is_representation_revision: n.is_representation_revision,
-        fdr_tested: n.fdr_tested ?? false,
-        fdr_discovery: n.fdr_discovery ?? false,
-        fdr_retracted: n.fdr_retracted ?? false,
-        fdr_index: n.fdr_index ?? null,
-        fdr_e_value: n.fdr_e_value ?? null,
-        fdr_alpha_allocated: n.fdr_alpha_allocated ?? null,
-        independence_tier: n.independence_tier ?? null,
-        severity_provenance: n.severity_provenance ?? null,
-        shared_cause_overlap: n.shared_cause_overlap ?? null,
-        position: n.position,
-        scale: 1,
-        opacity: 1,
-      }));
-    }
+    if (data) return data.nodes.map(staticInterpNode);
     return [];
   }, [interp, data]);
 

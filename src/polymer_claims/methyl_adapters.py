@@ -5,11 +5,10 @@ the per-sample region-mean betas: a direct group mean-difference and an OLS grou
 (numpy lstsq), which equals the mean difference for a two-group design — so they agree (a real
 two-implementation air-gap check) yet are genuinely different estimators. Umbrella/impure (file I/O
 via load_contract). Grammar + protocol untouched. NOT re-exported from __init__ (keeps base import
-numpy-free). See docs/superpowers/archive/specs/2026-06-12-ces-2-methylation-licensing-design.md.
+numpy-free).
 """
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
@@ -31,7 +30,7 @@ from polymer_protocol import AdapterCredential, AdapterRegistry
 
 from .adapter_identity import implementation_hash_for_adapter
 from .analysis_profile import profile_oracle_id
-from .contracts import load_contract
+from .contracts import load_contract, load_manifest
 from .profiles import CANONICAL_EPICV2_V1
 
 _IMPL = "methyl::region_delta_beta"
@@ -50,9 +49,7 @@ def _load_betas(
     p = {k: v for k, v in node.params}
     se = load_contract(handle.ref)
     betas_path = Path(se.access_methods[0].access_url)
-    manifest = json.loads(
-        (betas_path.parent / f"{se.contract_uid.split('@')[0]}.json").read_text()
-    )
+    manifest = load_manifest(se)
     group_col = p["group_col"]
     sample_ids = [c["sample_id"] for c in manifest["col_data"]]
     group_of = {c["sample_id"]: c[group_col] for c in manifest["col_data"]}

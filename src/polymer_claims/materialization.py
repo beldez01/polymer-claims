@@ -3,7 +3,7 @@ content-addressed dataset (a DataHandle) under an apparatus (oracle_ref), comput
 MaterializationContext carrying its dimnames_hash (SE-Contract address, CES-1), profile_hash
 (apparatus address, CES-0), and the composite semantic_run_id. Passed to run_cycle(materializations=)
 so the minted Satisfaction records the full content-address. Umbrella/impure (load_contract reads the
-bundled SE Contract); no numpy. See docs/superpowers/archive/specs/2026-06-12-ces-3-content-address-completeness-design.md.
+bundled SE Contract); no numpy.
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from polymer_grammar import DataHandle, MaterializationContext
 from polymer_protocol.corpus import Corpus
 
 from ._hashing import canonical_sha256
-from .analysis_profile import content_hash, profile_oracle_id
+from .analysis_profile import AnalysisProfile, content_hash, profile_oracle_id
 from .contracts import load_contract
 from .profiles import CANONICAL_EPICV2_V1
 
@@ -28,7 +28,7 @@ def materialization_map(
     corpus: Corpus,
     base_ctx: MaterializationContext,
     *,
-    profiles: tuple = (CANONICAL_EPICV2_V1,),
+    profiles: tuple[AnalysisProfile, ...] = (CANONICAL_EPICV2_V1,),
 ) -> dict[str, MaterializationContext]:
     """Per-claim enriched MaterializationContext keyed by claim id. A claim whose terminal node has
     no DataHandle, or whose DataHandle.ref does not resolve to a bundled contract, gets NO entry

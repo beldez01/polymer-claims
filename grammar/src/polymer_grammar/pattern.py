@@ -8,7 +8,7 @@ it reports a coverage metric, never closure. `adjusted_effect` merges the legacy
 """
 from __future__ import annotations
 
-from pydantic import field_validator
+from pydantic import Field
 
 from .base import _Model
 
@@ -27,17 +27,9 @@ class Pattern(_Model):
     scale: str
     invariance_group: str
     intended_applications: tuple[str, ...]
-    excluded_applications: tuple[str, ...]
+    # >=1 excluded_application pins the relation (closes the Newman hole)
+    excluded_applications: tuple[str, ...] = Field(min_length=1)
     merged_from: tuple[str, ...] = ()
-
-    @field_validator("excluded_applications")
-    @classmethod
-    def _at_least_one_exclusion(cls, v: tuple[str, ...]) -> tuple[str, ...]:
-        if not v:
-            raise ValueError(
-                "a pattern must declare >=1 excluded_application to pin its relation"
-            )
-        return v
 
 
 class _Registry:

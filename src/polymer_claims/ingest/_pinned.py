@@ -1,7 +1,6 @@
 """Resolve a pinned external input (local file/dir -> cache -> opt-in fetch) and verify its SHA-256.
 Used by the real-data kernel parity gate for the Xena matrix and the cBioPortal inputs. Fetch is
-opt-in (network only when allow_fetch=True). See
-docs/superpowers/specs/2026-06-25-h01b-real-kernel-parity-design.md §3."""
+opt-in (network only when allow_fetch=True)."""
 from __future__ import annotations
 
 import hashlib
@@ -67,9 +66,14 @@ def resolve_pinned_file(
         return _verify(cached, sha256, filename)
 
     if not (allow_fetch and url):
+        suffix = (
+            f"or pass --fetch to download from {url!r}."
+            if url
+            else "(no download URL is pinned for this input)."
+        )
         raise PinnedInputError(
             f"{filename}: not found locally or in cache ({cache_dir}). Supply it via "
-            f"--xena/--cbioportal, or pass --fetch to download from {url!r}.")
+            f"--xena/--cbioportal, {suffix}")
 
     cache_dir.mkdir(parents=True, exist_ok=True)
     # unique temp name so concurrent runs don't trample each other (spec §3: atomic .part-<n>)

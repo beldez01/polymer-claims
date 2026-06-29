@@ -248,8 +248,8 @@ Viewer nodes surface `independence_tier`, `severity_provenance`, and
 - Live state and next work: `docs/superpowers/CONTINUE.md`
 - Architecture map: `ARCHITECTURE_CURRENT.md`
 - Terminology: `GLOSSARY.md`
-- Forward roadmap: `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md`
+- Forward roadmap: `docs/superpowers/2026-06-23-remaining-roadmap.md`
 - Phase 2 north star: `docs/superpowers/2026-06-12-phase-2-north-star.md`
-- Calibration ledger + certificate: `docs/superpowers/specs/2026-06-22-calibration-ledger-and-certificate-design.md` (+ the matching plan)
+- Calibration ledger + certificate: design/plan in git history (consolidated out 2026-06-29); shipped — see `CONTINUE.md`
 - Current plans/specs: `docs/superpowers/plans/` and `docs/superpowers/specs/`
 - Historical plans/specs: `docs/superpowers/archive/`

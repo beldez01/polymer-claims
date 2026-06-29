@@ -2,7 +2,6 @@
 typed conceptual edges, giving each claim a MEANINGFUL 3D position (vs the id-hash force layout).
 Umbrella/impure (numpy). The grammar/protocol core never imports this; it is consumed by the viewer
 harness and tests. NOT re-exported from polymer_claims.__init__ (keeps the base import numpy-free).
-See docs/superpowers/archive/specs/2026-06-12-relational-graph-embedding-design.md.
 """
 from __future__ import annotations
 
@@ -184,7 +183,10 @@ def procrustes_align(
     is rounded to 6dp to match ``spectral_layout`` (byte-stable; pins cross-BLAS float noise).
     Deterministic for a fixed input (numpy SVD is deterministic)."""
     common = sorted(prev.keys() & new.keys())
-    if not prev or len(common) < 2:
+    # Need >=3 correspondences to pin all 3 rotational DOF: with exactly 2, the cross-covariance
+    # is rank-1 and SVD resolves the degenerate directions arbitrarily — applying a random
+    # rotation to every node (the very frame-thrash this alignment exists to suppress).
+    if not prev or len(common) < 3:
         return new
 
     P = np.array([prev[c] for c in common], dtype=float)  # n x 3 (target, previous frame)

@@ -65,6 +65,60 @@ export interface InterpFrame {
   consistency?: ConsistencyHeadline | null;
 }
 
+/** The per-instant animation fields that distinguish one InterpNode from another. */
+interface NodeAnim {
+  prevStatus: string;
+  statusT: number;
+  position: Vec3;
+  scale: number;
+  opacity: number;
+}
+
+/**
+ * Build an InterpNode by spreading the source node's static fields (status, pattern,
+ * strength, fdr_*, tier, …) and overlaying the per-instant animation fields. Single home
+ * for the field map — used by the three interpolateFrame branches and staticInterpNode.
+ */
+function makeInterpNode(src: TopologyNode, anim: NodeAnim): InterpNode {
+  return {
+    id: src.id,
+    status: src.status,
+    prevStatus: anim.prevStatus,
+    statusT: anim.statusT,
+    pattern_id: src.pattern_id,
+    subject_kind: src.subject_kind,
+    strength: src.strength,
+    is_representation_revision: src.is_representation_revision,
+    fdr_tested: src.fdr_tested ?? false,
+    fdr_discovery: src.fdr_discovery ?? false,
+    fdr_retracted: src.fdr_retracted ?? false,
+    fdr_index: src.fdr_index ?? null,
+    fdr_e_value: src.fdr_e_value ?? null,
+    fdr_alpha_allocated: src.fdr_alpha_allocated ?? null,
+    independence_tier: src.independence_tier ?? null,
+    severity_provenance: src.severity_provenance ?? null,
+    shared_cause_overlap: src.shared_cause_overlap ?? null,
+    position: anim.position,
+    scale: anim.scale,
+    opacity: anim.opacity,
+  };
+}
+
+/**
+ * Lift a raw static-export node into the InterpNode shape with no animation
+ * (prevStatus = status, full scale/opacity). Shared by the scene components'
+ * no-timeline fallback path so the field map lives in exactly one place.
+ */
+export function staticInterpNode(n: TopologyNode): InterpNode {
+  return makeInterpNode(n, {
+    prevStatus: n.status,
+    statusT: 1,
+    position: n.position,
+    scale: 1,
+    opacity: 1,
+  });
+}
+
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
@@ -119,80 +173,35 @@ export function interpolateFrame(
     if (na) {
       // persistent — lerp position, crossfade color when status changed
       const changed = na.status !== nb.status;
-      nodes.push({
-        id: nb.id,
-        status: nb.status,
+      nodes.push(makeInterpNode(nb, {
         prevStatus: na.status,
         statusT: changed ? t : 1,
-        pattern_id: nb.pattern_id,
-        subject_kind: nb.subject_kind,
-        strength: nb.strength,
-        is_representation_revision: nb.is_representation_revision,
-        fdr_tested: nb.fdr_tested ?? false,
-        fdr_discovery: nb.fdr_discovery ?? false,
-        fdr_retracted: nb.fdr_retracted ?? false,
-        fdr_index: nb.fdr_index ?? null,
-        fdr_e_value: nb.fdr_e_value ?? null,
-        fdr_alpha_allocated: nb.fdr_alpha_allocated ?? null,
-        independence_tier: nb.independence_tier ?? null,
-        severity_provenance: nb.severity_provenance ?? null,
-        shared_cause_overlap: nb.shared_cause_overlap ?? null,
         position: lerpVec3(na.position, nb.position, t),
         scale: 1,
         opacity: 1,
-      });
+      }));
     } else {
       // entering — B position, grow in
-      nodes.push({
-        id: nb.id,
-        status: nb.status,
+      nodes.push(makeInterpNode(nb, {
         prevStatus: nb.status,
         statusT: 1,
-        pattern_id: nb.pattern_id,
-        subject_kind: nb.subject_kind,
-        strength: nb.strength,
-        is_representation_revision: nb.is_representation_revision,
-        fdr_tested: nb.fdr_tested ?? false,
-        fdr_discovery: nb.fdr_discovery ?? false,
-        fdr_retracted: nb.fdr_retracted ?? false,
-        fdr_index: nb.fdr_index ?? null,
-        fdr_e_value: nb.fdr_e_value ?? null,
-        fdr_alpha_allocated: nb.fdr_alpha_allocated ?? null,
-        independence_tier: nb.independence_tier ?? null,
-        severity_provenance: nb.severity_provenance ?? null,
-        shared_cause_overlap: nb.shared_cause_overlap ?? null,
         position: nb.position,
         scale: t,
         opacity: t,
-      });
+      }));
     }
   }
 
   // present only in A (exiting)
   for (const na of A.nodes) {
     if (bNodes.has(na.id)) continue;
-    nodes.push({
-      id: na.id,
-      status: na.status,
+    nodes.push(makeInterpNode(na, {
       prevStatus: na.status,
       statusT: 1,
-      pattern_id: na.pattern_id,
-      subject_kind: na.subject_kind,
-      strength: na.strength,
-      is_representation_revision: na.is_representation_revision,
-      fdr_tested: na.fdr_tested ?? false,
-      fdr_discovery: na.fdr_discovery ?? false,
-      fdr_retracted: na.fdr_retracted ?? false,
-      fdr_index: na.fdr_index ?? null,
-      fdr_e_value: na.fdr_e_value ?? null,
-      fdr_alpha_allocated: na.fdr_alpha_allocated ?? null,
-      independence_tier: na.independence_tier ?? null,
-      severity_provenance: na.severity_provenance ?? null,
-      shared_cause_overlap: na.shared_cause_overlap ?? null,
       position: na.position,
       scale: 1 - t,
       opacity: 1 - t,
-    });
+    }));
   }
 
   // edges — union, styling prefers the containing frame (B first)

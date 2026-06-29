@@ -7,6 +7,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .._hashing import canonical_dumps
+
 
 @dataclass(frozen=True)
 class NimRequest:
@@ -25,7 +27,7 @@ Transport = Callable[["NimRequest", str], "NimResponse"]
 
 
 def _canonical(payload: dict) -> str:
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return canonical_dumps(payload)
 
 
 def urllib_transport(req: NimRequest, api_key: str) -> NimResponse:
@@ -72,5 +74,8 @@ class NimClient:
             resp.body.get(self.model_version_field) if isinstance(resp.body, dict) else None
         )
         resp = NimResponse(status=resp.status, body=resp.body, model_version=version)
-        path.write_text(json.dumps({"status": resp.status, "body": resp.body, "model_version": resp.model_version}))
+        # Only content-address a SUCCESS into the cache: a non-raising transport that returns
+        # an error status must not poison the cache (and be replayed forever) for this request.
+        if 200 <= resp.status < 300:
+            path.write_text(json.dumps({"status": resp.status, "body": resp.body, "model_version": resp.model_version}))
         return resp

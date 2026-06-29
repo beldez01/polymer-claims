@@ -14,15 +14,12 @@
  * Safety: any pair whose endpoint id is absent from the current frame's
  * position map is silently skipped — no NaN, no crash.
  *
- * Task 9: reads `focusedObstruction` from the store; when set, the focused
+ * Focus: reads `focusedObstruction` from the store; when set, the focused
  * obstruction's lines+ring render at full opacity/width and all others are
  * dimmed. When null, all render uniformly.
  *
  * Obstruction key scheme (consistent with RightRail.tsx `obstructionKey`):
  *   key = ob.claim_ids[0] if non-empty, else String(index).
- *
- * Task-8 cleanup: ObstructionRing's dead useFrame (wrote userData.opacity but
- * never drove the material) has been removed. The ring is now static.
  */
 
 import { useMemo, useRef } from 'react';
@@ -31,7 +28,8 @@ import { useFrame } from '@react-three/fiber';
 import { COLOR } from '@/config/theme';
 import { useViewer } from '@/store';
 import { useInterpolatedFrame } from '@/lib/useInterpolatedFrame';
-import type { InterpNode } from '@/lib/interpolate';
+import { staticInterpNode, type InterpNode } from '@/lib/interpolate';
+import { BASE_RADIUS, ringPoints } from '@/lib/ring';
 import type { Vec3 } from '@/lib/topology';
 
 // ── constants ──────────────────────────────────────────────────────────────
@@ -50,9 +48,7 @@ const PULSE_PERIOD = 1.8;
  * Outline ring sits between the hover ring (r·1.7) and the FDR ring (r·2.25),
  * so obstruction membership is visually distinct from both.
  */
-const BASE_RADIUS = 0.28;
 const OBSTRUCTION_RING_FACTOR = 1.95;
-const RING_SEGMENTS = 48;
 
 // Opacity levels for focus dimming.
 const OPACITY_FOCUSED_LINE = 0.95;
@@ -61,15 +57,6 @@ const OPACITY_FOCUSED_RING = 0.85;
 const OPACITY_DIMMED_RING = 0.18;
 
 // ── helpers ────────────────────────────────────────────────────────────────
-
-function ringPoints(radius: number): [number, number, number][] {
-  const pts: [number, number, number][] = [];
-  for (let i = 0; i <= RING_SEGMENTS; i++) {
-    const a = (i / RING_SEGMENTS) * Math.PI * 2;
-    pts.push([Math.cos(a) * radius, Math.sin(a) * radius, 0]);
-  }
-  return pts;
-}
 
 /** Obstruction key — must match `obstructionKey` in RightRail.tsx. */
 function obKey(ob: { claim_ids: string[] }, index: number): string {
@@ -80,8 +67,7 @@ function obKey(ob: { claim_ids: string[] }, index: number): string {
 
 /**
  * Single rose ring rendered as a Billboard around a node, indicating it is a
- * member of at least one H¹ obstruction cycle. Static opacity (Task-8 dead
- * useFrame removed — it wrote userData.opacity but never drove the material).
+ * member of at least one H¹ obstruction cycle. Static opacity.
  */
 function ObstructionRing({
   position,
@@ -185,28 +171,7 @@ export default function Obstructions() {
     if (interp) {
       nodes = interp.nodes;
     } else if (data) {
-      nodes = data.nodes.map((n) => ({
-        id: n.id,
-        status: n.status,
-        prevStatus: n.status,
-        statusT: 1,
-        pattern_id: n.pattern_id,
-        subject_kind: n.subject_kind,
-        strength: n.strength,
-        is_representation_revision: n.is_representation_revision,
-        fdr_tested: n.fdr_tested ?? false,
-        fdr_discovery: n.fdr_discovery ?? false,
-        fdr_retracted: n.fdr_retracted ?? false,
-        fdr_index: n.fdr_index ?? null,
-        fdr_e_value: n.fdr_e_value ?? null,
-        fdr_alpha_allocated: n.fdr_alpha_allocated ?? null,
-        independence_tier: n.independence_tier ?? null,
-        severity_provenance: n.severity_provenance ?? null,
-        shared_cause_overlap: n.shared_cause_overlap ?? null,
-        position: n.position,
-        scale: 1,
-        opacity: 1,
-      }));
+      nodes = data.nodes.map(staticInterpNode);
     }
 
     for (const n of nodes) map.set(n.id, n.position);
@@ -244,10 +209,9 @@ export default function Obstructions() {
   const phaseStep = PULSE_PERIOD / Math.max(obstructions.length, 1);
 
   // Determine which node ids belong to the focused obstruction (for ring emphasis).
-  const focusedMemberIds: Set<string> =
-    hasFocus && focusedObstruction !== null
-      ? (membersByKey.get(focusedObstruction) ?? new Set())
-      : new Set();
+  const focusedMemberIds: Set<string> = hasFocus
+    ? (membersByKey.get(focusedObstruction!) ?? new Set())
+    : new Set();
 
   return (
     <group>
