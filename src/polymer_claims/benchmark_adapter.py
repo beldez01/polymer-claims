@@ -132,12 +132,6 @@ class BenchmarkAdapter(Protocol):
 _FIXTURE_CLASSES = ("pos", "neg", "unk")
 
 
-def _hash_id(example_id: str, salt: str) -> str:
-    """Deterministic string hash of example_id + salt, label-independent."""
-    digest = hashlib.sha256(f"{salt}:{example_id}".encode()).hexdigest()
-    return digest
-
-
 class FixtureModelAdapter:
     """Deterministic fixture model adapter.  Predictions derived from feature
     values and example_id only — never from labels."""

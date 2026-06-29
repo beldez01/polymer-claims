@@ -230,8 +230,8 @@ def test_fixture_adapters_differ():
     model = FixtureModelAdapter(identity="fixture-model", config={})
     baseline = FixtureBaselineAdapter(identity="fixture-baseline", config={})
     art = _make_artifact()
-    # They may coincidentally agree on single examples but should differ overall
+    # They use different hash inputs and class spaces, so should diverge
     pv_m = model.predict(art.examples)
     pv_b = baseline.predict(art.examples)
-    # Both are valid PredictionVectors; this is a smoke test
-    assert pv_m.predictions != pv_b.predictions or True  # not required to differ, just mustn't crash
+    # With different salts and feature inputs, predictions should differ
+    assert pv_m.predictions != pv_b.predictions
