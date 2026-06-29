@@ -388,3 +388,288 @@ def test_collision_raises_on_dual_evidence():
             evidence_runtime=runtime,
             evidence={"ev1": 2.0},
         )
+
+
+# ---------------------------------------------------------------------------
+# Task 15: verify_stage evidence-route licensing tests
+# ---------------------------------------------------------------------------
+
+
+def _build_setup_with_e_value(e_value: float, provenance_e_value: float | None = None):
+    """Like _build_full_setup but with configurable e_value (and optional tampered provenance_e_value).
+    Returns (corpus, runtime) ready for run_cycle."""
+    if provenance_e_value is None:
+        provenance_e_value = e_value
+
+    ctx = MaterializationContext(id="M1", api_version="v1", data_version="d1")
+    descriptor = _make_descriptor()
+    policy = _make_policy(descriptor.content_hash)
+    cell = _make_cell(policy.content_hash)
+    claim = _make_evidence_claim(cell, policy.content_hash)
+
+    ledger = FDRLedger(target_fdr=0.05)
+    ch = commitment_hash(claim)
+    ledger = register_test(ledger, claim.id, ch)
+    fdr_test = ledger.tests[0]
+
+    corpus = Corpus(claims=(claim,), fdr_ledger=ledger)
+    corpus = commit(corpus)
+
+    prov = EvidenceProvenance(
+        claim_id=claim.id,
+        executor_descriptor_ref=descriptor.content_hash,
+        evidence_policy_ref=policy.content_hash,
+        benchmark_ref=_BENCH,
+        baseline_config_ref=_SHA,
+        baseline_predictions_ref=_SHA,
+        predictor_config_ref=_SHA,
+        capability_descriptor_ref=cell.content_hash,
+        observed_advantage=0.1,
+        theta0=0.0,
+        e_value=provenance_e_value,
+        execution_contract_digest=_SHA,
+        fdr_test_index=fdr_test.index,
+        alpha_allocated=fdr_test.alpha_allocated,
+    )
+    licensing_info = EvidenceLicensingInfo(
+        route=LicenseRoute.EVIDENCE_LICENSED,
+        verification_standing="single_source_baseline",
+        evidence_provenance=prov,
+        materialization=ctx,
+    )
+    record = ExecRecord(
+        claim_id=claim.id,
+        evaluation=VerifiedEvaluation(
+            results=(EvaluationResult(
+                verdict=SatisfactionVerdict.UNDETERMINED,
+                terminal=ExecValue(value=None),
+                nodes=(),
+                adapter_identity="ev-adapter",
+                status="complete",
+            ),),
+            agreement=False,
+            satisfaction=None,
+        ),
+    )
+    ee = EvidenceExecution(
+        record=record,
+        e_value=e_value,
+        licensing_info=licensing_info,
+    )
+    trust_entry = ExecutorTrustEntry(
+        descriptor_ref=descriptor.content_hash,
+        owner="test-org",
+        trusted=True,
+        version="v1",
+    )
+    runtime = EvidenceRuntime(
+        capability_registry=CapabilityRegistry(cells=(cell,)),
+        evidence_policy_registry=EvidencePolicyRegistry(policies=(policy,)),
+        executor_descriptor_registry=ExecutorDescriptorRegistry(descriptors=(descriptor,)),
+        executor_trust_registry=ExecutorTrustRegistry(entries=(trust_entry,)),
+        executor=_StubExecutor(descriptor.content_hash, ee),
+    )
+    return corpus, runtime, ctx
+
+
+def test_evidence_licensed_via_run_cycle():
+    """Discovery + grounded + provenance → claim LICENSED with EVIDENCE_LICENSED route.
+
+    Uses e_value=100.0 (well above the e-LOND threshold for the first test slot).
+    Checks: route, independence_tier=None, verification_standing, provenance.e_value==FDRTest.e_value.
+    """
+    from polymer_grammar import LicenseRoute as LR
+
+    corpus, runtime, ctx = _build_setup_with_e_value(e_value=100.0)
+    adapters = ()  # evidence claims skip the 2-adapter gate
+
+    result = run_cycle(corpus, adapters, ctx, evidence_runtime=runtime)
+
+    by_id = result.corpus.by_id()
+    c = by_id["ev1"]
+    assert c.status == Status.LICENSED, f"expected LICENSED, got {c.status}"
+    assert c.licensing is not None
+    assert c.licensing.route == LR.EVIDENCE_LICENSED
+    assert c.licensing.independence_tier is None
+    assert c.licensing.verification_standing == "single_source_baseline"
+    assert c.licensing.evidence_provenance is not None
+    # Provenance e_value must equal the resolved FDRTest e_value in the ledger
+    ledger_test = next(
+        t for t in result.corpus.fdr_ledger.tests if t.claim_id == "ev1"
+    )
+    assert c.licensing.evidence_provenance.e_value == ledger_test.e_value
+
+
+def test_evidence_sub_threshold_stays_pending():
+    """Sub-threshold e_value → no discovery → claim stays PENDING (not REFUTED, not REJECTED)."""
+    corpus, runtime, ctx = _build_setup_with_e_value(e_value=0.5)
+    adapters = ()
+
+    result = run_cycle(corpus, adapters, ctx, evidence_runtime=runtime)
+
+    c = result.corpus.by_id()["ev1"]
+    assert c.status == Status.PENDING, f"expected PENDING, got {c.status}"
+    assert c.pending_reason != PendingReason.EXECUTION_ERROR
+
+
+def test_evidence_failure_pending_execution_error():
+    """Executor credential mismatch → failure → claim PENDING with EXECUTION_ERROR."""
+    corpus, cell, policy, descriptor, ctx, runtime = _build_full_setup()
+
+    bad_cred = f"sha256:{'c' * 64}"
+    bad_runtime = EvidenceRuntime(
+        capability_registry=runtime.capability_registry,
+        evidence_policy_registry=runtime.evidence_policy_registry,
+        executor_descriptor_registry=runtime.executor_descriptor_registry,
+        executor_trust_registry=runtime.executor_trust_registry,
+        executor=_StubExecutor(bad_cred, None),  # type: ignore[arg-type]
+    )
+
+    adapters = ()
+    result = run_cycle(corpus, adapters, ctx, evidence_runtime=bad_runtime)
+
+    c = result.corpus.by_id()["ev1"]
+    assert c.status == Status.PENDING
+    assert c.pending_reason == PendingReason.EXECUTION_ERROR
+
+
+def test_evidence_grounded_out_rejected():
+    """Discovery but claim NOT in grounded extension → REJECTED DEFEAT_GROUNDED_OUT (fall-through)."""
+    from polymer_grammar import RejectionReason
+
+    from polymer_protocol.corpus import CycleScaffolding
+    from polymer_protocol.verify import verify_stage
+
+    ctx = MaterializationContext(id="M1", api_version="v1", data_version="d1")
+    descriptor = _make_descriptor()
+    policy = _make_policy(descriptor.content_hash)
+    cell = _make_cell(policy.content_hash)
+    claim = _make_evidence_claim(cell, policy.content_hash)
+
+    ledger = FDRLedger(target_fdr=0.05)
+    ch = commitment_hash(claim)
+    ledger = register_test(ledger, claim.id, ch)
+    fdr_test = ledger.tests[0]
+
+    corpus = Corpus(claims=(claim,), fdr_ledger=ledger)
+    corpus = commit(corpus)
+
+    # Grounded extension is EMPTY — claim is NOT grounded (defeated/absent).
+    scaffolding = CycleScaffolding(grounded_extension=(), frontier=())
+
+    ev_record = ExecRecord(
+        claim_id=claim.id,
+        evaluation=VerifiedEvaluation(
+            results=(EvaluationResult(
+                verdict=SatisfactionVerdict.UNDETERMINED,
+                terminal=ExecValue(value=None),
+                nodes=(),
+                adapter_identity="ev-adapter",
+                status="complete",
+            ),),
+            agreement=False,
+            satisfaction=None,
+        ),
+    )
+
+    prov = EvidenceProvenance(
+        claim_id=claim.id,
+        executor_descriptor_ref=descriptor.content_hash,
+        evidence_policy_ref=policy.content_hash,
+        benchmark_ref=_BENCH,
+        baseline_config_ref=_SHA,
+        baseline_predictions_ref=_SHA,
+        predictor_config_ref=_SHA,
+        capability_descriptor_ref=cell.content_hash,
+        observed_advantage=0.1,
+        theta0=0.0,
+        e_value=100.0,
+        execution_contract_digest=_SHA,
+        fdr_test_index=fdr_test.index,
+        alpha_allocated=fdr_test.alpha_allocated,
+    )
+    info = EvidenceLicensingInfo(
+        route=LicenseRoute.EVIDENCE_LICENSED,
+        verification_standing="single_source_baseline",
+        evidence_provenance=prov,
+        materialization=ctx,
+    )
+
+    out = verify_stage(
+        corpus, scaffolding, (ev_record,),
+        evidence={"ev1": 100.0},
+        evidence_licensing={"ev1": info},
+    )
+
+    c = out.by_id()["ev1"]
+    assert c.status == Status.REJECTED
+    assert c.rejection_reason == RejectionReason.DEFEAT_GROUNDED_OUT
+
+
+def test_evidence_ledger_equality_raises_on_e_value_mismatch():
+    """Tampered provenance.e_value (99.0) vs ledger e_value (100.0) → ValueError."""
+    corpus, runtime, ctx = _build_setup_with_e_value(
+        e_value=100.0,          # what goes into ev_map → resolves FDR test to 100.0
+        provenance_e_value=99.0,  # tampered: will NOT match ledger's 100.0
+    )
+    adapters = ()
+
+    with pytest.raises(ValueError, match="evidence provenance/ledger mismatch"):
+        run_cycle(corpus, adapters, ctx, evidence_runtime=runtime)
+
+
+def test_altered_precedence_over_evidence_failure():
+    """A claim in altered_ids AND evidence_failures → REJECTED HYPOTHESIS_ALTERED (not EXECUTION_ERROR).
+
+    Directly calls verify_stage with a FDR test registered under a wrong commitment_hash
+    (simulating post-hoc alteration) and the same claim_id in evidence_failures.
+    """
+    from polymer_grammar import RejectionReason
+
+    from polymer_protocol.corpus import CycleScaffolding
+    from polymer_protocol.verify import verify_stage
+
+    descriptor = _make_descriptor()
+    policy = _make_policy(descriptor.content_hash)
+    cell = _make_cell(policy.content_hash)
+    claim = _make_evidence_claim(cell, policy.content_hash)
+
+    real_ch = commitment_hash(claim)
+    wrong_ch = f"sha256:{'d' * 64}"
+    assert real_ch != wrong_ch  # sanity
+
+    ledger = FDRLedger(target_fdr=0.05)
+    ledger = register_test(ledger, claim.id, wrong_ch)  # register with WRONG hash
+
+    corpus = Corpus(claims=(claim,), fdr_ledger=ledger)
+    corpus = commit(corpus)  # sets provenance.preregistration_hash = real lock
+
+    scaffolding = CycleScaffolding(grounded_extension=(claim.id,), frontier=())
+
+    ev_record = ExecRecord(
+        claim_id=claim.id,
+        evaluation=VerifiedEvaluation(
+            results=(EvaluationResult(
+                verdict=SatisfactionVerdict.UNDETERMINED,
+                terminal=ExecValue(value=None),
+                nodes=(),
+                adapter_identity="ev-adapter",
+                status="complete",
+            ),),
+            agreement=False,
+            satisfaction=None,
+        ),
+    )
+
+    # Pass claim in evidence_failures to test precedence (altered should win).
+    evidence_failures = {claim.id: object()}
+
+    out = verify_stage(
+        corpus, scaffolding, (ev_record,),
+        evidence={"ev1": 3.0},          # triggers the alteration check
+        evidence_failures=evidence_failures,
+    )
+
+    c = out.by_id()[claim.id]
+    assert c.status == Status.REJECTED
+    assert c.rejection_reason == RejectionReason.HYPOTHESIS_ALTERED
