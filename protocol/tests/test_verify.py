@@ -19,7 +19,8 @@ from tests.conftest import make_claim, make_plan
 
 def _run_to_records(claim, empty_ledger, ctx, adapters):
     corpus = commit(Corpus(claims=(claim,), fdr_ledger=empty_ledger))
-    return execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
+    return corpus, records
 
 
 def test_satisfied_in_extension_becomes_licensed(empty_ledger, ctx, adapters):
@@ -60,7 +61,7 @@ def test_two_impl_disagreement_stays_pending(empty_ledger, ctx):
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
     # perturbed reference adapter -> terminal values disagree -> no mint, disagreement set
     disagreeing = (IdentityAdapter(), ReferenceAdapter(identity="reference", perturb=10.0))
-    corpus, records = execute_ground(corpus, disagreeing, ctx)
+    corpus, records, _ = execute_ground(corpus, disagreeing, ctx)
     assert records[0].evaluation.agreement is False
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     out = verify_stage(corpus, scaffolding, records)
@@ -71,7 +72,7 @@ def test_claim_without_record_is_untouched(empty_ledger, ctx, adapters):
     executed = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
     bystander = make_claim("b", status=Status.CONJECTURED)
     corpus = commit(Corpus(claims=(executed, bystander), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
     scaffolding = CycleScaffolding(grounded_extension=("a", "b"))
     out = verify_stage(corpus, scaffolding, records)
     assert out.by_id()["b"].status == Status.CONJECTURED
@@ -123,7 +124,7 @@ def test_oracle_grounded_license_caps_strength(empty_ledger, ctx, adapters):
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     reg = OracleRegistry(dossiers=(OracleDossier(oracle_id="api", validation_tier=ValidationTier.INDIRECT),))
     out = verify_stage(corpus, scaffolding, records, reg)
@@ -140,7 +141,7 @@ def test_builtin_only_claim_uncapped_without_registry(empty_ledger, ctx, adapter
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=sv)  # no oracle_ref
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     out = verify_stage(corpus, scaffolding, records)  # no oracles arg
     assert out.by_id()["a"].strength == sv  # unchanged — no oracle dependency
@@ -154,7 +155,7 @@ def test_oracle_grounded_claim_capped_without_registry(empty_ledger, ctx, adapte
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     out = verify_stage(corpus, scaffolding, records)  # no oracles -> empty -> unresolved -> UNVALIDATED
     graded = out.by_id()["a"]
@@ -171,7 +172,7 @@ def test_gold_oracle_with_registry_leaves_strength_unchanged(empty_ledger, ctx, 
                         severity=0.9, world_contact=0.9, explanatory_virtue=0.9)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"), strength=sv)
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     reg = OracleRegistry(dossiers=(OracleDossier(oracle_id="api", validation_tier=ValidationTier.GOLD),))
     out = verify_stage(corpus, scaffolding, records, reg)
@@ -191,7 +192,7 @@ def test_out_of_domain_oracle_caps_through_verify_stage(empty_ledger, ctx, adapt
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"),
                    strength=sv, subject=region)
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     # oracle qualified only for variant_vrs; our subject is genomic_region -> out of domain -> UNVALIDATED
     reg = OracleRegistry(dossiers=(OracleDossier(
@@ -214,7 +215,7 @@ def _verify_through_select(claims, adapters, ctx):
     corp, rec = select_stage(corp, budget=None, cost_model=CostModel(),
                              value_weights=ValueWeights(), cost_weights=CostWeights())
     corp = commit(corp, only=frozenset(d.claim_id for d in rec.decisions if d.selected))
-    corp, records = execute_ground(corp, adapters, ctx)
+    corp, records, _ = execute_ground(corp, adapters, ctx)
     return verify_stage(corp, scaffolding, records)
 
 
@@ -262,7 +263,7 @@ def test_earned_strength_licenses_and_is_tier_capped(empty_ledger, ctx, adapters
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05, oracle_ref="api"))
     assert c.strength is None
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     reg = OracleRegistry(dossiers=(OracleDossier(oracle_id="api",
                                                  validation_tier=ValidationTier.BENCHMARKED),))
@@ -279,7 +280,7 @@ def test_earned_path_leaves_const_none_strength_claim_exempt(empty_ledger, ctx, 
     # No oracle_ref -> NOT earned -> stays exempt, strength stays None (byte-unchanged behavior).
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     out = verify_stage(corpus, scaffolding, records)
     graded = out.by_id()["a"]

@@ -134,7 +134,7 @@ def test_mdl_route_carries_shared_cause_annotation_and_cap():
     )
     corpus = Corpus(claims=(*_redundant_object_claims(), rev_claim), fdr_ledger=empty_ledger)
     corpus = commit(corpus)
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
 
     # Stamp the test-cohort dimnames_hash onto the revision exec record.
     test_cohort = "cohortMDL"

@@ -22,6 +22,7 @@ from .canonicalize import canonicalize
 from .commit import commit
 from .corpus import Corpus, CycleResult, StageAudit, is_locked
 from .cost import CostModel, CostWeights
+from .evidence_executor import EvidenceRuntime
 from .execute import execute_ground
 from .generate import Proposer, generate_stage
 from .integrate import integrate
@@ -58,6 +59,7 @@ def run_cycle(
     materializations: dict[str, MaterializationContext] | None = None,
     evidence: dict[str, float] | None = None,
     replications: dict[str, tuple[Satisfaction, ...]] | None = None,
+    evidence_runtime: EvidenceRuntime | None = None,
 ) -> CycleResult:
     audit: list[StageAudit] = []
     led = ledger if ledger is not None else SelectionLedger()
@@ -115,8 +117,29 @@ def run_cycle(
     n_committed = len(_locked_ids(corpus) - locked_before)
     audit.append(StageAudit(stage="commit", note=f"{n_committed} claim(s) committed", count=n_committed))
 
-    corpus, records = execute_ground(corpus, adapters, ctx, only=selected_ids, materializations=materializations)
+    corpus, records, evidence_executions = execute_ground(
+        corpus, adapters, ctx, only=selected_ids,
+        materializations=materializations, evidence_runtime=evidence_runtime,
+    )
     audit.append(StageAudit(stage="execute_ground", note=f"{len(records)} executed", count=len(records)))
+
+    # Merge executor-produced evidence into the caller-supplied evidence map, detecting
+    # collisions (same claim_id present in both).
+    ev_map: dict[str, float] = dict(evidence) if evidence is not None else {}
+    evidence_licensing: dict[str, object] = {}
+    evidence_failures: dict[str, object] = {}
+    for ev in evidence_executions:
+        if ev.failure_reason is None:
+            cid = ev.record.claim_id
+            if cid in ev_map:
+                raise ValueError(
+                    f"evidence collision for claim {cid!r}: caller-supplied evidence "
+                    "and executor result both present"
+                )
+            ev_map[cid] = ev.e_value
+            evidence_licensing[cid] = ev.licensing_info
+        else:
+            evidence_failures[ev.record.claim_id] = ev.failure_reason
 
     # scaffolding stays valid: canonicalize/safety/commit/execute change neither defeat_edges
     # nor claim ids, and generate only ADDS CONJECTURED claims with no defeat edges (the pure
@@ -125,7 +148,11 @@ def run_cycle(
     executed_ids = {r.claim_id for r in records}
     corpus = verify_stage(
         corpus, scaffolding, records, oracles,
-        adapter_registry=adapter_registry, evidence=evidence, replications=replications,
+        adapter_registry=adapter_registry,
+        evidence=ev_map if ev_map else None,
+        replications=replications,
+        evidence_licensing=evidence_licensing,
+        evidence_failures=evidence_failures,
     )
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
     # Scope to THIS cycle's executed claims: a claim held for non-independence persists its

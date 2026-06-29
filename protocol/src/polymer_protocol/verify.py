@@ -156,6 +156,8 @@ def verify_stage(
     evidence: dict[str, float] | None = None,
     replications: dict[str, tuple[Satisfaction, ...]] | None = None,
     strict_shared_cause: bool = False,
+    evidence_licensing: dict[str, object] | None = None,
+    evidence_failures: dict[str, object] | None = None,
 ) -> Corpus:
     registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
