@@ -17,7 +17,7 @@ def _setup(ctx, adapters):
     empty_ledger = FDRLedger(target_fdr=0.05)
     c = make_claim("a", status=Status.PENDING, plan=make_plan(0.01, 0.05))
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, adapters, ctx)
+    corpus, records, _ = execute_ground(corpus, adapters, ctx)
     scaffolding = CycleScaffolding(grounded_extension=("a",))
     return corpus, scaffolding, records
 

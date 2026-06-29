@@ -1,6 +1,13 @@
 import pytest
 from polymer_protocol.calibration import (
-    ResolutionRecord, ResolutionKind, CalibrationTarget, ResolutionVerdict, Resolvability,
+    CalibrationLedger,
+    CalibrationTarget,
+    ResolutionKind,
+    ResolutionRecord,
+    ResolutionVerdict,
+    Resolvability,
+    calibration_summary,
+    resolvability_prior,
 )
 
 
@@ -42,12 +49,9 @@ def test_resolvability_rejected_on_non_attested():
         _definitional(resolvability=Resolvability.RESOLVABLE)
 
 
-from polymer_protocol.calibration import resolvability_prior
-
-
 def _claim(plan):
     # Minimal claim via the protocol test conftest builder.
-    from tests.conftest import make_claim, make_plan
+    from tests.conftest import make_claim
     return make_claim("subj", plan=plan)
 
 
@@ -58,9 +62,6 @@ def test_prior_resolvable_when_plan_present():
 
 def test_prior_unresolvable_when_plan_absent():
     assert resolvability_prior(_claim(None)) is Resolvability.UNRESOLVABLE
-
-
-from polymer_protocol.calibration import CalibrationLedger, calibration_summary
 
 
 def test_attested_stat_counts_resolvability_split_and_q():

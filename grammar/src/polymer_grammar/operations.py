@@ -15,7 +15,7 @@ import json
 from enum import Enum
 from typing import Annotated, Literal, Union
 
-from pydantic import Field, model_validator
+from pydantic import Field, model_serializer, model_validator
 
 from .base import _Model
 from .leaf import MeasurementBasis
@@ -202,3 +202,24 @@ class SatisfactionCriterion(_Model):
 class EvaluationPlan(_Model):
     graph: ComputeGraph
     criterion: SatisfactionCriterion
+    # V2.0: optional execution contract; omitted from serialized output when None
+    # (so existing plans' model_dump_json / commitment_hash stay byte-identical).
+    execution_contract: ExecutionContract | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler) -> dict:
+        """Drop execution_contract from the output when None so existing plans'
+        model_dump/model_dump_json stays byte-identical (no new key)."""
+        data = handler(self)
+        if data.get("execution_contract") is None:
+            data.pop("execution_contract", None)
+        return data
+
+
+# Late import to break the circular dependency: verification_policy.py imports
+# LicenseRoute / MaterializationContext from licensing.py, which in turn late-imports
+# EvidenceProvenance from verification_policy.py. Importing ExecutionContract here
+# (after EvaluationPlan is defined) mirrors the Task 8/9 pattern in licensing.py and
+# capability.py. model_rebuild() completes the EvaluationPlan schema with the resolved type.
+from .verification_policy import ExecutionContract  # noqa: E402
+EvaluationPlan.model_rebuild()

@@ -156,6 +156,8 @@ def verify_stage(
     evidence: dict[str, float] | None = None,
     replications: dict[str, tuple[Satisfaction, ...]] | None = None,
     strict_shared_cause: bool = False,
+    evidence_licensing: dict[str, object] | None = None,
+    evidence_failures: dict[str, object] | None = None,
 ) -> Corpus:
     registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
@@ -214,6 +216,71 @@ def verify_stage(
                 rejection_reason=RejectionReason.HYPOTHESIS_ALTERED,
             ))
             continue
+        # --- Task 15: evidence failure ---
+        if evidence_failures and c.id in evidence_failures:
+            new_claims.append(_with_status(
+                c, status=Status.PENDING, pending_reason=PendingReason.EXECUTION_ERROR, licensing=None,
+            ))
+            continue
+        # --- Task 15: evidence licensing ---
+        elif evidence_licensing and c.id in evidence_licensing:
+            info = evidence_licensing[c.id]
+            provenance = info.evidence_provenance
+            if (
+                _e_ok(c.id)
+                and c.id in in_ext
+                and c.provenance is not None
+                and c.status == Status.PENDING
+            ):
+                # Audit #18: assert ledger fields equal provenance fields (integrity gate).
+                test = next(
+                    (t for t in new_ledger.tests if t.index == provenance.fdr_test_index),
+                    None,
+                )
+                if test is None:
+                    raise ValueError(
+                        f"evidence provenance/ledger mismatch: no FDRTest at index "
+                        f"{provenance.fdr_test_index} for claim {c.id!r}"
+                    )
+                if test.claim_id != provenance.claim_id:
+                    raise ValueError(
+                        f"evidence provenance/ledger mismatch: claim_id mismatch for "
+                        f"claim {c.id!r}: ledger={test.claim_id!r}, provenance={provenance.claim_id!r}"
+                    )
+                if test.commitment_hash != commitment_hash(c):
+                    raise ValueError(
+                        f"evidence provenance/ledger mismatch: commitment_hash mismatch "
+                        f"for claim {c.id!r}"
+                    )
+                if test.alpha_allocated != provenance.alpha_allocated:
+                    raise ValueError(
+                        f"evidence provenance/ledger mismatch: alpha_allocated mismatch "
+                        f"for claim {c.id!r}: ledger={test.alpha_allocated}, "
+                        f"provenance={provenance.alpha_allocated}"
+                    )
+                if test.e_value != provenance.e_value:
+                    raise ValueError(
+                        f"evidence provenance/ledger mismatch: e_value mismatch for "
+                        f"claim {c.id!r}: ledger={test.e_value}, provenance={provenance.e_value}"
+                    )
+                sat = Satisfaction(
+                    verdict=SatisfactionVerdict.SATISFIED,
+                    materialization=info.materialization,
+                    credential_ids=(provenance.executor_descriptor_ref,),
+                )
+                lic = Licensing(
+                    route=LicenseRoute.EVIDENCE_LICENSED,
+                    satisfactions=(sat,),
+                    rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
+                    independence_tier=None,
+                    verification_standing=info.verification_standing,
+                    evidence_provenance=provenance,
+                )
+                new_claims.append(_with_status(
+                    c, status=Status.LICENSED, licensing=lic, pending_reason=None,
+                ))
+                continue
+            # Not eligible — fall through to existing branches below.
         rec = rec_by_id.get(c.id)
         if rec is None:
             new_claims.append(c)

@@ -169,6 +169,21 @@ from .representation import (
     meets_meta_tier_bar,
 )
 from .commitment import commitment_hash
+from .sampling import SamplingRegime
+from .evidence_policy import EvidencePolicy, EvidencePolicyRegistry
+from .verification_policy import (
+    EvidenceLicensingInfo,
+    EvidenceProvenance,
+    ExecutionContract,
+    VerificationPolicy,
+)
+from .executor_credential import (
+    Component,
+    ExecutorDescriptor,
+    ExecutorDescriptorRegistry,
+    ExecutorTrustEntry,
+    ExecutorTrustRegistry,
+)
 from .capability import (
     CapabilityCell, CapabilityRegistry, ParamCodec, SubjectRequirement, SubjectKind,
     OracleRequirement, DataRefKind, ConformanceResult, ConformanceReason, ConformanceWarning,
@@ -325,6 +340,7 @@ __all__ = [
     "classify",
     "RevisionDiscovery",
     "commitment_hash",
+    "SamplingRegime",
     "CapabilityCell",
     "CapabilityRegistry",
     "ParamCodec",
@@ -341,6 +357,17 @@ __all__ = [
     "validate_claim_conformance",
     "criterion_target_ok",
     "data_ref_ok",
+    "EvidencePolicy",
+    "EvidencePolicyRegistry",
+    "EvidenceLicensingInfo",
+    "EvidenceProvenance",
+    "ExecutionContract",
+    "VerificationPolicy",
+    "Component",
+    "ExecutorDescriptor",
+    "ExecutorDescriptorRegistry",
+    "ExecutorTrustEntry",
+    "ExecutorTrustRegistry",
     "CONFIRMATORY_SEVERITY_CEILING",
     "SHARED_CAUSE_TAU",
     "SeverityProvenance",

@@ -18,7 +18,7 @@ def _exec_record_with_value(claim_id, value, ctx, adapters, empty_ledger):
 
     c = make_claim(claim_id, status=Status.PENDING, plan=make_plan(value, 0.05))
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    _out, records = execute_ground(corpus, adapters, ctx)
+    _out, records, _ = execute_ground(corpus, adapters, ctx)
     return records[0]
 
 

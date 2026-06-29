@@ -7,7 +7,7 @@ import re
 from enum import Enum
 from typing import Literal
 
-from pydantic import computed_field, model_validator
+from pydantic import computed_field, model_serializer, model_validator
 
 from .base import _Model
 from .claim import Claim
@@ -19,10 +19,12 @@ from .operations import (
     OperationNode,
     ProducedLeafSpec,
     SatisfactionCriterion,
+    _sha,
 )
 from .pattern import PatternRef
 
 _SE_CONTRACT_RE = re.compile(r"^se:[^:@\s]+@[0-9]+$")
+_BENCHMARK_RE = re.compile(r"^bench:sha256:[0-9a-f]{64}$")
 
 SubjectKind = Literal[
     "genomic_region", "ontology_term", "variant_vrs", "s4_object", "gene_or_protein",
@@ -80,6 +82,7 @@ class ParamCodec(_Model):
 class DataRefKind(str, Enum):
     OPAQUE = "opaque"
     SE_CONTRACT = "se_contract"
+    BENCHMARK = "benchmark"
 
 
 def data_ref_ok(kind: DataRefKind, ref: str) -> bool:
@@ -87,6 +90,8 @@ def data_ref_ok(kind: DataRefKind, ref: str) -> bool:
         return bool(ref)
     if kind == DataRefKind.SE_CONTRACT:
         return bool(_SE_CONTRACT_RE.match(ref))
+    if kind == DataRefKind.BENCHMARK:
+        return bool(_BENCHMARK_RE.match(ref))
     return False  # pragma: no cover
 
 
@@ -128,10 +133,49 @@ class CapabilityCell(_Model):
     data_ref_kind: DataRefKind
     claim_leaf_kinds: tuple[Literal["quantity", "categorical", "existence", "proposition"], ...]
     criterion_target: Literal["threshold", "reference_leaf", "either"]
+    # V2.0: optional verification policy; omitted from serialized output when None
+    # (so existing cells' model_dump stays byte-identical — see _serialize below).
+    verification_policy: VerificationPolicy | None = None
 
     @property
     def ref(self) -> str:
         return f"{self.capability_id}@{self.capability_version}"
+
+    @property
+    def content_hash(self) -> str:
+        """SHA-256 content-address of this cell's canonical descriptor."""
+        canonical: dict = {
+            "capability_id": self.capability_id,
+            "capability_version": self.capability_version,
+            "operation_impl": self.operation_impl,
+            "title": self.title,
+            "pattern": self.pattern.model_dump(mode="json"),
+            "subject": self.subject.model_dump(mode="json"),
+            "param_schema": [p.model_dump(mode="json") for p in self.param_schema],
+            "produced": self.produced.model_dump(mode="json"),
+            "allowed_comparators": [c.value for c in self.allowed_comparators],
+            "eligible_adapter_identities": list(self.eligible_adapter_identities),
+            "min_executing_adapters": self.min_executing_adapters,
+            "oracle": self.oracle.model_dump(mode="json"),
+            "data_ref_kind": self.data_ref_kind.value,
+            "claim_leaf_kinds": list(self.claim_leaf_kinds),
+            "criterion_target": self.criterion_target,
+            "verification_policy": (
+                self.verification_policy.model_dump(mode="json")
+                if self.verification_policy is not None
+                else None
+            ),
+        }
+        return "sha256:" + _sha(canonical)
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler) -> dict:
+        """Drop verification_policy from the output when None so existing cells'
+        model_dump/model_dump_json stays byte-identical (no new key)."""
+        data = handler(self)
+        if data.get("verification_policy") is None:
+            data.pop("verification_policy", None)
+        return data
 
     @model_validator(mode="after")
     def _check(self) -> CapabilityCell:
@@ -146,8 +190,18 @@ class CapabilityCell(_Model):
         ids = self.eligible_adapter_identities
         if len(set(ids)) != len(ids) or any(not i.strip() for i in ids):
             raise ValueError("eligible_adapter_identities must be unique and nonempty")
-        if self.min_executing_adapters != 2:
-            raise ValueError("V1: min_executing_adapters must be 2")
+        # Cardinality migration: required min_executing_adapters depends on verification_policy.
+        # None or recompute_pair  => must be 2 (preserves all pre-Task-9 cells).
+        # single                  => must be 1.
+        vp = self.verification_policy
+        if vp is None or vp.execution == "recompute_pair":
+            if self.min_executing_adapters != 2:
+                raise ValueError(
+                    "recompute_pair (or no verification_policy): min_executing_adapters must be 2"
+                )
+        elif vp.execution == "single":
+            if self.min_executing_adapters != 1:
+                raise ValueError("single verification_policy: min_executing_adapters must be 1")
         if self.min_executing_adapters > len(ids):
             raise ValueError("min_executing_adapters exceeds eligible identities")
         if not self.claim_leaf_kinds:
@@ -332,3 +386,11 @@ def validate_claim_conformance(claim, registry, capability_id, capability_versio
         return ConformanceResult(reasons=(ConformanceReason.CAPABILITY_NOT_REGISTERED,),
                                  detail=f"{capability_id}@{capability_version} not registered")
     return validate_claim_shape(claim, cell)
+
+
+# Late import to break the potential circular dependency (verification_policy.py imports
+# from licensing.py, which is loaded transitively through claim.py above).
+# VerificationPolicy is resolved here after all classes in this module are defined,
+# then model_rebuild() completes the CapabilityCell schema (mirrors Task 8 / licensing.py).
+from .verification_policy import VerificationPolicy  # noqa: E402
+CapabilityCell.model_rebuild()

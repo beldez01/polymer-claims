@@ -51,7 +51,7 @@ def licensable_corpus() -> tuple[Corpus, CycleScaffolding, tuple[ExecRecord, ...
     empty_ledger = FDRLedger(target_fdr=0.05)
     c = make_claim("c1", status=Status.PENDING, plan=make_plan(0.01, 0.05), strength=_STRENGTH)
     corpus = commit(Corpus(claims=(c,), fdr_ledger=empty_ledger))
-    corpus, records = execute_ground(corpus, _ADAPTERS, _CTX)
+    corpus, records, _ = execute_ground(corpus, _ADAPTERS, _CTX)
     scaffolding = CycleScaffolding(grounded_extension=("c1",))
     return corpus, scaffolding, records
 
