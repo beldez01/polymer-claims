@@ -2,184 +2,208 @@
 
 **Date:** 2026-06-29
 **Author:** Z. Belden (synthesized with Claude)
-**Status:** DESIGN (v4, post-3rd-review) — awaiting review → `writing-plans`
+**Status:** DESIGN (v5, post-4th-review — architecture APPROVED, contract hardened) → `writing-plans`
 **Roadmap item:** V2.0 (`docs/superpowers/2026-06-23-remaining-roadmap.md`)
 **Depends on:** Capability Cell + Registry V1 (`b058d3c`)
 
 > **Revision history.** v1 (cassette + likelihood ratio) — no sampling distribution. v2 (accuracy vs
-> base-rate) — marginal mean bound ≠ sequential null; data-dependent `p₀`. v3 (paired baseline,
-> **out-of-cycle** precompute injected as `ResolvedVerification`) — *unsound*: computing evidence before
-> commit/α-lock is a multiplicity leak, the injected DTO is a license-forging surface, and removing
-> evidence claims from `exec_records` breaks pre-registration resolution + all bookkeeping. **This v4**
-> keeps the v2/v3 *statistics* (corrected) but moves execution **in-cycle, post-commit**, behind the
-> protocol's existing gate stack, via an injected executor. Architecture grounded in a full pipeline +
-> content-address map (see "Grounding" footnotes). **Slice 1 of Path A** (§13).
+> base-rate) — marginal bound ≠ sequential null; data-dependent `p₀`. v3 (out-of-cycle precompute +
+> injected DTO) — unsound (multiplicity leak, forge surface, broke pre-registration). v4 moved execution
+> **in-cycle, post-commit** behind the gate stack — *architecture approved in 4th review*. **This v5**
+> hardens the execution contract per the 4th review (binds the full execution contract into
+> pre-registration; requires a locked FDR slot; credentials the whole executor; preserves existing
+> content hashes; computed fixture). **Slice 1 of Path A** (§13).
 
 ---
 
 ## 1. Purpose & the generalization lesson
 
-V2.0 registers one genuinely-new capability — licensed *not* by two pure-Python recompute legs — to
-find where V1's abstraction breaks, and to build the minimal honest machinery. The lesson V2.0 teaches
-(and that gates V2.1–V2.3 + closed-world execution): **a capability can be executed and licensed by an
-in-cycle, registered, content-addressed *executor* that runs through the same eligibility gates as the
-recompute path — the gate stack, not the adapter count, is the trust boundary.**
+Register one genuinely-new capability — licensed *not* by two pure-Python recompute legs — to find
+where V1's abstraction breaks, and build the minimal honest machinery. The lesson (gating V2.1–V2.3 +
+closed-world execution): **a capability can be executed and licensed by an in-cycle, registered,
+content-addressed *executor* running through the same eligibility gates as the recompute path — the
+gate stack, not the adapter count, is the trust boundary.**
 
 **Non-goals:** the wedge (H1.A2 → H2 stays critical path); closed-world *enforcement*; V2.1–V2.3;
 networked calls; certificate/SLSA evidence integration (Slice 2); defeat/drift/reinstatement (Slice 3).
 
----
-
-## 2. Architecture — in-cycle, post-commit, gated (the v3→v4 fix)
-
-`run_cycle`'s order is REPRESENT → GENERATE → CANONICALIZE → SAFETY → **SELECT** → **COMMIT** →
-**EXECUTE** → **VERIFY** → INTEGRATE → LEDGER.¹ The evidence route plugs into the **existing** pipeline:
-
-1. **Identification.** An evidence claim's terminal `OperationNode.impl` is the capability's
-   `operation_impl` (e.g. `eval::benchmark_advantage`). It is already covered by `commitment_hash`
-   (which hashes `evaluation_plan` only²), so the capability + criterion are locked at COMMIT — swapping
-   them post-registration trips `HYPOTHESIS_ALTERED`.
-2. **Pre-registration (multiplicity-safe).** The caller `register_hypotheses(...)` **before**
-   `run_cycle` (today's pattern), locking the e-LOND α-slot + `commitment_hash`.³ The executor runs
-   *inside* the cycle at EXECUTE (post-COMMIT), so the caller never observes the outcome before the slot
-   is locked — closing the v3 multiplicity leak.
-3. **Execution branch.** `run_cycle` gains injected `evidence_executor` (umbrella; numpy lives there)
-   and the pure `capability_registry` (grammar). In `execute_ground`'s single per-claim chokepoint⁴,
-   if `capability_registry` resolves the node's `impl` to a cell whose `verification_policy.execution
-   == "single"`, the claim is dispatched to `evidence_executor` **instead of** the two-adapter
-   `verify()`. The executor returns a normal `ExecRecord(claim_id, evaluation=VerifiedEvaluation(...))`
-   carrying an **honest `SATISFIED` Satisfaction** *iff* the criterion is met (otherwise a non-satisfied
-   verdict → no Satisfaction → Gate A withholds the license). It **always** emits an e-value (to resolve
-   the locked FDR test even when the criterion is unmet) plus an `EvidenceLicensingInfo`
-   (route/standing/provenance). **Data flow:** `execute_ground` returns these alongside `records`;
-   `run_cycle` merges the e-values into the existing `evidence=` map and threads the
-   `EvidenceLicensingInfo` dict into `verify_stage` as a new parameter (§8). `ExecRecord` stays the
-   universal bridge⁶ — no new content-addressed structure is introduced.
-4. **Gating + licensing (reuse).** Because the output is a normal `ExecRecord` + an `evidence=` e-value,
-   the **entire existing `verify_stage` gate stack applies unchanged**: Gate A minted-Satisfaction,
-   B grounded-extension, C provenance, D BH selective-inference bar, E e-LOND, F commitment-hash match,
-   G PENDING.⁵ The Phase-D pre-registration resolution loop (which iterates `exec_records`) resolves the
-   locked test automatically. `executed_ids`, audit counts, and Goodhart/selection-ledger credit all
-   accrue because the claim went through SELECT and produced a record.⁶
-
-This is the v3→v4 correction: **no out-of-cycle precompute, no injected-DTO licensing path, no
-gate-bypass.** A malicious caller cannot forge a license — the executor runs in-cycle and its output
-still must clear A–G; trust in the executor itself is the same model as adapters (byte-derived
-credential, §6).
-
-> ¹ `cycle.py:62-183`. ² `commitment.py:13-18` (hashes `evaluation_plan` only). ³ `register.py:15`,
-> `fdr.py:111` `register_test`. ⁴ `execute.py:51-60`. ⁵ Gates quoted at `verify.py:231-233` +
-> `_permitted_by_bar` `verify.py:80-115` + `_e_ok` `verify.py:197-201`. ⁶ `cycle.py:125,130-168`.
-
-**Two localized `verify_stage` changes** (the only edits to the licensing block):
-- **Skip the independent-pair gate** (`verify.py:235-245`) for evidence claims (single-source by
-  design — else `ADAPTER_NOT_INDEPENDENT`).
-- **Stamp route/standing/provenance**: at `Licensing` construction (`verify.py:252-258`), if the claim
-  has `EvidenceLicensingInfo`, build `Licensing(route=EVIDENCE_LICENSED, independence_tier=None,
-  verification_standing=..., evidence_provenance=..., satisfactions=(sat,), ...)` instead of the
-  `SEVERE_TEST` default. This only **labels** an already-gated license; it cannot license anything that
-  fails A–G.
+**Trust model (stated honestly — audit-4 #6).** This is a *local injected-executor* model. The
+guarantee is narrow: **a result cannot bypass the protocol gates** (selection, commit, pre-registration,
+grounded extension, BH bar, e-LOND, commitment match). Scientific validity still depends on the
+configured executor and trust roots — a party controlling the executor, registry, benchmark and adapter
+registry can construct internally-consistent false evidence, exactly as a party controlling the adapters
+can today. What v5 adds is that the executor's code and the execution contract are **content-addressed
+and pre-registered**, so they cannot be silently swapped after the α-slot is locked.
 
 ---
 
-## 3. Statistical core (corrected per audit-3)
+## 2. Architecture — in-cycle, post-commit, gated
 
-**Inferential claim (unchanged from v3):** under a declared **IID** sampling of benchmark examples from
-a target population, the model's expected per-example accuracy **advantage over a precommitted baseline
-exceeds τ ≥ 0**.
+`run_cycle`'s order: REPRESENT → GENERATE → CANONICALIZE → SAFETY → **SELECT** → **COMMIT** →
+**EXECUTE** → **VERIFY** → INTEGRATE → LEDGER.¹ The evidence route uses the existing pipeline.
 
-**Paired increments / sequential null.** `Wᵢ = 1(model correctᵢ) − 1(baseline correctᵢ) ∈ {−1,0,+1}`.
-Test `H0: E[Wᵢ − τ | history] ≤ 0`. The criterion (in the claim's `SatisfactionCriterion`) tests
-observed advantage `> τ`; **the e-value tests the same τ** — the policy's `theta0 = τ` and the criterion
-threshold must be equal (validated), so a weak criterion cannot diverge from the null (audit #9, #14).
+1. **Identification + execution-contract binding (audit-4 #1/#3/#14).** The `EvaluationPlan` carries an
+   optional **`execution_contract`** field (omitted-when-`None`, §8) holding the **explicit
+   `capability_id` + `capability_version`**, `evidence_policy_ref`, and `baseline_ref` (τ already lives
+   in the criterion). Because `commitment_hash` hashes the whole `evaluation_plan`², these are bound by
+   pre-registration: a caller cannot register the claim and then resolve a *different* cell/policy/
+   baseline under the same `operation_impl` without changing the plan and tripping `HYPOTHESIS_ALTERED`.
+   Dispatch resolves the cell by the **explicit versioned capability key in `execution_contract`** (not
+   by inferring from `node.impl`, which is ambiguous across versions). The contract field is placed on
+   the plan (not on a graph node) so existing claims' **graph hashes** are untouched (§8).
+2. **Pre-registration is mandatory and enforced (audit-4 #2).** The caller `register_hypotheses(...)`
+   **before** `run_cycle`, locking the e-LOND α-slot + `commitment_hash`.³ The evidence dispatcher
+   **refuses to execute** a claim that is not `selected ∧ committed ∧ has a pending registered FDR test
+   ∧ commitment matches` — so "the outcome cannot be observed before the slot is locked" is *enforced*,
+   not convention. (Charge-at-verify is disallowed for the evidence route.)
+3. **Execution branch.** `run_cycle` gains injected `evidence_executor` (umbrella; numpy) + the pure
+   `capability_registry` (grammar). In `execute_ground`'s single per-claim chokepoint⁴, a claim whose
+   resolved cell has `verification_policy.execution == "single"` — **and** that passes claim-shape
+   conformance to that cell (§6, audit-4 #9) and the §2.2 precondition — is dispatched to
+   `evidence_executor` instead of the two-adapter `verify()`. The executor returns a typed
+   **`EvidenceExecution`** DTO (audit-4 #16):
+   `{record: ExecRecord, e_value: float | None, licensing_info: EvidenceLicensingInfo | None,
+   failure_reason: ExecutionFailure | None}`. The `record` carries an honest `SATISFIED` Satisfaction
+   **iff** the criterion is met (else a non-satisfied verdict → no Satisfaction → Gate A withholds).
+   **A successfully-scored execution always emits an `e_value`** (resolving the locked test regardless of
+   criterion verdict); a **structural failure** (empty/malformed/dup/missing/credential mismatch) emits
+   `e_value=None` + a `failure_reason` → the claim is PENDING `EXECUTION_ERROR` and **its locked α-slot
+   stays consumed and unresolved** (a deliberate, tested consequence — audit-4 #15).
+4. **Data flow.** `execute_ground` returns `(corpus, records, evidence_executions)`; `run_cycle` merges
+   the e-values into the existing `evidence=` map and threads an `evidence_licensing: dict[claim_id,
+   EvidenceLicensingInfo]` into `verify_stage`. `ExecRecord` stays the universal bridge⁶.
+5. **Gating + licensing (reuse).** Because the output is a normal `ExecRecord` + an `evidence=` e-value,
+   the **entire existing `verify_stage` gate stack applies unchanged**: A minted-Satisfaction,
+   B grounded-extension, C provenance, D BH bar, E e-LOND, F commitment-hash, G PENDING.⁵ Phase-D
+   resolution (iterating `exec_records`) resolves the locked test; `executed_ids`, audit counts, and
+   Goodhart/selection credit accrue because the claim went through SELECT and produced a record.⁷
+
+**Two localized `verify_stage` edits only:** skip the independent-pair gate (`verify.py:235-245`) for
+evidence claims (single-source by design); and at `Licensing` construction (`verify.py:252-258`), when
+`c.id ∈ evidence_licensing`, build `Licensing(route=EVIDENCE_LICENSED, independence_tier=None,
+verification_standing=…, evidence_provenance=…, satisfactions=(sat,), …)` instead of the `SEVERE_TEST`
+default. This only **labels** an already-gated license; it cannot license anything that fails A–G.
+
+> ¹ `cycle.py:62-183`. ² `commitment.py:13-18`. ³ `register.py:15`, `fdr.py:111`. ⁴ `execute.py:51-60`.
+> ⁵ `verify.py:231-233` + `_permitted_by_bar:80-115` + `_e_ok:197-201`. ⁶ `ExecRecord` `corpus.py:86`.
+> ⁷ `cycle.py:125,130-168`.
+
+---
+
+## 3. Statistical core
+
+**Inferential claim.** Under a declared **IID** sampling of benchmark examples from a target population —
+*with the model, baseline, preprocessing and decision rules all fixed independently of the evaluation
+sample* (recorded in the `EvidencePolicy` commitment — audit-4 #14) — the model's expected per-example
+accuracy **advantage over a precommitted baseline exceeds τ ≥ 0**.
+
+**Paired increments / sequential null.** `Wᵢ = 1(model correctᵢ) − 1(baseline correctᵢ) ∈ {−1,0,+1}`,
+test `H0: E[Wᵢ − τ | history] ≤ 0`. The claim's `SatisfactionCriterion` tests observed advantage `> τ`;
+the policy's `theta0 = τ` **must equal** that criterion threshold (validated) so criterion and null
+address one statistic (audit #9/#14).
 
 **E-value (committed order, no permutation).** `paired_advantage_evalue(w, theta0=τ)` runs the existing
-GRAPA capital core⁷ over `Wᵢ − τ` in the benchmark's **single committed example order** — *not* the
-seed-averaged random permutations of `betting_evalue` (which assume exchangeability beyond the stated
-sequential null; audit #6). Positivity: increments lie in `[−1−τ, 1−τ]`, so `lam_max = _C/(1+τ)` keeps
-every factor `1 + λ(Wᵢ−τ) ≥ 1−_C > 0`. **Validity (the proof obligation, audit #8):** under the IID
-null with `θ₀=τ`, `e = Πᵢ(1+λᵢ(Wᵢ−τ))` is a non-negative test supermartingale (predictable past-only
-`λ`, positive factors), so `E_H0[e] ≤ 1` by Ville's inequality — exactly the WSR guarantee the existing
-methyl e-value already relies on, transferred to the paired stream.
+GRAPA capital core⁸ over `Wᵢ − τ` in the benchmark's **single committed example order** (not the
+seed-averaged permutations of `betting_evalue`, audit #6). `lam_max = _C/(1+τ)` keeps factors
+`1+λ(Wᵢ−τ) ≥ 1−_C > 0`. **Validity (proof obligation, audit #8):** under the IID null with `θ₀=τ`,
+`e = Πᵢ(1+λᵢ(Wᵢ−τ))` is a non-negative test supermartingale (predictable past-only λ, positive
+factors), so `E_H0[e] ≤ 1` by Ville — the same WSR guarantee the methyl e-value relies on.
 
-**No outcome-dependent filtering (audit #1, critical).** Only *structurally* degenerate inputs are
-rejected (empty stream, missing/duplicate/extra predictions, malformed) — **never** based on the
-observed advantage. All-tie or all-negative streams are *valid results*: they yield `e ≤ 1`, no e-LOND
-discovery, and the claim stays PENDING. Submitting the test is decided before scoring, not after.
+**No outcome-dependent filtering (audit #1).** Only *structurally* degenerate inputs are rejected
+(empty / missing / dup / extra / malformed). All-tie or all-negative streams are **valid results** →
+`e ≤ 1`, no discovery, PENDING. The decision to submit the test is made before scoring.
 
-**Sampling regime is typed (audit #7).** `SamplingRegime` enum with one member for this slice,
-`IID_EXAMPLES`; it is a *disclosed assumption* recorded in the `EvidencePolicy`, not a free string.
+**Typed sampling regime (audit #7).** `SamplingRegime` enum, one member `IID_EXAMPLES`, a disclosed
+assumption recorded in the `EvidencePolicy`.
 
-> ⁷ `_grapa_capital` `src/polymer_claims/evidence.py:28-46`.
+> ⁸ `_grapa_capital` `evidence.py:28-46`.
 
 ---
 
 ## 4. Typed objects
 
-- **`VerificationPolicy`** (optional on `CapabilityCell`; **byte-safe** — `CapabilityCell` is content-
-  addressed nowhere⁸): `execution: Literal["recompute_pair","single"] = "recompute_pair"`,
-  `result_rule: Literal["criterion"] = "criterion"`, `independence_requirement: Literal["implementation",
-  "baseline_ground_truth"] = "implementation"`, `evidence_policy_ref: str | None = None`,
-  `min_adapters: int = 2`. Validator: `single` ⇒ `evidence_policy_ref` set, `min_adapters == 1`. Default
-  `None` ⇒ the three existing cells unchanged.
-- **`EvidencePolicy`** (pure grammar `_Model`; content-addressed by an **explicit** `content_hash`
-  property — `_Model` has none for free⁹, so define one over the canonical `_sha` of its fields; `ref`
-  = `content_hash`, no stored self-referential digest, audit #10): `policy_id`, `version`,
-  `null_family: Literal["paired_bounded_mean_betting"]`, `theta0: float` (= τ),
-  `statistic: Literal["accuracy_advantage_over_baseline"]`, `support: Literal["[-1,1]"]`,
-  `sampling_regime: SamplingRegime`, `baseline_ref: str`, `calibration_population_ref: str`,
-  `evalue_transform: Literal["paired_wsr_betting"]`. **Validators (audit #23):** non-empty ids/refs;
-  `theta0` finite and `≥ 0`; `null_family`↔`evalue_transform` compatible. `EvidencePolicyRegistry`:
-  `resolve(ref) -> EvidencePolicy | None` by recomputing `content_hash` (digest-verified).
-- **`EvidenceProvenance`** (on `Licensing`): `execution_credential_id`, `evidence_policy_ref`,
+- **`VerificationPolicy`** (optional on `CapabilityCell`): `execution: Literal["recompute_pair",
+  "single"]`, `result_rule: Literal["criterion"]`, `independence_requirement: Literal["implementation",
+  "baseline_ground_truth"]`, `evidence_policy_ref: str | None`, `min_adapters: int`. Validator: `single`
+  ⇒ `evidence_policy_ref` set ∧ `min_adapters == 1`. Default `None` ⇒ existing cells unchanged.
+- **`EvidencePolicy`** (pure grammar `_Model`; explicit `content_hash` property — `_Model` has none free⁹
+  — over canonical `_sha` of its fields; `ref = content_hash`, no stored self-digest, audit #10):
+  `policy_id`, `version`, `null_family: Literal["paired_bounded_mean_betting"]`, `theta0: float (=τ)`,
+  `statistic`, `support`, `sampling_regime: SamplingRegime`, `baseline_ref`,
+  `calibration_population_ref`, `evalue_transform`, and an `executor_credential_ref` (the digest of the
+  registered executor credential, §6). **Validators (audit #23):** non-empty ids/refs; `theta0` finite,
+  `≥0`; family↔transform compatible. `EvidencePolicyRegistry.resolve(ref)` recomputes `content_hash`.
+- **`ExecutionContract`** (the composite bound into pre-registration — audit #1/#17): the tuple
+  `(capability_id, capability_version, verification_policy, evidence_policy_ref, benchmark_ref,
+  baseline_ref, executor_credential_ref)`, all present in the plan or resolved-and-checked at verify; its
+  digest plus the `FDRTest` index + locked `alpha_allocated` are recorded in the provenance.
+- **`EvidenceProvenance`** (on `Licensing`): `executor_credential_ref`, `evidence_policy_ref`,
   `benchmark_ref`, `baseline_ref`, `oracle_dossier_ref | None`, `observed_advantage`, `theta0`,
-  `e_value`, `criterion_satisfied`. **Invariant (audit #24):** its `e_value` equals the resolved
-  `FDRTest.e_value` by construction (the executor produces one e-value used for both the ledger and the
-  provenance; a `verify_stage` assertion enforces equality).
-- **`EvidenceLicensingInfo`** (transient, executor→`verify_stage`, keyed by claim_id; *not* a stored
-  model): `route`, `verification_standing`, `evidence_provenance`. Carries the *labels* for an
-  already-gated license; it does not itself license.
-- **`verification_standing`** (on `Licensing`): `Literal["single_source_baseline"]` — a constrained
-  literal, not a free string (audit #22).
+  `e_value`, `criterion_satisfied`, **`execution_contract_digest`**, **`fdr_test_index`**,
+  **`alpha_allocated`** (audit #17). Invariant: its `e_value` equals the resolved `FDRTest.e_value` by
+  construction (audit #24).
+- **`EvidenceExecution`** (transient executor return DTO — audit #16): `record: ExecRecord`,
+  `e_value: float | None`, `licensing_info: EvidenceLicensingInfo | None`,
+  `failure_reason: ExecutionFailure | None`.
+- **`EvidenceLicensingInfo`** (transient executor→`verify_stage`): `route`, `verification_standing`,
+  `evidence_provenance`.
+- **`verification_standing`** (on `Licensing`): `Literal["single_source_baseline"]` (audit #22).
 
-> ⁸ `CAPABILITY_CELLS` consumed only via `.resolve()`; no hash/golden serializes a cell. ⁹ per-model
-> `content_hash` `@property` convention, e.g. `operations.py:153-160`.
+> ⁹ per-model `content_hash` `@property` convention, e.g. `operations.py:153-160`.
 
 ---
 
-## 5. The benchmark-adapter interface (the generalization lesson — audit #6)
+## 5. Benchmark interface (the generalization lesson — audit #6)
 
-V1's adapter returns a scalar `ExecValue`¹⁰; a per-example evaluation cannot. Slice 1 adds:
-- **`BenchmarkArtifact`** (content-addressed; `content_hash` over canonical bytes binding *everything*
-  — audit #16): ordered `example_ids`, per-example `features`, `labels`, `target_population`,
-  `sampling_regime`, `version`. The `EvidencePolicy.calibration_population_ref` **==** the artifact's
-  `content_hash`.
-- **`BenchmarkAdapter`** Protocol: `predict(examples_without_labels) -> PredictionVector` — the model
-  sees inputs + ids, **never** labels (structurally absent from the call). Its predictions are
-  content-addressed → `EvidencePolicy.baseline_ref` for the baseline (audit #17).
-- **`Scorer`** (separate; holds labels): joins predictions↔labels by `example_id` in the artifact's
-  committed order; missing/duplicate/extra/order-mismatch → `ScoringError` (an *execution error*, §7).
+V1's adapter returns a scalar `ExecValue`¹⁰; per-example evaluation cannot. Slice 1 adds:
+- **`BenchmarkArtifact`** (content-addressed `content_hash` over canonical bytes binding ordered
+  `example_ids`, per-example `features`, `labels`, `target_population`, `sampling_regime`, `version` —
+  audit #16). `EvidencePolicy.calibration_population_ref == artifact.content_hash`.
+- **`BenchmarkAdapter.predict(examples_without_labels) -> PredictionVector`** — labels structurally
+  absent from the call. Baseline predictions content-addressed → `EvidencePolicy.baseline_ref` (#17).
+- **`Scorer`** (separate, holds labels): joins predictions↔labels by `example_id` in committed order;
+  missing/dup/extra/order-mismatch → structural failure (§2.3, `EXECUTION_ERROR`).
 
 > ¹⁰ `ExecValue(value: float|str|None)` `evaluate.py:43`.
 
 ---
 
-## 6. Trust binding (single-execution) — audit #19/#20/#21
+## 6. Trust binding & validation — three layers (audit-4 #5/#7/#8/#9)
 
-A 4th cell needs both a `CAPABILITY_CELLS` entry **and** a `_bindings()` entry (else `bind()` raises¹¹).
-The binding's `AdapterRegistry` holds the model adapter's `AdapterCredential` with a **byte-derived
-`implementation_hash`** (`implementation_hash_for_adapter`, hashing the adapter's `execute` bytecode¹²)
-— so a swapped implementation is detected; identity-string matching is not the trust basis.
+The 4th review showed validation spans three distinct scopes; conflating them was a real error.
 
-`validate_trust_binding` gains an `evidence_policy_registry: EvidencePolicyRegistry | None = None`
-parameter (absent today¹³) and a **single-mode branch**: when `cell.verification_policy.execution ==
-"single"`, do **not** require an independent pair (skip `BINDING_NO_INDEPENDENT_PAIR`); instead require
-(a) the single execution credential resolvable + trusted, (b) the `EvidencePolicy` resolvable +
-digest-verified + `calibration_population_ref`/`baseline_ref` matching the bound benchmark/baseline, and
-(c) the oracle dossier if `cell.oracle.required`. `recompute_pair` cells are unchanged.
+**Layer 1 — cell trust binding** (cell-level, claim-independent). A 4th cell needs a `CAPABILITY_CELLS`
+entry **and** a `_bindings()` entry (else `bind()` raises¹¹). `min_executing_adapters` is reconciled
+with the policy (audit #4): the cell validator that today forces `== 2`¹² becomes `2` for
+`recompute_pair`, `1` for `single`. `validate_trust_binding` gains an `evidence_policy_registry`
+parameter (absent today¹³) and a single-mode branch: skip the independent-pair requirement; require the
+**executor credential** resolvable + trusted, and the `EvidencePolicy` resolvable + digest-verified.
+**Oracle guarantee, stated accurately (audit #8):** `OracleDossier` has no `trusted` field and this layer
+only confirms the oracle **id exists** in the registry — it does **not** call `in_domain` (no claim
+subject here).
 
-> ¹¹ `bind()` `capabilities.py:105-111`. ¹² `adapter_identity.py:13`. ¹³ `validate_trust_binding`
-> `capabilities.py:114-116`.
+**Layer 2 — claim-to-capability binding** (claim-level, before dispatch — audit #9). The runtime runs
+`validate_claim_shape(claim, cell)` (pattern/subject/params/output/data-ref/criterion) **before** taking
+the single path. A non-conforming claim is not dispatched to the executor (this is *evidence-route*
+enforcement, not general closed-world enforcement). Oracle `in_domain(subject)` is checked **here**,
+where the subject exists.
+
+**Layer 3 — runtime artifact/policy binding** (execution-time). The executor verifies: the
+`BenchmarkArtifact.content_hash == policy.calibration_population_ref`; the baseline digest ==
+`policy.baseline_ref`; and — critically — the **live executor implementation matches its registered
+credential**.
+
+**The executor is credentialed as a whole (audit #5).** Crediting only the model leaves the scorer and
+e-value transform untrusted — an injected callable could emit arbitrary evidence under the model's
+identity. So the **predictor, scorer, and evidence-transform implementations are each byte-hashed** (via
+a generalization of `implementation_hash_for_adapter` that accepts the relevant method — the existing
+one hashes `execute`¹⁴, and `BenchmarkAdapter` exposes `predict`, so the hasher takes the method
+explicitly), combined into one **executor credential** whose digest is `policy.executor_credential_ref`.
+Verification compares the **live** combined hash against the registered credential — not a returned
+identity string.
+
+> ¹¹ `bind()` `capabilities.py:105-111`. ¹² `min_executing_adapters` validator `capability.py:146-152`.
+> ¹³ `validate_trust_binding` `capabilities.py:114-116`. ¹⁴ `adapter_identity.py:13`.
 
 ---
 
@@ -187,136 +211,141 @@ digest-verified + `calibration_population_ref`/`baseline_ref` matching the bound
 
 | Outcome | Status |
 |---|---|
-| criterion satisfied **and** e-LOND discovery (+ gates B–G) | **LICENSED** (`EVIDENCE_LICENSED`, `single_source_baseline`) |
-| criterion satisfied, no discovery | **PENDING** (insufficient evidence) |
+| criterion satisfied ∧ e-LOND discovery ∧ gates B–G | **LICENSED** (`EVIDENCE_LICENSED`, `single_source_baseline`) |
+| criterion satisfied, no discovery | **PENDING** |
 | discovery, criterion unmet | **PENDING** |
-| all-tie / negative advantage (valid result) | **PENDING** (e ≤ 1, no discovery) |
-| structurally-invalid input (digest/policy/order/dup/credential mismatch, empty stream) | not dispatched / **PENDING** with `EXECUTION_ERROR`; never licensed |
-| adapter failure / NaN / out-of-support | **PENDING**, `PendingReason.EXECUTION_ERROR` |
+| all-tie / negative advantage (valid) | **PENDING** (e ≤ 1) |
+| structural failure (empty/dup/missing/order/credential/digest mismatch) | **PENDING** `EXECUTION_ERROR`; e_value=None; **locked α-slot consumed, test unresolved** |
 
-`PendingReason.EXECUTION_ERROR` is an additive enum member (audit #15). The executor mints a `SATISFIED`
-Satisfaction **only** when the criterion is met (audit #13) — an unsatisfied evaluation carries a
-non-satisfied verdict and cannot enter `Licensing` (whose validator requires every satisfaction be
-`SATISFIED`¹⁴).
+A successfully-scored execution **always** emits an e-value (resolving the locked test regardless of
+criterion verdict — audit #15); a structural failure emits none and leaves the registered test
+unresolved (tested, §10). `PendingReason.EXECUTION_ERROR` is additive. The executor mints a `SATISFIED`
+Satisfaction **only** when the criterion is met (audit #13) — `Licensing` requires every satisfaction be
+`SATISFIED`¹⁵.
 
-> ¹⁴ `Licensing._all_satisfied` `licensing.py:158-167`.
+> ¹⁵ `Licensing._all_satisfied` `licensing.py:158-167`.
 
 ---
 
-## 8. Schema deltas & compatibility (audit #25 — decided, not deferred)
+## 8. Schema deltas & compatibility (audit #10/#11 — preserve existing hashes)
 
 **Grammar (pure):** `LicenseRoute.EVIDENCE_LICENSED`; `Licensing.independence_tier: IndependenceTier |
-None` (keep default `REPRODUCED` so existing routes are unchanged; the evidence branch sets `None`);
-`Licensing.verification_standing` + `Licensing.evidence_provenance` (optional, present-only-when
-`route == EVIDENCE_LICENSED`, validated); `PendingReason.EXECUTION_ERROR`; `SamplingRegime`;
-`EvidencePolicy`(+registry); `VerificationPolicy`; optional `CapabilityCell.verification_policy`.
+None`; `Licensing.verification_standing` + `Licensing.evidence_provenance` (optional, present-only-when
+`route == EVIDENCE_LICENSED`); `PendingReason.EXECUTION_ERROR`; `SamplingRegime`; `EvidencePolicy`
+(+registry); `VerificationPolicy`; optional `CapabilityCell.verification_policy`; an optional
+`EvaluationPlan.execution_contract` field (`omitted-when-None`, so existing plans' `commitment_hash`,
+graph hash, and commit lock are **byte-identical**; the field sits on the plan, not in the graph, so
+`ComputeGraph.content_hash` is unaffected).
 
-**Protocol:** `run_cycle` + `execute_ground` gain `evidence_executor` + `capability_registry`;
-`verify_stage` gains `evidence_licensing: dict[str, EvidenceLicensingInfo] | None` and the two localized
-hooks (§2). The injected executor is a **`Callable` typed in protocol** (no grammar/numpy coupling); its
-umbrella implementation does the numpy work.
+**Protocol:** `run_cycle`/`execute_ground` gain `evidence_executor` + `capability_registry`;
+`execute_ground` returns `evidence_executions`; `verify_stage` gains `evidence_licensing` + the two
+localized hooks (§2). The executor is a `Callable` typed in protocol (no numpy coupling).
 
-**Compatibility, concretely (audit #25):**
-- `CapabilityCell.verification_policy` → **byte-identical** (cell serialized in no hash/golden⁸).
-- `Licensing.verification_standing`/`evidence_provenance` → **NOT byte-identical**: `Licensing` is
-  hashed transitively into the whole-claim attestation **subject digest** (`attestation.py:194`, **no**
-  `exclude_none`¹⁵), so every LICENSED claim's digest gains `"verification_standing":null,
-  "evidence_provenance":null`. **Decision:** re-bless `tests/attestation/_golden_bundle.json` (subject
-  digests `fb81e5a2…`, `2426880d…`) once, with a documented rationale — semantically correct, since an
-  evidence-licensed claim *should* digest differently from a recompute-licensed one. **Deferred (noted,
-  not entangled here):** switching the content-address convention to `exclude_none` so future optional
-  additions are byte-safe — a separate change touching every attested claim's digest.
+**Compatibility — preserve existing content hashes (audit #10, the corrected answer).** `Licensing` is
+hashed transitively into the whole-claim attestation **subject digest** (`attestation.py:194`, no
+`exclude_none`¹⁶). To keep **existing recompute-license digests byte-stable**, add a `@model_serializer`
+on `Licensing` that **omits `verification_standing` and `evidence_provenance` when they are `None`** (a
+*targeted, field-specific* exclusion — it does not touch the other already-`None` optionals, so no other
+claim's digest moves). Existing licensed claims therefore hash **identically**; evidence licenses (which
+populate the fields) hash differently *because their semantics differ*. **No golden re-bless needed.**
+`CapabilityCell.verification_policy` is similarly omitted-when-`None` in its dump so the cell is
+**byte-identical**, not merely "not-currently-hashed" (audit #11). (A broader move to `exclude_none` in
+the content-address convention is noted as out of scope.)
 
-Acceptance level (d) "content-address identical" is thus **explicitly relaxed**: identical for
-non-LICENSED claims and the three existing cells; LICENSED-claim subject digests re-blessed once.
-
-> ¹⁵ `_subject()` `attestation.py:194` (`canonical_sha256(claim.model_dump(mode="json"))`, no
-> exclude_none).
+> ¹⁶ `_subject()` `attestation.py:194`.
 
 ---
 
-## 9. Honest fixture (audit #5/#17)
+## 9. Honest fixture (audit #12/#13 — corrected)
 
-A tiny benchmark whose **labels are generated independently of the model's decision rule** (seeded label
-process), with the model genuinely — but not perfectly — better than the baseline (e.g. ~15/20 vs the
-baseline's ~10/20), so the e-value is a real finite value, not `∞`-by-construction. Predictions are
-frozen via a label-independent seed; the construction order (predictions fixed → labels assigned by an
-independent process) is documented in the fixture file. No labels are chosen to favor the predictions.
+The contradiction in v4 ("labels independent of the model" yet "model better") is fixed. The fixture
+declares:
+- a **predeclared feature-dependent label DGP** `y = f(features) ⊕ noise` with independently-sampled
+  noise;
+- a **model rule fixed before the draws** that is genuinely (probabilistically) more accurate than a
+  **weaker precommitted baseline**;
+- the *random draws* are independent of *implementation choices* — **not** the labels independent of the
+  features (audit #12).
+**The fixture is sized by computation, not assertion (audit #13):** its `Wᵢ` stream, in committed order,
+must yield `paired_advantage_evalue ≥ 1/α₁ ≈ 32.9` (q=0.05, γ₁=6/π²) against the **actual locked α** — a
+15/20-vs-10/20 sketch gives e≈13.03 and would *not* license. The plan computes the exact fixture and a
+test asserts the e-value clears the locked threshold before the end-to-end license test runs.
 
 ---
 
-## 10. Tests (audit #18/#19/#20/#21/#26/#27/#28)
+## 10. Tests (audit #18/#26/#27/#28)
 
-1. **E-value arithmetic regression** (renamed from "validity proof", audit #8): exact small-stream
-   values + a documented Ville argument in this spec (§3); a test that an all-tie/negative stream gives
-   `e ≤ 1` (audit #1).
-2. **No outcome filtering:** all-negative stream returns a valid low e-value (not an exception).
-3. **Structural degeneracy** only: empty/missing/dup/extra → `ScoringError`/`EXECUTION_ERROR`.
-4. **Label withholding (#20):** the `BenchmarkAdapter.predict` signature has no label parameter; a test
-   asserts the scorer is the only label holder.
-5. **Paired alignment (#21):** `Wᵢ` joins by `example_id` in committed order; a model == baseline gives
-   `e ≤ 1`, no license.
-6. **Content-address binding (#16/#17):** tampering any artifact/baseline byte changes its
-   `content_hash` and fails policy resolution.
-7. **Byte-derived credential (#21):** a swapped adapter implementation changes `implementation_hash` and
-   fails trust-binding.
-8. **Single-mode binding (#19):** `validate_trust_binding(..., evidence_policy_registry=…)` passes with
-   one credential; `recompute_pair` cells still require the pair.
-9. **Standing serialization:** evidence license has `independence_tier=None`,
-   `verification_standing="single_source_baseline"`; never `reproduced`.
-10. **Gate reuse (the core safety test):** an evidence claim that is **not** selected / not committed /
-    not in the grounded extension / has an altered plan / sub-threshold e-value is **not** licensed —
-    proving the evidence route is subject to all of A–G.
-11. **Validity-protection BEFORE end-to-end (#26):** tests 3,6,7,8 precede the end-to-end license test
-    in task order.
-12. **Compat goldens:** the three existing cells byte-identical; attestation goldens re-blessed with a
-    documented diff; full `scripts/check-all.sh` green **as the final task** (#27).
-13. **Protocol-test purity (#28):** protocol tests inject a tiny **grammar-DTO** executor stub; they do
-    **not** import `polymer_claims`.
+1. **E-value regression** (renamed from "validity proof", #8): exact small-stream values; all-tie/
+   negative → `e ≤ 1` (#1, **no exception**); a documented Ville argument in §3.
+2. **Structural-only degeneracy:** empty/missing/dup/extra/order → `EXECUTION_ERROR` + e_value=None.
+3. **Label withholding (#20):** `predict` has no label parameter; the scorer is the sole label holder.
+4. **Paired alignment (#21):** `Wᵢ` joins by `example_id` in committed order; model==baseline → `e ≤ 1`.
+5. **Execution-contract binding (#1/#3):** altering policy/baseline/capability changes `commitment_hash`
+   → `HYPOTHESIS_ALTERED`; dispatch refuses a claim with no pending registered test (#2).
+6. **Full-executor credential (#5):** swapping the **scorer** or **evidence-transform** (not just the
+   model) changes the executor credential and fails Layer-3 verification.
+7. **Three-layer validation (#7/#9):** a non-conforming claim is not dispatched; oracle `in_domain`
+   checked at Layer 2; single-mode binding passes with one credential, `recompute_pair` still needs the
+   pair.
+8. **Gate reuse (core safety):** an evidence claim not selected / not committed / not in grounded
+   extension / altered-plan / sub-threshold → **not licensed** (proves A–G apply).
+9. **Bookkeeping (#18):** evidence execution updates stage-audit counts, selection-ledger outcome,
+   Goodhart/operator credit, and integrate(); and an **execution failure leaves the registered test
+   unresolved** with the α-slot consumed.
+10. **Standing serialization:** evidence license has `independence_tier=None`, standing literal; never
+    `reproduced`.
+11. **Compatibility (#10/#11):** existing recompute-license attestation digests **byte-identical** (the
+    `_golden_bundle.json` digests unchanged); `CapabilityCell` dump byte-identical; the three existing
+    cells unchanged.
+12. **Computed-fixture license (#13):** the fixture's e-value clears the locked α₁ before the end-to-end
+    LICENSED assertion.
+13. **Protocol-test purity (#28):** protocol tests inject a tiny **grammar-DTO** executor stub; no
+    `polymer_claims` import.
+Validity/contract tests (2,5,6,7,9,11) precede the end-to-end license test (#26); `scripts/check-all.sh`
+is the **final** task (#27).
 
 ---
 
 ## 11. Acceptance criteria
 
-1. `eval::benchmark_advantage@v1` registered (cell + `_bindings()` entry + byte-derived credential +
-   `EvidencePolicy`).
-2. It licenses an inferential model-vs-precommitted-baseline claim **offline, in-cycle, post-commit**,
-   via the paired sequential betting e-value gated by the **full existing gate stack** (A–G) — no
-   out-of-cycle precompute, no gate-bypass, no synthetic corroborator.
-3. License carries `route=EVIDENCE_LICENSED`, `independence_tier=None`,
-   `verification_standing="single_source_baseline"`, and a durable provenance record whose `e_value`
-   equals the ledger's.
-4. The gate-reuse test (#10) proves the route is subject to selection, commit, grounded-extension,
-   provenance, BH bar, e-LOND, commitment-hash, and PENDING gating.
-5. Content-addressed benchmark/baseline + byte-derived credential + digest-verified policy reject every
+1. `eval::benchmark_advantage@v1` registered (cell + `_bindings()` + **whole-executor** byte-derived
+   credential + `EvidencePolicy`), `min_executing_adapters` reconciled with the policy.
+2. Licenses an inferential model-vs-precommitted-baseline claim **offline, in-cycle, post-commit**,
+   gated by the **full existing gate stack (A–G)** — no out-of-cycle precompute, no gate-bypass.
+3. The **execution contract** (capability+policy+benchmark+baseline+executor credential) is bound into
+   pre-registration (`commitment_hash`) and re-checked at verify; dispatch **requires a locked FDR
+   slot**; provenance records the contract digest + FDR index + locked α, and its e-value equals the
+   ledger's.
+4. License carries `route=EVIDENCE_LICENSED`, `independence_tier=None`, standing literal, durable
+   provenance.
+5. Three-layer validation enforced; content-addressed artifacts + whole-executor credential reject every
    tamper/mismatch before licensing.
-6. Compatibility per §8 (cells byte-identical; attestation goldens re-blessed once, documented);
-   `grammar/`+`protocol/` stay pure + numpy-free; `Corpus` stays 4; `check-all.sh` green.
+6. **Existing recompute-license attestation digests and the three existing cells are byte-identical**
+   (targeted None-exclusion; no golden re-bless); `grammar/`+`protocol/` pure + numpy-free; `Corpus`
+   stays 4; `check-all.sh` green.
 
 ---
 
-## 12. Audit-3 resolution map
+## 12. Audit resolution map
 
-#1 outcome-filtering removed (§3) · #2 in-cycle post-commit (§2) · #3 no inject path; gate reuse (§2) ·
-#4 normal `ExecRecord` resolves Phase-D (§2) · #5 honest fixture (§9) · #6 committed order (§3) ·
-#7 typed `SamplingRegime` (§3) · #8 regression test + Ville obligation (§3/§10) · #9 e-value tests τ
-(§3) · #10 explicit `EvidencePolicy.content_hash` (§4) · #11 `from .base import _Model` (plan) ·
-#12 Licensing needs ≥1 SATISFIED — executor mints SATISFIED only when satisfied (§7) · #13 same (§7) ·
-#14 criterion==τ==θ₀ (§3) · #15 normal record feeds all bookkeeping (§2) · #16 `BenchmarkArtifact`
-content hash (§5) · #17 baseline content-addressed + honest fixture (§5/§9) · #18 enumeration→regression
-(§10) · #19 `validate_trust_binding` gains policy-registry arg (§6) · #20 `_bindings()` entry (§6) ·
-#21 byte-derived credential (§6) · #22 `verification_standing` literal (§4) · #23 `EvidencePolicy`
-validators (§4) · #24 provenance `e_value` == ledger invariant (§4) · #25 compat decided (§8) ·
-#26 validity tests before e2e (§10) · #27 full gate last (§10) · #28 protocol tests use grammar DTOs
-(§10).
+**Audit-3 (all resolved in v4/v5):** see §3/§5/§6/§8/§12-prior.
+**Audit-4:** #1 execution-contract in plan+`commitment_hash` (§2/§4) · #2 dispatch requires locked slot
+(§2.2) · #3 explicit versioned capability key (§2.1) · #4 `min_executing_adapters` reconciled (§6 L1) ·
+#5 whole-executor credential (§6 L3) · #6 narrowed trust claim (§1) · #7 three-layer validation (§6) ·
+#8 accurate oracle guarantee (§6 L1/L2) · #9 claim-shape conformance before dispatch (§6 L2) ·
+#10 targeted None-exclusion preserves existing hashes (§8) · #11 `CapabilityCell` byte-identical (§8) ·
+#12 feature-dependent DGP fixture (§9) · #13 computed fixture e-value ≥ 32.9 (§9) · #14 IID binds
+model/baseline (§3) · #15 successfully-scored emits e-value; failure consumes slot (§2.3/§7) ·
+#16 `EvidenceExecution` DTO (§4) · #17 provenance binds contract digest + FDR index/α (§4) ·
+#18 bookkeeping tests (§10).
 
 ---
 
 ## 13. Decomposition (Path A) & rhythm
 
-- **Slice 1 (this spec):** the in-cycle gated executor + corrected statistics + content-addressed
-  artifacts + binding + honest fixture.
-- **Slice 2:** meaningful benchmark + full attestation chain + certificate/SLSA `resolvedDependencies`.
+- **Slice 1 (this spec):** in-cycle gated executor + corrected statistics + content-addressed artifacts
+  + whole-executor credential + three-layer validation + computed honest fixture.
+- **Slice 2:** meaningful benchmark + full attestation chain + certificate/SLSA.
 - **Slice 3:** defeat/drift/reinstatement/replay-over-time + tamper/boundary depth + downgraded-oracle.
 
 Each slice: `writing-plans` → `subagent-driven-development` (TDD) → whole-branch review → merge
