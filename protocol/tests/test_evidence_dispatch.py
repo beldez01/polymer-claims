@@ -159,7 +159,7 @@ def _make_evidence_claim(cell: CapabilityCell, policy_content_hash: str) -> Clai
             ),),
             terminal="n0",
         ),
-        criterion=SatisfactionCriterion(comparator=Comparator.LT, threshold=0.05),
+        criterion=SatisfactionCriterion(comparator=Comparator.LT, threshold=0.0),
         execution_contract=ExecutionContract(
             capability_id=cell.capability_id,
             capability_version=cell.capability_version,
@@ -673,3 +673,97 @@ def test_altered_precedence_over_evidence_failure():
     c = out.by_id()[claim.id]
     assert c.status == Status.REJECTED
     assert c.rejection_reason == RejectionReason.HYPOTHESIS_ALTERED
+
+
+# ---------------------------------------------------------------------------
+# Spec §4 chain link: criterion.threshold == policy.theta0
+# ---------------------------------------------------------------------------
+
+
+def test_criterion_threshold_mismatch_predispatch_failure():
+    """Claim with criterion.threshold != policy.theta0 → pre_dispatch policy_mismatch.
+
+    The claim is registered CONSISTENTLY — commitment_hash in the FDR ledger is
+    computed from THIS claim (threshold=0.5), so gate-1 passes and the claim is
+    NOT on the HYPOTHESIS_ALTERED path.  The new check 8 (criterion.threshold ==
+    policy.theta0) catches the divergence and produces a pre_dispatch failure.
+
+    Asserts via run_cycle: Status.PENDING + PendingReason.EXECUTION_ERROR, not licensed.
+    """
+    from polymer_protocol.cycle import run_cycle
+
+    ctx = MaterializationContext(id="M-div", api_version="v1", data_version="d1")
+
+    descriptor = _make_descriptor()
+    policy = _make_policy(descriptor.content_hash)  # theta0=0.0
+    cell = _make_cell(policy.content_hash)
+
+    # Build a claim whose criterion.threshold (0.5) diverges from policy.theta0 (0.0).
+    plan = EvaluationPlan(
+        graph=ComputeGraph(
+            nodes=(OperationNode(
+                id="n0",
+                impl=cell.operation_impl,
+                inputs=(DataHandle(ref=_BENCH),),
+                produces=cell.produced,
+            ),),
+            terminal="n0",
+        ),
+        criterion=SatisfactionCriterion(comparator=Comparator.LT, threshold=0.5),
+        execution_contract=ExecutionContract(
+            capability_id=cell.capability_id,
+            capability_version=cell.capability_version,
+            evidence_policy_ref=policy.content_hash,
+            capability_descriptor_ref=cell.content_hash,
+        ),
+    )
+    divergent_claim = Claim(
+        id="ev-div",
+        title="Divergent evidence claim",
+        pattern=PatternRef(id="adjusted_effect", version="v1"),
+        leaves=(CategoricalLeaf(ontology_term="term-ev-div"),),
+        status=Status.PENDING,
+        pending_reason=PendingReason.UNTESTED,
+        evaluation_plan=plan,
+    )
+
+    # Register using THIS claim's commitment_hash → gate-1 passes (not the altered path).
+    ledger = FDRLedger(target_fdr=0.05)
+    ch = commitment_hash(divergent_claim)
+    ledger = register_test(ledger, divergent_claim.id, ch)
+
+    corpus = Corpus(claims=(divergent_claim,), fdr_ledger=ledger)
+    corpus = commit(corpus)
+
+    trust_entry = ExecutorTrustEntry(
+        descriptor_ref=descriptor.content_hash,
+        owner="test-org",
+        trusted=True,
+        version="v1",
+    )
+    runtime = EvidenceRuntime(
+        capability_registry=CapabilityRegistry(cells=(cell,)),
+        evidence_policy_registry=EvidencePolicyRegistry(policies=(policy,)),
+        executor_descriptor_registry=ExecutorDescriptorRegistry(descriptors=(descriptor,)),
+        executor_trust_registry=ExecutorTrustRegistry(entries=(trust_entry,)),
+        executor=_StubExecutor(descriptor.content_hash, None),  # type: ignore[arg-type]
+    )
+
+    # Directly verify the pre-dispatch failure (commitment matches → new check fires).
+    _out, records, evidence_executions = execute_ground(
+        corpus, (), ctx, evidence_runtime=runtime,
+    )
+    assert len(evidence_executions) == 1, "expected exactly one EvidenceExecution"
+    ee = evidence_executions[0]
+    assert ee.failure_reason is not None, "expected a pre_dispatch failure"
+    assert ee.failure_reason.stage == "pre_dispatch"
+    assert ee.failure_reason.reason == "policy_mismatch"
+    assert ee.e_value is None
+    assert ee.licensing_info is None
+
+    # Full cycle: claim must end PENDING with EXECUTION_ERROR, not licensed.
+    result = run_cycle(corpus, (), ctx, evidence_runtime=runtime)
+    c = result.corpus.by_id()["ev-div"]
+    assert c.status == Status.PENDING, f"expected PENDING, got {c.status}"
+    assert c.pending_reason == PendingReason.EXECUTION_ERROR
+    assert c.licensing is None

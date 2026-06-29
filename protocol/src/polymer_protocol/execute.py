@@ -193,6 +193,20 @@ def execute_ground(
                     evidence_executions.append(ee)
                     continue
 
+                # Pre-dispatch check 8: criterion.threshold == policy.theta0 (spec §4 chain link).
+                # A None threshold is treated as a mismatch — evidence claims must have a numeric
+                # threshold, and it must equal the policy null exactly.
+                ct = (
+                    c.evaluation_plan.criterion.threshold
+                    if c.evaluation_plan.criterion is not None
+                    else None
+                )
+                if ct is None or ct != policy.theta0:
+                    rec, ee = _pre_dispatch_failure(c.id, "policy_mismatch", cred)
+                    records.append(rec)
+                    evidence_executions.append(ee)
+                    continue
+
                 # All checks pass — dispatch to executor.
                 result = er.executor.execute(c, cell, policy, ctx_c, fdr_test)
                 records.append(result.record)
