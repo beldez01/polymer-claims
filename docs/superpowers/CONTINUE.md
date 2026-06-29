@@ -27,6 +27,32 @@ GitHub Actions / PyPI publish are unblocked (no CI workflow committed yet; `scri
 remains the local gate until one mirroring it is added).
 
 **Shipped (newest first):**
+- **V2.0 Slice 1 — evidence-licensed capability (2026-06-29, merge `9b8848c`, LOCAL only — not yet
+  pushed; main is now ahead of origin/main).** A second, honest licensing route that is NOT the
+  two-adapter recompute air-gap: a 4th capability `eval::benchmark_advantage@v1` whose claim is
+  identified by its plan's `execution_contract` (bound by `commitment_hash`), dispatched **in-cycle,
+  post-commit** in `execute_ground` to an injected `EvidenceExecutor` (protocol-typed; numpy impl
+  umbrella-side) instead of `verify()`. It scores a model-vs-**precommitted-baseline** benchmark
+  advantage as a **paired sequential betting e-value** (reuses the GRAPA core), and `verify_stage`
+  mints `LicenseRoute.EVIDENCE_LICENSED` (new) **only on e-LOND discovery + the standard eligibility
+  gates** (selection, commit, mandatory pre-registration with locked α, grounded-extension,
+  commitment-match) with a 5-field ledger-equality check. **The e-LOND discovery IS the decision** (no
+  separate criterion); the BH bar is honestly exempt (e-LOND is the multiplicity control). New grammar:
+  `EvidencePolicy`/`ExecutorDescriptor`+`ExecutorTrustEntry` (content-addressed, validated registries),
+  `VerificationPolicy`/`ExecutionContract`/`EvidenceProvenance`, `verification_standing`, optional
+  `CapabilityCell.verification_policy`+`content_hash`, optional `EvaluationPlan.execution_contract`,
+  `DataRefKind.BENCHMARK`, `PendingReason.EXECUTION_ERROR`. **Compat byte-clean:** drop-when-None
+  `model_serializer`s keep ALL existing attestation/commitment/cell hashes byte-identical
+  (git-verified zero golden drift, no re-bless). Content-addressed end-to-end (whole-executor
+  credential + hash chain checked before scoring). Built via 19 subagent-driven TDD tasks (each
+  task-reviewed, risky ones opus-reviewed; final whole-branch opus review READY-TO-MERGE, no
+  Critical/Important). Suites: umbrella 697, grammar 568, protocol 467, isolation. **Honest scope
+  caveats:** the demo benchmark/fixture is a mechanics demonstration (powered DGP, not real biology);
+  label-blindness is **credential-enforced** (a label-peeking predictor changes the implementation hash
+  → fails Layer-3) not structural. Spec v8 + plan v3: `docs/superpowers/{specs,plans}/2026-06-29-v2-evidence-licensed-capability*`.
+  **Deferred follow-ons:** Slice 2 (full attestation chain + certificate/SLSA `resolvedDependencies`);
+  Slice 3 (defeat/drift/reinstatement/replay-over-time + tamper depth + downgraded-oracle); the ~14
+  triaged Minor findings (all DEFER — coverage/cosmetic; recorded in `.superpowers/sdd/progress.md`).
 - **Audit-driven cleanup + docs consolidation (2026-06-28→29).** A multi-agent tidiness/correctness
   audit (`CLEANUP_AUDIT.md`) applied as ~110 verified changes: **2 real correctness fixes** — the MDL
   meta-tier gate could be fooled by zero-structural-slot claims (a load-bearing pattern DEPRECATE
@@ -80,8 +106,12 @@ The single remaining **critical-path** gate is **H1.A2 — source a real 2nd HM4
 machine-readable IDH status (long lead; it's the gate to §2E REPLICATED and a shippable wedge, H2).
 Optional parallel, non-blocking code: finish **H1.A1** (Sigstore/cosign/Rekor — currently tabled by
 choice), the **Track B credence engines** (proper/surrogate scoring atop the ATTESTED typing), and the
-**capability-cell follow-ons** now that V1 shipped — **V2** (register one genuinely-new/external
-capability as the generalization test, then fan out) and eventually closed-world enforcement.
+**capability-cell follow-ons**: **V2.0 Slice 1 — the generalization test — SHIPPED (2026-06-29, local
+`9b8848c`)**; the evidence-licensed executor route now exists (see Shipped above). Remaining: **V2.0
+Slice 2** (attestation/SLSA for the evidence route) + **Slice 3** (defeat/drift/replay hardening); the
+**V2.1+ menu fan-out** now that the abstraction generalized past the 3 reductions; and eventually
+closed-world enforcement. **The V2.0 Slice 1 merge is LOCAL-only — `git push origin main` when ready
+(main is ahead of origin/main).**
 Authoritative forward plan: `docs/superpowers/2026-06-23-remaining-roadmap.md` (see *Vision-derived
 additions*); product vision: `docs/superpowers/vision.md`.
 
