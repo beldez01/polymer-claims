@@ -24,10 +24,12 @@ re-expression of the three existing reductions — to discover where the V1 abst
 build the minimal honest machinery to license it. What it teaches gates V2.1–V2.3 and closed-world
 agent execution.
 
-The three V1 cells are all *licensed by two independent pure-Python recompute legs*: `evaluate.py:391`
-raises `SelfLicensingError` on <2 distinct adapter identities, `verify()` is the **sole** `Satisfaction`
-minter, and `execute_ground` (`execute.py:58`) **always** calls that two-adapter `verify()` — there is
-no other licensing path. This slice adds a **second, honest licensing route**: a model evaluated against
+The three V1 cells are all *licensed by two independent pure-Python recompute legs*: `evaluate.py:394`
+raises `SelfLicensingError` on <2 distinct adapter identities, and `execute_ground` (`execute.py:58`) is
+the only licensing path — it calls `verify()`, which licenses only with ≥2 distinct adapters.
+(`Satisfaction` itself is also minted outside `verify()` in `replication.py:103,118`, so minting a
+single-source `Satisfaction` in the new orchestrator is not unprecedented — it is the *licensing route*,
+not the minting, that is new.) This slice adds a **second, honest licensing route**: a model evaluated against
 a precommitted baseline on held-out examples, licensed by a betting e-value on the per-example advantage,
 gated by e-LOND. Building it forces (and is the lesson of) a typed per-example adapter interface and a
 typed verification seam the V1 single-node/scalar model cannot express.
