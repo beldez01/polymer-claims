@@ -923,10 +923,13 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="epoch-state JSON path (default: epoch_state.json beside --calibration)",
     )
-    p_serve.add_argument("--llm", action="store_true", help="drive GENERATE with a real LLM agent (needs the [llm] extra + ANTHROPIC_API_KEY)")
-    p_serve.add_argument("--real-data", action="store_true", help="LLM proposes REAL-DATA mean_diff plans; node runs the local execution adapters + apparatus oracle (needs [llm] + ANTHROPIC_API_KEY)")
-    p_serve.add_argument("--methyl-data", action="store_true", help="LLM proposes executable methylation claims over SE-Contracts; node runs methylation adapters + e-value gate (needs [llm] + ANTHROPIC_API_KEY)")
-    p_serve.add_argument("--tcga-laml", action="store_true", help="seed the live node with the REAL TCGA-LAML genome-wide n-DMP claim (ingest first; one-shot compute, then displays)")
+    # The serve mode flags are mutually exclusive — _cmd_serve dispatches on the FIRST one set, so
+    # passing more than one used to silently ignore the rest. argparse now rejects conflicting combos.
+    serve_mode = p_serve.add_mutually_exclusive_group()
+    serve_mode.add_argument("--llm", action="store_true", help="drive GENERATE with a real LLM agent (needs the [llm] extra + ANTHROPIC_API_KEY)")
+    serve_mode.add_argument("--real-data", action="store_true", help="LLM proposes REAL-DATA mean_diff plans; node runs the local execution adapters + apparatus oracle (needs [llm] + ANTHROPIC_API_KEY)")
+    serve_mode.add_argument("--methyl-data", action="store_true", help="LLM proposes executable methylation claims over SE-Contracts; node runs methylation adapters + e-value gate (needs [llm] + ANTHROPIC_API_KEY)")
+    serve_mode.add_argument("--tcga-laml", action="store_true", help="seed the live node with the REAL TCGA-LAML genome-wide n-DMP claim (ingest first; one-shot compute, then displays)")
     p_serve.add_argument("--llm-model", default="claude-sonnet-4-6", help="model for --llm")
     p_serve.add_argument("--llm-every", type=int, default=4, help="LLM proposes every Nth tick (throttle)")
     p_serve.add_argument(
