@@ -1,5 +1,6 @@
 from __future__ import annotations
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 import numpy as np
 from ._hashing import canonical_sha256
 from .evidence import _C, _grapa_capital
@@ -9,11 +10,11 @@ class ScoringError(ValueError):
     """Raised when prediction vectors or labels fail validation."""
 
 
+@dataclass(frozen=True)
 class PredictionVector:
     """Immutable ordered sequence of (example_id, prediction) pairs."""
 
-    def __init__(self, predictions: tuple[tuple[str, str], ...]) -> None:
-        self.predictions: tuple[tuple[str, str], ...] = tuple(predictions)
+    predictions: tuple[tuple[str, str], ...]
 
     def as_map(self) -> dict[str, str]:
         """Return a dict of {example_id: prediction}. Raises ScoringError on duplicate ids."""
@@ -74,7 +75,7 @@ def score_advantage(
             f"Label coverage mismatch. Missing from labels: {missing}. Extra in labels: {extra}."
         )
 
-    # Build maps (raises ScoringError on duplicate ids)
+    # Build maps (defensive: as_map() raises ScoringError on duplicate ids, but order check above already guarantees no duplicates)
     model_map = model.as_map()
     baseline_map = baseline.as_map()
 

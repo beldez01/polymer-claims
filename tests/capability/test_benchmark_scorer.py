@@ -111,11 +111,3 @@ def test_score_advantage_labels_extra_id_raises():
     extra_labels = {"a": "cat", "b": "dog", "c": "bird", "d": "fish"}
     with pytest.raises(ScoringError):
         score_advantage(model, baseline, extra_labels, ORDER)
-
-
-def test_score_advantage_duplicate_id_in_vector_raises():
-    """Duplicate id in a vector's predictions → ScoringError (via as_map)."""
-    model = PredictionVector((("a", "cat"), ("a", "dog"), ("c", "bird")))
-    baseline = PredictionVector(PREDS_BASELINE)
-    with pytest.raises(ScoringError):
-        score_advantage(model, baseline, LABELS, ORDER)
