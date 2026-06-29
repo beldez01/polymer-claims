@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -21,6 +22,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .node import NodeRunner
+
+logger = logging.getLogger(__name__)
 
 # Per-subscriber SSE queue cap: drop-oldest beyond this many buffered frames so a
 # slow client can't grow an unbounded queue (memory leak).
@@ -83,7 +86,11 @@ def create_app(
         while True:
             await asyncio.sleep(interval)
             if runner.running:
-                await _do_tick()
+                try:
+                    await _do_tick()
+                except Exception:  # noqa: BLE001 — one bad tick must not kill the ticker
+                    # e.g. a transient LLM error or a numpy LinAlgError from the layout pass.
+                    logger.exception("tick failed; continuing")
 
     @asynccontextmanager
     async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -184,10 +191,14 @@ def create_app(
 
     async def _event_source() -> AsyncIterator[bytes]:
         q: asyncio.Queue = asyncio.Queue(maxsize=_SSE_QUEUE_MAX)
-        subscribers.add(q)
+        # Subscribe + snapshot the on-connect frame atomically w.r.t. ticks: tick() appends and
+        # publishes under `lock`, so doing both here closes the window where a new subscriber
+        # could read frames[-1]==K and then ALSO receive K via _publish (a duplicate initial frame).
+        async with lock:
+            subscribers.add(q)
+            initial = runner.frames[-1].model_dump_json()
         try:
-            # on connect: send the current frame immediately
-            yield _sse_event(runner.frames[-1].model_dump_json())
+            yield _sse_event(initial)
             while True:
                 try:
                     payload = await asyncio.wait_for(q.get(), timeout=15.0)

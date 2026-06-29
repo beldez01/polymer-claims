@@ -183,8 +183,8 @@ def _cmd_loop(args: argparse.Namespace) -> int:
                 file=sys.stderr,
             )
             break
-        if action.estimated_cost > remaining:
-            break
+        # affordability is already enforced by next_action (it returns only actions with
+        # estimated_cost <= the budget it was passed), so no extra guard is needed here.
         result = run_cycle(corpus, _ADAPTERS, _CTX, ledger=state.ledger)
         corpus = result.corpus
         remaining -= action.estimated_cost

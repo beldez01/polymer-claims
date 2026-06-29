@@ -86,8 +86,9 @@ def load_ledger(
     Latest line wins (definitional append-only semantics). First-seen order is preserved so the
     ledger has a stable deterministic ordering even as new records accumulate.
 
-    If `generating_models` is not explicitly supplied and a sidecar `<path>.models.json` exists,
-    models are auto-loaded from it so `certify` can show n_generated without extra caller plumbing."""
+    If no non-empty `generating_models` are supplied and a sidecar `<path>.models.json` exists,
+    models are auto-loaded from it so `certify` can show n_generated without extra caller plumbing.
+    (The empty-tuple default is indistinguishable from an explicit `()`, so both trigger auto-load.)"""
     path = Path(path)
     latest: dict[tuple, ResolutionRecord] = {}
     order: list[tuple] = []

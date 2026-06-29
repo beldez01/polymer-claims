@@ -72,5 +72,8 @@ class NimClient:
             resp.body.get(self.model_version_field) if isinstance(resp.body, dict) else None
         )
         resp = NimResponse(status=resp.status, body=resp.body, model_version=version)
-        path.write_text(json.dumps({"status": resp.status, "body": resp.body, "model_version": resp.model_version}))
+        # Only content-address a SUCCESS into the cache: a non-raising transport that returns
+        # an error status must not poison the cache (and be replayed forever) for this request.
+        if 200 <= resp.status < 300:
+            path.write_text(json.dumps({"status": resp.status, "body": resp.body, "model_version": resp.model_version}))
         return resp

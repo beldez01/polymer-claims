@@ -67,9 +67,14 @@ def resolve_pinned_file(
         return _verify(cached, sha256, filename)
 
     if not (allow_fetch and url):
+        suffix = (
+            f"or pass --fetch to download from {url!r}."
+            if url
+            else "(no download URL is pinned for this input)."
+        )
         raise PinnedInputError(
             f"{filename}: not found locally or in cache ({cache_dir}). Supply it via "
-            f"--xena/--cbioportal, or pass --fetch to download from {url!r}.")
+            f"--xena/--cbioportal, {suffix}")
 
     cache_dir.mkdir(parents=True, exist_ok=True)
     # unique temp name so concurrent runs don't trample each other (spec §3: atomic .part-<n>)

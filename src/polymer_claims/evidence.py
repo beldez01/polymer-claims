@@ -144,7 +144,9 @@ def evidence_map(corpus: Corpus) -> dict[str, float]:
             try:
                 indicators = dmp_indicators(node)
                 p0 = _alpha(node)
-            except (FileNotFoundError, KeyError, ValueError):
+                # inside the try (and catch ZeroDivisionError) so a bad p0 (e.g. alpha=0,
+                # which divides by zero in the e-value) skips the claim like other bad contracts
+                out[c.id] = count_enrichment_evalue(indicators, p0=p0)
+            except (FileNotFoundError, KeyError, ValueError, ZeroDivisionError):
                 continue
-            out[c.id] = count_enrichment_evalue(indicators, p0=p0)
     return out
