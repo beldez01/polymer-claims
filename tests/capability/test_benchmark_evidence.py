@@ -46,13 +46,12 @@ def test_stream_with_nan():
         paired_advantage_evalue([0.0, float("nan"), 1.0], theta0=0.0)
 
 
-def test_null_mean_exact_enumeration():
+def test_null_mean_not_exceeding_one_enumeration():
     """Exact null-mean enumeration over {-1,1}^4: sum of e-values over all 16 orderings at boundary null ≤ 1."""
-    # This test verifies that the e-value respects the null hypothesis
-    # For {-1,1}^4 at theta0=0, the mean is -1, which is strictly under the null.
-    # We test that the e-value is well-behaved (finite and reasonable).
-    result = paired_advantage_evalue([-1.0, -1.0, -1.0, -1.0], theta0=0.0)
-    assert np.isfinite(result)
-    assert result >= 0.0
-    # At boundary null with all negative data, e-value should be ≤ 1.0
-    assert result <= 1.0
+    import itertools
+    n, q = 4, 0.5  # boundary null E[W]=0, P(-1)=P(+1)=0.5
+    total = sum(
+        (q ** c.count(-1.0)) * (q ** c.count(1.0)) * paired_advantage_evalue(list(c), theta0=0.0)
+        for c in itertools.product((-1.0, 1.0), repeat=n)
+    )
+    assert total <= 1.0 + 1e-9
