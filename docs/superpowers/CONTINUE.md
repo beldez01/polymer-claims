@@ -12,19 +12,35 @@
 
 ---
 
-## Current state (2026-06-26) — authoritative snapshot
+## Current state (2026-06-29) — authoritative snapshot
 
 > **This is the single current-state summary.** The dated blocks further down are **historical**
 > (kept for build detail); when they disagree with this section, *this* section wins. Full shipped
 > history is in the **Done checklist** below + `git log`; the forward plan is
 > `docs/superpowers/2026-06-23-remaining-roadmap.md` (Path α — wedge-first).
 
-**Where it stands.** `main` is a single trunk (2 commits ahead of `origin` at this snapshot), ruff
-clean, all suites green: **umbrella 531 · grammar 398 · protocol 430** (+ the grammar isolation
-guard). `grammar/` + `protocol/` stay pure + numpy-free; **Corpus = exactly 4 collections**; numpy
-lives behind the umbrella `[embed]` extra.
+**Where it stands.** `main` is a single trunk, ruff clean, all suites green:
+**umbrella 572 · grammar 427 · protocol 431** (+ the grammar isolation guard) + viewer `tsc`/build.
+`grammar/` + `protocol/` stay pure + numpy-free; **Corpus = exactly 4 collections**; numpy lives
+behind the umbrella `[embed]` extra. **The `beldez01` account flag is RESOLVED (2026-06-29)** —
+GitHub Actions / PyPI publish are unblocked (no CI workflow committed yet; `scripts/check-all.sh`
+remains the local gate until one mirroring it is added).
 
-**Shipped this week (newest first):**
+**Shipped (newest first):**
+- **Audit-driven cleanup + docs consolidation (2026-06-28→29).** A multi-agent tidiness/correctness
+  audit (`CLEANUP_AUDIT.md`) applied as ~110 verified changes: **2 real correctness fixes** — the MDL
+  meta-tier gate could be fooled by zero-structural-slot claims (a load-bearing pattern DEPRECATE
+  wrongly cleared the bar), and `anchored_resolutions` emitted records in non-deterministic order
+  (→ a non-deterministic signed certificate digest) — plus condensation/refactors across all packages
+  (the 3 LLM adapters unified onto `_GenerationAdapterBase`; `_ndmp_gate` shared by both kernel proofs;
+  `node` ring buffer → `deque(maxlen)`; serve mode-flags now mutually exclusive — argparse error vs
+  silent shadowing). **Docs culled −63k lines:** shipped per-feature specs/plans + the entire
+  `docs/superpowers/archive/` tree removed (history in git); `specs/`+`plans/` keep only the 2 pending
+  features; the two spectral docs merged to `docs/spectral-layout.md`.
+- **Capability Cell + Registry (V1, 2026-06-27, merge `b058d3c`).** First-class versioned
+  `CapabilityCell` + `CapabilityRegistry`; the three reductions registered as the first cells;
+  conformance is advisory (closed-world enforcement deliberately deferred).
+- **Local transparency-log layer (H1.A1, 2026-06-25)** — RFC-6962 Merkle inclusion log + C2SP signed
 - **Local transparency-log layer (H1.A1, 2026-06-25)** — RFC-6962 Merkle inclusion log + C2SP signed
   checkpoint + a trust-gated, offline-verifiable Polymer bundle (Sigstore-INSPIRED, not
   wire-compatible), behind a `TransparencyLog` seam. CLI `verify-bundle PATH [--pub-key]
@@ -63,10 +79,9 @@ lives behind the umbrella `[embed]` extra.
 The single remaining **critical-path** gate is **H1.A2 — source a real 2nd HM450 cohort** with
 machine-readable IDH status (long lead; it's the gate to §2E REPLICATED and a shippable wedge, H2).
 Optional parallel, non-blocking code: finish **H1.A1** (Sigstore/cosign/Rekor — currently tabled by
-choice), the **Track B credence engines** (proper/surrogate scoring atop the ATTESTED typing), and —
-newly tracked — the **vision-derived capability-cell spine (V1)**: formalize a first-class, versioned
-**capability** object + registry (the three existing reductions become the first cells). It's the
-highest-leverage *non-data-blocked* build and the precondition for agent-first closed-world execution.
+choice), the **Track B credence engines** (proper/surrogate scoring atop the ATTESTED typing), and the
+**capability-cell follow-ons** now that V1 shipped — **V2** (register one genuinely-new/external
+capability as the generalization test, then fan out) and eventually closed-world enforcement.
 Authoritative forward plan: `docs/superpowers/2026-06-23-remaining-roadmap.md` (see *Vision-derived
 additions*); product vision: `docs/superpowers/vision.md`.
 
