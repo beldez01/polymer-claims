@@ -12,6 +12,11 @@ import json
 from typing import Any
 
 
+def canonical_dumps(obj: Any) -> str:
+    """The single canonical-JSON recipe: sorted keys, no whitespace. The byte-producing callers
+    append .encode('utf-8'); content-address callers hash it. One recipe, one place."""
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"))
+
+
 def canonical_sha256(obj: Any) -> str:
-    canonical = json.dumps(obj, sort_keys=True, separators=(",", ":"))
-    return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return "sha256:" + hashlib.sha256(canonical_dumps(obj).encode("utf-8")).hexdigest()

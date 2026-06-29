@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from polymer_claims.contracts import load_contract
+from polymer_claims.contracts import load_contract, load_manifest
 
 
 def stratified_split(sample_groups: dict[str, str]) -> tuple[list[str], list[str]]:
@@ -78,7 +78,7 @@ def top_k_hypermethylated(
     (the discovery half). Descending; ties broken by probe id. Deterministic."""
     se = load_contract(ref)
     betas_path = Path(se.access_methods[0].access_url)
-    manifest = json.loads((betas_path.parent / f"{se.contract_uid.split('@')[0]}.json").read_text())
+    manifest = load_manifest(se)
     group_of = {c["sample_id"]: c[group_col] for c in manifest["col_data"]}
     scored: list[tuple[float, str]] = []
     with open(betas_path) as fh:

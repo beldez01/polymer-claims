@@ -9,10 +9,11 @@ from __future__ import annotations
 
 import base64
 import hashlib
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Protocol
+
+from ._hashing import canonical_dumps
 
 if TYPE_CHECKING:
     from polymer_claims.attestation import DsseEnvelope
@@ -27,7 +28,7 @@ def canonical_entry_bytes(env: DsseEnvelope) -> bytes:
         "payload": env.payload,
         "signatures": [{"sig": s.sig, "keyid": s.keyid} for s in env.signatures],
     }
-    return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return canonical_dumps(obj).encode("utf-8")
 
 
 # --- RFC-6962 Merkle tree hash (SHA-256, domain-separated) ----------------------------------------

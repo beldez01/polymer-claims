@@ -113,6 +113,18 @@ def _defeat(src: str, tgt: str, kind: DefeatEdgeKind) -> DefeatEdge:
     return DefeatEdge(source=src, target=tgt, kind=kind)
 
 
+def _entails_pair(
+    upstream_estimand: str, downstream_estimand: str, label: str
+) -> tuple[Proposition, Proposition]:
+    """An (upstream, downstream) proposition pair where upstream's conclusion ENTAILS downstream's.
+    Returns (upstream, downstream) — both POSITIVE; `label` is the entails-edge note."""
+    downstream = _simple_prop(downstream_estimand, Direction.POSITIVE)
+    upstream = _prop_with_entails(
+        upstream_estimand, Direction.POSITIVE, downstream.content_hash, label
+    )
+    return upstream, downstream
+
+
 # ── Builder ────────────────────────────────────────────────────────────────────
 
 def planted_corpus() -> Corpus:
@@ -149,22 +161,12 @@ def planted_corpus() -> Corpus:
     prop_c0_2 = _simple_prop("synth_effect_polar", Direction.POSITIVE)
     prop_c0_3 = _simple_prop("synth_effect_polar", Direction.NEGATIVE)
 
-    # c0_4 and c0_5 for the entails chain: c0_4 ENTAILS c0_5
-    prop_c0_5 = _simple_prop("synth_effect_downstream", Direction.POSITIVE)
-    prop_c0_4 = _prop_with_entails(
-        "synth_effect_upstream",
-        Direction.POSITIVE,
-        prop_c0_5.content_hash,
-        "c0_4 => c0_5",
+    # c0_4 ENTAILS c0_5; c0_6 ENTAILS c0_7
+    prop_c0_4, prop_c0_5 = _entails_pair(
+        "synth_effect_upstream", "synth_effect_downstream", "c0_4 => c0_5"
     )
-
-    # c0_6 and c0_7 for the entails chain: c0_6 ENTAILS c0_7
-    prop_c0_7 = _simple_prop("synth_effect_leaf", Direction.POSITIVE)
-    prop_c0_6 = _prop_with_entails(
-        "synth_effect_branch",
-        Direction.POSITIVE,
-        prop_c0_7.content_hash,
-        "c0_6 => c0_7",
+    prop_c0_6, prop_c0_7 = _entails_pair(
+        "synth_effect_branch", "synth_effect_leaf", "c0_6 => c0_7"
     )
 
     claims += [
@@ -210,19 +212,11 @@ def planted_corpus() -> Corpus:
     #   UNDERCUT: c1_7→c1_6 (bidirectional tension keeps both in the subgraph)
     #   bridge: c1_6→c1_0, c1_7→c1_1 (so {c1_6,c1_7} join the c1_0..c1_5 body)
 
-    prop_c1_3 = _simple_prop("synth_mediation_downstream", Direction.POSITIVE)
-    prop_c1_2 = _prop_with_entails(
-        "synth_mediation_upstream",
-        Direction.POSITIVE,
-        prop_c1_3.content_hash,
-        "c1_2 => c1_3",
+    prop_c1_2, prop_c1_3 = _entails_pair(
+        "synth_mediation_upstream", "synth_mediation_downstream", "c1_2 => c1_3"
     )
-    prop_c1_5 = _simple_prop("synth_mediation_leaf", Direction.POSITIVE)
-    prop_c1_4 = _prop_with_entails(
-        "synth_mediation_branch",
-        Direction.POSITIVE,
-        prop_c1_5.content_hash,
-        "c1_4 => c1_5",
+    prop_c1_4, prop_c1_5 = _entails_pair(
+        "synth_mediation_branch", "synth_mediation_leaf", "c1_4 => c1_5"
     )
 
     claims += [
@@ -258,19 +252,11 @@ def planted_corpus() -> Corpus:
     #   UNDERCUT: c2_7→c2_6
     #   bridge: c2_6→c2_0, c2_7→c2_1 (so {c2_6,c2_7} join the c2_0..c2_5 body)
 
-    prop_c2_3 = _simple_prop("synth_dose_downstream", Direction.POSITIVE)
-    prop_c2_2 = _prop_with_entails(
-        "synth_dose_upstream",
-        Direction.POSITIVE,
-        prop_c2_3.content_hash,
-        "c2_2 => c2_3",
+    prop_c2_2, prop_c2_3 = _entails_pair(
+        "synth_dose_upstream", "synth_dose_downstream", "c2_2 => c2_3"
     )
-    prop_c2_5 = _simple_prop("synth_dose_leaf", Direction.POSITIVE)
-    prop_c2_4 = _prop_with_entails(
-        "synth_dose_branch",
-        Direction.POSITIVE,
-        prop_c2_5.content_hash,
-        "c2_4 => c2_5",
+    prop_c2_4, prop_c2_5 = _entails_pair(
+        "synth_dose_branch", "synth_dose_leaf", "c2_4 => c2_5"
     )
 
     claims += [

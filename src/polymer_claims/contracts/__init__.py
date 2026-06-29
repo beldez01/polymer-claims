@@ -79,6 +79,12 @@ def load_contract(ref: str) -> SEContractRef:
     return _load_contract(_resolve_uid(ref), root)
 
 
+def load_manifest(se: SEContractRef) -> dict:
+    """The `<uid>.json` col_data/manifest sitting beside a contract's betas TSV."""
+    betas_path = Path(se.access_methods[0].access_url)
+    return json.loads((betas_path.parent / f"{se.contract_uid.split('@')[0]}.json").read_text())
+
+
 @lru_cache(maxsize=None)
 def _load_contract(uid: str, root: Path) -> SEContractRef:
     stem = uid.split("@")[0]

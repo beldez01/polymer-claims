@@ -238,17 +238,10 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
     if args.format == "dsse":
         envelopes = [dsse_envelope(s) for s in build_attestation_statements(corpus, contract_index=index)]
         if args.key:
-            try:
-                from .signing import load_private_key, sign_envelope
-            except ModuleNotFoundError as exc:
-                return _sign_dep_error(exc)
-            try:
-                priv = load_private_key(Path(args.key).read_bytes())
-            except ModuleNotFoundError as exc:
-                return _sign_dep_error(exc)
-            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
-                print(f"export-attestation: cannot load private key {args.key}: {exc}", file=sys.stderr)
-                return 1
+            priv = _load_private_key_or_rc(args.key, "export-attestation")
+            if isinstance(priv, int):
+                return priv
+            from .signing import sign_envelope
             envelopes = [sign_envelope(e, priv) for e in envelopes]
             if args.rekor_url:
                 print("export-attestation: networked Rekor backend (--rekor-url) is not implemented yet; see spec §7", file=sys.stderr)
@@ -276,6 +269,8 @@ def _cmd_export_attestation(args: argparse.Namespace) -> int:
 
 
 def _cmd_calibrate(args: argparse.Namespace) -> int:
+    # `--synthetic` is currently informational (the only mode this slice); kept so tests can pass
+    # it and a future real-data mode can branch on it. Not read here.
     from .calibration_harness import run_calibration
     from .calibration_store import append_records, dump_models
     from polymer_protocol.calibration import GeneratingModelParams
@@ -463,6 +458,22 @@ def _sign_dep_error(exc: ModuleNotFoundError) -> int:
     return 1
 
 
+def _load_private_key_or_rc(path: str, cmd: str):
+    """Load an ed25519 private key from `path`, or return an int rc on failure: the [sign] extra
+    missing -> _sign_dep_error; an unreadable/malformed PEM -> 1 with a `<cmd>:` message."""
+    try:
+        from .signing import load_private_key
+    except ModuleNotFoundError as exc:
+        return _sign_dep_error(exc)
+    try:
+        return load_private_key(Path(path).read_bytes())
+    except ModuleNotFoundError as exc:
+        return _sign_dep_error(exc)
+    except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
+        print(f"{cmd}: cannot load private key {path}: {exc}", file=sys.stderr)
+        return 1
+
+
 def _parse_dsse_envelopes(text: str):
     """Parse a single DSSE-envelope JSON (compact OR pretty-printed) or an NDJSON of envelopes.
     Returns a list of DsseEnvelope, or None if the input is not parseable as either."""
@@ -580,17 +591,10 @@ def _cmd_certify(args: argparse.Namespace) -> int:
     elif args.format == "dsse":
         env = certificate_dsse_envelope(cert)
         if args.key:
-            try:
-                from .signing import load_private_key, sign_envelope
-            except ModuleNotFoundError as exc:
-                return _sign_dep_error(exc)
-            try:
-                priv = load_private_key(Path(args.key).read_bytes())
-            except ModuleNotFoundError as exc:
-                return _sign_dep_error(exc)
-            except (OSError, ValueError) as exc:        # unreadable / malformed PEM -> rc 1, no traceback
-                print(f"certify: cannot load private key {args.key}: {exc}", file=sys.stderr)
-                return 1
+            priv = _load_private_key_or_rc(args.key, "certify")
+            if isinstance(priv, int):
+                return priv
+            from .signing import sign_envelope
             if args.transparency_log and args.keyid is not None:
                 from .signing import keyid_for
                 if args.keyid != keyid_for(priv.public_key()):

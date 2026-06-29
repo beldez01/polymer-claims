@@ -7,6 +7,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .._hashing import canonical_dumps
+
 
 @dataclass(frozen=True)
 class NimRequest:
@@ -25,7 +27,7 @@ Transport = Callable[["NimRequest", str], "NimResponse"]
 
 
 def _canonical(payload: dict) -> str:
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return canonical_dumps(payload)
 
 
 def urllib_transport(req: NimRequest, api_key: str) -> NimResponse:
