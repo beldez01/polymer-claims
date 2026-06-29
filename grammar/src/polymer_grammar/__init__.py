@@ -170,6 +170,7 @@ from .representation import (
 )
 from .commitment import commitment_hash
 from .sampling import SamplingRegime
+from .evidence_policy import EvidencePolicy, EvidencePolicyRegistry
 from .capability import (
     CapabilityCell, CapabilityRegistry, ParamCodec, SubjectRequirement, SubjectKind,
     OracleRequirement, DataRefKind, ConformanceResult, ConformanceReason, ConformanceWarning,
@@ -343,6 +344,8 @@ __all__ = [
     "validate_claim_conformance",
     "criterion_target_ok",
     "data_ref_ok",
+    "EvidencePolicy",
+    "EvidencePolicyRegistry",
     "CONFIRMATORY_SEVERITY_CEILING",
     "SHARED_CAUSE_TAU",
     "SeverityProvenance",
