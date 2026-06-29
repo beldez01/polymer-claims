@@ -18,9 +18,17 @@
 - **Pydantic floor stays `>=2.6`** — None-omission via `@model_serializer(mode="wrap")`, NOT `Field(exclude_if=…)`.
 - Per-package: `uv run pytest -q` + `uv run ruff check src tests`. Full gate `scripts/check-all.sh`. TDD: failing test first. Branch `feat/v2-evidence-capability`, merge `--no-ff`.
 
-## Data-flow contract (resolves 8th-review #1–#4)
+## Reference formats (resolves 9th-review #10)
 
-`run_cycle` gains **one** keyword param `evidence_runtime: EvidenceRuntime | None = None` — a **protocol-level** dataclass (not a Corpus model; holds a callable) bundling: `capability_registry: CapabilityRegistry`, `evidence_policy_registry: EvidencePolicyRegistry`, `executor_descriptor_registry: ExecutorDescriptorRegistry`, `executor_trust_registry: ExecutorTrustRegistry` (all grammar), and `executor: EvidenceExecutor` (protocol type; umbrella impl). It threads into `execute_ground`. **No pre-filtering of evidence ids** (#4): the selected set is passed normally and the per-claim loop branches. The protocol resolves policy/descriptor/trust from the claim's `execution_contract` and does the precondition + hash-chain + credential + trust checks; only the umbrella `BenchmarkArtifact` is resolved inside `executor.execute(...)`. `executor.execute(claim, cell, policy, ctx, fdr_test) -> EvidenceExecution`.
+**All content-address refs are `"sha256:<hex>"`.** Every `content_hash` property (grammar `EvidencePolicy`/`ExecutorDescriptor`/`CapabilityCell`, umbrella `BenchmarkArtifact`/`PredictionVector`) returns `"sha256:" + hexdigest` — grammar models wrap `_sha` to add the prefix so grammar and umbrella agree. The **benchmark ref** is `"bench:" + artifact.content_hash` = `"bench:sha256:<hex>"`. Refs covered: evidence-policy, capability-descriptor, executor-descriptor, predictor/baseline config, baseline-predictions, benchmark. Every ref validator checks the exact `sha256:`/`bench:sha256:` shape, not merely "hash-shaped".
+
+## Data-flow contract (resolves 8th-review #1–#4, 9th-review #1/#2)
+
+`run_cycle` gains **one** keyword param `evidence_runtime: EvidenceRuntime | None = None` — a **protocol-level** dataclass (not a Corpus model; holds a callable) bundling: `capability_registry`, `evidence_policy_registry`, `executor_descriptor_registry`, `executor_trust_registry` (all grammar), and `executor: EvidenceExecutor`. It threads into `execute_ground`. **No pre-filtering of evidence ids**: the selected set passes normally; the per-claim loop branches. The protocol resolves policy/descriptor/trust from the claim's `execution_contract` and does the precondition + hash-chain + credential + trust checks; only the umbrella `BenchmarkArtifact` is resolved inside `executor.execute(...)`. `executor.execute(claim, cell, policy, ctx, fdr_test) -> EvidenceExecution`.
+
+**run_cycle wiring (9th-review #2):** after `execute_ground` returns `(corpus, records, evidence_executions)`, `run_cycle` MUST: unpack the third value; for each **success**, merge its `e_value` into the `evidence=` map and its `licensing_info` into an `evidence_licensing` dict; for each **failure**, put its `ExecutionFailure` into an `evidence_failures` dict; pass both dicts to `verify_stage`; and **reject a collision** where a caller-supplied `evidence[claim_id]` already exists for an evidence-executor claim (raise — do not silently overwrite, 9th-review #19).
+
+**Benchmark-ref binding (9th-review #1):** the hash-chain check (dispatch) additionally requires the claim's **terminal `DataHandle.ref == "bench:" + policy.calibration_population_ref == artifact.ref`** — so the claim's named benchmark is exactly the executed artifact.
 
 ## Compatibility sequencing (resolves #23/#24)
 
@@ -68,7 +76,7 @@ def paired_advantage_evalue(w: Sequence[float], *, theta0: float) -> float:
 
 **Files:** Modify `benchmark_evidence.py`; Test `tests/capability/test_benchmark_scorer.py`
 
-**Interfaces:** `PredictionVector(predictions: tuple[tuple[str,str],...])`; `score_advantage(model, baseline, labels, order) -> list[float]`; `ScoringError(ValueError)`. **Order check (8th-review #7):** require each `PredictionVector`'s id sequence to **equal `order` exactly** (not just the set); missing/dup/extra/order-mismatch → `ScoringError`.
+**Interfaces:** `PredictionVector(predictions: tuple[tuple[str,str],...])` with a **`content_hash` property** = `canonical_sha256` over ordered `(example_id, prediction)` pairs and `ref` = that hash (9th-review #7 — `EvidenceProvenance.baseline_predictions_ref` is this `ref`); `score_advantage(model, baseline, labels, order) -> list[float]`; `ScoringError(ValueError)`. **Order check (8th-review #7):** require each `PredictionVector`'s id sequence to **equal `order` exactly**. **Label coverage (9th-review #11):** require `set(labels) == set(order)` exactly (no missing/extra labels); every lookup failure → `ScoringError`.
 
 - [ ] **Step 1: failing test** — paired Wᵢ in order `[0,1,1]`; a vector with the same ids in **different order** → `ScoringError`; missing id → `ScoringError`; duplicate → `ScoringError`.
 - [ ] **Step 2–3:** implement `as_map()` (dup → error) + `score_advantage` asserting `tuple(eid for eid,_ in pv.predictions) == tuple(order)` for both model and baseline.
@@ -89,7 +97,7 @@ def paired_advantage_evalue(w: Sequence[float], *, theta0: float) -> float:
 
 **Files:** Create `src/polymer_claims/benchmark_adapter.py`; Test `tests/capability/test_benchmark_adapter.py`
 
-**Interfaces (8th-review #9):** `BenchmarkArtifact` is a **frozen pydantic model**: `example_ids: tuple[str,...]`, `features: tuple[tuple[tuple[str,str],...],...]`, `labels: tuple[tuple[str,str],...]`, `target_population: str`, `sampling_regime: SamplingRegime` (typed), `version: str`, `sampling_seed: int`, `dgp_digest: str`; **validators:** unique example_ids; `features`/`labels` keys exactly cover `example_ids`; no malformed labels; non-empty `target_population`/`version`; `dgp_digest` `sha256:`-shaped. `content_hash` = `canonical_sha256(model_dump(mode="json"))`; `ref` = `"bench:" + content_hash`. `BenchmarkAdapter` Protocol: `identity`, `config: dict`, `predict(examples) -> PredictionVector` (no labels). `FixtureModelAdapter`/`FixtureBaselineAdapter` (deterministic, label-independent seed).
+**Interfaces (8th-review #9, 9th-review #6):** `BenchmarkArtifact` is a **frozen pydantic model** with a **single `examples: tuple[BenchmarkExample, ...]`** sequence (each `BenchmarkExample` carries `example_id` + `features` + `label`) — **no parallel arrays** (9th-review #6); plus `target_population: str`, `sampling_regime: SamplingRegime` (typed), `version: str`, `sampling_seed: int`, `dgp_digest: str`. **Validators:** unique `example_id`s; non-empty labels; non-empty `target_population`/`version`; `dgp_digest` `sha256:`-shaped. `content_hash` = `canonical_sha256(model_dump(mode="json"))` (→ `sha256:<hex>`); `ref` = `"bench:" + content_hash`. (`BenchmarkExample` here carries the label for content-addressing; the **label-free view** passed to `predict` strips it.) `BenchmarkAdapter` Protocol: `identity`, `config: dict`, `predict(examples) -> PredictionVector` (no labels). `FixtureModelAdapter`/`FixtureBaselineAdapter` (deterministic, label-independent seed).
 
 - [ ] **Step 1: failing test** — `predict` signature has no `labels`; two artifacts with different labels differ in `content_hash`; `ref` == `"bench:" + content_hash`; duplicate example_id → `ValidationError`; label not covering an id → `ValidationError`.
 - [ ] **Step 2–4:** implement; run → PASS; `uv run ruff check src tests`.
@@ -99,7 +107,7 @@ def paired_advantage_evalue(w: Sequence[float], *, theta0: float) -> float:
 
 **Files:** Create `grammar/src/polymer_grammar/evidence_policy.py`; Modify `__init__.py`; Test `grammar/tests/test_evidence_policy.py`
 
-**Interfaces:** `EvidencePolicy(_Model)` per spec §4 (`baseline_config_ref`, `predictor_config_ref`, `executor_descriptor_ref`, …); `content_hash` `@property` via `_sha`; `ref` returns it. **Validators:** non-empty ids/refs; **`0 ≤ theta0 < 1`**; family↔transform compatible. `EvidencePolicyRegistry{policies; resolve(ref)}` with a **duplicate-ref validator** (8th-review #12).
+**Interfaces:** `EvidencePolicy(_Model)` per spec §4 (`baseline_config_ref`, `predictor_config_ref`, `executor_descriptor_ref`, …); `content_hash` `@property` = `"sha256:" + _sha(...)` (prefixed, per Reference formats); `ref` returns it. **Validators:** non-empty `sha256:`-shaped refs; **`theta0` finite ∧ `0 ≤ theta0 < 1`** (explicitly reject NaN/±inf — 9th-review #12); family↔transform compatible. `EvidencePolicyRegistry{policies; resolve(ref)}` with a **duplicate-ref validator** (8th-review #12).
 
 - [ ] **Step 1: failing test** — `ref == content_hash`; `resolve` round-trips; `theta0` 1.0/−0.1 → error; **two policies with the same `content_hash` in one registry → `ValidationError`**.
 - [ ] **Step 2–4:** implement (`from .base import _Model`); run → PASS; grammar + isolation green.
@@ -122,7 +130,7 @@ def paired_advantage_evalue(w: Sequence[float], *, theta0: float) -> float:
 **Interfaces:**
 - `VerificationPolicy` — **validate BOTH complete modes (8th-review #11):** `recompute_pair` ⇒ `result_rule="criterion"` ∧ `independence_requirement="implementation"` ∧ `evidence_policy_ref is None` ∧ `min_adapters==2`; `single` ⇒ `result_rule="evalue_discovery"` ∧ `independence_requirement="baseline_ground_truth"` ∧ `evidence_policy_ref is not None` ∧ `min_adapters==1`.
 - `ExecutionContract{capability_id, capability_version, evidence_policy_ref, capability_descriptor_ref}`.
-- `EvidenceProvenance` per §4 with **numeric validators (8th-review #16):** `observed_advantage ∈ [−1,1]`; `0 ≤ theta0 < 1`; `e_value ≥ 0` ∧ finite; `fdr_test_index > 0`; `0 < alpha_allocated ≤ 1`; refs non-empty/hash-shaped.
+- `EvidenceProvenance` per §4 — **add `claim_id: str` (9th-review #5)** — with **numeric validators (8th-review #16):** `observed_advantage ∈ [−1,1]`; `0 ≤ theta0 < 1`; **`e_value ≥ 0` ∧ not NaN (`+inf` PERMITTED — real n-DMP evidence already produces it; 9th-review #13)**; `fdr_test_index > 0`; `0 < alpha_allocated ≤ 1`; refs `sha256:`-shaped.
 - `EvidenceLicensingInfo{route: LicenseRoute, verification_standing: Literal["single_source_baseline"], evidence_provenance: EvidenceProvenance, materialization}` — **literal, not str (8th-review #13)**.
 
 - [ ] **Step 1: failing test** — `single` with `result_rule="criterion"` → error; `recompute_pair` with `evidence_policy_ref` set → error; provenance with `e_value=-1`/`alpha=0`/`observed_advantage=2` → error; standing literal rejects an arbitrary string.
@@ -177,9 +185,12 @@ class EvidenceExecution(_Model):
     e_value: float | None = None
     licensing_info: EvidenceLicensingInfo | None = None
     failure_reason: ExecutionFailure | None = None
-    # validator (#14): success => e_value & licensing_info present, failure None, e_value>=0 & finite;
-    #                   failure => failure present, e_value & licensing_info None;
-    #                   record.claim_id == licensing_info.evidence_provenance fields' claim (when success)
+    # validator (8th #14, 9th #14): SUCCESS => e_value & licensing_info present, failure None,
+    #   e_value>=0 & not NaN (+inf ok, 9th #13), record.evaluation verdict==UNDETERMINED, satisfaction
+    #   is None, exactly one result, result.adapter_identity==executor descriptor_ref,
+    #   record.claim_id == licensing_info.evidence_provenance.claim_id;
+    # FAILURE => failure present, e_value & licensing_info None, record result status=="error",
+    #   terminal value None.
 class EvidenceExecutor(Protocol):
     def credential(self) -> str: ...
     def execute(self, claim, cell, policy, ctx, fdr_test) -> EvidenceExecution: ...
@@ -193,9 +204,11 @@ EvidenceRuntime = dataclass(capability_registry, evidence_policy_registry,
 
 ### Task 12: Umbrella — `EvidenceExecutor` impl + internal artifact resolution + Layer-3 checks
 
-**Files:** Create `src/polymer_claims/benchmark_capability.py`; Test `tests/capability/test_benchmark_executor.py`
+**Files:** Modify `src/polymer_claims/adapter_identity.py` (generalized callable hash — 9th-review #4); Create `src/polymer_claims/benchmark_capability.py`; Test `tests/capability/test_callable_hash.py`, `tests/capability/test_benchmark_executor.py`
 
-**Interfaces:** `BenchmarkEvidenceExecutor` owns predictor/baseline/scorer/transform + an artifact store; `credential()` recomputes the live `ExecutorDescriptor.content_hash`; `execute(claim, cell, policy, ctx, fdr_test)` resolves the `BenchmarkArtifact` from `policy.calibration_population_ref`, verifies artifact + baseline-config + predictor-config links (failure → `ExecutionFailure(stage="execution"|"pre_dispatch")`), scores `Wᵢ`, computes the e-value, builds `EvidenceProvenance` (`e_value`, `observed_advantage`, both baseline refs, contract digest, `fdr_test_index`, `alpha_allocated` from `fdr_test`) + `EvidenceLicensingInfo`, returns `EvidenceExecution`. **No outcome filtering.**
+**Sub-task A — generalized callable hash (9th-review #4).** `adapter_identity.py` today hashes a class's `execute` only. Add `implementation_hash_for_callable(fn) -> str` (returns `"sha256:<hex>"`) hashing any method/function's `__code__` (co_code/co_consts/co_names/co_varnames + qualname). Test: it hashes `predict`, baseline `predict`, the scorer function, and the transform function; **swapping any one changes the value**. (The existing `implementation_hash_for_adapter` delegates to it.)
+
+**Interfaces:** `BenchmarkEvidenceExecutor` owns predictor/baseline/scorer/transform + an artifact store; `credential()` recomputes the live `ExecutorDescriptor.content_hash` from `implementation_hash_for_callable` over each component + canonical `config_hash`es; `execute(claim, cell, policy, ctx, fdr_test)` resolves the `BenchmarkArtifact` from `policy.calibration_population_ref`, verifies **the claim's terminal `DataHandle.ref == "bench:" + policy.calibration_population_ref == artifact.ref` (9th-review #1)** + baseline-config + predictor-config links (failure → `ExecutionFailure(stage="execution")`), scores `Wᵢ`, computes the e-value, builds `EvidenceProvenance` (incl. `claim_id`, `e_value`, `observed_advantage`, `baseline_config_ref` + `baseline_predictions_ref` (the produced `PredictionVector.ref`), contract digest, `fdr_test_index`, `alpha_allocated` from `fdr_test`) + `EvidenceLicensingInfo`, returns `EvidenceExecution`. **No outcome filtering.**
 
 - [ ] **Step 1: failing test** — strong fixture → `e_value > 1/alpha`, `route==EVIDENCE_LICENSED`, provenance populated, record verdict `UNDETERMINED`; tampered benchmark → `failure_reason.reason=="digest_mismatch"`, `e_value=None`; `credential()` changes when the baseline component swaps.
 - [ ] **Step 2–4:** implement; run → PASS; ruff clean.
@@ -219,7 +232,16 @@ EvidenceRuntime = dataclass(capability_registry, evidence_policy_registry,
 
 **Files:** Modify `protocol/src/polymer_protocol/execute.py`; Test `protocol/tests/test_evidence_dispatch.py`
 
-**Interfaces:** `execute_ground(...) -> (Corpus, tuple[ExecRecord,...], tuple[EvidenceExecution,...])`. Per-claim, if the resolved cell (via `evidence_runtime.capability_registry`, by the plan's `execution_contract` versioned key) is `execution=="single"`: resolve `EvidencePolicy`/`ExecutorDescriptor`/`ExecutorTrustEntry`; check the **hash chain** + `executor.credential()==descriptor.content_hash` + trust entry `trusted`; check the **precondition** — selected ∧ committed ∧ **a pending registered `FDRTest` located by the committed test index** with matching `claim_id`/`commitment_hash`/`alpha`/contract digest (8th-review #19) ∧ claim-shape conformance. Pass → `executor.execute(...)`, collect `ExecRecord` + `EvidenceExecution`; any check fails → **refuse** (no dispatch; or `ExecutionFailure(stage="pre_dispatch")`). Non-evidence claims unchanged.
+**Interfaces:** `execute_ground(...) -> (Corpus, tuple[ExecRecord,...], tuple[EvidenceExecution,...])`. Per-claim, if the resolved cell (via `evidence_runtime.capability_registry`, by the plan's `execution_contract` versioned key) is `execution=="single"`:
+
+**FDR-test lookup (9th-review #16):** the index is **not** in the contract. Locate the **unique pending unresolved `FDRTest` by `claim_id` ∧ `commitment_hash(claim)`**; bind its `index` + `alpha_allocated` into the execution (provenance records them afterward). On retry, the same uniquely-unresolved entry is reused.
+
+**Pre-dispatch outcomes (9th-review #3/#15) — exact:**
+- not selected / unregistered (no pending test) / **altered commitment** → **no execution record** (leave it to the existing branches; an altered claim is caught by the existing `HYPOTHESIS_ALTERED` branch — do **not** synthesize an evidence failure, 9th-review #15).
+- selected ∧ committed ∧ pending test ∧ commitment matches, **but** a policy/descriptor/trust/credential/artifact-ref/conformance check fails → **synthesize a protocol-side failure** `ExecRecord` (result `status="error"`, terminal None) + `EvidenceExecution(failure_reason=ExecutionFailure(stage="pre_dispatch", reason=…))` → routes to PENDING `EXECUTION_ERROR`.
+- all checks pass → `executor.execute(...)`; collect `ExecRecord` + `EvidenceExecution`.
+
+Checks: the **hash chain** (incl. terminal `DataHandle.ref == "bench:" + policy.calibration_population_ref`, 9th-review #1) + `executor.credential()==policy.executor_descriptor_ref==descriptor.content_hash` + trust entry `trusted` + claim-shape conformance. Non-evidence claims unchanged.
 
 - [ ] **Step 1: failing test** — registered evidence claim → `EvidenceExecution` + `ExecRecord`; unregistered → refused; in-cycle-GENERATE'd → not executed; a claim whose live `credential()` ≠ registered descriptor → `pre_dispatch` credential_mismatch.
 - [ ] **Step 2–4:** implement; run → PASS; protocol suite green.
@@ -239,9 +261,9 @@ EvidenceRuntime = dataclass(capability_registry, evidence_policy_registry,
 
 **Files:** Modify `src/polymer_claims/capabilities.py`; Test `tests/capability/test_cells.py`, `tests/capability/test_binding.py`
 
-**Interfaces:** add `EVAL_BENCHMARK_ADVANTAGE_CELL` (the §5 descriptor) to `CAPABILITY_CELLS`; `CapabilityTrustBinding` gains `executor_descriptor_registry` + `executor_trust_registry`; `_bindings()` entry supplies them; `validate_trust_binding(cell, adapter_registry, oracle_registry, *, evidence_policy_registry=None, executor_descriptor_registry=None, executor_trust_registry=None)` single-mode branch (skip pair; require policy resolvable+digest-verified, descriptor resolvable, trust entry `trusted`; unbounded oracle apparatus).
+**Interfaces:** add `EVAL_BENCHMARK_ADVANTAGE_CELL` (the §5 descriptor) to `CAPABILITY_CELLS`; `CapabilityTrustBinding` gains `executor_descriptor_registry` + `executor_trust_registry` **with empty-registry defaults so the three existing bindings keep constructing unchanged (9th-review #9)**; the new `_bindings()` entry supplies real ones; `validate_trust_binding(cell, adapter_registry, oracle_registry, *, evidence_policy_registry=None, executor_descriptor_registry=None, executor_trust_registry=None)` single-mode branch (skip pair; require policy resolvable+digest-verified, descriptor resolvable, trust entry `trusted`; unbounded oracle apparatus). **Tie eligible identity to the descriptor (9th-review #8):** require the descriptor's `predictor` component `identity ∈ cell.eligible_adapter_identities` (so `("benchmark-model",)` is load-bearing, not decorative).
 
-- [ ] **Step 1: failing tests** — cell is `single`; binding passes with one credential + trusted descriptor; untrusted entry fails; existing three cells still require the pair.
+- [ ] **Step 1: failing tests** — cell is `single`; binding passes with one credential + trusted descriptor whose predictor identity is eligible; a descriptor whose predictor identity is **not** eligible fails; untrusted entry fails; **`bind()` succeeds for all three existing cells (regression, 9th-review #9)**; existing three cells still require the pair.
 - [ ] **Step 2–4:** implement; run → PASS.
 - [ ] **Step 5: commit** `"feat(capability): register eval::benchmark_advantage + single-mode trust binding"`
 
@@ -249,9 +271,9 @@ EvidenceRuntime = dataclass(capability_registry, evidence_policy_registry,
 
 **Files:** Create `src/polymer_claims/_fixtures/benchmark_dgp.py`; `data/demo/benchmark_advantage_fixture.json`; Test `tests/capability/test_benchmark_fixture.py`
 
-**Interfaces (8th-review #20/#21/#22):** the generator constructs the model rule + weaker baseline **before** label generation, using a **separate fixed RNG stream** for the feature-dependent DGP `y=f(features)⊕noise`. A **deterministic Monte-Carlo power estimate** (fixed sim seed) computes `P̂_alt(E ≥ 1/α) ` and selects the **predeclared `n`** meeting `≥ 0.8` with a conservative margin. A helper `evalue_threshold(alpha)` returns `1/alpha` (used by both fixture and Task 19 — #22).
+**Interfaces (8th-review #20/#21/#22, 9th-review #17/#18):** the model rule + weaker baseline (configs) are **fixed first**; then an **independent fixed RNG stream** generates examples/noise for `y=f(features)⊕noise` (9th-review #18 — order: configs first, RNG draws after). A **deterministic Monte-Carlo power estimate** uses a declared **simulation count** and a **lower confidence bound**: require `P̂_alt(E ≥ 1/α) ≥ 0.85` (conservative margin for the nominal 0.8 target — 9th-review #17). A helper `evalue_threshold(alpha)` returns `1/alpha` (used by both fixture and Task 19 — #22).
 
-- [ ] **Step 1: failing test** — the Monte-Carlo power estimate at the chosen `n` is `≥ 0.8` (fixed sim seed, conservative tolerance); the committed fixture's realized `paired_advantage_evalue(W, theta0=τ) ≥ evalue_threshold(α)` where α is read/derived (not hardcoded 32.9); a test asserts the DGP RNG stream is distinct from and precedes the rule construction (#21).
+- [ ] **Step 1: failing test** — the Monte-Carlo power estimate at the chosen `n` (declared sim count, fixed sim seed) has a **lower confidence bound ≥ 0.8** (point estimate ≥ 0.85); the committed fixture's realized `paired_advantage_evalue(W, theta0=τ) ≥ evalue_threshold(α)` where α is read/derived (not hardcoded 32.9); a test asserts **the model/baseline configs are fixed before** the example-generating RNG stream runs and the streams are independent (#18).
 - [ ] **Step 2–4:** generate with the predeclared n/seed (escalate n only via the predeclared schedule); run → PASS.
 - [ ] **Step 5: commit** `"test(capability): powered fixture (MC power calc, separate RNG, ledger-derived threshold)"`
 
@@ -269,7 +291,7 @@ EvidenceRuntime = dataclass(capability_registry, evidence_policy_registry,
 
 **Interfaces (8th-review #25/#26):** assert **observable consequences**, not the internal `executed_ids` var: the verify/execute **stage-audit counts**, the **selection-ledger outcome**, the claim **status/provenance**, and an **executor call count** (spy). For Goodhart credit, construct the evidence claim with **explicit generated-by/operator provenance** (or limit to selection-ledger outcome).
 
-- [ ] **Step 1: failing tests** — `register_hypotheses` → `run_cycle(..., evidence_runtime=EvidenceRuntime(...))` on the powered fixture: LICENSED, `route=EVIDENCE_LICENSED`, `independence_tier=None`, standing literal, `provenance.e_value == registered FDRTest.e_value`, `e_value ≥ evalue_threshold(alpha_allocated)`. **Defeat semantics:** non-grounded discovered → REJECTED `DEFEAT_GROUNDED_OUT`; altered → REJECTED `HYPOTHESIS_ALTERED`; sub-threshold → PENDING. **Bookkeeping (observable):** stage-audit counts reflect the execution; selection-ledger outcome present; executor called once; a failure leaves the registered test unresolved (α consumed); retry under identical `(commitment, index, α, contract digest)` permitted, varied contract → `HYPOTHESIS_ALTERED`. **BH exemption** documented.
+- [ ] **Step 1: failing tests** — `register_hypotheses` → `run_cycle(..., evidence_runtime=EvidenceRuntime(...))` on the powered fixture: LICENSED, `route=EVIDENCE_LICENSED`, `independence_tier=None`, standing literal, `provenance.e_value == registered FDRTest.e_value`, `e_value ≥ evalue_threshold(alpha_allocated)`. **Defeat semantics:** non-grounded discovered → REJECTED `DEFEAT_GROUNDED_OUT`; altered → REJECTED `HYPOTHESIS_ALTERED`; sub-threshold → PENDING. **Collision (9th-review #19):** a caller-supplied `evidence={claim_id: …}` colliding with an evidence-executor claim → `run_cycle` **raises** (no silent overwrite). **Bookkeeping (observable):** stage-audit counts reflect the execution; selection-ledger outcome present; executor called once (spy); a failure leaves the registered test unresolved (α consumed); retry on the same uniquely-unresolved test permitted, varied contract → `HYPOTHESIS_ALTERED`. **BH exemption** documented.
 - [ ] **Step 2–4:** make pass.
 - [ ] **Step 5: final gate** — `scripts/check-all.sh` ALL GREEN; commit `"test(capability): end-to-end evidence license + defeat semantics + observable bookkeeping"`
 
@@ -281,7 +303,9 @@ EvidenceRuntime = dataclass(capability_registry, evidence_policy_registry,
 
 **8th-review coverage:** #1–#4 data-flow/`EvidenceRuntime`/no-pre-filter (Data-flow contract + 13,14). #5 DataRefKind in capability.py (3). #6 `bench:sha256:` (3,4). #7 scorer order (2). #8 e-value validation (1). #9 frozen artifact + validators (4). #10 enum-before-artifact (3<4). #11 both-mode policy (7). #12 registry uniqueness (5,6). #13 literal standing (7). #14 EvidenceExecution validator (11). #15 ExecutionFailure stages (11). #16 provenance invariants (7). #17 altered-first (15). #18 ledger-equality step (15). #19 exact-index retry (14). #20 MC power calc (17). #21 RNG separation (17). #22 1/alpha helper (17,19). #23/#24 serializer sequencing (8,9,10; 18 goldens). #25 observable bookkeeping (19). #26 operator provenance (19).
 
-**Type consistency:** `executor_descriptor_ref` throughout; `paired_advantage_evalue(w, *, theta0)` in 1,12,17; `EvidenceRuntime`/`EvidenceExecution`/`EvidenceExecutor` in protocol (11) used by 13,14,15; `evalue_threshold(alpha)` in 17,19.
+**9th-review coverage:** #1 benchmark-ref binding (data-flow, 12, 14). #2 run_cycle unpack/merge/collision (data-flow, 13, 19). #3 pre-dispatch exact behavior (14). #4 generalized callable hash (12-A). #5 provenance `claim_id` (7, 11). #6 artifact `examples` (4). #7 PredictionVector ref (2). #8 eligible↔descriptor (16). #9 binding migration + regression (16). #10 ref formats (preamble + 5). #11 scorer label coverage (2). #12 nonfinite theta (5). #13 `+inf` e-value permitted (7, 11). #14 EvidenceExecution record shape (11). #15 altered-first pre-dispatch (14). #16 FDR lookup by claim_id+commitment (14). #17 power confidence bound (17). #18 RNG order (17). #19 collision test (19).
+
+**Type consistency:** `executor_descriptor_ref` throughout; all refs `sha256:<hex>` / `bench:sha256:<hex>`; `paired_advantage_evalue(w, *, theta0)` in 1,12,17; `EvidenceRuntime`/`EvidenceExecution`/`EvidenceExecutor` in protocol (11) used by 13,14,15; `evalue_threshold(alpha)` in 17,19; `EvidenceProvenance.claim_id` in 7,11,12.
 
 ## Optional internal split
 
