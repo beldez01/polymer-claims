@@ -1,851 +1,324 @@
-# V2.0 Slice 1 — Evidence-licensed capability (model-vs-baseline benchmark advantage) Implementation Plan
+# V2.0 Slice 1 — Evidence-licensed capability (in-cycle gated executor) Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax.
 
-> **Status / provenance:** Built from spec `docs/superpowers/specs/2026-06-29-v2-evidence-licensed-capability-design.md` (v3, post-2nd-review). The v3 spec has **not** completed a third independent audit (internal auditors were stopped to route review externally). **Review this plan together with the v3 spec.** Open design risks the external reviewer should weigh are listed in "Known open risks" below.
+**Source spec:** `docs/superpowers/specs/2026-06-29-v2-evidence-licensed-capability-design.md` (v8, architecture approved over 7 reviews). Read it first.
 
-**Goal:** Register a fourth capability cell, `eval::benchmark_advantage@v1`, that licenses an inferential "model beats a precommitted baseline on held-out examples" claim via a paired sequential betting e-value gated by e-LOND — a second, honest licensing route that does not use the two-adapter recompute air-gap.
+**Goal:** Register `eval::benchmark_advantage@v1` — a capability licensed by an in-cycle, post-commit, content-addressed executor whose paired sequential betting e-value, gated by e-LOND through the existing verify gates, mints an honest `EVIDENCE_LICENSED` license — without the two-adapter recompute air-gap.
 
-**Architecture:** Umbrella-side orchestration (Seam B). A new umbrella primitive computes a paired betting e-value; a typed `BenchmarkAdapter`/`Scorer` interface keeps gold labels out of the model; an umbrella orchestrator emits a typed `ResolvedVerification`; a new protocol dispatch in `run_cycle`/`verify_stage` licenses from it without calling the two-adapter `verify()`. Grammar gains additive, optional fields (a new license route, a verification standing, an evidence-provenance record, an execution-error pending reason) and a pure `EvidencePolicy` content-addressed model.
+**Architecture:** Umbrella `EvidenceExecutor` runs at EXECUTE (post-COMMIT); `execute_ground` branches single-policy claims to it; it returns a normal `ExecRecord` (verdict `UNDETERMINED`) + an e-value via the existing `evidence=` map; `verify_stage`'s minimal evidence-route block mints the Satisfaction + license **only on e-LOND discovery + eligibility**, with all other outcomes falling through to existing branches. Pure DTOs live in grammar; `EvidenceExecution`/`EvidenceExecutor` (wrap `ExecRecord`) live in protocol; the executor implementation + benchmark machinery + e-value live in the umbrella.
 
-**Tech Stack:** Python 3, Pydantic frozen `_Model`s, numpy (umbrella `[embed]`/evidence side only), pytest, ruff, `uv`.
+**Tech Stack:** Python 3, Pydantic 2.13 frozen `_Model`, numpy (umbrella only), pytest, ruff, `uv`.
 
 ## Global Constraints
 
-- `grammar/` and `protocol/` MUST stay pure + deterministic + **numpy-free** (no clock/random/IO; time-like inputs passed in). numpy lives only umbrella-side. (Verbatim invariant from CONTINUE.md.)
-- `grammar/` MUST NEVER import `polymer_formalclaim`; `protocol/` depends one-way on `grammar/` (isolation-tested by `grammar/tests/test_isolation.py`).
-- `Corpus` = exactly 4 collections (claims, defeat_edges, equivalences, fdr_ledger). Do not add a 5th.
-- All models subclass `_Model` (frozen, `extra="forbid"`); collections are **tuples**, never `dict`/`list` fields on models. (Function parameters may be `dict`/`tuple` — only model *fields* are constrained.)
-- New cross-cutting fields land **additive/optional** (`X | None = None`) with a present-only-when-relevant validator; opt-in features default to byte-identical behavior when off.
-- Per-package tests: `uv run pytest -q` + `uv run ruff check src tests` in each of `grammar/`, `protocol/`, and the umbrella root. Full gate: `scripts/check-all.sh`. TDD: failing test first.
-- Merge to `main` `--no-ff` after whole-branch review. Current feature branch: `feat/v2-evidence-capability`.
+- `grammar/` + `protocol/` stay **pure + deterministic + numpy-free**; numpy only umbrella-side.
+- `grammar/` never imports `polymer_formalclaim`; `protocol/` depends one-way on `grammar/` (isolation-tested).
+- `Corpus` = exactly 4 collections. Models subclass `_Model` (frozen, `extra="forbid"`); collections are tuples, never `dict`/`list` model fields (function params may be dict/tuple).
+- New cross-cutting fields land additive/optional with present-only-when validators; opt-in defaults to byte-identical behavior.
+- **Pydantic floor stays `>=2.6`** — use `@model_serializer(mode="wrap")` for None-omission, NOT `Field(exclude_if=…)`.
+- Per-package gate: `uv run pytest -q` + `uv run ruff check src tests` in `grammar/`, `protocol/`, umbrella. Full gate: `scripts/check-all.sh`. TDD: failing test first. Branch `feat/v2-evidence-capability`, merge `--no-ff`.
 
-## Known open risks (for the external reviewer)
+## Known risks (carried from review)
 
-1. **E-value validity under the declared regime.** `paired_advantage_evalue` reuses `_grapa_capital` (`src/polymer_claims/evidence.py:28`). Validity of `E_H0[E] ≤ 1` rests on (a) the increments `Wᵢ∈[−1,1]` keeping every capital factor `1+λᵢWᵢ>0` — satisfied because the most-negative increment is `−1` and `λ_max=_C=0.9` ⇒ factors `≥ 0.1`; and (b) the **disclosed assumption** that benchmark examples are an IID/exchangeable draw so `E[Wᵢ|history]≤0` holds under H0. Seed-averaging over orderings is a convex combination of valid e-values, so it preserves `E≤1`. Confirm this argument is acceptable; if a stronger guarantee is wanted, the fallback is a single canonical order plus a documented exchangeability statement.
-2. **Protocol blast radius.** Evidence-licensed claims must bypass `execute_ground` (`protocol/.../execute.py:58`), whose `verify()` licenses only with ≥2 distinct adapters (`evaluate.py:394`), AND be licensed in `verify_stage` from the injected `ResolvedVerification`. This touches `run_cycle`, the executability gate, and `verify_stage`. Tasks 11–13 isolate it. *(Minting a single-source `Satisfaction` in the orchestrator is not unprecedented — `replication.py:103,118` already constructs `Satisfaction` outside `verify()`; only the licensing route is new.)*
-3. **Compatibility level.** Adding optional fields to frozen models can change `model_dump()`; the target is canonical-serialization + content-address identical for the three existing cells (Task 15 golden). If the serializer does not exclude unset defaults, a one-time documented content-address bump is the fallback.
+- The whole-executor trust depends on byte-derived hashes of `predict`/score/transform + canonical config hashes; a party controlling all trust roots can still construct false evidence (the guarantee is gate-non-bypass, not absolute validity).
+- The compat `model_serializer` must be proven not to perturb existing attestation subject digests / commitment hashes — Task 18 is a hard golden gate.
 
 ---
 
 ## File structure
 
-**Phase 1a — umbrella primitives + pure policy model (licenses nothing yet; fully unit-testable):**
-- Create `grammar/src/polymer_grammar/evidence_policy.py` — `EvidencePolicy` (pure frozen `_Model`; ref = its `content_hash`) + `EvidencePolicyRegistry` (tuple + `resolve`).
-- Create `src/polymer_claims/benchmark_evidence.py` — `paired_advantage_evalue`, `PredictionVector`, `score_advantage` (the Scorer), degenerate-input validation.
-- Create `src/polymer_claims/benchmark_adapter.py` — `BenchmarkAdapter` Protocol + a deterministic in-repo fixture adapter + baseline.
+**Phase 1a — pure objects + umbrella primitives (no protocol dispatch; licenses nothing):**
+- Grammar: `evidence_policy.py` (`EvidencePolicy`, `EvidencePolicyRegistry`), `executor_credential.py` (`ExecutorDescriptor`, `Component`, `ExecutorTrustEntry`, `ExecutorTrustRegistry`), `verification_policy.py` (`VerificationPolicy`, `ExecutionContract`, `SamplingRegime`, `EvidenceProvenance`, `EvidenceLicensingInfo`); edits to `licensing.py`, `status.py`, `operations.py` (DataRefKind, EvaluationPlan), `capability.py` (CapabilityCell), `__init__.py`.
+- Protocol: `evidence_executor.py` (`EvidenceExecutor` Protocol, `EvidenceExecution`, `ExecutionFailure`).
+- Umbrella: `benchmark_evidence.py` (paired e-value, `PredictionVector`, `Scorer`), `benchmark_adapter.py` (`BenchmarkArtifact`, `BenchmarkAdapter`, fixture predictors), `benchmark_capability.py` (the `EvidenceExecutor` impl + cell + `_bindings()` + hash-chain checks).
 
-**Phase 1b — grammar schema deltas + orchestrator + protocol dispatch (end-to-end license):**
-- Modify `grammar/src/polymer_grammar/licensing.py` — `LicenseRoute.EVIDENCE_LICENSED`; `independence_tier` → optional; `verification_standing` field; `EvidenceProvenance` DTO.
-- Modify `grammar/src/polymer_grammar/status.py` — `PendingReason.EXECUTION_ERROR`.
-- Create `grammar/src/polymer_grammar/verification_policy.py` — `VerificationPolicy` + `ResolvedVerification` (pure; carries a `Satisfaction` + provenance + floats/strings).
-- Modify `grammar/src/polymer_grammar/capability.py` — optional `verification_policy` field on `CapabilityCell`.
-- Create `src/polymer_claims/benchmark_capability.py` — the orchestrator: resolve cell+policy, run adapter, score, compute e-value, validity-checks, mint single-source `Satisfaction`, emit `ResolvedVerification`.
-- Modify `src/polymer_claims/capabilities.py` — register `EVAL_BENCHMARK_ADVANTAGE_CELL`; `validate_trust_binding` single-mode branch.
-- Modify `protocol/src/polymer_protocol/cycle.py` — thread `resolved_verifications`; gate evidence claims out of `execute_ground`.
-- Modify `protocol/src/polymer_protocol/verify.py` — thread `resolved_verifications`; add their e-values to e-LOND; license-from-resolved branch.
-- Tests under `grammar/tests/`, `protocol/tests/`, and `tests/capability/`.
+**Phase 1b — protocol dispatch + end-to-end:**
+- Protocol edits: `cycle.py` (`run_cycle`), `execute.py` (`execute_ground` branch), `verify.py` (evidence-route block).
+- Umbrella: `capabilities.py` (register cell, `_bindings()`, `validate_trust_binding`), fixture `data/demo/benchmark_advantage_fixture.json`.
+- Tests under `grammar/tests/`, `protocol/tests/`, `tests/capability/`.
 
 ---
 
-## Phase 1a — umbrella primitives + pure policy model
+## Phase 1a — pure objects + umbrella primitives
 
 ### Task 1: Paired betting e-value primitive
 
-**Files:**
-- Create: `src/polymer_claims/benchmark_evidence.py`
-- Test: `tests/capability/test_benchmark_evidence.py`
+**Files:** Create `src/polymer_claims/benchmark_evidence.py`; Test `tests/capability/test_benchmark_evidence.py`
 
-**Interfaces:**
-- Produces: `paired_advantage_evalue(w: Sequence[float]) -> float` — a deterministic seed-averaged WSR betting e-value for `H0: E[Wᵢ|history] ≤ 0` over increments `Wᵢ ∈ [−1,1]`. Empty input raises `ValueError` (degenerate; caller treats as invalid input, not `0.0`).
-- Consumes: `_grapa_capital`, `_C`, `_SEEDS` from `src/polymer_claims/evidence.py`.
+**Interfaces:** Produces `paired_advantage_evalue(w: Sequence[float], *, theta0: float) -> float` — deterministic GRAPA betting e-value over `Wᵢ − θ₀` in committed order, `Wᵢ∈[−1,1]`. Empty → `ValueError`. Consumes `_grapa_capital`, `_C` from `evidence.py`.
 
-- [ ] **Step 1: Write the failing test**
-
+- [ ] **Step 1: failing test**
 ```python
 # tests/capability/test_benchmark_evidence.py
-import itertools
-import numpy as np
-import pytest
+import itertools, pytest
 from polymer_claims.benchmark_evidence import paired_advantage_evalue
 
+def test_strong_advantage_large_evalue():
+    assert paired_advantage_evalue([1.0]*40, theta0=0.0) > 32.9   # clears e-LOND alpha1
 
-def test_all_positive_advantage_gives_large_evalue():
-    # model right, baseline wrong on every example -> strong evidence
-    e = paired_advantage_evalue([1.0] * 30)
-    assert e > 20.0
+def test_all_ties_evalue_one():
+    assert paired_advantage_evalue([0.0]*10, theta0=0.0) == pytest.approx(1.0)
 
+def test_all_negative_is_valid_low_evalue():   # audit: NO outcome filtering
+    assert paired_advantage_evalue([-1.0]*10, theta0=0.0) <= 1.0
 
-def test_all_ties_give_evalue_one():
-    # every W_i == 0 -> capital never moves -> e == 1.0
-    assert paired_advantage_evalue([0.0] * 10) == pytest.approx(1.0)
-
-
-def test_empty_stream_is_rejected():
+def test_empty_raises():
     with pytest.raises(ValueError):
-        paired_advantage_evalue([])
+        paired_advantage_evalue([], theta0=0.0)
 
-
-def test_null_mean_does_not_exceed_one_exact_enumeration():
-    # EXACT null-mean check (audit #18): enumerate all {-1,0,1}^n weighted by a worst-case
-    # boundary null E[W]=0 (symmetric: P(-1)=P(+1)=q, P(0)=1-2q). For the boundary null the
-    # e-value must satisfy E[E] <= 1. Enumerate n=4, q=0.5 (P(-1)=P(+1)=0.5, no ties).
-    n, q = 4, 0.5
-    total = 0.0
-    for combo in itertools.product((-1.0, 0.0, 1.0), repeat=n):
-        k_neg = combo.count(-1.0); k_pos = combo.count(1.0); k_zero = combo.count(0.0)
-        prob = (q ** k_neg) * (q ** k_pos) * ((1 - 2 * q) ** k_zero)
-        if prob == 0.0:
-            continue
-        total += prob * paired_advantage_evalue(list(combo))
+def test_null_mean_not_exceeding_one_enumeration():
+    n, q = 4, 0.5  # boundary null E[W]=0, P(-1)=P(+1)=0.5
+    total = sum(
+        (q**c.count(-1.0))*(q**c.count(1.0)) * paired_advantage_evalue(list(c), theta0=0.0)
+        for c in itertools.product((-1.0,1.0), repeat=n))
     assert total <= 1.0 + 1e-9
 ```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run: `uv run pytest tests/capability/test_benchmark_evidence.py -q`
-Expected: FAIL — `ModuleNotFoundError: polymer_claims.benchmark_evidence`.
-
-- [ ] **Step 3: Write minimal implementation**
-
+- [ ] **Step 2:** `uv run pytest tests/capability/test_benchmark_evidence.py -q` → FAIL (ModuleNotFound).
+- [ ] **Step 3: implement**
 ```python
 # src/polymer_claims/benchmark_evidence.py
-"""Evidence-licensed benchmark capability primitives (umbrella, numpy-side).
-
-paired_advantage_evalue is a Waudby-Smith & Ramdas betting e-value for the SEQUENTIAL
-null H0: E[W_i | history] <= 0 over paired advantage increments W_i = 1(model correct)
-- 1(baseline correct) in {-1,0,+1}. Reuses the shared GRAPA capital core. Valid from
-boundedness (Ville) under the disclosed IID/exchangeable sampling of examples; theta0=0
-is fixed by construction (no data-dependent null).
-"""
 from __future__ import annotations
-
 from collections.abc import Sequence
-
 import numpy as np
+from .evidence import _C, _grapa_capital
 
-from .evidence import _C, _SEEDS, _grapa_capital
-
-
-def _capital_paired(w: np.ndarray, seed: int) -> float:
-    """One betting capital process for H0: E[W] <= 0 over W in [-1, 1]. theta0 = 0, so no
-    shift. Order-averaged via the seed (the process is order-dependent)."""
-    rng = np.random.default_rng(seed)
-    W = w[rng.permutation(len(w))]
-    lam_max = _C  # support [-1,1]: most-negative W is -1, so 1 + lam*(-1) >= 1 - _C > 0
-    return _grapa_capital(W, lam_max)
-
-
-def paired_advantage_evalue(w: Sequence[float]) -> float:
-    """Deterministic seed-averaged e-value over paired increments W_i in [-1, 1].
-    Empty -> ValueError (degenerate input; the caller rejects it, never licenses)."""
+def paired_advantage_evalue(w: Sequence[float], *, theta0: float) -> float:
+    """WSR betting e-value for H0: E[W_i - theta0 | history] <= 0 over W_i in [-1,1], in
+    committed order (NO permutation). Valid by Ville (positive factors)."""
     arr = np.asarray(w, dtype=float)
     if arr.size == 0:
-        raise ValueError("paired_advantage_evalue: empty increment stream")
+        raise ValueError("paired_advantage_evalue: empty stream")
     if np.any(arr < -1.0) or np.any(arr > 1.0):
-        raise ValueError("paired_advantage_evalue: increments must lie in [-1, 1]")
-    es = [_capital_paired(arr, s) for s in _SEEDS]
-    return float(sum(es) / len(es))
+        raise ValueError("increments must lie in [-1, 1]")
+    W = arr - float(theta0)
+    lam_max = _C / (1.0 + abs(float(theta0)))   # positivity cap for support [-1-θ0, 1-θ0]
+    return _grapa_capital(W, lam_max)
 ```
+- [ ] **Step 4:** rerun → PASS.
+- [ ] **Step 5: commit** `git add -A && git commit -m "feat(capability): paired-advantage betting e-value (committed order)"`
 
-- [ ] **Step 4: Run test to verify it passes**
+### Task 2: PredictionVector + Scorer (label-withholding)
 
-Run: `uv run pytest tests/capability/test_benchmark_evidence.py -q`
-Expected: PASS (4 tests).
+**Files:** Modify `benchmark_evidence.py`; Test `tests/capability/test_benchmark_scorer.py`
 
-- [ ] **Step 5: Commit**
+**Interfaces:** `PredictionVector(predictions: tuple[tuple[str,str],...])`; `score_advantage(model: PredictionVector, baseline: PredictionVector, labels: Mapping[str,str], order: Sequence[str]) -> list[float]` (Wᵢ in order); `ScoringError(ValueError)`. Missing/dup/extra/order-mismatch → `ScoringError`.
 
-```bash
-git add src/polymer_claims/benchmark_evidence.py tests/capability/test_benchmark_evidence.py
-git commit -m "feat(capability): paired-advantage betting e-value primitive"
-```
+- [ ] **Step 1: failing test** (assert paired Wᵢ in order `[0,1,1]` for a 3/3 model vs 1/3 baseline; missing id → `ScoringError`; duplicate id → `ScoringError`).
+- [ ] **Step 2:** run → FAIL.
+- [ ] **Step 3: implement** `PredictionVector` (frozen dataclass with `as_map()` raising `ScoringError` on dup), `score_advantage` (validate both prediction sets' ids == `set(order)`; compute `float(m[e]==labels[e]) - float(b[e]==labels[e])`).
+- [ ] **Step 4:** run → PASS.
+- [ ] **Step 5: commit** `"feat(capability): PredictionVector + label-withholding scorer"`
 
-### Task 2: PredictionVector + Scorer (label-withholding join)
+### Task 3: BenchmarkArtifact (content-addressed) + BenchmarkAdapter + fixture predictors
 
-**Files:**
-- Modify: `src/polymer_claims/benchmark_evidence.py`
-- Test: `tests/capability/test_benchmark_scorer.py`
+**Files:** Create `src/polymer_claims/benchmark_adapter.py`; Test `tests/capability/test_benchmark_adapter.py`
 
 **Interfaces:**
-- Produces:
-  - `PredictionVector` — frozen dataclass: `predictions: tuple[tuple[str, str], ...]` (ordered `(example_id, prediction)`).
-  - `score_advantage(predictions: PredictionVector, baseline: PredictionVector, labels: Mapping[str, str], order: Sequence[str]) -> list[float]` — returns the `Wᵢ` stream in `order`. Raises `ScoringError` on missing/duplicate/extra/order mismatch.
-  - `ScoringError(ValueError)`.
+- `BenchmarkExample(example_id: str, features: tuple[tuple[str,str],...])` (no label field).
+- `BenchmarkArtifact` frozen: `example_ids: tuple[str,...]`, `features: tuple[...]`, `labels: tuple[tuple[str,str],...]`, `target_population: str`, `sampling_regime: str`, `version: str`, `sampling_seed: int`, `dgp_digest: str`; `content_hash` property via `canonical_sha256` (`_hashing.py`); `ref` = `"bench:" + content_hash`.
+- `BenchmarkAdapter` Protocol: `identity: str`, `config: dict`, `predict(examples: Sequence[BenchmarkExample]) -> PredictionVector` (NO labels).
+- Fixture `FixtureModelAdapter`, `FixtureBaselineAdapter` (deterministic, label-independent seed).
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: failing test** — `predict` signature has no `labels` param (audit #20); two artifacts with different labels have different `content_hash`; `ref` starts `bench:`.
+- [ ] **Step 2:** run → FAIL.
+- [ ] **Step 3: implement** per interfaces; `content_hash = canonical_sha256(self.model_dump(mode="json"))` (artifact is a frozen `_Model`-style dataclass or a pydantic model in the umbrella).
+- [ ] **Step 4:** run → PASS; `uv run ruff check src tests`.
+- [ ] **Step 5: commit** `"feat(capability): content-addressed BenchmarkArtifact + label-free adapters"`
 
-```python
-# tests/capability/test_benchmark_scorer.py
-import pytest
-from polymer_claims.benchmark_evidence import (
-    PredictionVector, ScoringError, score_advantage,
-)
+### Task 4: Grammar — `SamplingRegime` + `DataRefKind.BENCHMARK`
 
-ORDER = ("e1", "e2", "e3")
-LABELS = {"e1": "A", "e2": "B", "e3": "A"}
+**Files:** Modify `grammar/src/polymer_grammar/{operations.py (DataRefKind + bench: matcher), __init__.py}`; Create `grammar/src/polymer_grammar/sampling.py` (`SamplingRegime`); Test `grammar/tests/test_sampling_and_dataref.py`
 
+- [ ] **Step 1: failing test** — `SamplingRegime.IID_EXAMPLES.value == "iid_examples"`; a `DataRefKind.BENCHMARK` matcher accepts `"bench:<hex>"` and rejects `"se:x@1"`/`"opaque"`.
+- [ ] **Step 2–4:** implement enum + extend the data-ref matcher for the `bench:` form (mirror the existing `se:`/OPAQUE matchers); run → PASS; grammar suite green.
+- [ ] **Step 5: commit** `"feat(grammar): SamplingRegime + DataRefKind.BENCHMARK"`
 
-def _pv(d):  # helper: dict -> PredictionVector in ORDER
-    return PredictionVector(predictions=tuple((k, d[k]) for k in ORDER))
+### Task 5: Grammar — `EvidencePolicy` (+registry, content_hash, validators)
 
+**Files:** Create `grammar/src/polymer_grammar/evidence_policy.py`; Modify `__init__.py`; Test `grammar/tests/test_evidence_policy.py`
 
-def test_scores_paired_increments_in_order():
-    model = _pv({"e1": "A", "e2": "B", "e3": "A"})      # 3/3 correct
-    base = _pv({"e1": "A", "e2": "A", "e3": "B"})       # 1/3 correct
-    # W = [1-1, 1-0, 1-0] = [0, 1, 1]
-    assert score_advantage(model, base, LABELS, ORDER) == [0.0, 1.0, 1.0]
+**Interfaces:** `EvidencePolicy(_Model)` fields per spec §4 (incl. `baseline_config_ref`, `predictor_config_ref`, `executor_descriptor_ref`); `content_hash` `@property` via the grammar `_sha` helper over a canonical dict of fields; `ref` returns it. Validators: non-empty ids/refs; `0 <= theta0 < 1`; `null_family`↔`evalue_transform` compatible. `EvidencePolicyRegistry(_Model){policies: tuple[...]; resolve(ref) -> EvidencePolicy | None}` (recompute hash).
 
+- [ ] **Step 1: failing test** — `ref == content_hash`; registry `resolve` round-trips; `theta0=1.0` → `ValidationError`; `theta0=-0.1` → error; changing `baseline_config_ref` changes `ref`.
+- [ ] **Step 2:** run → FAIL (`cd grammar && uv run pytest tests/test_evidence_policy.py -q`).
+- [ ] **Step 3: implement.** Import base via `from .base import _Model`; reuse the package's `_sha` (grep `def _sha` in `operations.py`) for `content_hash`.
+- [ ] **Step 4:** run → PASS; grammar suite + isolation green.
+- [ ] **Step 5: commit** `"feat(grammar): content-addressed EvidencePolicy + registry + validators"`
 
-def test_missing_prediction_raises():
-    model = PredictionVector(predictions=(("e1", "A"), ("e2", "B")))  # missing e3
-    base = _pv({"e1": "A", "e2": "A", "e3": "B"})
-    with pytest.raises(ScoringError):
-        score_advantage(model, base, LABELS, ORDER)
+### Task 6: Grammar — `ExecutorDescriptor` / `ExecutorTrustEntry` (+registries, validators)
 
+**Files:** Create `grammar/src/polymer_grammar/executor_credential.py`; Modify `__init__.py`; Test `grammar/tests/test_executor_credential.py`
 
-def test_duplicate_example_id_raises():
-    model = PredictionVector(predictions=(("e1", "A"), ("e1", "A"), ("e3", "A")))
-    base = _pv({"e1": "A", "e2": "A", "e3": "B"})
-    with pytest.raises(ScoringError):
-        score_advantage(model, base, LABELS, ORDER)
-```
+**Interfaces:** `Component(_Model){role: Literal["predictor","baseline_predictor","scorer","evidence_transform"], identity, implementation_hash, config_hash}`; `ExecutorDescriptor(_Model){components: tuple[Component,...], version}` + `content_hash` property; validators (audit #15): exactly one of each role, canonical role order, unique identities, non-empty `sha256:`-prefixed hashes. `ExecutorTrustEntry(_Model){descriptor_ref, owner, trusted: bool, version}`; `ExecutorTrustRegistry(_Model){entries: tuple[...]; resolve(descriptor_ref) -> ExecutorTrustEntry | None}`.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 1: failing test** — valid descriptor has stable `content_hash`; missing the baseline role → `ValidationError`; wrong role order → error; duplicate identity → error; non-`sha256:` hash → error; trust registry resolves by `descriptor_ref`.
+- [ ] **Step 2–4:** implement + validators; run → PASS; grammar suite green.
+- [ ] **Step 5: commit** `"feat(grammar): ExecutorDescriptor (content) + ExecutorTrustEntry (trust) split"`
 
-Run: `uv run pytest tests/capability/test_benchmark_scorer.py -q`
-Expected: FAIL — names not defined.
+### Task 7: Grammar — `VerificationPolicy`, `ExecutionContract`, `EvidenceProvenance`, `EvidenceLicensingInfo`
 
-- [ ] **Step 3: Write minimal implementation** (append to `benchmark_evidence.py`)
-
-```python
-from collections.abc import Mapping
-from dataclasses import dataclass
-
-
-class ScoringError(ValueError):
-    """Prediction set does not cleanly join to the benchmark (missing/dup/extra/order)."""
-
-
-@dataclass(frozen=True)
-class PredictionVector:
-    predictions: tuple[tuple[str, str], ...]  # ordered (example_id, prediction)
-
-    def as_map(self) -> dict[str, str]:
-        ids = [eid for eid, _ in self.predictions]
-        if len(set(ids)) != len(ids):
-            raise ScoringError("duplicate example_id in prediction vector")
-        return dict(self.predictions)
-
-
-def score_advantage(
-    predictions: PredictionVector,
-    baseline: PredictionVector,
-    labels: Mapping[str, str],
-    order: Sequence[str],
-) -> list[float]:
-    """W_i = 1(model correct) - 1(baseline correct), in `order`. Labels live ONLY here —
-    never passed to a BenchmarkAdapter."""
-    m = predictions.as_map()
-    b = baseline.as_map()
-    expected = set(order)
-    for name, mp in (("model", m), ("baseline", b)):
-        if set(mp) != expected:
-            raise ScoringError(f"{name} example ids {set(mp)} != benchmark {expected}")
-    w: list[float] = []
-    for eid in order:
-        if eid not in labels:
-            raise ScoringError(f"no gold label for {eid}")
-        w.append(float(m[eid] == labels[eid]) - float(b[eid] == labels[eid]))
-    return w
-```
-
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `uv run pytest tests/capability/test_benchmark_scorer.py -q`
-Expected: PASS.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/polymer_claims/benchmark_evidence.py tests/capability/test_benchmark_scorer.py
-git commit -m "feat(capability): PredictionVector + label-withholding scorer"
-```
-
-### Task 3: Degenerate-policy validation (reject, don't clamp)
-
-**Files:**
-- Modify: `src/polymer_claims/benchmark_evidence.py`
-- Test: `tests/capability/test_benchmark_scorer.py` (extend)
+**Files:** Create `grammar/src/polymer_grammar/verification_policy.py`; Modify `__init__.py`; Test `grammar/tests/test_verification_policy.py`
 
 **Interfaces:**
-- Produces: `validate_advantage_stream(w: Sequence[float]) -> None` — raises `ScoringError` for empty or baseline-already-perfect (`all(wᵢ ≤ 0)`) streams (audit #13/#19). Ties-only is allowed (yields `e=1`, no license) but all-`≤0` with no positive is rejected as a vacuous benchmark.
+- `VerificationPolicy(_Model){execution: Literal["recompute_pair","single"]="recompute_pair", result_rule: Literal["criterion","evalue_discovery"]="criterion", independence_requirement: Literal["implementation","baseline_ground_truth"]="implementation", evidence_policy_ref: str|None=None, min_adapters: int=2}`; validator `single` ⇒ `evidence_policy_ref` set ∧ `min_adapters==1`.
+- `ExecutionContract(_Model){capability_id, capability_version, evidence_policy_ref, capability_descriptor_ref}`.
+- `EvidenceProvenance(_Model)` per spec §4 (all refs + `observed_advantage`, `theta0`, `e_value`, `execution_contract_digest`, `fdr_test_index`, `alpha_allocated`).
+- `EvidenceLicensingInfo(_Model){route: LicenseRoute, verification_standing: str, evidence_provenance: EvidenceProvenance}`.
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: failing test** — `single` policy without `evidence_policy_ref` → error; `recompute_pair` default round-trips; `EvidenceProvenance`/`ExecutionContract` construct + round-trip.
+- [ ] **Step 2–4:** implement; run → PASS; grammar suite + isolation green (no numpy).
+- [ ] **Step 5: commit** `"feat(grammar): VerificationPolicy + ExecutionContract + EvidenceProvenance + LicensingInfo"`
 
-```python
-def test_baseline_perfect_stream_rejected():
-    from polymer_claims.benchmark_evidence import validate_advantage_stream, ScoringError
-    # baseline correct everywhere model can only tie or lose -> no advantage possible
-    with pytest.raises(ScoringError):
-        validate_advantage_stream([0.0, -1.0, 0.0, -1.0])
+### Task 8: Grammar — `Licensing` route/standing/provenance + `PendingReason.EXECUTION_ERROR`
 
-def test_mixed_stream_ok():
-    from polymer_claims.benchmark_evidence import validate_advantage_stream
-    validate_advantage_stream([1.0, 0.0, -1.0])  # no raise
-```
+**Files:** Modify `grammar/src/polymer_grammar/{licensing.py, status.py}`; Test `grammar/tests/test_licensing_evidence_route.py`
 
-- [ ] **Step 2: Run** `uv run pytest tests/capability/test_benchmark_scorer.py -q` → FAIL (name not defined).
+**Interfaces:** `LicenseRoute.EVIDENCE_LICENSED="evidence_licensed"`; `Licensing.independence_tier: IndependenceTier | None = IndependenceTier.REPRODUCED` (default unchanged); `Licensing.verification_standing: Literal["single_source_baseline"] | None = None`; `Licensing.evidence_provenance: EvidenceProvenance | None = None`; validator: standing/provenance non-None **iff** `route==EVIDENCE_LICENSED`. `PendingReason.EXECUTION_ERROR="execution_error"`.
 
-- [ ] **Step 3: Implement** (append)
+- [ ] **Step 1: failing test** — evidence-route `Licensing` with standing+provenance + `independence_tier=None` round-trips; standing on a `SEVERE_TEST` route → error; `Licensing(satisfactions=())` still rejected (`_all_satisfied`); `PendingReason.EXECUTION_ERROR` exists.
+- [ ] **Step 2–4:** implement; run → PASS; full grammar suite green.
+- [ ] **Step 5: commit** `"feat(grammar): EVIDENCE_LICENSED route + standing + provenance + EXECUTION_ERROR"`
 
-```python
-def validate_advantage_stream(w: Sequence[float]) -> None:
-    arr = list(w)
-    if not arr:
-        raise ScoringError("empty advantage stream")
-    if all(x <= 0.0 for x in arr):
-        raise ScoringError("baseline-perfect / no positive advantage possible (vacuous benchmark)")
-```
+### Task 9: Grammar — `CapabilityCell.content_hash` + optional `verification_policy`; `min_executing_adapters` migration
 
-- [ ] **Step 4: Run** → PASS.
+**Files:** Modify `grammar/src/polymer_grammar/capability.py`; Test `grammar/tests/test_capability_descriptors.py`
 
-- [ ] **Step 5: Commit**
+**Interfaces:** add `CapabilityCell.content_hash` `@property`; add optional `verification_policy: VerificationPolicy | None = None`; relax the cardinality validator: `verification_policy is None` or `execution=="recompute_pair"` ⇒ require `min_executing_adapters == 2`; `execution=="single"` ⇒ `== 1`.
 
-```bash
-git add src/polymer_claims/benchmark_evidence.py tests/capability/test_benchmark_scorer.py
-git commit -m "feat(capability): reject degenerate advantage streams (no clamp)"
-```
+- [ ] **Step 1: failing test** — the three existing cells (None policy, `min=2`) stay valid + their `content_hash` is stable; a `single`-policy cell with `min_executing_adapters=2` → error; with `=1` → valid.
+- [ ] **Step 2–4:** implement (None-omit serializer for `verification_policy` comes in Task 18); run → PASS; full grammar suite green.
+- [ ] **Step 5: commit** `"feat(grammar): CapabilityCell content_hash + optional VerificationPolicy + cardinality migration"`
 
-### Task 4: `EvidencePolicy` pure model (ref = content_hash)
+### Task 10: Grammar — optional `EvaluationPlan.execution_contract`
 
-**Files:**
-- Create: `grammar/src/polymer_grammar/evidence_policy.py`
-- Modify: `grammar/src/polymer_grammar/__init__.py` (export `EvidencePolicy`, `EvidencePolicyRegistry`)
-- Test: `grammar/tests/test_evidence_policy.py`
+**Files:** Modify `grammar/src/polymer_grammar/operations.py`; Test `grammar/tests/test_operations_contract.py`
+
+**Interfaces:** `EvaluationPlan.execution_contract: ExecutionContract | None = None` (on the plan, NOT the graph). None-omit serializer in Task 18.
+
+- [ ] **Step 1: failing test** — a plan with `execution_contract` round-trips; an existing plan without one is unchanged; **`ComputeGraph.content_hash` is unaffected** by adding the field (assert two graphs equal hash regardless of plan-level contract).
+- [ ] **Step 2–4:** implement; run → PASS; grammar suite green.
+- [ ] **Step 5: commit** `"feat(grammar): optional EvaluationPlan.execution_contract"`
+
+### Task 11: Protocol — `EvidenceExecutor` protocol + `EvidenceExecution` + `ExecutionFailure`
+
+**Files:** Create `protocol/src/polymer_protocol/evidence_executor.py`; Modify `__init__.py`; Test `protocol/tests/test_evidence_executor_types.py`
 
 **Interfaces:**
-- Produces:
-  - `EvidencePolicy(_Model)` fields: `policy_id: str`, `version: str`, `null_family: Literal["paired_bounded_mean_betting"]`, `theta0: float = 0.0`, `statistic: str = "accuracy_advantage_over_baseline"`, `support: str = "[-1,1]"`, `sampling_regime: str = "exchangeable_iid (disclosed assumption)"`, `baseline_ref: str`, `calibration_population_ref: str`, `evalue_transform: Literal["paired_wsr_betting"]`. Property `ref -> str` returns `self.content_hash` (the project `_Model` content address; **no stored digest field → no self-reference**, audit #10).
-  - `EvidencePolicyRegistry(_Model)`: `policies: tuple[EvidencePolicy, ...] = ()`; `resolve(ref: str) -> EvidencePolicy | None` returns the policy whose `content_hash == ref` (digest verified by reconstruction).
-
-- [ ] **Step 1: Write the failing test**
-
 ```python
-# grammar/tests/test_evidence_policy.py
-from polymer_grammar import EvidencePolicy, EvidencePolicyRegistry
-
-
-def _policy(**kw):
-    base = dict(
-        policy_id="bench-adv", version="v1", null_family="paired_bounded_mean_betting",
-        baseline_ref="bench:demo@1#baseline", calibration_population_ref="bench:demo@1",
-        evalue_transform="paired_wsr_betting",
-    )
-    base.update(kw)
-    return EvidencePolicy(**base)
-
-
-def test_ref_is_content_hash_and_resolves():
-    p = _policy()
-    reg = EvidencePolicyRegistry(policies=(p,))
-    assert reg.resolve(p.ref) is p
-    assert p.ref == p.content_hash
-
-
-def test_ref_changes_with_content():
-    assert _policy().ref != _policy(baseline_ref="other").ref
-
-
-def test_unknown_ref_resolves_none():
-    assert EvidencePolicyRegistry().resolve("nope") is None
+class ExecutionFailure(_Model):
+    reason: Literal["empty","malformed","duplicate","missing","order_mismatch",
+                    "credential_mismatch","digest_mismatch"]
+    detail: str = ""
+class EvidenceExecution(_Model):
+    record: ExecRecord
+    e_value: float | None = None
+    licensing_info: EvidenceLicensingInfo | None = None
+    failure_reason: ExecutionFailure | None = None
+class EvidenceExecutor(Protocol):
+    def credential(self) -> str: ...
+    def execute(self, claim, cell, policy, benchmark_artifact, ctx, fdr_test) -> EvidenceExecution: ...
 ```
 
-- [ ] **Step 2: Run** `cd grammar && uv run pytest tests/test_evidence_policy.py -q` → FAIL (import error).
+- [ ] **Step 1: failing test** — construct an `EvidenceExecution` wrapping an `ExecRecord`; a trivial stub satisfying `EvidenceExecutor` (grammar/protocol DTOs only, no umbrella import) returns one. Confirms protocol-test purity (audit #14).
+- [ ] **Step 2–4:** implement; run → PASS (`cd protocol && uv run pytest -q`); isolation green.
+- [ ] **Step 5: commit** `"feat(protocol): EvidenceExecutor protocol + EvidenceExecution + ExecutionFailure"`
 
-- [ ] **Step 3: Implement**
+### Task 12: Umbrella — `EvidenceExecutor` implementation + hash-chain checks
 
-```python
-# grammar/src/polymer_grammar/evidence_policy.py
-"""Typed, content-addressed EvidencePolicy: the e-value calibration for an evidence-
-licensed capability. Pure + numpy-free. Its content address (content_hash) IS its
-reference — there is no stored digest field, so the address is never self-referential.
-The oracle dossier may still attest apparatus credibility; it is NOT this object.
-"""
-from __future__ import annotations
+**Files:** Create `src/polymer_claims/benchmark_capability.py`; Test `tests/capability/test_benchmark_executor.py`
 
-from typing import Literal
+**Interfaces:** `BenchmarkEvidenceExecutor` implementing the protocol: owns `predictor`, `baseline_predictor`, `scorer`, `evidence_transform`(=`paired_advantage_evalue`); `credential()` recomputes the live `ExecutorDescriptor.content_hash` from component impl+config hashes; `execute(...)` runs Layer-3 link checks, scores `Wᵢ`, computes the e-value, builds `EvidenceProvenance` + `EvidenceLicensingInfo`, returns `EvidenceExecution`. Structural failures → `failure_reason` + `e_value=None`. **No outcome filtering.**
 
-from ._model import _Model  # adjust to the actual base-model import path in this package
-
-
-class EvidencePolicy(_Model):
-    policy_id: str
-    version: str
-    null_family: Literal["paired_bounded_mean_betting"]
-    theta0: float = 0.0
-    statistic: str = "accuracy_advantage_over_baseline"
-    support: str = "[-1,1]"
-    sampling_regime: str = "exchangeable_iid (disclosed assumption)"
-    baseline_ref: str
-    calibration_population_ref: str
-    evalue_transform: Literal["paired_wsr_betting"]
-
-    @property
-    def ref(self) -> str:
-        return self.content_hash
-
-
-class EvidencePolicyRegistry(_Model):
-    policies: tuple[EvidencePolicy, ...] = ()
-
-    def resolve(self, ref: str) -> EvidencePolicy | None:
-        return next((p for p in self.policies if p.content_hash == ref), None)
-```
-
-> **Implementer note:** confirm the base-model import (`grammar` uses a shared frozen base — grep `class CapabilityCell` in `capability.py` for the exact `_Model` import and `content_hash` property name; reuse them verbatim). If `content_hash` is named differently, use that name in `ref`.
-
-- [ ] **Step 4: Run** → PASS, then `cd grammar && uv run ruff check src tests`.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add grammar/src/polymer_grammar/evidence_policy.py grammar/src/polymer_grammar/__init__.py grammar/tests/test_evidence_policy.py
-git commit -m "feat(grammar): content-addressed EvidencePolicy + registry"
-```
-
-### Task 5: `BenchmarkAdapter` protocol + deterministic fixture adapter
-
-**Files:**
-- Create: `src/polymer_claims/benchmark_adapter.py`
-- Test: `tests/capability/test_benchmark_adapter.py`
-
-**Interfaces:**
-- Produces:
-  - `BenchmarkExample` — frozen dataclass `example_id: str`, `features: tuple[tuple[str, str], ...]` (NO label field — labels are structurally absent here).
-  - `BenchmarkAdapter` — `typing.Protocol` with `identity: str` and `predict(examples: Sequence[BenchmarkExample]) -> PredictionVector`.
-  - `FixtureModelAdapter`, `FixtureBaselineAdapter` — deterministic in-repo adapters whose predictions are seeded **independently of labels** (audit #17).
-
-- [ ] **Step 1: Write the failing test**
-
-```python
-# tests/capability/test_benchmark_adapter.py
-import inspect
-from polymer_claims.benchmark_adapter import (
-    BenchmarkExample, FixtureModelAdapter, FixtureBaselineAdapter,
-)
-
-
-def test_adapter_predict_signature_has_no_labels():
-    # audit #20: the model adapter interface must not receive gold labels
-    sig = inspect.signature(FixtureModelAdapter().predict)
-    assert "labels" not in sig.parameters
-    assert "label" not in str(sig).lower()
-
-
-def test_fixture_predictions_are_deterministic():
-    ex = [BenchmarkExample(example_id=f"e{i}", features=(("x", str(i % 2)),)) for i in range(5)]
-    a, b = FixtureModelAdapter(), FixtureModelAdapter()
-    assert a.predict(ex).predictions == b.predict(ex).predictions
-```
-
-- [ ] **Step 2: Run** → FAIL.
-
-- [ ] **Step 3: Implement**
-
-```python
-# src/polymer_claims/benchmark_adapter.py
-"""Typed benchmark adapter interface. The model sees example inputs + ids, NEVER gold
-labels (labels live only in the scorer). Fixture adapters are deterministic and seeded
-independently of labels (predictions are frozen before labels are revealed)."""
-from __future__ import annotations
-
-from collections.abc import Sequence
-from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
-
-from .benchmark_evidence import PredictionVector
-
-
-@dataclass(frozen=True)
-class BenchmarkExample:
-    example_id: str
-    features: tuple[tuple[str, str], ...]  # no label field by construction
-
-
-@runtime_checkable
-class BenchmarkAdapter(Protocol):
-    identity: str
-    def predict(self, examples: Sequence[BenchmarkExample]) -> PredictionVector: ...
-
-
-class FixtureModelAdapter:
-    identity = "fixture-model"
-    def predict(self, examples: Sequence[BenchmarkExample]) -> PredictionVector:
-        # deterministic rule over features only (label-independent): predict "A" when the
-        # int feature is even, else "B". (Fixture: the demo labels are chosen to make this
-        # beat the baseline; see Task 9 fixture construction order.)
-        out = []
-        for ex in examples:
-            x = dict(ex.features).get("x", "0")
-            out.append((ex.example_id, "A" if (int(x) % 2 == 0) else "B"))
-        return PredictionVector(predictions=tuple(out))
-
-
-class FixtureBaselineAdapter:
-    identity = "fixture-baseline"
-    def predict(self, examples: Sequence[BenchmarkExample]) -> PredictionVector:
-        # precommitted constant majority-class baseline
-        return PredictionVector(predictions=tuple((ex.example_id, "A") for ex in examples))
-```
-
-- [ ] **Step 4: Run** → PASS; `uv run ruff check src tests`.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/polymer_claims/benchmark_adapter.py tests/capability/test_benchmark_adapter.py
-git commit -m "feat(capability): typed BenchmarkAdapter protocol + label-free fixture adapters"
-```
+- [ ] **Step 1: failing test** — a strong fixture → `EvidenceExecution` with `e_value > 32.9`, `licensing_info.route == EVIDENCE_LICENSED`, provenance populated, record verdict `UNDETERMINED`; a tampered benchmark digest → `failure_reason="digest_mismatch"`, `e_value=None`; `credential()` matches the registered descriptor and changes when the **baseline** swaps.
+- [ ] **Step 2–4:** implement; run → PASS; `uv run ruff check src tests`.
+- [ ] **Step 5: commit** `"feat(capability): umbrella EvidenceExecutor + hash-chain verification"`
 
 ---
 
-## Phase 1b — grammar schema deltas + orchestrator + protocol dispatch
+## Phase 1b — protocol dispatch + end-to-end
 
-### Task 6: Grammar — `LicenseRoute.EVIDENCE_LICENSED` + optional `independence_tier` + `verification_standing`
+### Task 13: Protocol — thread executor + registry through `run_cycle`; gate evidence claims out of two-adapter `verify()`
 
-**Files:**
-- Modify: `grammar/src/polymer_grammar/licensing.py:53` (LicenseRoute), `:65` (keep IndependenceTier as-is), `:153` (Licensing field)
-- Test: `grammar/tests/test_licensing_evidence_route.py`
+**Files:** Modify `protocol/src/polymer_protocol/cycle.py`; Test `protocol/tests/test_evidence_dispatch.py`
 
-**Interfaces:**
-- Produces: `LicenseRoute.EVIDENCE_LICENSED = "evidence_licensed"`; `Licensing.independence_tier: IndependenceTier | None = None` (was non-optional default REPRODUCED — see compat note); `Licensing.verification_standing: str | None = None`.
+**Interfaces:** `run_cycle(..., evidence_executor: EvidenceExecutor | None = None, capability_registry: CapabilityRegistry | None = None)`; forward both into `execute_ground`; exclude evidence-claim ids from the two-adapter set.
 
-> **Compat decision (audit #11):** changing the `independence_tier` default would change existing licenses' serialization. To keep the three existing routes byte-identical, **do not change the existing default**; instead make the field `IndependenceTier | None` and have the EVIDENCE_LICENSED branch (Task 13) set it to `None` explicitly while all existing routes continue to pass `independence_tier_of(sats)`. Add a validator: `verification_standing` is non-None **iff** `route == EVIDENCE_LICENSED`.
+- [ ] **Step 1: failing test** — a cycle with one evidence claim + an injected stub executor does **not** raise (the claim is not sent to two-adapter `verify()`); a non-evidence cycle with both params `None` is byte-identical to today.
+- [ ] **Step 2–4:** implement signature + pass-through; run → PASS; full protocol suite green.
+- [ ] **Step 5: commit** `"feat(protocol): thread evidence_executor + capability_registry through run_cycle"`
 
-- [ ] **Step 1: Write the failing test**
+### Task 14: Protocol — `execute_ground` dispatch branch + precondition + return `evidence_executions`
 
-```python
-# grammar/tests/test_licensing_evidence_route.py
-import pytest
-from polymer_grammar import Licensing, LicenseRoute, RivalSetClosure
+**Files:** Modify `protocol/src/polymer_protocol/execute.py`; Test `protocol/tests/test_evidence_dispatch.py`
 
+**Interfaces:** `execute_ground(...) -> (Corpus, tuple[ExecRecord,...], tuple[EvidenceExecution,...])`. For a claim whose resolved cell is `execution=="single"`, passing §2.2 precondition (`selected ∧ committed ∧ pending registered test ∧ commitment matches`) + claim-shape conformance + the dispatch-time hash-chain + `credential()` compare: call `evidence_executor.execute(...)`, append its `record` to records and the `EvidenceExecution` to a new list; on precondition/chain failure → refuse (no dispatch). Non-evidence claims unchanged.
 
-def test_evidence_route_allows_none_tier_and_standing():
-    lic = Licensing(
-        route=LicenseRoute.EVIDENCE_LICENSED,
-        satisfactions=(),
-        rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
-        independence_tier=None,
-        verification_standing="single_source_baseline",
-    )
-    assert lic.independence_tier is None
-    assert lic.verification_standing == "single_source_baseline"
+- [ ] **Step 1: failing test** — evidence claim with a pending registered test → produces an `EvidenceExecution` + an `ExecRecord`; an **unregistered** evidence claim is refused (not executed); an in-cycle-GENERATE'd evidence claim is not executed.
+- [ ] **Step 2–4:** implement; run → PASS; protocol suite green.
+- [ ] **Step 5: commit** `"feat(protocol): execute_ground evidence dispatch + locked-slot precondition"`
 
+### Task 15: Protocol — `verify_stage` evidence-route block (license-on-discovery; EXECUTION_ERROR; fall-through)
 
-def test_standing_requires_evidence_route():
-    with pytest.raises(ValueError):
-        Licensing(
-            route=LicenseRoute.SEVERE_TEST, satisfactions=(),
-            rival_set_closure=RivalSetClosure.OPEN_ACKNOWLEDGED,
-            verification_standing="single_source_baseline",
-        )
-```
+**Files:** Modify `protocol/src/polymer_protocol/verify.py`; Test `protocol/tests/test_evidence_dispatch.py`
 
-- [ ] **Step 2: Run** `cd grammar && uv run pytest tests/test_licensing_evidence_route.py -q` → FAIL.
+**Interfaces:** `verify_stage(..., evidence_licensing: dict[str, EvidenceLicensingInfo] | None = None, evidence_failures: dict[str, ExecutionFailure] | None = None)`. For an evidence claim: (a) if in `evidence_failures` → `_with_status(PENDING, EXECUTION_ERROR)`; (b) elif e-LOND discovery (`_e_ok` true after Phase-D resolution) **and** eligible (`c.id in in_ext`, provenance present, not altered, status PENDING) → mint `Satisfaction(SATISFIED, materialization, credential_ids=(descriptor_ref,))` + `Licensing(EVIDENCE_LICENSED, independence_tier=None, verification_standing, evidence_provenance)` → LICENSED; (c) else **fall through** to the existing per-claim branches (grounded-out → REJECTED `DEFEAT_GROUNDED_OUT`, altered → REJECTED `HYPOTHESIS_ALTERED`, else passthrough PENDING). Skip the independent-pair gate for evidence claims.
 
-- [ ] **Step 3: Implement** — add the enum member; change the field type to `IndependenceTier | None = IndependenceTier.REPRODUCED` (default unchanged → existing serialization unchanged); add `verification_standing: str | None = None`; add a `model_validator(mode="after")` enforcing the iff with `EVIDENCE_LICENSED`. (Show the exact field block and validator inline when editing.)
+- [ ] **Step 1: failing tests** — discovery+eligible → LICENSED (route/standing/`independence_tier=None`/provenance.e_value == ledger); **discovered but non-grounded → REJECTED `DEFEAT_GROUNDED_OUT`** (audit #5, not PENDING); sub-threshold → PENDING (not REFUTED); failure → PENDING `EXECUTION_ERROR`.
+- [ ] **Step 2–4:** implement; run → PASS; **full protocol suite green** (inert when both dicts `None`).
+- [ ] **Step 5: commit** `"feat(protocol): verify_stage evidence-route licensing block (discovery=decision)"`
 
-- [ ] **Step 4: Run** → PASS; `cd grammar && uv run pytest -q` (full grammar suite stays green); `uv run ruff check src tests`.
+### Task 16: Umbrella — register cell + `_bindings()` + `validate_trust_binding` single-mode
 
-- [ ] **Step 5: Commit**
+**Files:** Modify `src/polymer_claims/capabilities.py`; Test `tests/capability/test_cells.py`, `tests/capability/test_binding.py`
 
-```bash
-git add grammar/src/polymer_grammar/licensing.py grammar/tests/test_licensing_evidence_route.py
-git commit -m "feat(grammar): EVIDENCE_LICENSED route + optional independence_tier + verification_standing"
-```
+**Interfaces:** add `EVAL_BENCHMARK_ADVANTAGE_CELL` (the §5 descriptor) to `CAPABILITY_CELLS`; add a `_bindings()` entry whose `CapabilityTrustBinding` gains an `executor_trust_registry: ExecutorTrustRegistry` field; `validate_trust_binding(cell, adapter_registry, oracle_registry, *, evidence_policy_registry=None, executor_trust_registry=None)` single-mode branch: skip pair requirement; require `EvidencePolicy` resolvable+digest-verified and `ExecutorTrustEntry` resolvable+`trusted`; unbounded oracle apparatus.
 
-### Task 7: Grammar — `PendingReason.EXECUTION_ERROR`
+- [ ] **Step 1: failing tests** — `CAPABILITY_CELLS.resolve("eval::benchmark_advantage","v1")` is `single`; `validate_trust_binding` passes with one credential + a trusted descriptor; an **untrusted** entry fails; the three existing cells still require the pair.
+- [ ] **Step 2–4:** implement (`CapabilityTrustBinding` gains the field — additive); run → PASS.
+- [ ] **Step 5: commit** `"feat(capability): register eval::benchmark_advantage + single-mode trust binding"`
 
-**Files:**
-- Modify: `grammar/src/polymer_grammar/status.py:17-34`
-- Test: `grammar/tests/test_status_execution_error.py`
+### Task 17: Powered fixture
 
-- [ ] **Step 1: Failing test**
+**Files:** Create `data/demo/benchmark_advantage_fixture.json`; `src/polymer_claims/_fixtures/benchmark_dgp.py` (generator); Test `tests/capability/test_benchmark_fixture.py`
 
-```python
-# grammar/tests/test_status_execution_error.py
-from polymer_grammar import PendingReason
-def test_execution_error_member_exists():
-    assert PendingReason.EXECUTION_ERROR.value == "execution_error"
-```
+**Interfaces:** a generator with a declared feature-dependent DGP `y=f(features)⊕noise`, a fixed model rule + weaker baseline, a **predeclared** `n` chosen for `P_alt(E≥1/α)≥0.8`, and the **first fixed seed**. Emits a `BenchmarkArtifact` JSON (with `sampling_seed` + `dgp_digest`).
 
-- [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Implement** — add `EXECUTION_ERROR = "execution_error"` to the enum.
-- [ ] **Step 4: Run** → PASS; full grammar suite green.
-- [ ] **Step 5: Commit**
-
-```bash
-git add grammar/src/polymer_grammar/status.py grammar/tests/test_status_execution_error.py
-git commit -m "feat(grammar): PendingReason.EXECUTION_ERROR"
-```
-
-### Task 8: Grammar — `EvidenceProvenance` DTO on `Licensing`
-
-**Files:**
-- Modify: `grammar/src/polymer_grammar/licensing.py`
-- Test: `grammar/tests/test_licensing_evidence_route.py` (extend)
-
-**Interfaces:**
-- Produces: `EvidenceProvenance(_Model)` fields: `execution_credential_ids: tuple[str, ...]`, `evidence_policy_ref: str`, `benchmark_ref: str`, `baseline_ref: str`, `oracle_dossier_ref: str | None = None`, `observed_advantage: float`, `criterion_threshold: float`, `theta0: float`, `e_value: float`, `criterion_satisfied: bool`. New optional field `Licensing.evidence_provenance: EvidenceProvenance | None = None` (present-only-when `route == EVIDENCE_LICENSED`).
-
-- [ ] **Step 1: Failing test** — construct a `Licensing` with a populated `EvidenceProvenance`; assert round-trip + that it's rejected on a non-evidence route.
-- [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Implement** the DTO + optional field + validator extension.
-- [ ] **Step 4: Run** → PASS; grammar suite green.
-- [ ] **Step 5: Commit**
-
-```bash
-git add grammar/src/polymer_grammar/licensing.py grammar/tests/test_licensing_evidence_route.py
-git commit -m "feat(grammar): EvidenceProvenance record on Licensing"
-```
-
-### Task 9: Grammar — `VerificationPolicy` + `ResolvedVerification`
-
-**Files:**
-- Create: `grammar/src/polymer_grammar/verification_policy.py`
-- Modify: `grammar/src/polymer_grammar/__init__.py`
-- Test: `grammar/tests/test_verification_policy.py`
-
-**Interfaces:**
-- Produces:
-  - `VerificationPolicy(_Model)`: `execution: Literal["recompute_pair","single"] = "recompute_pair"`, `result_rule: Literal["criterion"] = "criterion"`, `independence_requirement: Literal["implementation","baseline_ground_truth"] = "implementation"`, `evidence_policy_ref: str | None = None`, `min_adapters: int = 2`. Validator: `execution=="single"` requires `evidence_policy_ref is not None` and `min_adapters == 1`.
-  - `ResolvedVerification(_Model)`: `claim_id: str`, `route: LicenseRoute`, `verification_standing: str`, `satisfaction: Satisfaction`, `evidence_provenance: EvidenceProvenance`, `e_value: float`, `criterion_satisfied: bool`.
-
-- [ ] **Step 1: Failing test** — build a `single` policy (rejects without `evidence_policy_ref`); build a `ResolvedVerification` and assert fields/round-trip.
-- [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Implement** both models + validator; export.
-- [ ] **Step 4: Run** → PASS; grammar suite + `test_isolation.py` green (no numpy import).
-- [ ] **Step 5: Commit**
-
-```bash
-git add grammar/src/polymer_grammar/verification_policy.py grammar/src/polymer_grammar/__init__.py grammar/tests/test_verification_policy.py
-git commit -m "feat(grammar): VerificationPolicy + ResolvedVerification models"
-```
-
-### Task 10: Grammar — optional `verification_policy` on `CapabilityCell`
-
-**Files:**
-- Modify: `grammar/src/polymer_grammar/capability.py:115-155`
-- Test: `grammar/tests/test_capability_descriptors.py` (extend)
-
-**Interfaces:**
-- Produces: `CapabilityCell.verification_policy: VerificationPolicy | None = None` (default `None` ⇒ behaves as the implicit `recompute_pair` default; existing three cells unchanged).
-
-- [ ] **Step 1: Failing test** — a cell with `verification_policy=VerificationPolicy(execution="single", evidence_policy_ref="x", min_adapters=1)` round-trips; a cell without one keeps `content_hash` identical to the pre-change value (use a stored constant from a golden in Task 15, or assert `verification_policy is None`).
-- [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Implement** the optional field.
-- [ ] **Step 4: Run** → PASS; full grammar suite green.
-- [ ] **Step 5: Commit**
-
-```bash
-git add grammar/src/polymer_grammar/capability.py grammar/tests/test_capability_descriptors.py
-git commit -m "feat(grammar): optional VerificationPolicy on CapabilityCell"
-```
-
-### Task 11: Umbrella — orchestrator emits `ResolvedVerification`
-
-**Files:**
-- Create: `src/polymer_claims/benchmark_capability.py`
-- Test: `tests/capability/test_benchmark_orchestrator.py`
-
-**Interfaces:**
-- Consumes: Tasks 1–5, 9; `Satisfaction`, `SatisfactionVerdict`, `MaterializationContext`, `EvidenceProvenance`, `ResolvedVerification`, `LicenseRoute` from grammar.
-- Produces: `resolve_benchmark_verification(*, claim_id, cell, policy, benchmark, labels, order, model, baseline, ctx, criterion_threshold) -> ResolvedVerification | RuntimeFailure`. Computes `Wᵢ` (Task 2), `validate_advantage_stream` (Task 3), `paired_advantage_evalue` (Task 1), observed advantage = mean(model_correct) − mean(baseline_correct), `criterion_satisfied = observed_advantage > criterion_threshold` (`τ ≥ 0`), mints a single-source `Satisfaction(verdict=SATISFIED, materialization=ctx, credential_ids=(model.identity,))`, builds `EvidenceProvenance`, returns `ResolvedVerification(route=EVIDENCE_LICENSED, verification_standing="single_source_baseline", ...)`. Adapter/scoring failures → `RuntimeFailure(reason="execution_error")`; degenerate/validity failures → `RuntimeFailure(reason="invalid_input")`.
-
-- [ ] **Step 1: Write the failing test**
-
-```python
-# tests/capability/test_benchmark_orchestrator.py
-from polymer_claims.benchmark_capability import resolve_benchmark_verification, RuntimeFailure
-from polymer_claims.benchmark_adapter import BenchmarkExample, FixtureModelAdapter, FixtureBaselineAdapter
-from polymer_grammar import EvidencePolicy, LicenseRoute
-# ... build ctx via the project's MaterializationContext test helper ...
-
-def _benchmark():
-    # 20 examples; feature x = i%2; labels chosen so model (even->A) beats baseline (always A)
-    return [BenchmarkExample(example_id=f"e{i}", features=(("x", str(i % 2)),)) for i in range(20)]
-
-def test_orchestrator_licenses_and_carries_provenance(materialization_ctx):
-    ex = _benchmark()
-    labels = {f"e{i}": ("A" if i % 2 == 0 else "B") for i in range(20)}  # model is 20/20, baseline 10/20
-    order = tuple(e.example_id for e in ex)
-    policy = EvidencePolicy(policy_id="p", version="v1", null_family="paired_bounded_mean_betting",
-                            baseline_ref="b", calibration_population_ref="c", evalue_transform="paired_wsr_betting")
-    rv = resolve_benchmark_verification(
-        claim_id="c1", cell=None, policy=policy, benchmark=ex, labels=labels, order=order,
-        model=FixtureModelAdapter(), baseline=FixtureBaselineAdapter(), ctx=materialization_ctx,
-        criterion_threshold=0.0,
-    )
-    assert rv.route == LicenseRoute.EVIDENCE_LICENSED
-    assert rv.criterion_satisfied is True
-    assert rv.e_value > 20.0
-    assert rv.evidence_provenance.observed_advantage > 0.0
-    assert rv.satisfaction.credential_ids == ("fixture-model",)
-```
-
-- [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Implement** the orchestrator + `RuntimeFailure` dataclass per the interface above (full code written at implementation time; mirror the field names in the test).
-- [ ] **Step 4: Run** → PASS; `uv run ruff check src tests`.
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/polymer_claims/benchmark_capability.py tests/capability/test_benchmark_orchestrator.py
-git commit -m "feat(capability): benchmark orchestrator emits ResolvedVerification"
-```
-
-### Task 12: Protocol — thread `resolved_verifications` through `run_cycle` + gate out of `execute_ground`
-
-**Files:**
-- Modify: `protocol/src/polymer_protocol/cycle.py:40-61` (run_cycle signature + pass-through), and the executability gate so evidence-licensed claim ids are NOT sent to `execute_ground` (which would raise `SelfLicensingError` on <2 adapters).
-- Test: `protocol/tests/test_evidence_dispatch.py`
-
-**Interfaces:**
-- Produces: `run_cycle(..., resolved_verifications: dict[str, ResolvedVerification] | None = None)`; forwards to `verify_stage`; excludes `resolved_verifications` claim ids from the 2-adapter execution set.
-
-- [ ] **Step 1: Write the failing test** — run a cycle on a corpus containing one evidence-licensed claim (no adapters that match it) + `resolved_verifications={"c1": rv}`; assert the cycle does **not** raise and `c1` is not in the executed-with-2-adapters set. (Use a minimal corpus + the Task 11 `rv`.)
-- [ ] **Step 2: Run** `cd protocol && uv run pytest tests/test_evidence_dispatch.py -q` → FAIL.
-- [ ] **Step 3: Implement** the signature + pass-through + the gate (filter evidence ids before `execute_ground`).
-- [ ] **Step 4: Run** → PASS; full protocol suite green (existing cycles unaffected when `resolved_verifications is None`).
-- [ ] **Step 5: Commit**
-
-```bash
-git add protocol/src/polymer_protocol/cycle.py protocol/tests/test_evidence_dispatch.py
-git commit -m "feat(protocol): thread resolved_verifications; gate evidence claims out of execute_ground"
-```
-
-### Task 13: Protocol — license-from-`ResolvedVerification` branch in `verify_stage`
-
-**Files:**
-- Modify: `protocol/src/polymer_protocol/verify.py:150-159` (signature), `:188-201` (add evidence e-values to `executed_with_e` + `_e_ok`), `:209-210` (per-claim loop: handle resolved claims first)
-- Test: `protocol/tests/test_evidence_dispatch.py` (extend)
-
-**Interfaces:**
-- Consumes: `resolved_verifications: dict[str, ResolvedVerification] | None`.
-- Behavior: for each `c.id` in `resolved_verifications`: (a) include `(c.id, rv.e_value)` in the e-LOND `elond_decisions` intake so FDR is controlled across all e-tests; (b) at the top of the per-claim loop, if a resolved verification exists, license iff `rv.criterion_satisfied and _e_ok(c.id)` (e-LOND discovery), constructing `Licensing(route=EVIDENCE_LICENSED, satisfactions=(rv.satisfaction,), rival_set_closure=OPEN_ACKNOWLEDGED, independence_tier=None, verification_standing=rv.verification_standing, evidence_provenance=rv.evidence_provenance)`; else `PENDING` (criterion unmet or sub-threshold). Resolved claims never reach the 2-adapter block.
-
-- [ ] **Step 1: Write the failing tests**
-
-```python
-# extend protocol/tests/test_evidence_dispatch.py
-def test_resolved_claim_licenses_without_two_adapters(...):
-    # rv with criterion_satisfied=True, large e_value, fresh FDR ledger
-    out = run_cycle(corpus, adapters=(), ctx=ctx, resolved_verifications={"c1": rv})
-    c = out.corpus.by_id()["c1"]
-    assert c.status == Status.LICENSED
-    assert c.licensing.route == LicenseRoute.EVIDENCE_LICENSED
-    assert c.licensing.independence_tier is None
-    assert c.licensing.verification_standing == "single_source_baseline"
-    assert c.licensing.evidence_provenance.e_value == rv.e_value
-
-def test_subthreshold_evalue_stays_pending(...):
-    # rv with a tiny e_value (< 1/alpha) -> PENDING, never LICENSED, never REPRODUCED
-    out = run_cycle(corpus, adapters=(), ctx=ctx, resolved_verifications={"c1": rv_low})
-    assert out.corpus.by_id()["c1"].status == Status.PENDING
-```
-
-- [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Implement** the signature + e-LOND intake addition + the per-claim resolved branch (insert before the `rec = rec_by_id.get(c.id)` handling at `verify.py:217`).
-- [ ] **Step 4: Run** → PASS; **full protocol suite green** (`cd protocol && uv run pytest -q`) — confirm no existing test regresses (the branch is inert when `resolved_verifications is None`).
-- [ ] **Step 5: Commit**
-
-```bash
-git add protocol/src/polymer_protocol/verify.py protocol/tests/test_evidence_dispatch.py
-git commit -m "feat(protocol): license claims from injected ResolvedVerification (no two-adapter verify)"
-```
-
-### Task 14: Umbrella — register the cell + single-mode `validate_trust_binding`
-
-**Files:**
-- Modify: `src/polymer_claims/capabilities.py:25-61` (register `EVAL_BENCHMARK_ADVANTAGE_CELL`), `:130-132` (`validate_trust_binding` single-mode branch)
-- Test: `tests/capability/test_cells.py` (extend), `tests/capability/test_binding.py` (extend)
-
-**Interfaces:**
-- Produces: `EVAL_BENCHMARK_ADVANTAGE_CELL` with `verification_policy=VerificationPolicy(execution="single", independence_requirement="baseline_ground_truth", evidence_policy_ref=<policy ref>, min_adapters=1)`, registered in `CAPABILITY_CELLS`. `validate_trust_binding`: when `cell.verification_policy.execution == "single"`, do **not** require an independent credential pair (skip `BINDING_NO_INDEPENDENT_PAIR`); instead require the single execution credential resolvable + (if `cell.oracle.required`) a resolvable in-domain oracle.
-
-- [ ] **Step 1: Write the failing tests** — (a) `CAPABILITY_CELLS.resolve("eval::benchmark_advantage","v1")` is not None and is `single`; (b) `validate_trust_binding` on the single cell with ONE credential returns `.ok` (no `BINDING_NO_INDEPENDENT_PAIR`); (c) the three existing `recompute_pair` cells still require the pair.
-- [ ] **Step 2: Run** `uv run pytest tests/capability/test_cells.py tests/capability/test_binding.py -q` → FAIL.
-- [ ] **Step 3: Implement** registration + the single-mode branch.
-- [ ] **Step 4: Run** → PASS.
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/polymer_claims/capabilities.py tests/capability/test_cells.py tests/capability/test_binding.py
-git commit -m "feat(capability): register eval::benchmark_advantage; single-mode trust binding"
-```
-
-### Task 15: Compatibility goldens + end-to-end honest license
-
-**Files:**
-- Create: `tests/capability/test_benchmark_end_to_end.py`, `tests/capability/test_existing_cells_golden.py`
-- Test data: `data/demo/benchmark_advantage_fixture.json` (the frozen-before-labels tiny benchmark)
-
-**Interfaces:** consumes everything above.
-
-- [ ] **Step 1: Write the failing tests**
-  - **Golden (audit #11/#32):** assert the canonical serialization (`model_dump(mode="json")`) and `content_hash` of `MEAN_DIFF_CELL`, `REGION_DELTA_BETA_CELL`, `N_DMPS_CELL` equal committed golden constants. (Capture the goldens from `main` BEFORE Task 6–10 if not already; if the optional fields changed the hash, this test documents the one-time bump per the compat decision.)
-  - **End-to-end:** load the fixture, run `resolve_benchmark_verification` → `run_cycle(..., resolved_verifications=...)` → assert the claim is `LICENSED`, `route=EVIDENCE_LICENSED`, `verification_standing="single_source_baseline"`, `independence_tier is None`, provenance populated, and the e-value is a hand-checkable multiple of `1/α`.
-- [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Add the fixture + make the tests pass** (the fixture's predictions/baseline are generated by a label-independent seed; a comment documents the construction order — predictions frozen, then labels assigned — per audit #17).
-- [ ] **Step 4: Run** `scripts/check-all.sh` → ALL GREEN (grammar + protocol + umbrella + ruff + isolation; viewer unaffected).
-- [ ] **Step 5: Commit**
-
-```bash
-git add tests/capability/test_benchmark_end_to_end.py tests/capability/test_existing_cells_golden.py data/demo/benchmark_advantage_fixture.json
-git commit -m "test(capability): existing-cell goldens + end-to-end evidence license"
-```
-
-### Task 16: Validity-protection checks (audit #16) wired into the orchestrator
-
-**Files:**
-- Modify: `src/polymer_claims/benchmark_capability.py`
-- Test: `tests/capability/test_benchmark_validity_protection.py`
-
-**Interfaces:**
-- Produces: the orchestrator verifies, before emitting a `ResolvedVerification`: `policy.ref` resolves in the supplied `EvidencePolicyRegistry` and `policy.calibration_population_ref == benchmark_ref`; `policy.baseline_ref == baseline_ref`; model credential identity matches the cell's bound execution credential; the `(benchmark_ref, policy.ref, claim_id)` triple has not already produced a result in this run (no reuse under a different claim/benchmark). Any failure → `RuntimeFailure` (no `ResolvedVerification`; claim never licenses).
-
-- [ ] **Step 1: Write the failing tests** — one per mismatch: benchmark-digest mismatch, policy-ref unresolvable, baseline mismatch, credential mismatch, duplicate/missing example ids (already covered by Task 2 — assert it surfaces as `RuntimeFailure` here), result-reuse under a second claim. Each asserts `isinstance(result, RuntimeFailure)` and that a subsequent `run_cycle` leaves the claim unlicensed.
-- [ ] **Step 2: Run** → FAIL.
-- [ ] **Step 3: Implement** the checks.
-- [ ] **Step 4: Run** → PASS; `scripts/check-all.sh` green.
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/polymer_claims/benchmark_capability.py tests/capability/test_benchmark_validity_protection.py
-git commit -m "feat(capability): validity-protection checks (digest/credential/reuse) before licensing"
-```
+- [ ] **Step 1: failing test** — load the fixture; compute `Wᵢ` via the scorer; assert `paired_advantage_evalue(W, theta0=τ) ≥ 32.9` (α₁) AND document the power target in the test; assert labels are independent of the model rule's seed.
+- [ ] **Step 2–4:** generate the fixture with one predeclared `n`/seed (escalate `n` only via the predeclared schedule if needed — never seed-search); run → PASS.
+- [ ] **Step 5: commit** `"test(capability): powered benchmark fixture (declared power target, first seed)"`
+
+### Task 18: Compatibility — `model_serializer` None-omission + golden battery
+
+**Files:** Modify `grammar/src/polymer_grammar/{licensing.py, capability.py, operations.py}`; Test `grammar/tests/test_compat_serialization.py`, `tests/attestation/test_golden_unchanged.py`
+
+**Interfaces:** add `@model_serializer(mode="wrap")` to `Licensing`, `CapabilityCell`, `EvaluationPlan` that calls the handler then pops `verification_standing`/`evidence_provenance` / `verification_policy` / `execution_contract` when `None`.
+
+- [ ] **Step 1: failing tests (the hard gate)** — for each model: None → key absent in `model_dump`/`model_dump_json`; set → present; **historical JSON lacking the field deserializes**; a `ComputeGraph.content_hash` / `commitment_hash` over an existing plan is unchanged; **`tests/attestation/_golden_bundle.json` subject digests (`fb81e5a2…`, `2426880d…`) are byte-identical**; the three existing cells' `model_dump_json` unchanged; JSON-schema generation succeeds; nested round-trip holds.
+- [ ] **Step 2–4:** implement the three serializers; run → PASS (this proves "no golden re-bless").
+- [ ] **Step 5: commit** `"feat(grammar): None-omit model_serializers preserve existing digests (no re-bless)"`
+
+### Task 19: End-to-end + defeat-semantics + bookkeeping + final gate
+
+**Files:** Test `tests/capability/test_benchmark_end_to_end.py`; Modify `data`/wiring as needed
+
+- [ ] **Step 1: failing tests** — full pipeline (`register_hypotheses` → `run_cycle(..., evidence_executor=BenchmarkEvidenceExecutor(...), capability_registry=CAPABILITY_CELLS, ...)`) on the powered fixture: claim LICENSED, `route=EVIDENCE_LICENSED`, `independence_tier=None`, standing literal, `evidence_provenance.e_value == registered FDRTest.e_value`, `e_value ≥ 1/alpha_allocated`. **Defeat semantics:** a non-grounded discovered claim → REJECTED `DEFEAT_GROUNDED_OUT`; an altered-plan claim → REJECTED `HYPOTHESIS_ALTERED`; sub-threshold → PENDING. **Bookkeeping:** the claim appears in `executed_ids`, the verify stage-audit counts, the selection-ledger outcome, and Goodhart credit; a failure leaves the registered test unresolved (α consumed); retry under the identical `(commitment, index, α, contract digest)` permitted, varied contract trips `HYPOTHESIS_ALTERED`. **BH exemption** documented.
+- [ ] **Step 2–4:** make them pass.
+- [ ] **Step 5: final gate** — `scripts/check-all.sh` ALL GREEN (grammar + protocol + umbrella + ruff + isolation; viewer unaffected); commit `"test(capability): end-to-end evidence license + defeat semantics + bookkeeping"`
 
 ---
 
-## Self-review (coverage map spec → tasks)
+## Self-review (spec → task coverage)
 
-- §2 capability / inferential claim → Tasks 5, 11, 14, 15.
-- §3 statistical core (paired increments, sequential null, paired e-value, degenerate rejection, criterion↔null) → Tasks 1, 2, 3, 11.
-- §4 typed objects (VerificationPolicy, EvidencePolicy, provenance, ResolvedVerification) → Tasks 4, 8, 9, 10.
-- §5 benchmark-adapter/scorer/label-withholding → Tasks 2, 5.
-- §6 lifecycle + EXECUTION_ERROR → Tasks 7, 11, 13.
-- §7 schema + runtime seam (route, standing, optional tier, protocol dispatch, four-layer validation, compat) → Tasks 6, 10, 12, 13, 14, 15.
-- §8 validity-protection IN slice 1 → Task 16.
-- §9 fixture frozen-before-labels → Tasks 5, 15.
-- §10 tests (exact enumeration, degenerate, label-withholding, paired, standing serialization, runtime guard, e2e, goldens) → Tasks 1, 3, 5, 6, 12, 13, 15, 16.
-- §11 acceptance criteria → all tasks; final gate Task 15/16.
+§2 architecture → 11,13,14,15. §3 statistics → 1,17. §4 objects/modules/executor/chain → 5,6,7,11,12. §5 descriptor → 9,16. §6 three-layer binding → 12,16. §7 lifecycle/status → 8,15,19. §8 schema+compat → 4,8,9,10,18. §9 fixture → 17. §10 tests → every task + 19. §11 acceptance → 16,18,19. §12 audit-7 map → 6 (trust split), 7 (result_rule via cell in 16), 15 (status), 18 (serializer), 17 (fixture).
 
-**Deferred to Slice 2/3 (not in this plan):** full attestation chain + certificate/SLSA (Slice 2); defeat/drift/reinstatement/replay-over-time + tamper depth + out-of-domain/downgraded-oracle behavior (Slice 3).
+**Type-consistency check:** `executor_descriptor_ref` (not `executor_credential_ref`) used in Tasks 5,7,12,15. `paired_advantage_evalue(w, *, theta0)` consistent in 1,12,17. `EvidenceExecution`/`EvidenceExecutor` in protocol (11) consumed by 13,14,15. `validate_trust_binding` extra params keyword-only, consistent in 16.
 
-## Optional internal split (per spec §12)
+## Optional internal split
 
-- **1a = Tasks 1–5** (umbrella primitives + pure `EvidencePolicy`; licenses nothing; fully unit-tested) — mergeable on its own.
-- **1b = Tasks 6–16** (grammar schema + orchestrator + protocol dispatch + end-to-end) — depends on 1a.
+- **1a = Tasks 1–12** (pure objects + umbrella primitives + executor impl; no protocol dispatch; licenses nothing; fully unit-tested) — mergeable alone.
+- **1b = Tasks 13–19** (dispatch + verify block + cell registration + fixture + compat goldens + end-to-end).
 
-## Execution rhythm
+## Execution
 
 `subagent-driven-development` (fresh subagent per task + two-stage review) → whole-branch review → merge `--no-ff` → update `CONTINUE.md` + memory.
