@@ -35,7 +35,7 @@ from .adapter_identity import implementation_hash_for_callable
 from .benchmark_adapter import BenchmarkAdapter, BenchmarkArtifact
 from .benchmark_evidence import PredictionVector, ScoringError
 
-__all__ = ["BenchmarkEvidenceExecutor"]
+__all__ = ["BenchmarkEvidenceExecutor", "BenchmarkKit", "build_benchmark_kit", "EVAL_BENCHMARK_ADVANTAGE_CELL"]
 
 _EXECUTOR_VERSION = "1.0"
 
@@ -358,3 +358,188 @@ class BenchmarkEvidenceExecutor:
             licensing_info=licensing_info,
             failure_reason=None,
         )
+
+
+# ---------------------------------------------------------------------------
+# Task 16 — Consistent capability kit (used by registration + Task 19 e2e)
+# ---------------------------------------------------------------------------
+
+from typing import NamedTuple  # noqa: E402
+
+
+class BenchmarkKit(NamedTuple):
+    """All objects in the benchmark capability, built consistently by construction.
+
+    ``descriptor.content_hash == executor.credential() == policy.executor_descriptor_ref``
+    ``policy.calibration_population_ref == demo_benchmark.content_hash``
+    """
+
+    executor: "BenchmarkEvidenceExecutor"
+    descriptor: "ExecutorDescriptor"
+    policy: object  # EvidencePolicy (avoid forward-ref cycle)
+    trust_entry: object  # ExecutorTrustEntry
+    policy_registry: object  # EvidencePolicyRegistry
+    descriptor_registry: object  # ExecutorDescriptorRegistry
+    trust_registry: object  # ExecutorTrustRegistry
+    demo_benchmark: "BenchmarkArtifact"
+    cell: object  # CapabilityCell
+
+
+def build_benchmark_kit() -> BenchmarkKit:
+    """Build the full benchmark capability kit.
+
+    All cross-object references are consistent by construction — no hand-coded hash strings.
+    Safe to call multiple times (pure, deterministic).
+    """
+    from polymer_grammar.capability import (
+        CapabilityCell, DataRefKind, OracleRequirement, SubjectRequirement,
+    )
+    from polymer_grammar.executor_credential import (
+        ExecutorDescriptor as _ExecutorDescriptor,
+        ExecutorDescriptorRegistry,
+        ExecutorTrustEntry,
+        ExecutorTrustRegistry,
+    )
+    from polymer_grammar.evidence_policy import EvidencePolicy, EvidencePolicyRegistry
+    from polymer_grammar.operations import Comparator, MeasurementBasis, ProducedLeafSpec
+    from polymer_grammar.pattern import PatternRef
+    from polymer_grammar.sampling import SamplingRegime
+    from polymer_grammar.verification_policy import VerificationPolicy
+
+    from ._fixtures.benchmark_dgp import (
+        DGPBaselineAdapter,
+        DGPModelAdapter,
+        TAU,
+        build_demo_benchmark,
+    )
+    from .benchmark_evidence import paired_advantage_evalue, score_advantage
+
+    # 1. Build demo benchmark (deterministic; content_hash is its calibration_population_ref)
+    demo_benchmark = build_demo_benchmark()
+
+    # 2. Build adapters.
+    #    The model adapter gets the canonical Component identity "benchmark-model" so the
+    #    descriptor's predictor role has that identity, which matches eligible_adapter_identities.
+    #    The DGP config (MODEL_RULE_CONFIG) stays as-is; only the registry identity is overridden.
+    model_adapter = DGPModelAdapter()
+    model_adapter.identity = "benchmark-model"  # canonical registry identity for eligibility
+    baseline_adapter = DGPBaselineAdapter()
+
+    # 3. Build executor (owns the components; credential() recomputes the descriptor hash)
+    executor = BenchmarkEvidenceExecutor(
+        predictor=model_adapter,
+        baseline_predictor=baseline_adapter,
+        scorer=score_advantage,
+        transform=paired_advantage_evalue,
+        artifact_store={demo_benchmark.content_hash: demo_benchmark},
+    )
+
+    # 4. Build the ExecutorDescriptor with the SAME components the executor uses internally,
+    #    so that descriptor.content_hash == executor.credential() by construction.
+    descriptor = _ExecutorDescriptor(
+        components=(
+            Component(
+                role="predictor",
+                identity=model_adapter.identity,  # "benchmark-model"
+                implementation_hash=implementation_hash_for_callable(model_adapter.predict),
+                config_hash=_config_hash(model_adapter.config),
+            ),
+            Component(
+                role="baseline_predictor",
+                identity=baseline_adapter.identity,
+                implementation_hash=implementation_hash_for_callable(baseline_adapter.predict),
+                config_hash=_config_hash(baseline_adapter.config),
+            ),
+            Component(
+                role="scorer",
+                identity=_fn_identity(score_advantage),
+                implementation_hash=implementation_hash_for_callable(score_advantage),
+                config_hash=_fn_config_hash(),
+            ),
+            Component(
+                role="evidence_transform",
+                identity=_fn_identity(paired_advantage_evalue),
+                implementation_hash=implementation_hash_for_callable(paired_advantage_evalue),
+                config_hash=_fn_config_hash(),
+            ),
+        ),
+        version=_EXECUTOR_VERSION,
+    )
+    # Hard invariant: must match at construction time or something changed.
+    assert descriptor.content_hash == executor.credential(), (
+        f"Kit invariant violated: descriptor.content_hash {descriptor.content_hash!r} "
+        f"!= executor.credential() {executor.credential()!r}"
+    )
+
+    # 5. Build EvidencePolicy — all refs are live-computed, no hand-coded hashes.
+    policy = EvidencePolicy(
+        policy_id="benchmark-advantage-v1",
+        version="v1",
+        null_family="paired_bounded_mean_betting",
+        theta0=TAU,
+        statistic="paired_mean_increment",
+        support="[-1,1]",
+        sampling_regime=SamplingRegime.IID_EXAMPLES,
+        baseline_config_ref=_config_hash(baseline_adapter.config),
+        calibration_population_ref=demo_benchmark.content_hash,
+        predictor_config_ref=_config_hash(model_adapter.config),
+        executor_descriptor_ref=descriptor.content_hash,
+        evalue_transform="paired_wsr_betting",
+    )
+
+    # 6. ExecutorTrustEntry: trust the descriptor we just built.
+    trust_entry = ExecutorTrustEntry(
+        descriptor_ref=descriptor.content_hash,
+        owner="polymer-claims-v1",
+        trusted=True,
+        version="v1",
+    )
+
+    # 7. Registries
+    policy_registry = EvidencePolicyRegistry(policies=(policy,))
+    descriptor_registry = ExecutorDescriptorRegistry(descriptors=(descriptor,))
+    trust_registry = ExecutorTrustRegistry(entries=(trust_entry,))
+
+    # 8. CapabilityCell (evidence_policy_ref = policy.content_hash, live-computed)
+    _q = ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED)
+    cell = CapabilityCell(
+        capability_id="eval::benchmark_advantage",
+        capability_version="v1",
+        operation_impl="eval::benchmark_advantage",
+        title="model-vs-baseline benchmark advantage",
+        pattern=PatternRef(id="adjusted_effect", version="v1"),
+        subject=SubjectRequirement(mode="forbidden"),
+        param_schema=(),
+        produced=_q,
+        allowed_comparators=(Comparator.GT,),
+        eligible_adapter_identities=("benchmark-model",),
+        min_executing_adapters=1,
+        oracle=OracleRequirement(default_oracle_id="benchmark_eval_apparatus", required=True),
+        data_ref_kind=DataRefKind.BENCHMARK,
+        claim_leaf_kinds=("categorical",),
+        criterion_target="threshold",
+        verification_policy=VerificationPolicy(
+            execution="single",
+            result_rule="evalue_discovery",
+            independence_requirement="baseline_ground_truth",
+            evidence_policy_ref=policy.content_hash,
+            min_adapters=1,
+        ),
+    )
+
+    return BenchmarkKit(
+        executor=executor,
+        descriptor=descriptor,
+        policy=policy,
+        trust_entry=trust_entry,
+        policy_registry=policy_registry,
+        descriptor_registry=descriptor_registry,
+        trust_registry=trust_registry,
+        demo_benchmark=demo_benchmark,
+        cell=cell,
+    )
+
+
+# Module-level instances (built once; deterministic)
+_BENCHMARK_KIT: BenchmarkKit = build_benchmark_kit()
+EVAL_BENCHMARK_ADVANTAGE_CELL = _BENCHMARK_KIT.cell

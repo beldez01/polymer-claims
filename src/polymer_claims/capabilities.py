@@ -9,6 +9,7 @@ from polymer_grammar.operations import Comparator, MeasurementBasis, ProducedLea
 from polymer_grammar.pattern import PatternRef
 
 from .analysis_profile import profile_oracle_id
+from .benchmark_capability import EVAL_BENCHMARK_ADVANTAGE_CELL  # noqa: E402 (breaks cycle safely)
 from .profiles import CANONICAL_EPICV2_V1
 
 _Q = ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED)
@@ -58,21 +59,38 @@ N_DMPS_CELL = CapabilityCell(
     data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("categorical",), criterion_target="threshold",
 )
 
-CAPABILITY_CELLS = CapabilityRegistry(cells=(MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL, N_DMPS_CELL))
+CAPABILITY_CELLS = CapabilityRegistry(cells=(
+    MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL, N_DMPS_CELL, EVAL_BENCHMARK_ADVANTAGE_CELL,
+))
 
 # ---------------------------------------------------------------------------
 # Phase 5 — typed trust bindings
 # ---------------------------------------------------------------------------
-from pydantic import model_validator  # noqa: E402
+from pydantic import Field, model_validator  # noqa: E402
 from polymer_protocol import AdapterRegistry, OracleRegistry  # noqa: E402
 from polymer_grammar.base import _Model  # noqa: E402
 from polymer_grammar.capability import ConformanceReason, ConformanceResult, ConformanceWarning  # noqa: E402
+from polymer_grammar.executor_credential import (  # noqa: E402
+    ExecutorDescriptorRegistry, ExecutorTrustRegistry,
+)
+from polymer_grammar.evidence_policy import EvidencePolicyRegistry  # noqa: E402
 
 
 class CapabilityTrustBinding(_Model):
     adapter_registry: AdapterRegistry
     oracle_registry: OracleRegistry
     trust_profile: str
+    # V2.0 evidence-licensed capability fields.
+    # Empty-registry defaults so the three pre-existing bindings construct unchanged (9th-review #9).
+    evidence_policy_registry: EvidencePolicyRegistry = Field(
+        default_factory=EvidencePolicyRegistry
+    )
+    executor_descriptor_registry: ExecutorDescriptorRegistry = Field(
+        default_factory=ExecutorDescriptorRegistry
+    )
+    executor_trust_registry: ExecutorTrustRegistry = Field(
+        default_factory=ExecutorTrustRegistry
+    )
 
     @model_validator(mode="after")
     def _check(self) -> "CapabilityTrustBinding":
@@ -99,7 +117,51 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
         ("methyl::n_dmps", "v1"): CapabilityTrustBinding(
             adapter_registry=ndmp_independent_registry(), oracle_registry=methyl_oracles,
             trust_profile="bundled-recomputable-public"),
+        ("eval::benchmark_advantage", "v1"): _benchmark_binding(),
     }
+
+
+def _benchmark_binding() -> "CapabilityTrustBinding":
+    """Build the trust binding for eval::benchmark_advantage@v1 from the module-level kit."""
+    from polymer_grammar.oracle import ApplicabilityDomain, OracleDossier, ValidationTier
+    from polymer_protocol import AdapterRegistry
+    from polymer_protocol.adapter_registry import AdapterCredential
+
+    from .benchmark_capability import _BENCHMARK_KIT
+    from .adapter_identity import implementation_hash_for_callable
+
+    kit = _BENCHMARK_KIT
+
+    # Adapter credential: one entry for "benchmark-model" (the executor's predictor identity)
+    from ._fixtures.benchmark_dgp import DGPModelAdapter
+    _model = DGPModelAdapter()
+    _model.identity = "benchmark-model"
+    benchmark_adapter_registry = AdapterRegistry(credentials=(
+        AdapterCredential(
+            identity="benchmark-model",
+            owner="polymer-claims-dgp-v1",
+            implementation_hash=implementation_hash_for_callable(_model.predict),
+            trusted=True,
+        ),
+    ))
+
+    # Oracle registry: unbounded apparatus (ApplicabilityDomain() has empty subject_kinds = unbounded)
+    benchmark_oracle_registry = OracleRegistry(dossiers=(
+        OracleDossier(
+            oracle_id="benchmark_eval_apparatus",
+            validation_tier=ValidationTier.BENCHMARKED,
+            applicability_domain=ApplicabilityDomain(),  # empty = unbounded
+        ),
+    ))
+
+    return CapabilityTrustBinding(
+        adapter_registry=benchmark_adapter_registry,
+        oracle_registry=benchmark_oracle_registry,
+        trust_profile="bundled-benchmark-dgp-v1",
+        evidence_policy_registry=kit.policy_registry,
+        executor_descriptor_registry=kit.descriptor_registry,
+        executor_trust_registry=kit.trust_registry,
+    )
 
 
 def bind(capability_id: str, capability_version: str = "v1") -> CapabilityTrustBinding:
@@ -112,8 +174,31 @@ def bind(capability_id: str, capability_version: str = "v1") -> CapabilityTrustB
 
 
 def validate_trust_binding(
-    cell: CapabilityCell, adapter_registry: AdapterRegistry, oracle_registry: OracleRegistry,
+    cell: CapabilityCell,
+    adapter_registry: AdapterRegistry,
+    oracle_registry: OracleRegistry,
+    *,
+    evidence_policy_registry: "EvidencePolicyRegistry | None" = None,
+    executor_descriptor_registry: "ExecutorDescriptorRegistry | None" = None,
+    executor_trust_registry: "ExecutorTrustRegistry | None" = None,
 ) -> ConformanceResult:
+    vp = cell.verification_policy
+    if vp is not None and vp.execution == "single":
+        return _validate_single_mode(
+            cell, adapter_registry, oracle_registry,
+            evidence_policy_registry=evidence_policy_registry,
+            executor_descriptor_registry=executor_descriptor_registry,
+            executor_trust_registry=executor_trust_registry,
+        )
+    return _validate_recompute_pair_mode(cell, adapter_registry, oracle_registry)
+
+
+def _validate_recompute_pair_mode(
+    cell: CapabilityCell,
+    adapter_registry: AdapterRegistry,
+    oracle_registry: OracleRegistry,
+) -> ConformanceResult:
+    """Existing recompute-pair logic (unchanged)."""
     from polymer_protocol.adapter_registry import adapters_independent
 
     reasons: list[ConformanceReason] = []
@@ -137,6 +222,92 @@ def validate_trust_binding(
                 reasons.append(ConformanceReason.BINDING_ORACLE_MISSING)
         else:
             warnings.append(ConformanceWarning.BINDING_ORACLE_SATISFIABILITY_UNKNOWN)
+    return ConformanceResult(reasons=_dedup_local(reasons), warnings=_dedup_local(warnings))
+
+
+def _validate_single_mode(
+    cell: CapabilityCell,
+    adapter_registry: AdapterRegistry,
+    oracle_registry: OracleRegistry,
+    *,
+    evidence_policy_registry: "EvidencePolicyRegistry | None",
+    executor_descriptor_registry: "ExecutorDescriptorRegistry | None",
+    executor_trust_registry: "ExecutorTrustRegistry | None",
+) -> ConformanceResult:
+    """Single-mode trust binding validation (evidence-licensed capability).
+
+    Skips the independent-pair requirement.  Requires:
+    - EvidencePolicy resolvable from evidence_policy_registry and digest-verified.
+    - ExecutorDescriptor resolvable via policy.executor_descriptor_ref.
+    - ExecutorTrustEntry resolvable and trusted is True.
+    - Descriptor's predictor component identity ∈ cell.eligible_adapter_identities.
+    - Oracle id present in oracle_registry (unbounded apparatus; no subject in_domain check).
+    """
+    vp = cell.verification_policy
+    reasons: list[ConformanceReason] = []
+    warnings: list[ConformanceWarning] = []
+
+    # Adapter credential warnings (informational only; no pair required in single mode)
+    for ident in cell.eligible_adapter_identities:
+        cred = adapter_registry.resolve(ident)
+        if cred is None:
+            warnings.append(ConformanceWarning.BINDING_ADAPTER_MISSING)
+        elif not cred.trusted:
+            warnings.append(ConformanceWarning.BINDING_ADAPTER_UNTRUSTED)
+
+    # Oracle existence (unbounded apparatus — no subject in_domain check)
+    if cell.oracle.required:
+        oid = cell.oracle.default_oracle_id
+        if oid is not None:
+            if not any(d.oracle_id == oid for d in oracle_registry.dossiers):
+                reasons.append(ConformanceReason.BINDING_ORACLE_MISSING)
+        else:
+            warnings.append(ConformanceWarning.BINDING_ORACLE_SATISFIABILITY_UNKNOWN)
+
+    # Evidence policy: resolvable + digest-verified
+    policy = None
+    if (
+        vp is None
+        or vp.evidence_policy_ref is None
+        or evidence_policy_registry is None
+    ):
+        reasons.append(ConformanceReason.BINDING_NO_INDEPENDENT_PAIR)
+    else:
+        policy = evidence_policy_registry.resolve(vp.evidence_policy_ref)
+        if policy is None or policy.content_hash != vp.evidence_policy_ref:
+            reasons.append(ConformanceReason.BINDING_NO_INDEPENDENT_PAIR)
+            policy = None  # can't continue executor checks without a valid policy
+
+    # Executor descriptor: resolvable via policy.executor_descriptor_ref
+    descriptor = None
+    if policy is not None:
+        if executor_descriptor_registry is None:
+            reasons.append(ConformanceReason.BINDING_NO_INDEPENDENT_PAIR)
+        else:
+            descriptor = executor_descriptor_registry.resolve(policy.executor_descriptor_ref)
+            if descriptor is None:
+                reasons.append(ConformanceReason.BINDING_NO_INDEPENDENT_PAIR)
+
+    # Trust entry: resolvable and trusted
+    if descriptor is not None:
+        if executor_trust_registry is None:
+            reasons.append(ConformanceReason.BINDING_NO_INDEPENDENT_PAIR)
+        else:
+            entry = executor_trust_registry.resolve(descriptor.content_hash)
+            if entry is None or not entry.trusted:
+                reasons.append(ConformanceReason.BINDING_NO_INDEPENDENT_PAIR)
+
+    # Predictor identity eligibility: descriptor.predictor.identity ∈ cell.eligible_adapter_identities
+    if descriptor is not None:
+        predictor_comp = next(
+            (c for c in descriptor.components if c.role == "predictor"), None
+        )
+        if (
+            predictor_comp is None
+            or predictor_comp.identity not in cell.eligible_adapter_identities
+        ):
+            reasons.append(ConformanceReason.BINDING_NO_INDEPENDENT_PAIR)
+
     return ConformanceResult(reasons=_dedup_local(reasons), warnings=_dedup_local(warnings))
 
 

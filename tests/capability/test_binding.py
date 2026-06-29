@@ -1,7 +1,7 @@
 import pytest
 from polymer_claims.capabilities import (
     bind, validate_trust_binding, CapabilityNotFound, CapabilityTrustBinding,
-    MEAN_DIFF_CELL, N_DMPS_CELL,
+    MEAN_DIFF_CELL, N_DMPS_CELL, EVAL_BENCHMARK_ADVANTAGE_CELL,
 )
 from polymer_claims.exec_adapters import apparatus_oracle_registry
 from polymer_protocol import AdapterRegistry
@@ -9,6 +9,7 @@ from polymer_protocol.adapter_registry import AdapterCredential
 from polymer_grammar.capability import (
     ConformanceReason as R, ConformanceWarning as W, OracleRequirement,
 )
+from polymer_grammar.executor_credential import ExecutorTrustEntry, ExecutorTrustRegistry
 
 def test_bind_resolves_each():
     for cap in ("stats::mean_diff", "methyl::region_delta_beta", "methyl::n_dmps"):
@@ -74,3 +75,94 @@ def test_methyl_binding_resolves_profile_oracle():
     b = bind("methyl::n_dmps", "v1")
     assert validate_trust_binding(N_DMPS_CELL, b.adapter_registry, b.oracle_registry).ok
     assert b.trust_profile == "bundled-recomputable-public"
+
+
+# ---------------------------------------------------------------------------
+# Task 16 — regression: existing bindings unbroken by new CapabilityTrustBinding fields
+# ---------------------------------------------------------------------------
+
+def test_bind_succeeds_all_three_existing():
+    """bind() still works for the three pre-existing cells (new fields have empty defaults)."""
+    for cap in ("stats::mean_diff", "methyl::region_delta_beta", "methyl::n_dmps"):
+        b = bind(cap, "v1")
+        assert isinstance(b, CapabilityTrustBinding)
+        # New fields should be empty by default
+        assert b.executor_descriptor_registry.descriptors == ()
+        assert b.executor_trust_registry.entries == ()
+
+
+def test_existing_cells_still_require_independent_pair():
+    """The three pre-existing recompute-pair cells still fail without an independent pair."""
+    reg = AdapterRegistry(credentials=(
+        AdapterCredential(identity="stats-pure", owner="same", implementation_hash="sha256:" + "a" * 64, trusted=True),
+        AdapterCredential(identity="stats-stdlib", owner="same", implementation_hash="sha256:" + "a" * 64, trusted=True),
+    ))  # same owner + same hash → not independent
+    res = validate_trust_binding(MEAN_DIFF_CELL, reg, bind("stats::mean_diff").oracle_registry)
+    assert R.BINDING_NO_INDEPENDENT_PAIR in res.reasons and not res.ok
+
+
+# ---------------------------------------------------------------------------
+# Task 16 — eval::benchmark_advantage binding
+# ---------------------------------------------------------------------------
+
+def test_benchmark_binding_validates_ok():
+    """validate_trust_binding for the new cell with its kit registries passes."""
+    b = bind("eval::benchmark_advantage", "v1")
+    res = validate_trust_binding(
+        EVAL_BENCHMARK_ADVANTAGE_CELL,
+        b.adapter_registry,
+        b.oracle_registry,
+        evidence_policy_registry=b.evidence_policy_registry,
+        executor_descriptor_registry=b.executor_descriptor_registry,
+        executor_trust_registry=b.executor_trust_registry,
+    )
+    assert res.ok, f"Expected ok but got reasons={res.reasons} warnings={res.warnings}"
+
+
+def test_benchmark_binding_wrong_predictor_identity():
+    """A descriptor whose predictor identity is NOT in eligible_adapter_identities → not ok.
+
+    Approach: keep the kit registries (with predictor identity 'benchmark-model') but give the
+    cell a modified eligible_adapter_identities that excludes that identity.  The descriptor
+    resolves successfully but its predictor identity is not in the cell's eligible set.
+    """
+    b = bind("eval::benchmark_advantage", "v1")
+    # Override the cell's eligible_adapter_identities to exclude "benchmark-model"
+    bad_cell = EVAL_BENCHMARK_ADVANTAGE_CELL.model_copy(update={
+        "eligible_adapter_identities": ("some-other-identity",),
+    })
+    res = validate_trust_binding(
+        bad_cell,
+        b.adapter_registry,
+        b.oracle_registry,
+        evidence_policy_registry=b.evidence_policy_registry,
+        executor_descriptor_registry=b.executor_descriptor_registry,
+        executor_trust_registry=b.executor_trust_registry,
+    )
+    assert not res.ok, "Expected NOT ok for wrong predictor identity"
+
+
+def test_benchmark_binding_untrusted_executor():
+    """An untrusted ExecutorTrustEntry → not ok."""
+    b = bind("eval::benchmark_advantage", "v1")
+    # Pull the descriptor hash from the binding's descriptor registry
+    descriptor_hash = b.executor_descriptor_registry.descriptors[0].content_hash
+
+    # Replace the trust registry with one containing an untrusted entry for the same descriptor
+    untrusted_entry = ExecutorTrustEntry(
+        descriptor_ref=descriptor_hash,
+        owner="polymer-claims-v1",
+        trusted=False,  # explicitly NOT trusted
+        version="v1",
+    )
+    bad_trust_registry = ExecutorTrustRegistry(entries=(untrusted_entry,))
+
+    res = validate_trust_binding(
+        EVAL_BENCHMARK_ADVANTAGE_CELL,
+        b.adapter_registry,
+        b.oracle_registry,
+        evidence_policy_registry=b.evidence_policy_registry,
+        executor_descriptor_registry=b.executor_descriptor_registry,
+        executor_trust_registry=bad_trust_registry,
+    )
+    assert not res.ok, "Expected NOT ok for untrusted executor entry"
