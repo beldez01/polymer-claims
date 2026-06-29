@@ -13,8 +13,9 @@ later phases.
 from __future__ import annotations
 
 from enum import Enum
+from typing import Literal
 
-from pydantic import model_validator
+from pydantic import model_serializer, model_validator
 
 from .base import _Model
 from .shared_cause import SHARED_CAUSE_TAU, SeverityProvenance, shared_cause_jaccard
@@ -54,6 +55,7 @@ class LicenseRoute(str, Enum):
     SEVERE_TEST = "severe_test"
     REPLICATION = "replication"
     MDL_GATE = "mdl_gate"  # a representation-revision earned its license from corpus compressibility
+    EVIDENCE_LICENSED = "evidence_licensed"  # e-value evidence against a baseline (V2.0)
 
 
 class RivalSetClosure(str, Enum):
@@ -150,10 +152,25 @@ class Licensing(_Model):
     satisfactions: tuple[Satisfaction, ...]
     rival_set_closure: RivalSetClosure
     rivals_considered: tuple[str, ...] = ()
-    independence_tier: IndependenceTier = IndependenceTier.REPRODUCED
+    independence_tier: IndependenceTier | None = IndependenceTier.REPRODUCED
     severity_provenance: SeverityProvenance | None = None
     shared_cause_overlap: float | None = None
     note: str | None = None
+    # V2.0 evidence-licensed fields — non-None iff route=EVIDENCE_LICENSED.
+    # Both are omitted from serialized output when None (see _serialize below).
+    verification_standing: Literal["single_source_baseline"] | None = None
+    evidence_provenance: EvidenceProvenance | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler) -> dict:
+        """Drop verification_standing and evidence_provenance from the output when
+        they are None, so a non-evidence Licensing is byte-identical to pre-Task-8."""
+        data = handler(self)
+        if data.get("verification_standing") is None:
+            data.pop("verification_standing", None)
+        if data.get("evidence_provenance") is None:
+            data.pop("evidence_provenance", None)
+        return data
 
     @model_validator(mode="after")
     def _all_satisfied(self) -> Licensing:
@@ -199,3 +216,31 @@ class Licensing(_Model):
                 "rival_set_closure=enumerated requires a non-empty rivals_considered"
             )
         return self
+
+    @model_validator(mode="after")
+    def _evidence_route_fields(self) -> Licensing:
+        """verification_standing and evidence_provenance are non-None iff route=EVIDENCE_LICENSED."""
+        is_evidence = self.route == LicenseRoute.EVIDENCE_LICENSED
+        has_standing = self.verification_standing is not None
+        has_provenance = self.evidence_provenance is not None
+        if is_evidence:
+            if not has_standing or not has_provenance:
+                raise ValueError(
+                    "route=evidence_licensed requires both verification_standing and "
+                    "evidence_provenance"
+                )
+        else:
+            if has_standing or has_provenance:
+                raise ValueError(
+                    "verification_standing and evidence_provenance are only valid "
+                    "when route=evidence_licensed"
+                )
+        return self
+
+
+# Late import to break the circular dependency with verification_policy.py, which imports
+# LicenseRoute and MaterializationContext from this module (defined above Licensing).
+# EvidenceProvenance is resolved here after verification_policy is loadable, then
+# model_rebuild() completes the Licensing schema.
+from .verification_policy import EvidenceProvenance  # noqa: E402
+Licensing.model_rebuild()

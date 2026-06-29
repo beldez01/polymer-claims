@@ -32,6 +32,8 @@ class PendingReason(str, Enum):
     # verify withheld a license under strict_shared_cause: the hypothesis prior shares a cohort
     # with the test data (confirmatory, not a held-out severe test)
     SHARED_CAUSE_CONFIRMATORY = "shared_cause_confirmatory"
+    # the evidence execution pipeline raised an unrecoverable error
+    EXECUTION_ERROR = "execution_error"
 
 
 class RejectionReason(str, Enum):
