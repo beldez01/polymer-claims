@@ -327,4 +327,7 @@ def anchored_resolutions(
             pressure_kind=kind,
             exposure_start_cycle=pressure.exposure_start.get(cid),
         ))
-    return tuple(out)
+    # Sort deterministically: `cause` is built caller-side from a set, so its iteration
+    # order is PYTHONHASHSEED-dependent; the records feed the JSONL ledger + signed
+    # certificate digest, which must be byte-stable. (key is unique within a batch.)
+    return tuple(sorted(out, key=lambda r: (r.subject_claim_id, r.license_epoch)))

@@ -316,3 +316,21 @@ def test_add_pattern_literally_named_merged_is_still_rejected():
     # unused ADD still costs bits -> rejected, regardless of the misleading name.
     assert mdl_delta(claims, s, rev) > 0.0
     assert classify(mdl_delta(claims, s, rev), novelty_residual(claims, s, rev)) == "rejected"
+
+
+def test_loadbearing_deprecate_of_slotless_claims_is_rejected():
+    # Regression: a load-bearing pattern carrying only categorical/existence leaves (ZERO
+    # structural slots) must still be expensive to deprecate. The _GENERIC_FILL_BITS penalty
+    # was multiplied by the slot count (0), so a slotless load-bearing deprecation escaped the
+    # penalty entirely and was wrongly accepted as a 'consolidation'.
+    claims = tuple(
+        _claim(f"a{i}", "A", leaves=(_cleaf("GO:0008150"),)) for i in range(5)
+    )
+    s = corpus_implied_schema(claims)
+    rev = RepresentationRevision(
+        operation=RevisionOperation.DEPRECATE,
+        target=PatternTarget(patterns=(_refA,)), rationale="x",
+    )
+    delta = mdl_delta(claims, s, rev)
+    assert delta > 0.0, f"deprecating a load-bearing slotless pattern must cost bits, got {delta}"
+    assert classify(delta, novelty_residual(claims, s, rev)) == "rejected"
