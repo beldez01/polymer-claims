@@ -10,25 +10,22 @@ import hashlib
 import marshal
 
 
-def implementation_hash_for_callable(fn: object) -> str:
-    """Return a deterministic sha256 digest for any function or method.
+def _hash_code(identity: str, code: object) -> str:
+    """Shared byte-hashing core used by both public helpers.
 
-    Hashes the callable's bytecode fields (co_code, co_consts, co_names,
-    co_varnames) plus its qualname so that:
-    - Two distinct callables (different implementations or different names)
-      produce different hashes.
-    - The same callable always produces the same hash (stable).
-
-    Returns ``"sha256:<hex>"``.
+    Builds a length-prefixed payload from ``identity`` and bytecode fields
+    (co_code, co_consts, co_names, co_varnames), sha256s it, and returns
+    ``"sha256:<hex>"``.  The identity string is caller-supplied so that
+    ``implementation_hash_for_adapter`` can use the *class* module.qualname
+    (preserving pre-Task-12 values) while ``implementation_hash_for_callable``
+    uses the function/method's own module.qualname.
     """
-    code = fn.__code__  # type: ignore[attr-defined]
-    qualname: str = getattr(fn, "__qualname__", repr(fn))
     payload = (
-        qualname.encode(),
-        marshal.dumps(code.co_code),
-        repr(code.co_consts).encode(),
-        repr(code.co_names).encode(),
-        repr(code.co_varnames).encode(),
+        identity.encode(),
+        marshal.dumps(code.co_code),  # type: ignore[attr-defined]
+        repr(code.co_consts).encode(),  # type: ignore[attr-defined]
+        repr(code.co_names).encode(),  # type: ignore[attr-defined]
+        repr(code.co_varnames).encode(),  # type: ignore[attr-defined]
     )
     h = hashlib.sha256()
     for part in payload:
@@ -37,12 +34,34 @@ def implementation_hash_for_callable(fn: object) -> str:
     return "sha256:" + h.hexdigest()
 
 
+def implementation_hash_for_callable(fn: object) -> str:
+    """Return a deterministic sha256 digest for any function or method.
+
+    Hashes the callable's bytecode fields (co_code, co_consts, co_names,
+    co_varnames) plus its ``module.qualname`` so that:
+    - Two distinct callables (different implementations or different names)
+      produce different hashes.
+    - The same callable always produces the same hash (stable).
+
+    Returns ``"sha256:<hex>"``.
+    """
+    code = fn.__code__  # type: ignore[attr-defined]
+    module: str = getattr(fn, "__module__", "") or ""
+    qualname: str = getattr(fn, "__qualname__", repr(fn))
+    identity = f"{module}.{qualname}" if module else qualname
+    return _hash_code(identity, code)
+
+
 def implementation_hash_for_adapter(adapter_or_cls: object) -> str:
     """Return a deterministic sha256 digest for an adapter class's execute implementation.
 
-    Delegates to ``implementation_hash_for_callable`` over the class's ``execute``
-    method so the two helpers share one hashing algorithm.
+    Uses the *class* ``module.qualname`` as the identity string (e.g.
+    ``"polymer_claims.exec_adapters.StatsPureAdapter"``) — identical to the
+    pre-Task-12 formula — so existing adapter hashes are preserved byte-for-byte.
+    Shares the byte-hashing core (``_hash_code``) with
+    ``implementation_hash_for_callable`` but keeps a distinct identity string.
     """
     cls = adapter_or_cls if isinstance(adapter_or_cls, type) else adapter_or_cls.__class__
     execute = getattr(cls, "execute")
-    return implementation_hash_for_callable(execute)
+    identity = f"{cls.__module__}.{cls.__qualname__}"
+    return _hash_code(identity, execute.__code__)

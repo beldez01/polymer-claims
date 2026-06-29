@@ -10,6 +10,7 @@ from polymer_claims.adapter_identity import (
 )
 from polymer_claims.benchmark_adapter import FixtureModelAdapter, FixtureBaselineAdapter
 from polymer_claims.benchmark_evidence import score_advantage, paired_advantage_evalue
+from polymer_claims.exec_adapters import StatsPureAdapter
 
 _SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
@@ -150,9 +151,35 @@ def test_adapter_hash_works_with_class():
     assert h_instance == h_class
 
 
-def test_adapter_hash_depends_on_callable_hash():
-    """The refactored implementation_hash_for_adapter delegates to implementation_hash_for_callable.
-    It therefore equals the hash of the class's execute method."""
+def test_adapter_hash_does_not_equal_callable_hash_of_execute():
+    """implementation_hash_for_adapter uses the *class* module.qualname as identity,
+    while implementation_hash_for_callable uses the method's own module.qualname.
+    They share the same byte-hashing core but produce different digests for the same
+    execute method — this is intentional to preserve pre-Task-12 adapter hash values."""
     h_adapter = implementation_hash_for_adapter(_DummyAdapter)
     h_execute = implementation_hash_for_callable(_DummyAdapter.execute)
-    assert h_adapter == h_execute
+    assert h_adapter != h_execute, (
+        "adapter hash must use class identity, not method qualname"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Regression pin — backward-compat guard for pre-Task-12 adapter hash values
+# ---------------------------------------------------------------------------
+
+
+def test_stats_pure_adapter_hash_is_pinned():
+    """Regression pin: StatsPureAdapter must hash to the pre-Task-12 value.
+
+    This value was produced by the original implementation_hash_for_adapter before
+    Task 12 introduced implementation_hash_for_callable.  Any change here means the
+    adapter independence check in the protocol registry will reject previously
+    attested adapters — change only if you intend a breaking migration.
+
+    Pin value: sha256:ff14cf51ba2917fb9033976db374a80992b3956d182ac53448946e346f0077a5
+    """
+    expected = "sha256:ff14cf51ba2917fb9033976db374a80992b3956d182ac53448946e346f0077a5"
+    assert implementation_hash_for_adapter(StatsPureAdapter) == expected, (
+        "StatsPureAdapter hash changed — this breaks backward-compat with "
+        "pre-Task-12 attestation goldens.  Update only via a deliberate migration."
+    )

@@ -293,6 +293,9 @@ def test_execute_success_route_is_evidence_licensed():
 
 
 def test_execute_success_provenance_populated():
+    import re
+    _SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+
     executor, predictor, baseline, artifact = _build_executor()
     policy = _make_policy(
         artifact, predictor, baseline,
@@ -312,6 +315,16 @@ def test_execute_success_provenance_populated():
     assert prov.e_value == result.e_value
     assert prov.fdr_test_index == fdr_test.index
     assert prov.alpha_allocated == fdr_test.alpha_allocated
+    # baseline_predictions_ref and execution_contract_digest must be present
+    # and carry a valid sha256: prefix — these are integrity anchors.
+    assert prov.baseline_predictions_ref is not None, "baseline_predictions_ref must be set"
+    assert _SHA256_RE.match(prov.baseline_predictions_ref), (
+        f"baseline_predictions_ref not sha256-shaped: {prov.baseline_predictions_ref!r}"
+    )
+    assert prov.execution_contract_digest is not None, "execution_contract_digest must be set"
+    assert _SHA256_RE.match(prov.execution_contract_digest), (
+        f"execution_contract_digest not sha256-shaped: {prov.execution_contract_digest!r}"
+    )
 
 
 def test_execute_success_record_verdict_undetermined():
