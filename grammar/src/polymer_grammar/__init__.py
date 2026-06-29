@@ -169,6 +169,7 @@ from .representation import (
     meets_meta_tier_bar,
 )
 from .commitment import commitment_hash
+from .sampling import SamplingRegime
 from .capability import (
     CapabilityCell, CapabilityRegistry, ParamCodec, SubjectRequirement, SubjectKind,
     OracleRequirement, DataRefKind, ConformanceResult, ConformanceReason, ConformanceWarning,
@@ -325,6 +326,7 @@ __all__ = [
     "classify",
     "RevisionDiscovery",
     "commitment_hash",
+    "SamplingRegime",
     "CapabilityCell",
     "CapabilityRegistry",
     "ParamCodec",

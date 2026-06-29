@@ -23,6 +23,7 @@ from .operations import (
 from .pattern import PatternRef
 
 _SE_CONTRACT_RE = re.compile(r"^se:[^:@\s]+@[0-9]+$")
+_BENCHMARK_RE = re.compile(r"^bench:sha256:[0-9a-f]{64}$")
 
 SubjectKind = Literal[
     "genomic_region", "ontology_term", "variant_vrs", "s4_object", "gene_or_protein",
@@ -80,6 +81,7 @@ class ParamCodec(_Model):
 class DataRefKind(str, Enum):
     OPAQUE = "opaque"
     SE_CONTRACT = "se_contract"
+    BENCHMARK = "benchmark"
 
 
 def data_ref_ok(kind: DataRefKind, ref: str) -> bool:
@@ -87,6 +89,8 @@ def data_ref_ok(kind: DataRefKind, ref: str) -> bool:
         return bool(ref)
     if kind == DataRefKind.SE_CONTRACT:
         return bool(_SE_CONTRACT_RE.match(ref))
+    if kind == DataRefKind.BENCHMARK:
+        return bool(_BENCHMARK_RE.match(ref))
     return False  # pragma: no cover
 
 
