@@ -1,10 +1,14 @@
 # ⟳ Polymer Claims — RESUME HERE
 
 > Hook-loaded continuity file (a SessionStart hook surfaces it). **Keep the *Current state* + *NEXT*
-> sections current at every phase boundary.** Detailed build history lives in git (`git log --oneline`),
-> the canonical spec (`docs/superpowers/polymer-claims-canonical-spec.md`), the per-slice plans
-> (`docs/superpowers/archive/plans/`), and the archived per-feature design specs (`docs/superpowers/archive/specs/`).
+> sections current at every phase boundary.** Detailed build history lives in git (`git log --oneline`)
+> and the canonical spec (`docs/superpowers/polymer-claims-canonical-spec.md`).
 > One-page architecture map: `ARCHITECTURE_CURRENT.md`. Reserved terminology: `GLOSSARY.md`.
+>
+> **Doc consolidation (2026-06-29):** the per-feature `specs/`, `plans/`, and the whole `archive/`
+> tree were culled — that shipped-feature design history now lives only in git. Inline
+> `docs/superpowers/{specs,plans,archive}/…-design.md` paths below are historical references
+> (find them via `git log`/`git show`); only `specs/` + `plans/` for *pending* work remain in-tree.
 
 ---
 
@@ -278,7 +282,7 @@ already displays `independence_tier`. Phase B also has a small methylation data-
 (`methylation_asset_catalog`) that lists bundled SE-Contract fixtures and locally generated TCGA
 contracts when present; the methylation generator prompt is now metadata-driven rather than hardcoded.
 
-Other safe slices (the historical decision menu is archived at `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`):
+Other safe slices:
 
 1. **§2E follow-ups** — viewer tier display + live-node `replication_map` wiring are done. Remaining:
    bind a **real** second cohort when available so REPLICATED is earned, not only exercised.
@@ -320,7 +324,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   3D viewer (Next 16 / React Three Fiber; sample + live modes), verified in-browser
 - ✅ Real LLM generation adapter (`[llm]` extra) driving the live node (`serve --llm`)
 
-**External audit — CLOSED** (`docs/superpowers/archive/polymer-claims-audit.md`):
+**External audit — CLOSED:**
 - ✅ Tier A+B (`c662f1c`): bounded frame retention · tick-serialization lock · bounded SSE queues ·
   non-loopback bind guard · machine-clean JSON · `ARCHITECTURE_CURRENT.md` + `GLOSSARY.md` · v1.2 frozen
   banners
@@ -328,7 +332,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 - ✅ Tier-C (`2b7ccb5`): viewer `CONTRACT_VERSION` + 6-axis strength validator · `run_cycle` output
   revalidation · packaging metadata
 
-**Credibility arc + CES** (`docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`):
+**Credibility arc + CES:**
 - ✅ M1 structural-equivalence status (`Status.STRUCTURAL` — no more false LICENSED on structural
   collapse) · earned-strength · relational graph embedding v1 (signed-Laplacian eigenmap, silhouette 0.62)
   · live spectral layout (`procrustes-embedding-alignment`) — eigenmap as the live `NodeRunner` default,
@@ -433,12 +437,10 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 ## Reference pointers
 
 - **Product vision:** `docs/superpowers/vision.md` (external-facing thesis — capability-cell spine, three registries, closed-world agent execution, verification ladder; reconciled to current state 2026-06-27).
-- **Forward roadmap:** `docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md` (three-arc linchpin; authoritative) · `docs/superpowers/2026-06-16-autonomous-hypothesis-loop.md` (autonomous-loop; partly leapfrogged — sheaf gauge opened arc-3) · historical decision menu (archived): `docs/superpowers/archive/2026-06-13-overnight-deferred-analysis.md`
+- **Forward roadmap:** `docs/superpowers/2026-06-23-remaining-roadmap.md` (authoritative) · `docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md` (the three-arc linchpin vision)
 - **Phase-2 north star:** `docs/superpowers/2026-06-12-phase-2-north-star.md`
-- **Credibility-arc roadmap:** `docs/superpowers/archive/roadmaps/2026-06-11-credibility-arc-roadmap.md`
 - **Architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`
-- **Spectral layout guides:** `docs/spectral-layout-how-to-use.md` (usage) ·
-  `docs/spectral-layout-how-it-works.md` (eigenmap + Procrustes math/theory)
+- **Spectral layout guide:** `docs/spectral-layout.md` (usage + eigenmap/Procrustes math)
 - **Memory:** `project_polymer_claims_knowledge_protocol` (full phase history + follow-ups)
 - **Deep design source:**
   `~/Desktop/Research/topics/epistemic-claim-foundations/generative-protocol/_FINAL_knowledge_generation_protocol.md`

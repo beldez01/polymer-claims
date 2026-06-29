@@ -1,7 +1,6 @@
 """Resolve a pinned external input (local file/dir -> cache -> opt-in fetch) and verify its SHA-256.
 Used by the real-data kernel parity gate for the Xena matrix and the cBioPortal inputs. Fetch is
-opt-in (network only when allow_fetch=True). See
-docs/superpowers/specs/2026-06-25-h01b-real-kernel-parity-design.md §3."""
+opt-in (network only when allow_fetch=True)."""
 from __future__ import annotations
 
 import hashlib

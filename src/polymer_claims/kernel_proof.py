@@ -1,7 +1,7 @@
 """Offline kernel proof: build the synthetic HM450 fixture, run the REAL n-DMP gate, return the
 outcome. Shared by the verify-kernel CLI and the CI guard test. No network; deterministic.
 Builds into a TemporaryDirectory scoped by using_contract_root — nothing is written to the source
-tree. See docs/superpowers/specs/2026-06-23-offline-kernel-proof-design.md."""
+tree."""
 from __future__ import annotations
 
 import tempfile

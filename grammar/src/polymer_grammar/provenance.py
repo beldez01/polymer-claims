@@ -33,9 +33,8 @@ class Provenance(_Model):
     preregistration_hash: str | None = None      # hash-lock of the primary test (anti-HARKing)
     # FIRST-PASS rationale surface (2026-06): a free-text justification carried for
     # display only. NOT validated, NOT structured, NOT linked to the corpus claims it
-    # builds on. See docs/superpowers/notes/2026-06-08-rationale-followups.md for the
-    # rigorous extension (structured premises, cited-claim links, anti-hallucination
-    # validation, promotion out of Provenance metadata).
+    # builds on. A rigorous extension (structured premises, cited-claim links,
+    # anti-hallucination validation, promotion out of Provenance metadata) is future work.
     rationale: str | None = None   # FIRST PASS: opaque free-text "why this claim was proposed"
     # §5a literature-shared-cause: cohort identities (dimnames_hash namespace) that this
     # hypothesis's motivating prior was established on. Empty => no shared-cause info (inert).

@@ -8,7 +8,7 @@ do the first-use / wedge work before this. Resume by reviewing this spec, then `
 **Date:** 2026-06-26
 **Author:** Z. Belden (brainstormed with Claude)
 **Roadmap:** H1.A1 (Arc-2 slice 3 — real signing), the networked half. Successor to the shipped local
-transparency layer (`specs/2026-06-25-transparency-log-design.md`, v0.3 SHIPPED). This discharges that
+transparency layer (the local transparency-log design, v0.3 SHIPPED — in git history). This discharges that
 spec's §7 network seam.
 
 > **One line.** Add a networked `RekorTransparencyLog` backend behind the existing
@@ -186,7 +186,7 @@ checkpoints) and witness/gossip corroboration. The CLI/docs must not overstate.
 
 ## 10. References
 
-- `docs/superpowers/specs/2026-06-25-transparency-log-design.md` (v0.3 SHIPPED) — §7 seam this discharges.
+- the local transparency-log design (v0.3 SHIPPED — in git history) — §7 seam this discharges.
 - `src/polymer_claims/transparency.py` — `TransparencyLog` protocol, `LogEntry`, `verify_inclusion`, C2SP note helpers.
 - `src/polymer_claims/bundle.py` — `build_bundle`, `verify_bundle`, `TrustStatus`, `BundleVerification`.
 - `src/polymer_claims/signing.py` — Ed25519 sign/verify, DER (de)serializers (the Rekor path adds ECDSA-P256 verify alongside).

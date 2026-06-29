@@ -6,7 +6,6 @@ count as a replication. Returns the extra (cohort-B) Satisfaction to append to t
 the PRODUCT e-value e1*e2 (valid: independent data -> independent e-values for the shared null). The
 grammar/protocol stay ignorant of cohort B — verify receives a finished `replications=` map, mirroring
 CES-3 `materializations=` / Phase-2.1 `evidence=`. Umbrella/impure; numpy only via methyl_adapters.
-See docs/superpowers/specs/2026-06-14-2e-tiered-independence-design.md.
 """
 from __future__ import annotations
 

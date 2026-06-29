@@ -3,7 +3,6 @@
 This module turns a Corpus into a SheafStructure: scalar-ℝ stalks on Quantity-leaf claims,
 equivalence edges (agreement) and defeat edges (antagonism, sign-flipped). The numpy spectrum
 (energy/H⁰/H¹) lives umbrella-side in polymer_claims.sheaf_spectrum behind the [embed] extra.
-Design: docs/superpowers/specs/2026-06-21-sheaf-consistency-gauge-design.md.
 """
 from __future__ import annotations
 

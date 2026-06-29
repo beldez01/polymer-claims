@@ -5,7 +5,7 @@ e-value for the severe-test composite one-sided null H0: (mu_B - mu_A) <= thresh
 region-mean betas bounded in [0,1]. Exactly valid from BOUNDEDNESS ALONE (Ville's inequality on a
 predictable-lambda test supermartingale) — no Gaussianity; variance-adaptive; finite at zero variance.
 `evidence_map` resolves each apparatus claim's per-sample betas (impure: load_contract via
-_region_group_means) and computes its e-value. See docs/superpowers/archive/specs/2026-06-12-phase-2-1-evalue-fdr-verify-design.md.
+_region_group_means) and computes its e-value.
 """
 from __future__ import annotations
 

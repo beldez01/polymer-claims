@@ -2,7 +2,7 @@
 
 Umbrella-side, deterministic, stdlib-only. Pure builder (`build_attestation_bundle`) takes the
 resolved contract index + optional adapter registry as injected params; `resolve_contract_index`
-is the only IO. Design: docs/superpowers/specs/2026-06-21-standards-skin-attestation-design.md
+is the only IO. Design:
 """
 from __future__ import annotations
 

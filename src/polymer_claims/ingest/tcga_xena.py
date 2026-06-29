@@ -2,8 +2,7 @@
 methylation450 matrix + cBioPortal laml_tcga_pub genotyping into the contract format load_contract
 reads. Byte-faithful port of data/tcga_laml/build_contract_xena.py (absolute paths removed;
 idh_call_source + the count-band/controls passed in, not read from SOURCE.txt). The IDH count-band
-self-check is parameterized so a tiny synthetic builder test need not manufacture 20+ IDH-mut cases.
-See docs/superpowers/specs/2026-06-25-h01b-real-kernel-parity-design.md §3, §4.1."""
+self-check is parameterized so a tiny synthetic builder test need not manufacture 20+ IDH-mut cases."""
 from __future__ import annotations
 
 import gzip

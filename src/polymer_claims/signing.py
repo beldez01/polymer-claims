@@ -1,8 +1,7 @@
 """Local ed25519 DSSE-PAE signing for Polymer attestation/certificate envelopes.
 
 `pae` is pure stdlib. Everything cryptographic goes through `_require_crypto()` so the base install
-stays crypto-free — `cryptography` lives only in the [sign] extra. See
-docs/superpowers/specs/2026-06-23-dsse-signing-design.md.
+stays crypto-free — `cryptography` lives only in the [sign] extra.
 """
 from __future__ import annotations
 

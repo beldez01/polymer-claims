@@ -3,7 +3,6 @@
 Merkle math and `canonical_entry_bytes` are pure stdlib (no crypto). The checkpoint signing/verify
 and the local log reuse `signing._require_crypto()` so the base install stays crypto-free. v1 is a
 Merkle *inclusion* log (no consistency proofs -> no verified append-only-ness); see
-docs/superpowers/specs/2026-06-25-transparency-log-design.md.
 """
 from __future__ import annotations
 

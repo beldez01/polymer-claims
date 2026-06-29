@@ -3,7 +3,7 @@
 restore_consistency runs the newcomer-yields AGM contest. Phase 2.2: a LICENSED survivor grounded-OUT
 this cycle is de-licensed (REJECTED) and its e-LOND discovery is refunded (tombstoned), as are any
 AGM-removed claims' discoveries — so defeat and FDR are one mechanism (the ledger advance/add lives in
-VERIFY; INTEGRATE does the retract). Spec docs/superpowers/archive/specs/2026-06-12-phase-2-2-defeat-evalue-refund-design.md.
+VERIFY; INTEGRATE does the retract).
 """
 from __future__ import annotations
 

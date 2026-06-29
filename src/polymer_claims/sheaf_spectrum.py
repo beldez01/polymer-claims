@@ -3,8 +3,7 @@
 Computes the corpus inconsistency energy (Robinson consistency radius), the equivalence/defeat
 energy split, dim H⁰, the spectral gap λ₂, per-claim tension, and (Task 5) localized H¹
 frustration obstructions. NOT re-exported from polymer_claims.__init__ — base import stays
-numpy-free; import lazily. Behind the [embed] extra. Design:
-docs/superpowers/specs/2026-06-21-sheaf-consistency-gauge-design.md.
+numpy-free; import lazily. Behind the [embed] extra.
 """
 from __future__ import annotations
 

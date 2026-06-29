@@ -3,7 +3,7 @@
 > **Date:** 2026-06-18 · **Status:** approved, pre-implementation
 > **Scope:** local-only earned run (gitignored ingestion + run script), no `src/` changes
 > **Predecessors:** `2026-06-18-idh-source-swap-design.md` (region-Δβ @2, e₁=5.672 PENDING),
-> `archive/specs/2026-06-14-2e-tiered-independence-design.md` (the REPLICATED machinery)
+> the §2E tiered-independence design (the REPLICATED machinery — in git history)
 > **Roadmap:** autonomous-hypothesis-loop Phase C · north-star arc 1 (§2E) · linchpin C2 (biomarker/REPLICATED tier)
 
 ## 1. Goal & scope
