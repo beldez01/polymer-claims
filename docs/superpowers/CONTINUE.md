@@ -12,7 +12,54 @@
 
 ---
 
-## Current state (2026-06-29) — authoritative snapshot
+## Current state (2026-07-01) — authoritative snapshot
+
+> Session 2026-06-30 → 07-01. Paused for compute. Servers stopped; scratch bigWigs removed.
+
+**Merged to `main`** (import + viewer layer):
+- **Foreign-claim ingestion route** — `ingest-formal-claims` CLI + `src/polymer_claims/formal_claim_import.py`
+  (`--sheaf-active` mode). Imports external formal-claim-IR corpora as **WITNESSED** (conjectured/pending,
+  **never licensed** — they haven't passed our gate). Importer script `scripts/import_formal_claim_ir.py`.
+- **47-claim PolymerGenomics reference universe** — `data/demo/polymergenomics_universe.json`
+  (+ `…_sheaf.json`). It's the viewer's default bundle (`viewer/scripts/make_polymergenomics_timeline.py`).
+- **Viewer aesthetics** reconciled to the metrology system: node scale (`viewer/src/lib/ring.ts`
+  BASE_RADIUS 0.07) + origin-centered ±X/Y/Z axes (`ReferenceFrame.tsx`).
+
+**On branch `feat/phase1-license-loop` — 2 commits, NOT yet merged:**
+- **Phase 1 (`c4fe813`)** — proved the licensing loop. `verify-kernel --real` → **LICENSED @ REPRODUCED**
+  on real TCGA-LAML (on-disk Xena matrix, no download). A licensed n-DMP node is injected into the
+  universe bundle via `viewer/scripts/make_universe_timeline.py`.
+- **Phase 2 (`b8fbb1f`)** — licensed a **migrated** claim on real data.
+  `hla_t_naive_promoter_methylation_bimodal` promoted WITNESSED→LICENSED via the **mean_diff air-gap**
+  (StatsPure vs StatsStdlib) over real **BLUEPRINT WGBS** (`datasets/hla_a_promoter_meth.csv`,
+  Δβ≈0.59 ≈ the claim's stated 0.51). Factory `exec_adapters.hla_promoter_meth_claim()`,
+  test `tests/test_hla_promoter_license.py`. Universe bundle now shows **2 blue licensed nodes**.
+
+### NEXT — where to proceed
+1. **Merge** `feat/phase1-license-loop` → `main` (Phase 1 + 2). Full suite was green before these
+   additive changes; touched-area tests pass. `git checkout main && git merge --ff-only feat/phase1-license-loop`.
+2. **Generalize licensing:** more **mean_diff** migrated claims (bind real data→CSV, set threshold,
+   reuse the `hla_promoter_meth_claim` pattern). Then the frontier — **correlation** claims
+   (`spearman_rho`, a large fraction of the 47, e.g. `hla_a_dg37_vs_tpm`): needs TWO independent
+   correlation adapters + a `CORRELATION_CELL` + a generation adapter (none exist — scope first).
+3. **Optional conceptual thread:** a first-class `WITNESSED` status (currently: `--sheaf-active`
+   pending + the discipline written in `docs/superpowers/foundations/compute-boundary.md`).
+4. **Uncommitted design docs** (untracked — decide whether to commit): `foundations/compute-boundary.md`
+   (the notary / verification-ladder / Science-Claw / WITNESSED spine of this session), plus
+   `EXPLAINER.md`, `foundations/residualism.md`, and the `docs/`+`specs/` files in `git status`.
+
+### Environment notes for resuming
+- **pyBigWig** was installed into `.venv` (only to extract HLA betas; the committed licensing path is
+  pyBigWig-free — reads the CSV).
+- Real **TCGA-LAML Xena matrix**: `/Users/zbb2/Desktop/Site Projects/Hack/data/tcga_laml/TCGA-LAML.methylation450.tsv.gz`
+  → `verify-kernel --real --xena <that> --cbioportal data/tcga_laml/cbioportal` (no `--fetch`).
+- Regenerate the HLA CSV per `src/polymer_claims/datasets/hla_a_promoter_meth.SOURCE.md`.
+- View the universe: `polymer-claims serve --seed-corpus data/demo/polymergenomics_universe.json --layout spectral`
+  + `cd viewer && npm run dev`; or just `npm run dev` (default bundle already shows the 48-node universe).
+
+---
+
+## Current state (2026-06-29) — historical (superseded by 2026-07-01 above)
 
 > **This is the single current-state summary.** The dated blocks further down are **historical**
 > (kept for build detail); when they disagree with this section, *this* section wins. Full shipped
