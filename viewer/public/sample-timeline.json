@@ -335,10 +335,17 @@
           },
           {
             "id": "hla_t_naive_promoter_methylation_bimodal",
-            "status": "conjectured",
+            "status": "licensed",
             "pattern_id": "adjusted_effect",
             "subject_kind": null,
-            "strength": null,
+            "strength": [
+              0.6,
+              0.6,
+              0.6,
+              0.7,
+              0.6,
+              0.5
+            ],
             "is_representation_revision": false,
             "fdr_tested": false,
             "fdr_discovery": false,
@@ -346,7 +353,7 @@
             "fdr_index": null,
             "fdr_e_value": null,
             "fdr_alpha_allocated": null,
-            "independence_tier": null,
+            "independence_tier": "reproduced",
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
@@ -1510,9 +1517,9 @@
       "stats": {
         "cycle_index": 0,
         "n_nodes": 48,
-        "n_licensed": 1,
+        "n_licensed": 2,
         "n_pending": 0,
-        "n_conjectured": 43,
+        "n_conjectured": 42,
         "n_rejected": 4,
         "n_edges": 54,
         "n_effective_edges": 54,

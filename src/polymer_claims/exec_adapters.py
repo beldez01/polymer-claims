@@ -160,6 +160,26 @@ def mean_diff_claim(
     )
 
 
+def hla_promoter_meth_claim(
+    claim_id: str = "hla_t_naive_promoter_methylation_bimodal",
+    *,
+    threshold: float = 0.3,
+) -> Claim:
+    """Phase 2: the migrated HLA claim re-expressed as an executable two-group mean difference over
+    REAL BLUEPRINT WGBS (datasets/hla_a_promoter_meth.csv). Compares HLA-A 5'UTR/promoter mean
+    methylation in CD4-T vs monocytes; licenses when the cell-type Δβ clears `threshold` (the real
+    Δβ ≈ 0.59, matching the original claim's ~0.51). A rationale is supplied so the claim carries the
+    provenance the gate requires."""
+    return mean_diff_claim(
+        claim_id,
+        value_col="beta", group_col="cell_type", group_a="cd4_t", group_b="monocyte",
+        comparator=Comparator.GT, threshold=threshold, ref="hla_a_promoter_meth",
+        title="HLA-A 5'UTR/promoter methylation is cell-type-specific: hypermethylated in CD4-T vs open in monocytes",
+        ontology_term="hla-a-promoter-methylation",
+        rationale="cell-type-specific HLA-A promoter methylation, monocyte vs CD4-T (BLUEPRINT WGBS)",
+    )
+
+
 def independent_registry() -> AdapterRegistry:
     """Credentials asserting the two adapters are genuinely independent (distinct owners +
     impl hashes), so the #5 gate licenses on their agreement."""

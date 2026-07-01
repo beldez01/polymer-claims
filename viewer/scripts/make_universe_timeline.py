@@ -25,6 +25,7 @@ from polymer_protocol import (
     TopologyTimeline,
     export_topology,
     frame_stats,
+    run_cycle,
 )
 
 from polymer_claims._ndmp_gate import run_ndmp_gate
@@ -51,12 +52,42 @@ def _licensed_ndmp_claim():
     return g["licensed_claim"]
 
 
+def _licensed_hla_claim():
+    """Phase 2: license the migrated HLA claim on real BLUEPRINT WGBS (datasets/hla_a_promoter_meth.csv)
+    via the mean_diff air-gap, and return the LICENSED Claim (same id as the imported one, so it
+    replaces the conjectured node in place)."""
+    from polymer_grammar import FDRLedger, MaterializationContext
+
+    from polymer_claims.exec_adapters import (
+        StatsPureAdapter,
+        StatsStdlibAdapter,
+        apparatus_oracle_registry,
+        hla_promoter_meth_claim,
+        independent_registry,
+    )
+
+    ctx = MaterializationContext(id="M1", api_version="v1", data_version="blueprint_wgbs@2016")
+    c = hla_promoter_meth_claim()
+    result = run_cycle(
+        Corpus(claims=(c,), fdr_ledger=FDRLedger(target_fdr=0.05)),
+        (StatsPureAdapter(), StatsStdlibAdapter()), ctx,
+        adapter_registry=independent_registry(), oracles=apparatus_oracle_registry(),
+    )
+    out = next(x for x in result.corpus.claims if x.id == c.id)
+    if out.status.value != "licensed":
+        raise SystemExit(f"HLA claim did not license: status={out.status.value!r}")
+    return out
+
+
 def main() -> None:
     ndmp = _licensed_ndmp_claim()
+    hla = _licensed_hla_claim()
     uni = load_corpus(str(_SEED))
 
+    # promote the migrated HLA claim in place (conjectured -> licensed), then add the n-DMP node.
+    promoted = tuple(hla if c.id == hla.id else c for c in uni.claims)
     combined = Corpus(
-        claims=(*uni.claims, ndmp),
+        claims=(*promoted, ndmp),
         defeat_edges=uni.defeat_edges,
         equivalences=uni.equivalences,
         fdr_ledger=uni.fdr_ledger,
