@@ -37,9 +37,12 @@ def main() -> None:
     ap.add_argument("--out", required=True, help="output Corpus JSON path")
     ap.add_argument("--validate", action="store_true",
                     help="validate the result against the Corpus model before writing")
+    ap.add_argument("--sheaf-active", action="store_true",
+                    help="emit a sheaf-active corpus (pending + dimensionless magnitude leaves + "
+                         "sheaf-eligible depends_on edges) so the consistency gauge engages")
     args = ap.parse_args()
 
-    corpus = build_corpus_dict(args.source)
+    corpus = build_corpus_dict(args.source, sheaf_active=args.sheaf_active)
     text = json.dumps(corpus, indent=1)
 
     if args.validate:

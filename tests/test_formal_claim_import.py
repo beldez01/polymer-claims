@@ -68,3 +68,43 @@ def test_cli_ingest_formal_claims_writes_loadable_corpus(tmp_path):
     assert rc == 0
     corpus = load_corpus(str(out))
     assert len(corpus.claims) == 2
+
+
+def test_sheaf_active_promotes_to_pending_with_dimensionless_magnitude_leaves(tmp_path):
+    d = tmp_path / "claims"
+    d.mkdir()
+    _write_claim(d, "effect", outcome="positive", value=-0.71)
+    _write_claim(d, "falsified", outcome="negative", value=0.1)
+
+    corpus = import_formal_claim_ir([d], sheaf_active=True)
+    by = {c.id: c for c in corpus.claims}
+
+    # still never licensed — pending is the weakest sheaf-eligible standing.
+    assert all(c.status != Status.LICENSED for c in corpus.claims)
+    assert by["effect"].status == Status.PENDING
+    assert by["falsified"].status == Status.REJECTED  # negatives stay rejected
+
+    leaf = by["effect"].leaves[0]
+    assert leaf.value == 0.71            # magnitude, not the signed -0.71
+    assert leaf.dimension is not None    # dimensionless signature, not None (so it can wire)
+
+
+def test_sheaf_active_makes_the_gauge_engage(tmp_path):
+    from polymer_protocol import extract_sheaf
+
+    d = tmp_path / "claims"
+    d.mkdir()
+    _write_claim(d, "base", outcome="positive", value=0.7)
+    _write_claim(d, "synth", outcome="positive", value=0.71, depends_on=["base"])
+
+    active = import_formal_claim_ir([d], sheaf_active=True)
+    default = import_formal_claim_ir([d])
+
+    s_active = extract_sheaf(active)     # DEFAULT filter {licensed, pending}
+    s_default = extract_sheaf(default)
+
+    # sheaf-active: pending + dimensionless + genuine depends_on edge -> the gauge sees structure.
+    assert len(s_active.vertices) >= 2
+    assert len(s_active.edges) >= 1
+    # default import: conjectured -> filtered out entirely.
+    assert len(s_default.vertices) == 0

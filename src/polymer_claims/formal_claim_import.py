@@ -50,15 +50,41 @@ def _group_label(source_dir: str) -> str:
     return os.path.basename(os.path.dirname(norm)) if base == "claims" else base
 
 
-def build_corpus_dict(sources: Iterable[str | os.PathLike]) -> dict:
-    """Transform formal-claim-IR JSON directories into a Corpus-shaped dict (unvalidated)."""
+def build_corpus_dict(sources: Iterable[str | os.PathLike], *, sheaf_active: bool = False) -> dict:
+    """Transform formal-claim-IR JSON directories into a Corpus-shaped dict (unvalidated).
+
+    sheaf_active=False (default): the honest un-laundered WITNESSED view — non-negatives are
+    ``conjectured``, leaves keep their signed value and ``dimension=None``, and all equivalence
+    edges are ``structural`` (so nothing enters the sheaf gauge).
+
+    sheaf_active=True: make the universe project in the sheaf gauge, honestly:
+      * leaf value -> abs(value); dimension -> dimensionless {exponents: []} (commensurable);
+      * non-negatives -> ``pending`` (untested) so they clear the {licensed, pending} sheaf filter
+        (negatives stay ``rejected``; nothing is ever ``licensed``);
+      * genuine ``depends_on`` edges -> ``pending`` (feed layout AND sheaf); the thematic same-topic
+        scaffold stays ``structural`` (feeds layout only — the sheaf never sees it, so it cannot
+        fabricate tension).
+    """
+    sources = [os.fspath(s) for s in sources]
     claims: list[dict] = []
     equivalences: list[dict] = []
     groups: dict[str, list[str]] = {}
     idset: set[str] = set()
 
+    # sheaf-active gates a depends_on edge into the sheaf ONLY when both claims share the same
+    # headline quantity — so the gauge never equates non-comparable values (e.g. an AUROC with a
+    # raw count). Pre-scan the headline formula per claim id to decide.
+    formula_by_id: dict[str, str] = {}
+    if sheaf_active:
+        for src in sources:
+            for f in sorted(glob.glob(os.path.join(src, "*.json"))):
+                if f.endswith(".evaluation.json"):
+                    continue
+                dd = json.load(open(f))
+                _, sn = _headline_value(dd.get("statistics") or [])
+                formula_by_id[os.path.basename(f)[:-5]] = f"migrated::{sn}"
+
     for src in sources:
-        src = os.fspath(src)
         label = _group_label(src)
         for f in sorted(glob.glob(os.path.join(src, "*.json"))):
             if f.endswith(".evaluation.json"):
@@ -77,19 +103,29 @@ def build_corpus_dict(sources: Iterable[str | os.PathLike]) -> dict:
             val, statname = _headline_value(d.get("statistics") or [])
             is_neg = (outcome == "negative") or (verdict == "REJECTED")
 
+            if is_neg:
+                status, pending_reason, rejection_reason = "rejected", None, "refuted"
+            elif sheaf_active:
+                status, pending_reason, rejection_reason = "pending", "untested", None
+            else:
+                status, pending_reason, rejection_reason = "conjectured", None, None
+
+            leaf_value = abs(float(val)) if sheaf_active else float(val)
+            leaf_dimension = {"exponents": []} if sheaf_active else None
+
             claims.append({
                 "schema_version": "v1.3",
                 "id": stem,
                 "title": title[:200],
                 "pattern": dict(_ADJUSTED_EFFECT),
                 "leaves": [{
-                    "kind": "quantity", "value": round(float(val), 6), "unit": None,
+                    "kind": "quantity", "value": round(leaf_value, 6), "unit": None,
                     "uncertainty": None, "measurement_basis": "derived",
-                    "formula": f"migrated::{statname}", "dimension": None,
+                    "formula": f"migrated::{statname}", "dimension": leaf_dimension,
                 }],
-                "status": "rejected" if is_neg else "conjectured",
-                "pending_reason": None,
-                "rejection_reason": "refuted" if is_neg else None,
+                "status": status,
+                "pending_reason": pending_reason,
+                "rejection_reason": rejection_reason,
                 "strength": None, "conclusion": None, "licensing": None, "roles": None,
                 "subject": None, "provenance": None, "governance": None,
                 "evaluation_plan": None, "representation_revision": None,
@@ -97,10 +133,19 @@ def build_corpus_dict(sources: Iterable[str | os.PathLike]) -> dict:
             idset.add(stem)
             groups.setdefault(label, []).append(stem)
 
+            # genuine depends_on -> a layout edge; sheaf-eligible (pending) ONLY when the two claims
+            # share the same headline quantity (else it would equate non-comparable values).
             for dep in (d.get("depends_on") or []):
+                same_q = (
+                    sheaf_active
+                    and formula_by_id.get(stem) is not None
+                    and formula_by_id.get(stem) == formula_by_id.get(dep)
+                )
                 equivalences.append({
                     "id": f"eq_dep_{stem[:10]}_{dep[:10]}", "left": stem, "right": dep,
-                    "severity": 0.7, "status": "structural", "pending_reason": None,
+                    "severity": 0.7,
+                    "status": "pending" if same_q else "structural",
+                    "pending_reason": "untested" if same_q else None,
                     "note": "migrated depends_on",
                 })
 
@@ -128,6 +173,8 @@ def build_corpus_dict(sources: Iterable[str | os.PathLike]) -> dict:
     }
 
 
-def import_formal_claim_ir(sources: Iterable[str | os.PathLike]) -> Corpus:
+def import_formal_claim_ir(
+    sources: Iterable[str | os.PathLike], *, sheaf_active: bool = False
+) -> Corpus:
     """Import one or more formal-claim-IR `claims/` directories into a validated `Corpus`."""
-    return Corpus.model_validate(build_corpus_dict(sources))
+    return Corpus.model_validate(build_corpus_dict(sources, sheaf_active=sheaf_active))

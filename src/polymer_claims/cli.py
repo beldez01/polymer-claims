@@ -315,7 +315,7 @@ def _cmd_ingest_formal_claims(args: argparse.Namespace) -> int:
     from .formal_claim_import import import_formal_claim_ir
 
     try:
-        corpus = import_formal_claim_ir(args.source)
+        corpus = import_formal_claim_ir(args.source, sheaf_active=args.sheaf_active)
     except (ValueError, OSError) as exc:
         print(f"ingest-formal-claims failed: {exc}", file=sys.stderr)
         return 1
@@ -1000,6 +1000,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ifc.add_argument("--source", action="append", required=True, metavar="DIR",
                        help="a formal-claim-IR claims/ directory (repeatable)")
     p_ifc.add_argument("--out", help="write the Corpus here (default: stdout)")
+    p_ifc.add_argument("--sheaf-active", action="store_true",
+                       help="promote to pending + dimensionless magnitude leaves + sheaf-eligible "
+                            "depends_on edges so the consistency gauge engages (still never licensed)")
     p_ifc.set_defaults(func=_cmd_ingest_formal_claims)
 
     p_cert = sub.add_parser("certify", help="emit a single-claim certificate (standing + calibrated q)")
