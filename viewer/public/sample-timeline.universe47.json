@@ -378,35 +378,6 @@
             ]
           },
           {
-            "id": "kernel-ndmp-licensed",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": [
-              0.6,
-              0.6,
-              0.6,
-              0.7,
-              0.6,
-              0.5
-            ],
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": "reproduced",
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              -0.55981,
-              0.489939,
-              -0.539391
-            ]
-          },
-          {
             "id": "ltr_fraction_expression_negative_gc_independent",
             "status": "conjectured",
             "pattern_id": "adjusted_effect",
@@ -423,7 +394,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.878727,
+              -0.232384,
               0.241,
               -0.877102
             ]
@@ -467,9 +438,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.604214,
-              -0.499673,
-              0.544671
+              0.506897,
+              0.611438,
+              -0.56644
             ]
           },
           {
@@ -489,7 +460,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.895719,
+              -0.215393,
               -0.869825,
               0.215393
             ]
@@ -511,7 +482,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              1.0,
+              -0.111111,
               -0.869825,
               0.371461
             ]
@@ -533,7 +504,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.895719,
+              -0.215393,
               -0.555556,
               0.895719
             ]
@@ -555,7 +526,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.73965,
+              -0.371461,
               -0.241286,
               1.0
             ]
@@ -577,7 +548,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.555556,
+              -0.555556,
               -0.111111,
               0.555556
             ]
@@ -599,7 +570,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.371461,
+              -0.73965,
               -0.241286,
               0.111111
             ]
@@ -621,7 +592,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.215393,
+              -0.895719,
               -0.555556,
               0.215393
             ]
@@ -643,7 +614,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.111111,
+              -1.0,
               -0.869825,
               0.73965
             ]
@@ -665,7 +636,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.215393,
+              -0.895719,
               -0.869825,
               0.895719
             ]
@@ -709,7 +680,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              1.0,
+              -0.111111,
               0.171896,
               -0.859519
             ]
@@ -753,7 +724,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.962927,
+              -0.148184,
               0.338632,
               -0.507185
             ]
@@ -775,7 +746,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.903413,
+              -0.207698,
               0.565045,
               -0.186926
             ]
@@ -797,7 +768,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.824735,
+              -0.286376,
               0.788847,
               -0.111111
             ]
@@ -819,7 +790,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.731229,
+              -0.379882,
               0.948469,
               -0.330014
             ]
@@ -841,7 +812,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.628045,
+              -0.483067,
               1.0,
               -0.698477
             ]
@@ -863,7 +834,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.520867,
+              -0.590244,
               0.929262,
               -0.972167
             ]
@@ -885,7 +856,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.415601,
+              -0.695511,
               0.755717,
               -0.969595
             ]
@@ -907,7 +878,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.264665,
+              -0.846447,
               0.520712,
               -0.723237
             ]
@@ -929,7 +900,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.216942,
+              -0.894169,
               0.387906,
               -0.470137
             ]
@@ -951,7 +922,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.26296,
+              -0.848151,
               0.366721,
               -0.348529
             ]
@@ -973,7 +944,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.26296,
+              -0.848151,
               0.366721,
               -0.348529
             ]
@@ -995,7 +966,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.216942,
+              -0.894169,
               0.387906,
               -0.470137
             ]
@@ -1469,7 +1440,6 @@
               "hla_c_mir148a_canonical_absence",
               "hla_t_naive_promoter_methylation_bimodal",
               "human_ecoli_effect_ratio_consistent_with_ne_scaling",
-              "kernel-ndmp-licensed",
               "ltr_fraction_expression_negative_gc_independent",
               "nc_fraction_of_hla_variation",
               "rc05_p1_elm_beats_elastic_net_age_FALSIFIED",
@@ -1509,8 +1479,8 @@
       },
       "stats": {
         "cycle_index": 0,
-        "n_nodes": 48,
-        "n_licensed": 1,
+        "n_nodes": 47,
+        "n_licensed": 0,
         "n_pending": 0,
         "n_conjectured": 43,
         "n_rejected": 4,
@@ -1519,7 +1489,7 @@
         "n_provisional_edges": 0,
         "n_frontier": 0,
         "n_added": 0,
-        "n_newly_licensed": 1
+        "n_newly_licensed": 0
       }
     }
   ],

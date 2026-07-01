@@ -58,4 +58,5 @@ def run_ndmp_gate(ref: str, claim_id: str, *, alpha: float = 0.05) -> dict:
         "status_enum": c.status, "tier_enum": tier,
         "status": c.status.value, "independence_tier": tier.value if tier is not None else None,
         "profile_hash": profile_hash, "semantic_run_id": semantic_run_id,
+        "licensed_claim": c,  # the Claim object itself, so callers can surface it (e.g. the viewer)
     }
