@@ -311,6 +311,23 @@ def _cmd_ingest_attested(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_ingest_formal_claims(args: argparse.Namespace) -> int:
+    from .formal_claim_import import import_formal_claim_ir
+
+    try:
+        corpus = import_formal_claim_ir(args.source)
+    except (ValueError, OSError) as exc:
+        print(f"ingest-formal-claims failed: {exc}", file=sys.stderr)
+        return 1
+    _write_or_print(dump_corpus(corpus), args.out)
+    print(
+        f"imported {len(corpus.claims)} claim(s) from {len(args.source)} source(s) "
+        f"(none licensed — WITNESSED discipline)",
+        file=sys.stderr,
+    )
+    return 0
+
+
 def _cmd_verify_kernel(args: argparse.Namespace) -> int:
     if getattr(args, "real", False):
         return _verify_kernel_real(args)
@@ -975,6 +992,15 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ing.add_argument("--calibration", required=True, help="path to the calibration JSONL ledger")
     p_ing.add_argument("--out", help="write updated corpus here (default: stdout)")
     p_ing.set_defaults(func=_cmd_ingest_attested)
+
+    p_ifc = sub.add_parser(
+        "ingest-formal-claims",
+        help="import a formal-claim-IR corpus (foreign claims) into a polymer-claims Corpus (WITNESSED)",
+    )
+    p_ifc.add_argument("--source", action="append", required=True, metavar="DIR",
+                       help="a formal-claim-IR claims/ directory (repeatable)")
+    p_ifc.add_argument("--out", help="write the Corpus here (default: stdout)")
+    p_ifc.set_defaults(func=_cmd_ingest_formal_claims)
 
     p_cert = sub.add_parser("certify", help="emit a single-claim certificate (standing + calibrated q)")
     p_cert.add_argument("claim_id")
