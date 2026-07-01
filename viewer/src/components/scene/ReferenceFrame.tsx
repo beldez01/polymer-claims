@@ -2,54 +2,32 @@
 
 import { Line, Html } from '@react-three/drei';
 import { COLOR, FONT_FAMILY_MONO } from '@/config/theme';
-import type { Extent, Vec3 } from '@/lib/topology';
+import type { Extent } from '@/lib/topology';
 
-// Round a span into a "nice" tick step (1, 2, 5 × 10^k) targeting ~5 ticks.
-function niceStep(span: number, target = 5): number {
-  if (span <= 0) return 1;
-  const raw = span / target;
-  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
-  const norm = raw / mag;
-  let step: number;
-  if (norm < 1.5) step = 1;
-  else if (norm < 3) step = 2;
-  else if (norm < 7) step = 5;
-  else step = 10;
-  return step * mag;
-}
-
-function ticksFor(min: number, max: number): number[] {
-  const step = niceStep(max - min);
-  const start = Math.ceil(min / step) * step;
-  const out: number[] = [];
-  for (let v = start; v <= max + 1e-9; v += step) {
-    out.push(Math.abs(v) < 1e-9 ? 0 : v);
-  }
-  return out;
-}
-
-function fmt(v: number): string {
-  return v.toFixed(1);
-}
-
-const HAIRLINE = COLOR.border.subtle; // #D4D4D8
-const AXIS = COLOR.border.strong; // #A1A1AA
+const AXIS = COLOR.border.strong; // #A1A1AA — hairline axis
 const LABEL = COLOR.text.tertiary; // #52525B
 
-function tickLabelStyle(): React.CSSProperties {
+function axisLabelStyle(): React.CSSProperties {
   return {
     fontFamily: FONT_FAMILY_MONO,
-    fontSize: 9,
+    fontSize: 11,
     lineHeight: 1,
+    fontWeight: 600,
+    letterSpacing: '0.08em',
     color: LABEL,
-    fontVariantNumeric: 'tabular-nums',
-    whiteSpace: 'nowrap',
     userSelect: 'none',
     pointerEvents: 'none',
     transform: 'translate(-50%, -50%)',
   };
 }
 
+/**
+ * Reference frame: three perpendicular X/Y/Z axes through the ORIGIN, projected symmetrically far
+ * in both directions. The signed-Laplacian eigenmap coordinates are mean-centered (each eigenvector
+ * sums to zero), so (0,0,0) is the true centroid — the axes cross there, spanning ± equally. Long
+ * hairlines read as effectively infinite within any normal view; letters sit at the positive ends.
+ * No bounding cube, no numeric ticks (eigenvector components aren't meaningful magnitudes).
+ */
 export default function ReferenceFrame({
   extent,
   layoutId,
@@ -57,89 +35,43 @@ export default function ReferenceFrame({
   extent: Extent;
   layoutId: string;
 }) {
-  const { min, max } = extent;
-  const [x0, y0, z0] = min;
-  const [x1, y1, z1] = max;
+  const { min, max, size } = extent;
+  const span = Math.max(size[0], size[1], size[2]);
 
-  // ── Wireframe bounding box (12 edges) ─────────────────────────────────────
-  const boxCorners: Vec3[] = [
-    [x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0],
-    [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1],
-  ];
-  const boxEdges: [number, number][] = [
-    [0, 1], [1, 2], [2, 3], [3, 0], // bottom-z face
-    [4, 5], [5, 6], [6, 7], [7, 4], // top-z face
-    [0, 4], [1, 5], [2, 6], [3, 7], // verticals
-  ];
+  const REACH = span * 25;   // effectively-infinite projection in each direction
+  const gap = span * 0.06;   // letter sits just beyond the positive data edge
 
-  // ── Axis lines along the lower-front-left corner of the box ───────────────
-  const xTicks = ticksFor(x0, x1);
-  const yTicks = ticksFor(y0, y1);
-  const zTicks = ticksFor(z0, z1);
-
-  const tickLen = Math.max(extent.size[0], extent.size[1], extent.size[2]) * 0.02;
+  // positive reach of the data per axis (so the letter clears the cloud, not the far tip)
+  const rx = Math.max(Math.abs(min[0]), Math.abs(max[0])) + gap;
+  const ry = Math.max(Math.abs(min[1]), Math.abs(max[1])) + gap;
+  const rz = Math.max(Math.abs(min[2]), Math.abs(max[2])) + gap;
 
   return (
     <group>
-      {/* bounding box — hairline */}
-      {boxEdges.map(([a, b], i) => (
-        <Line
-          key={`box-${i}`}
-          points={[boxCorners[a], boxCorners[b]]}
-          color={HAIRLINE}
-          lineWidth={1}
-          transparent
-          opacity={0.9}
-        />
-      ))}
+      {/* perpendicular X / Y / Z axes through the origin, projected ± symmetrically */}
+      <Line points={[[-REACH, 0, 0], [REACH, 0, 0]]} color={AXIS} lineWidth={1} transparent opacity={0.55} />
+      <Line points={[[0, -REACH, 0], [0, REACH, 0]]} color={AXIS} lineWidth={1} transparent opacity={0.55} />
+      <Line points={[[0, 0, -REACH], [0, 0, REACH]]} color={AXIS} lineWidth={1} transparent opacity={0.55} />
 
-      {/* X axis (along y0, z0) */}
-      <Line points={[[x0, y0, z0], [x1, y0, z0]]} color={AXIS} lineWidth={1} />
-      {xTicks.map((tx) => (
-        <group key={`xt-${tx}`}>
-          <Line
-            points={[[tx, y0, z0], [tx, y0 - tickLen, z0]]}
-            color={AXIS}
-            lineWidth={1}
-          />
-          <Html position={[tx, y0 - tickLen * 3, z0]} center distanceFactor={10}>
-            <span style={tickLabelStyle()} className="mono tabular">{fmt(tx)}</span>
-          </Html>
-        </group>
-      ))}
+      {/* origin marker — small neutral node at the true centroid (0,0,0) */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[span * 0.007, 12, 12]} />
+        <meshBasicMaterial color={AXIS} />
+      </mesh>
 
-      {/* Y axis (along x0, z0) */}
-      <Line points={[[x0, y0, z0], [x0, y1, z0]]} color={AXIS} lineWidth={1} />
-      {yTicks.map((ty) => (
-        <group key={`yt-${ty}`}>
-          <Line
-            points={[[x0, ty, z0], [x0 - tickLen, ty, z0]]}
-            color={AXIS}
-            lineWidth={1}
-          />
-          <Html position={[x0 - tickLen * 3, ty, z0]} center distanceFactor={10}>
-            <span style={tickLabelStyle()} className="mono tabular">{fmt(ty)}</span>
-          </Html>
-        </group>
-      ))}
+      {/* axis letters at the positive ends, just past the data */}
+      <Html position={[rx, 0, 0]} center distanceFactor={10}>
+        <span style={axisLabelStyle()} className="mono">X</span>
+      </Html>
+      <Html position={[0, ry, 0]} center distanceFactor={10}>
+        <span style={axisLabelStyle()} className="mono">Y</span>
+      </Html>
+      <Html position={[0, 0, rz]} center distanceFactor={10}>
+        <span style={axisLabelStyle()} className="mono">Z</span>
+      </Html>
 
-      {/* Z axis (along x0, y0) */}
-      <Line points={[[x0, y0, z0], [x0, y0, z1]]} color={AXIS} lineWidth={1} />
-      {zTicks.map((tz) => (
-        <group key={`zt-${tz}`}>
-          <Line
-            points={[[x0, y0, tz], [x0, y0 - tickLen, tz]]}
-            color={AXIS}
-            lineWidth={1}
-          />
-          <Html position={[x0, y0 - tickLen * 3, tz]} center distanceFactor={10}>
-            <span style={tickLabelStyle()} className="mono tabular">{fmt(tz)}</span>
-          </Html>
-        </group>
-      ))}
-
-      {/* layout_id caption at the frame origin */}
-      <Html position={[x0, y0 - tickLen * 6, z0]} center distanceFactor={10}>
+      {/* layout_id caption below the cloud */}
+      <Html position={[0, min[1] - gap * 2, 0]} center distanceFactor={10}>
         <span
           style={{
             fontFamily: FONT_FAMILY_MONO,
