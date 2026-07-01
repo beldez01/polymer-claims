@@ -4,199 +4,9 @@
       "topology": {
         "nodes": [
           {
-            "id": "A01",
-            "status": "pending",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              3.355536,
-              0.246788,
-              0.182249
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "pending",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              1.762761,
-              2.840824,
-              -1.763812
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "pending",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.425299,
-              2.515507,
-              1.580265
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "pending",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              1.383015,
-              -0.345936,
-              -2.503347
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "pending",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.497068,
-              -3.403806,
-              -0.335692
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "pending",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -1.025245,
-              0.125417,
-              3.482046
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -2.554738,
-              -1.605564,
-              -1.630168
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -2.807991,
-              -0.649017,
-              1.421962
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -2.981242,
-              2.033347,
-              -0.8487
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -1.258462,
-              1.926054,
-              -3.116428
-            ]
-          },
-          {
-            "id": "SRC",
+            "id": "class_ii_intron_divergence_extreme",
             "status": "conjectured",
-            "pattern_id": "dose_response",
+            "pattern_id": "adjusted_effect",
             "subject_kind": null,
             "strength": null,
             "is_representation_revision": false,
@@ -206,3006 +16,1483 @@
             "fdr_index": null,
             "fdr_e_value": null,
             "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
             "position": [
-              0.406634,
-              -2.082516,
-              2.527822
+              -0.20554,
+              -0.86564,
+              -0.742536
+            ]
+          },
+          {
+            "id": "cost_expression_gradient_ecoli_bsubtilis",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              0.472048,
+              -0.111111,
+              -0.83143
+            ]
+          },
+          {
+            "id": "cost_expression_gradient_human",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              0.352384,
+              -0.516272,
+              -0.891401
+            ]
+          },
+          {
+            "id": "cost_expression_survives_full_confounder_control",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              0.351735,
+              -0.944444,
+              -0.754639
+            ]
+          },
+          {
+            "id": "dual_channel_selection_hypothesis",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              0.371862,
+              -0.827721,
+              -0.196834
+            ]
+          },
+          {
+            "id": "eqtl_positive_genes_stronger_biophysics_coupling",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.111111,
+              -0.922094,
+              -0.761887
+            ]
+          },
+          {
+            "id": "histogram_modes_map_to_serological_groups",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.252442,
+              -0.729768,
+              -0.61312
+            ]
+          },
+          {
+            "id": "hla_a_cpg_density_vs_tpm",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.414317,
+              -0.449052,
+              -0.390804
+            ]
+          },
+          {
+            "id": "hla_a_dg37_vs_tpm",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.498672,
+              -0.350498,
+              -0.25525
+            ]
+          },
+          {
+            "id": "hla_a_erv_methylation_shadow_FALSIFIED",
+            "status": "rejected",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.526314,
+              -0.427087,
+              -0.218104
+            ]
+          },
+          {
+            "id": "hla_a_expression_prediction_robust_across_premise_sets",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.538178,
+              -0.456897,
+              -0.111111
+            ]
+          },
+          {
+            "id": "hla_a_ramsuran_pos224",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.680759,
+              -0.67109,
+              -0.240971
+            ]
+          },
+          {
+            "id": "hla_b_bulk_biophysics_null",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.792678,
+              -0.818456,
+              -0.378893
+            ]
+          },
+          {
+            "id": "hla_b_crc_polymorphic_cpg_cluster",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.856163,
+              -0.879508,
+              -0.594445
+            ]
+          },
+          {
+            "id": "hla_c_mir148a_canonical_absence",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.858249,
+              -0.834202,
+              -0.792908
+            ]
+          },
+          {
+            "id": "hla_t_naive_promoter_methylation_bimodal",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.798509,
+              -0.697413,
+              -0.887072
+            ]
+          },
+          {
+            "id": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              0.58858,
+              -0.28057,
+              -0.111111
+            ]
+          },
+          {
+            "id": "ltr_fraction_expression_negative_gc_independent",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.232384,
+              0.241,
+              -0.877102
+            ]
+          },
+          {
+            "id": "nc_fraction_of_hla_variation",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.689145,
+              -0.514051,
+              -0.835559
+            ]
+          },
+          {
+            "id": "rc05_p1_elm_beats_elastic_net_age_FALSIFIED",
+            "status": "rejected",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              0.506897,
+              0.611438,
+              -0.56644
+            ]
+          },
+          {
+            "id": "recomb_a1_partial_correlations_109_signals",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.215393,
+              -0.869825,
+              0.215393
+            ]
+          },
+          {
+            "id": "recomb_a2_co_vs_nco_signflip_curvature",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.111111,
+              -0.869825,
+              0.371461
+            ]
+          },
+          {
+            "id": "recomb_a2_co_vs_nco_signflip_groove_width",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.215393,
+              -0.555556,
+              0.895719
+            ]
+          },
+          {
+            "id": "recomb_a2_co_vs_nco_signflip_wrapping_energy",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.371461,
+              -0.241286,
+              1.0
+            ]
+          },
+          {
+            "id": "recomb_a3_gbgc_age_gradient_deformability",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.555556,
+              -0.111111,
+              0.555556
+            ]
+          },
+          {
+            "id": "recomb_a3_gbgc_age_gradient_gc",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.73965,
+              -0.241286,
+              0.111111
+            ]
+          },
+          {
+            "id": "recomb_a4_translocation_overlap",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.895719,
+              -0.555556,
+              0.215393
+            ]
+          },
+          {
+            "id": "recomb_a6_rf_top_feature_quantization_map",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -1.0,
+              -0.869825,
+              0.73965
+            ]
+          },
+          {
+            "id": "recomb_neg_isochore_rediscovery_falsified",
+            "status": "rejected",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.895719,
+              -0.869825,
+              0.895719
+            ]
+          },
+          {
+            "id": "sbs_thermodynamic_loudness_ranking",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              1.0,
+              -0.611111,
+              -0.510054
+            ]
+          },
+          {
+            "id": "sine_fraction_expression_positive_gc_independent",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.111111,
+              0.171896,
+              -0.859519
+            ]
+          },
+          {
+            "id": "stimulation_amplifies_biophysical_signal",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.551227,
+              -0.256816,
+              -0.704683
+            ]
+          },
+          {
+            "id": "te_cell_deconvolution_critique_withdrawn",
+            "status": "rejected",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.148184,
+              0.338632,
+              -0.507185
+            ]
+          },
+          {
+            "id": "te_corsiv_or_identity_mode",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.207698,
+              0.565045,
+              -0.186926
+            ]
+          },
+          {
+            "id": "te_density_mutation_null_partial_gc",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.286376,
+              0.788847,
+              -0.111111
+            ]
+          },
+          {
+            "id": "te_methylation_class_specific_at_boundary",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.379882,
+              0.948469,
+              -0.330014
+            ]
+          },
+          {
+            "id": "te_oncoexaptation_or_active_mode_gc_matched",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.483067,
+              1.0,
+              -0.698477
+            ]
+          },
+          {
+            "id": "te_resolution_gain_curvature_h3k9me3_147bp",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.590244,
+              0.929262,
+              -0.972167
+            ]
+          },
+          {
+            "id": "te_retro_age_or_identity_mode",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.695511,
+              0.755717,
+              -0.969595
+            ]
+          },
+          {
+            "id": "te_silencing_biophysics_overall_auroc",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.846447,
+              0.520712,
+              -0.723237
+            ]
+          },
+          {
+            "id": "te_silencing_h3k9me3_negative_control",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.894169,
+              0.387906,
+              -0.470137
+            ]
+          },
+          {
+            "id": "te_silencing_top_feature_stacking_dg37",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.848151,
+              0.366721,
+              -0.348529
+            ]
+          },
+          {
+            "id": "te_silencing_within_age_bivalent",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.848151,
+              0.366721,
+              -0.348529
+            ]
+          },
+          {
+            "id": "te_surveillance_dichotomy_composition_vs_identity",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.894169,
+              0.387906,
+              -0.470137
+            ]
+          },
+          {
+            "id": "titv_2to1_fixation_bias",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              0.991821,
+              -0.71269,
+              -0.786734
+            ]
+          },
+          {
+            "id": "titv_balancing_selection_signature",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.551068,
+              -0.111111,
+              -0.933518
+            ]
+          },
+          {
+            "id": "within_protein_biophysical_variance_invisible_to_matching",
+            "status": "conjectured",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": null,
+            "strength": null,
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": null,
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.552021,
+              -0.179565,
+              -0.898071
             ]
           }
         ],
-        "edges": [],
+        "edges": [
+          {
+            "source": "class_ii_intron_divergence_extreme",
+            "target": "eqtl_positive_genes_stronger_biophysics_coupling",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "cost_expression_gradient_ecoli_bsubtilis",
+            "target": "cost_expression_gradient_human",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "cost_expression_gradient_human",
+            "target": "cost_expression_survives_full_confounder_control",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "cost_expression_survives_full_confounder_control",
+            "target": "cost_expression_gradient_human",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "cost_expression_survives_full_confounder_control",
+            "target": "dual_channel_selection_hypothesis",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "dual_channel_selection_hypothesis",
+            "target": "cost_expression_gradient_human",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "dual_channel_selection_hypothesis",
+            "target": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "eqtl_positive_genes_stronger_biophysics_coupling",
+            "target": "histogram_modes_map_to_serological_groups",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "histogram_modes_map_to_serological_groups",
+            "target": "hla_a_cpg_density_vs_tpm",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_a_cpg_density_vs_tpm",
+            "target": "hla_a_dg37_vs_tpm",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_a_dg37_vs_tpm",
+            "target": "hla_a_erv_methylation_shadow_FALSIFIED",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_a_erv_methylation_shadow_FALSIFIED",
+            "target": "hla_a_expression_prediction_robust_across_premise_sets",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_a_expression_prediction_robust_across_premise_sets",
+            "target": "hla_a_cpg_density_vs_tpm",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_a_expression_prediction_robust_across_premise_sets",
+            "target": "hla_a_dg37_vs_tpm",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_a_expression_prediction_robust_across_premise_sets",
+            "target": "hla_a_ramsuran_pos224",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_a_ramsuran_pos224",
+            "target": "hla_b_bulk_biophysics_null",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_b_bulk_biophysics_null",
+            "target": "hla_b_crc_polymorphic_cpg_cluster",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_b_crc_polymorphic_cpg_cluster",
+            "target": "hla_c_mir148a_canonical_absence",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_c_mir148a_canonical_absence",
+            "target": "hla_t_naive_promoter_methylation_bimodal",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "hla_t_naive_promoter_methylation_bimodal",
+            "target": "nc_fraction_of_hla_variation",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+            "target": "cost_expression_gradient_ecoli_bsubtilis",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+            "target": "cost_expression_gradient_human",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+            "target": "sbs_thermodynamic_loudness_ranking",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "ltr_fraction_expression_negative_gc_independent",
+            "target": "sine_fraction_expression_positive_gc_independent",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "nc_fraction_of_hla_variation",
+            "target": "stimulation_amplifies_biophysical_signal",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "recomb_a1_partial_correlations_109_signals",
+            "target": "recomb_a2_co_vs_nco_signflip_curvature",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "recomb_a2_co_vs_nco_signflip_curvature",
+            "target": "recomb_a2_co_vs_nco_signflip_groove_width",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "recomb_a2_co_vs_nco_signflip_groove_width",
+            "target": "recomb_a2_co_vs_nco_signflip_wrapping_energy",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "recomb_a2_co_vs_nco_signflip_wrapping_energy",
+            "target": "recomb_a3_gbgc_age_gradient_deformability",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "recomb_a3_gbgc_age_gradient_deformability",
+            "target": "recomb_a3_gbgc_age_gradient_gc",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "recomb_a3_gbgc_age_gradient_deformability",
+            "target": "recomb_a3_gbgc_age_gradient_gc",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "recomb_a3_gbgc_age_gradient_gc",
+            "target": "recomb_a4_translocation_overlap",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "recomb_a4_translocation_overlap",
+            "target": "recomb_a6_rf_top_feature_quantization_map",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "recomb_a6_rf_top_feature_quantization_map",
+            "target": "recomb_neg_isochore_rediscovery_falsified",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "sbs_thermodynamic_loudness_ranking",
+            "target": "titv_2to1_fixation_bias",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "sine_fraction_expression_positive_gc_independent",
+            "target": "te_cell_deconvolution_critique_withdrawn",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "stimulation_amplifies_biophysical_signal",
+            "target": "hla_a_cpg_density_vs_tpm",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "stimulation_amplifies_biophysical_signal",
+            "target": "hla_a_dg37_vs_tpm",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "stimulation_amplifies_biophysical_signal",
+            "target": "titv_balancing_selection_signature",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_cell_deconvolution_critique_withdrawn",
+            "target": "te_corsiv_or_identity_mode",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_corsiv_or_identity_mode",
+            "target": "te_density_mutation_null_partial_gc",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_density_mutation_null_partial_gc",
+            "target": "te_methylation_class_specific_at_boundary",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_methylation_class_specific_at_boundary",
+            "target": "te_oncoexaptation_or_active_mode_gc_matched",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_oncoexaptation_or_active_mode_gc_matched",
+            "target": "te_resolution_gain_curvature_h3k9me3_147bp",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_resolution_gain_curvature_h3k9me3_147bp",
+            "target": "te_retro_age_or_identity_mode",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_retro_age_or_identity_mode",
+            "target": "te_silencing_biophysics_overall_auroc",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_silencing_biophysics_overall_auroc",
+            "target": "te_silencing_h3k9me3_negative_control",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_silencing_h3k9me3_negative_control",
+            "target": "te_silencing_top_feature_stacking_dg37",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_silencing_top_feature_stacking_dg37",
+            "target": "te_silencing_within_age_bivalent",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_silencing_within_age_bivalent",
+            "target": "te_surveillance_dichotomy_composition_vs_identity",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_surveillance_dichotomy_composition_vs_identity",
+            "target": "te_silencing_biophysics_overall_auroc",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_surveillance_dichotomy_composition_vs_identity",
+            "target": "te_silencing_h3k9me3_negative_control",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "te_surveillance_dichotomy_composition_vs_identity",
+            "target": "te_silencing_within_age_bivalent",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          },
+          {
+            "source": "titv_balancing_selection_signature",
+            "target": "within_protein_biophysical_variance_invisible_to_matching",
+            "kind": "equivalence",
+            "effective": true,
+            "provisional": false
+          }
+        ],
         "clusters": [
           {
             "id": "pattern:adjusted_effect",
             "label": "pattern:adjusted_effect",
             "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
+              "class_ii_intron_divergence_extreme",
+              "cost_expression_gradient_ecoli_bsubtilis",
+              "cost_expression_gradient_human",
+              "cost_expression_survives_full_confounder_control",
+              "dual_channel_selection_hypothesis",
+              "eqtl_positive_genes_stronger_biophysics_coupling",
+              "histogram_modes_map_to_serological_groups",
+              "hla_a_cpg_density_vs_tpm",
+              "hla_a_dg37_vs_tpm",
+              "hla_a_erv_methylation_shadow_FALSIFIED",
+              "hla_a_expression_prediction_robust_across_premise_sets",
+              "hla_a_ramsuran_pos224",
+              "hla_b_bulk_biophysics_null",
+              "hla_b_crc_polymorphic_cpg_cluster",
+              "hla_c_mir148a_canonical_absence",
+              "hla_t_naive_promoter_methylation_bimodal",
+              "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+              "ltr_fraction_expression_negative_gc_independent",
+              "nc_fraction_of_hla_variation",
+              "rc05_p1_elm_beats_elastic_net_age_FALSIFIED",
+              "recomb_a1_partial_correlations_109_signals",
+              "recomb_a2_co_vs_nco_signflip_curvature",
+              "recomb_a2_co_vs_nco_signflip_groove_width",
+              "recomb_a2_co_vs_nco_signflip_wrapping_energy",
+              "recomb_a3_gbgc_age_gradient_deformability",
+              "recomb_a3_gbgc_age_gradient_gc",
+              "recomb_a4_translocation_overlap",
+              "recomb_a6_rf_top_feature_quantization_map",
+              "recomb_neg_isochore_rediscovery_falsified",
+              "sbs_thermodynamic_loudness_ranking",
+              "sine_fraction_expression_positive_gc_independent",
+              "stimulation_amplifies_biophysical_signal",
+              "te_cell_deconvolution_critique_withdrawn",
+              "te_corsiv_or_identity_mode",
+              "te_density_mutation_null_partial_gc",
+              "te_methylation_class_specific_at_boundary",
+              "te_oncoexaptation_or_active_mode_gc_matched",
+              "te_resolution_gain_curvature_h3k9me3_147bp",
+              "te_retro_age_or_identity_mode",
+              "te_silencing_biophysics_overall_auroc",
+              "te_silencing_h3k9me3_negative_control",
+              "te_silencing_top_feature_stacking_dg37",
+              "te_silencing_within_age_bivalent",
+              "te_surveillance_dichotomy_composition_vs_identity",
+              "titv_2to1_fixation_bias",
+              "titv_balancing_selection_signature",
+              "within_protein_biophysical_variance_invisible_to_matching"
             ]
           }
         ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=sha256",
-        "contract_version": "1.0"
+        "layout_id": "external:spectral-v1",
+        "contract_version": "1.0",
+        "consistency": null
       },
       "stats": {
         "cycle_index": 0,
-        "n_nodes": 11,
+        "n_nodes": 47,
         "n_licensed": 0,
-        "n_pending": 10,
-        "n_conjectured": 1,
-        "n_rejected": 0,
-        "n_edges": 0,
-        "n_effective_edges": 0,
+        "n_pending": 0,
+        "n_conjectured": 43,
+        "n_rejected": 4,
+        "n_edges": 54,
+        "n_effective_edges": 54,
         "n_provisional_edges": 0,
-        "n_frontier": 0,
-        "n_added": 0,
-        "n_newly_licensed": 0
-      }
-    },
-    {
-      "topology": {
-        "nodes": [
-          {
-            "id": "A01",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 1,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.030396355092701333,
-            "position": [
-              3.860317,
-              0.236361,
-              0.25418
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 2,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.015198177546350666,
-            "position": [
-              2.043186,
-              3.216248,
-              -1.965063
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "pending",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.545233,
-              2.916456,
-              1.871612
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "pending",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              1.659075,
-              -0.484563,
-              -2.909073
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "pending",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.613883,
-              -3.897135,
-              -0.391191
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "pending",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -1.112515,
-              0.158845,
-              3.98341
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -2.888256,
-              -1.898981,
-              -1.880615
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -3.238848,
-              -0.786465,
-              1.657596
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -3.393256,
-              2.325607,
-              -0.918748
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -1.392356,
-              2.155464,
-              -3.551793
-            ]
-          },
-          {
-            "id": "SRC",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.295327,
-              -1.754721,
-              2.153307
-            ]
-          },
-          {
-            "id": "gen-rival-26354b7cdf258b57",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.092791,
-              0.253814,
-              -0.057801
-            ]
-          },
-          {
-            "id": "gen-rival-b6b933ae9cee51e5",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.629803,
-              0.100564,
-              -0.048501
-            ]
-          }
-        ],
-        "edges": [
-          {
-            "source": "gen-rival-26354b7cdf258b57",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          },
-          {
-            "source": "gen-rival-b6b933ae9cee51e5",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          }
-        ],
-        "clusters": [
-          {
-            "id": "pattern:adjusted_effect",
-            "label": "pattern:adjusted_effect",
-            "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC",
-              "gen-rival-26354b7cdf258b57",
-              "gen-rival-b6b933ae9cee51e5"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
-            ]
-          }
-        ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=warm",
-        "contract_version": "1.0"
-      },
-      "stats": {
-        "cycle_index": 1,
-        "n_nodes": 13,
-        "n_licensed": 2,
-        "n_pending": 8,
-        "n_conjectured": 3,
-        "n_rejected": 0,
-        "n_edges": 2,
-        "n_effective_edges": 0,
-        "n_provisional_edges": 2,
-        "n_frontier": 0,
-        "n_added": 2,
-        "n_newly_licensed": 2
-      }
-    },
-    {
-      "topology": {
-        "nodes": [
-          {
-            "id": "A01",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 1,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.030396355092701333,
-            "position": [
-              4.366094,
-              0.232612,
-              0.31954
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 2,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.015198177546350666,
-            "position": [
-              2.315051,
-              3.595355,
-              -2.171126
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 3,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.010132118364233778,
-            "position": [
-              0.659757,
-              3.331337,
-              2.145164
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 4,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.007599088773175333,
-            "position": [
-              1.925833,
-              -0.609005,
-              -3.32553
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "pending",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.73075,
-              -4.390482,
-              -0.446419
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "pending",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -1.197599,
-              0.189209,
-              4.485342
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -3.223572,
-              -2.178771,
-              -2.143984
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -3.678977,
-              -0.914138,
-              1.881363
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -3.799245,
-              2.624308,
-              -0.996498
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -1.526504,
-              2.386218,
-              -3.98637
-            ]
-          },
-          {
-            "id": "SRC",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.184118,
-              -1.426938,
-              1.778752
-            ]
-          },
-          {
-            "id": "gen-rival-26354b7cdf258b57",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.019877,
-              -0.084527,
-              0.316777
-            ]
-          },
-          {
-            "id": "gen-rival-b6b933ae9cee51e5",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.480175,
-              -0.214697,
-              0.323415
-            ]
-          }
-        ],
-        "edges": [
-          {
-            "source": "gen-rival-26354b7cdf258b57",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          },
-          {
-            "source": "gen-rival-b6b933ae9cee51e5",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          }
-        ],
-        "clusters": [
-          {
-            "id": "pattern:adjusted_effect",
-            "label": "pattern:adjusted_effect",
-            "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC",
-              "gen-rival-26354b7cdf258b57",
-              "gen-rival-b6b933ae9cee51e5"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
-            ]
-          }
-        ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=warm",
-        "contract_version": "1.0"
-      },
-      "stats": {
-        "cycle_index": 2,
-        "n_nodes": 13,
-        "n_licensed": 4,
-        "n_pending": 6,
-        "n_conjectured": 3,
-        "n_rejected": 0,
-        "n_edges": 2,
-        "n_effective_edges": 0,
-        "n_provisional_edges": 2,
-        "n_frontier": 0,
-        "n_added": 0,
-        "n_newly_licensed": 2
-      }
-    },
-    {
-      "topology": {
-        "nodes": [
-          {
-            "id": "A01",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 1,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.030396355092701333,
-            "position": [
-              4.872282,
-              0.232274,
-              0.381776
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 2,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.015198177546350666,
-            "position": [
-              2.582219,
-              3.976587,
-              -2.37941
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 3,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.010132118364233778,
-            "position": [
-              0.77055,
-              3.753826,
-              2.408451
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 4,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.007599088773175333,
-            "position": [
-              2.187145,
-              -0.726389,
-              -3.74747
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 5,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.006079271018540267,
-            "position": [
-              0.847874,
-              -4.884039,
-              -0.49917
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 6,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.005066059182116889,
-            "position": [
-              -1.279459,
-              0.215286,
-              4.988052
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -3.559369,
-              -2.450756,
-              -2.414834
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -4.1238,
-              -1.036795,
-              2.098582
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -4.201823,
-              2.926841,
-              -1.077141
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -1.660893,
-              2.617155,
-              -4.420775
-            ]
-          },
-          {
-            "id": "SRC",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.073252,
-              -1.099197,
-              1.404059
-            ]
-          },
-          {
-            "id": "gen-rival-26354b7cdf258b57",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.063358,
-              -0.420391,
-              0.691289
-            ]
-          },
-          {
-            "id": "gen-rival-b6b933ae9cee51e5",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.338889,
-              -0.533129,
-              0.695777
-            ]
-          }
-        ],
-        "edges": [
-          {
-            "source": "gen-rival-26354b7cdf258b57",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          },
-          {
-            "source": "gen-rival-b6b933ae9cee51e5",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          }
-        ],
-        "clusters": [
-          {
-            "id": "pattern:adjusted_effect",
-            "label": "pattern:adjusted_effect",
-            "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC",
-              "gen-rival-26354b7cdf258b57",
-              "gen-rival-b6b933ae9cee51e5"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
-            ]
-          }
-        ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=warm",
-        "contract_version": "1.0"
-      },
-      "stats": {
-        "cycle_index": 3,
-        "n_nodes": 13,
-        "n_licensed": 6,
-        "n_pending": 4,
-        "n_conjectured": 3,
-        "n_rejected": 0,
-        "n_edges": 2,
-        "n_effective_edges": 0,
-        "n_provisional_edges": 2,
-        "n_frontier": 0,
-        "n_added": 0,
-        "n_newly_licensed": 2
-      }
-    },
-    {
-      "topology": {
-        "nodes": [
-          {
-            "id": "A01",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 1,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.030396355092701333,
-            "position": [
-              5.378554,
-              0.233119,
-              0.443319
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 2,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.015198177546350666,
-            "position": [
-              2.847112,
-              4.359079,
-              -2.588291
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 3,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.010132118364233778,
-            "position": [
-              0.878815,
-              4.179641,
-              2.667409
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 4,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.007599088773175333,
-            "position": [
-              2.445661,
-              -0.841522,
-              -4.17175
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 5,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.006079271018540267,
-            "position": [
-              0.965042,
-              -5.377738,
-              -0.550479
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 6,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.005066059182116889,
-            "position": [
-              -1.359191,
-              0.23967,
-              5.49119
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 7,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.004342336441814476,
-            "position": [
-              -3.894928,
-              -2.719355,
-              -2.689341
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 8,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0037995443865876666,
-            "position": [
-              -4.570572,
-              -1.157396,
-              2.312941
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -4.602665,
-              3.231668,
-              -1.157798
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "pending",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -1.795598,
-              2.847684,
-              -4.855299
-            ]
-          },
-          {
-            "id": "SRC",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.007166,
-              -0.832607,
-              1.082505
-            ]
-          },
-          {
-            "id": "gen-rival-26354b7cdf258b57",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.385421,
-              -0.606476,
-              0.971291
-            ]
-          },
-          {
-            "id": "gen-rival-b6b933ae9cee51e5",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.467497,
-              -0.868639,
-              0.997287
-            ]
-          }
-        ],
-        "edges": [
-          {
-            "source": "gen-rival-26354b7cdf258b57",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          },
-          {
-            "source": "gen-rival-b6b933ae9cee51e5",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          }
-        ],
-        "clusters": [
-          {
-            "id": "pattern:adjusted_effect",
-            "label": "pattern:adjusted_effect",
-            "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC",
-              "gen-rival-26354b7cdf258b57",
-              "gen-rival-b6b933ae9cee51e5"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
-            ]
-          }
-        ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=warm",
-        "contract_version": "1.0"
-      },
-      "stats": {
-        "cycle_index": 4,
-        "n_nodes": 13,
-        "n_licensed": 8,
-        "n_pending": 2,
-        "n_conjectured": 3,
-        "n_rejected": 0,
-        "n_edges": 2,
-        "n_effective_edges": 0,
-        "n_provisional_edges": 2,
-        "n_frontier": 0,
-        "n_added": 0,
-        "n_newly_licensed": 2
-      }
-    },
-    {
-      "topology": {
-        "nodes": [
-          {
-            "id": "A01",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 1,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.030396355092701333,
-            "position": [
-              5.885083,
-              0.237004,
-              0.502512
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 2,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.015198177546350666,
-            "position": [
-              3.109646,
-              4.742983,
-              -2.797555
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 3,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.010132118364233778,
-            "position": [
-              0.983557,
-              4.608384,
-              2.922944
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 4,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.007599088773175333,
-            "position": [
-              2.70126,
-              -0.955096,
-              -4.598206
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 5,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.006079271018540267,
-            "position": [
-              1.081017,
-              -5.871238,
-              -0.606086
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 6,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.005066059182116889,
-            "position": [
-              -1.440369,
-              0.268683,
-              5.993834
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 7,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.004342336441814476,
-            "position": [
-              -4.230457,
-              -2.984725,
-              -2.966996
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 8,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0037995443865876666,
-            "position": [
-              -5.02028,
-              -1.273869,
-              2.523365
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 9,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.003377372788077926,
-            "position": [
-              -5.002246,
-              3.538386,
-              -1.237537
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 10,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0030396355092701336,
-            "position": [
-              -1.931008,
-              3.077829,
-              -5.289807
-            ]
-          },
-          {
-            "id": "SRC",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.115038,
-              -1.068321,
-              1.335516
-            ]
-          },
-          {
-            "id": "gen-rival-26354b7cdf258b57",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.575544,
-              -0.906114,
-              1.316364
-            ]
-          },
-          {
-            "id": "gen-rival-b6b933ae9cee51e5",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.353322,
-              -1.209243,
-              1.332494
-            ]
-          }
-        ],
-        "edges": [
-          {
-            "source": "gen-rival-26354b7cdf258b57",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          },
-          {
-            "source": "gen-rival-b6b933ae9cee51e5",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          }
-        ],
-        "clusters": [
-          {
-            "id": "pattern:adjusted_effect",
-            "label": "pattern:adjusted_effect",
-            "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC",
-              "gen-rival-26354b7cdf258b57",
-              "gen-rival-b6b933ae9cee51e5"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
-            ]
-          }
-        ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=warm",
-        "contract_version": "1.0"
-      },
-      "stats": {
-        "cycle_index": 5,
-        "n_nodes": 13,
-        "n_licensed": 10,
-        "n_pending": 0,
-        "n_conjectured": 3,
-        "n_rejected": 0,
-        "n_edges": 2,
-        "n_effective_edges": 0,
-        "n_provisional_edges": 2,
-        "n_frontier": 0,
-        "n_added": 0,
-        "n_newly_licensed": 2
-      }
-    },
-    {
-      "topology": {
-        "nodes": [
-          {
-            "id": "A01",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 1,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.030396355092701333,
-            "position": [
-              6.393035,
-              0.246101,
-              0.547237
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 2,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.015198177546350666,
-            "position": [
-              3.368866,
-              5.124025,
-              -3.015985
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 3,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.010132118364233778,
-            "position": [
-              1.086708,
-              5.042732,
-              3.169524
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 4,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.007599088773175333,
-            "position": [
-              2.950725,
-              -1.06416,
-              -5.02945
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 5,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.006079271018540267,
-            "position": [
-              1.192403,
-              -6.36353,
-              -0.679111
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 6,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.005066059182116889,
-            "position": [
-              -1.531954,
-              0.303923,
-              6.494298
-            ]
-          },
-          {
-            "id": "C-rev-saturating",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": true,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.191,
-              0.767061,
-              0.698155
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 7,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.004342336441814476,
-            "position": [
-              -4.565716,
-              -3.244223,
-              -3.250475
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 8,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0037995443865876666,
-            "position": [
-              -5.476289,
-              -1.387587,
-              2.721405
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 9,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.003377372788077926,
-            "position": [
-              -5.402129,
-              3.841811,
-              -1.327685
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 10,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0030396355092701336,
-            "position": [
-              -2.067057,
-              3.304618,
-              -5.725877
-            ]
-          },
-          {
-            "id": "SRC",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.246805,
-              -1.484649,
-              1.598643
-            ]
-          },
-          {
-            "id": "gen-rival-26354b7cdf258b57",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.699038,
-              -1.321851,
-              1.584513
-            ]
-          },
-          {
-            "id": "gen-rival-b6b933ae9cee51e5",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.213691,
-              -1.622468,
-              1.596707
-            ]
-          }
-        ],
-        "edges": [
-          {
-            "source": "gen-rival-26354b7cdf258b57",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          },
-          {
-            "source": "gen-rival-b6b933ae9cee51e5",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          }
-        ],
-        "clusters": [
-          {
-            "id": "pattern:adjusted_effect",
-            "label": "pattern:adjusted_effect",
-            "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C-rev-saturating",
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC",
-              "gen-rival-26354b7cdf258b57",
-              "gen-rival-b6b933ae9cee51e5"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
-            ]
-          }
-        ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=warm",
-        "contract_version": "1.0"
-      },
-      "stats": {
-        "cycle_index": 6,
-        "n_nodes": 14,
-        "n_licensed": 10,
-        "n_pending": 0,
-        "n_conjectured": 4,
-        "n_rejected": 0,
-        "n_edges": 2,
-        "n_effective_edges": 0,
-        "n_provisional_edges": 2,
-        "n_frontier": 0,
-        "n_added": 1,
-        "n_newly_licensed": 0
-      }
-    },
-    {
-      "topology": {
-        "nodes": [
-          {
-            "id": "A01",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 1,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.030396355092701333,
-            "position": [
-              6.901061,
-              0.259418,
-              0.590022
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 2,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.015198177546350666,
-            "position": [
-              3.628168,
-              5.504865,
-              -3.234671
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 3,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.010132118364233778,
-            "position": [
-              1.189357,
-              5.47671,
-              3.416963
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 4,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.007599088773175333,
-            "position": [
-              3.19853,
-              -1.172271,
-              -5.46189
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 5,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.006079271018540267,
-            "position": [
-              1.301901,
-              -6.854549,
-              -0.762777
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 6,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.005066059182116889,
-            "position": [
-              -1.626455,
-              0.34705,
-              6.993601
-            ]
-          },
-          {
-            "id": "C-rev-saturating",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": true,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.267548,
-              1.257446,
-              0.580898
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 7,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.004342336441814476,
-            "position": [
-              -4.90162,
-              -3.500694,
-              -3.535939
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 8,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0037995443865876666,
-            "position": [
-              -5.934857,
-              -1.496856,
-              2.916015
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 9,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.003377372788077926,
-            "position": [
-              -5.802797,
-              4.144579,
-              -1.416545
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 10,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0030396355092701336,
-            "position": [
-              -2.203751,
-              3.529617,
-              -6.162672
-            ]
-          },
-          {
-            "id": "SRC",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.385694,
-              -1.884439,
-              1.883151
-            ]
-          },
-          {
-            "id": "gen-rival-26354b7cdf258b57",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.835294,
-              -1.72095,
-              1.871245
-            ]
-          },
-          {
-            "id": "gen-rival-b6b933ae9cee51e5",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.072104,
-              -2.02384,
-              1.87764
-            ]
-          }
-        ],
-        "edges": [
-          {
-            "source": "gen-rival-26354b7cdf258b57",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          },
-          {
-            "source": "gen-rival-b6b933ae9cee51e5",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          }
-        ],
-        "clusters": [
-          {
-            "id": "pattern:adjusted_effect",
-            "label": "pattern:adjusted_effect",
-            "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C-rev-saturating",
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC",
-              "gen-rival-26354b7cdf258b57",
-              "gen-rival-b6b933ae9cee51e5"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
-            ]
-          }
-        ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=warm",
-        "contract_version": "1.0"
-      },
-      "stats": {
-        "cycle_index": 7,
-        "n_nodes": 14,
-        "n_licensed": 10,
-        "n_pending": 0,
-        "n_conjectured": 4,
-        "n_rejected": 0,
-        "n_edges": 2,
-        "n_effective_edges": 0,
-        "n_provisional_edges": 2,
-        "n_frontier": 0,
-        "n_added": 0,
-        "n_newly_licensed": 0
-      }
-    },
-    {
-      "topology": {
-        "nodes": [
-          {
-            "id": "A01",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 1,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.030396355092701333,
-            "position": [
-              7.409153,
-              0.276335,
-              0.630698
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 2,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.015198177546350666,
-            "position": [
-              3.888229,
-              5.884856,
-              -3.453931
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 3,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.010132118364233778,
-            "position": [
-              1.29226,
-              5.909719,
-              3.665989
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 4,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.007599088773175333,
-            "position": [
-              3.444856,
-              -1.280189,
-              -5.895223
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 5,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.006079271018540267,
-            "position": [
-              1.40918,
-              -7.34403,
-              -0.857584
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 6,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.005066059182116889,
-            "position": [
-              -1.724023,
-              0.397471,
-              7.49163
-            ]
-          },
-          {
-            "id": "C-rev-saturating",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": true,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.349318,
-              1.749601,
-              0.475147
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 7,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.004342336441814476,
-            "position": [
-              -5.237821,
-              -3.754997,
-              -3.822991
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 8,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0037995443865876666,
-            "position": [
-              -6.395553,
-              -1.602907,
-              3.107353
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 9,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.003377372788077926,
-            "position": [
-              -6.204767,
-              4.445903,
-              -1.504426
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 10,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0030396355092701336,
-            "position": [
-              -2.340992,
-              3.752122,
-              -6.600571
-            ]
-          },
-          {
-            "id": "SRC",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.528877,
-              -2.274038,
-              2.179455
-            ]
-          },
-          {
-            "id": "gen-rival-26354b7cdf258b57",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.976987,
-              -2.109195,
-              2.170031
-            ]
-          },
-          {
-            "id": "gen-rival-b6b933ae9cee51e5",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.072657,
-              -2.415306,
-              2.170698
-            ]
-          }
-        ],
-        "edges": [
-          {
-            "source": "gen-rival-26354b7cdf258b57",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          },
-          {
-            "source": "gen-rival-b6b933ae9cee51e5",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          }
-        ],
-        "clusters": [
-          {
-            "id": "pattern:adjusted_effect",
-            "label": "pattern:adjusted_effect",
-            "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C-rev-saturating",
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC",
-              "gen-rival-26354b7cdf258b57",
-              "gen-rival-b6b933ae9cee51e5"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
-            ]
-          }
-        ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=warm",
-        "contract_version": "1.0"
-      },
-      "stats": {
-        "cycle_index": 8,
-        "n_nodes": 14,
-        "n_licensed": 10,
-        "n_pending": 0,
-        "n_conjectured": 4,
-        "n_rejected": 0,
-        "n_edges": 2,
-        "n_effective_edges": 0,
-        "n_provisional_edges": 2,
-        "n_frontier": 0,
-        "n_added": 0,
-        "n_newly_licensed": 0
-      }
-    },
-    {
-      "topology": {
-        "nodes": [
-          {
-            "id": "A01",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 1,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.030396355092701333,
-            "position": [
-              7.917297,
-              0.296391,
-              0.669251
-            ]
-          },
-          {
-            "id": "A02",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 2,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.015198177546350666,
-            "position": [
-              4.149524,
-              6.263579,
-              -3.673917
-            ]
-          },
-          {
-            "id": "A03",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 3,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.010132118364233778,
-            "position": [
-              1.395984,
-              6.34137,
-              3.917023
-            ]
-          },
-          {
-            "id": "B01",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 4,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.007599088773175333,
-            "position": [
-              3.689916,
-              -1.38828,
-              -6.32923
-            ]
-          },
-          {
-            "id": "B02",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 5,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.006079271018540267,
-            "position": [
-              1.514077,
-              -7.831758,
-              -0.963445
-            ]
-          },
-          {
-            "id": "B03",
-            "status": "licensed",
-            "pattern_id": "mediation",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 6,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.005066059182116889,
-            "position": [
-              -1.824628,
-              0.454585,
-              7.988331
-            ]
-          },
-          {
-            "id": "C-rev-saturating",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": true,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              -0.436751,
-              2.242925,
-              0.37988
-            ]
-          },
-          {
-            "id": "C01",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 7,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.004342336441814476,
-            "position": [
-              -5.574107,
-              -4.007732,
-              -4.111325
-            ]
-          },
-          {
-            "id": "C02",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 8,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0037995443865876666,
-            "position": [
-              -6.858005,
-              -1.706646,
-              3.295701
-            ]
-          },
-          {
-            "id": "C03",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 9,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.003377372788077926,
-            "position": [
-              -6.608333,
-              4.745313,
-              -1.591535
-            ]
-          },
-          {
-            "id": "C04",
-            "status": "licensed",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": true,
-            "fdr_discovery": true,
-            "fdr_retracted": false,
-            "fdr_index": 10,
-            "fdr_e_value": 1000000.0,
-            "fdr_alpha_allocated": 0.0030396355092701336,
-            "position": [
-              -2.478659,
-              3.971762,
-              -7.039781
-            ]
-          },
-          {
-            "id": "SRC",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.674628,
-              -2.656195,
-              2.484094
-            ]
-          },
-          {
-            "id": "gen-rival-26354b7cdf258b57",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              1.121664,
-              -2.489922,
-              2.476963
-            ]
-          },
-          {
-            "id": "gen-rival-b6b933ae9cee51e5",
-            "status": "conjectured",
-            "pattern_id": "dose_response",
-            "subject_kind": null,
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "position": [
-              0.219556,
-              -2.799231,
-              2.472548
-            ]
-          }
-        ],
-        "edges": [
-          {
-            "source": "gen-rival-26354b7cdf258b57",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          },
-          {
-            "source": "gen-rival-b6b933ae9cee51e5",
-            "target": "SRC",
-            "kind": "rebut",
-            "effective": false,
-            "provisional": true
-          }
-        ],
-        "clusters": [
-          {
-            "id": "pattern:adjusted_effect",
-            "label": "pattern:adjusted_effect",
-            "member_ids": [
-              "A01",
-              "A02",
-              "A03"
-            ]
-          },
-          {
-            "id": "pattern:dose_response",
-            "label": "pattern:dose_response",
-            "member_ids": [
-              "C-rev-saturating",
-              "C01",
-              "C02",
-              "C03",
-              "C04",
-              "SRC",
-              "gen-rival-26354b7cdf258b57",
-              "gen-rival-b6b933ae9cee51e5"
-            ]
-          },
-          {
-            "id": "pattern:mediation",
-            "label": "pattern:mediation",
-            "member_ids": [
-              "B01",
-              "B02",
-              "B03"
-            ]
-          }
-        ],
-        "layout_id": "fruchterman-reingold:iters=50,seed=warm",
-        "contract_version": "1.0"
-      },
-      "stats": {
-        "cycle_index": 9,
-        "n_nodes": 14,
-        "n_licensed": 10,
-        "n_pending": 0,
-        "n_conjectured": 4,
-        "n_rejected": 0,
-        "n_edges": 2,
-        "n_effective_edges": 0,
-        "n_provisional_edges": 2,
         "n_frontier": 0,
         "n_added": 0,
         "n_newly_licensed": 0
       }
     }
   ],
-  "n_cycles": 9,
+  "n_cycles": 0,
   "contract_version": "1.0"
 }
