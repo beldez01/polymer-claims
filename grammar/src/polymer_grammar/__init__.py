@@ -60,6 +60,7 @@ from .blame import (
     BlameSet,
     BlameVerdict,
     aggregate_blame,
+    duhem_rejection_reason,
     duhem_status,
 )
 from .revision import (
@@ -251,6 +252,7 @@ __all__ = [
     "BlameSet",
     "BlameVerdict",
     "aggregate_blame",
+    "duhem_rejection_reason",
     "duhem_status",
     "Entrench",
     "RetractionVerdict",

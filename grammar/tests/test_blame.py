@@ -57,3 +57,16 @@ def test_duhem_status_maps_underdetermined_and_robust():
     assert duhem_status("c2", v) == (Status.PENDING, PendingReason.DUHEM_UNDERDETERMINED)
     assert duhem_status("c1", v) == (Status.REJECTED, None)
     assert duhem_status("c3", v) is None
+
+
+def test_duhem_rejection_reason_flags_robustly_blamed():
+    from polymer_grammar.blame import duhem_rejection_reason
+    from polymer_grammar.status import RejectionReason
+    v = BlameVerdict(
+        robustly_blamed=frozenset({"c1"}),
+        possibly_blamed=frozenset({"c1", "c2"}),
+        underdetermined=frozenset({"c2"}),
+    )
+    assert duhem_rejection_reason("c1", v) == RejectionReason.ROBUSTLY_BLAMED
+    assert duhem_rejection_reason("c2", v) is None   # underdetermined -> not a rejection
+    assert duhem_rejection_reason("c3", v) is None   # not implicated

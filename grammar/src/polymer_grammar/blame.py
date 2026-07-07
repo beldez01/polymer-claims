@@ -11,7 +11,7 @@ from __future__ import annotations
 from pydantic import Field
 
 from .base import _Model
-from .status import PendingReason, Status
+from .status import PendingReason, RejectionReason, Status
 
 
 class BlameAssignment(_Model):
@@ -52,4 +52,13 @@ def duhem_status(
         return (Status.PENDING, PendingReason.DUHEM_UNDERDETERMINED)
     if claim_id in verdict.robustly_blamed:
         return (Status.REJECTED, None)
+    return None
+
+
+def duhem_rejection_reason(claim_id: str, verdict: BlameVerdict) -> RejectionReason | None:
+    """The RejectionReason to record when `duhem_status` returns REJECTED for `claim_id`.
+    Robust Duhem blame is terminal; this wires the reserved RejectionReason.ROBUSTLY_BLAMED.
+    Returns None if the claim is not robustly blamed (PENDING or uninvolved carry no reason)."""
+    if claim_id in verdict.robustly_blamed:
+        return RejectionReason.ROBUSTLY_BLAMED
     return None
