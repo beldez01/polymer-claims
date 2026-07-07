@@ -13,7 +13,6 @@ from polymer_protocol.sheaf import (
     ClaimTension,
     ConsistencyHeadline,
     ConsistencyReport,
-    Obstruction,
     SheafStructure,
     frustration_obstructions,
 )
