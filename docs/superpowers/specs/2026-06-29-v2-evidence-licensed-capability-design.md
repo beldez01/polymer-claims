@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-29
 **Author:** Z. Belden (synthesized with Claude)
-**Status:** DESIGN (v8, post-7th-review — architecture approved; wiring, registries, status-mapping finalized) → `writing-plans`
+**Status:** ✅ **SHIPPED — Slice 1 merged (`9b8848c`, 2026-06-29).** `eval::benchmark_advantage@v1`, the `EvidenceExecutor`, `EVIDENCE_LICENSED` route, and the in-cycle gated dispatch are all in `main`. Slice-1 detail below is historical (authoritative record: `git log` + `CONTINUE.md`). **Pending:** Slice 2 (full attestation chain + certificate/SLSA `resolvedDependencies`) and Slice 3 (defeat/drift/reinstatement/replay-over-time) — see the roadmap. Kept in-tree only for that pending Slice-2/3 design.
 **Roadmap item:** V2.0 (`docs/superpowers/2026-06-23-remaining-roadmap.md`)
 **Depends on:** Capability Cell + Registry V1 (`b058d3c`)
 
