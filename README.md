@@ -120,6 +120,12 @@ new claims; the corpus self-corrects and accumulates. The IR earns its existence
 that loop machine-runnable, falsifiable, and reversible. "Compiler + runtime for science,"
 not "file format."
 
+> **On verification:** the floor under every licensed claim is an **attested log** (proof the
+> computation ran — *existence*, not correctness), which costs the platform no compute of its own.
+> Two-implementation agreement is the **REPRODUCED** strength tier *above* that floor, not the
+> foundation — and it tests reproducibility, not truth. See
+> `docs/superpowers/foundations/compute-boundary.md`.
+
 Two artifacts define the system, a **compiler/runtime pair over one IR**:
 
 - **The Grammar** — what a claim *is* (well-formed, interpreted, licensable). → `grammar/`

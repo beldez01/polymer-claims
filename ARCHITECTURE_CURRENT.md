@@ -1,6 +1,8 @@
 # Polymer Claims — Current Architecture (the short, true version)
 
 > One-page map of what is **active**, what is **frozen**, and what is **user-gated/future**. Runtime state as of 2026-06-26 (last feature merge: local transparency-log layer; networked Rekor backend designed but tabled); doc refreshed 2026-06-26.
+>
+> ⚠ **This snapshot's tables predate several merges. Authoritative current state is `docs/superpowers/CONTINUE.md` (2026-07-01).** Shipped since 2026-06-26, not yet reflected in the tables below: **Capability Cell + Registry** (V1, `b058d3c`); **V2.0 Slice 1 — evidence-licensed capability** (`eval::benchmark_advantage`, `EVIDENCE_LICENSED` route, `9b8848c`); **foreign-claim ingestion** (`ingest-formal-claims`, WITNESSED); **Phase 1/2 real-data licensing** (TCGA-LAML n-DMP + HLA-A promoter on BLUEPRINT WGBS). Confirm any status against `git log` + `CONTINUE.md`, never against a dated design doc.
 > For the detailed phase-by-phase build log, see `docs/superpowers/CONTINUE.md` (continuity log — dense by design).
 > For terminology, see `GLOSSARY.md`.
 
