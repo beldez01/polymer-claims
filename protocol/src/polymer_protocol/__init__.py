@@ -103,6 +103,9 @@ from .sheaf import (
     SheafVertex,
     extract_sheaf,
 )
+from .blame_bridge import (
+    blame_set_from_obstruction,
+)
 from .verify import verify_stage
 from .evidence_executor import (
     ExecutionFailure,
@@ -222,6 +225,7 @@ __all__ = [
     "SheafStructure",
     "SheafVertex",
     "extract_sheaf",
+    "blame_set_from_obstruction",
     # ── topology / timeline export (the viewer data contract) ─────────────
     "CONTRACT_VERSION",
     "export_topology",
