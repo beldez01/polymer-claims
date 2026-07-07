@@ -102,6 +102,7 @@ from .sheaf import (
     SheafStructure,
     SheafVertex,
     extract_sheaf,
+    frustration_obstructions,
 )
 from .blame_bridge import (
     blame_set_from_obstruction,
@@ -227,6 +228,7 @@ __all__ = [
     "SheafStructure",
     "SheafVertex",
     "extract_sheaf",
+    "frustration_obstructions",
     "blame_set_from_obstruction",
     "blame_verdict_from_obstructions",
     "duhem_statuses_from_obstructions",

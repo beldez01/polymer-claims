@@ -6,12 +6,15 @@ equivalence edges (agreement) and defeat edges (antagonism, sign-flipped). The n
 """
 from __future__ import annotations
 
+from collections import deque
+
 from polymer_grammar import Status, effective_defeats
 
 from .base import _Model
 from .corpus import Corpus
 
 _DEFAULT_FILTER = frozenset({Status.LICENSED, Status.PENDING})
+_FRUSTRATION_ROUND = 6  # 6dp byte-stable output, matching umbrella's _ROUND
 
 
 class SheafVertex(_Model):
@@ -182,3 +185,70 @@ def extract_sheaf(
         edges.append(SheafEdge(kind="defeat", u=src, v=tgt, weight=_attacker_evalue(latest, src), sign=-1))
 
     return SheafStructure(vertices=tuple(vertices), edges=tuple(edges), flags=tuple(flags))
+
+
+def _cycle_ids(parent: dict, u: str, v: str) -> list[str]:
+    """Tree path v→root and u→root, spliced into the fundamental cycle through edge (u,v)."""
+    def up(x: str) -> list[str]:
+        path = []
+        while x is not None:
+            path.append(x)
+            x = parent[x]
+        return path
+
+    pu, pv = up(u), up(v)
+    sv = {p: i for i, p in enumerate(pv)}
+    anc = next(p for p in pu if p in sv)            # lowest common ancestor
+    left = pu[: pu.index(anc) + 1]                  # u → anc (inclusive)
+    right = pv[: sv[anc]]                            # v → (just below anc)
+    return left + right[::-1]
+
+
+def frustration_obstructions(structure: SheafStructure) -> tuple[Obstruction, ...]:
+    """Signed-BFS frustration detection (pure; no numpy).
+
+    Each vertex gets a label in {+1,-1}; edge (u,v,sign) demands label[v] == sign*label[u].
+    A back-edge that violates the running label witnesses a frustrated fundamental cycle
+    (tree path u→…→v plus that edge) — a contradiction with no local witness. Deterministic:
+    sorted ids.
+    """
+    adj: dict[str, list[tuple[str, int, float]]] = {v.claim_id: [] for v in structure.vertices}
+    for e in structure.edges:
+        adj[e.u].append((e.v, e.sign, e.weight))
+        adj[e.v].append((e.u, e.sign, e.weight))    # undirected for balance check
+
+    label: dict[str, int] = {}
+    parent: dict[str, str | None] = {}
+    obstructions: list[Obstruction] = []
+    seen_cycles: set[frozenset[str]] = set()
+
+    for root in sorted(adj):
+        if root in label:
+            continue
+        label[root] = 1
+        parent[root] = None
+        queue: deque[str] = deque([root])
+        while queue:
+            u = queue.popleft()
+            for v, sign, _w in sorted(adj[u]):
+                want = sign * label[u]
+                if v not in label:
+                    label[v] = want
+                    parent[v] = u
+                    queue.append(v)
+                elif label[v] != want:
+                    cyc = _cycle_ids(parent, u, v)
+                    key = frozenset(cyc)
+                    if key not in seen_cycles:
+                        seen_cycles.add(key)
+                        edges = tuple(
+                            (cyc[i], cyc[(i + 1) % len(cyc)]) for i in range(len(cyc))
+                        )
+                        mag = round(
+                            float(sum(e.weight for e in structure.edges if {e.u, e.v} <= key)),
+                            _FRUSTRATION_ROUND,
+                        )
+                        obstructions.append(
+                            Obstruction(claim_ids=tuple(cyc), edges=edges, magnitude=mag)
+                        )
+    return tuple(obstructions)
