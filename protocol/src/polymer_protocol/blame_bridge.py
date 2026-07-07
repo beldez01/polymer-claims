@@ -39,7 +39,7 @@ def blame_set_from_obstruction(obs: Obstruction) -> BlameSet:
 def blame_verdict_from_obstructions(obstructions: Sequence[Obstruction]) -> BlameVerdict:
     """Aggregate blame across frustrated cycles. A claim in EVERY obstruction (>=2 of them) is the
     robustly-blamed common culprit; a single cycle has no local witness so nothing is robust."""
-    member_sets = [frozenset(o.claim_ids) for o in obstructions]
+    member_sets = list(dict.fromkeys(frozenset(o.claim_ids) for o in obstructions))
     if not member_sets:
         empty: frozenset[str] = frozenset()
         return BlameVerdict(robustly_blamed=empty, possibly_blamed=empty, underdetermined=empty)
@@ -63,6 +63,8 @@ def duhem_statuses_from_obstructions(
     for cid in sorted(verdict.possibly_blamed):
         mapped = duhem_status(cid, verdict)
         if mapped is None:
+            # defensive: unreachable for verdicts from blame_verdict_from_obstructions
+            # (possibly_blamed == underdetermined ∪ robustly_blamed), kept for hand-built verdicts.
             continue
         status, pending_reason = mapped
         out[cid] = (status, pending_reason, duhem_rejection_reason(cid, verdict))

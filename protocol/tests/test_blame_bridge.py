@@ -37,6 +37,16 @@ def test_shared_claim_across_two_cycles_is_robustly_blamed():
     assert v.underdetermined == frozenset({"A", "B", "C", "D"})
 
 
+def test_duplicate_obstruction_is_not_robustly_blamed():
+    # the SAME frustrated cycle appearing twice is still ONE distinct cycle with no local
+    # witness — it must NOT terminally reject its members (regression guard for dedup).
+    c = _cycle("A", "B", "C")
+    v = blame_verdict_from_obstructions([c, c])
+    assert v.robustly_blamed == frozenset()
+    assert v.underdetermined == frozenset({"A", "B", "C"})
+    assert v.possibly_blamed == frozenset({"A", "B", "C"})
+
+
 def test_no_obstructions_is_empty_verdict():
     v = blame_verdict_from_obstructions([])
     assert v.possibly_blamed == frozenset()
