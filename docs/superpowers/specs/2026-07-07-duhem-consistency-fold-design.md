@@ -24,9 +24,26 @@ Two spine commitments bind the design, and one corrects it:
 - **Refund-Validity (the spine's named theorem): "a defeat refunds the ledger *only if it entails
   the null*."** A duhem coherence suspension does **not** entail any claim's effect-null — it is a
   *warrant-only* move ("the effect is there but the claims can't all mean what they say at once").
-  Per `refund-validity.md` §6/§8, warrant-only defeats de-license in the graph but **leave the
-  `FDRTest` live**. So this fold is **ledger-neutral** — it must not tombstone. (This corrects an
-  earlier draft of §4 that refunded on demote — which would have been the exact bug §6 names.)
+  Per `refund-validity.md` §6/§8 and `epistemic-core-derivation.pdf` §5, warrant-only defeats
+  de-license in the graph but **leave the `FDRTest` live** (only `NULL_BEARING_KINDS = {rebut}`
+  refunds; `defeat.py:54`). So this fold is **ledger-neutral** — it must not tombstone. (This
+  corrects an earlier draft of §4 that refunded on demote — the exact bug §6 names.)
+
+Also checked against `docs/epistemic-core-derivation.pdf`:
+
+- **The conservation thesis (§4): the believed state is `({eᵢ}, D)`, and the `Discover` predicate
+  is the only place statistical belief moves.** The fold touches **neither** — it emits no new
+  `eᵢ` and writes no `D` (warrant-only ⇒ no retract). It changes only *graph* standing
+  (`LICENSED → PENDING`), which is exactly the layer the derivation's page-7 split already
+  governs: "de-licenses in the graph… but its `FDRTest` stays live." So a duhem-suspended claim is
+  correctly a **live discovery in the ledger while `PENDING` in the graph** — the coupling does not
+  introduce a second belief-removal mechanism inside the `(eᵢ, D)` unification; it rides the
+  existing warrant-only graph layer.
+- **Why a fold and not a defeat edge.** An H¹ obstruction has *no local witness* — blame is
+  non-localizable across the cycle. A defeat edge (source → target) would falsely localize it, so
+  the fold uses the distinct `PendingReason.DUHEM_UNDERDETERMINED` verdict (already in the grammar,
+  separate from `DEFEAT_GROUNDED_OUT`) rather than authoring defeat edges. This is the grammar's
+  own pre-existing distinction, honored.
 
 ---
 
