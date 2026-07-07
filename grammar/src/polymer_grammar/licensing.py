@@ -12,6 +12,7 @@ later phases.
 """
 from __future__ import annotations
 
+import math
 from enum import Enum
 from typing import Literal
 
@@ -43,12 +44,57 @@ class MaterializationContext(_Model):
     shared_cause_factors: tuple[str, ...] = ()
 
 
+class LegValue(_Model):
+    """One executing leg's identity + terminal value, as recorded on `LegEvidence`."""
+
+    identity: str
+    value: float
+
+
+class LegEvidence(_Model):
+    """R5.1 — the per-leg independence evidence attested on a recompute-licensed
+    (REPRODUCED) Satisfaction: RECORD only, no strength cap. Carries every executing leg's
+    (adapter_identity, terminal value) plus their relative divergence, so the certificate shows
+    HOW independent the two legs actually were, not just a status label."""
+
+    legs: tuple[LegValue, ...]
+    relative_divergence: float
+
+    @model_validator(mode="after")
+    def _at_least_two_legs(self) -> LegEvidence:
+        if len(self.legs) < 2:
+            raise ValueError("LegEvidence requires >= 2 legs")
+        return self
+
+    @model_validator(mode="after")
+    def _finite_values(self) -> LegEvidence:
+        values = [leg.value for leg in self.legs] + [self.relative_divergence]
+        if not all(math.isfinite(v) for v in values):
+            raise ValueError("LegEvidence values must be finite")
+        return self
+
+
 class Satisfaction(_Model):
     verdict: SatisfactionVerdict
     materialization: MaterializationContext
     # Adapter credential identities that justified this satisfaction under an active registry.
     # Empty => not recorded / legacy path; tuple keeps the model frozen and content-addressable.
     credential_ids: tuple[str, ...] = ()
+    # R5.1: per-leg independence evidence, populated only by the recompute/air-gap route
+    # (verify()'s agreement path in evaluate.py) when it mints a REPRODUCED Satisfaction.
+    # None for the single-source EVIDENCE_LICENSED route and every other pre-existing
+    # Satisfaction. Omitted from serialized output when None (see _serialize below) so
+    # every claim that doesn't set it stays byte-identical.
+    leg_evidence: LegEvidence | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler) -> dict:
+        """Drop leg_evidence from the output when None so pre-existing Satisfactions'
+        model_dump/model_dump_json stay byte-identical (no new key)."""
+        data = handler(self)
+        if data.get("leg_evidence") is None:
+            data.pop("leg_evidence", None)
+        return data
 
 
 class LicenseRoute(str, Enum):

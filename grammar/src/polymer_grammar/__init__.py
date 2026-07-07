@@ -29,6 +29,8 @@ from .proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
 from .equivalence import EquivalenceClaim, are_equivalent, equivalence_class
 from .licensing import (
     IndependenceTier,
+    LegEvidence,
+    LegValue,
     LicenseRoute,
     Licensing,
     MaterializationContext,
@@ -221,6 +223,8 @@ __all__ = [
     "LicenseRoute",
     "Licensing",
     "MaterializationContext",
+    "LegEvidence",
+    "LegValue",
     "cohorts_error_independent",
     "independence_tier_of",
     "max_shared_cause_overlap",

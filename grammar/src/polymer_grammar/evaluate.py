@@ -24,7 +24,7 @@ from .leaf import (
     PropositionLeaf,
     QuantityLeaf,
 )
-from .licensing import MaterializationContext, Satisfaction, SatisfactionVerdict
+from .licensing import LegEvidence, LegValue, MaterializationContext, Satisfaction, SatisfactionVerdict
 from .operations import (
     Comparator,
     EvaluationPlan,
@@ -385,6 +385,25 @@ def _check_agreement(
     return True, None
 
 
+def _leg_evidence(results: tuple[EvaluationResult, ...]) -> LegEvidence | None:
+    """R5.1: the per-leg independence evidence for a REPRODUCED Satisfaction — each executing
+    leg's (adapter_identity, terminal value) plus their relative divergence. None when any
+    leg's terminal value isn't numeric (leg_evidence is a numeric-evidence record, not a
+    general-purpose value log); RECORD only, never gates agreement or caps strength."""
+    vals = [r.terminal.value for r in results]
+    if not all(isinstance(v, (int, float)) for v in vals):
+        return None
+    legs = tuple(
+        LegValue(identity=r.adapter_identity, value=float(r.terminal.value))
+        for r in results
+    )
+    values = [leg.value for leg in legs]
+    vmax, vmin = max(values), min(values)
+    denom = max(abs(vmax), abs(vmin), 1.0)
+    relative_divergence = abs(vmax - vmin) / denom
+    return LegEvidence(legs=legs, relative_divergence=relative_divergence)
+
+
 def verify(
     plan: EvaluationPlan,
     ctx: MaterializationContext,
@@ -426,7 +445,8 @@ def verify(
     satisfaction: Satisfaction | None = None
     if agreement and results[0].verdict == SatisfactionVerdict.SATISFIED:
         satisfaction = Satisfaction(
-            verdict=SatisfactionVerdict.SATISFIED, materialization=ctx
+            verdict=SatisfactionVerdict.SATISFIED, materialization=ctx,
+            leg_evidence=_leg_evidence(results),
         )
     return VerifiedEvaluation(
         results=results,

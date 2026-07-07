@@ -17,7 +17,7 @@ from pydantic import Field
 from polymer_grammar import Status
 from polymer_grammar.base import _Model
 from polymer_grammar.fdr import FDRTest
-from polymer_grammar.licensing import Satisfaction
+from polymer_grammar.licensing import LegEvidence, Satisfaction
 from polymer_claims._hashing import canonical_sha256
 from polymer_claims.contracts import _DIR as _CONTRACTS_DIR
 from polymer_claims.contracts import load_contract
@@ -72,10 +72,16 @@ class ExternalParameters(_Model):
 
 
 class InternalParameters(_Model):
-    independence_tier: str = Field(alias="independenceTier")
+    independence_tier: str | None = Field(default=None, alias="independenceTier")
     independence_witnessed: bool = Field(alias="independenceWitnessed")
     severity_provenance: str | None = Field(default=None, alias="severityProvenance")
     shared_cause_overlap: float | None = Field(default=None, alias="sharedCauseOverlap")
+    # R5.1: the recompute/REPRODUCED route's per-leg independence evidence (adapter identities +
+    # terminal values + relative divergence), carried straight from the licensing Satisfaction that
+    # recorded it — see `_leg_evidence_for`. None for the single-source EVIDENCE_LICENSED route and
+    # every other Satisfaction that never set it; every builder here uses exclude_none=True, so the
+    # key is simply absent (no custom serializer needed for byte-identity).
+    leg_evidence: LegEvidence | None = Field(default=None, alias="legEvidence")
 
 
 class BuildDefinition(_Model):
@@ -232,13 +238,30 @@ def _external_parameters(claim, licensing, ledger) -> ExternalParameters:
     )
 
 
+def _leg_evidence_for(licensing) -> LegEvidence | None:
+    """The leg_evidence to surface on the attestation: the first satisfaction (in stored,
+    deterministic order) that carries one. None for the single-source EVIDENCE_LICENSED route
+    and any Satisfaction predating R5.1 — none of those ever set leg_evidence."""
+    for s in licensing.satisfactions:
+        if s.leg_evidence is not None:
+            return s.leg_evidence
+    return None
+
+
 def _internal_parameters(licensing, *, independence_witnessed: bool) -> InternalParameters:
     sp = licensing.severity_provenance
+    it = licensing.independence_tier
     return InternalParameters(
-        independence_tier=licensing.independence_tier.value,
+        # Pre-existing latent gap fixed in passing: independence_tier is None for the
+        # EVIDENCE_LICENSED route (route-level, not per-satisfaction) — `.value` on None used to
+        # raise AttributeError, un-exercised by any prior test. Byte-identical for every route
+        # that sets independence_tier (all pre-existing tests): only the previously-crashing
+        # None case now degrades to an omitted key instead.
+        independence_tier=it.value if it is not None else None,
         independence_witnessed=independence_witnessed,
         severity_provenance=sp.value if sp is not None else None,
         shared_cause_overlap=licensing.shared_cause_overlap,
+        leg_evidence=_leg_evidence_for(licensing),
     )
 
 
