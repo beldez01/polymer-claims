@@ -71,8 +71,9 @@ def methyl_node(**kwargs):
     from polymer_grammar import MaterializationContext
 
     from polymer_claims.analysis_profile import profile_oracle_registry
+    from polymer_claims.capabilities import CAPABILITY_CELLS
     from polymer_claims.methyl_adapters import (
-        RegionLmCoefAdapter,
+        RegionHodgesLehmannAdapter,
         RegionMeanDiffAdapter,
         methyl_independent_registry,
         region_delta_beta_claim,
@@ -85,10 +86,11 @@ def methyl_node(**kwargs):
     base = MaterializationContext(id="M", api_version="v1", data_version="d1")
     return NodeRunner(
         corpus,
-        adapters=(RegionMeanDiffAdapter(), RegionLmCoefAdapter()),
+        adapters=(RegionMeanDiffAdapter(), RegionHodgesLehmannAdapter()),
         ctx=base,
         content_address=kwargs.pop("content_address", True),
         adapter_registry=methyl_independent_registry(),
         oracles=profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public")),
+        capability_registry=kwargs.pop("capability_registry", CAPABILITY_CELLS),
         **kwargs,
     )

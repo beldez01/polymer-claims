@@ -24,11 +24,12 @@ from polymer_protocol.calibration import (
 )
 from polymer_protocol.corpus import Corpus
 
+from .capabilities import CAPABILITY_CELLS
 from .contracts import using_contract_root
 from .evidence import evidence_map
 from .materialization import materialization_map
 from .methyl_adapters import (
-    RegionLmCoefAdapter,
+    RegionHodgesLehmannAdapter,
     RegionMeanDiffAdapter,
     methyl_independent_registry,
     region_delta_beta_claim,
@@ -114,7 +115,7 @@ def synthetic_cohort(*, model: GeneratingModelParams, batch_id: str, seed: int,
 # Task 6: end-to-end harness -- runs synthetic batches through the REAL gate
 # ---------------------------------------------------------------------------
 
-_ADAPTERS = (RegionMeanDiffAdapter(), RegionLmCoefAdapter())
+_ADAPTERS = (RegionMeanDiffAdapter(), RegionHodgesLehmannAdapter())
 
 
 def run_batch(
@@ -162,6 +163,7 @@ def run_batch(
                 materializations=mats,
                 evidence=ev,
                 adapter_registry=methyl_independent_registry(),
+                capability_registry=CAPABILITY_CELLS,
             )
             runner.tick()
             final = runner.corpus

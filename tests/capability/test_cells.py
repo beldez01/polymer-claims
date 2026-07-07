@@ -25,9 +25,15 @@ def test_n_dmps_eligible_adapters_are_ttest_and_rank():
     assert set(N_DMPS_CELL.eligible_adapter_identities) == {"methyl-ndmp-ttest", "methyl-ndmp-rank"}
 
 
-def test_only_n_dmps_sets_agreement_mode():
+def test_region_delta_beta_eligible_adapters_are_meandiff_and_hodges_lehmann():
+    assert set(REGION_DELTA_BETA_CELL.eligible_adapter_identities) == {
+        "methyl-meandiff-beta", "methyl-hodges-lehmann",
+    }
+
+
+def test_only_mean_diff_keeps_tight_numeric_agreement_mode():
     assert MEAN_DIFF_CELL.agreement_mode == "tight_numeric"
-    assert REGION_DELTA_BETA_CELL.agreement_mode == "tight_numeric"
+    assert REGION_DELTA_BETA_CELL.agreement_mode == "both_satisfy_criterion"
     assert N_DMPS_CELL.agreement_mode == "both_satisfy_criterion"
 
 

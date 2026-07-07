@@ -1,11 +1,14 @@
 """§2E: conceptual replication across an independent cohort.
 
 For a claim bound to a second SE-Contract cohort (different dimnames_hash), AIR-GAP that cohort with the
-same two independent methyl legs; only if they AGREE and the agreed value is SATISFIED does the cohort
-count as a replication. Returns the extra (cohort-B) Satisfaction to append to the claim's Licensing and
-the PRODUCT e-value e1*e2 (valid: independent data -> independent e-values for the shared null). The
-grammar/protocol stay ignorant of cohort B — verify receives a finished `replications=` map, mirroring
-CES-3 `materializations=` / Phase-2.1 `evidence=`. Umbrella/impure; numpy only via methyl_adapters.
+same two independent methyl legs; only if BOTH legs independently satisfy the claim's criterion does the
+cohort count as a replication (mirrors CapabilityCell.agreement_mode="both_satisfy_criterion" for
+REGION_DELTA_BETA_CELL — the two legs are genuinely different estimators (mean-difference vs
+Hodges–Lehmann) that need not be numerically close). Returns the extra (cohort-B) Satisfaction to append
+to the claim's Licensing and the PRODUCT e-value e1*e2 (valid: independent data -> independent e-values
+for the shared null). The grammar/protocol stay ignorant of cohort B — verify receives a finished
+`replications=` map, mirroring CES-3 `materializations=` / Phase-2.1 `evidence=`. Umbrella/impure; numpy
+only via methyl_adapters.
 """
 from __future__ import annotations
 
@@ -24,15 +27,11 @@ from .claim_detail import _compare
 from .contracts import load_contract
 from .evidence import _terminal_node, betting_evalue, evidence_map
 from .methyl_adapters import (
-    RegionLmCoefAdapter,
+    RegionHodgesLehmannAdapter,
     RegionMeanDiffAdapter,
     _IMPL,
     _region_group_means,
 )
-
-# Abs-only arm of the evaluator air-gap (the grammar evaluator uses abs+rel tolerance). Safe here
-# because region Δβ is bounded near zero, so an absolute 1e-9 is the operative bound either way.
-_AGREE_TOL = 1e-9
 
 
 @dataclass(frozen=True)
@@ -55,10 +54,10 @@ def build_replication_inputs(
     *,
     bindings: dict[str, str],
 ) -> ReplicationInputs:
-    """For each claim id in `bindings` mapped to a cohort-B ref: air-gap cohort B and, if the two legs
-    AGREE and the agreed value is SATISFIED and B's dimnames_hash differs from the primary cohort's,
-    emit the cohort-B Satisfaction + the product e-value e1*e2. Claims with no binding keep their
-    single-cohort e-value (evidence_map). Impure (reads contracts)."""
+    """For each claim id in `bindings` mapped to a cohort-B ref: air-gap cohort B and, if BOTH legs
+    independently satisfy the claim's criterion and B's dimnames_hash differs from the primary
+    cohort's, emit the cohort-B Satisfaction + the product e-value e1*e2. Claims with no binding
+    keep their single-cohort e-value (evidence_map). Impure (reads contracts)."""
     evidence = dict(evidence_map(corpus))
     replications: dict[str, tuple[Satisfaction, ...]] = {}
     by_id = {c.id: c for c in corpus.claims}
@@ -86,15 +85,18 @@ def build_replication_inputs(
         try:
             a2, b2 = _region_group_means(node_b)
             v_meandiff = RegionMeanDiffAdapter().execute(node_b, (), base_ctx).value
-            v_lmcoef = RegionLmCoefAdapter().execute(node_b, (), base_ctx).value
+            v_hl = RegionHodgesLehmannAdapter().execute(node_b, (), base_ctx).value
         except (FileNotFoundError, KeyError, ValueError):
             continue
-        if abs(v_meandiff - v_lmcoef) > _AGREE_TOL:
-            continue  # cohort B did not air-gap (the two legs disagree)
 
         crit = claim.evaluation_plan.criterion
-        if crit.threshold is None or not _compare(v_meandiff, crit.comparator, crit.threshold, None):
-            continue  # cohort B did not show the effect -> no replication
+        if crit.threshold is None:
+            continue
+        if not (
+            _compare(v_meandiff, crit.comparator, crit.threshold, None)
+            and _compare(v_hl, crit.comparator, crit.threshold, None)
+        ):
+            continue  # cohort B did not air-gap: not both legs independently show the effect
 
         if cid not in evidence:
             continue  # no cohort-A e-value -> cannot earn REPLICATED from cohort B alone

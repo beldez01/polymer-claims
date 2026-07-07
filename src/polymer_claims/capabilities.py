@@ -41,9 +41,15 @@ REGION_DELTA_BETA_CELL = CapabilityCell(
     param_schema=(_STR(name="region_probes", codec="csv"), _STR(name="group_col", codec="string"),
                   _STR(name="level_a", codec="string"), _STR(name="level_b", codec="string")),
     produced=_Q, allowed_comparators=_ALL_CMP,
-    eligible_adapter_identities=("methyl-meandiff-beta", "methyl-lm-coef"),
+    eligible_adapter_identities=("methyl-meandiff-beta", "methyl-hodges-lehmann"),
     oracle=OracleRequirement(default_oracle_id=_METHYL_ORACLE, required=True),
     data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("categorical",), criterion_target="threshold",
+    # region-Δβ's two legs (group mean-difference vs Hodges–Lehmann location-shift) are
+    # genuinely different estimators that can clear a threshold claim's criterion by different
+    # amounts on skewed betas — the honest agreement bar is "both legs independently satisfy the
+    # claim's criterion", not numeric closeness on the point estimate. See
+    # CapabilityCell.agreement_mode / evaluate._check_agreement.
+    agreement_mode="both_satisfy_criterion",
 )
 
 N_DMPS_CELL = CapabilityCell(

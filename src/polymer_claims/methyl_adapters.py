@@ -1,11 +1,15 @@
 """CES-2: region differential-methylation execution over a content-addressed SE Contract.
 
-Two methodologically-independent legs compute the SAME region Δβ = mean(level_b) − mean(level_a) of
-the per-sample region-mean betas: a direct group mean-difference and an OLS group coefficient
-(numpy lstsq), which equals the mean difference for a two-group design — so they agree (a real
-two-implementation air-gap check) yet are genuinely different estimators. Umbrella/impure (file I/O
-via load_contract). Grammar + protocol untouched. NOT re-exported from __init__ (keeps base import
-numpy-free).
+Two INDEPENDENT legs compute the region Δβ of the per-sample region-mean betas two genuinely
+different ways — a direct group mean-difference (leg A; parametric, moment-based) vs the
+Hodges–Lehmann location-shift estimator (leg B; the median of ALL pairwise differences
+b_j - a_i, a robust rank-family estimator insensitive to tail/outlier behavior). The two legs
+rest on different assumptions, so they can genuinely disagree on skewed betas, not just on a
+coding bug — see RegionHodgesLehmannAdapter's docstring. Agreement is gated on each leg
+INDEPENDENTLY satisfying the claim's criterion (CapabilityCell.agreement_mode=
+"both_satisfy_criterion" in capabilities.py), not numeric closeness between the two point
+estimates. Umbrella/impure (file I/O via load_contract). Grammar + protocol untouched. NOT
+re-exported from __init__ (keeps base import numpy-free).
 """
 from __future__ import annotations
 
@@ -94,19 +98,25 @@ class RegionMeanDiffAdapter:
         return ExecValue(value=(sum(b) / len(b)) - (sum(a) / len(a)))
 
 
-class RegionLmCoefAdapter:
-    """Independent impl B — OLS coefficient of region-mean-β on a level_b indicator (numpy lstsq).
-    Equals the two-group mean difference exactly, computed by a different estimator."""
+class RegionHodgesLehmannAdapter:
+    """Independent impl B — Hodges–Lehmann location-shift estimator: the median of ALL pairwise
+    differences {b_j - a_i : for all i, j} over the per-sample region-mean betas. A genuinely
+    different, rank-based/robust estimator from leg A's mean difference (insensitive to a skewed
+    or outlier-laden tail) — unlike a leg forced to algebraically mirror leg A (the retired
+    OLS-coefficient leg equalled the mean difference exactly, by construction, for any two-group
+    design), this one can — and on skewed betas, does — diverge from leg A's point estimate. The
+    air-gap between the two legs is gated on each leg independently clearing the claim's
+    criterion (CapabilityCell.agreement_mode="both_satisfy_criterion" in capabilities.py), not
+    numeric closeness or exact equality on the point estimate."""
 
-    identity = "methyl-lm-coef"
+    identity = "methyl-hodges-lehmann"
 
     def execute(self, node, upstream, ctx) -> ExecValue:
         a, b = _region_group_means(node)
-        y = np.array(a + b, dtype=float)
-        ind = np.array([0.0] * len(a) + [1.0] * len(b))
-        X = np.column_stack([np.ones_like(ind), ind])
-        coef, *_ = np.linalg.lstsq(X, y, rcond=None)
-        return ExecValue(value=float(coef[1]))
+        a_arr = np.asarray(a, dtype=float)
+        b_arr = np.asarray(b, dtype=float)
+        pairwise = (b_arr[:, None] - a_arr[None, :]).ravel()
+        return ExecValue(value=float(np.median(pairwise)))
 
 
 # Default signal region of the bundled fixture (first 5 probes, chr1:1,000,000-1,000,800).
@@ -180,8 +190,8 @@ def methyl_independent_registry() -> AdapterRegistry:
             implementation_hash=implementation_hash_for_adapter(RegionMeanDiffAdapter),
         ),
         AdapterCredential(
-            identity="methyl-lm-coef",
-            owner="owner-lm",
-            implementation_hash=implementation_hash_for_adapter(RegionLmCoefAdapter),
+            identity="methyl-hodges-lehmann",
+            owner="owner-hl",
+            implementation_hash=implementation_hash_for_adapter(RegionHodgesLehmannAdapter),
         ),
     ))

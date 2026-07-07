@@ -758,7 +758,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         from polymer_grammar import FDRLedger
         from .analysis_profile import profile_oracle_registry
         from .methyl_adapters import (
-            RegionLmCoefAdapter,
+            RegionHodgesLehmannAdapter,
             RegionMeanDiffAdapter,
             methyl_independent_registry,
         )
@@ -777,7 +777,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             corpus,
             adapters=(
                 RegionMeanDiffAdapter(),
-                RegionLmCoefAdapter(),
+                RegionHodgesLehmannAdapter(),
                 NDmpTTestAdapter(),
                 NDmpRankAdapter(),
             ),

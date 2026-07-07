@@ -4,15 +4,16 @@ from polymer_grammar import FDRLedger, IndependenceTier, MaterializationContext,
 from polymer_protocol import Corpus, run_cycle
 
 from polymer_claims.analysis_profile import profile_oracle_registry
+from polymer_claims.capabilities import CAPABILITY_CELLS
 from polymer_claims.evidence import evidence_map
 from polymer_claims.materialization import materialization_map
 from polymer_claims.methyl_adapters import (
-    RegionLmCoefAdapter, RegionMeanDiffAdapter, methyl_independent_registry, region_delta_beta_claim,
+    RegionHodgesLehmannAdapter, RegionMeanDiffAdapter, methyl_independent_registry, region_delta_beta_claim,
 )
 from polymer_claims.profiles import CANONICAL_EPICV2_V1
 from polymer_claims.replication import build_replication_inputs
 
-_ADAPTERS = (RegionMeanDiffAdapter(), RegionLmCoefAdapter())
+_ADAPTERS = (RegionMeanDiffAdapter(), RegionHodgesLehmannAdapter())
 _BASE = MaterializationContext(id="M", api_version="v1", data_version="d1")
 _POWERED = "se:epicv2_casectrl_powered@1"
 _STRONG = ("cg00000001", "cg00000002", "cg00000003", "cg00000004", "cg00000005")
@@ -37,6 +38,7 @@ def test_replicated_across_two_cohorts_licenses_at_replicated_tier():
         materializations=materialization_map(corpus, _BASE),
         evidence=rep.evidence,
         replications=rep.replications,
+        capability_registry=CAPABILITY_CELLS,
     )
     c = next(x for x in result.corpus.claims if x.id == "c-repl")
     assert c.status == Status.LICENSED
@@ -59,6 +61,7 @@ def test_single_cohort_demo_stays_reproduced():
         oracles=profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public")),
         materializations=materialization_map(corpus, _BASE),
         evidence=evidence_map(corpus),
+        capability_registry=CAPABILITY_CELLS,
     )
     c = next(x for x in result.corpus.claims if x.id == "c-solo")
     assert c.status == Status.LICENSED
@@ -77,6 +80,7 @@ def test_same_cohort_binding_does_not_multiply_or_replicate():
         materializations=materialization_map(corpus, _BASE),
         evidence=rep.evidence,
         replications=rep.replications,
+        capability_registry=CAPABILITY_CELLS,
     )
     c = next(x for x in result.corpus.claims if x.id == "c-same")
     assert c.status == Status.LICENSED
