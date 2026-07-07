@@ -28,3 +28,19 @@ def blame_set_from_obstruction(obs: Obstruction) -> BlameSet:
         contradiction_id="h1:" + "|".join(members),
         assignments=tuple(BlameAssignment(targets=(cid,)) for cid in members),
     )
+
+
+def blame_verdict_from_obstructions(obstructions: Sequence[Obstruction]) -> BlameVerdict:
+    """Aggregate blame across frustrated cycles. A claim in EVERY obstruction (>=2 of them) is the
+    robustly-blamed common culprit; a single cycle has no local witness so nothing is robust."""
+    member_sets = [frozenset(o.claim_ids) for o in obstructions]
+    if not member_sets:
+        empty: frozenset[str] = frozenset()
+        return BlameVerdict(robustly_blamed=empty, possibly_blamed=empty, underdetermined=empty)
+    union = frozenset().union(*member_sets)
+    robust = frozenset.intersection(*member_sets) if len(member_sets) >= 2 else frozenset()
+    return BlameVerdict(
+        robustly_blamed=robust,
+        possibly_blamed=union,
+        underdetermined=union - robust,
+    )

@@ -1,7 +1,7 @@
 from polymer_grammar.blame import aggregate_blame
 from polymer_grammar.status import PendingReason, Status
 from polymer_protocol.sheaf import Obstruction
-from polymer_protocol.blame_bridge import blame_set_from_obstruction
+from polymer_protocol.blame_bridge import blame_set_from_obstruction, blame_verdict_from_obstructions
 
 
 def _cycle(*ids):
@@ -17,3 +17,24 @@ def test_single_cycle_has_no_local_witness_all_underdetermined():
     assert v.possibly_blamed == frozenset({"A", "B", "C"})
     assert v.robustly_blamed == frozenset()                     # no local witness
     assert v.underdetermined == frozenset({"A", "B", "C"})      # all PENDING duhem
+
+
+def test_one_obstruction_is_all_underdetermined_never_robust():
+    v = blame_verdict_from_obstructions([_cycle("A", "B", "C")])
+    assert v.robustly_blamed == frozenset()
+    assert v.underdetermined == frozenset({"A", "B", "C"})
+
+
+def test_shared_claim_across_two_cycles_is_robustly_blamed():
+    # X sits in both frustrated cycles -> the common culprit; the others stay underdetermined
+    v = blame_verdict_from_obstructions([_cycle("A", "B", "X"), _cycle("C", "D", "X")])
+    assert v.robustly_blamed == frozenset({"X"})
+    assert v.possibly_blamed == frozenset({"A", "B", "C", "D", "X"})
+    assert v.underdetermined == frozenset({"A", "B", "C", "D"})
+
+
+def test_no_obstructions_is_empty_verdict():
+    v = blame_verdict_from_obstructions([])
+    assert v.possibly_blamed == frozenset()
+    assert v.robustly_blamed == frozenset()
+    assert v.underdetermined == frozenset()
