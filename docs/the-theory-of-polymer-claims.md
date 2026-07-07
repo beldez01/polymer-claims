@@ -81,8 +81,20 @@ Stated first-class, the way the engine demands. If any fires and survives, the t
   convenience," this defeater has fired.
 - **D4 — Warrant is hollow.** If *conceptual* independence proves impossible even to *measure* (the
   Sellarsian back-door Given), then agreement certifies only a shared frame and the warrant means
-  less than it claims. `foundations/residualism.md` §7 lists this as an open problem, not a solved
-  one — honestly the theory's most exposed flank.
+  less than it claims. `foundations/residualism.md` §7 lists this as an open problem, not a solved one.
+  **Empirical update (2026-07-07):** an audit of the shipped air-gap pairs found all three were
+  *algebraic tautologies* (two encodings of the same estimator) — the exact hollow warrant this
+  defeater names, live in the trust core. Two are now fixed and *measured*: the n-DMP pair buys genuine
+  independence (two methods flag genuinely different probes — Jaccard 0.73), the region-Δβ pair does not
+  (two scalar-location estimators nearly coincide, 0.09% apart). The refinement this forced is
+  load-bearing: **REPRODUCED is epistemically meaningful for set/count/classification claims but
+  structurally thin for scalar point-estimate claims** — you cannot manufacture independence for a
+  scalar by computing it two ways, so scalar-effect claims must earn genuine independence from
+  **REPLICATED** (cross-cohort, different data), not a second within-cohort leg. D4 is thus now
+  *measured, not asserted*: the defensible pitch is "our independence guarantee is claim-shape-aware,
+  and we measure how much each buys" — stronger than the old blanket "two implementations agree." Still
+  the most exposed flank (correlated *bias* with no truth anchor stays invisible), but now instrumented
+  rather than cosmetic. Detail: `docs/superpowers/plans/2026-07-07-adapter-independence-hardening-plan.md` §3.7.
 - **D5 — Cold-start.** If a standard never reaches the network effect — agents don't author the IR,
   consumers don't ask for the ledger — the protocol dies of adoption, not of being wrong. (Mitigant:
   agents author the IR automatically; adoption rides the AI-science wave rather than asking humans to

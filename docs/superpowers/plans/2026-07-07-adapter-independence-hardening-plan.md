@@ -112,6 +112,41 @@ statement — plus the go/no-go for R2. Hand back to the plan; it sets R2's prio
 
 ---
 
+## 3.7 Execution log & findings — the in-repo tautology audit (2026-07-07)
+
+Before the cross-model experiment, we audited the **shipped** within-package air-gap pairs and found
+all three were **algebraic tautologies** — two encodings of the *same* estimator, agreeing by
+construction, not by independent method (the docstrings even *labeled* them "genuinely independent").
+Two are now fixed on branch `feat/ndmp-independent-rank-leg`:
+
+**n-DMP (`e789b05`) — genuine independence bought.** Replaced the OLS-coef leg (`== pooled-t` by
+algebra) with a Mann-Whitney **rank** leg; switched the cell to `both_satisfy_criterion`. Measured the
+per-probe DMP-set overlap on real TCGA-LAML (378,894 probes): pooled-t flags 115,405, rank flags
+132,031; `|A∩B|=104,115`, `|A∪B|=143,321` → **Jaccard 0.73**, and they **cross** (11,290 t-only, 27,916
+rank-only — *not* nested). ~27% of the flagged union is method-specific → **N_eff genuinely > 1**, real
+(if partial) independence. *(The all-probe φ=0.77 / N_eff=1.13 is an artifact of the ~235k shared
+non-DMP majority; the Jaccard is the meaningful per-flag measure.)*
+
+**region-Δβ (`c99c35a`) — honest, but thin.** Replaced the lm-coef leg (`== mean-diff` by algebra) with
+the **Hodges–Lehmann** location-shift estimator. On real/noisy data the two legs **nearly coincide**
+(0.12112 vs 0.12123). The algebraic tautology is gone, but the independence bought is minimal.
+
+**The structural insight (reshapes R5 and the independence tiers):**
+
+> The within-cohort two-implementation air-gap (**REPRODUCED**) is epistemically meaningful for
+> **set / count / classification** claims — two methods can partition the outcome space genuinely
+> differently (n-DMP: Jaccard 0.73) — and **structurally thin for scalar point-estimate** claims —
+> two consistent estimators of one location converge (region-Δβ: 0.09% apart). **You cannot
+> manufacture independence for a scalar by computing it two ways.**
+
+Consequence: **REPRODUCED means different things for different claim shapes.** For scalar-effect
+claims, genuine independence must come from **REPLICATED** (cross-cohort, *different data* — the one
+thing that breaks the shared-data floor), not a second within-cohort estimator. The stats
+`pure`-vs-`stdlib` mean pair (the third, unfixed tautology) is a scalar-mean demo and inherits the same
+thinness.
+
+---
+
 ## 4. The build arc (each slice plugs into an existing seam — none greenfield)
 
 ### R1 — Provenance lineage in the credential *(the cheap prior; ship regardless of Step 0)*
@@ -128,11 +163,21 @@ Run both legs, record each leg's **signed error vector** (not its output), compu
 ρ** and **double-fault**. **Seam:** the shipped `calibrate`/`certify` warrant-tiered `q`-ledger — one
 more column.
 
-### R5 — Effective-N as the cap *(the integration)*
-Make the strength vector's evidence axes reflect **`N_eff = 2/(1+ρ)`** (bounded by R1's provenance
-prior when ρ is unmeasurable), instead of a hand-set tier discount. The organizational tier degrades to
-a **fallback prior used only until the battery has spoken.** **Seam:** the existing oracle strength-cap
-mechanism — this changes what *feeds* the cap, not the gate itself.
+### R5 — Independence-breadth into the strength cap *(the integration — now shape-dependent)*
+The region-Δβ finding (§3.7) **kills the naïve "one `N_eff = 2/(1+ρ)` caps everything"**: the right
+independence metric **depends on claim shape** — set-overlap / error-correlation for classification,
+near-collinear-*by-construction* for scalar. R5 is therefore **sliced**:
+
+- **R5.1 — attest the independence evidence** *(the correct first slice; build now).* Record each
+  licensed claim's per-leg values (and, for set/count claims, the flagged-set overlap) on the licensed
+  `Satisfaction`, so every REPRODUCED certificate **carries how independent its legs actually were** —
+  *attest before cap.* **Seam:** an optional, omit-when-None `Satisfaction` field (byte-compatible).
+- **R5.2 — the shape-dependent cap** *(staged).* Map the recorded evidence to a strength cap:
+  set/count claims capped by measured set-overlap / error-ρ (from R2); **scalar within-cohort
+  REPRODUCED capped low by construction**, with genuine independence-strength deferred to
+  **REPLICATED**. The organizational tier degrades to a fallback prior used only until measurement
+  speaks. **Seam:** the existing oracle strength-cap mechanism — R5.2 changes what *feeds* the cap, not
+  the gate.
 
 ### R3 — Adversarial shared-failure probing *(active; no waiting on batteries)*
 Don't only measure on a fixed battery — *hunt* for inputs where both legs likely share a blind spot:
