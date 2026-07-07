@@ -1,7 +1,11 @@
 from polymer_grammar.blame import aggregate_blame
-from polymer_grammar.status import PendingReason, Status
+from polymer_grammar.status import PendingReason, RejectionReason, Status
 from polymer_protocol.sheaf import Obstruction
-from polymer_protocol.blame_bridge import blame_set_from_obstruction, blame_verdict_from_obstructions
+from polymer_protocol.blame_bridge import (
+    blame_set_from_obstruction,
+    blame_verdict_from_obstructions,
+    duhem_statuses_from_obstructions,
+)
 
 
 def _cycle(*ids):
@@ -38,10 +42,6 @@ def test_no_obstructions_is_empty_verdict():
     assert v.possibly_blamed == frozenset()
     assert v.robustly_blamed == frozenset()
     assert v.underdetermined == frozenset()
-
-
-from polymer_grammar.status import RejectionReason
-from polymer_protocol.blame_bridge import duhem_statuses_from_obstructions
 
 
 def test_single_cycle_routes_all_members_to_pending_duhem():
