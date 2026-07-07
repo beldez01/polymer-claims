@@ -176,3 +176,41 @@ def test_content_hash_single_policy_differs_from_no_policy(make_cell):
         eligible_adapter_identities=("p",),
     )
     assert cell_no_vp.content_hash != cell_single.content_hash
+
+
+# ---------------------------------------------------------------------------
+# agreement_mode — per-capability agreement-mode override (mirrors verification_policy's
+# default-byte-identical + omit-at-default pattern above).
+# ---------------------------------------------------------------------------
+
+
+def test_agreement_mode_defaults_to_tight_numeric(make_cell):
+    assert make_cell().agreement_mode == "tight_numeric"
+
+
+def test_model_dump_no_agreement_mode_key_when_default(make_cell):
+    cell = make_cell()
+    assert "agreement_mode" not in cell.model_dump(mode="json")
+    assert "agreement_mode" not in json.loads(cell.model_dump_json())
+
+
+def test_model_dump_includes_agreement_mode_when_set(make_cell):
+    cell = make_cell(agreement_mode="both_satisfy_criterion")
+    data = cell.model_dump(mode="json")
+    assert data["agreement_mode"] == "both_satisfy_criterion"
+
+
+def test_content_hash_unchanged_when_agreement_mode_default(make_cell):
+    """Introducing the field must not perturb any pre-existing cell's content_hash."""
+    assert make_cell().content_hash == make_cell(agreement_mode="tight_numeric").content_hash
+
+
+def test_content_hash_changes_with_agreement_mode(make_cell):
+    cell_default = make_cell()
+    cell_both = make_cell(agreement_mode="both_satisfy_criterion")
+    assert cell_default.content_hash != cell_both.content_hash
+
+
+def test_agreement_mode_rejects_unknown_value(make_cell):
+    with pytest.raises(Exception):
+        make_cell(agreement_mode="loose")

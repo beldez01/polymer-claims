@@ -136,6 +136,18 @@ class CapabilityCell(_Model):
     # V2.0: optional verification policy; omitted from serialized output when None
     # (so existing cells' model_dump stays byte-identical — see _serialize below).
     verification_policy: VerificationPolicy | None = None
+    # Per-capability agreement MODE for the recompute_pair air-gap (evaluate.verify's
+    # cross-adapter check). "tight_numeric" (the default) preserves today's GLOBAL tight bound
+    # (abs 1e-9 OR rel 1e-6) on the two legs' terminal VALUES for every pre-existing cell,
+    # byte-identical. "both_satisfy_criterion" drops the numeric-closeness requirement entirely:
+    # each leg's EvaluationResult.verdict already reflects whether THAT leg's own value
+    # independently satisfies the claim's SatisfactionCriterion, so requiring the two verdicts
+    # to match (already the first check in _check_agreement) IS the agreement bar — no
+    # requirement that the two legs' magnitudes be numerically close (e.g. n-DMP: two genuinely
+    # different statistical procedures can both clear an enrichment threshold by very different
+    # amounts — see capabilities.py). Omitted from serialized output and from content_hash when
+    # at the "tight_numeric" default (mirrors verification_policy above).
+    agreement_mode: Literal["tight_numeric", "both_satisfy_criterion"] = "tight_numeric"
 
     @property
     def ref(self) -> str:
@@ -166,15 +178,23 @@ class CapabilityCell(_Model):
                 else None
             ),
         }
+        # agreement_mode is omitted at its "tight_numeric" default (not even as a key) so a
+        # pre-existing cell's content_hash is untouched by this field's introduction — only a
+        # cell that actually opts into "both_satisfy_criterion" (n-DMP) gets a new content_hash.
+        if self.agreement_mode != "tight_numeric":
+            canonical["agreement_mode"] = self.agreement_mode
         return "sha256:" + _sha(canonical)
 
     @model_serializer(mode="wrap")
     def _serialize(self, handler) -> dict:
-        """Drop verification_policy from the output when None so existing cells'
-        model_dump/model_dump_json stays byte-identical (no new key)."""
+        """Drop verification_policy when None, and agreement_mode at its "tight_numeric"
+        default, from the output so existing cells' model_dump/model_dump_json stays
+        byte-identical (no new key)."""
         data = handler(self)
         if data.get("verification_policy") is None:
             data.pop("verification_policy", None)
+        if data.get("agreement_mode") == "tight_numeric":
+            data.pop("agreement_mode", None)
         return data
 
     @model_validator(mode="after")

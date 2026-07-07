@@ -136,6 +136,31 @@ def test_three_cells_no_verification_policy_key_model_dump_json():
 
 
 # ---------------------------------------------------------------------------
+# 2b. agreement_mode byte-identical for every pre-existing cell (only n-DMP opts in)
+# ---------------------------------------------------------------------------
+
+
+def test_mean_diff_and_region_cells_no_agreement_mode_key():
+    """The tight global agreement bound is unaffected for every pre-existing cell: no new
+    'agreement_mode' key, hence no content_hash drift, for mean_diff / region-Δβ."""
+    from polymer_claims.capabilities import MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL
+    for cell in (MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL):
+        d = _cell_dump(cell)
+        assert "agreement_mode" not in d, (
+            f"{cell.capability_id}: agreement_mode must be omitted at the tight_numeric default; keys: {list(d)}"
+        )
+        assert cell.agreement_mode == "tight_numeric"
+
+
+def test_n_dmps_cell_intentionally_sets_agreement_mode():
+    """n-DMP is the ONE deliberate exception: it opts into both_satisfy_criterion (documented in
+    capabilities.py, N_DMPS_CELL), so its dump DOES carry the key."""
+    from polymer_claims.capabilities import N_DMPS_CELL
+    d = _cell_dump(N_DMPS_CELL)
+    assert d["agreement_mode"] == "both_satisfy_criterion"
+
+
+# ---------------------------------------------------------------------------
 # 3. EvaluationPlan commitment_hash unchanged (no execution_contract key when None)
 # ---------------------------------------------------------------------------
 

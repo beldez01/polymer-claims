@@ -294,3 +294,65 @@ def test_verify_agreement_on_undetermined_does_not_mint():
     assert ve.results[0].verdict == SatisfactionVerdict.UNDETERMINED
     assert ve.agreement is True
     assert ve.satisfaction is None
+
+
+# ---------------------------------------------------------------------------
+# Per-capability agreement_mode override (CapabilityCell.agreement_mode's grammar-level
+# mechanism; n-DMP threads "both_satisfy_criterion" through in the umbrella).
+# ---------------------------------------------------------------------------
+
+
+class _ConstCountAdapter:
+    """Toy adapter that always reports a fixed terminal count, regardless of the node — exercises
+    the agreement-mode mechanism in isolation, independent of any real capability."""
+
+    def __init__(self, identity: str, value: float) -> None:
+        self.identity = identity
+        self._value = value
+
+    def execute(self, node, upstream, ctx) -> ExecValue:
+        return ExecValue(value=self._value)
+
+
+def _count_plan(threshold: float = 0.0) -> EvaluationPlan:
+    node = OperationNode(id="a", impl="builtin::const", params=(("value", "0.0"),), produces=_q())
+    criterion = SatisfactionCriterion(comparator=Comparator.GE, threshold=threshold)
+    return EvaluationPlan(graph=ComputeGraph(nodes=(node,), terminal="a"), criterion=criterion)
+
+
+def test_verify_both_satisfy_criterion_agrees_despite_large_magnitude_gap():
+    # threshold k=10: 100 and 500 both clear it by very different amounts (80% relative gap,
+    # far beyond any numeric tolerance) -- both_satisfy_criterion mode agrees anyway, because
+    # BOTH legs' own verdicts are independently SATISFIED (100>=10 and 500>=10); there is no
+    # numeric-closeness requirement in this mode.
+    ve = verify(
+        _count_plan(threshold=10.0), _ctx(),
+        (_ConstCountAdapter("a1", 100.0), _ConstCountAdapter("a2", 500.0)),
+        agreement_mode="both_satisfy_criterion",
+    )
+    assert ve.agreement is True
+    assert ve.satisfaction is not None
+
+
+def test_verify_both_satisfy_criterion_disagrees_when_only_one_leg_clears_threshold():
+    # threshold k=10: leg a1's 5.0 REFUTES (5 < 10) while leg a2's 20.0 SATISFIES (20 >= 10) --
+    # the two legs' own verdicts genuinely disagree, so even under both_satisfy_criterion mode
+    # (no numeric-closeness check) agreement fails and nothing is minted.
+    ve = verify(
+        _count_plan(threshold=10.0), _ctx(),
+        (_ConstCountAdapter("a1", 5.0), _ConstCountAdapter("a2", 20.0)),
+        agreement_mode="both_satisfy_criterion",
+    )
+    assert ve.agreement is False
+    assert ve.satisfaction is None
+
+
+def test_verify_default_mode_preserves_tight_numeric_bound():
+    # No override (agreement_mode="tight_numeric", the default) -> the OLD global tight bound
+    # (abs 1e-9 OR rel 1e-6) still applies byte-identically: a difference that both independently
+    # satisfy the (GE 0) criterion, but that lies outside the tight bound, must still disagree.
+    ve = verify(
+        _count_plan(), _ctx(),
+        (_ConstCountAdapter("a1", 100.0), _ConstCountAdapter("a2", 100.001)),
+    )
+    assert ve.agreement is False

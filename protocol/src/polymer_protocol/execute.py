@@ -19,7 +19,7 @@ from polymer_grammar import (
     requires_safety_review,
     verify,
 )
-from polymer_grammar.capability import validate_claim_shape
+from polymer_grammar.capability import CapabilityRegistry, validate_claim_shape
 from polymer_grammar.commitment import commitment_hash
 from polymer_grammar.evaluate import EvaluationResult, ExecValue, SatisfactionVerdict, VerifiedEvaluation
 
@@ -37,6 +37,25 @@ def _is_executable(claim: Claim) -> bool:
     if claim.governance is not None and requires_safety_review(claim.governance):
         return False
     return True
+
+
+def _agreement_mode_for(
+    claim: Claim, capability_registry: CapabilityRegistry | None
+) -> str:
+    """Resolve the per-capability agreement mode (CapabilityCell.agreement_mode) for a claim's
+    terminal node, by matching node.impl to a registered cell's operation_impl. "tight_numeric"
+    (no registry, or no matching cell) preserves the global tight bound byte-identically — this
+    is purely an opt-in per-capability override."""
+    if capability_registry is None or claim.evaluation_plan is None:
+        return "tight_numeric"
+    graph = claim.evaluation_plan.graph
+    node = next((n for n in graph.nodes if n.id == graph.terminal), None)
+    if node is None:
+        return "tight_numeric"
+    for cell in capability_registry.cells:
+        if cell.operation_impl == node.impl:
+            return cell.agreement_mode
+    return "tight_numeric"
 
 
 def _pre_dispatch_failure(claim_id: str, reason: str, adapter_identity: str = "") -> tuple[ExecRecord, EvidenceExecution]:
@@ -66,6 +85,7 @@ def execute_ground(
     only: frozenset[str] | None = None,
     materializations: dict[str, MaterializationContext] | None = None,
     evidence_runtime: EvidenceRuntime | None = None,
+    capability_registry: CapabilityRegistry | None = None,
 ) -> tuple[Corpus, tuple[ExecRecord, ...], tuple[EvidenceExecution, ...]]:
     """Run verify() over executable claims, optionally gated to this cycle's selection.
 
@@ -81,6 +101,11 @@ def execute_ground(
     capability cell has ``verification_policy.execution == "single"`` are dispatched to the
     EvidenceExecutor instead of the 2-adapter verify() gate. When None, all claims use the
     standard verify() path and the third return element is always an empty tuple.
+
+    ``capability_registry`` (when supplied) resolves each claim's CapabilityCell (by matching its
+    terminal node's impl to a cell's operation_impl) to thread a per-capability agreement mode
+    into the 2-adapter verify() gate. None (default) → every claim uses the global tight bound,
+    byte-identical to before this parameter existed.
 
     Returns ``(corpus, records, evidence_executions)``. The third element is always present
     (even when evidence_runtime is None — it is then an empty tuple).
@@ -214,7 +239,11 @@ def execute_ground(
                 continue
 
         # ── Standard 2-adapter verify() path ─────────────────────────────────
-        evaluation = verify(c.evaluation_plan, ctx_c, adapters, claim_leaves=c.leaves)
+        mode = _agreement_mode_for(c, capability_registry)
+        evaluation = verify(
+            c.evaluation_plan, ctx_c, adapters, claim_leaves=c.leaves,
+            agreement_mode=mode,
+        )
         records.append(ExecRecord(claim_id=c.id, evaluation=evaluation))
 
     return corpus, tuple(records), tuple(evidence_executions)

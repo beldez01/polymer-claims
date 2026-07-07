@@ -21,6 +21,16 @@ def test_cell_shapes_and_comparators_and_oracle():
     assert {p.name for p in N_DMPS_CELL.param_schema} == {"probes", "group_col", "level_a", "level_b", "alpha"}
 
 
+def test_n_dmps_eligible_adapters_are_ttest_and_rank():
+    assert set(N_DMPS_CELL.eligible_adapter_identities) == {"methyl-ndmp-ttest", "methyl-ndmp-rank"}
+
+
+def test_only_n_dmps_sets_agreement_mode():
+    assert MEAN_DIFF_CELL.agreement_mode == "tight_numeric"
+    assert REGION_DELTA_BETA_CELL.agreement_mode == "tight_numeric"
+    assert N_DMPS_CELL.agreement_mode == "both_satisfy_criterion"
+
+
 # ---------------------------------------------------------------------------
 # Task 16 — eval::benchmark_advantage@v1
 # ---------------------------------------------------------------------------
