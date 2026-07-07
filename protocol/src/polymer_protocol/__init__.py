@@ -109,6 +109,11 @@ from .blame_bridge import (
     blame_verdict_from_obstructions,
     duhem_statuses_from_obstructions,
 )
+from .duhem_fold import (
+    DuhemFoldAudit,
+    apply_duhem_consistency,
+    duhem_fold_from_obstructions,
+)
 from .verify import verify_stage
 from .evidence_executor import (
     ExecutionFailure,
@@ -232,6 +237,9 @@ __all__ = [
     "blame_set_from_obstruction",
     "blame_verdict_from_obstructions",
     "duhem_statuses_from_obstructions",
+    "DuhemFoldAudit",
+    "apply_duhem_consistency",
+    "duhem_fold_from_obstructions",
     # ── topology / timeline export (the viewer data contract) ─────────────
     "CONTRACT_VERSION",
     "export_topology",
