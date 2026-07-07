@@ -1,8 +1,9 @@
-from polymer_grammar import FDRLedger, PendingReason, Status
-from polymer_protocol.sheaf import Obstruction
+from polymer_grammar import DefeatEdge, DefeatEdgeKind, EquivalenceClaim, FDRLedger, PendingReason, Status
+from polymer_protocol.sheaf import Obstruction, extract_sheaf, frustration_obstructions
 from polymer_protocol.corpus import Corpus
-from polymer_protocol.duhem_fold import duhem_fold_from_obstructions
+from polymer_protocol.duhem_fold import apply_duhem_consistency, duhem_fold_from_obstructions
 
+from tests.conftest import _make_quantity_claim as make_quantity_claim
 from tests.conftest import make_claim
 
 
@@ -59,3 +60,43 @@ def test_ledger_is_untouched():
     corpus_in = _corpus(a, make_claim("B", status=Status.LICENSED))
     corpus_out, _ = duhem_fold_from_obstructions(corpus_in, [_obstruction("A", "B")])
     assert corpus_out.fdr_ledger == corpus_in.fdr_ledger   # warrant-only ⇒ no refund
+
+
+def _make_frustrated_corpus() -> Corpus:
+    """Three LICENSED Quantity-leaf claims A,B,C, commensurable (same dimension, no unit ⇒
+    DERIVED basis), related by two equivalence edges (A≡B, B≡C, sign +1) and one defeat edge
+    (C⊣A, sign -1). Mirrors test_sheaf.py's equivalence/defeat constructions
+    (test_equivalence_edge_weight_and_commensurability, test_effective_defeat_becomes_signed_edge...).
+    Odd number (one) of sign -1 edges around the A-B-C triangle ⇒ extract_sheaf renders a
+    frustrated cycle (BFS labeling contradiction, no local witness)."""
+    dim = (("mass", 1),)
+    a = make_quantity_claim("A", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    b = make_quantity_claim("B", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    c = make_quantity_claim("C", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    equivalences = (
+        EquivalenceClaim(id="e1", left="A", right="B", severity=0.9, status=Status.LICENSED),
+        EquivalenceClaim(id="e2", left="B", right="C", severity=0.9, status=Status.LICENSED),
+    )
+    defeat_edges = (DefeatEdge(source="C", target="A", kind=DefeatEdgeKind.REBUT),)
+    return Corpus(
+        claims=(a, b, c),
+        equivalences=equivalences,
+        defeat_edges=defeat_edges,
+        fdr_ledger=FDRLedger(target_fdr=0.05),
+    )
+
+
+def test_apply_duhem_consistency_demotes_on_a_real_frustrated_corpus():
+    frustrated_corpus = _make_frustrated_corpus()
+    # Non-vacuous: the corpus really does frustrate before we ever call the fold.
+    obstructions = frustration_obstructions(extract_sheaf(frustrated_corpus))
+    assert obstructions != ()
+    assert set(obstructions[0].claim_ids) == {"A", "B", "C"}
+
+    corpus, audit = apply_duhem_consistency(frustrated_corpus)
+    by_id = corpus.by_id()
+    assert set(audit.demoted) == {"A", "B", "C"}
+    for cid in ("A", "B", "C"):
+        assert by_id[cid].status == Status.PENDING
+        assert by_id[cid].pending_reason == PendingReason.DUHEM_UNDERDETERMINED
+    assert corpus.fdr_ledger == frustrated_corpus.fdr_ledger   # still ledger-neutral end-to-end
