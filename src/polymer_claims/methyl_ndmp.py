@@ -1,9 +1,14 @@
 """n-DMPs-at-FDR: the count of differentially-methylated probes (a probe is a DMP iff its per-probe
-two-group pooled t-test p-value < alpha), as a second scalar reduction alongside region-Δβ. Two
-independent legs compute the per-probe t two ways (manual pooled-t vs OLS-coef t) and AGREE on the
-integer count -> air-gap. Umbrella/impure (reads the contract via _load_betas). NOT re-exported from
-__init__ (base import stays numpy-free). The count's e-value (count_enrichment_evalue) lives in
-evidence.py.
+two-group test p-value < alpha), as a second scalar reduction alongside region-Δβ. Two
+INDEPENDENT legs compute the per-probe DMP call two genuinely different ways — a manual pooled
+two-sample t-test (parametric; leg A) vs a Mann-Whitney U / Wilcoxon rank-sum test (nonparametric,
+rank-based; leg B) — and AGREE on the integer count WITHIN A RELATIVE TOLERANCE -> air-gap. The two
+legs rest on different statistical assumptions (normality/equal-variance vs none), so they can
+genuinely disagree on a shared-assumption failure (e.g. a skewed/outlier-laden probe), not just on
+a coding bug — see NDmpRankAdapter's docstring. Umbrella/impure (reads the contract via
+_load_betas). NOT re-exported from __init__ (base import stays numpy-free). The count's e-value
+(count_enrichment_evalue) lives in evidence.py and is computed EXCLUSIVELY from leg A's indicators
+(dmp_indicators) — the rank leg is a corroborating gate only and never feeds the e-value.
 """
 from __future__ import annotations
 
@@ -149,25 +154,6 @@ def _alpha(node) -> float:
     return float(dict(node.params)["alpha"])
 
 
-def _ols_t(a: np.ndarray, b: np.ndarray) -> tuple[float, int]:
-    """OLS group-coefficient t-statistic + df (numpy lstsq). Leg B — equals _pooled_t for two groups."""
-    na, nb = len(a), len(b)
-    df = na + nb - 2
-    y = np.concatenate([a, b])
-    ind = np.concatenate([np.zeros(na), np.ones(nb)])
-    X = np.column_stack([np.ones_like(ind), ind])
-    coef, *_ = np.linalg.lstsq(X, y, rcond=None)
-    resid = y - X @ coef
-    mse = float(resid @ resid) / df
-    xtx_inv = np.linalg.inv(X.T @ X)
-    se = math.sqrt(mse * float(xtx_inv[1, 1]))
-    if se == 0.0:
-        # se==0: degenerate. Mirror _pooled_t exactly (compare group means, not the
-        # BLAS-reconstructed coef[1]) so the two legs never disagree on a constant probe.
-        return (0.0 if a.mean() == b.mean() else math.inf), df
-    return (float(coef[1]) / se, df)
-
-
 class NDmpTTestAdapter:
     """Independent leg A — DMP count via the manual pooled two-sample t-test."""
 
@@ -177,14 +163,92 @@ class NDmpTTestAdapter:
         return ExecValue(value=float(_n_dmps(_per_probe_pvalues(node, leg=_pooled_t), _alpha(node))))
 
 
-class NDmpOlsCoefAdapter:
-    """Independent leg B — DMP count via the per-probe OLS group-coefficient t (numpy lstsq).
-    Equals leg A's count for a two-group design (the OLS-coef t == the pooled t)."""
+# --- Mann-Whitney U / Wilcoxon rank-sum two-group test (pure Python/numpy, no scipy) ---
 
-    identity = "methyl-ndmp-ols"
+
+def _std_normal_cdf(x: float) -> float:
+    """Standard normal CDF via the error function (math.erf; stdlib, no scipy)."""
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+
+
+def _rank_sum_p(a: np.ndarray, b: np.ndarray) -> float:
+    """Two-sided Mann-Whitney U / Wilcoxon rank-sum p-value, normal approximation with tie
+    correction and continuity correction (pure-Python/numpy, no scipy). Leg B — a genuinely
+    different statistical procedure from leg A's pooled t-test (rank-based; no normality or
+    equal-variance assumption), so it can disagree with leg A on a shared-assumption failure
+    (e.g. a skewed or outlier-laden probe), not merely on a coding bug.
+
+    Ranks the pooled sample (average rank within tie blocks), computes U for group b, and its
+    tie-corrected normal-approximation z-score with a +/-0.5 continuity correction. Degenerate
+    case: if every pooled value is tied (sigma_U == 0 — only possible when the ENTIRE pooled
+    sample is one tie block), mirrors _pooled_t's se==0 branch: identical values -> not a DMP
+    (p=1.0)."""
+    na, nb = len(a), len(b)
+    combined = np.concatenate([a, b])
+    n = na + nb
+    order = np.argsort(combined, kind="mergesort")
+    sorted_vals = combined[order]
+    ranks = np.empty(n, dtype=float)
+    tie_term = 0.0
+    i = 0
+    while i < n:
+        j = i
+        while j + 1 < n and sorted_vals[j + 1] == sorted_vals[i]:
+            j += 1
+        avg_rank = (i + 1 + j + 1) / 2.0  # average of the 1-indexed rank positions i+1..j+1
+        t = j - i + 1
+        for k in range(i, j + 1):
+            ranks[order[k]] = avg_rank
+        tie_term += t**3 - t
+        i = j + 1
+    r_b = ranks[na:].sum()
+    u_b = r_b - nb * (nb + 1) / 2.0
+    mean_u = na * nb / 2.0
+    var_u = (na * nb / 12.0) * ((n + 1) - tie_term / (n * (n - 1)))
+    if var_u <= 0.0:
+        return 1.0
+    sigma_u = math.sqrt(var_u)
+    diff = u_b - mean_u
+    cc = 0.5 if diff > 0.0 else (-0.5 if diff < 0.0 else 0.0)
+    z = (diff - cc) / sigma_u
+    p = 2.0 * (1.0 - _std_normal_cdf(abs(z)))
+    return min(max(p, 0.0), 1.0)
+
+
+def _per_probe_pvalues_rank(node: OperationNode) -> dict[str, float]:
+    """Per-probe two-sided rank-sum p-values over the node's `probes` param (leg B). Loads betas
+    the same way as _per_probe_pvalues, but never shares its t/df machinery — kept fully separate
+    so leg A (the e-value's view, dmp_indicators) is untouched by this leg's introduction."""
+    beta, sample_ids, group_of, p = _load_betas(node)
+    probes = [s for s in p["probes"].split(",") if s]
+    level_a, level_b = p["level_a"], p["level_b"]
+    a_ids = [s for s in sample_ids if group_of[s] == level_a]
+    b_ids = [s for s in sample_ids if group_of[s] == level_b]
+    if len(a_ids) < 2 or len(b_ids) < 2:
+        raise ValueError("need >=2 samples per group for a rank-sum test")
+    out: dict[str, float] = {}
+    for cg in probes:
+        if cg not in beta:
+            raise KeyError(f"probe {cg!r} not in contract")
+        a = np.array([beta[cg][s] for s in a_ids], dtype=float)
+        b = np.array([beta[cg][s] for s in b_ids], dtype=float)
+        out[cg] = _rank_sum_p(a, b)
+    return out
+
+
+class NDmpRankAdapter:
+    """Independent leg B — DMP count via the per-probe Mann-Whitney U / Wilcoxon rank-sum test.
+    A genuinely different statistical procedure from leg A (rank-based, no normality or
+    equal-variance assumption) — unlike a leg forced to algebraically mirror leg A, this one can
+    (and on adversarial/non-normal data, does) disagree with leg A's count. The air-gap between
+    the two legs is gated on each leg independently clearing the claim's criterion
+    (CapabilityCell.agreement_mode="both_satisfy_criterion" in capabilities.py), not numeric
+    closeness or exact equality on the count."""
+
+    identity = "methyl-ndmp-rank"
 
     def execute(self, node, upstream, ctx) -> ExecValue:
-        return ExecValue(value=float(_n_dmps(_per_probe_pvalues(node, leg=_ols_t), _alpha(node))))
+        return ExecValue(value=float(_n_dmps(_per_probe_pvalues_rank(node), _alpha(node))))
 
 
 def _all_probe_ids(ref: str) -> tuple[str, ...]:
@@ -254,8 +318,8 @@ def ndmp_independent_registry() -> AdapterRegistry:
             implementation_hash=implementation_hash_for_adapter(NDmpTTestAdapter),
         ),
         AdapterCredential(
-            identity="methyl-ndmp-ols",
-            owner="owner-ols",
-            implementation_hash=implementation_hash_for_adapter(NDmpOlsCoefAdapter),
+            identity="methyl-ndmp-rank",
+            owner="owner-rank",
+            implementation_hash=implementation_hash_for_adapter(NDmpRankAdapter),
         ),
     ))

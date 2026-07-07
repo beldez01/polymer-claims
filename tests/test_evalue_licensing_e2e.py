@@ -5,13 +5,14 @@ from polymer_grammar import FDRLedger, MaterializationContext, Status
 from polymer_protocol import Corpus, run_cycle
 
 from polymer_claims.analysis_profile import profile_oracle_registry
+from polymer_claims.capabilities import CAPABILITY_CELLS
 from polymer_claims.evidence import evidence_map
 from polymer_claims.methyl_adapters import (
-    RegionLmCoefAdapter, RegionMeanDiffAdapter, methyl_independent_registry, region_delta_beta_claim,
+    RegionHodgesLehmannAdapter, RegionMeanDiffAdapter, methyl_independent_registry, region_delta_beta_claim,
 )
 from polymer_claims.profiles import CANONICAL_EPICV2_V1
 
-_ADAPTERS = (RegionMeanDiffAdapter(), RegionLmCoefAdapter())
+_ADAPTERS = (RegionMeanDiffAdapter(), RegionHodgesLehmannAdapter())
 _BASE = MaterializationContext(id="M", api_version="v1", data_version="d1")
 _POWERED = "se:epicv2_casectrl_powered@1"
 _STRONG = ("cg00000001", "cg00000002", "cg00000003", "cg00000004", "cg00000005")
@@ -25,6 +26,7 @@ def _run(claim):
         adapter_registry=methyl_independent_registry(),
         oracles=profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public")),
         evidence=evidence_map(corpus),
+        capability_registry=CAPABILITY_CELLS,
     )
 
 

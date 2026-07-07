@@ -4,9 +4,10 @@ from polymer_grammar import FDRLedger, IndependenceTier, MaterializationContext,
 from polymer_protocol import Corpus
 
 from polymer_claims.analysis_profile import profile_oracle_registry
+from polymer_claims.capabilities import CAPABILITY_CELLS
 from polymer_claims.materialization import materialization_map
 from polymer_claims.methyl_adapters import (
-    RegionLmCoefAdapter,
+    RegionHodgesLehmannAdapter,
     RegionMeanDiffAdapter,
     methyl_independent_registry,
     region_delta_beta_claim,
@@ -25,7 +26,7 @@ def test_node_runner_computes_replication_inputs_live():
     corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
     runner = NodeRunner.from_seed(
         corpus,
-        adapters=(RegionMeanDiffAdapter(), RegionLmCoefAdapter()),
+        adapters=(RegionMeanDiffAdapter(), RegionHodgesLehmannAdapter()),
         ctx=ctx,
         scheduler_budget=10.0,
         adapter_registry=methyl_independent_registry(),
@@ -34,6 +35,7 @@ def test_node_runner_computes_replication_inputs_live():
         replication_bindings={"c-repl-live": "se:epicv2_casectrl_demo_b@1"},
         layout="force",
         budget=2.5,
+        capability_registry=CAPABILITY_CELLS,
     )
 
     runner.tick()

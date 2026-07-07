@@ -11,11 +11,15 @@ act next). A threaded SelectionLedger (passed in via `ledger=` and returned on C
 cross-cycle accumulating belief + per-operator surprise-Goodhart credit; an optional
 OracleRegistry caps a licensed claim's empirical strength at VERIFY; SELECT also supports a
 quality-diversity portfolio (cell caps) and a heterodox reserve lane (both off by default).
+An optional `capability_registry=` threads each executed claim's per-capability agreement
+mode (CapabilityCell.agreement_mode) into execute_ground's verify() gate; omitted
+(default) → every claim uses the global tight bound, byte-identical to before.
 Spec §6.8 + SELECT #3a/#3b + GENERATE #4a + oracle dossier #2.
 """
 from __future__ import annotations
 
 from polymer_grammar import Adapter, Claim, MaterializationContext, PendingReason, Satisfaction, Status
+from polymer_grammar.capability import CapabilityRegistry
 
 from .adapter_registry import AdapterRegistry
 from .canonicalize import canonicalize
@@ -60,6 +64,7 @@ def run_cycle(
     evidence: dict[str, float] | None = None,
     replications: dict[str, tuple[Satisfaction, ...]] | None = None,
     evidence_runtime: EvidenceRuntime | None = None,
+    capability_registry: CapabilityRegistry | None = None,
 ) -> CycleResult:
     audit: list[StageAudit] = []
     led = ledger if ledger is not None else SelectionLedger()
@@ -120,6 +125,7 @@ def run_cycle(
     corpus, records, evidence_executions = execute_ground(
         corpus, adapters, ctx, only=selected_ids,
         materializations=materializations, evidence_runtime=evidence_runtime,
+        capability_registry=capability_registry,
     )
     audit.append(StageAudit(stage="execute_ground", note=f"{len(records)} executed", count=len(records)))
 

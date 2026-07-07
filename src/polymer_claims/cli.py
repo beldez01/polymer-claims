@@ -695,8 +695,9 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         if getattr(args, "calibration_epoch", None):
             cal_kwargs["calibration_epoch_path"] = args.calibration_epoch
     if getattr(args, "tcga_laml", False):
-        from .methyl_ndmp import NDmpOlsCoefAdapter, NDmpTTestAdapter, ndmp_independent_registry
+        from .methyl_ndmp import NDmpRankAdapter, NDmpTTestAdapter, ndmp_independent_registry
         from .analysis_profile import profile_oracle_registry
+        from .capabilities import CAPABILITY_CELLS
         from .evidence import evidence_map
         from .materialization import materialization_map
         from .profiles import CANONICAL_HM450_V1
@@ -704,7 +705,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         corpus, seed_kwargs = real_ndmp_seed_corpus()
         runner = NodeRunner.from_seed(
             corpus,
-            adapters=(NDmpTTestAdapter(), NDmpOlsCoefAdapter()),
+            adapters=(NDmpTTestAdapter(), NDmpRankAdapter()),
             ctx=_CTX,
             scheduler_budget=args.budget,
             max_frames=args.max_frames,
@@ -713,6 +714,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             materializations=materialization_map(corpus, _CTX, profiles=(CANONICAL_HM450_V1,)),
             evidence=evidence_map(corpus),
             layout=args.layout,
+            capability_registry=CAPABILITY_CELLS,
             **seed_kwargs,
             **cal_kwargs,
         )
@@ -756,11 +758,12 @@ def _cmd_serve(args: argparse.Namespace) -> int:
         from polymer_grammar import FDRLedger
         from .analysis_profile import profile_oracle_registry
         from .methyl_adapters import (
-            RegionLmCoefAdapter,
+            RegionHodgesLehmannAdapter,
             RegionMeanDiffAdapter,
             methyl_independent_registry,
         )
-        from .methyl_ndmp import NDmpOlsCoefAdapter, NDmpTTestAdapter, ndmp_independent_registry
+        from .methyl_ndmp import NDmpRankAdapter, NDmpTTestAdapter, ndmp_independent_registry
+        from .capabilities import CAPABILITY_CELLS
         from .profiles import CANONICAL_EPICV2_V1, CANONICAL_HM450_V1
         from .throttle import every_n_ticks
 
@@ -774,9 +777,9 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             corpus,
             adapters=(
                 RegionMeanDiffAdapter(),
-                RegionLmCoefAdapter(),
+                RegionHodgesLehmannAdapter(),
                 NDmpTTestAdapter(),
-                NDmpOlsCoefAdapter(),
+                NDmpRankAdapter(),
             ),
             ctx=_CTX,
             scheduler_budget=args.budget,
@@ -792,6 +795,7 @@ def _cmd_serve(args: argparse.Namespace) -> int:
             profiles=(CANONICAL_EPICV2_V1, CANONICAL_HM450_V1),
             layout=args.layout,
             budget=2.5,
+            capability_registry=CAPABILITY_CELLS,
             **cal_kwargs,
         )
         return _run_node(uvicorn, create_app, runner, args)

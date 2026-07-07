@@ -12,10 +12,11 @@ from polymer_grammar import FDRLedger, MaterializationContext
 from polymer_protocol import Corpus, run_cycle
 
 from .analysis_profile import profile_oracle_id, profile_oracle_registry
+from .capabilities import CAPABILITY_CELLS
 from .evidence import count_enrichment_evalue
 from .materialization import materialization_map
 from .methyl_ndmp import (
-    NDmpOlsCoefAdapter,
+    NDmpRankAdapter,
     NDmpTTestAdapter,
     _all_probe_ids,
     dmp_indicators,
@@ -40,11 +41,12 @@ def run_ndmp_gate(ref: str, claim_id: str, *, alpha: float = 0.05) -> dict:
     base = MaterializationContext(id="M", api_version="v1", data_version="d1")
     corpus = Corpus(claims=(claim,), fdr_ledger=FDRLedger(target_fdr=0.05))
     result = run_cycle(
-        corpus, (NDmpTTestAdapter(), NDmpOlsCoefAdapter()), base,
+        corpus, (NDmpTTestAdapter(), NDmpRankAdapter()), base,
         adapter_registry=ndmp_independent_registry(),
         oracles=profile_oracle_registry((CANONICAL_HM450_V1, "recomputable_public")),
         materializations=materialization_map(corpus, base, profiles=(CANONICAL_HM450_V1,)),
-        evidence={claim_id: evalue})
+        evidence={claim_id: evalue},
+        capability_registry=CAPABILITY_CELLS)
     c = next((x for x in result.corpus.claims if x.id == claim_id), None)
     if c is None:
         raise RuntimeError(f"claim {claim_id!r} missing from cycle result")

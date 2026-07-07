@@ -24,7 +24,7 @@ from .leaf import (
     PropositionLeaf,
     QuantityLeaf,
 )
-from .licensing import MaterializationContext, Satisfaction, SatisfactionVerdict
+from .licensing import LegEvidence, LegValue, MaterializationContext, Satisfaction, SatisfactionVerdict
 from .operations import (
     Comparator,
     EvaluationPlan,
@@ -350,11 +350,26 @@ def evaluate(
 
 
 def _check_agreement(
-    results: tuple[EvaluationResult, ...], abs_tol: float, rel_tol: float
+    results: tuple[EvaluationResult, ...], abs_tol: float, rel_tol: float,
+    *, mode: Literal["tight_numeric", "both_satisfy_criterion"] = "tight_numeric",
 ) -> tuple[bool, str | None]:
+    """mode="both_satisfy_criterion" (see CapabilityCell.agreement_mode) treats verdict
+    agreement ALONE as sufficient: each EvaluationResult.verdict already reflects whether THAT
+    leg's own terminal value independently satisfies the claim's SatisfactionCriterion (computed
+    per-adapter by evaluate()/_apply_criterion against the same criterion), so the verdict-match
+    check below already IS "both legs independently satisfy (or both refute) the criterion" — no
+    requirement that the two legs' terminal magnitudes be numerically close. Honest limitation:
+    this checks only that both legs cross the SAME threshold, not WHICH underlying units produced
+    that count (e.g. two n-DMP legs can agree the count clears k while flagging different probes)
+    — the stronger per-unit concordance check is deliberately deferred.
+
+    mode="tight_numeric" (the default) preserves the byte-identical global tight bound (abs 1e-9
+    OR rel 1e-6) on the two legs' terminal values, for every pre-existing capability."""
     verdicts = {r.verdict for r in results}
     if len(verdicts) > 1:
         return False, f"verdict disagreement: {sorted(v.value for v in verdicts)}"
+    if mode == "both_satisfy_criterion":
+        return True, None
     vals = [r.terminal.value for r in results]
     numeric = [v for v in vals if isinstance(v, (int, float))]
     if len(numeric) == len(vals) and numeric:
@@ -370,6 +385,25 @@ def _check_agreement(
     return True, None
 
 
+def _leg_evidence(results: tuple[EvaluationResult, ...]) -> LegEvidence | None:
+    """R5.1: the per-leg independence evidence for a REPRODUCED Satisfaction — each executing
+    leg's (adapter_identity, terminal value) plus their relative divergence. None when any
+    leg's terminal value isn't numeric (leg_evidence is a numeric-evidence record, not a
+    general-purpose value log); RECORD only, never gates agreement or caps strength."""
+    vals = [r.terminal.value for r in results]
+    if not all(isinstance(v, (int, float)) for v in vals):
+        return None
+    legs = tuple(
+        LegValue(identity=r.adapter_identity, value=float(r.terminal.value))
+        for r in results
+    )
+    values = [leg.value for leg in legs]
+    vmax, vmin = max(values), min(values)
+    denom = max(abs(vmax), abs(vmin), 1.0)
+    relative_divergence = abs(vmax - vmin) / denom
+    return LegEvidence(legs=legs, relative_divergence=relative_divergence)
+
+
 def verify(
     plan: EvaluationPlan,
     ctx: MaterializationContext,
@@ -378,6 +412,7 @@ def verify(
     claim_leaves: tuple[Leaf, ...] = (),
     agreement_abs_tol: float = _ABS_TOL,
     agreement_rel_tol: float = _REL_TOL,
+    agreement_mode: Literal["tight_numeric", "both_satisfy_criterion"] = "tight_numeric",
 ) -> VerifiedEvaluation:
     """Run `plan` under >=2 distinct-identity adapters; mint a Satisfaction ONLY on
     agreement + SATISFIED. The structural 'no self-licensing' air-gap: the writer of a
@@ -387,6 +422,11 @@ def verify(
     identities map to genuinely independent implementations (so a single actor cannot
     supply two cosmetically-different adapters) is the responsibility of the adapter
     registry / protocol layer, not this function.
+
+    `agreement_mode="both_satisfy_criterion"` (see CapabilityCell.agreement_mode) replaces the
+    abs/rel tight-bound numeric check with plain verdict agreement (each leg independently
+    satisfies, or both refute, the claim's SatisfactionCriterion); "tight_numeric" (the default)
+    preserves today's global tight bound byte-identically.
     """
     if len(adapters) < 2:
         raise SelfLicensingError("verify requires >= 2 adapters (writer != verifier)")
@@ -399,11 +439,14 @@ def verify(
     results = tuple(
         evaluate(plan, ctx, a, claim_leaves=claim_leaves) for a in adapters
     )
-    agreement, detail = _check_agreement(results, agreement_abs_tol, agreement_rel_tol)
+    agreement, detail = _check_agreement(
+        results, agreement_abs_tol, agreement_rel_tol, mode=agreement_mode,
+    )
     satisfaction: Satisfaction | None = None
     if agreement and results[0].verdict == SatisfactionVerdict.SATISFIED:
         satisfaction = Satisfaction(
-            verdict=SatisfactionVerdict.SATISFIED, materialization=ctx
+            verdict=SatisfactionVerdict.SATISFIED, materialization=ctx,
+            leg_evidence=_leg_evidence(results),
         )
     return VerifiedEvaluation(
         results=results,

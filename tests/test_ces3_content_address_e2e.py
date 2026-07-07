@@ -5,14 +5,15 @@ from polymer_protocol import Corpus, run_cycle
 from polymer_protocol.drift import drift_pass, reopen_drifted
 
 from polymer_claims.analysis_profile import content_hash, profile_oracle_registry
+from polymer_claims.capabilities import CAPABILITY_CELLS
 from polymer_claims.contracts import load_contract
 from polymer_claims.materialization import materialization_map
 from polymer_claims.methyl_adapters import (
-    RegionLmCoefAdapter, RegionMeanDiffAdapter, methyl_independent_registry, region_delta_beta_claim,
+    RegionHodgesLehmannAdapter, RegionMeanDiffAdapter, methyl_independent_registry, region_delta_beta_claim,
 )
 from polymer_claims.profiles import CANONICAL_EPICV2_V1
 
-_ADAPTERS = (RegionMeanDiffAdapter(), RegionLmCoefAdapter())
+_ADAPTERS = (RegionMeanDiffAdapter(), RegionHodgesLehmannAdapter())
 _BASE = MaterializationContext(id="M", api_version="v1", data_version="d1")
 
 
@@ -22,7 +23,8 @@ def _run(claim):
     return run_cycle(corpus, _ADAPTERS, _BASE,
                      adapter_registry=methyl_independent_registry(),
                      oracles=profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public")),
-                     materializations=mats)
+                     materializations=mats,
+                     capability_registry=CAPABILITY_CELLS)
 
 
 def test_licensed_claim_records_full_content_address():
