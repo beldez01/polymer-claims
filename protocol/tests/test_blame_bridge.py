@@ -38,3 +38,20 @@ def test_no_obstructions_is_empty_verdict():
     assert v.possibly_blamed == frozenset()
     assert v.robustly_blamed == frozenset()
     assert v.underdetermined == frozenset()
+
+
+from polymer_grammar.status import RejectionReason
+from polymer_protocol.blame_bridge import duhem_statuses_from_obstructions
+
+
+def test_single_cycle_routes_all_members_to_pending_duhem():
+    out = duhem_statuses_from_obstructions([_cycle("A", "B", "C")])
+    for cid in ("A", "B", "C"):
+        assert out[cid] == (Status.PENDING, PendingReason.DUHEM_UNDERDETERMINED, None)
+
+
+def test_shared_claim_routes_to_rejected_robustly_blamed():
+    out = duhem_statuses_from_obstructions([_cycle("A", "B", "X"), _cycle("C", "D", "X")])
+    assert out["X"] == (Status.REJECTED, None, RejectionReason.ROBUSTLY_BLAMED)
+    assert out["A"] == (Status.PENDING, PendingReason.DUHEM_UNDERDETERMINED, None)
+    assert out["D"] == (Status.PENDING, PendingReason.DUHEM_UNDERDETERMINED, None)

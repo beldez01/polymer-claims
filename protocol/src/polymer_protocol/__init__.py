@@ -106,6 +106,7 @@ from .sheaf import (
 from .blame_bridge import (
     blame_set_from_obstruction,
     blame_verdict_from_obstructions,
+    duhem_statuses_from_obstructions,
 )
 from .verify import verify_stage
 from .evidence_executor import (
@@ -228,6 +229,7 @@ __all__ = [
     "extract_sheaf",
     "blame_set_from_obstruction",
     "blame_verdict_from_obstructions",
+    "duhem_statuses_from_obstructions",
     # ── topology / timeline export (the viewer data contract) ─────────────
     "CONTRACT_VERSION",
     "export_topology",

@@ -14,7 +14,13 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from polymer_grammar.blame import BlameAssignment, BlameSet, BlameVerdict
+from polymer_grammar.blame import (
+    BlameAssignment,
+    BlameSet,
+    BlameVerdict,
+    duhem_rejection_reason,
+    duhem_status,
+)
 from polymer_grammar.status import PendingReason, RejectionReason, Status
 
 from .sheaf import Obstruction
@@ -44,3 +50,20 @@ def blame_verdict_from_obstructions(obstructions: Sequence[Obstruction]) -> Blam
         possibly_blamed=union,
         underdetermined=union - robust,
     )
+
+
+def duhem_statuses_from_obstructions(
+    obstructions: Sequence[Obstruction],
+) -> dict[str, tuple[Status, PendingReason | None, RejectionReason | None]]:
+    """Per-claim (status, pending_reason, rejection_reason) for every claim implicated by the
+    obstructions. Underdetermined -> PENDING duhem_underdetermined; robustly blamed -> REJECTED
+    robustly_blamed. Claims not implicated are absent from the dict."""
+    verdict = blame_verdict_from_obstructions(obstructions)
+    out: dict[str, tuple[Status, PendingReason | None, RejectionReason | None]] = {}
+    for cid in sorted(verdict.possibly_blamed):
+        mapped = duhem_status(cid, verdict)
+        if mapped is None:
+            continue
+        status, pending_reason = mapped
+        out[cid] = (status, pending_reason, duhem_rejection_reason(cid, verdict))
+    return out
