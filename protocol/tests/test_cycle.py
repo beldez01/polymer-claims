@@ -22,7 +22,7 @@ def test_cycle_licenses_a_satisfied_claim(empty_ledger, ctx, adapters):
     # audit records one line per stage
     assert {a.stage for a in result.audit} == {
         "represent", "generate_stage", "canonicalize", "safety_gate", "select_stage",
-        "commit", "execute_ground", "verify_stage", "integrate",
+        "commit", "execute_ground", "verify_stage", "integrate", "duhem_consistency",
     }
 
 
@@ -654,3 +654,56 @@ def test_C2_injected_licensing_block_is_rejected(empty_ledger, ctx, adapters):
     assert "smug" not in r1.corpus.by_id()
     reasons = {d.claim_id: d.reason for d in r1.generation.discarded}
     assert reasons.get("smug") == "illicit-licensing"
+
+
+def test_run_cycle_demotes_odd_defeat_cycle_then_reopens_on_structural_resolution(
+    empty_ledger, ctx, adapters
+):
+    # Duhem fold, live: three LICENSED Quantity-leaf claims A,B,C in an odd (3-edge) REBUT
+    # defeat cycle. Under grounded semantics a directed 3-cycle never grounds ANY member
+    # (each is attacked, none is defended), so A/B/C are excluded from `prior_in` from the
+    # very start of the cycle -> integrate's `flipped_out` (= prior_in - in_set) can never
+    # include them -> integrate does not REJECT them -> they survive integrate LICENSED ->
+    # the duhem fold (called right after integrate) demotes them. Confirmed empirically below,
+    # not assumed.
+    from polymer_grammar import DefeatEdge, DefeatEdgeKind, PendingReason
+
+    from tests.conftest import _make_quantity_claim as make_quantity_claim
+
+    dim = (("mass", 1),)
+    claim_a = make_quantity_claim("A", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    claim_b = make_quantity_claim("B", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    claim_c = make_quantity_claim("C", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    defeat_edges = (
+        DefeatEdge(source="A", target="B", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="B", target="C", kind=DefeatEdgeKind.REBUT),
+        DefeatEdge(source="C", target="A", kind=DefeatEdgeKind.REBUT),
+    )
+    corpus = Corpus(
+        claims=(claim_a, claim_b, claim_c), defeat_edges=defeat_edges, fdr_ledger=empty_ledger
+    )
+
+    result = run_cycle(corpus, adapters, ctx)
+    # distinguish a wiring failure (no stage at all) from an integrate-interaction failure
+    assert "duhem_consistency" in {s.stage for s in result.audit}
+
+    by_id = result.corpus.by_id()
+    demoted = [
+        cid
+        for cid in ("A", "B", "C")
+        if by_id[cid].pending_reason == PendingReason.DUHEM_UNDERDETERMINED
+    ]
+    observed = [(cid, by_id[cid].status, by_id[cid].pending_reason) for cid in ("A", "B", "C")]
+    assert demoted, (
+        "odd defeat cycle among licensed claims should demote to PENDING duhem; "
+        f"observed post-run_cycle statuses: {observed}"
+    )
+    assert any(s.stage == "duhem_consistency" and s.count > 0 for s in result.audit)
+
+    # structural resolution: remove ONE defeat edge -> the 3-cycle is broken -> next cycle reopens
+    remaining = tuple(
+        e for e in result.corpus.defeat_edges if not (e.source == "C" and e.target == "A")
+    )
+    resolved = result.corpus.model_copy(update={"defeat_edges": remaining})
+    result2 = run_cycle(resolved, adapters, ctx)
+    assert result2.corpus.by_id()["A"].pending_reason == PendingReason.REINSTATED

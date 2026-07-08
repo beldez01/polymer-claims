@@ -26,6 +26,7 @@ from .canonicalize import canonicalize
 from .commit import commit
 from .corpus import Corpus, CycleResult, StageAudit, is_locked
 from .cost import CostModel, CostWeights
+from .duhem_fold import apply_duhem_consistency
 from .evidence_executor import EvidenceRuntime
 from .execute import execute_ground
 from .generate import Proposer, generate_stage
@@ -181,6 +182,14 @@ def run_cycle(
             count=corpus.fdr_ledger.n_tests,
         )
     )
+
+    corpus, duhem_audit = apply_duhem_consistency(corpus)
+    audit.append(StageAudit(
+        stage="duhem_consistency",
+        note=f"{len(duhem_audit.demoted)} demoted (duhem), {len(duhem_audit.reopened)} reopened"
+             + (f"; {sorted(duhem_audit.contradiction_ids)}" if duhem_audit.contradiction_ids else ""),
+        count=len(duhem_audit.demoted),
+    ))
 
     # Credit is allocated on SURVIVAL: the snapshot is taken POST-INTEGRATE so a claim that
     # licenses at VERIFY but is RETRACTED by INTEGRATE's AGM consistency contest earns no
