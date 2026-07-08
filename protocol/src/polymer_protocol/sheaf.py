@@ -133,12 +133,19 @@ def extract_sheaf(
     corpus: Corpus,
     *,
     status_filter: frozenset[Status] = _DEFAULT_FILTER,
+    effective_only: bool = True,
 ) -> SheafStructure:
     """Extract a SheafStructure from a Corpus.
 
     Only Quantity-leaf claims whose status is in ``status_filter`` become vertices.
     Equivalence edges (Task 2) and defeat edges (Task 3) are built here; the numpy
     spectrum (Task 4) lives umbrella-side.
+
+    ``effective_only`` (default True) restricts defeat edges to those that survive the VAF
+    licensing/dominance filter (byte-identical to prior behavior). ``False`` builds defeat
+    edges from every authored ``corpus.defeat_edges``, ignoring attacker licensing/dominance
+    — the STRUCTURAL sheaf, used to detect contradictions that persist even when a demotion
+    has de-licensed (and so inertted) the effective attack.
     """
     vertices: list[SheafVertex] = []
     for c in corpus.claims:
@@ -172,11 +179,15 @@ def extract_sheaf(
         u, v = sorted((eq.left, eq.right))
         edges.append(SheafEdge(kind="equivalence", u=u, v=v, weight=float(eq.severity), sign=1))
 
-    eff = effective_defeats(
-        corpus.defeat_edges, corpus.strength_map(), licensed_ids=corpus.licensed_ids()
-    )
+    if effective_only:
+        defeat_pairs = effective_defeats(
+            corpus.defeat_edges, corpus.strength_map(), licensed_ids=corpus.licensed_ids()
+        )
+    else:
+        # structural: every authored defeat edge, regardless of attacker licensing/dominance
+        defeat_pairs = {(e.source, e.target) for e in corpus.defeat_edges}
     latest = {t.claim_id: t for t in corpus.fdr_ledger.tests}   # last write wins = latest test per claim
-    for src, tgt in sorted(eff):
+    for src, tgt in sorted(defeat_pairs):
         if src not in vmap or tgt not in vmap:
             continue                                            # synthetic ':' source or non-quantity endpoint
         a, b = vmap[src], vmap[tgt]

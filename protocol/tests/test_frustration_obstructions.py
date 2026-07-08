@@ -1,5 +1,9 @@
-from polymer_protocol.sheaf import SheafEdge, SheafStructure, SheafVertex
+from polymer_grammar import DefeatEdge, DefeatEdgeKind, FDRLedger, Status
+from polymer_protocol.corpus import Corpus
+from polymer_protocol.sheaf import SheafEdge, SheafStructure, SheafVertex, extract_sheaf
 from polymer_protocol import frustration_obstructions
+
+from .conftest import _make_quantity_claim as make_quantity_claim
 
 
 def _v(cid):
@@ -36,3 +40,30 @@ def test_balanced_cycle_has_no_obstruction():
         ),
     )
     assert frustration_obstructions(s) == ()
+
+
+def test_structural_sheaf_sees_delicensed_defeats_effective_does_not():
+    # Three PENDING (not LICENSED) Quantity-leaf claims with a PROVISIONAL odd defeat cycle
+    # A⊣B⊣C⊣A. Provisional defeat edges are inert unless their source is in licensed_ids();
+    # since no claim here is LICENSED, the effective sheaf drops all three edges, but the
+    # structural sheaf (effective_only=False) ignores the provisional/licensing filter entirely.
+    dim = (("mass", 1),)
+    a = make_quantity_claim("A", value=1.0, status=Status.PENDING, dim=dim, unit=None)
+    b = make_quantity_claim("B", value=1.0, status=Status.PENDING, dim=dim, unit=None)
+    c = make_quantity_claim("C", value=1.0, status=Status.PENDING, dim=dim, unit=None)
+    defeat_edges = (
+        DefeatEdge(source="A", target="B", kind=DefeatEdgeKind.REBUT, provisional=True),
+        DefeatEdge(source="B", target="C", kind=DefeatEdgeKind.REBUT, provisional=True),
+        DefeatEdge(source="C", target="A", kind=DefeatEdgeKind.REBUT, provisional=True),
+    )
+    pending_odd_cycle_corpus = Corpus(
+        claims=(a, b, c),
+        defeat_edges=defeat_edges,
+        fdr_ledger=FDRLedger(target_fdr=0.05),
+    )
+
+    eff = frustration_obstructions(extract_sheaf(pending_odd_cycle_corpus))                 # effective
+    struct = frustration_obstructions(extract_sheaf(pending_odd_cycle_corpus, effective_only=False))
+    assert eff == ()                       # no licensed attacker → no effective frustration
+    assert struct != ()                    # structural cycle still present
+    assert frozenset(struct[0].claim_ids) == frozenset({"A", "B", "C"})

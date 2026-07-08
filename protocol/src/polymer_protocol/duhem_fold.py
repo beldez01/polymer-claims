@@ -56,29 +56,33 @@ def _reopen_duhem(c: Claim) -> Claim:
 
 
 def duhem_fold_from_obstructions(
-    corpus: Corpus, obstructions: Sequence[Obstruction]
+    corpus: Corpus,
+    effective_obstructions: Sequence[Obstruction],
+    structural_obstructions: Sequence[Obstruction],
 ) -> tuple[Corpus, DuhemFoldAudit]:
-    """Demote LICENSED claims implicated by any obstruction to PENDING duhem_underdetermined;
-    reopen PENDING-duhem claims no longer implicated. Ledger untouched (warrant-only)."""
-    implicated = blame_verdict_from_obstructions(obstructions).possibly_blamed
+    """Demote LICENSED claims implicated by an EFFECTIVE frustration; reopen PENDING-duhem claims
+    no longer in any STRUCTURAL frustration (the contradiction's defeat edges are genuinely gone,
+    not merely inert because the claim was suspended)."""
+    implicated_eff = blame_verdict_from_obstructions(effective_obstructions).possibly_blamed
+    implicated_struct = blame_verdict_from_obstructions(structural_obstructions).possibly_blamed
     demoted: list[str] = []
     reopened: list[str] = []
     new_claims: list[Claim] = []
     for c in corpus.claims:
-        if c.status == Status.LICENSED and c.id in implicated:
+        if c.status == Status.LICENSED and c.id in implicated_eff:
             new_claims.append(_demote_duhem(c))
             demoted.append(c.id)
         elif (
             c.status == Status.PENDING
             and c.pending_reason == PendingReason.DUHEM_UNDERDETERMINED
-            and c.id not in implicated
+            and c.id not in implicated_struct
         ):
             new_claims.append(_reopen_duhem(c))
             reopened.append(c.id)
         else:
             new_claims.append(c)
     contradiction_ids = tuple(
-        "h1:" + "|".join(sorted(o.claim_ids)) for o in obstructions
+        "h1:" + "|".join(sorted(o.claim_ids)) for o in effective_obstructions
     )
     audit = DuhemFoldAudit(
         demoted=tuple(sorted(demoted)),
@@ -89,7 +93,8 @@ def duhem_fold_from_obstructions(
 
 
 def apply_duhem_consistency(corpus: Corpus) -> tuple[Corpus, DuhemFoldAudit]:
-    """Detect frustration obstructions from the corpus's sheaf, then apply the fold. Self-contained
-    entry point for run_cycle."""
-    obstructions = frustration_obstructions(extract_sheaf(corpus))
-    return duhem_fold_from_obstructions(corpus, obstructions)
+    """Detect effective and structural frustration obstructions from the corpus's sheaf, then
+    apply the fold. Self-contained entry point for run_cycle."""
+    effective = frustration_obstructions(extract_sheaf(corpus))
+    structural = frustration_obstructions(extract_sheaf(corpus, effective_only=False))
+    return duhem_fold_from_obstructions(corpus, effective, structural)
