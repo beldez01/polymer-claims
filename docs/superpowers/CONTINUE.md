@@ -596,6 +596,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
 
 - **Product vision:** `docs/superpowers/vision.md` (external-facing thesis — capability-cell spine, three registries, closed-world agent execution, verification ladder; reconciled to current state 2026-06-27).
 - **Forward roadmap:** `docs/superpowers/2026-06-23-remaining-roadmap.md` (authoritative) · `docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md` (the three-arc linchpin vision)
+- **Parameterization-seam research program (the neurosymbolic frontier — IR leaves layer):** `docs/open-questions-research-plan.typ` — the open questions at the symbolic-type-system↔neural-judgment seam (strength axes, causal roles, ontology grounding, leaf-types, neurosymbolic caging) stated as a *falsifiable program* (metric + first study per seam). Its Group-B1 conceptual-independence is backlog item ② *independence-as-claim*; companion to `foundations/measurement-foundation.md`. *(Source `.typ` tracked; `.pdf` is a gitignored build artifact — `typst compile` to render.)*
 - **Phase-2 north star:** `docs/superpowers/2026-06-12-phase-2-north-star.md`
 - **Architecture map:** `ARCHITECTURE_CURRENT.md` · **Glossary:** `GLOSSARY.md`
 - **Spectral layout guide:** `docs/spectral-layout.md` (usage + eigenmap/Procrustes math)

@@ -63,6 +63,7 @@ The theory's most exposed defeater (`docs/the-theory-of-polymer-claims.md`, D4):
 
 - **First-class `WITNESSED` status** (today: `--sheaf-active` pending + the compute-boundary discipline).
 - **V3.1** temporal reproducibility as an explicit earned standing; **V3.2** operational states (`resource-exceeded`, `migrated`, `untrusted`).
+- **Parameterization-seam research program (the neurosymbolic frontier — the IR leaves layer).** The open questions at the seam where the symbolic type-system meets neural judgment that fills the typed slots (strength-axis parameterization, causal-role assignment, ontology grounding, leaf-types, and *neurosymbolic caging* — how much bad neural judgment the symbolic layer catches) are laid out as a **falsifiable research program** — each seam stated as a testable hypothesis with the metric that decides it and the first study that closes it: **`docs/open-questions-research-plan.typ`**. Group A is the leaves/parameterization frontier; Group B carries the statistical seams (its **B1 conceptual-independence** is exactly backlog item ② *independence-as-claim*). This is the "validate from foundations" discipline the *NOT building now* line below refers to — the calibration studies, not new machinery. Companion to `docs/superpowers/foundations/measurement-foundation.md` (the parameterization-seam whisper).
 
 ## Hygiene / small (do opportunistically)
 
@@ -75,7 +76,7 @@ The theory's most exposed defeater (`docs/the-theory-of-polymer-claims.md`, D4):
 - **Layer B:** full autonomous hypothesizer; negative-capacity corpus; red-team marketplace.
 - **Layer A:** Earn-Standing API; federated / BYO-compute (`POST /inject` hook noted); the reproducibility observatory (the **Science Claw** — agent-facing, local-first, BYO-compute).
 - **V4** claim registry as a published surface (gated on H2 — a real shareable claim worth publishing).
-- **Deferred infra** (pull in only when they block a higher item): Python/R hash parity (needs an R serializer); `ROBUSTLY_BLAMED` wiring; schema→TypeScript codegen / API narrowing; PyPI publish + a CI workflow mirroring `scripts/check-all.sh` (`beldez01` flag resolved — publish unblocked).
+- **Deferred infra** (pull in only when they block a higher item): Python/R hash parity (needs an R serializer); schema→TypeScript codegen / API narrowing; PyPI publish + a CI workflow mirroring `scripts/check-all.sh` (`beldez01` flag resolved — publish unblocked). *(`ROBUSTLY_BLAMED` wiring — done 2026-07-07 via the H¹→blame-set coupling; no longer deferred.)*
 
 ## Explicitly NOT building now
 
