@@ -25,6 +25,17 @@ llm = ["anthropic>=0.40"]
 embed = ["numpy>=1.26"]
 calibrate = ["numpy>=1.26"]
 sign = ["cryptography>=42"]
+# STRATA pharmacogenomic engine (lifted from Hack): marker->drug discovery on GDSC.
+# Heavy scientific deps kept opt-in so the core wheel stays lean.
+strata = [
+    "pandas>=2",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "statsmodels>=0.14",
+    "scikit-learn>=1.3",
+    "lifelines>=0.30",
+    "openpyxl>=3.1",
+]
 
 [project.scripts]
 polymer-claims = "polymer_claims.cli:main"
