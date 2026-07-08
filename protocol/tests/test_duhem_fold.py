@@ -136,3 +136,114 @@ def test_structural_sheaf_ignores_support_edges_no_phantom_frustration():
     )
     structure = extract_sheaf(corpus, effective_only=False)
     assert frustration_obstructions(structure) == ()
+
+
+def _theta_corpus() -> Corpus:
+    """The §7.7 theta witness: a,b,p2,p3 LICENSED Quantity-leaf claims (same dimension, no unit
+    ⇒ DERIVED basis), joined by THREE independent paths between a and b — direct (a≡b), via p2
+    (a≡p2, p2≡b), and via p3 (a≡p3, p3⊣b REBUT) — forming a single biconnected (theta) block.
+    The a-b-p3 triangle is sign-unbalanced (one -1 defeat edge); the a-b-p2 triangle is balanced
+    on its own. `frustration_obstructions`' spanning-tree BFS lands on the a-b-p3 fundamental
+    cycle and never visits p2's fundamental-cycle edge, so its reported union misses p2 — but the
+    whole block (all 4 vertices) is frustrated, which `frustrated_vertices` correctly reports."""
+    dim = (("mass", 1),)
+    a = make_quantity_claim("a", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    b = make_quantity_claim("b", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    p2 = make_quantity_claim("p2", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    p3 = make_quantity_claim("p3", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    equivalences = (
+        EquivalenceClaim(id="e1", left="a", right="b", severity=0.9, status=Status.LICENSED),
+        EquivalenceClaim(id="e2", left="a", right="p2", severity=0.9, status=Status.LICENSED),
+        EquivalenceClaim(id="e3", left="p2", right="b", severity=0.9, status=Status.LICENSED),
+        EquivalenceClaim(id="e4", left="a", right="p3", severity=0.9, status=Status.LICENSED),
+    )
+    defeat_edges = (DefeatEdge(source="p3", target="b", kind=DefeatEdgeKind.REBUT),)
+    return Corpus(
+        claims=(a, b, p2, p3),
+        equivalences=equivalences,
+        defeat_edges=defeat_edges,
+        fdr_ledger=FDRLedger(target_fdr=0.05),
+    )
+
+
+def test_theta_demotes_the_vertex_obstructions_would_miss():
+    corpus = _theta_corpus()   # a,b,p2,p3 LICENSED; a≡b, a≡p2, p2≡b, a≡p3, p3⊣b(REBUT)
+    eff = extract_sheaf(corpus)
+    assert len(eff.edges) == 5, "the REBUT defeat must survive the effective filter (attacker licensed)"
+    reported = frozenset().union(*(frozenset(o.claim_ids) for o in frustration_obstructions(eff)))
+    assert "p2" not in reported                       # obstruction-union would miss p2
+    out, audit = apply_duhem_consistency(corpus)
+    assert "p2" in audit.demoted                       # frustrated_vertices catches it
+    assert out.by_id()["p2"].pending_reason == PendingReason.DUHEM_UNDERDETERMINED
+
+
+def _triangle_corpus() -> Corpus:
+    """§7.8 STATE 1: a simple frustrated triangle {a,p2,p3} — a≡p2, a≡p3, p2⊣p3(REBUT). Mirrors
+    `_make_frustrated_corpus` (A-B-C) with the odd (one) sign-flip that makes the triangle
+    unbalanced, relabeled to the p2/p3 ids used by the theta witness."""
+    dim = (("mass", 1),)
+    a = make_quantity_claim("a", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    p2 = make_quantity_claim("p2", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    p3 = make_quantity_claim("p3", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    equivalences = (
+        EquivalenceClaim(id="e1", left="a", right="p2", severity=0.9, status=Status.LICENSED),
+        EquivalenceClaim(id="e2", left="a", right="p3", severity=0.9, status=Status.LICENSED),
+    )
+    defeat_edges = (DefeatEdge(source="p2", target="p3", kind=DefeatEdgeKind.REBUT),)
+    return Corpus(
+        claims=(a, p2, p3),
+        equivalences=equivalences,
+        defeat_edges=defeat_edges,
+        fdr_ledger=FDRLedger(target_fdr=0.05),
+    )
+
+
+def _theta_corpus_with_pending_p2() -> Corpus:
+    """§7.8 STATE 2: the theta witness carrying p2 as an already-PENDING duhem_underdetermined
+    claim (as if a prior fold cycle had suspended it) — a,b,p3 LICENSED, p2 PENDING duhem.
+    Relative to STATE 1's triangle, the p2⊣p3 edge is REMOVED and b + a≡b, p2≡b, p3⊣b(REBUT)
+    are ADDED, reproducing the exact _theta_corpus edge set with p2's status swapped to PENDING."""
+    dim = (("mass", 1),)
+    a = make_quantity_claim("a", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    b = make_quantity_claim("b", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    p2 = make_quantity_claim(
+        "p2", value=1.0, status=Status.PENDING, dim=dim, unit=None,
+        pending_reason=PendingReason.DUHEM_UNDERDETERMINED,
+    )
+    p3 = make_quantity_claim("p3", value=1.0, status=Status.LICENSED, dim=dim, unit=None)
+    equivalences = (
+        EquivalenceClaim(id="e1", left="a", right="b", severity=0.9, status=Status.LICENSED),
+        EquivalenceClaim(id="e2", left="a", right="p2", severity=0.9, status=Status.LICENSED),
+        EquivalenceClaim(id="e3", left="p2", right="b", severity=0.9, status=Status.LICENSED),
+        EquivalenceClaim(id="e4", left="a", right="p3", severity=0.9, status=Status.LICENSED),
+    )
+    defeat_edges = (DefeatEdge(source="p3", target="b", kind=DefeatEdgeKind.REBUT),)
+    return Corpus(
+        claims=(a, b, p2, p3),
+        equivalences=equivalences,
+        defeat_edges=defeat_edges,
+        fdr_ledger=FDRLedger(target_fdr=0.05),
+    )
+
+
+def test_reopen_does_not_fire_while_structurally_frustrated_but_fires_when_resolved():
+    # STATE 1 — simple frustrated triangle {a,p2,p3}: a≡p2, a≡p3, p2⊣p3(REBUT) → p2 demotes
+    state1 = _triangle_corpus()                        # a,p2,p3 LICENSED
+    s1, a1 = apply_duhem_consistency(state1)
+    assert "p2" in a1.demoted
+    assert s1.by_id()["p2"].pending_reason == PendingReason.DUHEM_UNDERDETERMINED
+
+    # STATE 2 — the theta witness, carrying p2 as PENDING-duhem; p2⊣p3 removed, b + 3 edges added
+    state2 = _theta_corpus_with_pending_p2()           # a,b,p3 LICENSED; p2 PENDING duhem; a≡b,a≡p2,p2≡b,a≡p3,p3⊣b
+    reported = frozenset().union(*(frozenset(o.claim_ids)
+                                   for o in frustration_obstructions(extract_sheaf(state2, effective_only=False))))
+    assert "p2" not in reported                        # reported structural obstructions miss p2 ...
+    s2, a2 = apply_duhem_consistency(state2)
+    assert "p2" not in a2.reopened                     # ... but frustrated_vertices keeps it suspended
+    assert s2.by_id()["p2"].pending_reason == PendingReason.DUHEM_UNDERDETERMINED
+
+    # COMPLEMENT — remove the p3⊣b defeat → p2 on no structural frustrated cycle → reopens
+    resolved = state2.model_copy(update={"defeat_edges": ()})
+    s3, a3 = apply_duhem_consistency(resolved)
+    assert "p2" in a3.reopened
+    assert s3.by_id()["p2"].pending_reason == PendingReason.REINSTATED
