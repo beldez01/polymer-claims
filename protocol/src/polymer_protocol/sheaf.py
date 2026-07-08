@@ -264,3 +264,106 @@ def frustration_obstructions(structure: SheafStructure) -> tuple[Obstruction, ..
                             Obstruction(claim_ids=tuple(cyc), edges=edges, magnitude=mag)
                         )
     return tuple(obstructions)
+
+
+def frustrated_vertices(structure: SheafStructure) -> frozenset[str]:
+    """Every claim on some frustrated (sign-unbalanced) cycle — independent of any spanning tree.
+    A vertex is frustrated iff it is touched by an edge of an unbalanced biconnected block, or is a
+    negative self-loop. Multigraph-correct: edge-identity Tarjan BCC. Pure; no numpy.
+
+    Contrast with `frustration_obstructions`, which reports only violated *fundamental* cycles and
+    can miss a genuinely-frustrated vertex (see the theta witness in the design spec)."""
+    verts = {v.claim_id for v in structure.vertices}
+    edges: list[tuple[str, str, int]] = []            # (u, v, sign) for non-loop, valid edges
+    neg_self_loops: set[str] = set()
+    adj: dict[str, list[int]] = {vid: [] for vid in verts}
+    for e in structure.edges:
+        if e.u not in verts or e.v not in verts:      # validate endpoints FIRST
+            continue
+        if e.u == e.v:                                # self-loop, only after validation
+            if e.sign < 0:
+                neg_self_loops.add(e.u)
+            continue
+        idx = len(edges)
+        edges.append((e.u, e.v, e.sign))
+        adj[e.u].append(idx)
+        adj[e.v].append(idx)
+
+    disc: dict[str, int] = {}
+    low: dict[str, int] = {}
+    edge_stack: list[int] = []
+    blocks: list[list[int]] = []
+    timer = 0
+
+    def other(ei: int, u: str) -> str:
+        a, b, _s = edges[ei]
+        return b if a == u else a
+
+    def dfs(root: str) -> None:
+        nonlocal timer
+        # explicit stack: (vertex, parent_edge_index, neighbor-iterator)
+        disc[root] = low[root] = timer
+        timer += 1
+        stack: list[tuple[str, int, object]] = [(root, -1, iter(adj[root]))]
+        while stack:
+            u, pe, it = stack[-1]
+            descended = False
+            for ei in it:
+                if ei == pe:                          # skip ONLY the exact incoming edge id
+                    continue
+                w = other(ei, u)
+                if w not in disc:
+                    edge_stack.append(ei)
+                    disc[w] = low[w] = timer
+                    timer += 1
+                    stack.append((w, ei, iter(adj[w])))
+                    descended = True
+                    break
+                elif disc[w] < disc[u]:               # back edge to a proper ancestor
+                    edge_stack.append(ei)
+                    low[u] = min(low[u], disc[w])
+            if descended:
+                continue
+            stack.pop()
+            if stack:
+                p = stack[-1][0]
+                low[p] = min(low[p], low[u])
+                if low[u] >= disc[p]:                 # p is an articulation point / root
+                    block: list[int] = []
+                    while True:
+                        e = edge_stack.pop()
+                        block.append(e)
+                        if e == pe:                   # pop through the triggering edge id
+                            break
+                    blocks.append(block)
+
+    for s in sorted(adj):
+        if s not in disc:
+            dfs(s)
+
+    result: set[str] = set(neg_self_loops)
+    for block in blocks:
+        block_adj: dict[str, list[tuple[str, int]]] = {}
+        for ei in block:
+            u, v, sign = edges[ei]
+            block_adj.setdefault(u, []).append((v, sign))
+            block_adj.setdefault(v, []).append((u, sign))
+        label: dict[str, int] = {}
+        unbalanced = False
+        for r in sorted(block_adj):
+            if r in label:
+                continue
+            label[r] = 1
+            dq = deque([r])
+            while dq:
+                x = dq.popleft()
+                for y, sign in block_adj[x]:
+                    want = sign * label[x]
+                    if y not in label:
+                        label[y] = want
+                        dq.append(y)
+                    elif label[y] != want:
+                        unbalanced = True
+        if unbalanced:
+            result.update(block_adj.keys())
+    return frozenset(result)
