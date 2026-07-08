@@ -187,7 +187,7 @@ def run_cycle(
     audit.append(StageAudit(
         stage="duhem_consistency",
         note=f"{len(duhem_audit.demoted)} demoted (duhem), {len(duhem_audit.reopened)} reopened"
-             + (f"; {sorted(duhem_audit.contradiction_ids)}" if duhem_audit.contradiction_ids else ""),
+             + (f"; {list(duhem_audit.contradiction_ids)}" if duhem_audit.contradiction_ids else ""),
         count=len(duhem_audit.demoted),
     ))
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections import deque
 
-from polymer_grammar import Status, effective_defeats
+from polymer_grammar import ATTACK_KINDS, Status, effective_defeats
 
 from .base import _Model
 from .corpus import Corpus
@@ -184,8 +184,9 @@ def extract_sheaf(
             corpus.defeat_edges, corpus.strength_map(), licensed_ids=corpus.licensed_ids()
         )
     else:
-        # structural: every authored defeat edge, regardless of attacker licensing/dominance
-        defeat_pairs = {(e.source, e.target) for e in corpus.defeat_edges}
+        # structural: every authored ATTACK edge, regardless of licensing/dominance — but
+        # support (evidence_for) edges are never antagonism, so keep the kind filter.
+        defeat_pairs = {(e.source, e.target) for e in corpus.defeat_edges if e.kind in ATTACK_KINDS}
     latest = {t.claim_id: t for t in corpus.fdr_ledger.tests}   # last write wins = latest test per claim
     for src, tgt in sorted(defeat_pairs):
         if src not in vmap or tgt not in vmap:

@@ -22,6 +22,8 @@ from .sheaf import Obstruction, extract_sheaf, frustration_obstructions
 class DuhemFoldAudit(_Model):
     demoted: tuple[str, ...] = ()
     reopened: tuple[str, ...] = ()
+    # EFFECTIVE obstructions only (those that drove a demotion this fold) — a claim held PENDING
+    # by a structural-only cycle (e.g. one closed by a de-licensed/inert attack) won't appear here.
     contradiction_ids: tuple[str, ...] = ()
 
 
@@ -61,8 +63,8 @@ def duhem_fold_from_obstructions(
     structural_obstructions: Sequence[Obstruction],
 ) -> tuple[Corpus, DuhemFoldAudit]:
     """Demote LICENSED claims implicated by an EFFECTIVE frustration; reopen PENDING-duhem claims
-    no longer in any STRUCTURAL frustration (the contradiction's defeat edges are genuinely gone,
-    not merely inert because the claim was suspended)."""
+    no longer implicated by any *reported* structural obstruction (blame may re-localize across
+    a re-decomposed cycle space) — not merely inert because the claim was suspended."""
     implicated_eff = blame_verdict_from_obstructions(effective_obstructions).possibly_blamed
     implicated_struct = blame_verdict_from_obstructions(structural_obstructions).possibly_blamed
     demoted: list[str] = []

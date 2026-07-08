@@ -111,3 +111,28 @@ def test_apply_duhem_consistency_demotes_on_a_real_frustrated_corpus():
         assert by_id[cid].status == Status.PENDING
         assert by_id[cid].pending_reason == PendingReason.DUHEM_UNDERDETERMINED
     assert corpus.fdr_ledger == frustrated_corpus.fdr_ledger   # still ledger-neutral end-to-end
+    assert audit.contradiction_ids == ("h1:A|B|C",)
+
+
+def test_structural_sheaf_ignores_support_edges_no_phantom_frustration():
+    """A support (EVIDENCE_FOR) edge closing an equivalence triangle must NOT read as
+    antagonism (sign=-1) in the STRUCTURAL sheaf — regression guard for the Critical bug
+    where the structural branch dropped the ATTACK_KINDS filter, so `evidence_for` edges
+    manufactured phantom frustration and PENDING-duhem claims could never reopen."""
+    dim = (("mass", 1),)
+    a = make_quantity_claim("A", value=1.0, status=Status.PENDING, dim=dim, unit=None)
+    b = make_quantity_claim("B", value=1.0, status=Status.PENDING, dim=dim, unit=None)
+    c = make_quantity_claim("C", value=1.0, status=Status.PENDING, dim=dim, unit=None)
+    equivalences = (
+        EquivalenceClaim(id="e1", left="A", right="B", severity=0.9, status=Status.LICENSED),
+        EquivalenceClaim(id="e2", left="B", right="C", severity=0.9, status=Status.LICENSED),
+    )
+    defeat_edges = (DefeatEdge(source="C", target="A", kind=DefeatEdgeKind.EVIDENCE_FOR),)
+    corpus = Corpus(
+        claims=(a, b, c),
+        equivalences=equivalences,
+        defeat_edges=defeat_edges,
+        fdr_ledger=FDRLedger(target_fdr=0.05),
+    )
+    structure = extract_sheaf(corpus, effective_only=False)
+    assert frustration_obstructions(structure) == ()

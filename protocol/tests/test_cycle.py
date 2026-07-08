@@ -694,9 +694,9 @@ def test_run_cycle_demotes_odd_defeat_cycle_then_reopens_on_structural_resolutio
         if by_id[cid].pending_reason == PendingReason.DUHEM_UNDERDETERMINED
     ]
     observed = [(cid, by_id[cid].status, by_id[cid].pending_reason) for cid in ("A", "B", "C")]
-    assert demoted, (
-        "odd defeat cycle among licensed claims should demote to PENDING duhem; "
-        f"observed post-run_cycle statuses: {observed}"
+    assert set(demoted) == {"A", "B", "C"}, (
+        "a single 3-cycle implicates all three members; expected all of A/B/C to demote to "
+        f"PENDING duhem; observed post-run_cycle statuses: {observed}"
     )
     assert any(s.stage == "duhem_consistency" and s.count > 0 for s in result.audit)
 
@@ -706,4 +706,9 @@ def test_run_cycle_demotes_odd_defeat_cycle_then_reopens_on_structural_resolutio
     )
     resolved = result.corpus.model_copy(update={"defeat_edges": remaining})
     result2 = run_cycle(resolved, adapters, ctx)
-    assert result2.corpus.by_id()["A"].pending_reason == PendingReason.REINSTATED
+    by_id2 = result2.corpus.by_id()
+    observed2 = [(cid, by_id2[cid].status, by_id2[cid].pending_reason) for cid in ("A", "B", "C")]
+    for cid in ("A", "B", "C"):
+        assert by_id2[cid].pending_reason == PendingReason.REINSTATED, (
+            f"expected all of A/B/C to reopen after breaking the cycle; observed: {observed2}"
+        )
