@@ -71,3 +71,5 @@ def test_simple_frustrated_cycle_equals_obstruction_union():
 def test_invalid_edge_endpoint_is_skipped_not_raised():
     s = _struct(("a",), [_e("a", "ghost", -1)])                     # ghost not a vertex
     assert frustrated_vertices(s) == frozenset()
+    s = _struct(("a",), [_e("ghost", "ghost", -1)])                 # negative self-loop on a non-existent vertex
+    assert frustrated_vertices(s) == frozenset()                     # skipped by endpoint validation, not returned

@@ -9,8 +9,7 @@ edge.
 """
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import AbstractSet
+from collections.abc import Sequence, Set as AbstractSet
 
 from polymer_grammar import Claim, PendingReason, Status
 
