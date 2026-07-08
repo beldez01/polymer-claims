@@ -457,40 +457,178 @@ git commit -m "test(duhem-fold): apply_duhem_consistency composes detection+fold
 
 ---
 
-### Task 4: Wire into `run_cycle`
+### Task 4: Structural-resolution reopen (demote-effective / reopen-structural)
+
+**Why:** frustration is computed from *effective* defeats (licensed attacker). A demotion de-licenses the cycle members, so their attacks go inert and the *effective* frustration vanishes — a naive "reopen when no longer implicated" would then flap (reopen a claim whose structural contradiction is still present). Fix: **demote** on effective frustration, but **reopen** only when the *structural* signed cycle is gone (a defeat edge actually removed), independent of current licensing.
+
+**Files:**
+- Modify: `protocol/src/polymer_protocol/sheaf.py` (add `effective_only` switch to `extract_sheaf`)
+- Modify: `protocol/src/polymer_protocol/duhem_fold.py` (fold takes effective + structural obstructions)
+- Modify: `protocol/tests/test_duhem_fold.py` (update calls to the new signature; add the structural-stays-put case)
+
+**Interfaces:**
+- `extract_sheaf(corpus, *, status_filter=..., effective_only: bool = True) -> SheafStructure`. Default `True` = current behavior (byte-identical). `False` = *structural*: build defeat edges from ALL `corpus.defeat_edges` (skip the `effective_defeats` licensing/dominance filter).
+- `duhem_fold_from_obstructions(corpus, effective_obstructions, structural_obstructions) -> tuple[Corpus, DuhemFoldAudit]` — demote on effective, reopen on structural-absence.
+- `apply_duhem_consistency(corpus)` computes both and delegates.
+
+- [ ] **Step 1: Add `effective_only` to `extract_sheaf`, test the structural variant**
+
+In `protocol/src/polymer_protocol/sheaf.py`, add the keyword param and branch the defeat-pair source. Change the signature to add `effective_only: bool = True`, and replace the `eff = effective_defeats(...)` line (currently sheaf.py:175-177) with:
+
+```python
+    if effective_only:
+        defeat_pairs = effective_defeats(
+            corpus.defeat_edges, corpus.strength_map(), licensed_ids=corpus.licensed_ids()
+        )
+    else:
+        # structural: every authored defeat edge, regardless of attacker licensing/dominance
+        defeat_pairs = {(e.source, e.target) for e in corpus.defeat_edges}
+```
+
+Then change the loop header `for src, tgt in sorted(eff):` to `for src, tgt in sorted(defeat_pairs):`. Leave the vmap/commensurable guards and the `SheafEdge(..., sign=-1)` append exactly as they are (structural still only builds edges between actual Quantity-leaf vertices in `status_filter`).
+
+Add to `protocol/tests/test_frustration_obstructions.py` (or a new corpus-level test) a check that a corpus with an odd defeat cycle among **de-licensed (PENDING)** claims yields NO effective obstruction but DOES yield a structural one:
+
+```python
+def test_structural_sheaf_sees_delicensed_defeats_effective_does_not():
+    # build 3 PENDING Quantity-leaf claims A,B,C with an odd defeat cycle A⊣B⊣C⊣A
+    # (construct as in test_duhem_fold's frustrated corpus, but PENDING not LICENSED).
+    from polymer_protocol.sheaf import extract_sheaf, frustration_obstructions
+    eff = frustration_obstructions(extract_sheaf(pending_odd_cycle_corpus))                 # effective
+    struct = frustration_obstructions(extract_sheaf(pending_odd_cycle_corpus, effective_only=False))
+    assert eff == ()                       # no licensed attacker → no effective frustration
+    assert struct != ()                    # structural cycle still present
+```
+
+Build `pending_odd_cycle_corpus` inline following Task 3's construction (read `test_sheaf.py` for the defeat-edge API — `DefeatEdge(kind=REBUT, source=..., target=...)`), but with `status=PENDING` claims and three defeat edges A⊣B, B⊣C, C⊣A (odd). Verify `struct` is non-empty before asserting.
+
+- [ ] **Step 2: Run to verify it fails, then implement**
+
+Run: `cd protocol && python -m pytest tests/test_frustration_obstructions.py -k structural -v` → FAIL (`extract_sheaf` has no `effective_only`). Implement Step 1, re-run → PASS.
+
+- [ ] **Step 3: Rework the fold to demote-effective / reopen-structural**
+
+In `protocol/src/polymer_protocol/duhem_fold.py`, change `duhem_fold_from_obstructions` to take both obstruction sets and key the two branches differently:
+
+```python
+def duhem_fold_from_obstructions(
+    corpus: Corpus,
+    effective_obstructions: Sequence[Obstruction],
+    structural_obstructions: Sequence[Obstruction],
+) -> tuple[Corpus, DuhemFoldAudit]:
+    """Demote LICENSED claims implicated by an EFFECTIVE frustration; reopen PENDING-duhem claims
+    no longer in any STRUCTURAL frustration (the contradiction's defeat edges are genuinely gone,
+    not merely inert because the claim was suspended)."""
+    implicated_eff = blame_verdict_from_obstructions(effective_obstructions).possibly_blamed
+    implicated_struct = blame_verdict_from_obstructions(structural_obstructions).possibly_blamed
+    demoted: list[str] = []
+    reopened: list[str] = []
+    new_claims: list[Claim] = []
+    for c in corpus.claims:
+        if c.status == Status.LICENSED and c.id in implicated_eff:
+            new_claims.append(_demote_duhem(c)); demoted.append(c.id)
+        elif (
+            c.status == Status.PENDING
+            and c.pending_reason == PendingReason.DUHEM_UNDERDETERMINED
+            and c.id not in implicated_struct
+        ):
+            new_claims.append(_reopen_duhem(c)); reopened.append(c.id)
+        else:
+            new_claims.append(c)
+    contradiction_ids = tuple("h1:" + "|".join(sorted(o.claim_ids)) for o in effective_obstructions)
+    audit = DuhemFoldAudit(
+        demoted=tuple(sorted(demoted)),
+        reopened=tuple(sorted(reopened)),
+        contradiction_ids=tuple(sorted(contradiction_ids)),
+    )
+    return corpus.model_copy(update={"claims": tuple(new_claims)}), audit
+```
+
+(Note: `implicated_eff ⊆ implicated_struct` since effective defeats are a subset of structural ones, so a freshly-demoted claim is in `implicated_struct` and cannot be reopened in the same call — mutual exclusivity preserved.)
+
+Update `apply_duhem_consistency`:
+
+```python
+def apply_duhem_consistency(corpus: Corpus) -> tuple[Corpus, DuhemFoldAudit]:
+    effective = frustration_obstructions(extract_sheaf(corpus))
+    structural = frustration_obstructions(extract_sheaf(corpus, effective_only=False))
+    return duhem_fold_from_obstructions(corpus, effective, structural)
+```
+
+- [ ] **Step 4: Update the fold tests to the new signature**
+
+In `protocol/tests/test_duhem_fold.py`, update each `duhem_fold_from_obstructions(corpus, X)` call to pass both sets:
+- demote tests: `duhem_fold_from_obstructions(corpus, [obs], [obs])`.
+- ledger test: `duhem_fold_from_obstructions(corpus, [obs], [obs])`.
+- the reopen test (`test_resolved_cycle_reopens...`): `duhem_fold_from_obstructions(corpus, [], [])` — structural empty ⇒ reopen fires.
+
+Add a NEW test for the structural-stays-put case (this is the branch the Task-2 review flagged as untested, now meaningful):
+
+```python
+def test_pending_duhem_stays_put_while_structurally_implicated():
+    stuck = make_claim("A", status=Status.PENDING, pending_reason=PendingReason.DUHEM_UNDERDETERMINED)
+    corpus, audit = duhem_fold_from_obstructions(_corpus(stuck), [], [_obstruction("A", "B", "A")])
+    # effective empty (no demote), but A still in a STRUCTURAL cycle → NOT reopened
+    assert corpus.by_id()["A"].pending_reason == PendingReason.DUHEM_UNDERDETERMINED
+    assert audit.reopened == ()
+```
+
+(Use a structural obstruction whose `claim_ids` include "A"; adjust the tuple to a valid obstruction over ≥2 ids that contains "A".)
+
+- [ ] **Step 5: Run the fold + detector suites**
+
+Run: `cd protocol && ruff check . && python -m pytest tests/test_duhem_fold.py tests/test_frustration_obstructions.py -v`
+All green, ruff clean. Also run `python -m pytest tests/test_sheaf.py -q` and `cd /Users/zbb2/Desktop/polymer-claims && python -m pytest tests/test_sheaf_spectrum.py -q` to confirm the `extract_sheaf` change (default `effective_only=True`) left existing sheaf behavior byte-identical.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add protocol/src/polymer_protocol/sheaf.py protocol/src/polymer_protocol/duhem_fold.py protocol/tests/test_duhem_fold.py protocol/tests/test_frustration_obstructions.py
+git commit -m "feat(duhem-fold): structural-resolution reopen (demote effective, reopen when structural cycle gone)"
+```
+
+**Scope guard:** `effective_only` defaults `True` (existing callers unaffected). Reopen keys on structural absence; demote on effective presence. Still ledger-neutral, still demote-only.
+
+---
+
+### Task 5: Wire into `run_cycle` + empirically confirm the demote fires
 
 **Files:**
 - Modify: `protocol/src/polymer_protocol/cycle.py`
 - Test: `protocol/tests/test_cycle.py`
 
-**Interfaces:**
-- Consumes: `apply_duhem_consistency` (Task 2). Adds one `StageAudit` stage `"duhem_consistency"`.
+**Interfaces:** Consumes `apply_duhem_consistency` (Task 4). Adds one `StageAudit` stage `"duhem_consistency"`.
 
-- [ ] **Step 1: Add the failing integration test**
+**The load-bearing empirical question:** the demote fires only if `integrate` leaves the frustrated (freshly-licensed) odd-cycle claims `LICENSED` (they are not in `prior_in`, so `flipped_out` should exclude them — but this MUST be confirmed against the real `integrate`/`restore_consistency`, not assumed). Step 1's test is the confirmation. **If the claims are NOT `LICENSED` after `integrate` (integrate strips them first), STOP and report DONE_WITH_CONCERNS** — that means the fold must move *inside* integrate's undecided-set handling (reclassify undecided-cycle members from REJECTED to PENDING duhem) rather than run as a post-integrate pass, which is a redesign, not a fix to bury here.
 
-Read `protocol/tests/test_cycle.py` for how a cycle is driven (the `run_cycle` call, the adapters/ctx fixtures). Add a test that runs a cycle whose corpus forms a frustrated cycle among LICENSED claims and asserts they end `PENDING duhem_underdetermined`, and that a follow-up cycle which removes the frustrating edge reopens them. Skeleton (adapt fixtures to the file's existing helpers):
+- [ ] **Step 1: Add the integration test (demote → structural resolve → reopen)**
+
+Read `protocol/tests/test_cycle.py` for the `run_cycle` call and its adapters/ctx fixtures. Build a corpus with **three LICENSED Quantity-leaf claims A,B,C and an odd defeat cycle A⊣B, B⊣C, C⊣A** (REBUT edges; odd count frustrates). Drive one cycle and assert the members demote; then remove one defeat edge (structural resolution) and drive again, asserting reopen:
 
 ```python
-def test_run_cycle_demotes_frustrated_licensed_claims_then_reopens(...):
-    # 1) drive a cycle to a corpus with a frustrated cycle among LICENSED claims
-    result = run_cycle(frustrated_corpus, adapters, ctx, ...)
+def test_run_cycle_demotes_odd_defeat_cycle_then_reopens_on_structural_resolution(...):
+    result = run_cycle(odd_cycle_corpus, adapters, ctx, ...)
     by_id = result.corpus.by_id()
-    demoted = [cid for cid in ("A", "B", "C") if by_id[cid].pending_reason == PendingReason.DUHEM_UNDERDETERMINED]
-    assert demoted, "a frustrated licensed cycle should demote to PENDING duhem"
+    demoted = [cid for cid in ("A", "B", "C")
+               if by_id[cid].pending_reason == PendingReason.DUHEM_UNDERDETERMINED]
+    # If this assert fails because the claims are REJECTED/absent, integrate stripped them first:
+    # STOP and report DONE_WITH_CONCERNS (fold must move inside integrate) — do not force the test.
+    assert demoted, "odd defeat cycle among licensed claims should demote to PENDING duhem"
     assert any(a.stage == "duhem_consistency" and a.count > 0 for a in result.audit)
 
-    # 2) resolve the cycle (remove the frustrating defeat edge) and run again → reopen
-    resolved = result.corpus.model_copy(update={"defeat_edges": ()})   # or drop the C⊣A edge
+    # remove ONE defeat edge → structural cycle broken → reopen next cycle
+    remaining = tuple(e for e in result.corpus.defeat_edges if not (e.source == "C" and e.target == "A"))
+    resolved = result.corpus.model_copy(update={"defeat_edges": remaining})
     result2 = run_cycle(resolved, adapters, ctx, ...)
     assert result2.corpus.by_id()["A"].pending_reason == PendingReason.REINSTATED
 ```
 
-If constructing a frustrated LICENSED corpus through `run_cycle` is heavy, reuse the Task-3 `frustrated_corpus` as the `run_cycle` input.
+Adapt fixtures/ids to `test_cycle.py`'s helpers. Before the demote assert, it is fine to assert the `duhem_consistency` stage exists so a wiring failure is distinguishable from an integrate-interaction failure.
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run: `cd protocol && python -m pytest tests/test_cycle.py -k frustrated -v`
-Expected: FAIL — no `duhem_consistency` stage yet; claims stay LICENSED.
+Run: `cd protocol && python -m pytest tests/test_cycle.py -k odd_defeat_cycle -v`
+Expected: FAIL — no `duhem_consistency` stage yet.
 
 - [ ] **Step 3: Wire the fold into `run_cycle`**
 
@@ -514,7 +652,7 @@ Run:
 ```bash
 cd /Users/zbb2/Desktop/polymer-claims/protocol && ruff check . && python -m pytest tests/test_cycle.py -q && python -m pytest -q
 ```
-Expected: the new test passes; the full protocol suite stays green (the fold is a no-op on corpora with no frustrated cycle, so existing cycle tests are unaffected).
+Expected: the new test passes; the full protocol suite stays green (the fold is a no-op on corpora with no frustrated cycle). If the demote assert fails per Step 1's guard, report DONE_WITH_CONCERNS with the observed post-integrate statuses.
 
 - [ ] **Step 5: Commit**
 
@@ -529,10 +667,11 @@ git commit -m "feat(cycle): apply duhem consistency fold after integrate (demote
 
 ## Self-review
 
-- **Spec coverage:** §3 detector port → Task 1; §4 fold (demote/reopen/ledger-neutral/never-reject) → Task 2 + its tests; §4 `apply_duhem_consistency` real-corpus composition → Task 3; §5 run_cycle wiring + StageAudit + ordering-before-credit → Task 4; §8 ledger-unchanged assertion → Task 2 `test_ledger_is_untouched` + Task 3 end-to-end ledger check. The §8 reopen→re-verify no-double-register watch is exercised by Task 4's resolve-then-reopen test (a reopened claim re-enters verify next cycle); if that surfaces a double-count, it is a real finding for the review loop.
-- **Placeholder scan:** none — code is complete. Task 3 Step 1 and Task 4 Step 1 are lookup-then-reuse instructions (find the existing frustrated-corpus construction), with concrete assertions around them; this is the same pattern used for the item-① e2e fixture, not a placeholder.
-- **Type consistency:** `DuhemFoldAudit` fields (`demoted`/`reopened`/`contradiction_ids`) used identically across Tasks 2–4; `apply_duhem_consistency`/`duhem_fold_from_obstructions` signatures match their call sites; `PendingReason.DUHEM_UNDERDETERMINED`/`REINSTATED` and `Status.PENDING`/`LICENSED` used consistently.
+- **Spec coverage:** §3 detector port → Task 1; §4 fold (demote/ledger-neutral/never-reject) → Task 2 + its tests; §4 `apply_duhem_consistency` real-corpus composition → Task 3; §4/§8 **structural-resolution reopen** (the correction: demote on effective frustration, reopen only when the structural cycle is gone) → Task 4; §5 run_cycle wiring + StageAudit + ordering-before-credit → Task 5. §8 ledger-unchanged → Task 2 `test_ledger_is_untouched` + Task 3 end-to-end check.
+- **The load-bearing risk, made explicit:** whether the demote fires through `run_cycle` depends on `integrate` leaving freshly-licensed odd-cycle claims `LICENSED` (they are not in `prior_in`, so `flipped_out` should exclude them). This is confirmed empirically by Task 5 Step 1, NOT assumed — with an explicit STOP-and-report guard if `integrate` strips them first (which would mean the fold must move inside integrate's undecided-set handling, a redesign). This is the single place the whole wiring could be a no-op, so it is verified by a second route (a live cycle), not by static reasoning.
+- **Placeholder scan:** none — code is complete. Task 3 Step 1, Task 4 Step 1, and Task 5 Step 1 are read-the-fixture-then-build instructions (the odd-defeat-cycle corpus), with concrete assertions and an explicit finding-guard around them — the same pattern used for the item-① e2e fixture, not a placeholder.
+- **Type consistency:** `DuhemFoldAudit` fields used identically across Tasks 2–5; `duhem_fold_from_obstructions` takes `(corpus, effective_obstructions, structural_obstructions)` consistently after Task 4; `apply_duhem_consistency(corpus)` signature matches its Task-5 call site; `extract_sheaf`'s new `effective_only` kw defaults `True` (existing callers unaffected).
 
 ## Execution note
 
-Tasks 1–2 are the load-bearing pure changes and are fully unit-tested from hand-built inputs. Tasks 3–4 verify composition against the real detector and the live cycle; if the frustrated-corpus construction proves finicky (Task 3 Step 1), that is a lookup cost, not a redesign — the fold logic is already proven in Task 2.
+Tasks 1–3 are the pure building blocks, fully unit-tested. Task 4 is the correctness rework (structural reopen) driven by the effective-vs-structural frustration distinction. Task 5 is the live wiring and is the one place a hidden `integrate` interaction could make the fold a no-op — its integration test is written to *surface that as a finding* (DONE_WITH_CONCERNS) rather than pass hollow, so a real no-op cannot masquerade as success.
