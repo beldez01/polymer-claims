@@ -12,7 +12,72 @@
 
 ---
 
-## Current state (2026-07-01) — authoritative snapshot
+## Current state (2026-07-08) — authoritative snapshot
+
+> Session 2026-07-07 → 08. `main` = `9643d8b`, **pushed to `origin`** (`origin/main == main`). All suites
+> green: **grammar 578 · protocol 497 · umbrella green**; ruff clean. grammar/protocol stay pure +
+> numpy-free; **Corpus = exactly 4 collections**. Feature branches merged and deleted; single trunk.
+
+**Merged since the 2026-07-01 snapshot:**
+
+- **Phase 1 + Phase 2 real-data licensing merged** (`c4fe813`, `b8fbb1f`) — the `feat/phase1-license-loop`
+  work from the last snapshot is now on `main` (`verify-kernel --real` → LICENSED @ REPRODUCED on real
+  TCGA-LAML; the migrated HLA-A promoter claim licensed on real BLUEPRINT WGBS).
+- **R5.1 — genuine adapter independence** (2026-07-07, `e789b05` / `c99c35a` / `12a1fa6`, merges `4f9f8d9`
+  + `2e79457`) — the two methyl legs are now *genuinely* different algorithms (an n-DMP **rank** leg +
+  a **Hodges-Lehmann region-Δβ** leg, `both_satisfy_criterion` agreement), and REPRODUCED results
+  **attest per-leg independence evidence**. Plus the in-repo **tautology-audit** findings +
+  shape-dependent independence docs (`5952695`, `307165a`).
+- **Duhem consistency fold — the sheaf's H¹ frustration now ACTS on claim status** (2026-07-07, this
+  session). Three slices, each brainstorm → spec → plan → subagent-driven-TDD → whole-branch review:
+  1. **neg2 whisper backlog** (`4e59911`) — a `/neg2` peripheral read of the foundations corpus triaged
+     into 5 buildable seams + notes (`docs/superpowers/specs/2026-07-07-neg-whisper-backlog-design.md`).
+  2. **Item ① — H¹→blame-set coupling** (`3eaca5f`..`0927867`) — pure `blame_bridge.py`: an obstruction
+     (frustrated cycle, **no local witness**) → Duhem blame; single cycle → `PENDING duhem_underdetermined`;
+     a claim shared across ≥2 cycles → robust (`ROBUSTLY_BLAMED`, now wired).
+  3. **The fold wired into `run_cycle`** (`215b6c8`..`50a7dd4`) — `apply_duhem_consistency` runs after
+     `integrate` (before the survival-credit snapshot): **demote** LICENSED claims on a frustrated cycle
+     to `PENDING duhem_underdetermined`, **reopen** to `PENDING reinstated` when the contradiction
+     structurally resolves. **Ledger-neutral** (warrant-only per Refund-Validity — `FDRTest` stays live,
+     no `retract_tests`), **demote-only** (never terminal-rejects). The detector `frustration_obstructions`
+     moved into pure protocol; `extract_sheaf` gained an `effective_only` switch (effective drives demote,
+     structural drives reopen).
+  4. **`frustrated_vertices`** (`a37aa84`..`9643d8b`) — demote/reopen now key on membership in *any*
+     frustrated cycle (edge-identity **biconnected blocks**, multigraph-correct), fixing a
+     spanning-tree-dependent bug where the reported-obstruction union could miss a genuinely-frustrated
+     claim (theta-graph witness). `frustration_obstructions` retained for the audit/viewer only. The
+     whole-branch review fuzzed the BCC against a brute-force cycle oracle (8,000 graphs, 0 mismatches).
+
+### NEXT — where to proceed
+
+The neg2 backlog (`docs/superpowers/specs/2026-07-07-neg-whisper-backlog-design.md`) has **4 buildable
+items left** (item ① shipped above):
+1. **② independence-as-claim** — promote the shared-cause/common-cause overlap from an operator-asserted
+   flag to a first-class **defeasible claim** with its own evidence bar (the correlated-variance probe
+   from `2026-06-29-adapter-independence-hardening-notes.md`). *The load-bearing risk named in every doc.*
+2. **③ residue budget** — a residue-value term in the `protocol/economics.py` scheduler so the PENDING
+   graveyard (esp. `duhem_underdetermined`) earns scheduled re-examination, not silent accretion.
+3. **④ q-stationarity horizon** — stamp the corpus `q` with a drift-epoch / validity window so the
+   actuarial framing carries its stationarity assumption explicitly.
+4. **⑤ forbidden-vs-unobserved** — a severity-backed **licensed-negative** claim path so the morphospace
+   "forbidden region" is separable from "not yet looked."
+
+**Deferred (non-blocking) follow-ups from the duhem line:** promote the `frustrated_vertices` fuzz-vs-oracle
+harness into a seeded property test; a guard to skip the structural `extract_sheaf` pass when no claim is
+`PENDING duhem_underdetermined` (premature optimization — do on measured cost); per-claim suspension
+provenance for a finer reopen (current policy is conservative: reopen iff on no structural frustrated cycle).
+
+### Environment notes for resuming
+
+- **Other-instance in-flight files uncommitted on `main`** (untracked): `docs/the-spine-one-pager.{typ,pdf}`,
+  `epistemic-core-derivation.{typ,pdf}`, `prior-art-and-novelty.{typ,pdf}`, `open-questions-research-plan.typ`,
+  `foundations/{residualism,compute-boundary}.md`, `roadmap-cross-domain-ecosystems.md`, `actionability-and-roi.md`,
+  and the `2026-06-29-{adapter-independence-hardening-notes,claim-type-menu-design}.md` specs. They need
+  their author's commit-or-discard call; left untouched.
+
+---
+
+## Current state (2026-07-01) — historical (superseded by 2026-07-08 above)
 
 > Session 2026-06-30 → 07-01. Paused for compute. Servers stopped; scratch bigWigs removed.
 
@@ -486,7 +551,8 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   Quantity-leaf claims; equivalence edges = agreement, defeat edges = sign-flipped antagonism (generalizing
   the signed-Laplacian embedding); Laplacian → inconsistency energy (consistency radius) + dim H⁰ + localized
   H¹ frustration obstructions; `export-consistency` CLI + cheap live headline (`TopologyExport.consistency`)
-  on the topology frame; instrument not a gate; pure protocol extractor (`protocol/sheaf.py`) + numpy spectrum
+  on the topology frame; instrument not a gate *(at the time — H¹ frustration was later wired to act via the
+  **duhem consistency fold**, 2026-07-07; see the current-state snapshot at the top)*; pure protocol extractor (`protocol/sheaf.py`) + numpy spectrum
   (`polymer_claims/sheaf_spectrum.py`) behind `[embed]`. spec+plan
   `docs/superpowers/{specs,plans}/2026-06-21-sheaf-consistency-gauge*`. **Deferred:** stalk enrichments
   (standardized-effect, ℝ²(value,uncertainty)), unit-conversion registry (ρ≠1),

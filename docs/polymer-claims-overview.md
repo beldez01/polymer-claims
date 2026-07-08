@@ -136,7 +136,7 @@ What the system *produces*:
 The engine is the **`run_cycle` flywheel** — one pure pass that threads a frozen corpus forward:
 
 ```
- generate  →  select  →  execute  →  verify  →  integrate
+ generate  →  select  →  execute  →  verify  →  integrate  →  duhem-consistency
  (propose     (budget-    (run the    (≥2 indep.   (commit status,
   rivals/      ranked      pinned       adapters     update FDR ledger,
   revisions)   pursuit)    computation) must AGREE)  resolve defeat graph)
@@ -175,7 +175,7 @@ standards-native, and alive**, in three arcs:
    hierarchical), the local-compute **agent protocol** ("deploy an agent to examine a region,
    re-execute, post verification/attack events"), a credence layer, and — the long horizon — a
    **sheaf-cohomology consistency gauge** that turns "grows toward truth" into a number that falls as
-   independent recomputations bring claims into harmony. *The first piece of this is built:* a cellular sheaf over the claims graph computes Robinson inconsistency energy, `dim H⁰`, and `H¹` frustration obstructions, available via `export-consistency` and as a live headline on every `TopologyExport`. It is an instrument, not a gate. *The viewer overlay is also built:* a throttled `GET /consistency` route feeds a live consistency overlay — energy HUD, per-claim tension halos (nonnegative edge-share), and an animated H¹ frustration-cycle overlay with an obstruction panel.
+   independent recomputations bring claims into harmony. *The first piece of this is built:* a cellular sheaf over the claims graph computes Robinson inconsistency energy, `dim H⁰`, and `H¹` frustration obstructions, available via `export-consistency` and as a live headline on every `TopologyExport`. The energy/`H⁰` gauge is instrument-only, but **`H¹` frustration now *acts*** — since 2026-07-07 it drives the **duhem consistency fold** (a `run_cycle` stage that demotes claims on a frustrated cycle to `PENDING duhem_underdetermined` and reopens them when the contradiction resolves; ledger-neutral, demote-only). *The viewer overlay is also built:* a throttled `GET /consistency` route feeds a live consistency overlay — energy HUD, per-claim tension halos (nonnegative edge-share), and an animated H¹ frustration-cycle overlay with an obstruction panel.
 
 ---
 

@@ -199,7 +199,7 @@ The `protocol/` package (`polymer_protocol`) is the **runtime half of the compil
 State is a frozen `Corpus` = (claims, defeat_edges, equivalences, fdr_ledger). `run_cycle(corpus, adapters, ctx)` chains seven pure assessment stages:
 
 ```
-represent → canonicalize → safety_gate → commit → execute_ground → verify_stage → integrate
+represent → canonicalize → safety_gate → commit → execute_ground → verify_stage → integrate → duhem_consistency
 ```
 
 returning a new `Corpus` plus the unresolved-attack `frontier`, the `gated_lane` (claims blocked by governance), and a per-stage `audit`.
