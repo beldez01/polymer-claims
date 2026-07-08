@@ -1,7 +1,7 @@
 from polymer_grammar import DefeatEdge, DefeatEdgeKind, EquivalenceClaim, FDRLedger, PendingReason, Status
 from polymer_protocol.sheaf import Obstruction, extract_sheaf, frustration_obstructions
 from polymer_protocol.corpus import Corpus
-from polymer_protocol.duhem_fold import apply_duhem_consistency, duhem_fold_from_obstructions
+from polymer_protocol.duhem_fold import apply_duhem_consistency, duhem_fold
 
 from tests.conftest import _make_quantity_claim as make_quantity_claim
 from tests.conftest import make_claim
@@ -21,7 +21,7 @@ def test_licensed_claim_in_frustrated_cycle_demotes_to_pending_duhem():
     b = make_claim("B", status=Status.LICENSED)
     c = make_claim("C", status=Status.LICENSED)
     obs = _obstruction("A", "B", "C")
-    corpus, audit = duhem_fold_from_obstructions(_corpus(a, b, c), [obs], [obs])
+    corpus, audit = duhem_fold(_corpus(a, b, c), frozenset({"A", "B", "C"}), frozenset({"A", "B", "C"}), [obs])
     by_id = corpus.by_id()
     for cid in ("A", "B", "C"):
         assert by_id[cid].status == Status.PENDING
@@ -34,15 +34,15 @@ def test_licensed_claim_in_frustrated_cycle_demotes_to_pending_duhem():
 def test_never_sets_rejected():
     a = make_claim("A", status=Status.LICENSED)
     obs = _obstruction("A", "B")
-    corpus, _ = duhem_fold_from_obstructions(_corpus(a, make_claim("B", status=Status.LICENSED)),
-                                             [obs], [obs])
+    corpus, _ = duhem_fold(_corpus(a, make_claim("B", status=Status.LICENSED)),
+                            frozenset({"A", "B"}), frozenset({"A", "B"}), [obs])
     assert all(c.status != Status.REJECTED for c in corpus.claims)
 
 
 def test_resolved_cycle_reopens_pending_duhem_to_reinstated():
     # a claim already PENDING duhem from a prior cycle, no longer implicated → reopen
     stuck = make_claim("A", status=Status.PENDING, pending_reason=PendingReason.DUHEM_UNDERDETERMINED)
-    corpus, audit = duhem_fold_from_obstructions(_corpus(stuck), [], [])   # structural empty ⇒ reopen fires
+    corpus, audit = duhem_fold(_corpus(stuck), frozenset(), frozenset(), [])   # structural empty ⇒ reopen fires
     assert corpus.by_id()["A"].status == Status.PENDING
     assert corpus.by_id()["A"].pending_reason == PendingReason.REINSTATED
     assert set(audit.reopened) == {"A"}
@@ -50,7 +50,7 @@ def test_resolved_cycle_reopens_pending_duhem_to_reinstated():
 
 def test_pending_duhem_stays_put_while_structurally_implicated():
     stuck = make_claim("A", status=Status.PENDING, pending_reason=PendingReason.DUHEM_UNDERDETERMINED)
-    corpus, audit = duhem_fold_from_obstructions(_corpus(stuck), [], [_obstruction("A", "B", "C")])
+    corpus, audit = duhem_fold(_corpus(stuck), frozenset(), frozenset({"A", "B"}), [])
     # effective empty (no demote), but A still in a STRUCTURAL cycle → NOT reopened
     assert corpus.by_id()["A"].pending_reason == PendingReason.DUHEM_UNDERDETERMINED
     assert audit.reopened == ()
@@ -59,7 +59,7 @@ def test_pending_duhem_stays_put_while_structurally_implicated():
 def test_unimplicated_and_unrelated_claims_untouched():
     lic = make_claim("A", status=Status.LICENSED)                       # licensed, not implicated
     other = make_claim("B", status=Status.PENDING, pending_reason=PendingReason.UNTESTED)
-    corpus, audit = duhem_fold_from_obstructions(_corpus(lic, other), [], [])
+    corpus, audit = duhem_fold(_corpus(lic, other), frozenset(), frozenset(), [])
     assert corpus.by_id()["A"].status == Status.LICENSED
     assert corpus.by_id()["B"].pending_reason == PendingReason.UNTESTED
     assert audit.demoted == () and audit.reopened == ()
@@ -69,7 +69,7 @@ def test_ledger_is_untouched():
     a = make_claim("A", status=Status.LICENSED)
     corpus_in = _corpus(a, make_claim("B", status=Status.LICENSED))
     obs = _obstruction("A", "B")
-    corpus_out, _ = duhem_fold_from_obstructions(corpus_in, [obs], [obs])
+    corpus_out, _ = duhem_fold(corpus_in, frozenset({"A", "B"}), frozenset({"A", "B"}), [obs])
     assert corpus_out.fdr_ledger == corpus_in.fdr_ledger   # warrant-only ⇒ no refund
 
 
