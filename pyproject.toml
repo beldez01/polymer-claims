@@ -25,6 +25,7 @@ llm = ["anthropic>=0.40"]
 embed = ["numpy>=1.26"]
 calibrate = ["numpy>=1.26"]
 sign = ["cryptography>=42"]
+wgbs = ["pysam>=0.22"]
 
 [project.scripts]
 polymer-claims = "polymer_claims.cli:main"
