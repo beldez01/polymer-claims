@@ -103,11 +103,13 @@ Each licensable candidate becomes one `Claim` built by a new factory
   `ApplicabilityDomain.subject_kinds` admits the composite subject kind (else the
   claim silently resolves out-of-domain → capped UNVALIDATED). Modeled on the
   existing methylation apparatus oracle.
-- **Leaf:** an L0 `QuantityLeaf` for the licensed effect (the median-split ΔAUC),
-  `measurement_basis=DERIVED`, a `formula`, `unit=None` (basis discipline forbids a
-  unit on a non-fundamental quantity). This makes the claim visible to the sheaf
-  consistency gauge and the morphospace. A secondary `CategoricalLeaf` may carry
-  the semantic tag.
+- **Leaf:** a `CategoricalLeaf` (`ontology_term="pharmacogenomic_association"`),
+  matching every shipped Polymer real-data claim (the methyl and mean-diff claims).
+  The licensed effect (the Polymer-computed median-split ΔAUC) lives in the verify
+  result, **not** baked into a leaf — STRATA's `r_adj` (and its L0–L3 grading) never
+  enters the `Claim`, the leaves, or the provenance. (An L0 `QuantityLeaf` for
+  sheaf-gauge participation is a possible later enhancement; deferred to keep the
+  claim STRATA-free and aligned with shipped practice.)
 - **Strength:** `None` for the generated claim (matches every shipped real-data
   claim; a strength-bearing claim would hit the cardinality-scaled bar and never
   license). Earned, oracle-capped strength is a later reconciliation.

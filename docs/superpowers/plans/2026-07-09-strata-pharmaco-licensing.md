@@ -437,7 +437,7 @@ git commit -m "feat(pharmaco): marker->drug betting e-value (single leg, within-
   - `PHARMACO_ASSOC_CELL` (capability `pharmaco::assoc@v1`, `agreement_mode="both_satisfy_criterion"`, subject required kind `composite`, eligible adapters `("pharmaco-meandiff","pharmaco-rank")`, `data_ref_kind=SE_CONTRACT`).
   - `pharmaco_independent_registry() -> AdapterRegistry`.
   - `pharmaco_oracle_id() -> str` and `pharmaco_oracle_registry() -> OracleRegistry` (a BENCHMARKED apparatus whose `ApplicabilityDomain.subject_kinds=("composite",)` admits the gene/drug subject).
-  - `marker_drug_claim(claim_id, *, ref, marker, drug, drug_chebi_uri, tissue_adjusted=True, threshold=0.0, comparator=Comparator.GT, r_adj, search_cardinality, agent_id="strata-mechanism-v1", prior_cohorts=(), strength=None) -> Claim`.
+  - `marker_drug_claim(claim_id, *, ref, marker, drug, drug_chebi_uri, tissue_adjusted=True, threshold=0.0, comparator=Comparator.GT, search_cardinality, agent_id="strata-mechanism-v1", prior_cohorts=(), strength=None) -> Claim`. **No `r_adj` parameter — STRATA's statistic never enters the claim.**
 
 - [ ] **Step 1: Write the failing test**
 
@@ -456,11 +456,11 @@ def test_marker_drug_claim_shape():
     c = marker_drug_claim(
         "pgx-CDKN2A-Palbociclib", ref="se:gdsc_pharmaco@1", marker="CDKN2A",
         drug="Palbociclib", drug_chebi_uri="http://purl.obolibrary.org/obo/CHEBI_85993",
-        r_adj=-0.34, search_cardinality=8)
+        search_cardinality=8)
     assert c.status == Status.PENDING
     assert c.pattern.id == "adjusted_effect"
     assert c.subject.kind == "composite" and len(c.subject.parts) == 2
-    assert c.leaves[0].kind == "quantity"
+    assert c.leaves[0].kind == "categorical"     # Polymer-native; no STRATA r_adj in the claim
     assert c.provenance.generated_by.value == "agent_generated"
     assert c.provenance.agent_id == "strata-mechanism-v1"
     # composite subject is admitted by the apparatus domain
@@ -485,7 +485,7 @@ PHARMACO_ASSOC_CELL = CapabilityCell(
     produced=_Q, allowed_comparators=_ALL_CMP,
     eligible_adapter_identities=("pharmaco-meandiff", "pharmaco-rank"),
     oracle=OracleRequirement(default_oracle_id="gdsc_pharmaco_apparatus", required=True),
-    data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("quantity", "categorical"),
+    data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("categorical",),
     criterion_target="threshold", agreement_mode="both_satisfy_criterion",
 )
 ```
@@ -505,7 +505,7 @@ from .pharmaco_adapters import pharmaco_independent_registry, pharmaco_oracle_re
 # appended to src/polymer_claims/pharmaco_adapters.py
 from polymer_grammar import (
     CategoricalLeaf, Claim, Comparator, CompositeSubject, GeneOrProtein,
-    MeasurementBasis, OntologyTerm, PatternRef, PendingReason, QuantityLeaf,
+    OntologyTerm, PatternRef, PendingReason,
     SatisfactionCriterion, Status, StrengthVector,
 )
 from polymer_grammar.subject import GeneOrProteinIdentifiers
@@ -542,13 +542,14 @@ def pharmaco_independent_registry() -> AdapterRegistry:
 def marker_drug_claim(
     claim_id: str, *, ref: str, marker: str, drug: str, drug_chebi_uri: str,
     threshold: float = 0.0, comparator: Comparator = Comparator.GT,
-    r_adj: float, search_cardinality: int, agent_id: str = "strata-mechanism-v1",
+    search_cardinality: int, agent_id: str = "strata-mechanism-v1",
     prior_cohorts: tuple[str, ...] = (), preregistration_hash: str | None = None,
     strength: StrengthVector | None = None,
 ) -> Claim:
     """PENDING adjusted-association claim: gene-G methylation is associated (tissue-adjusted) with
-    drug-D response. Pattern adjusted_effect@v1 (association, NOT a causal edge). L0 QuantityLeaf =
-    the proposal r_adj (DERIVED, no unit). Composite (gene, CHEBI drug) subject. AGENT_GENERATED."""
+    drug-D response. Pattern adjusted_effect@v1 (association, NOT a causal edge). CategoricalLeaf
+    per shipped Polymer practice; the computed ΔAUC lives in the verify result — STRATA's r_adj
+    never enters the claim. Composite (gene, CHEBI drug) subject. AGENT_GENERATED."""
     from .capabilities import PHARMACO_ASSOC_CELL
     from polymer_grammar.capability import build_evaluation_plan
 
@@ -567,9 +568,7 @@ def marker_drug_claim(
     return Claim(
         id=claim_id, title=f"{marker} methylation ~ {drug} sensitivity (tissue-adjusted)",
         pattern=PatternRef(id="adjusted_effect", version="v1"),
-        leaves=(QuantityLeaf(value=float(r_adj), measurement_basis=MeasurementBasis.DERIVED,
-                             formula="tissue-adjusted partial Spearman rho (proposal statistic)"),
-                CategoricalLeaf(ontology_term="pharmacogenomic_association")),
+        leaves=(CategoricalLeaf(ontology_term="pharmacogenomic_association"),),
         status=Status.PENDING, pending_reason=PendingReason.UNTESTED, strength=strength,
         subject=subject, evaluation_plan=plan,
         provenance=Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id=agent_id,
@@ -578,7 +577,7 @@ def marker_drug_claim(
                               rationale=f"mechanism-anchored proposal: {marker} in {drug}'s target/pathway"))
 ```
 
-> If `CompositeSubject`/`QuantityLeaf`/`OntologyTerm`/`GeneOrProtein` are not re-exported from the `polymer_grammar` top-level, import them from `polymer_grammar.subject` / `polymer_grammar.leaf`. Verify against `grammar/src/polymer_grammar/__init__.py`.
+> If `CompositeSubject`/`CategoricalLeaf`/`OntologyTerm`/`GeneOrProtein` are not re-exported from the `polymer_grammar` top-level, import them from `polymer_grammar.subject` / `polymer_grammar.leaf`. Verify against `grammar/src/polymer_grammar/__init__.py`.
 
 - [ ] **Step 4: Run tests to verify they pass**
 
@@ -661,7 +660,7 @@ def propose_claims(res_df, *, ref, chebi_of, agent_id="strata-mechanism-v1"):
             continue
         claims.append(marker_drug_claim(
             f"pgx-{r.marker}-{r.drug}", ref=ref, marker=str(r.marker), drug=str(r.drug),
-            drug_chebi_uri=uri, r_adj=float(r.r_adj),
+            drug_chebi_uri=uri,
             search_cardinality=int(getattr(r, "n_genes_tested", 1) or 1), agent_id=agent_id))
     if skipped:
         log.warning("propose_claims: skipped %d rows lacking a CHEBI uri", skipped)
