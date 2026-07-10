@@ -653,7 +653,7 @@ from polymer_grammar import FDRLedger, MaterializationContext
 from polymer_grammar.claim import Status
 from polymer_protocol import Corpus, run_cycle
 from .panels import load_panel
-from .ingest.loyfer_wgbs import extract_region
+from .ingest.loyfer_wgbs import extract_regions_multi
 from .ingest.build_loyfer_contract import build_contract
 from .exec_adapters import (
     StatsPureAdapter, HodgesLehmannMeanDiffAdapter,
@@ -672,9 +672,12 @@ class RipResult:
 def run(panel_path, bed_dir, manifest, contracts_dir, *, target_fdr: float = 0.05) -> RipResult:
     panel = load_panel(Path(panel_path))
     contracts_dir = Path(contracts_dir); contracts_dir.mkdir(parents=True, exist_ok=True)
+    # single-pass multi-window extraction (Task 4b) — one scan per sample file, not per window
+    windows = [(loc.locus_id, loc.chrom, loc.start, loc.end) for loc in panel]
+    all_rows = extract_regions_multi(Path(bed_dir), Path(manifest), windows)
     claims = []
     for loc in panel:                       # FIXED panel order = pre-registered order
-        rows = extract_region(Path(bed_dir), Path(manifest), loc.chrom, loc.start, loc.end)
+        rows = all_rows.get(loc.locus_id, [])
         uid = f"{loc.locus_id}@1"
         build_contract(rows, uid, contracts_dir, group_col="cell_type_broad")
         cmp = Comparator.GT if loc.comparator == "GT" else Comparator.LT
