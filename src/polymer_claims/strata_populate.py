@@ -8,8 +8,16 @@ import re
 import sys
 from pathlib import Path
 
-from polymer_grammar import Claim, Comparator, FDRLedger, MaterializationContext, Status
-from polymer_protocol import Corpus, Layout, export_topology, register_hypotheses, run_cycle
+from polymer_grammar import (
+    Claim,
+    Comparator,
+    FDRLedger,
+    MaterializationContext,
+    Status,
+    commitment_hash,
+    register_test,
+)
+from polymer_protocol import Corpus, Layout, export_topology, run_cycle
 
 from .capabilities import CAPABILITY_CELLS
 from .contracts import load_contract
@@ -95,11 +103,29 @@ def propose_claims(
 
 def preregister(corpus: Corpus, claims: list[Claim]) -> Corpus:
     """Admit the proposed claims into the corpus (PENDING — no standing yet) and lock an e-LOND
-    slot per claim via the protocol's register_hypotheses (which internally charges
-    register_test/commitment_hash) BEFORE any e-value exists. Standing (LICENSED) is only
-    conferred later by Task 6's run_cycle."""
+    slot per claim (register_test/commitment_hash) BEFORE any e-value exists. Standing (LICENSED)
+    is only conferred later by Task 6's run_cycle.
+
+    Registration order is the LIST order of `claims` — i.e. STRENGTH-rank order, because
+    propose_claims builds the list straight from the mechanism scan's DataFrame (sorted by level
+    desc, |r_adj| desc). This is the intended use of e-LOND's front-loaded γ_t weights: test the
+    most-promising hypotheses first so the strongest signals get the earliest (lowest) discovery
+    bars. FDR control is order-INDEPENDENT (the γ_j sum to 1 regardless of order); only power
+    changes. NOT protocol's register_hypotheses, which re-sorts claim_ids ALPHABETICALLY and would
+    bury a strong-but-late-alphabet signal (e.g. MTAP→Palbociclib) behind a ~10^6 threshold. The
+    locked α is honored at verify: pre-registered claims resolve via resolve_test (verify.py
+    Phase D) against the α locked HERE, never re-sorted by elond_decisions."""
     admitted = corpus.model_copy(update={"claims": corpus.claims + tuple(claims)})
-    return register_hypotheses(admitted, claim_ids=[c.id for c in claims])
+    ledger = admitted.fdr_ledger
+    pending = {t.claim_id for t in ledger.tests if t.e_value is None and not t.retracted}
+    for c in claims:
+        if c.evaluation_plan is None or c.id in pending:
+            continue                              # planless / already-registered -> no double-charge
+        ledger = register_test(ledger, c.id, commitment_hash(c))
+        pending.add(c.id)
+    if ledger == admitted.fdr_ledger:
+        return admitted
+    return admitted.model_copy(update={"fdr_ledger": ledger})
 
 
 def _evidence_for(claims: list[Claim], *, threshold: float = 0.0) -> dict[str, float]:

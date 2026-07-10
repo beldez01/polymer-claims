@@ -47,3 +47,26 @@ def test_preregister_locks_a_slot_before_any_evalue():
     assert len(pending) == 1
     assert pending[0].e_value is None                     # registered, unresolved
     assert pending[0].commitment_hash is not None          # pre-registration hash locked
+
+
+def test_preregister_charges_in_strength_list_order_not_alphabetical():
+    # List (strength-rank) order puts the STRONG signal first even though its claim id sorts
+    # LAST alphabetically. e-LOND's front-loaded gamma_t weights must reach it at the earliest
+    # (lowest-threshold) slot -> registration follows list order, NOT sorted(claim_ids).
+    res = pd.DataFrame([
+        {"drug": "Zoledronic", "marker": "MTAP", "level": "L3", "r_adj": -0.30, "n_genes_tested": 5},
+        {"drug": "Aspirin", "marker": "AAA", "level": "L0", "r_adj": -0.05, "n_genes_tested": 5},
+    ])
+    claims = propose_claims(res, ref="se:gdsc_pharmaco@1", chebi_of={})
+    assert [c.id for c in claims] == ["pgx-MTAP-Zoledronic", "pgx-AAA-Aspirin"]  # list = strength order
+
+    out = preregister(Corpus(fdr_ledger=FDRLedger(target_fdr=0.05)), claims)
+    tests = out.fdr_ledger.tests
+
+    # registration order == list order (strength), not alphabetical (which would put -AAA- first)
+    assert [t.claim_id for t in tests] == ["pgx-MTAP-Zoledronic", "pgx-AAA-Aspirin"]
+    assert [t.index for t in tests] == [1, 2]
+    # the strong signal sits at position 1 -> the LARGEST alpha -> the LOWEST discovery bar
+    strong, weak = tests[0], tests[1]
+    assert strong.alpha_allocated > weak.alpha_allocated
+    assert (1.0 / strong.alpha_allocated) < (1.0 / weak.alpha_allocated)
