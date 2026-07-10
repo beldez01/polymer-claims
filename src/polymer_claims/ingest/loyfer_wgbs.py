@@ -23,6 +23,14 @@ def load_manifest(path: Path) -> list[tuple[str, str, str, str]]:
     return [(r[i_stem], r[i_ct], r[i_br], r[i_ln]) for r in rows[1:]]
 
 
+def _parse_bed_line(line: str) -> tuple[str, int, float, int] | None:
+    """Parse one atlas bed.gz data line -> (chrom, pos, beta, cov), or None for comments/blanks."""
+    if not line or line.startswith("#"):
+        return None
+    c = line.rstrip("\n").split("\t")
+    return c[0], int(c[1]), float(c[3]), int(c[4])
+
+
 def _iter_region(bed_path: Path, chrom: str, start: int, end: int):
     """Yield (pos, beta, cov) for CpGs in [start, end). Tabix if available, else stream-scan."""
     try:
@@ -37,17 +45,17 @@ def _iter_region(bed_path: Path, chrom: str, start: int, end: int):
         pass
     with gzip.open(bed_path, "rt") as fh:
         for line in fh:
-            if line.startswith("#"):
+            parsed = _parse_bed_line(line)
+            if parsed is None:
                 continue
-            c = line.rstrip("\n").split("\t")
-            if c[0] != chrom:
+            c_chrom, pos, beta, cov = parsed
+            if c_chrom != chrom:
                 continue
-            pos = int(c[1])
             if pos < start:
                 continue
             if pos >= end:
                 continue
-            yield pos, float(c[3]), int(c[4])
+            yield pos, beta, cov
 
 
 def _find_bed(bed_dir: Path, stem: str) -> Path | None:
@@ -75,3 +83,52 @@ def extract_region(bed_dir: Path, manifest: Path, chrom: str, start: int, end: i
                               beta=sum(betas) / len(betas), n_cpg=len(betas),
                               mean_cov=sum(covs) / len(covs)))
     return out
+
+
+def extract_regions_multi(
+    bed_dir: Path, manifest: Path,
+    windows: list[tuple[str, str, int, int]],  # (locus_id, chrom, start, end)
+    *, min_cov: int = 4, min_cpg: int = 3,
+) -> dict[str, list[SampleBeta]]:
+    """Scan each sample bed.gz ONCE, accumulating per-CpG betas for every window it overlaps.
+
+    Returns locus_id -> [SampleBeta], same per-sample QC as extract_region (mean of per-CpG beta
+    over CpGs with cov >= min_cov; a sample with surviving n_cpg < min_cpg is dropped for that
+    locus). Must agree exactly with calling extract_region once per window.
+    """
+    by_chrom: dict[str, list[tuple[str, int, int]]] = {}
+    for locus_id, chrom, start, end in windows:
+        by_chrom.setdefault(chrom, []).append((locus_id, start, end))
+
+    result: dict[str, list[SampleBeta]] = {locus_id: [] for locus_id, _, _, _ in windows}
+
+    for stem, ct, br, ln in load_manifest(manifest):
+        bed = _find_bed(Path(bed_dir), stem)
+        if bed is None:
+            continue
+        acc: dict[str, tuple[list[float], list[int]]] = {locus_id: ([], []) for locus_id, _, _, _ in windows}
+        try:
+            with gzip.open(bed, "rt") as fh:
+                for line in fh:
+                    parsed = _parse_bed_line(line)
+                    if parsed is None:
+                        continue
+                    chrom, pos, beta, cov = parsed
+                    wins = by_chrom.get(chrom)
+                    if not wins or cov < min_cov:
+                        continue
+                    for locus_id, start, end in wins:
+                        if start <= pos < end:
+                            betas, covs = acc[locus_id]
+                            betas.append(beta)
+                            covs.append(cov)
+        except (OSError, EOFError):
+            continue  # truncated/corrupt source bed.gz for this sample: skip, don't crash the batch
+        for locus_id, (betas, covs) in acc.items():
+            if len(betas) < min_cpg:
+                continue  # QC-drop: PENDING(unpowered) decided downstream by group size
+            result[locus_id].append(SampleBeta(
+                sample=stem, cell_type=ct, cell_type_broad=br, lineage=ln,
+                beta=sum(betas) / len(betas), n_cpg=len(betas),
+                mean_cov=sum(covs) / len(covs)))
+    return result

@@ -96,11 +96,13 @@ def coverage_precheck(panel, bed_dir, manifest, *, min_cov: int = 4, min_cpg: in
     Reads coverage only, never the effect — safe to run pre-registration to prune
     unpowerable loci without touching the comparison this panel will be scored on.
     """
-    from ..ingest.loyfer_wgbs import extract_region
+    from ..ingest.loyfer_wgbs import extract_regions_multi
+    windows = [(loc.locus_id, loc.chrom, loc.start, loc.end) for loc in panel]
+    by_locus = extract_regions_multi(Path(bed_dir), Path(manifest), windows,
+                                      min_cov=min_cov, min_cpg=min_cpg)
     ok: dict[str, bool] = {}
     for loc in panel:
-        rows = extract_region(Path(bed_dir), Path(manifest), loc.chrom, loc.start, loc.end,
-                               min_cov=min_cov, min_cpg=min_cpg)
+        rows = by_locus[loc.locus_id]
         a = sum(1 for r in rows if r.cell_type_broad == loc.group_a)
         b = sum(1 for r in rows if r.cell_type_broad == loc.group_b)
         ok[loc.locus_id] = a >= 2 and b >= 2
