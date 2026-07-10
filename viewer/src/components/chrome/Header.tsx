@@ -43,7 +43,7 @@ export default function Header() {
           color: COLOR.text.tertiary,
         }}
       >
-        § Claims Universe
+        § STRATA — pharmacogenomic claims universe (GDSC)
       </span>
       <span style={{ flex: 1 }} />
       <span
@@ -55,7 +55,7 @@ export default function Header() {
           letterSpacing: '0.04em',
         }}
       >
-        TopologyExport · FORCE_DIRECTED
+        696 claims · fruchterman-reingold
       </span>
       <LiveControl />
     </header>

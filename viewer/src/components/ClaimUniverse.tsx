@@ -79,15 +79,21 @@ export default function ClaimUniverse() {
   const setTimeline = useViewer((s) => s.setTimeline);
   const [error, setError] = useState<string | null>(null);
 
-  // Default to the timeline; fall back to the static export if it's absent.
+  // Default bundle: the STRATA pharmacogenomic claims universe (GDSC) — the Monday demo
+  // centerpiece, 696 nodes. Falls back to the prior PolymerGenomics timeline, then the static
+  // export, if the pharmaco bundle is ever absent (e.g. a checkout before it was generated).
   useEffect(() => {
-    loadTimeline()
+    loadTimeline('/pharmaco-universe.json')
       .then(setTimeline)
-      .catch(() => {
-        loadTopology()
-          .then(setData)
-          .catch((e) => setError(String(e)));
-      });
+      .catch(() =>
+        loadTimeline()
+          .then(setTimeline)
+          .catch(() => {
+            loadTopology()
+              .then(setData)
+              .catch((e) => setError(String(e)));
+          }),
+      );
   }, [setTimeline, setData]);
 
   // A stable reference frame over the WHOLE run: union of every frame's node
