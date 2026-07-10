@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from polymer_grammar import Claim, Comparator, MaterializationContext
+from polymer_grammar import Claim, Comparator, FDRLedger, MaterializationContext, Status
 from polymer_protocol import Corpus, register_hypotheses, run_cycle
 
 from .capabilities import CAPABILITY_CELLS
@@ -21,7 +21,14 @@ from .pharmaco_evidence import pharmaco_evalue
 
 log = logging.getLogger(__name__)
 
-__all__ = ["propose_claims", "preregister", "license_batch"]
+__all__ = [
+    "ControlCheckFailed",
+    "check_controls",
+    "license_batch",
+    "populate_universe",
+    "preregister",
+    "propose_claims",
+]
 
 
 def propose_claims(
@@ -101,3 +108,42 @@ def license_batch(
         evidence=_evidence_for(claims),
         capability_registry=CAPABILITY_CELLS)
     return result.corpus
+
+
+class ControlCheckFailed(RuntimeError):
+    """The publish guard: a control behaved wrong (positive did not license, or negative did)."""
+
+
+def check_controls(
+    corpus: Corpus, *,
+    positive: str = "pgx-MTAP-Palbociclib", negative: str = "pgx-MGMT-Temozolomide",
+) -> dict:
+    """A read-only instrument, not a gate: reports whether the known-mechanism positive control
+    licensed and the known-null negative control did not — never mutates any claim's status.
+    The negative condition is "not LICENSED" (robust to the null landing PENDING as a residue OR
+    terminal-REJECTED via agreed refutation — either way it is not licensed)."""
+    by_id = corpus.by_id()
+    pos = by_id.get(positive)
+    neg = by_id.get(negative)
+    positive_licensed = pos is not None and pos.status == Status.LICENSED
+    negative_licensed = neg is not None and neg.status == Status.LICENSED
+    return {
+        "ok": positive_licensed and not negative_licensed,
+        "positive_licensed": positive_licensed,
+        "negative_licensed": negative_licensed,
+    }
+
+
+def populate_universe(
+    res_df, *, ref: str, chebi_of: dict[str, str], shared_cause_factors: tuple[str, ...],
+    require_controls: bool = True, agent_id: str = "strata-mechanism-v1",
+) -> Corpus:
+    """End-to-end: propose -> preregister -> license_batch -> check_controls (the publish guard).
+    Raises ControlCheckFailed if require_controls and the control instrument reports not-ok."""
+    claims = propose_claims(res_df, ref=ref, chebi_of=chebi_of, agent_id=agent_id)
+    corpus = preregister(Corpus(fdr_ledger=FDRLedger(target_fdr=0.05)), claims)
+    corpus = license_batch(corpus, claims, ref=ref, shared_cause_factors=shared_cause_factors)
+    report = check_controls(corpus)
+    if require_controls and not report["ok"]:
+        raise ControlCheckFailed(f"control instrument failed: {report}")
+    return corpus
