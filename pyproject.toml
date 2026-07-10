@@ -36,6 +36,8 @@ strata = [
     "lifelines>=0.30",
     "openpyxl>=3.1",
 ]
+# immuno/ERV WGBS drive: tabix reads of Loyfer per-CpG beds (optional; gzip fallback works without it).
+wgbs = ["pysam>=0.22"]
 
 [project.scripts]
 polymer-claims = "polymer_claims.cli:main"
