@@ -26,6 +26,7 @@ from polymer_protocol import Corpus, run_cycle
 from .analysis_profile import profile_oracle_registry
 from .capabilities import CAPABILITY_CELLS
 from .contracts import clear_contract_cache, using_contract_root
+from .evidence import evidence_map
 from .ingest.build_loyfer_contract import build_contract
 from .ingest.loyfer_wgbs import extract_regions_multi
 from .methyl_adapters import (
@@ -49,8 +50,17 @@ _CMP = {
 
 @dataclass
 class RipResult:
-    verdicts: dict[str, str]  # locus_id -> "LICENSED" | "PENDING"
+    verdicts: dict[str, str]  # locus_id -> "LICENSED" | "REJECTED" | "PENDING"
     corpus: object
+
+
+def _verdict(status) -> str:
+    """Map the three real gate outcomes distinctly (do NOT collapse REJECTED into PENDING)."""
+    if status == Status.LICENSED:
+        return "LICENSED"
+    if status == Status.REJECTED:
+        return "REJECTED"
+    return "PENDING"
 
 
 def run(panel_path, bed_dir, manifest, contracts_dir, *, target_fdr: float = 0.05) -> RipResult:
@@ -108,10 +118,15 @@ def run(panel_path, bed_dir, manifest, contracts_dir, *, target_fdr: float = 0.0
             # licensed claim is no longer a candidate, so re-running only re-probes the PENDING tail.
             prev = None
             for _ in range(3):
+                # Recompute the native e-value map on the CURRENT corpus each pass (the corpus
+                # mutates as loci settle) and feed it to the gate: this is what resolves each
+                # pre-registered e-LOND slot at its LOCKED α, so the FDR budget actually bites.
+                ev = evidence_map(corpus)
                 corpus = run_cycle(
                     corpus, _ADAPTERS, _CTX,
                     adapter_registry=registry, oracles=oracles,
                     capability_registry=CAPABILITY_CELLS,
+                    evidence=ev,
                 ).corpus
                 snapshot = tuple((c.id, c.status) for c in corpus.claims)
                 if snapshot == prev:
@@ -120,8 +135,5 @@ def run(panel_path, bed_dir, manifest, contracts_dir, *, target_fdr: float = 0.0
         finally:
             clear_contract_cache()
 
-    verdicts = {
-        c.id: ("LICENSED" if c.status == Status.LICENSED else "PENDING")
-        for c in corpus.claims
-    }
+    verdicts = {c.id: _verdict(c.status) for c in corpus.claims}
     return RipResult(verdicts=verdicts, corpus=corpus)
