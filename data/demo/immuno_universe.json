@@ -1,0 +1,91 @@
+{
+  "claims": [
+    {
+      "schema_version": "v1.3",
+      "id": "mhc_ndmp",
+      "title": "n-DMPs Lymphoid vs Myeloid over chr6:29,900,000-33,100,000",
+      "pattern": {
+        "id": "count_enrichment",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 4682,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "count_enrichment_dmp_count",
+          "dimension": null
+        }
+      ],
+      "status": "LICENSED",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": {
+        "semantic_run_id": "sha256:a71f3d329a9813b9b2a269dc1fecdebbce3d71ea0d07a6aed97359c298d50e5c"
+      },
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null,
+      "tier": "REPRODUCED",
+      "region": "chr6:29900000-33100000",
+      "n_probes": 11582,
+      "dmp_count": 4682,
+      "e_value": "inf",
+      "semantic_run_id": "sha256:a71f3d329a9813b9b2a269dc1fecdebbce3d71ea0d07a6aed97359c298d50e5c"
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "hervk_ndmp",
+      "title": "n-DMPs Lymphoid vs Myeloid across 630 HERV-K LTR5_Hs elements",
+      "pattern": {
+        "id": "count_enrichment",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 1083,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "count_enrichment_dmp_count",
+          "dimension": null
+        }
+      ],
+      "status": "LICENSED",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": {
+        "semantic_run_id": "sha256:e193e5e10828e898d5034a6be077425d5e01ec5febd1494df711376c82c2e55e"
+      },
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null,
+      "tier": "REPRODUCED",
+      "region": "HERVK_LTR5_Hs(630 elements)",
+      "n_probes": 2587,
+      "dmp_count": 1083,
+      "e_value": "3.2507899878758665e+274",
+      "semantic_run_id": "sha256:e193e5e10828e898d5034a6be077425d5e01ec5febd1494df711376c82c2e55e"
+    }
+  ],
+  "defeat_edges": [],
+  "equivalences": [],
+  "fdr_ledger": {
+    "target_fdr": 0.05,
+    "procedure": "elond",
+    "tests": []
+  }
+}
