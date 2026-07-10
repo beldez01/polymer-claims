@@ -1,2002 +1,2190 @@
 {
- "claims": [
-  {
-   "schema_version": "v1.3",
-   "id": "class_ii_intron_divergence_extreme",
-   "title": "Class II HLA loci accumulate non-coding substitutions at 9.8\u201317.9\u00d7 the coding rate (DPB1 peak); DRB1 non-coding identity against reference is only 40.6%",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+  "claims": [
     {
-     "kind": "quantity",
-     "value": 35.55,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::per_locus_mean_noncoding_substitution_rate_pct",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "eqtl_positive_genes_stronger_biophysics_coupling",
-   "title": "Genes with known cis-eQTLs show stronger biophysics\u2013expression coupling than genes without \u2014 body deformability partial |r| = 0.262 (eQTL+, n=16,692) vs 0.117 (eQTL\u2212, n=820), \u0394|r| = +0.145",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "class_ii_intron_divergence_extreme",
+      "title": "Class II HLA loci accumulate non-coding substitutions at 9.8\u201317.9\u00d7 the coding rate (DPB1 peak); DRB1 non-coding identity against reference is only 40.6%",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 35.55,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::per_locus_mean_noncoding_substitution_rate_pct",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": -0.262,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::partial_r_body_deformability_tpm_eqtl_positive",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "histogram_modes_map_to_serological_groups",
-   "title": "Per-allele (coding, non-coding) substitution-count histograms at each Class I locus partition into 6 GMM components \u2014 three recurring archetypes (near-reference core, tight multi-serogroup lineages, n",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "eqtl_positive_genes_stronger_biophysics_coupling",
+      "title": "Genes with known cis-eQTLs show stronger biophysics\u2013expression coupling than genes without \u2014 body deformability partial |r| = 0.262 (eQTL+, n=16,692) vs 0.117 (eQTL\u2212, n=820), \u0394|r| = +0.145",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": -0.262,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::partial_r_body_deformability_tpm_eqtl_positive",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 6.0,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::gmm_bic_optimal_k_per_locus",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "hla_a_cpg_density_vs_tpm",
-   "title": "HLA-A CpG density positively correlates with mRNA expression \u2014 opposite-signed companion of the dG37 anti-correlation",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "histogram_modes_map_to_serological_groups",
+      "title": "Per-allele (coding, non-coding) substitution-count histograms at each Class I locus partition into 6 GMM components \u2014 three recurring archetypes (near-reference core, tight multi-serogroup lineages, n",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 6.0,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::gmm_bic_optimal_k_per_locus",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.702,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::spearman_rho",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "hla_a_dg37_vs_tpm",
-   "title": "HLA-A whole-allele dG37 anti-correlates with mRNA expression across protein-distinct alleles",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "hla_a_cpg_density_vs_tpm",
+      "title": "HLA-A CpG density positively correlates with mRNA expression \u2014 opposite-signed companion of the dG37 anti-correlation",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.702,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::spearman_rho",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": -0.711,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::spearman_rho",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "hla_a_erv_methylation_shadow_FALSIFIED",
-   "title": "FALSIFIED: HLA-A monocyte methylation does NOT track distance-to-nearest-ERV3-16A3_I-int beyond what a random reference point achieves",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "hla_a_dg37_vs_tpm",
+      "title": "HLA-A whole-allele dG37 anti-correlates with mRNA expression across protein-distinct alleles",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": -0.711,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::spearman_rho",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.68,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::abs_spearman_rho_erv_anchor",
-     "dimension": null
-    }
-   ],
-   "status": "rejected",
-   "pending_reason": null,
-   "rejection_reason": "refuted",
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "hla_a_expression_prediction_robust_across_premise_sets",
-   "title": "Cross-run synthesis: HLA-A expression-biophysics correlations replicate at |rho| ~0.7 across two premise sets (exp24 n=69 and exp26 n=19/HLA-A subset)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "hla_a_erv_methylation_shadow_FALSIFIED",
+      "title": "FALSIFIED: HLA-A monocyte methylation does NOT track distance-to-nearest-ERV3-16A3_I-int beyond what a random reference point achieves",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.68,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::abs_spearman_rho_erv_anchor",
+          "dimension": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": -0.7105,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::spearman_rho_per_run_dg37_vs_tpm",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "hla_a_ramsuran_pos224",
-   "title": "Underpowered but direction-matched: HLA-A pos-224 (5'UTR -155 from ATG) CG vs TG partition shows lower TPM at CG (Cohen's d ~ -0.93)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "hla_a_expression_prediction_robust_across_premise_sets",
+      "title": "Cross-run synthesis: HLA-A expression-biophysics correlations replicate at |rho| ~0.7 across two premise sets (exp24 n=69 and exp26 n=19/HLA-A subset)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": -0.7105,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::spearman_rho_per_run_dg37_vs_tpm",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 5.0,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::n_cg_alleles_at_pos_224",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "hla_b_bulk_biophysics_null",
-   "title": "Designed negative control: HLA-B whole-allele dG37 does NOT correlate with mRNA expression (rho ~ +0.017, leave-one-out stable)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "hla_a_ramsuran_pos224",
+      "title": "Underpowered but direction-matched: HLA-A pos-224 (5'UTR -155 from ATG) CG vs TG partition shows lower TPM at CG (Cohen's d ~ -0.93)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 5.0,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::n_cg_alleles_at_pos_224",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.017,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::spearman_rho_full_sample",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "hla_b_crc_polymorphic_cpg_cluster",
-   "title": "Five FDR-significant HLA-B 5'UTR polymorphic CpGs cluster within named CRC modules (4 of 5)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "hla_b_bulk_biophysics_null",
+      "title": "Designed negative control: HLA-B whole-allele dG37 does NOT correlate with mRNA expression (rho ~ +0.017, leave-one-out stable)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.017,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::spearman_rho_full_sample",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 5.0,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::n_fdr_sig_polymorphic_cpgs",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "hla_c_mir148a_canonical_absence",
-   "title": "HLA-C miR-148a canonical 8-mer site is absent in 0/3,284 alleles, but the 7-mer seed is present in ~25% \u2014 partially dissolved by length audit",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "hla_b_crc_polymorphic_cpg_cluster",
+      "title": "Five FDR-significant HLA-B 5'UTR polymorphic CpGs cluster within named CRC modules (4 of 5)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 5.0,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::n_fdr_sig_polymorphic_cpgs",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.0,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::n_alleles_with_canonical_mir148a_site",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "hla_t_naive_promoter_methylation_bimodal",
-   "title": "HLA-A 5'UTR/promoter is dramatically cell-type-specific \u2014 monocyte \u03b2=0.083 (open) vs T-naive \u03b2=0.593 (closed), a \u0394\u03b2=0.510 inversion that explains the Phase 4c paradox",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "hla_c_mir148a_canonical_absence",
+      "title": "HLA-C miR-148a canonical 8-mer site is absent in 0/3,284 alleles, but the 7-mer seed is present in ~25% \u2014 partially dissolved by length audit",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.0,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::n_alleles_with_canonical_mir148a_site",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.083,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::hla_a_5utr_promoter_mean_beta_monocyte",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "nc_fraction_of_hla_variation",
-   "title": "Architecture: 85-99.6% of substitutions across HLA loci are non-coding (descriptive K-class claim)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "hla_t_naive_promoter_methylation_bimodal",
+      "title": "HLA-A 5'UTR/promoter is dramatically cell-type-specific \u2014 monocyte \u03b2=0.083 (open) vs T-naive \u03b2=0.593 (closed), a \u0394\u03b2=0.510 inversion that explains the Phase 4c paradox",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.083,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::hla_a_5utr_promoter_mean_beta_monocyte",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.929333,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::non_coding_fraction_of_substitutions_per_locus",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "stimulation_amplifies_biophysical_signal",
-   "title": "Stimulation amplifies (does NOT collapse) the biophysical-expression signal: 10 of 12 locus-metric pairs increase |rho| under stim",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "nc_fraction_of_hla_variation",
+      "title": "Architecture: 85-99.6% of substitutions across HLA loci are non-coding (descriptive K-class claim)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.929333,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::non_coding_fraction_of_substitutions_per_locus",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.23,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::abs_rho_per_locus_metric_baseline",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "titv_balancing_selection_signature",
-   "title": "HLA coding Ti/Tv = 0.67\u20131.54 (vs genome coding baseline ~3.0); HLA non-coding Ti/Tv = 0.51\u20130.73 (vs neutral baseline ~2.0) \u2014 the transversion-enriched signature of diversifying selection",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "stimulation_amplifies_biophysical_signal",
+      "title": "Stimulation amplifies (does NOT collapse) the biophysical-expression signal: 10 of 12 locus-metric pairs increase |rho| under stim",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.23,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::abs_rho_per_locus_metric_baseline",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 1.087167,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::per_locus_coding_titv",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "within_protein_biophysical_variance_invisible_to_matching",
-   "title": "Within-protein (2-field-invisible) non-coding biophysical variance is substantial at Class I HLA loci (29\u201369% at HLA-A; Z-penalty 68.9%) and corresponds to expression-variant alleles at d up to 2.49",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "titv_balancing_selection_signature",
+      "title": "HLA coding Ti/Tv = 0.67\u20131.54 (vs genome coding baseline ~3.0); HLA non-coding Ti/Tv = 0.51\u20130.73 (vs neutral baseline ~2.0) \u2014 the transversion-enriched signature of diversifying selection",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 1.087167,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::per_locus_coding_titv",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 42.84,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::hla_a_within_protein_variance_percent_range",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "ltr_fraction_expression_negative_gc_independent",
-   "title": "LTR fraction negatively correlates with median GTEx expression after GC residualization (partial rho ~ -0.18) \u2014 opposite-signed SINE companion",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "within_protein_biophysical_variance_invisible_to_matching",
+      "title": "Within-protein (2-field-invisible) non-coding biophysical variance is substantial at Class I HLA loci (29\u201369% at HLA-A; Z-penalty 68.9%) and corresponds to expression-variant alleles at d up to 2.49",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 42.84,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::hla_a_within_protein_variance_percent_range",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": -0.18,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::partial_spearman_ltr_fraction_vs_median_tpm_given_gc",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "sine_fraction_expression_positive_gc_independent",
-   "title": "SINE fraction positively correlates with median GTEx expression after GC residualization (partial rho ~ +0.18)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "ltr_fraction_expression_negative_gc_independent",
+      "title": "LTR fraction negatively correlates with median GTEx expression after GC residualization (partial rho ~ -0.18) \u2014 opposite-signed SINE companion",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": -0.18,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::partial_spearman_ltr_fraction_vs_median_tpm_given_gc",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.18,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::partial_spearman_sine_fraction_vs_median_tpm_given_gc",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_cell_deconvolution_critique_withdrawn",
-   "title": "The Phase 1 cell-deconvolution critique of TE silencing prediction is withdrawn \u2014 ChromHMM tissue-specific chromatin states and methylation-array CpG counts are structurally different assays, so cell ",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "sine_fraction_expression_positive_gc_independent",
+      "title": "SINE fraction positively correlates with median GTEx expression after GC residualization (partial rho ~ +0.18)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.18,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::partial_spearman_sine_fraction_vs_median_tpm_given_gc",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.0,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::n_rows_where_exp03_target_equals_methylation_array",
-     "dimension": null
-    }
-   ],
-   "status": "rejected",
-   "pending_reason": null,
-   "rejection_reason": "refuted",
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_corsiv_or_identity_mode",
-   "title": "CoRSIV variably-methylated regions are enriched 1.676-fold at identity-dependent TEs and the enrichment survives GC- and length-stratified permutation",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_cell_deconvolution_critique_withdrawn",
+      "title": "The Phase 1 cell-deconvolution critique of TE silencing prediction is withdrawn \u2014 ChromHMM tissue-specific chromatin states and methylation-array CpG counts are structurally different assays, so cell ",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.0,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::n_rows_where_exp03_target_equals_methylation_array",
+          "dimension": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 1.676,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::fisher_odds_ratio_raw",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_density_mutation_null_partial_gc",
-   "title": "Mutation null: TE density does not predict somatic mutation rate after GC correction (partial rho ~ 0.000 across SNV / indel / SV)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_corsiv_or_identity_mode",
+      "title": "CoRSIV variably-methylated regions are enriched 1.676-fold at identity-dependent TEs and the enrichment survives GC- and length-stratified permutation",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 1.676,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::fisher_odds_ratio_raw",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.004,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::spearman_rho_bivariate_te_vs_snv",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_methylation_class_specific_at_boundary",
-   "title": "Methylation cell-type variance at TE boundaries is class-specific \u2014 LTR/LINE/DNA elements show ~0.019 cross-cell-type variance, SINE only 0.014, with TE-free regions at 0.018 as baseline",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_density_mutation_null_partial_gc",
+      "title": "Mutation null: TE density does not predict somatic mutation rate after GC correction (partial rho ~ 0.000 across SNV / indel / SV)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.004,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::spearman_rho_bivariate_te_vs_snv",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.01804,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::mean_cross_celltype_methylation_variance_by_te_class",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_oncoexaptation_or_active_mode_gc_matched",
-   "title": "Oncoexapted TEs are enriched in the Active surveillance mode (raw OR=3.88) and the enrichment survives GC-matched stratified permutation",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_methylation_class_specific_at_boundary",
+      "title": "Methylation cell-type variance at TE boundaries is class-specific \u2014 LTR/LINE/DNA elements show ~0.019 cross-cell-type variance, SINE only 0.014, with TE-free regions at 0.018 as baseline",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.01804,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::mean_cross_celltype_methylation_variance_by_te_class",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 3.88,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::fisher_odds_ratio_raw",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_resolution_gain_curvature_h3k9me3_147bp",
-   "title": "Resolution gain at 147bp: curvature -> H3K9me3 AUROC improves over 1kb with bootstrap CI excluding zero",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_oncoexaptation_or_active_mode_gc_matched",
+      "title": "Oncoexapted TEs are enriched in the Active surveillance mode (raw OR=3.88) and the enrichment survives GC-matched stratified permutation",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 3.88,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::fisher_odds_ratio_raw",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.586,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::auroc_curvature_1kb_h3k9me3",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_retro_age_or_identity_mode",
-   "title": "Retro-Age epigenetic clock CpGs are enriched 3.744-fold at identity-dependent TEs and the enrichment survives GC- and length-stratified permutation",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_resolution_gain_curvature_h3k9me3_147bp",
+      "title": "Resolution gain at 147bp: curvature -> H3K9me3 AUROC improves over 1kb with bootstrap CI excluding zero",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.586,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::auroc_curvature_1kb_h3k9me3",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 3.744,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::fisher_odds_ratio_raw",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_silencing_biophysics_overall_auroc",
-   "title": "Multi-tissue overall: biophysics adds mean delta AUROC = +0.082 to TE silencing prediction across 5 representative tissues",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_retro_age_or_identity_mode",
+      "title": "Retro-Age epigenetic clock CpGs are enriched 3.744-fold at identity-dependent TEs and the enrichment survives GC- and length-stratified permutation",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 3.744,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::fisher_odds_ratio_raw",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.6288,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::auroc_per_tissue_m0",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_silencing_h3k9me3_negative_control",
-   "title": "Designed negative control: biophysics adds essentially nothing to baseline for H3K9me3 prediction (delta AUROC = +0.004 in H1 ESC)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_silencing_biophysics_overall_auroc",
+      "title": "Multi-tissue overall: biophysics adds mean delta AUROC = +0.082 to TE silencing prediction across 5 representative tissues",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.6288,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::auroc_per_tissue_m0",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.637,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::auroc_mean_cv_h3k9me3",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_silencing_top_feature_stacking_dg37",
-   "title": "Stacking \u0394G\u2083\u2087 is the #1 feature for TE silencing prediction across 4 of 5 tissues; evolutionary age ranks 10th\u201314th",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_silencing_h3k9me3_negative_control",
+      "title": "Designed negative control: biophysics adds essentially nothing to baseline for H3K9me3 prediction (delta AUROC = +0.004 in H1 ESC)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.637,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::auroc_mean_cv_h3k9me3",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.0,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::modal_top_feature_across_tissues",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_silencing_within_age_bivalent",
-   "title": "Within age-matched TEs (5-15% divergence), DNA biophysics predicts bivalent chromatin in fetal brain at AUROC 0.986",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_silencing_top_feature_stacking_dg37",
+      "title": "Stacking \u0394G\u2083\u2087 is the #1 feature for TE silencing prediction across 4 of 5 tissues; evolutionary age ranks 10th\u201314th",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.0,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::modal_top_feature_across_tissues",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 24794.0,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::n_tes_in_5_15_pct_divergence_band",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "te_surveillance_dichotomy_composition_vs_identity",
-   "title": "TE silencing pathway choice partitions into two orthogonal regimes \u2014 GC predicts H3K27me3 (Polycomb, AUROC 0.678) while age predicts H3K9me3 (KRAB-ZnF, AUROC 0.633); the dissociation magnitude \u0394=0.078",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_silencing_within_age_bivalent",
+      "title": "Within age-matched TEs (5-15% divergence), DNA biophysics predicts bivalent chromatin in fetal brain at AUROC 0.986",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 24794.0,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::n_tes_in_5_15_pct_divergence_band",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.678,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::auroc_gc_only_h3k27me3_binary",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "recomb_a1_partial_correlations_109_signals",
-   "title": "109 biophysics-recombination partial correlations exceed |r| > 0.08 after GC control \u2014 the genome-wide strong-signal census",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "te_surveillance_dichotomy_composition_vs_identity",
+      "title": "TE silencing pathway choice partitions into two orthogonal regimes \u2014 GC predicts H3K27me3 (Polycomb, AUROC 0.678) while age predicts H3K9me3 (KRAB-ZnF, AUROC 0.633); the dissociation magnitude \u0394=0.078",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.678,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::auroc_gc_only_h3k27me3_binary",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 109.0,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::count_partial_r_abs_gt_008",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "recomb_a2_co_vs_nco_signflip_curvature",
-   "title": "Curvature has opposite signs for crossover vs non-crossover rate after GC correction (CO -0.238, NCO +0.064)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "recomb_a1_partial_correlations_109_signals",
+      "title": "109 biophysics-recombination partial correlations exceed |r| > 0.08 after GC control \u2014 the genome-wide strong-signal census",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 109.0,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::count_partial_r_abs_gt_008",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": -0.238,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::partial_spearman_r_curvature_vs_co_given_gc",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "recomb_a2_co_vs_nco_signflip_groove_width",
-   "title": "Groove width has opposite signs for crossover vs non-crossover rate after GC correction (CO +0.218, NCO -0.202; Steiger Z significant)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "recomb_a2_co_vs_nco_signflip_curvature",
+      "title": "Curvature has opposite signs for crossover vs non-crossover rate after GC correction (CO -0.238, NCO +0.064)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": -0.238,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::partial_spearman_r_curvature_vs_co_given_gc",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.218,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::partial_spearman_r_groove_vs_co_given_gc",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "recomb_a2_co_vs_nco_signflip_wrapping_energy",
-   "title": "Wrapping energy has opposite signs for crossover vs non-crossover rate after GC correction (CO +0.166, NCO -0.125)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "recomb_a2_co_vs_nco_signflip_groove_width",
+      "title": "Groove width has opposite signs for crossover vs non-crossover rate after GC correction (CO +0.218, NCO -0.202; Steiger Z significant)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.218,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::partial_spearman_r_groove_vs_co_given_gc",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.166,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::partial_spearman_r_wrapping_vs_co_given_gc",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "recomb_a3_gbgc_age_gradient_deformability",
-   "title": "Surprise: OLD crossover hotspots are MORE deformable than YOUNG (Cohen's d = +1.73), overturning the naive gBGC stiffening prediction",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "recomb_a2_co_vs_nco_signflip_wrapping_energy",
+      "title": "Wrapping energy has opposite signs for crossover vs non-crossover rate after GC correction (CO +0.166, NCO -0.125)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.166,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::partial_spearman_r_wrapping_vs_co_given_gc",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 20.1,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::deformability_mean_old_hotspots",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "recomb_a3_gbgc_age_gradient_gc",
-   "title": "Old crossover hotspots are GC-enriched relative to young hotspots (Cohen's d = +1.76); the gBGC scar is visible in the material channel",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "recomb_a3_gbgc_age_gradient_deformability",
+      "title": "Surprise: OLD crossover hotspots are MORE deformable than YOUNG (Cohen's d = +1.73), overturning the naive gBGC stiffening prediction",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 20.1,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::deformability_mean_old_hotspots",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.471,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::gc_mean_old_hotspots",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "recomb_a4_translocation_overlap",
-   "title": "Cancer translocation breakpoints share the recombination hotspot biophysical signature: Fisher OR=2.34 enrichment, biophysics Cohen's d ~ +0.99",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "recomb_a3_gbgc_age_gradient_gc",
+      "title": "Old crossover hotspots are GC-enriched relative to young hotspots (Cohen's d = +1.76); the gBGC scar is visible in the material channel",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.471,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::gc_mean_old_hotspots",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.7,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::median_recomb_percentile_at_breakpoints",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "recomb_a6_rf_top_feature_quantization_map",
-   "title": "Quantization_map (nucleosome-lattice property) ranks #1 in random-forest permutation importance for crossover prediction; GC ranks 8th",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "recomb_a4_translocation_overlap",
+      "title": "Cancer translocation breakpoints share the recombination hotspot biophysical signature: Fisher OR=2.34 enrichment, biophysics Cohen's d ~ +0.99",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.7,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::median_recomb_percentile_at_breakpoints",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.0,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::rank_1_feature_by_permutation_importance",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "recomb_neg_isochore_rediscovery_falsified",
-   "title": "Pre-registration falsified: 1 Mb biophysics-vs-recombination is NOT just an isochore rediscovery \u2014 observed signals exceed all pre-registered null thresholds",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "recomb_a6_rf_top_feature_quantization_map",
+      "title": "Quantization_map (nucleosome-lattice property) ranks #1 in random-forest permutation importance for crossover prediction; GC ranks 8th",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.0,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::rank_1_feature_by_permutation_importance",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.37,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::a1_max_abs_partial_r_after_gc_observed",
-     "dimension": null
-    }
-   ],
-   "status": "rejected",
-   "pending_reason": null,
-   "rejection_reason": "refuted",
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "cost_expression_gradient_ecoli_bsubtilis",
-   "title": "Amino acid biosynthetic cost anti-correlates with expression in E. coli (\u0394=0.60 ATP/residue, 2.5%) and B. subtilis (\u0394=0.40, 1.8%) \u2014 the cross-species validation of the cost-expression gradient",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "recomb_neg_isochore_rediscovery_falsified",
+      "title": "Pre-registration falsified: 1 Mb biophysics-vs-recombination is NOT just an isochore rediscovery \u2014 observed signals exceed all pre-registered null thresholds",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.37,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::a1_max_abs_partial_r_after_gc_observed",
+          "dimension": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.6,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::ecoli_q1_minus_q5_atp_per_residue",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "cost_expression_gradient_human",
-   "title": "Mean amino acid biosynthetic cost anti-correlates with human protein abundance after controlling for GC, length, disorder, conservation, secretion, and gene age",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "cost_expression_gradient_ecoli_bsubtilis",
+      "title": "Amino acid biosynthetic cost anti-correlates with expression in E. coli (\u0394=0.60 ATP/residue, 2.5%) and B. subtilis (\u0394=0.40, 1.8%) \u2014 the cross-species validation of the cost-expression gradient",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.6,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::ecoli_q1_minus_q5_atp_per_residue",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": -0.145,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::spearman_rho_bivariate",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "cost_expression_survives_full_confounder_control",
-   "title": "Cost-expression partial Spearman survives simultaneous control for GC, length, disorder, conservation, secretion, and gene age (|partial r| > 0.03)",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "cost_expression_gradient_human",
+      "title": "Mean amino acid biosynthetic cost anti-correlates with human protein abundance after controlling for GC, length, disorder, conservation, secretion, and gene age",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": -0.145,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::spearman_rho_bivariate",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": -0.125,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::partial_rho_controlling_each_confounder_individually",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "dual_channel_selection_hypothesis",
-   "title": "HYPOTHESIZED (post-MOD-1 reframe): symbolic-channel selection on codon identity opposes material-channel perturbation on the same mutations",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "cost_expression_survives_full_confounder_control",
+      "title": "Cost-expression partial Spearman survives simultaneous control for GC, length, disorder, conservation, secretion, and gene age (|partial r| > 0.03)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": -0.125,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::partial_rho_controlling_each_confounder_individually",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 2.05,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::titv_fixed_human_lineage",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
-   "title": "Human cost-expression effect size is 16% of E. coli's \u2014 far larger than the naive Ne\u224810^-4 prediction, placing human cost selection in the strong-selection regime",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "dual_channel_selection_hypothesis",
+      "title": "HYPOTHESIZED (post-MOD-1 reframe): symbolic-channel selection on codon identity opposes material-channel perturbation on the same mutations",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 2.05,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::titv_fixed_human_lineage",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 0.158,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::observed_human_over_ecoli_q1q5_pct_ratio",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "sbs_thermodynamic_loudness_ranking",
-   "title": "COSMIC v3.4 SBS signatures rank by mean thermodynamic perturbation; clinical signatures (SBS1 aging, SBS2/13 APOBEC, SBS4 smoking, SBS7 UV) span the loudness spectrum",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+      "title": "Human cost-expression effect size is 16% of E. coli's \u2014 far larger than the naive Ne\u224810^-4 prediction, placing human cost selection in the strong-selection regime",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 0.158,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::observed_human_over_ecoli_q1q5_pct_ratio",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 1.205,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::top_10_signatures_by_mean_thermodynamic_perturbation",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "titv_2to1_fixation_bias",
-   "title": "Descriptive: human fixed substitutions show ~2:1 transition/transversion ratio, ~3.4-fold enriched over the unselected germline mutational input",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "sbs_thermodynamic_loudness_ranking",
+      "title": "COSMIC v3.4 SBS signatures rank by mean thermodynamic perturbation; clinical signatures (SBS1 aging, SBS2/13 APOBEC, SBS4 smoking, SBS7 UV) span the loudness spectrum",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 1.205,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::top_10_signatures_by_mean_thermodynamic_perturbation",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 2.05,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::titv_human_fixed",
-     "dimension": null
-    }
-   ],
-   "status": "conjectured",
-   "pending_reason": null,
-   "rejection_reason": null,
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
-  },
-  {
-   "schema_version": "v1.3",
-   "id": "rc05_p1_elm_beats_elastic_net_age_FALSIFIED",
-   "title": "FALSIFIED: ELM reservoir at m=5000 does NOT match elastic-net age MAE on GSE40279 5-fold CV",
-   "pattern": {
-    "id": "adjusted_effect",
-    "version": "v1"
-   },
-   "leaves": [
+      "schema_version": "v1.3",
+      "id": "titv_2to1_fixation_bias",
+      "title": "Descriptive: human fixed substitutions show ~2:1 transition/transversion ratio, ~3.4-fold enriched over the unselected germline mutational input",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 2.05,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::titv_human_fixed",
+          "dimension": null
+        }
+      ],
+      "status": "conjectured",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
     {
-     "kind": "quantity",
-     "value": 4.7,
-     "unit": null,
-     "uncertainty": null,
-     "measurement_basis": "derived",
-     "formula": "migrated::mae_years_5fold_cv",
-     "dimension": null
+      "schema_version": "v1.3",
+      "id": "rc05_p1_elm_beats_elastic_net_age_FALSIFIED",
+      "title": "FALSIFIED: ELM reservoir at m=5000 does NOT match elastic-net age MAE on GSE40279 5-fold CV",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "quantity",
+          "value": 4.7,
+          "unit": null,
+          "uncertainty": null,
+          "measurement_basis": "derived",
+          "formula": "migrated::mae_years_5fold_cv",
+          "dimension": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": null,
+      "provenance": null,
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "mhc-ndmp",
+      "title": "MHC (chr6:29.9-33.1Mb) is differentially methylated between lymphoid and myeloid lineages (n-DMP count-enrichment, Loyfer WGBS)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "differential_methylation",
+          "assay": null
+        }
+      ],
+      "status": "licensed",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": {
+        "magnitude": 0.6,
+        "certainty": 0.6,
+        "evidence_against_null": 0.6,
+        "severity": 0.7,
+        "world_contact": 0.6,
+        "explanatory_virtue": 0.5
+      },
+      "conclusion": null,
+      "licensing": {
+        "route": "severe_test",
+        "satisfactions": [
+          {
+            "verdict": "satisfied",
+            "materialization": {
+              "id": "M1",
+              "api_version": "v1",
+              "data_version": "loyfer_2023@1",
+              "note": null,
+              "semantic_run_id": "sha256:a71f3d329a9813b9b2a269dc1fecdebbce3d71ea0d07a6aed97359c298d50e5c",
+              "profile_hash": "sha256:617ecb0647f7b036316ac2d16b4e64f874bc1cb489778e69a202ddc9e113e89f",
+              "dimnames_hash": "sha256:5080b9e23f0c26fd04ce39e51775fe3ce7c0c557a314974258e4d041897f941e",
+              "shared_cause_factors": []
+            },
+            "credential_ids": [
+              "methyl-ndmp-ttest",
+              "methyl-ndmp-rank"
+            ],
+            "leg_evidence": {
+              "legs": [
+                {
+                  "identity": "methyl-ndmp-ttest",
+                  "value": 4682.0
+                },
+                {
+                  "identity": "methyl-ndmp-rank",
+                  "value": 4677.0
+                }
+              ],
+              "relative_divergence": 0.0010679196924391287
+            }
+          }
+        ],
+        "rival_set_closure": "open_acknowledged",
+        "rivals_considered": [],
+        "independence_tier": "reproduced",
+        "severity_provenance": null,
+        "shared_cause_overlap": null,
+        "note": null
+      },
+      "roles": null,
+      "subject": {
+        "id": "chr6:29900000-33100000",
+        "display": "chr6:29,900,000-33,100,000",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr6",
+        "start": 29900000,
+        "end": 33100000,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 1,
+        "preregistration_hash": "8aa7e3f07b58510cfec32e2f83e5494cbaa535e753da5c8b4bef4ee2a7b18e88",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "hervk-ndmp",
+      "title": "HERV-K(HML-2) LTR5_Hs elements are differentially methylated between lymphoid and myeloid lineages (n-DMP count-enrichment, Loyfer WGBS)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "differential_methylation",
+          "assay": null
+        }
+      ],
+      "status": "licensed",
+      "pending_reason": null,
+      "rejection_reason": null,
+      "strength": {
+        "magnitude": 0.6,
+        "certainty": 0.6,
+        "evidence_against_null": 0.6,
+        "severity": 0.7,
+        "world_contact": 0.6,
+        "explanatory_virtue": 0.5
+      },
+      "conclusion": null,
+      "licensing": {
+        "route": "severe_test",
+        "satisfactions": [
+          {
+            "verdict": "satisfied",
+            "materialization": {
+              "id": "M1",
+              "api_version": "v1",
+              "data_version": "loyfer_2023@1",
+              "note": null,
+              "semantic_run_id": "sha256:e193e5e10828e898d5034a6be077425d5e01ec5febd1494df711376c82c2e55e",
+              "profile_hash": "sha256:617ecb0647f7b036316ac2d16b4e64f874bc1cb489778e69a202ddc9e113e89f",
+              "dimnames_hash": "sha256:40f76606bbce4e0a24ec308a1ee09dcf8b699e8ff781cf202c2180636d3d6fa0",
+              "shared_cause_factors": []
+            },
+            "credential_ids": [
+              "methyl-ndmp-ttest",
+              "methyl-ndmp-rank"
+            ],
+            "leg_evidence": {
+              "legs": [
+                {
+                  "identity": "methyl-ndmp-ttest",
+                  "value": 1083.0
+                },
+                {
+                  "identity": "methyl-ndmp-rank",
+                  "value": 1073.0
+                }
+              ],
+              "relative_divergence": 0.009233610341643583
+            }
+          }
+        ],
+        "rival_set_closure": "open_acknowledged",
+        "rivals_considered": [],
+        "independence_tier": "reproduced",
+        "severity_provenance": null,
+        "shared_cause_overlap": null,
+        "note": null
+      },
+      "roles": null,
+      "subject": {
+        "id": "HERVK_LTR5_Hs:0-630",
+        "display": "HERVK_LTR5_Hs:0-630",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "HERVK_LTR5_Hs",
+        "start": 0,
+        "end": 630,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 1,
+        "preregistration_hash": "fa72c46239f17957c5fa1de714ff98da1898281accf89b9fa30b63e0f59d483c",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
     }
-   ],
-   "status": "rejected",
-   "pending_reason": null,
-   "rejection_reason": "refuted",
-   "strength": null,
-   "conclusion": null,
-   "licensing": null,
-   "roles": null,
-   "subject": null,
-   "provenance": null,
-   "governance": null,
-   "evaluation_plan": null,
-   "representation_revision": null
+  ],
+  "defeat_edges": [],
+  "equivalences": [
+    {
+      "id": "eq_dep_hla_a_expr_hla_a_dg37",
+      "left": "hla_a_expression_prediction_robust_across_premise_sets",
+      "right": "hla_a_dg37_vs_tpm",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_hla_a_expr_hla_a_cpg_",
+      "left": "hla_a_expression_prediction_robust_across_premise_sets",
+      "right": "hla_a_cpg_density_vs_tpm",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_stimulatio_hla_a_dg37",
+      "left": "stimulation_amplifies_biophysical_signal",
+      "right": "hla_a_dg37_vs_tpm",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_stimulatio_hla_a_cpg_",
+      "left": "stimulation_amplifies_biophysical_signal",
+      "right": "hla_a_cpg_density_vs_tpm",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_te_surveil_te_silenci",
+      "left": "te_surveillance_dichotomy_composition_vs_identity",
+      "right": "te_silencing_biophysics_overall_auroc",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_te_surveil_te_silenci_x",
+      "left": "te_surveillance_dichotomy_composition_vs_identity",
+      "right": "te_silencing_within_age_bivalent",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_te_surveil_te_silenci_x_x",
+      "left": "te_surveillance_dichotomy_composition_vs_identity",
+      "right": "te_silencing_h3k9me3_negative_control",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_recomb_a3__recomb_a3_",
+      "left": "recomb_a3_gbgc_age_gradient_deformability",
+      "right": "recomb_a3_gbgc_age_gradient_gc",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_cost_expre_cost_expre",
+      "left": "cost_expression_survives_full_confounder_control",
+      "right": "cost_expression_gradient_human",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_dual_chann_cost_expre",
+      "left": "dual_channel_selection_hypothesis",
+      "right": "cost_expression_gradient_human",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_human_ecol_cost_expre",
+      "left": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+      "right": "cost_expression_gradient_human",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_dep_human_ecol_cost_expre_x",
+      "left": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+      "right": "cost_expression_gradient_ecoli_bsubtilis",
+      "severity": 0.7,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "migrated depends_on"
+    },
+    {
+      "id": "eq_grp_class_ii_i_eqtl_posit",
+      "left": "class_ii_intron_divergence_extreme",
+      "right": "eqtl_positive_genes_stronger_biophysics_coupling",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_eqtl_posit_histogram_",
+      "left": "eqtl_positive_genes_stronger_biophysics_coupling",
+      "right": "histogram_modes_map_to_serological_groups",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_histogram__hla_a_cpg_",
+      "left": "histogram_modes_map_to_serological_groups",
+      "right": "hla_a_cpg_density_vs_tpm",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_hla_a_cpg__hla_a_dg37",
+      "left": "hla_a_cpg_density_vs_tpm",
+      "right": "hla_a_dg37_vs_tpm",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_hla_a_dg37_hla_a_erv_",
+      "left": "hla_a_dg37_vs_tpm",
+      "right": "hla_a_erv_methylation_shadow_FALSIFIED",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_hla_a_erv__hla_a_expr",
+      "left": "hla_a_erv_methylation_shadow_FALSIFIED",
+      "right": "hla_a_expression_prediction_robust_across_premise_sets",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_hla_a_expr_hla_a_rams",
+      "left": "hla_a_expression_prediction_robust_across_premise_sets",
+      "right": "hla_a_ramsuran_pos224",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_hla_a_rams_hla_b_bulk",
+      "left": "hla_a_ramsuran_pos224",
+      "right": "hla_b_bulk_biophysics_null",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_hla_b_bulk_hla_b_crc_",
+      "left": "hla_b_bulk_biophysics_null",
+      "right": "hla_b_crc_polymorphic_cpg_cluster",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_hla_b_crc__hla_c_mir1",
+      "left": "hla_b_crc_polymorphic_cpg_cluster",
+      "right": "hla_c_mir148a_canonical_absence",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_hla_c_mir1_hla_t_naiv",
+      "left": "hla_c_mir148a_canonical_absence",
+      "right": "hla_t_naive_promoter_methylation_bimodal",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_hla_t_naiv_nc_fractio",
+      "left": "hla_t_naive_promoter_methylation_bimodal",
+      "right": "nc_fraction_of_hla_variation",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_nc_fractio_stimulatio",
+      "left": "nc_fraction_of_hla_variation",
+      "right": "stimulation_amplifies_biophysical_signal",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_stimulatio_titv_balan",
+      "left": "stimulation_amplifies_biophysical_signal",
+      "right": "titv_balancing_selection_signature",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_titv_balan_within_pro",
+      "left": "titv_balancing_selection_signature",
+      "right": "within_protein_biophysical_variance_invisible_to_matching",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (HLA experiment)"
+    },
+    {
+      "id": "eq_grp_ltr_fracti_sine_fract",
+      "left": "ltr_fraction_expression_negative_gc_independent",
+      "right": "sine_fraction_expression_positive_gc_independent",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_sine_fract_te_cell_de",
+      "left": "sine_fraction_expression_positive_gc_independent",
+      "right": "te_cell_deconvolution_critique_withdrawn",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_cell_de_te_corsiv_",
+      "left": "te_cell_deconvolution_critique_withdrawn",
+      "right": "te_corsiv_or_identity_mode",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_corsiv__te_density",
+      "left": "te_corsiv_or_identity_mode",
+      "right": "te_density_mutation_null_partial_gc",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_density_te_methyla",
+      "left": "te_density_mutation_null_partial_gc",
+      "right": "te_methylation_class_specific_at_boundary",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_methyla_te_oncoexa",
+      "left": "te_methylation_class_specific_at_boundary",
+      "right": "te_oncoexaptation_or_active_mode_gc_matched",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_oncoexa_te_resolut",
+      "left": "te_oncoexaptation_or_active_mode_gc_matched",
+      "right": "te_resolution_gain_curvature_h3k9me3_147bp",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_resolut_te_retro_a",
+      "left": "te_resolution_gain_curvature_h3k9me3_147bp",
+      "right": "te_retro_age_or_identity_mode",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_retro_a_te_silenci",
+      "left": "te_retro_age_or_identity_mode",
+      "right": "te_silencing_biophysics_overall_auroc",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_silenci_te_silenci",
+      "left": "te_silencing_biophysics_overall_auroc",
+      "right": "te_silencing_h3k9me3_negative_control",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_silenci_te_silenci_x",
+      "left": "te_silencing_h3k9me3_negative_control",
+      "right": "te_silencing_top_feature_stacking_dg37",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_silenci_te_silenci_x_x",
+      "left": "te_silencing_top_feature_stacking_dg37",
+      "right": "te_silencing_within_age_bivalent",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_te_silenci_te_surveil",
+      "left": "te_silencing_within_age_bivalent",
+      "right": "te_surveillance_dichotomy_composition_vs_identity",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (TE surveillance)"
+    },
+    {
+      "id": "eq_grp_recomb_a1__recomb_a2_",
+      "left": "recomb_a1_partial_correlations_109_signals",
+      "right": "recomb_a2_co_vs_nco_signflip_curvature",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (recombination hotspots)"
+    },
+    {
+      "id": "eq_grp_recomb_a2__recomb_a2_",
+      "left": "recomb_a2_co_vs_nco_signflip_curvature",
+      "right": "recomb_a2_co_vs_nco_signflip_groove_width",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (recombination hotspots)"
+    },
+    {
+      "id": "eq_grp_recomb_a2__recomb_a2__x",
+      "left": "recomb_a2_co_vs_nco_signflip_groove_width",
+      "right": "recomb_a2_co_vs_nco_signflip_wrapping_energy",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (recombination hotspots)"
+    },
+    {
+      "id": "eq_grp_recomb_a2__recomb_a3_",
+      "left": "recomb_a2_co_vs_nco_signflip_wrapping_energy",
+      "right": "recomb_a3_gbgc_age_gradient_deformability",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (recombination hotspots)"
+    },
+    {
+      "id": "eq_grp_recomb_a3__recomb_a3_",
+      "left": "recomb_a3_gbgc_age_gradient_deformability",
+      "right": "recomb_a3_gbgc_age_gradient_gc",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (recombination hotspots)"
+    },
+    {
+      "id": "eq_grp_recomb_a3__recomb_a4_",
+      "left": "recomb_a3_gbgc_age_gradient_gc",
+      "right": "recomb_a4_translocation_overlap",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (recombination hotspots)"
+    },
+    {
+      "id": "eq_grp_recomb_a4__recomb_a6_",
+      "left": "recomb_a4_translocation_overlap",
+      "right": "recomb_a6_rf_top_feature_quantization_map",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (recombination hotspots)"
+    },
+    {
+      "id": "eq_grp_recomb_a6__recomb_neg",
+      "left": "recomb_a6_rf_top_feature_quantization_map",
+      "right": "recomb_neg_isochore_rediscovery_falsified",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (recombination hotspots)"
+    },
+    {
+      "id": "eq_grp_cost_expre_cost_expre",
+      "left": "cost_expression_gradient_ecoli_bsubtilis",
+      "right": "cost_expression_gradient_human",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (dual_channel)"
+    },
+    {
+      "id": "eq_grp_cost_expre_cost_expre_x",
+      "left": "cost_expression_gradient_human",
+      "right": "cost_expression_survives_full_confounder_control",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (dual_channel)"
+    },
+    {
+      "id": "eq_grp_cost_expre_dual_chann",
+      "left": "cost_expression_survives_full_confounder_control",
+      "right": "dual_channel_selection_hypothesis",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (dual_channel)"
+    },
+    {
+      "id": "eq_grp_dual_chann_human_ecol",
+      "left": "dual_channel_selection_hypothesis",
+      "right": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (dual_channel)"
+    },
+    {
+      "id": "eq_grp_human_ecol_sbs_thermo",
+      "left": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
+      "right": "sbs_thermodynamic_loudness_ranking",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (dual_channel)"
+    },
+    {
+      "id": "eq_grp_sbs_thermo_titv_2to1_",
+      "left": "sbs_thermodynamic_loudness_ranking",
+      "right": "titv_2to1_fixation_bias",
+      "severity": 0.3,
+      "status": "structural",
+      "pending_reason": null,
+      "note": "thematic topic (dual_channel)"
+    }
+  ],
+  "fdr_ledger": {
+    "target_fdr": 0.05,
+    "procedure": "elond",
+    "tests": []
   }
- ],
- "defeat_edges": [],
- "equivalences": [
-  {
-   "id": "eq_dep_hla_a_expr_hla_a_dg37",
-   "left": "hla_a_expression_prediction_robust_across_premise_sets",
-   "right": "hla_a_dg37_vs_tpm",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_hla_a_expr_hla_a_cpg_",
-   "left": "hla_a_expression_prediction_robust_across_premise_sets",
-   "right": "hla_a_cpg_density_vs_tpm",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_stimulatio_hla_a_dg37",
-   "left": "stimulation_amplifies_biophysical_signal",
-   "right": "hla_a_dg37_vs_tpm",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_stimulatio_hla_a_cpg_",
-   "left": "stimulation_amplifies_biophysical_signal",
-   "right": "hla_a_cpg_density_vs_tpm",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_te_surveil_te_silenci",
-   "left": "te_surveillance_dichotomy_composition_vs_identity",
-   "right": "te_silencing_biophysics_overall_auroc",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_te_surveil_te_silenci_x",
-   "left": "te_surveillance_dichotomy_composition_vs_identity",
-   "right": "te_silencing_within_age_bivalent",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_te_surveil_te_silenci_x_x",
-   "left": "te_surveillance_dichotomy_composition_vs_identity",
-   "right": "te_silencing_h3k9me3_negative_control",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_recomb_a3__recomb_a3_",
-   "left": "recomb_a3_gbgc_age_gradient_deformability",
-   "right": "recomb_a3_gbgc_age_gradient_gc",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_cost_expre_cost_expre",
-   "left": "cost_expression_survives_full_confounder_control",
-   "right": "cost_expression_gradient_human",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_dual_chann_cost_expre",
-   "left": "dual_channel_selection_hypothesis",
-   "right": "cost_expression_gradient_human",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_human_ecol_cost_expre",
-   "left": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
-   "right": "cost_expression_gradient_human",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_dep_human_ecol_cost_expre_x",
-   "left": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
-   "right": "cost_expression_gradient_ecoli_bsubtilis",
-   "severity": 0.7,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "migrated depends_on"
-  },
-  {
-   "id": "eq_grp_class_ii_i_eqtl_posit",
-   "left": "class_ii_intron_divergence_extreme",
-   "right": "eqtl_positive_genes_stronger_biophysics_coupling",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_eqtl_posit_histogram_",
-   "left": "eqtl_positive_genes_stronger_biophysics_coupling",
-   "right": "histogram_modes_map_to_serological_groups",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_histogram__hla_a_cpg_",
-   "left": "histogram_modes_map_to_serological_groups",
-   "right": "hla_a_cpg_density_vs_tpm",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_hla_a_cpg__hla_a_dg37",
-   "left": "hla_a_cpg_density_vs_tpm",
-   "right": "hla_a_dg37_vs_tpm",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_hla_a_dg37_hla_a_erv_",
-   "left": "hla_a_dg37_vs_tpm",
-   "right": "hla_a_erv_methylation_shadow_FALSIFIED",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_hla_a_erv__hla_a_expr",
-   "left": "hla_a_erv_methylation_shadow_FALSIFIED",
-   "right": "hla_a_expression_prediction_robust_across_premise_sets",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_hla_a_expr_hla_a_rams",
-   "left": "hla_a_expression_prediction_robust_across_premise_sets",
-   "right": "hla_a_ramsuran_pos224",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_hla_a_rams_hla_b_bulk",
-   "left": "hla_a_ramsuran_pos224",
-   "right": "hla_b_bulk_biophysics_null",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_hla_b_bulk_hla_b_crc_",
-   "left": "hla_b_bulk_biophysics_null",
-   "right": "hla_b_crc_polymorphic_cpg_cluster",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_hla_b_crc__hla_c_mir1",
-   "left": "hla_b_crc_polymorphic_cpg_cluster",
-   "right": "hla_c_mir148a_canonical_absence",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_hla_c_mir1_hla_t_naiv",
-   "left": "hla_c_mir148a_canonical_absence",
-   "right": "hla_t_naive_promoter_methylation_bimodal",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_hla_t_naiv_nc_fractio",
-   "left": "hla_t_naive_promoter_methylation_bimodal",
-   "right": "nc_fraction_of_hla_variation",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_nc_fractio_stimulatio",
-   "left": "nc_fraction_of_hla_variation",
-   "right": "stimulation_amplifies_biophysical_signal",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_stimulatio_titv_balan",
-   "left": "stimulation_amplifies_biophysical_signal",
-   "right": "titv_balancing_selection_signature",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_titv_balan_within_pro",
-   "left": "titv_balancing_selection_signature",
-   "right": "within_protein_biophysical_variance_invisible_to_matching",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (HLA experiment)"
-  },
-  {
-   "id": "eq_grp_ltr_fracti_sine_fract",
-   "left": "ltr_fraction_expression_negative_gc_independent",
-   "right": "sine_fraction_expression_positive_gc_independent",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_sine_fract_te_cell_de",
-   "left": "sine_fraction_expression_positive_gc_independent",
-   "right": "te_cell_deconvolution_critique_withdrawn",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_cell_de_te_corsiv_",
-   "left": "te_cell_deconvolution_critique_withdrawn",
-   "right": "te_corsiv_or_identity_mode",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_corsiv__te_density",
-   "left": "te_corsiv_or_identity_mode",
-   "right": "te_density_mutation_null_partial_gc",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_density_te_methyla",
-   "left": "te_density_mutation_null_partial_gc",
-   "right": "te_methylation_class_specific_at_boundary",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_methyla_te_oncoexa",
-   "left": "te_methylation_class_specific_at_boundary",
-   "right": "te_oncoexaptation_or_active_mode_gc_matched",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_oncoexa_te_resolut",
-   "left": "te_oncoexaptation_or_active_mode_gc_matched",
-   "right": "te_resolution_gain_curvature_h3k9me3_147bp",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_resolut_te_retro_a",
-   "left": "te_resolution_gain_curvature_h3k9me3_147bp",
-   "right": "te_retro_age_or_identity_mode",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_retro_a_te_silenci",
-   "left": "te_retro_age_or_identity_mode",
-   "right": "te_silencing_biophysics_overall_auroc",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_silenci_te_silenci",
-   "left": "te_silencing_biophysics_overall_auroc",
-   "right": "te_silencing_h3k9me3_negative_control",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_silenci_te_silenci_x",
-   "left": "te_silencing_h3k9me3_negative_control",
-   "right": "te_silencing_top_feature_stacking_dg37",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_silenci_te_silenci_x_x",
-   "left": "te_silencing_top_feature_stacking_dg37",
-   "right": "te_silencing_within_age_bivalent",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_te_silenci_te_surveil",
-   "left": "te_silencing_within_age_bivalent",
-   "right": "te_surveillance_dichotomy_composition_vs_identity",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (TE surveillance)"
-  },
-  {
-   "id": "eq_grp_recomb_a1__recomb_a2_",
-   "left": "recomb_a1_partial_correlations_109_signals",
-   "right": "recomb_a2_co_vs_nco_signflip_curvature",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (recombination hotspots)"
-  },
-  {
-   "id": "eq_grp_recomb_a2__recomb_a2_",
-   "left": "recomb_a2_co_vs_nco_signflip_curvature",
-   "right": "recomb_a2_co_vs_nco_signflip_groove_width",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (recombination hotspots)"
-  },
-  {
-   "id": "eq_grp_recomb_a2__recomb_a2__x",
-   "left": "recomb_a2_co_vs_nco_signflip_groove_width",
-   "right": "recomb_a2_co_vs_nco_signflip_wrapping_energy",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (recombination hotspots)"
-  },
-  {
-   "id": "eq_grp_recomb_a2__recomb_a3_",
-   "left": "recomb_a2_co_vs_nco_signflip_wrapping_energy",
-   "right": "recomb_a3_gbgc_age_gradient_deformability",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (recombination hotspots)"
-  },
-  {
-   "id": "eq_grp_recomb_a3__recomb_a3_",
-   "left": "recomb_a3_gbgc_age_gradient_deformability",
-   "right": "recomb_a3_gbgc_age_gradient_gc",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (recombination hotspots)"
-  },
-  {
-   "id": "eq_grp_recomb_a3__recomb_a4_",
-   "left": "recomb_a3_gbgc_age_gradient_gc",
-   "right": "recomb_a4_translocation_overlap",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (recombination hotspots)"
-  },
-  {
-   "id": "eq_grp_recomb_a4__recomb_a6_",
-   "left": "recomb_a4_translocation_overlap",
-   "right": "recomb_a6_rf_top_feature_quantization_map",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (recombination hotspots)"
-  },
-  {
-   "id": "eq_grp_recomb_a6__recomb_neg",
-   "left": "recomb_a6_rf_top_feature_quantization_map",
-   "right": "recomb_neg_isochore_rediscovery_falsified",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (recombination hotspots)"
-  },
-  {
-   "id": "eq_grp_cost_expre_cost_expre",
-   "left": "cost_expression_gradient_ecoli_bsubtilis",
-   "right": "cost_expression_gradient_human",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (dual_channel)"
-  },
-  {
-   "id": "eq_grp_cost_expre_cost_expre_x",
-   "left": "cost_expression_gradient_human",
-   "right": "cost_expression_survives_full_confounder_control",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (dual_channel)"
-  },
-  {
-   "id": "eq_grp_cost_expre_dual_chann",
-   "left": "cost_expression_survives_full_confounder_control",
-   "right": "dual_channel_selection_hypothesis",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (dual_channel)"
-  },
-  {
-   "id": "eq_grp_dual_chann_human_ecol",
-   "left": "dual_channel_selection_hypothesis",
-   "right": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (dual_channel)"
-  },
-  {
-   "id": "eq_grp_human_ecol_sbs_thermo",
-   "left": "human_ecoli_effect_ratio_consistent_with_ne_scaling",
-   "right": "sbs_thermodynamic_loudness_ranking",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (dual_channel)"
-  },
-  {
-   "id": "eq_grp_sbs_thermo_titv_2to1_",
-   "left": "sbs_thermodynamic_loudness_ranking",
-   "right": "titv_2to1_fixation_bias",
-   "severity": 0.3,
-   "status": "structural",
-   "pending_reason": null,
-   "note": "thematic topic (dual_channel)"
-  }
- ],
- "fdr_ledger": {
-  "target_fdr": 0.05,
-  "procedure": "elond",
-  "tests": []
- }
 }

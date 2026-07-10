@@ -136,6 +136,35 @@
             ]
           },
           {
+            "id": "hervk-ndmp",
+            "status": "licensed",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": "genomic_region",
+            "strength": [
+              0.6,
+              0.6,
+              0.6,
+              0.7,
+              0.6,
+              0.5
+            ],
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": "reproduced",
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              -0.522565,
+              0.614131,
+              -0.549884
+            ]
+          },
+          {
             "id": "histogram_modes_map_to_serological_groups",
             "status": "conjectured",
             "pattern_id": "adjusted_effect",
@@ -408,7 +437,7 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.55981,
+              0.551301,
               0.489939,
               -0.539391
             ]
@@ -430,9 +459,38 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.878727,
-              0.241,
-              -0.877102
+              -0.232384,
+              -0.870111,
+              0.234009
+            ]
+          },
+          {
+            "id": "mhc-ndmp",
+            "status": "licensed",
+            "pattern_id": "adjusted_effect",
+            "subject_kind": "genomic_region",
+            "strength": [
+              0.6,
+              0.6,
+              0.6,
+              0.7,
+              0.6,
+              0.5
+            ],
+            "is_representation_revision": false,
+            "fdr_tested": false,
+            "fdr_discovery": false,
+            "fdr_retracted": false,
+            "fdr_index": null,
+            "fdr_e_value": null,
+            "fdr_alpha_allocated": null,
+            "independence_tier": "reproduced",
+            "severity_provenance": null,
+            "shared_cause_overlap": null,
+            "position": [
+              0.557671,
+              -0.525329,
+              0.490007
             ]
           },
           {
@@ -475,7 +533,7 @@
             "shared_cause_overlap": null,
             "position": [
               -0.604214,
-              -0.499673,
+              0.611438,
               0.544671
             ]
           },
@@ -497,7 +555,7 @@
             "shared_cause_overlap": null,
             "position": [
               0.895719,
-              -0.869825,
+              0.241286,
               0.215393
             ]
           },
@@ -519,7 +577,7 @@
             "shared_cause_overlap": null,
             "position": [
               1.0,
-              -0.869825,
+              0.241286,
               0.371461
             ]
           },
@@ -541,7 +599,7 @@
             "shared_cause_overlap": null,
             "position": [
               0.895719,
-              -0.555556,
+              0.555556,
               0.895719
             ]
           },
@@ -563,7 +621,7 @@
             "shared_cause_overlap": null,
             "position": [
               0.73965,
-              -0.241286,
+              0.869825,
               1.0
             ]
           },
@@ -585,7 +643,7 @@
             "shared_cause_overlap": null,
             "position": [
               0.555556,
-              -0.111111,
+              1.0,
               0.555556
             ]
           },
@@ -607,7 +665,7 @@
             "shared_cause_overlap": null,
             "position": [
               0.371461,
-              -0.241286,
+              0.869825,
               0.111111
             ]
           },
@@ -629,7 +687,7 @@
             "shared_cause_overlap": null,
             "position": [
               0.215393,
-              -0.555556,
+              0.555556,
               0.215393
             ]
           },
@@ -651,7 +709,7 @@
             "shared_cause_overlap": null,
             "position": [
               0.111111,
-              -0.869825,
+              0.241286,
               0.73965
             ]
           },
@@ -673,7 +731,7 @@
             "shared_cause_overlap": null,
             "position": [
               0.215393,
-              -0.869825,
+              0.241286,
               0.895719
             ]
           },
@@ -716,9 +774,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              1.0,
-              0.171896,
-              -0.859519
+              -0.111111,
+              -0.939215,
+              0.251592
             ]
           },
           {
@@ -760,9 +818,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.962927,
-              0.338632,
-              -0.507185
+              -0.148184,
+              -0.772479,
+              0.603926
             ]
           },
           {
@@ -782,9 +840,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.903413,
-              0.565045,
-              -0.186926
+              -0.207698,
+              -0.546067,
+              0.924185
             ]
           },
           {
@@ -804,9 +862,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.824735,
-              0.788847,
-              -0.111111
+              -0.286376,
+              -0.322265,
+              1.0
             ]
           },
           {
@@ -826,9 +884,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.731229,
-              0.948469,
-              -0.330014
+              -0.379882,
+              -0.162642,
+              0.781097
             ]
           },
           {
@@ -848,9 +906,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.628045,
-              1.0,
-              -0.698477
+              -0.483067,
+              -0.111111,
+              0.412634
             ]
           },
           {
@@ -870,9 +928,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.520867,
-              0.929262,
-              -0.972167
+              -0.590244,
+              -0.181849,
+              0.138944
             ]
           },
           {
@@ -892,9 +950,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.415601,
-              0.755717,
-              -0.969595
+              -0.695511,
+              -0.355394,
+              0.141516
             ]
           },
           {
@@ -914,9 +972,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.264665,
-              0.520712,
-              -0.723237
+              -0.846447,
+              -0.590399,
+              0.387874
             ]
           },
           {
@@ -936,9 +994,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.216942,
-              0.387906,
-              -0.470137
+              -0.894169,
+              -0.723205,
+              0.640974
             ]
           },
           {
@@ -958,9 +1016,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.26296,
-              0.366721,
-              -0.348529
+              -0.848151,
+              -0.74439,
+              0.762582
             ]
           },
           {
@@ -980,9 +1038,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.26296,
-              0.366721,
-              -0.348529
+              -0.848151,
+              -0.74439,
+              0.762582
             ]
           },
           {
@@ -1002,9 +1060,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.216942,
-              0.387906,
-              -0.470137
+              -0.894169,
+              -0.723205,
+              0.640974
             ]
           },
           {
@@ -1465,6 +1523,7 @@
               "cost_expression_survives_full_confounder_control",
               "dual_channel_selection_hypothesis",
               "eqtl_positive_genes_stronger_biophysics_coupling",
+              "hervk-ndmp",
               "histogram_modes_map_to_serological_groups",
               "hla_a_cpg_density_vs_tpm",
               "hla_a_dg37_vs_tpm",
@@ -1478,6 +1537,7 @@
               "human_ecoli_effect_ratio_consistent_with_ne_scaling",
               "kernel-ndmp-licensed",
               "ltr_fraction_expression_negative_gc_independent",
+              "mhc-ndmp",
               "nc_fraction_of_hla_variation",
               "rc05_p1_elm_beats_elastic_net_age_FALSIFIED",
               "recomb_a1_partial_correlations_109_signals",
@@ -1516,8 +1576,8 @@
       },
       "stats": {
         "cycle_index": 0,
-        "n_nodes": 48,
-        "n_licensed": 2,
+        "n_nodes": 50,
+        "n_licensed": 4,
         "n_pending": 0,
         "n_conjectured": 42,
         "n_rejected": 4,
