@@ -16,6 +16,8 @@ _IMPL = "pharmaco::assoc"
 def _pharmaco_split(node: OperationNode) -> tuple[list[float], list[float]]:
     """(high-meth AUCs, low-meth AUCs), median-split within each tissue on marker methylation,
     pooled across tissues. Drops lines missing either value. Raises on empty groups."""
+    if node.impl != _IMPL:
+        raise ValueError(f"{_IMPL} adapter cannot execute impl {node.impl!r}")
     beta, sample_ids, tissue_of, p = _load_betas(node)  # tissue_of = col_data[group_col]
     marker_row, drug_row = f"meth::{p['marker']}", f"auc::{p['drug']}"
     if marker_row not in beta or drug_row not in beta:
