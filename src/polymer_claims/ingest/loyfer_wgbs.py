@@ -15,6 +15,14 @@ class SampleBeta:
     beta: float; n_cpg: int; mean_cov: float
 
 
+@dataclass(frozen=True)
+class CpgMatrix:
+    probe_ids: list[str]                 # "chr6:29942123" per retained CpG, in genomic order
+    samples: list[str]                   # filename_stem per retained sample, stable order
+    sample_meta: list[dict]              # per sample: {"sample","cell_type","cell_type_broad","lineage"}
+    betas: list[list[float]]             # betas[p][s] = beta of probe p in sample s
+
+
 def load_manifest(path: Path) -> list[tuple[str, str, str, str]]:
     rows = [ln.split("\t") for ln in Path(path).read_text().splitlines() if ln.strip()]
     hdr = rows[0]
@@ -132,3 +140,56 @@ def extract_regions_multi(
                 beta=sum(betas) / len(betas), n_cpg=len(betas),
                 mean_cov=sum(covs) / len(covs)))
     return result
+
+
+def extract_cpg_matrix(
+    bed_dir: Path, manifest: Path, chrom: str, start: int, end: int,
+    *, min_cov: int = 4, require_all_samples: bool = True,
+) -> CpgMatrix:
+    """Single pass per sample bed.gz over [start,end): collect per-CpG beta where cov>=min_cov.
+
+    Then align across samples on genomic position. require_all_samples=True (default, the tested
+    path) keeps the COMPLETE-CASE probe set: CpG positions covered (>=min_cov) in EVERY retained
+    sample, aligned in genomic order. require_all_samples=False instead keeps the union of covered
+    positions across samples, filling gaps with float('nan'). A sample with zero covered CpGs in
+    the window is dropped before the intersection/union is computed. Deterministic; no clock/random.
+    """
+    per_sample: list[dict[int, float]] = []
+    kept_meta: list[tuple[str, str, str, str]] = []
+    for stem, ct, br, ln in load_manifest(manifest):
+        bed = _find_bed(Path(bed_dir), stem)
+        if bed is None:
+            continue
+        pos_beta: dict[int, float] = {}
+        try:
+            for pos, beta, cov in _iter_region(bed, chrom, start, end):
+                if cov >= min_cov:
+                    pos_beta[pos] = beta
+        except (OSError, EOFError):
+            continue  # truncated/corrupt source bed.gz for this sample: skip, don't crash the batch
+        if not pos_beta:
+            continue  # sample with zero covered CpGs in the window: dropped
+        per_sample.append(pos_beta)
+        kept_meta.append((stem, ct, br, ln))
+
+    if not per_sample:
+        return CpgMatrix(probe_ids=[], samples=[], sample_meta=[], betas=[])
+
+    if require_all_samples:
+        common = set(per_sample[0])
+        for pb in per_sample[1:]:
+            common &= set(pb)
+        positions = sorted(common)
+        betas = [[pb[pos] for pb in per_sample] for pos in positions]
+    else:
+        all_pos: set[int] = set()
+        for pb in per_sample:
+            all_pos |= set(pb)
+        positions = sorted(all_pos)
+        betas = [[pb.get(pos, float("nan")) for pb in per_sample] for pos in positions]
+
+    probe_ids = [f"{chrom}:{pos}" for pos in positions]
+    samples = [stem for stem, _, _, _ in kept_meta]
+    sample_meta = [{"sample": stem, "cell_type": ct, "cell_type_broad": br, "lineage": ln}
+                   for stem, ct, br, ln in kept_meta]
+    return CpgMatrix(probe_ids=probe_ids, samples=samples, sample_meta=sample_meta, betas=betas)
