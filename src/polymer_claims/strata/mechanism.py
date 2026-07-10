@@ -193,6 +193,45 @@ def rank_mechanism_opportunities(meth, drug, ann, meta, *, min_lines=100):
     return res
 
 
+def all_mechanism_markers(meth, drug, ann, meta, *, min_lines=100):
+    """The full-panel VOLUME scan: mirrors ``rank_mechanism_opportunities`` exactly (same
+    per-drug mechanism gene set, same ``min_lines``, same columns), but instead of keeping only
+    the single best marker per drug, emits ONE ROW PER (drug, gene) for EVERY sensitivity-direction
+    eval (``eval_gene`` non-None and ``r_adj < 0``). This is the candidate-generation path that
+    lets every apt mechanism marker for a drug become its own claim, rather than dropping all but
+    the winner. ``n_genes_tested`` is still the honest per-drug mechanism-gene-set cardinality
+    (shared across all rows for that drug), NOT the count of rows emitted.
+    """
+    tissue = ann["tissue"]
+    valid = set(meth.columns)
+    rows = []
+    for _, mr in meta.iterrows():
+        dn, tgt, pw = mr["DRUG_NAME"], mr["PUTATIVE_TARGET"], mr["PATHWAY_NAME"]
+        genes = set(parse_targets(tgt, valid)) | {g for g in PATHWAY_GENES.get(pw, []) if g in valid}
+        if not genes:
+            continue
+        auc = _auc(drug, dn)
+        if len(auc) < min_lines:
+            continue
+        evals = [e for e in (eval_gene(meth, auc, tissue, g) for g in genes) if e]
+        evals = [e for e in evals if e["r_adj"] < 0]  # sensitivity-direction marks
+        if not evals:
+            continue
+        for e in evals:
+            rows.append((dn, str(pw), e["gene"], e["level"], e["r_adj"], e["rho_pooled"],
+                         e["p_adj"], e["retained"], e["within_sig"], e["n_tissues"],
+                         len(genes)))
+    res = pd.DataFrame(rows, columns=["drug", "pathway", "marker", "level", "r_adj", "rho_pooled",
+                                      "p_adj", "retained", "within_sig", "n_tissues",
+                                      "n_genes_tested"])
+    res = res.sort_values(
+        ["level", "r_adj"],
+        key=lambda c: c.map(_LEVEL_ORDER) if c.name == "level" else c.abs(),
+        ascending=[False, False],
+    ).reset_index(drop=True)
+    return res
+
+
 def positive_control(meth, drug, ann, marker="MTAP", drug_name="Palbociclib"):
     """The CDK4/6i positive control: MTAP (9p21) methylation -> Palbociclib
     sensitivity. Expected L3, r_adj strongly negative."""

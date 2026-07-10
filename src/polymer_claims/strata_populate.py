@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import logging
 import math
+import re
+import sys
+from pathlib import Path
 
 from polymer_grammar import Claim, Comparator, FDRLedger, MaterializationContext, Status
-from polymer_protocol import Corpus, register_hypotheses, run_cycle
+from polymer_protocol import Corpus, Layout, export_topology, register_hypotheses, run_cycle
 
 from .capabilities import CAPABILITY_CELLS
 from .contracts import load_contract
@@ -24,35 +27,69 @@ log = logging.getLogger(__name__)
 
 __all__ = [
     "ControlCheckFailed",
+    "KNOWN_DRUG_CHEBI",
     "check_controls",
     "license_batch",
     "populate_universe",
     "preregister",
+    "GDSC_SHARED_CAUSE_FACTORS",
     "propose_claims",
+    "run_full_universe",
 ]
+
+# this file: <repo>/src/polymer_claims/strata_populate.py -> parents[2] == <repo>
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# The GDSC-shared causes: every pharmaco materialization carries these, so any later
+# cross-cohort replication is gated by §E (cohorts_error_independent) rather than silently
+# minting REPLICATED.
+GDSC_SHARED_CAUSE_FACTORS = (
+    "gdsc2-manifest", "gdsc-imputed-normalization", "hg38",
+    "cell-model-passports", "scipy-statsmodels",
+)
+
+# A small curated drug -> CHEBI uri map, sufficient for the two published controls
+# (MTAP->Palbociclib, MGMT->Temozolomide) plus a few other well-known GDSC compounds. Any drug
+# NOT in this map still gets a claim (propose_claims never drops a drug) — it falls back to a
+# synthetic "other"-ontology urn instead. A full GDSC drug->CHEBI resolver is out of scope for v1.
+KNOWN_DRUG_CHEBI: dict[str, str] = {
+    "Palbociclib": "http://purl.obolibrary.org/obo/CHEBI_85993",
+    "Temozolomide": "http://purl.obolibrary.org/obo/CHEBI_72564",
+}
+
+_SLUG_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _slugify(name: str) -> str:
+    return _SLUG_RE.sub("-", name.lower()).strip("-") or "unknown"
 
 
 def propose_claims(
     res_df, *, ref: str, chebi_of: dict[str, str], agent_id: str = "strata-mechanism-v1"
 ) -> list[Claim]:
-    """One marker_drug_claim per scan row whose drug has a CHEBI uri. search_cardinality =
-    the row's n_genes_tested (falls back to 1). Skipped-for-no-CHEBI count is logged, not silent."""
+    """One marker_drug_claim per scan row. search_cardinality = the row's n_genes_tested (falls
+    back to 1). No drug is ever dropped: a drug in `chebi_of` gets a CHEBI-ontology subject term;
+    any other drug falls back to the "other" ontology with a synthetic urn:strata:drug:<slug> uri
+    (a stable, honest stand-in — not a real ontology resolution)."""
     claims: list[Claim] = []
-    skipped = 0
+    n_fallback = 0
     for r in res_df.itertuples():
-        uri = chebi_of.get(str(r.drug))
+        drug = str(r.drug)
+        uri = chebi_of.get(drug)
         if uri is None:
-            skipped += 1
-            continue
+            ontology, uri = "other", f"urn:strata:drug:{_slugify(drug)}"
+            n_fallback += 1
+        else:
+            ontology = "CHEBI"
         n_genes = getattr(r, "n_genes_tested", 1)
         if n_genes is None or not n_genes or (isinstance(n_genes, float) and math.isnan(n_genes)):
             n_genes = 1                          # missing/0/NaN -> the honest floor of 1
         claims.append(marker_drug_claim(
-            f"pgx-{r.marker}-{r.drug}", ref=ref, marker=str(r.marker), drug=str(r.drug),
-            drug_chebi_uri=uri,
+            f"pgx-{r.marker}-{drug}", ref=ref, marker=str(r.marker), drug=drug,
+            drug_chebi_uri=uri, drug_ontology=ontology,
             search_cardinality=int(n_genes), agent_id=agent_id))
-    if skipped:
-        log.warning("propose_claims: skipped %d rows lacking a CHEBI uri", skipped)
+    if n_fallback:
+        log.info("propose_claims: %d row(s) used the 'other'-ontology CHEBI fallback", n_fallback)
     return claims
 
 
@@ -150,4 +187,64 @@ def populate_universe(
     report = check_controls(corpus)
     if require_controls and not report["ok"]:
         raise ControlCheckFailed(f"control instrument failed: {report}")
+    return corpus
+
+
+def _evalue_of(corpus: Corpus, claim_id: str) -> float | None:
+    """The claim's resolved e-value from the fdr_ledger, or None if never registered/resolved."""
+    for t in reversed(corpus.fdr_ledger.tests):
+        if t.claim_id == claim_id:
+            return t.e_value
+    return None
+
+
+def run_full_universe(
+    *, require_controls: bool = False, agent_id: str = "strata-mechanism-v1",
+    out_path: "str | Path | None" = None,
+) -> Corpus:
+    """The volume path for the Monday demo: rebuild the contract with full mechanism-gene
+    coverage, run `all_mechanism_markers` (every apt (drug, gene) row, not just the single best
+    per drug -> ~2,000 candidates), propose+license a claim for EVERY row (no drug dropped —
+    `KNOWN_DRUG_CHEBI` resolves the curated few, every other drug gets an "other"-ontology
+    fallback), print a stderr summary (total/LICENSED/PENDING/REJECTED + the top-15 LICENSED
+    claims by e-value), and save the exported topology under data/pharmaco/ (gitignored) so a
+    viewer step can consume it later. Returns the populated Corpus."""
+    from .ingest.gdsc_pharmaco import ingest_gdsc_pharmaco
+    from .strata.mechanism import all_mechanism_markers, load_inputs
+
+    summary = ingest_gdsc_pharmaco()
+    print(f"ingest: {summary}", file=sys.stderr)
+    ref = "se:gdsc_pharmaco@1"
+
+    res = all_mechanism_markers(*load_inputs())
+    n_drugs = res["drug"].nunique() if len(res) else 0
+    print(f"mechanism scan (full volume path): {len(res)} candidate marker/drug row(s) "
+          f"across {n_drugs} drug(s)", file=sys.stderr)
+
+    corpus = populate_universe(
+        res, ref=ref, chebi_of=dict(KNOWN_DRUG_CHEBI), shared_cause_factors=GDSC_SHARED_CAUSE_FACTORS,
+        require_controls=require_controls, agent_id=agent_id)
+
+    licensed = [c for c in corpus.claims if c.status == Status.LICENSED]
+    pending = [c for c in corpus.claims if c.status == Status.PENDING]
+    rejected = [c for c in corpus.claims if c.status == Status.REJECTED]
+    print(f"universe: {len(corpus.claims)} total claims "
+          f"({len(licensed)} LICENSED / {len(pending)} PENDING / {len(rejected)} REJECTED)",
+          file=sys.stderr)
+
+    ranked = sorted(
+        ((c.id, _evalue_of(corpus, c.id)) for c in licensed),
+        key=lambda x: (x[1] is None, -(x[1] if x[1] is not None else 0.0)),
+    )
+    print(f"top {min(15, len(ranked))} LICENSED claims by e-value:", file=sys.stderr)
+    for cid, e in ranked[:15]:
+        print(f"  {cid}: e={e}", file=sys.stderr)
+
+    resolved_out = Path(out_path) if out_path else (
+        _REPO_ROOT / "data" / "pharmaco" / "gdsc_pharmaco_universe_topology.json")
+    resolved_out.parent.mkdir(parents=True, exist_ok=True)
+    topo = export_topology(corpus, layout=Layout.FORCE_DIRECTED)
+    resolved_out.write_text(topo.model_dump_json(indent=2))
+    print(f"topology exported: {resolved_out}", file=sys.stderr)
+
     return corpus

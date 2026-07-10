@@ -55,17 +55,24 @@ def build_pharmaco_contract(
 
 def ingest_gdsc_pharmaco(data_dir: str | None = None) -> str:
     """Load the lifted GDSC data, restrict to the mechanism-gene union + all drugs, and build the
-    contract into the package contracts/ dir (gitignored). Returns a one-line summary."""
-    from polymer_claims import contracts as _contracts
-    from polymer_claims.strata.data import gdsc
-    from polymer_claims.strata.mechanism import PATHWAY_GENES, TARGET_ALIAS
+    contract into the package contracts/ dir (gitignored). Returns a one-line summary.
 
-    meth = gdsc.load_gdsc_methylation()            # lines x genes
-    drug = gdsc.load_gdsc_drug_response()          # long: COSMIC_ID, drug_name, auc
-    ann = gdsc.load_gdsc_annotations()             # index COSMIC_ID -> tissue
-    valid = set(meth.columns)
-    gene_union = sorted({g for genes in PATHWAY_GENES.values() for g in genes if g in valid}
-                        | set(TARGET_ALIAS.values()) & valid)
+    ``gene_union`` is exactly the union of scan-candidate genes across all drugs — i.e. every
+    gene the STRATA mechanism scan (``rank_mechanism_opportunities`` / ``all_mechanism_markers``)
+    could possibly propose a marker for — NOT merely the curated ``PATHWAY_GENES`` +
+    ``TARGET_ALIAS`` values (which can miss a drug's own parsed target gene). This guarantees
+    every ``meth::<gene>`` row the scan proposes actually exists in the contract."""
+    from polymer_claims import contracts as _contracts
+    from polymer_claims.strata.mechanism import PATHWAY_GENES, load_inputs, parse_targets
+
+    meth, drug, ann, meta = load_inputs()          # meth: lines x genes; drug: long COSMIC_ID/drug_name/auc
+    valid = set(meth.columns)                      # ann: index COSMIC_ID -> tissue; meta: per-drug target/pathway
+    gene_union: set[str] = set()
+    for _, mr in meta.iterrows():
+        tgt, pw = mr["PUTATIVE_TARGET"], mr["PATHWAY_NAME"]
+        gene_union |= set(parse_targets(tgt, valid))
+        gene_union |= {g for g in PATHWAY_GENES.get(pw, []) if g in valid}
+    gene_union = sorted(gene_union)
     drugs = sorted(drug["drug_name"].unique().tolist())
     lines = [str(x) for x in meth.index]
     tissue = {s: str(ann["tissue"].get(s, "unknown")) for s in lines if s in ann.index}

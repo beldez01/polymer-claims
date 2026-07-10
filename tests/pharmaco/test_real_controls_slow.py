@@ -67,9 +67,9 @@ def test_real_controls_positive_licenses_negative_does_not():
     res = rank_mechanism_opportunities(meth, drug, ann, meta)
     assert len(res) > 0, "the real full-panel mechanism scan produced zero rows"
 
-    # --- Full-panel universe: exactly what a real STRATA run proposes for these two drugs
-    # (chebi_of only resolves Palbociclib/Temozolomide -- everything else is honestly skipped,
-    # logged not silent, by propose_claims). Robust pipeline-integrity facts only. ---
+    # --- Full-panel universe: exactly what a real STRATA run proposes (chebi_of only resolves
+    # Palbociclib/Temozolomide -- every other drug still gets a claim via propose_claims' "other"
+    # -ontology CHEBI fallback; no drug is ever dropped). Robust pipeline-integrity facts only. ---
     full_universe = populate_universe(
         res, ref=_REF, chebi_of=_CHEBI, shared_cause_factors=_SHARED_CAUSE,
         require_controls=False)

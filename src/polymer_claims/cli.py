@@ -124,17 +124,6 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
-_STRATA_SHARED_CAUSE_FACTORS = (
-    "gdsc2-manifest", "gdsc-imputed-normalization", "hg38",
-    "cell-model-passports", "scipy-statsmodels",
-)
-# Curated drug -> CHEBI uri, sufficient for the two published controls (MTAP->Palbociclib,
-# MGMT->Temozolomide). A full GDSC drug->CHEBI resolver is out of scope for v1: propose_claims
-# logs (not silently drops) every scan row whose drug isn't in this map.
-_STRATA_KNOWN_CHEBI = {
-    "Palbociclib": "http://purl.obolibrary.org/obo/CHEBI_85993",
-    "Temozolomide": "http://purl.obolibrary.org/obo/CHEBI_72564",
-}
 
 
 def _strata_evalue(corpus: Corpus, claim_id: str) -> float | None:
@@ -148,10 +137,45 @@ def _strata_evalue(corpus: Corpus, claim_id: str) -> float | None:
 def _cmd_strata_populate(args: argparse.Namespace) -> int:
     if args.data_dir:
         os.environ["STRATA_DATA_ROOT"] = args.data_dir
+    require_controls = not args.no_require_controls
+
+    if args.full:
+        # The volume path: all_mechanism_markers (every apt (drug, gene) row, not just the
+        # single best marker per drug -> ~2,000 candidates), no drug ever dropped.
+        try:
+            from .strata_populate import ControlCheckFailed, run_full_universe
+        except ModuleNotFoundError:
+            print(
+                "strata-populate needs the [strata] extra (pandas/numpy/scipy/statsmodels/"
+                "scikit-learn/lifelines/openpyxl): install it with "
+                "`pip install 'polymer-claims[strata]'`",
+                file=sys.stderr,
+            )
+            return 1
+        try:
+            corpus = run_full_universe(require_controls=require_controls)
+        except ControlCheckFailed as exc:
+            print(f"strata-populate: {exc}", file=sys.stderr)
+            return 1
+        print(f"status: {_status_summary(corpus)}", file=sys.stderr)
+        result = {
+            "contract": "se:gdsc_pharmaco@1",
+            "n_claims": len(corpus.claims),
+            "status_counts": dict(_status_counts(corpus)),
+        }
+        print(json.dumps(result))
+        return 0
+
     try:
         from .ingest.gdsc_pharmaco import ingest_gdsc_pharmaco
         from .strata.mechanism import load_inputs, rank_mechanism_opportunities
-        from .strata_populate import ControlCheckFailed, check_controls, populate_universe
+        from .strata_populate import (
+            GDSC_SHARED_CAUSE_FACTORS,
+            KNOWN_DRUG_CHEBI,
+            ControlCheckFailed,
+            check_controls,
+            populate_universe,
+        )
     except ModuleNotFoundError:
         print(
             "strata-populate needs the [strata] extra (pandas/numpy/scipy/statsmodels/"
@@ -168,11 +192,10 @@ def _cmd_strata_populate(args: argparse.Namespace) -> int:
     res = rank_mechanism_opportunities(*load_inputs())
     print(f"mechanism scan: {len(res)} drug/marker row(s)", file=sys.stderr)
 
-    require_controls = not args.no_require_controls
     try:
         corpus = populate_universe(
-            res, ref=ref, chebi_of=dict(_STRATA_KNOWN_CHEBI),
-            shared_cause_factors=_STRATA_SHARED_CAUSE_FACTORS,
+            res, ref=ref, chebi_of=dict(KNOWN_DRUG_CHEBI),
+            shared_cause_factors=GDSC_SHARED_CAUSE_FACTORS,
             require_controls=require_controls)
     except ControlCheckFailed as exc:
         print(f"strata-populate: {exc}", file=sys.stderr)
@@ -955,6 +978,10 @@ def _build_parser() -> argparse.ArgumentParser:
     p_strata.add_argument("--no-require-controls", action="store_true",
                           help="do not fail if the control instrument reports not-ok "
                                "(observe the universe instead of gating publish on it)")
+    p_strata.add_argument("--full", action="store_true",
+                          help="the volume path: all_mechanism_markers (every apt marker per "
+                               "drug, ~2k candidates) instead of one best marker per drug, and "
+                               "no drug is ever dropped for lacking a CHEBI uri")
     p_strata.set_defaults(func=_cmd_strata_populate)
 
     p_run = sub.add_parser("run-cycle", help="run ONE run_cycle over a corpus")
