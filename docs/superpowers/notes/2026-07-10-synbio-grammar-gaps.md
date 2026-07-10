@@ -28,7 +28,20 @@ purity/backward-compat cost · byte-identical proof (once resolved).
 - **Cost/backward-compat.** Additive registry entry only; touches no core primitive, no
   existing claim. Byte-identical to existing corpora by construction (registry is append-only).
 
-## GAP-2 — QuantityLeaf has no context-conditioning
+## GAP-2 — QuantityLeaf has no context-conditioning ✅ RESOLVED (Phase 2a, 2026-07-10)
+
+> **Resolution shipped.** Added an optional structured `MeasurementContext`
+> (`tissue`/`cell_line`/`assay`/`condition`, all optional) to `QuantityLeaf`, plus a
+> `@model_serializer(mode="wrap")` that **drops `context` when None** (mirrors `capability.py:188`).
+> **Byte-identity proven:** a context-less leaf serializes to the exact pre-field baseline (test
+> `grammar/tests/test_leaf_context.py::test_context_less_leaf_is_byte_identical`), and the full
+> grammar (582) + protocol (497) + umbrella suites stay green. C2 re-expressed to populate the
+> context; its schema tripwire flipped to a passing assertion. expansion_class: **general** (core
+> primitive) — this is the reusable recipe for every future general expansion. Design:
+> `docs/superpowers/specs/2026-07-10-synbio-phase2-design.md` §2.
+>
+> Original finding retained below for the record.
+
 
 - **Constraint.** C2's 277-fold dynamic range is **cell-line-specific** and degrades in other
   contexts. Synbio (and every field — "context-independent design" is a field-wide open

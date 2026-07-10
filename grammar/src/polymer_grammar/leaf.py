@@ -13,7 +13,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Annotated, Literal, Union
 
-from pydantic import Field, model_validator
+from pydantic import Field, model_serializer, model_validator
 
 from .base import _Model
 from .units import Dimension
@@ -27,6 +27,20 @@ class MeasurementBasis(str, Enum):
     NOMINAL = "nominal"
 
 
+class MeasurementContext(_Model):
+    """The context a measurement holds in — descriptive only (spec Phase-2a / GAP-2).
+
+    Conditions interpretation (a derived statistic like ADAR ~277-fold is cell-line-specific;
+    an expression TPM is tissue-specific), so two claims of the same estimand in different
+    contexts are distinguishable. It carries NO value and NO unit and never enters a licensing
+    criterion. All fields optional; an all-None context is meaningless and is dropped on serialize.
+    """
+    tissue: str | None = None      # e.g. "AML" / "bone marrow"
+    cell_line: str | None = None   # e.g. the ADAR reporter line
+    assay: str | None = None       # e.g. "RNA-seq TPM", "luciferase ratio"
+    condition: str | None = None   # free-form residual (temperature, timepoint)
+
+
 class QuantityLeaf(_Model):
     kind: Literal["quantity"] = "quantity"
     value: float
@@ -35,6 +49,16 @@ class QuantityLeaf(_Model):
     measurement_basis: MeasurementBasis
     formula: str | None = None
     dimension: Dimension | None = None
+    context: MeasurementContext | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler) -> dict:
+        """Drop `context` when None so a context-less leaf serializes byte-identically to the
+        pre-field grammar (no new key). Mirrors the additive-field pattern in capability.py."""
+        data = handler(self)
+        if data.get("context") is None:
+            data.pop("context", None)
+        return data
 
     @model_validator(mode="after")
     def _basis_discipline(self) -> QuantityLeaf:

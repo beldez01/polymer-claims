@@ -14,7 +14,12 @@ registry lookup — and record the missing pattern as an analysis-class expansio
 from __future__ import annotations
 
 from polymer_grammar.claim import Claim
-from polymer_grammar.leaf import MeasurementBasis, PropositionLeaf, QuantityLeaf
+from polymer_grammar.leaf import (
+    MeasurementBasis,
+    MeasurementContext,
+    PropositionLeaf,
+    QuantityLeaf,
+)
 from polymer_grammar.pattern import PatternRef
 from polymer_grammar.provenance import GenerationMode, Provenance
 from polymer_grammar.status import Status
@@ -61,8 +66,9 @@ def adar_dynamic_range_claim() -> Claim:
     """C2 — an ADAR RNA sensor achieves ~277-fold dynamic range (edited vs unedited payload).
     A DERIVED statistic: dimensionless fold-change, so it carries a formula and NO unit.
 
-    GAP (context-conditioning): the 277-fold is cell-line-specific and degrades in other
-    contexts, but `QuantityLeaf` has no field to carry that context. Logged general-class."""
+    GAP-2 RESOLVED (Phase 2a): the 277-fold is context-specific, now carried by a
+    `MeasurementContext` (the assay it was measured in). Source states no cell line, so
+    `cell_line` stays None rather than fabricate one."""
     return Claim(
         id="synbio-c2-adar-dynamic-range",
         title="ADAR RNA-sensor dynamic range ≈ 277-fold",
@@ -73,6 +79,9 @@ def adar_dynamic_range_claim() -> Claim:
                 unit=None,
                 measurement_basis=MeasurementBasis.DERIVED,
                 formula="edited_payload / unedited_payload",
+                context=MeasurementContext(
+                    assay="ADAR RNA-sensor: edited/unedited payload ratio"
+                ),
             ),
         ),
         status=Status.CONJECTURED,
