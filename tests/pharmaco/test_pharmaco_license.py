@@ -20,7 +20,7 @@ from polymer_protocol import Corpus
 
 from polymer_claims import contracts
 from polymer_claims.ingest.gdsc_pharmaco import build_pharmaco_contract
-from polymer_claims.strata_populate import license_batch, preregister, propose_claims
+from polymer_claims.pharmaco_populate import license_batch, preregister, propose_claims
 
 _REF = "se:gdsc_pharmaco@1"
 _CHEBI = {

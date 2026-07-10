@@ -19,7 +19,7 @@ import pandas as pd
 from scipy import stats
 from scipy.stats import spearmanr
 
-from polymer_claims.strata.data import gdsc
+from polymer_claims.pharmaco.data import gdsc
 
 MIN_TISSUE_N = 20
 

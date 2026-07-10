@@ -1,6 +1,6 @@
 # Rejection ≠ forbidden region: the agent loop must reason about parameterization
 
-**Date:** 2026-07-10. Prompted by the MGMT→Temozolomide result in the STRATA pharmaco
+**Date:** 2026-07-10. Prompted by the MGMT→Temozolomide result in the pharmacogenomic
 licensing build (merged `90510f8`).
 
 ## The worked example
@@ -14,7 +14,7 @@ artifact of the measurement scale.**
   methylation** silences MGMT and sensitizes cells to the alkylating agent. The signal
   lives in the promoter.
 - Our SE-Contract is built from **gene-level (gene-body-averaged) imputed methylation**
-  (`ingest/gdsc_pharmaco.py` → `strata/data/gdsc.load_gdsc_methylation` →
+  (`ingest/gdsc_pharmaco.py` → `pharmaco/data/gdsc.load_gdsc_methylation` →
   `methylation_imputed.csv.gz`). Gene-body averaging **washes out** the promoter signal.
   Hack's own `notes/MGMT_GATE.md` documented exactly this (gene-level MGMT rho≈−0.02, null).
 - **Promoter methylation for the same lines exists** but was not lifted:
@@ -43,7 +43,7 @@ The loop should be able to:
    coarser or different dimension (gene-body average).
 2. **Re-parameterize and re-propose** the same subject (marker→drug) over the correct
    measurement space (a promoter-β SE-Contract), as a *new* claim with its own pre-registered
-   e-test — STRATA-style: an untrusted proposer generating the corrected hypothesis.
+   e-test — untrusted-proposer-style: an untrusted proposer generating the corrected hypothesis.
 3. **Re-test** through the same gate. Only a claim rejected over the *right* parameterization
    is a trustworthy forbidden-region negative.
 

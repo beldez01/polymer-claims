@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from polymer_claims.strata.mechanism import all_mechanism_markers, rank_mechanism_opportunities
+from polymer_claims.pharmaco.mechanism import all_mechanism_markers, rank_mechanism_opportunities
 
 _TISSUES = ("a", "b", "c")
 _N_PER_TISSUE = 20  # >= MIN_TISSUE_N so every tissue survives eval_gene's per-tissue filter

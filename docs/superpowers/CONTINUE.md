@@ -16,7 +16,7 @@
 
 > Session 2026-07-09 → 10. `main` = `47ddda5` (**local; ahead of `origin/main` `e58adf6` — not yet
 > pushed**). grammar/protocol stay pure + numpy-free; **Corpus = exactly 4 collections**. Also on `main`
-> (merged concurrently by another session): the **STRATA pharmacogenomic engine** (`[strata]` extra).
+> (merged concurrently by another session): the **pharmacogenomic engine** (`[pharmaco]` extra).
 
 **Immuno / ERV methylation licensing drive merged** (`feat/immuno-erv-drive` → merge `47ddda5`) — two
 genuine **licensed immuno nodes** on the real **Loyfer 2023 WGBS atlas** (GSE186458), via the **e-LOND
@@ -43,9 +43,9 @@ the same route as the TCGA n-DMP proof. Post-merge cleanup: dead `HodgesLehmannM
 `immuno_independent_registry` removed (superseded by the `methyl_adapters` legs the drivers use).
 
 ### NEXT — where to proceed
-- **Push `main` to origin** when ready — coordinate with the concurrent STRATA line (both are in local `main`).
+- **Push `main` to origin** when ready — coordinate with the concurrent pharmacogenomic-engine line (both are in local `main`).
 - More count-enrichment immuno claims (L1HS young-LINE-1 family; other MHC sub-regions); a **REPLICATED**
-  tier via a 2nd WGBS cohort. The neg2 backlog (below) + STRATA follow-ups remain open.
+  tier via a 2nd WGBS cohort. The neg2 backlog (below) + pharmacogenomic-engine follow-ups remain open.
 
 ---
 

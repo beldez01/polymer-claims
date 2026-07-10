@@ -18,9 +18,9 @@ def test_marker_drug_claim_shape():
     assert c.status == Status.PENDING
     assert c.pattern.id == "adjusted_effect"
     assert c.subject.kind == "composite" and len(c.subject.parts) == 2
-    assert c.leaves[0].kind == "categorical"  # Polymer-native; no STRATA r_adj in the claim
+    assert c.leaves[0].kind == "categorical"  # Polymer-native; no engine r_adj in the claim
     assert c.provenance.generated_by.value == "agent_generated"
-    assert c.provenance.agent_id == "strata-mechanism-v1"
+    assert c.provenance.agent_id == "pharmaco-mechanism-v1"
     # composite subject is admitted by the apparatus domain
     dom = pharmaco_oracle_registry().dossiers[0].applicability_domain
     assert "composite" in dom.subject_kinds

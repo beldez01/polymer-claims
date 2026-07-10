@@ -16,7 +16,7 @@ docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md
 # Phase A real-data: raw GDC cache + the generated real SE-Contracts (never committed)
 /data/tcga_laml/
 /data/sal_aml/
-# STRATA pharmacogenomic engine: lifted GDSC data (never committed — ~81M)
+# pharmacogenomic engine: lifted GDSC data (never committed — ~81M)
 /data/pharmaco/
 src/polymer_claims/contracts/gdsc_pharmaco.json
 src/polymer_claims/contracts/gdsc_pharmaco.betas.tsv

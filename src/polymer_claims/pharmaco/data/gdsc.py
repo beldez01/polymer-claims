@@ -15,7 +15,7 @@ from functools import lru_cache
 
 import pandas as pd
 
-from polymer_claims.strata.config import DATA_DIR
+from polymer_claims.pharmaco.config import DATA_DIR
 
 GDSC_DIR = DATA_DIR / "gdsc"
 

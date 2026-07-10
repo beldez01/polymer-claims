@@ -117,14 +117,14 @@ def marker_drug_claim(
     claim_id: str, *, ref: str, marker: str, drug: str, drug_chebi_uri: str,
     drug_ontology: str = "CHEBI",
     tissue_adjusted: bool = True, threshold: float = 0.0, comparator: Comparator = Comparator.GT,
-    search_cardinality: int, agent_id: str = "strata-mechanism-v1",
+    search_cardinality: int, agent_id: str = "pharmaco-mechanism-v1",
     prior_cohorts: tuple[str, ...] = (), preregistration_hash: str | None = None,
     strength: StrengthVector | None = None,
 ) -> Claim:
     """PENDING adjusted-association claim: marker methylation is associated (tissue-adjusted) with
     drug response. Pattern adjusted_effect@v1 (association, NOT a causal edge). CategoricalLeaf
     per shipped Polymer practice; the computed AUC-difference/HL-shift lives in the verify
-    result — STRATA's r_adj never enters the claim. Composite (gene, drug) subject; the drug term's
+    result — the engine's r_adj never enters the claim. Composite (gene, drug) subject; the drug term's
     ontology defaults to CHEBI but `drug_ontology` lets an un-mapped drug use OntologyTerm's
     "other" ontology with a synthetic URI (`drug_chebi_uri` still carries the uri arg either way).
     AGENT_GENERATED. `tissue_adjusted` documents the median-split-within-tissue discipline that

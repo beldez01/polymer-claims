@@ -25,9 +25,9 @@ llm = ["anthropic>=0.40"]
 embed = ["numpy>=1.26"]
 calibrate = ["numpy>=1.26"]
 sign = ["cryptography>=42"]
-# STRATA pharmacogenomic engine (lifted from Hack): marker->drug discovery on GDSC.
+# pharmacogenomic engine (lifted from Hack): marker->drug discovery on GDSC.
 # Heavy scientific deps kept opt-in so the core wheel stays lean.
-strata = [
+pharmaco = [
     "pandas>=2",
     "numpy>=1.26",
     "scipy>=1.11",

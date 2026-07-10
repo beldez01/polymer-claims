@@ -5,7 +5,7 @@ Runs the REAL `ingest_gdsc_pharmaco` for the first time ever against the lifted 
 mechanism scan, and `populate_universe` with `require_controls=False`. This is an OBSERVATIONAL
 test: the whole point is to see what a real single-cohort e-LOND gate does with real biology,
 not to force a particular outcome onto it. Data-gated: skipped when the real GDSC data isn't
-present (gitignored); honors `STRATA_DATA_ROOT`. Marked `slow` (loads the full methylation
+present (gitignored); honors `PHARMACO_DATA_ROOT`. Marked `slow` (loads the full methylation
 matrix + reads the 21M xlsx) — excluded from fast/core test selection via `-m "not slow"`.
 
 Two named controls are checked directly (marker pinned explicitly, not left to the full-panel
@@ -25,11 +25,11 @@ import os
 
 import pytest
 
-if os.environ.get("STRATA_DATA_ROOT"):
+if os.environ.get("PHARMACO_DATA_ROOT"):
     _METH_PATH = os.path.join(
-        os.path.expanduser(os.environ["STRATA_DATA_ROOT"]), "gdsc", "methylation_imputed.csv.gz")
+        os.path.expanduser(os.environ["PHARMACO_DATA_ROOT"]), "gdsc", "methylation_imputed.csv.gz")
 else:
-    from polymer_claims.strata.config import DATA_DIR
+    from polymer_claims.pharmaco.config import DATA_DIR
     _METH_PATH = str(DATA_DIR / "gdsc" / "methylation_imputed.csv.gz")
 
 pytestmark = [
@@ -57,8 +57,8 @@ def test_real_controls_positive_licenses_negative_does_not():
     from polymer_grammar import Status
 
     from polymer_claims.ingest.gdsc_pharmaco import ingest_gdsc_pharmaco
-    from polymer_claims.strata.mechanism import load_inputs, rank_mechanism_opportunities
-    from polymer_claims.strata_populate import check_controls, populate_universe
+    from polymer_claims.pharmaco.mechanism import load_inputs, rank_mechanism_opportunities
+    from polymer_claims.pharmaco_populate import check_controls, populate_universe
 
     summary = ingest_gdsc_pharmaco()
     print(f"\n[real ingest] {summary}")
@@ -67,7 +67,7 @@ def test_real_controls_positive_licenses_negative_does_not():
     res = rank_mechanism_opportunities(meth, drug, ann, meta)
     assert len(res) > 0, "the real full-panel mechanism scan produced zero rows"
 
-    # --- Full-panel universe: exactly what a real STRATA run proposes (chebi_of only resolves
+    # --- Full-panel universe: exactly what a real pharmacogenomic run proposes (chebi_of only resolves
     # Palbociclib/Temozolomide -- every other drug still gets a claim via propose_claims' "other"
     # -ontology CHEBI fallback; no drug is ever dropped). Robust pipeline-integrity facts only. ---
     full_universe = populate_universe(

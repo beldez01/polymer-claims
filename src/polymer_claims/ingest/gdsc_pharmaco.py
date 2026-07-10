@@ -58,12 +58,12 @@ def ingest_gdsc_pharmaco(data_dir: str | None = None) -> str:
     contract into the package contracts/ dir (gitignored). Returns a one-line summary.
 
     ``gene_union`` is exactly the union of scan-candidate genes across all drugs — i.e. every
-    gene the STRATA mechanism scan (``rank_mechanism_opportunities`` / ``all_mechanism_markers``)
+    gene the pharmacogenomic mechanism scan (``rank_mechanism_opportunities`` / ``all_mechanism_markers``)
     could possibly propose a marker for — NOT merely the curated ``PATHWAY_GENES`` +
     ``TARGET_ALIAS`` values (which can miss a drug's own parsed target gene). This guarantees
     every ``meth::<gene>`` row the scan proposes actually exists in the contract."""
     from polymer_claims import contracts as _contracts
-    from polymer_claims.strata.mechanism import PATHWAY_GENES, load_inputs, parse_targets
+    from polymer_claims.pharmaco.mechanism import PATHWAY_GENES, load_inputs, parse_targets
 
     meth, drug, ann, meta = load_inputs()          # meth: lines x genes; drug: long COSMIC_ID/drug_name/auc
     valid = set(meth.columns)                      # ann: index COSMIC_ID -> tissue; meta: per-drug target/pathway

@@ -126,7 +126,7 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 
 
 
-def _strata_evalue(corpus: Corpus, claim_id: str) -> float | None:
+def _pharmaco_evalue(corpus: Corpus, claim_id: str) -> float | None:
     """The claim's resolved e-value from the fdr_ledger, or None if never registered/resolved."""
     for t in reversed(corpus.fdr_ledger.tests):
         if t.claim_id == claim_id:
@@ -134,28 +134,28 @@ def _strata_evalue(corpus: Corpus, claim_id: str) -> float | None:
     return None
 
 
-def _cmd_strata_populate(args: argparse.Namespace) -> int:
+def _cmd_pharmaco_populate(args: argparse.Namespace) -> int:
     if args.data_dir:
-        os.environ["STRATA_DATA_ROOT"] = args.data_dir
+        os.environ["PHARMACO_DATA_ROOT"] = args.data_dir
     require_controls = not args.no_require_controls
 
     if args.full:
         # The volume path: all_mechanism_markers (every apt (drug, gene) row, not just the
         # single best marker per drug -> ~2,000 candidates), no drug ever dropped.
         try:
-            from .strata_populate import ControlCheckFailed, run_full_universe
+            from .pharmaco_populate import ControlCheckFailed, run_full_universe
         except ModuleNotFoundError:
             print(
-                "strata-populate needs the [strata] extra (pandas/numpy/scipy/statsmodels/"
+                "pharmaco-populate needs the [pharmaco] extra (pandas/numpy/scipy/statsmodels/"
                 "scikit-learn/lifelines/openpyxl): install it with "
-                "`pip install 'polymer-claims[strata]'`",
+                "`pip install 'polymer-claims[pharmaco]'`",
                 file=sys.stderr,
             )
             return 1
         try:
             corpus = run_full_universe(require_controls=require_controls)
         except ControlCheckFailed as exc:
-            print(f"strata-populate: {exc}", file=sys.stderr)
+            print(f"pharmaco-populate: {exc}", file=sys.stderr)
             return 1
         print(f"status: {_status_summary(corpus)}", file=sys.stderr)
         result = {
@@ -168,8 +168,8 @@ def _cmd_strata_populate(args: argparse.Namespace) -> int:
 
     try:
         from .ingest.gdsc_pharmaco import ingest_gdsc_pharmaco
-        from .strata.mechanism import load_inputs, rank_mechanism_opportunities
-        from .strata_populate import (
+        from .pharmaco.mechanism import load_inputs, rank_mechanism_opportunities
+        from .pharmaco_populate import (
             GDSC_SHARED_CAUSE_FACTORS,
             KNOWN_DRUG_CHEBI,
             ControlCheckFailed,
@@ -178,9 +178,9 @@ def _cmd_strata_populate(args: argparse.Namespace) -> int:
         )
     except ModuleNotFoundError:
         print(
-            "strata-populate needs the [strata] extra (pandas/numpy/scipy/statsmodels/"
+            "pharmaco-populate needs the [pharmaco] extra (pandas/numpy/scipy/statsmodels/"
             "scikit-learn/lifelines/openpyxl): install it with "
-            "`pip install 'polymer-claims[strata]'`",
+            "`pip install 'polymer-claims[pharmaco]'`",
             file=sys.stderr,
         )
         return 1
@@ -198,7 +198,7 @@ def _cmd_strata_populate(args: argparse.Namespace) -> int:
             shared_cause_factors=GDSC_SHARED_CAUSE_FACTORS,
             require_controls=require_controls)
     except ControlCheckFailed as exc:
-        print(f"strata-populate: {exc}", file=sys.stderr)
+        print(f"pharmaco-populate: {exc}", file=sys.stderr)
         return 1
 
     report = check_controls(corpus)
@@ -211,8 +211,8 @@ def _cmd_strata_populate(args: argparse.Namespace) -> int:
         "status_counts": dict(_status_counts(corpus)),
         "controls": report,
         "control_evalues": {
-            "pgx-MTAP-Palbociclib": _strata_evalue(corpus, "pgx-MTAP-Palbociclib"),
-            "pgx-MGMT-Temozolomide": _strata_evalue(corpus, "pgx-MGMT-Temozolomide"),
+            "pgx-MTAP-Palbociclib": _pharmaco_evalue(corpus, "pgx-MTAP-Palbociclib"),
+            "pgx-MGMT-Temozolomide": _pharmaco_evalue(corpus, "pgx-MGMT-Temozolomide"),
         },
     }
     print(json.dumps(result))
@@ -967,22 +967,22 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ingest.add_argument("--data-dir", default="./data/tcga_laml", help="local cache dir for raw GDC files (gitignored)")
     p_ingest.set_defaults(func=_cmd_ingest)
 
-    p_strata = sub.add_parser(
-        "strata-populate",
-        help="run the STRATA pharmacogenomic mechanism scan end-to-end into a licensed "
-             "universe (needs the [strata] extra)",
+    p_pharmaco = sub.add_parser(
+        "pharmaco-populate",
+        help="run the pharmacogenomic mechanism scan end-to-end into a licensed "
+             "universe (needs the [pharmaco] extra)",
     )
-    p_strata.add_argument("--data-dir", default=None,
-                          help="override STRATA_DATA_ROOT (local GDSC data cache dir, gitignored; "
+    p_pharmaco.add_argument("--data-dir", default=None,
+                          help="override PHARMACO_DATA_ROOT (local GDSC data cache dir, gitignored; "
                                "default ./data/pharmaco)")
-    p_strata.add_argument("--no-require-controls", action="store_true",
+    p_pharmaco.add_argument("--no-require-controls", action="store_true",
                           help="do not fail if the control instrument reports not-ok "
                                "(observe the universe instead of gating publish on it)")
-    p_strata.add_argument("--full", action="store_true",
+    p_pharmaco.add_argument("--full", action="store_true",
                           help="the volume path: all_mechanism_markers (every apt marker per "
                                "drug, ~2k candidates) instead of one best marker per drug, and "
                                "no drug is ever dropped for lacking a CHEBI uri")
-    p_strata.set_defaults(func=_cmd_strata_populate)
+    p_pharmaco.set_defaults(func=_cmd_pharmaco_populate)
 
     p_run = sub.add_parser("run-cycle", help="run ONE run_cycle over a corpus")
     p_run.add_argument("corpus", help="path to a corpus JSON file")

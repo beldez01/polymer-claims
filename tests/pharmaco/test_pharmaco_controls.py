@@ -20,7 +20,7 @@ from polymer_protocol import Corpus
 
 from polymer_claims import contracts
 from polymer_claims.ingest.gdsc_pharmaco import build_pharmaco_contract
-from polymer_claims.strata_populate import (
+from polymer_claims.pharmaco_populate import (
     ControlCheckFailed,
     check_controls,
     populate_universe,
@@ -38,7 +38,7 @@ def _build_weak_positive_contract(out_dir):
     """MTAP~Palbociclib as a weak residue (tiny AUC gap): both legs still satisfy the GT-0
     criterion (not terminal-rejected) but the e-value stays well below the discovery threshold,
     so the claim stays PENDING and the positive control never licenses. Mirrors the residue
-    construction in test_strata_license.py."""
+    construction in test_pharmaco_license.py."""
     lines = [f"L{i}" for i in range(40)]
     tissue = {ln: ("a" if i < 20 else "b") for i, ln in enumerate(lines)}
     meth = {ln: (0.1 if i % 2 == 0 else 0.9) for i, ln in enumerate(lines)}

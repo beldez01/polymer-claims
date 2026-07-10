@@ -1,4 +1,4 @@
-"""Task 5: batch proposal + pre-registration. STRATA is an untrusted proposer — propose_claims
+"""Task 5: batch proposal + pre-registration. The pharmacogenomic engine is an untrusted proposer — propose_claims
 turns mechanism-scan rows into claims (honest search_cardinality; NO drug is ever dropped — an
 unknown-CHEBI drug falls back to the "other" ontology with a synthetic urn); preregister locks
 e-LOND slots BEFORE any e-value exists."""
@@ -8,7 +8,7 @@ import pandas as pd
 from polymer_grammar import FDRLedger
 from polymer_protocol import Corpus
 
-from polymer_claims.strata_populate import preregister, propose_claims
+from polymer_claims.pharmaco_populate import preregister, propose_claims
 
 
 def test_propose_sets_search_cardinality_and_never_drops_a_drug(caplog):
@@ -28,7 +28,7 @@ def test_propose_sets_search_cardinality_and_never_drops_a_drug(caplog):
     unknown = by_id["pgx-FOO-MysteryDrug"]
     assert unknown.provenance.search_cardinality == 3
     assert unknown.subject.parts[1].ontology == "other"
-    assert unknown.subject.parts[1].uri == "urn:strata:drug:mysterydrug"
+    assert unknown.subject.parts[1].uri == "urn:pharmaco:drug:mysterydrug"
     assert "1" in caplog.text                       # fallback count logged, not silent
 
 

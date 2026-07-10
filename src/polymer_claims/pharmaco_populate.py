@@ -1,5 +1,5 @@
-"""Batch runner: turn STRATA mechanism-scan rows into pre-registered, licensable claims.
-STRATA is an untrusted proposer; standing is conferred only in Task 6's run_cycle pass."""
+"""Batch runner: turn pharmacogenomic mechanism-scan rows into pre-registered, licensable claims.
+The pharmacogenomic engine is an untrusted proposer; standing is conferred only in Task 6's run_cycle pass."""
 from __future__ import annotations
 
 import logging
@@ -45,7 +45,7 @@ __all__ = [
     "run_full_universe",
 ]
 
-# this file: <repo>/src/polymer_claims/strata_populate.py -> parents[2] == <repo>
+# this file: <repo>/src/polymer_claims/pharmaco_populate.py -> parents[2] == <repo>
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # The GDSC-shared causes: every pharmaco materialization carries these, so any later
@@ -73,11 +73,11 @@ def _slugify(name: str) -> str:
 
 
 def propose_claims(
-    res_df, *, ref: str, chebi_of: dict[str, str], agent_id: str = "strata-mechanism-v1"
+    res_df, *, ref: str, chebi_of: dict[str, str], agent_id: str = "pharmaco-mechanism-v1"
 ) -> list[Claim]:
     """One marker_drug_claim per scan row. search_cardinality = the row's n_genes_tested (falls
     back to 1). No drug is ever dropped: a drug in `chebi_of` gets a CHEBI-ontology subject term;
-    any other drug falls back to the "other" ontology with a synthetic urn:strata:drug:<slug> uri
+    any other drug falls back to the "other" ontology with a synthetic urn:pharmaco:drug:<slug> uri
     (a stable, honest stand-in — not a real ontology resolution)."""
     claims: list[Claim] = []
     n_fallback = 0
@@ -85,7 +85,7 @@ def propose_claims(
         drug = str(r.drug)
         uri = chebi_of.get(drug)
         if uri is None:
-            ontology, uri = "other", f"urn:strata:drug:{_slugify(drug)}"
+            ontology, uri = "other", f"urn:pharmaco:drug:{_slugify(drug)}"
             n_fallback += 1
         else:
             ontology = "CHEBI"
@@ -203,7 +203,7 @@ def check_controls(
 
 def populate_universe(
     res_df, *, ref: str, chebi_of: dict[str, str], shared_cause_factors: tuple[str, ...],
-    require_controls: bool = True, agent_id: str = "strata-mechanism-v1",
+    require_controls: bool = True, agent_id: str = "pharmaco-mechanism-v1",
 ) -> Corpus:
     """End-to-end: propose -> preregister -> license_batch -> check_controls (the publish guard).
     Raises ControlCheckFailed if require_controls and the control instrument reports not-ok."""
@@ -225,7 +225,7 @@ def _evalue_of(corpus: Corpus, claim_id: str) -> float | None:
 
 
 def run_full_universe(
-    *, require_controls: bool = False, agent_id: str = "strata-mechanism-v1",
+    *, require_controls: bool = False, agent_id: str = "pharmaco-mechanism-v1",
     out_path: "str | Path | None" = None,
 ) -> Corpus:
     """The volume path for the Monday demo: rebuild the contract with full mechanism-gene
@@ -236,7 +236,7 @@ def run_full_universe(
     claims by e-value), and save the exported topology under data/pharmaco/ (gitignored) so a
     viewer step can consume it later. Returns the populated Corpus."""
     from .ingest.gdsc_pharmaco import ingest_gdsc_pharmaco
-    from .strata.mechanism import all_mechanism_markers, load_inputs
+    from .pharmaco.mechanism import all_mechanism_markers, load_inputs
 
     summary = ingest_gdsc_pharmaco()
     print(f"ingest: {summary}", file=sys.stderr)
