@@ -124,6 +124,78 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
+_STRATA_SHARED_CAUSE_FACTORS = (
+    "gdsc2-manifest", "gdsc-imputed-normalization", "hg38",
+    "cell-model-passports", "scipy-statsmodels",
+)
+# Curated drug -> CHEBI uri, sufficient for the two published controls (MTAP->Palbociclib,
+# MGMT->Temozolomide). A full GDSC drug->CHEBI resolver is out of scope for v1: propose_claims
+# logs (not silently drops) every scan row whose drug isn't in this map.
+_STRATA_KNOWN_CHEBI = {
+    "Palbociclib": "http://purl.obolibrary.org/obo/CHEBI_85993",
+    "Temozolomide": "http://purl.obolibrary.org/obo/CHEBI_72564",
+}
+
+
+def _strata_evalue(corpus: Corpus, claim_id: str) -> float | None:
+    """The claim's resolved e-value from the fdr_ledger, or None if never registered/resolved."""
+    for t in reversed(corpus.fdr_ledger.tests):
+        if t.claim_id == claim_id:
+            return t.e_value
+    return None
+
+
+def _cmd_strata_populate(args: argparse.Namespace) -> int:
+    if args.data_dir:
+        os.environ["STRATA_DATA_ROOT"] = args.data_dir
+    try:
+        from .ingest.gdsc_pharmaco import ingest_gdsc_pharmaco
+        from .strata.mechanism import load_inputs, rank_mechanism_opportunities
+        from .strata_populate import ControlCheckFailed, check_controls, populate_universe
+    except ModuleNotFoundError:
+        print(
+            "strata-populate needs the [strata] extra (pandas/numpy/scipy/statsmodels/"
+            "scikit-learn/lifelines/openpyxl): install it with "
+            "`pip install 'polymer-claims[strata]'`",
+            file=sys.stderr,
+        )
+        return 1
+
+    summary = ingest_gdsc_pharmaco()
+    print(f"ingest: {summary}", file=sys.stderr)
+    ref = "se:gdsc_pharmaco@1"
+
+    res = rank_mechanism_opportunities(*load_inputs())
+    print(f"mechanism scan: {len(res)} drug/marker row(s)", file=sys.stderr)
+
+    require_controls = not args.no_require_controls
+    try:
+        corpus = populate_universe(
+            res, ref=ref, chebi_of=dict(_STRATA_KNOWN_CHEBI),
+            shared_cause_factors=_STRATA_SHARED_CAUSE_FACTORS,
+            require_controls=require_controls)
+    except ControlCheckFailed as exc:
+        print(f"strata-populate: {exc}", file=sys.stderr)
+        return 1
+
+    report = check_controls(corpus)
+    print(f"status: {_status_summary(corpus)}", file=sys.stderr)
+    print(f"controls: {report}", file=sys.stderr)
+
+    result = {
+        "contract": ref,
+        "n_claims": len(corpus.claims),
+        "status_counts": dict(_status_counts(corpus)),
+        "controls": report,
+        "control_evalues": {
+            "pgx-MTAP-Palbociclib": _strata_evalue(corpus, "pgx-MTAP-Palbociclib"),
+            "pgx-MGMT-Temozolomide": _strata_evalue(corpus, "pgx-MGMT-Temozolomide"),
+        },
+    }
+    print(json.dumps(result))
+    return 0
+
+
 def _anthropic_proposer(adapter_cls, model: str, flag: str):
     """Shared builder: require ANTHROPIC_API_KEY, then a bridge_proposer over an Anthropic-backed
     adapter (`.anthropic` lazy-imports the [llm] extra and raises RuntimeError if it is missing)."""
@@ -871,6 +943,19 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ingest.add_argument("dataset", choices=("tcga-laml",), help="which dataset to ingest")
     p_ingest.add_argument("--data-dir", default="./data/tcga_laml", help="local cache dir for raw GDC files (gitignored)")
     p_ingest.set_defaults(func=_cmd_ingest)
+
+    p_strata = sub.add_parser(
+        "strata-populate",
+        help="run the STRATA pharmacogenomic mechanism scan end-to-end into a licensed "
+             "universe (needs the [strata] extra)",
+    )
+    p_strata.add_argument("--data-dir", default=None,
+                          help="override STRATA_DATA_ROOT (local GDSC data cache dir, gitignored; "
+                               "default ./data/pharmaco)")
+    p_strata.add_argument("--no-require-controls", action="store_true",
+                          help="do not fail if the control instrument reports not-ok "
+                               "(observe the universe instead of gating publish on it)")
+    p_strata.set_defaults(func=_cmd_strata_populate)
 
     p_run = sub.add_parser("run-cycle", help="run ONE run_cycle over a corpus")
     p_run.add_argument("corpus", help="path to a corpus JSON file")

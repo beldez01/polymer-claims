@@ -3,6 +3,7 @@ STRATA is an untrusted proposer; standing is conferred only in Task 6's run_cycl
 from __future__ import annotations
 
 import logging
+import math
 
 from polymer_grammar import Claim, Comparator, FDRLedger, MaterializationContext, Status
 from polymer_protocol import Corpus, register_hypotheses, run_cycle
@@ -43,10 +44,13 @@ def propose_claims(
         if uri is None:
             skipped += 1
             continue
+        n_genes = getattr(r, "n_genes_tested", 1)
+        if n_genes is None or not n_genes or (isinstance(n_genes, float) and math.isnan(n_genes)):
+            n_genes = 1                          # missing/0/NaN -> the honest floor of 1
         claims.append(marker_drug_claim(
             f"pgx-{r.marker}-{r.drug}", ref=ref, marker=str(r.marker), drug=str(r.drug),
             drug_chebi_uri=uri,
-            search_cardinality=int(getattr(r, "n_genes_tested", 1) or 1), agent_id=agent_id))
+            search_cardinality=int(n_genes), agent_id=agent_id))
     if skipped:
         log.warning("propose_claims: skipped %d rows lacking a CHEBI uri", skipped)
     return claims

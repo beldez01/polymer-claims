@@ -158,7 +158,10 @@ def rank_mechanism_opportunities(meth, drug, ann, meta, *, min_lines=100):
     its evidence level. Returns a DataFrame sorted by (level desc, |r_adj| desc).
 
     Columns: ``drug, pathway, marker, level, r_adj, rho_pooled, p_adj, retained,
-    within_sig, n_tissues``.
+    within_sig, n_tissues, n_genes_tested``. ``n_genes_tested`` is the honest per-drug
+    multiple-testing cardinality: the size of the mechanism gene set actually evaluated
+    for that drug (its parsed targets union its pathway's curated genes, restricted to
+    genes present in the methylation matrix) — NOT just the winning marker.
     """
     tissue = ann["tissue"]
     valid = set(meth.columns)
@@ -177,9 +180,11 @@ def rank_mechanism_opportunities(meth, drug, ann, meta, *, min_lines=100):
             continue
         best = max(evals, key=lambda e: (_LEVEL_ORDER[e["level"]], abs(e["r_adj"])))
         rows.append((dn, str(pw), best["gene"], best["level"], best["r_adj"], best["rho_pooled"],
-                     best["p_adj"], best["retained"], best["within_sig"], best["n_tissues"]))
+                     best["p_adj"], best["retained"], best["within_sig"], best["n_tissues"],
+                     len(genes)))
     res = pd.DataFrame(rows, columns=["drug", "pathway", "marker", "level", "r_adj", "rho_pooled",
-                                      "p_adj", "retained", "within_sig", "n_tissues"])
+                                      "p_adj", "retained", "within_sig", "n_tissues",
+                                      "n_genes_tested"])
     res = res.sort_values(
         ["level", "r_adj"],
         key=lambda c: c.map(_LEVEL_ORDER) if c.name == "level" else c.abs(),
