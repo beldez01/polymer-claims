@@ -71,8 +71,22 @@ N_DMPS_CELL = CapabilityCell(
     agreement_mode="both_satisfy_criterion",
 )
 
+PHARMACO_ASSOC_CELL = CapabilityCell(
+    capability_id="pharmaco::assoc", capability_version="v1", operation_impl="pharmaco::assoc",
+    title="marker->drug tissue-adjusted association", pattern=_PATTERN,
+    subject=SubjectRequirement(mode="required", kind="composite"),
+    param_schema=(_STR(name="marker", codec="string"), _STR(name="drug", codec="string"),
+                  _STR(name="group_col", codec="string")),
+    produced=_Q, allowed_comparators=_ALL_CMP,
+    eligible_adapter_identities=("pharmaco-meandiff", "pharmaco-rank"),
+    oracle=OracleRequirement(default_oracle_id="gdsc_pharmaco_apparatus", required=True),
+    data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("categorical",),
+    criterion_target="threshold", agreement_mode="both_satisfy_criterion",
+)
+
 CAPABILITY_CELLS = CapabilityRegistry(cells=(
     MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL, N_DMPS_CELL, EVAL_BENCHMARK_ADVANTAGE_CELL,
+    PHARMACO_ASSOC_CELL,
 ))
 
 # ---------------------------------------------------------------------------
@@ -117,6 +131,7 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
     from .exec_adapters import apparatus_oracle_registry, independent_registry
     from .methyl_adapters import methyl_independent_registry
     from .methyl_ndmp import ndmp_independent_registry
+    from .pharmaco_adapters import pharmaco_independent_registry, pharmaco_oracle_registry
 
     methyl_oracles = profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public"))
     return {
@@ -130,6 +145,10 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
             adapter_registry=ndmp_independent_registry(), oracle_registry=methyl_oracles,
             trust_profile="bundled-recomputable-public"),
         ("eval::benchmark_advantage", "v1"): _benchmark_binding(),
+        ("pharmaco::assoc", "v1"): CapabilityTrustBinding(
+            adapter_registry=pharmaco_independent_registry(),
+            oracle_registry=pharmaco_oracle_registry(),
+            trust_profile="gdsc-pharmaco-recomputable-public"),
     }
 
 

@@ -6,8 +6,28 @@ Umbrella/impure. NOT re-exported from __init__ (base import stays numpy-free).""
 from __future__ import annotations
 
 import numpy as np
-from polymer_grammar import ExecValue, OperationNode
+from polymer_grammar import (
+    CategoricalLeaf,
+    Claim,
+    Comparator,
+    CompositeSubject,
+    ExecValue,
+    GeneOrProtein,
+    GeneOrProteinIdentifiers,
+    GenerationMode,
+    OntologyTerm,
+    OperationNode,
+    PatternRef,
+    PendingReason,
+    Provenance,
+    SatisfactionCriterion,
+    Status,
+    StrengthVector,
+)
+from polymer_grammar.oracle import ApplicabilityDomain, OracleDossier, ValidationTier
+from polymer_protocol import AdapterCredential, AdapterRegistry, OracleRegistry
 
+from .adapter_identity import implementation_hash_for_adapter
 from .methyl_adapters import _load_betas
 
 _IMPL = "pharmaco::assoc"
@@ -67,3 +87,68 @@ class PharmacoRankAdapter:
         lo_arr = np.asarray(lo, dtype=float)
         pairwise = (lo_arr[:, None] - h[None, :]).ravel()
         return ExecValue(value=float(np.median(pairwise)))
+
+
+_PHARMACO_ORACLE_ID = "gdsc_pharmaco_apparatus"
+
+
+def pharmaco_oracle_id() -> str:
+    return _PHARMACO_ORACLE_ID
+
+
+def pharmaco_oracle_registry() -> OracleRegistry:
+    """BENCHMARKED GDSC apparatus admitting the composite gene/drug subject."""
+    return OracleRegistry(dossiers=(OracleDossier(
+        oracle_id=_PHARMACO_ORACLE_ID, validation_tier=ValidationTier.BENCHMARKED,
+        applicability_domain=ApplicabilityDomain(subject_kinds=("composite",)),
+        anchor="gdsc-pharmaco-v1"),))
+
+
+def pharmaco_independent_registry() -> AdapterRegistry:
+    return AdapterRegistry(credentials=(
+        AdapterCredential(identity="pharmaco-meandiff", owner="owner-meandiff",
+                          implementation_hash=implementation_hash_for_adapter(PharmacoMeanDiffAdapter)),
+        AdapterCredential(identity="pharmaco-rank", owner="owner-rank",
+                          implementation_hash=implementation_hash_for_adapter(PharmacoRankAdapter)),
+    ))
+
+
+def marker_drug_claim(
+    claim_id: str, *, ref: str, marker: str, drug: str, drug_chebi_uri: str,
+    tissue_adjusted: bool = True, threshold: float = 0.0, comparator: Comparator = Comparator.GT,
+    search_cardinality: int, agent_id: str = "strata-mechanism-v1",
+    prior_cohorts: tuple[str, ...] = (), preregistration_hash: str | None = None,
+    strength: StrengthVector | None = None,
+) -> Claim:
+    """PENDING adjusted-association claim: marker methylation is associated (tissue-adjusted) with
+    drug response. Pattern adjusted_effect@v1 (association, NOT a causal edge). CategoricalLeaf
+    per shipped Polymer practice; the computed AUC-difference/HL-shift lives in the verify
+    result — STRATA's r_adj never enters the claim. Composite (gene, CHEBI drug) subject.
+    AGENT_GENERATED. `tissue_adjusted` documents the median-split-within-tissue discipline that
+    both legs enforce (via _pharmaco_split's group_col resolution) — it does not change plan shape."""
+    from polymer_grammar.capability import build_evaluation_plan
+
+    from .capabilities import PHARMACO_ASSOC_CELL
+
+    plan = build_evaluation_plan(
+        PHARMACO_ASSOC_CELL, params={"marker": marker, "drug": drug, "group_col": "Sample_Group"},
+        data_ref=ref, criterion=SatisfactionCriterion(comparator=comparator, threshold=float(threshold)),
+        oracle_ref=_PHARMACO_ORACLE_ID)
+    subject = CompositeSubject(
+        id=f"{marker}~{drug}", display=f"{marker} methylation ~ {drug} response", relation="correlational",
+        parts=(
+            GeneOrProtein(id=f"HGNC:{marker}", display=marker, entity_type="gene",
+                          identifiers=GeneOrProteinIdentifiers(hgnc=marker, symbol=marker)),
+            OntologyTerm(id=f"CHEBI:{drug}", display=drug, ontology="CHEBI",
+                         ontology_release="unknown", uri=drug_chebi_uri),
+        ))
+    return Claim(
+        id=claim_id, title=f"{marker} methylation ~ {drug} sensitivity (tissue-adjusted)",
+        pattern=PatternRef(id="adjusted_effect", version="v1"),
+        leaves=(CategoricalLeaf(ontology_term="pharmacogenomic_association"),),
+        status=Status.PENDING, pending_reason=PendingReason.UNTESTED, strength=strength,
+        subject=subject, evaluation_plan=plan,
+        provenance=Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id=agent_id,
+                              search_cardinality=int(search_cardinality),
+                              preregistration_hash=preregistration_hash, prior_cohorts=prior_cohorts,
+                              rationale=f"mechanism-anchored proposal: {marker} in {drug}'s target/pathway"))
