@@ -82,7 +82,7 @@ def run(panel_path, bed_dir, manifest, contracts_dir, *, target_fdr: float = 0.0
     for loc in panel:  # FIXED panel order == pre-registered order
         rows = all_rows.get(loc.locus_id, [])
         uid = f"{loc.locus_id}@1"
-        build_contract(rows, uid, contracts_dir, group_col="cell_type_broad")
+        build_contract(rows, uid, contracts_dir, group_col=loc.group_col)
         # The contract's single feature row is named for the locus (uid stem).
         # Map the panel's comparator convention (τ applies to group_a − group_b) onto the
         # region adapters, which compute level_b − level_a: set level_a=group_b, level_b=group_a.
@@ -91,7 +91,7 @@ def run(panel_path, bed_dir, manifest, contracts_dir, *, target_fdr: float = 0.0
             ref=f"se:{uid}",
             region_probes=(loc.locus_id,),
             region=(loc.chrom, loc.start, loc.end),
-            group_col="cell_type_broad",
+            group_col=loc.group_col,
             level_a=loc.group_b,
             level_b=loc.group_a,
             comparator=_CMP[loc.comparator],

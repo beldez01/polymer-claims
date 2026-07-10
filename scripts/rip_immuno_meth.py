@@ -11,7 +11,7 @@ _ATLAS = Path.home() / "Desktop/PolymerGenomicsAPI/data/wgbs/loyfer_2023"
 
 def main() -> None:
     res = run(
-        Path("src/polymer_claims/panels/immuno_meth_v1.tsv"),
+        Path("src/polymer_claims/panels/immuno_meth_lineage_v1.tsv"),
         _ATLAS / "bed_hg38",
         _ATLAS / "sample_manifest.tsv",
         Path("src/polymer_claims/contracts"),

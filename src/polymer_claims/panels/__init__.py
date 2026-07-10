@@ -24,6 +24,7 @@ class LocusSpec:
     comparator: str
     tau: float
     rationale: str
+    group_col: str = "cell_type_broad"
 
 
 _PANEL_COLUMNS = (
@@ -57,6 +58,7 @@ def load_panel(path: Path) -> list[LocusSpec]:
             comparator=r[idx["comparator"]],
             tau=float(r[idx["tau"]]),
             rationale=r[idx["rationale"]],
+            group_col=r[idx["group_col"]] if "group_col" in idx else "cell_type_broad",
         ))
     return out
 
@@ -103,7 +105,7 @@ def coverage_precheck(panel, bed_dir, manifest, *, min_cov: int = 4, min_cpg: in
     ok: dict[str, bool] = {}
     for loc in panel:
         rows = by_locus[loc.locus_id]
-        a = sum(1 for r in rows if r.cell_type_broad == loc.group_a)
-        b = sum(1 for r in rows if r.cell_type_broad == loc.group_b)
+        a = sum(1 for r in rows if getattr(r, loc.group_col) == loc.group_a)
+        b = sum(1 for r in rows if getattr(r, loc.group_col) == loc.group_b)
         ok[loc.locus_id] = a >= 2 and b >= 2
     return ok
