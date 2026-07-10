@@ -22,6 +22,7 @@ def test_c3_c4_build_as_derived():
     strict=True,
 )
 def test_c3_interval_gap():
-    # WANT: honest low/high bounds for a two-orders-of-magnitude range.
+    # WANT: honest low/high bounds for a two-orders-of-magnitude range. Tripwire flips when
+    # C3 is re-expressed with explicit bounds (the candidate-(a) IntervalLeaf resolution, GAP-3).
     leaf = car_threshold_claim().leaves[0]
     assert getattr(leaf, "low", None) is not None and getattr(leaf, "high", None) is not None

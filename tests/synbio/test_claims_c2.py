@@ -25,9 +25,10 @@ def test_c2_derived_requires_formula_and_no_unit():
     strict=True,
 )
 def test_c2_context_conditioning_gap():
-    # WANT: a field carrying the measurement context (e.g. the cell line / assay condition).
-    # This xfail is a tripwire — it flips to a failure the day a context field is added,
-    # forcing a deliberate review of the resolution.
-    claim = adar_dynamic_range_claim()
-    leaf = claim.leaves[0]
-    assert getattr(leaf, "context", None) is not None
+    # WANT: QuantityLeaf to carry the measurement context (e.g. cell line / assay condition).
+    # SCHEMA tripwire — flips the day QuantityLeaf GAINS a `context` field, forcing a
+    # deliberate review of the resolution (spec §5 / GAP-2). A value-based check would miss
+    # it: the resolution field is optional and defaults to None, so populating it is a
+    # separate step from growing the schema.
+    leaf = adar_dynamic_range_claim().leaves[0]
+    assert "context" in type(leaf).model_fields

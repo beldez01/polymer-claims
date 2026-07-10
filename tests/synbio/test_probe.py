@@ -27,8 +27,8 @@ def test_probe_report_enumerates_claims_and_gaps():
     assert general == {"GAP-2", "GAP-3"}
 
 
-def test_probe_covers_all_four_leaf_kinds_used():
+def test_probe_covers_quantity_and_proposition_kinds():
     kinds = {e["leaf_kind"] for e in probe_report()["claims"]}
-    # C1 FUNDAMENTAL, C2/C3/C4 DERIVED quantities, C5 proposition.
+    # C1–C4 are `quantity` leaves (differing by measurement_basis), C5 is `proposition`.
     assert "quantity" in kinds
     assert "proposition" in kinds
