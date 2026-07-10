@@ -33,12 +33,21 @@ class MeasurementContext(_Model):
     Conditions interpretation (a derived statistic like ADAR ~277-fold is cell-line-specific;
     an expression TPM is tissue-specific), so two claims of the same estimand in different
     contexts are distinguishable. It carries NO value and NO unit and never enters a licensing
-    criterion. All fields optional; an all-None context is meaningless and is dropped on serialize.
+    criterion. All fields optional, but an all-None context is meaningless and is REJECTED at
+    construction — use `context=None` on the leaf for "no context" (the single representation).
     """
     tissue: str | None = None      # e.g. "AML" / "bone marrow"
     cell_line: str | None = None   # e.g. the ADAR reporter line
     assay: str | None = None       # e.g. "RNA-seq TPM", "luciferase ratio"
     condition: str | None = None   # free-form residual (temperature, timepoint)
+
+    @model_validator(mode="after")
+    def _at_least_one_field(self) -> MeasurementContext:
+        if not any((self.tissue, self.cell_line, self.assay, self.condition)):
+            raise ValueError(
+                "MeasurementContext must set at least one field; use context=None for no context"
+            )
+        return self
 
 
 class QuantityLeaf(_Model):

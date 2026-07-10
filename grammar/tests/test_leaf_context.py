@@ -44,9 +44,15 @@ def test_context_bearing_leaf_round_trips():
     assert back.context.assay == "RNA-seq TPM"
 
 
-def test_measurement_context_all_optional():
-    c = MeasurementContext()
-    assert c.tissue is None and c.cell_line is None and c.assay is None and c.condition is None
+def test_measurement_context_one_field_ok():
+    c = MeasurementContext(tissue="AML")
+    assert c.tissue == "AML" and c.assay is None
+
+
+def test_measurement_context_rejects_all_none():
+    # An all-None context is meaningless — use context=None instead (single representation).
+    with pytest.raises(ValueError):
+        MeasurementContext()
 
 
 def test_fundamental_discipline_unchanged():
