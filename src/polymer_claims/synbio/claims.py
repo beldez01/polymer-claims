@@ -14,15 +14,16 @@ registry lookup — and record the missing pattern as an analysis-class expansio
 from __future__ import annotations
 
 from polymer_grammar.claim import Claim
-from polymer_grammar.leaf import MeasurementBasis, QuantityLeaf
+from polymer_grammar.leaf import MeasurementBasis, PropositionLeaf, QuantityLeaf
 from polymer_grammar.pattern import PatternRef
 from polymer_grammar.provenance import GenerationMode, Provenance
 from polymer_grammar.status import Status
 
 from .sources import SOURCES
 
-# Placeholder pattern for reported point-quantities (see module GAP note).
+# Placeholder patterns for content the registry has no home for yet (see gap report GAP-1).
 _REPORTED_QUANTITY = PatternRef(id="reported_quantity", version="v1")
+_MECHANISTIC_LAW = PatternRef(id="mechanistic_law", version="v1")
 
 
 def _reported_provenance(source_key: str) -> Provenance:
@@ -120,4 +121,41 @@ def endosomal_escape_claim() -> Claim:
         ),
         status=Status.CONJECTURED,
         provenance=_reported_provenance("PLM-XIII"),
+    )
+
+
+def affinity_discrimination_law_claim() -> Claim:
+    """C5 — the specificity wall, generalized: above a threshold affinity, single-base
+    discrimination gets *worse*, not better. A `PropositionLeaf` with a mechanistic warrant.
+
+    This is the claim that defeats the SNV-sensing lane. Defeat is a corpus-level edge graph
+    (leaf-type-agnostic), but as a reported claim it may author only PROVISIONAL edges (spec
+    §2b / gap report GAP-4) — an unlicensed prior must not knock out a licensed claim."""
+    return Claim(
+        id="synbio-c5-affinity-discrimination-law",
+        title="Above a threshold affinity, single-base discrimination degrades (non-monotonic)",
+        pattern=_MECHANISTIC_LAW,
+        leaves=(
+            PropositionLeaf(
+                data=(
+                    "Raising sensor–target affinity beyond a threshold degrades single-base "
+                    "discrimination rather than improving it (the ADAR single-mismatch wall: "
+                    "realized fold-change F≈1 against a required F*≈5–7)."
+                ),
+                warrant=(
+                    "Discrimination at the synapse/duplex is a kinetic proofreading computation "
+                    "(dwell-time / duplex occupancy), not a thermodynamic one: a long high-affinity "
+                    "arm saturates both matched and mismatched targets and collapses the kinetic "
+                    "difference the discrimination rests on."
+                ),
+                rebuttal=(
+                    "Fails where readout is equilibrium with no proofreading step, or where the "
+                    "mismatch itself dominates binding (e.g. a junction/non-self target with no "
+                    "wild-type counterpart at the window)."
+                ),
+                warrant_type="mechanistic_analogy",
+            ),
+        ),
+        status=Status.CONJECTURED,
+        provenance=_reported_provenance("PLM-II"),
     )

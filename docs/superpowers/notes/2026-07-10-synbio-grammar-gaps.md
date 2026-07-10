@@ -62,4 +62,36 @@ purity/backward-compat cost · byte-identical proof (once resolved).
   union and every exhaustive leaf-kind switch must be checked. (b) adds two optional fields.
   Either way: prove byte-identical against existing corpora before shipping.
 
-<!-- Task 5 appends GAP-4 (defeater provisionality). -->
+## GAP-4 — reported defeaters must be provisional (a wiring constraint, not a missing field)
+
+- **Constraint.** C5 (the affinity–discrimination law) is the claim that defeats the SNV-sensing
+  lane. `defeat.py` confirms defeat is a corpus-level edge graph over claim *ids* — leaf-type-
+  agnostic — so a `PropositionLeaf` law defeating another claim is expressible today.
+- **The finding.** `effective_defeats` makes an attack stand whenever the target does not
+  strength-dominate the source; a reported claim with `strength=None` is **never** dominated, so
+  an unlicensed literature prior could knock out a LICENSED computed claim — violating "standing
+  only through the kernel."
+- **Resolution (decided, Phase 0 spec §2b).** Reported-stratum (`LITERATURE_EXTRACTED`) claims
+  may author only `provisional=True` defeat/support edges (inert until the source itself gains
+  standing) and may serve as L1 `incompatible_with` context. Precedent: `bridge_proposer`
+  already coerces untrusted proposal-supplied edges to provisional (the C1 security fix).
+- **expansion_class:** none — no IR change. This is a **Phase 2 wiring rule** for the
+  `sense_and_kill` defeat construction, recorded here so it is not forgotten.
+- **Also noted (extends GAP-1):** a mechanistic *law* likewise has no home pattern; C5 uses a
+  placeholder `mechanistic_law@v1`. Fold into the GAP-1 registry work (a `mechanistic_law` /
+  `principle` pattern with its own excluded_applications).
+
+---
+
+## Summary (entry gate for Phase 2)
+
+| Gap | Class | Lands in | Ships when |
+|---|---|---|---|
+| GAP-1 reported-quantity / law patterns | analysis | open `pattern.registry` | Phase 2 (cheap, additive) |
+| GAP-2 context-conditioning | **general** | core `QuantityLeaf` | Phase 2, byte-identical proof required |
+| GAP-3 interval/range | **general** | core `Leaf` (new variant or fields) | Phase 2, byte-identical proof required |
+| GAP-4 reported-defeater provisionality | — (wiring) | `sense_and_kill` construction | Phase 2 |
+
+**Yield verdict:** all five Tier-1/Tier-2 claims formalized and validated through the real
+grammar with no core change; the two *general* gaps (context, interval) are the highest-value
+finds — they compound across every field, exactly the doctrine's intended payoff.
