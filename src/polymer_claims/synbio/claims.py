@@ -54,3 +54,26 @@ def mismatch_energy_claim() -> Claim:
         status=Status.CONJECTURED,
         provenance=_reported_provenance("PLM-I"),
     )
+
+
+def adar_dynamic_range_claim() -> Claim:
+    """C2 — an ADAR RNA sensor achieves ~277-fold dynamic range (edited vs unedited payload).
+    A DERIVED statistic: dimensionless fold-change, so it carries a formula and NO unit.
+
+    GAP (context-conditioning): the 277-fold is cell-line-specific and degrades in other
+    contexts, but `QuantityLeaf` has no field to carry that context. Logged general-class."""
+    return Claim(
+        id="synbio-c2-adar-dynamic-range",
+        title="ADAR RNA-sensor dynamic range ≈ 277-fold",
+        pattern=_REPORTED_QUANTITY,
+        leaves=(
+            QuantityLeaf(
+                value=277.0,
+                unit=None,
+                measurement_basis=MeasurementBasis.DERIVED,
+                formula="edited_payload / unedited_payload",
+            ),
+        ),
+        status=Status.CONJECTURED,
+        provenance=_reported_provenance("PLM-III"),
+    )
