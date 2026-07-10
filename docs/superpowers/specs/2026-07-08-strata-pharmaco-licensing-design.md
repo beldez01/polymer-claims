@@ -21,8 +21,12 @@ re-compute** the association on a pinned, content-addressed SE-Contract; the
 kernel licenses only what agrees and clears the e-LOND FDR gate. Positive control
 MTAP→Palbociclib must license; negative control MGMT→Temozolomide must not; that
 check is a calibration **instrument and publish guard**, not a claim-status gate.
-Non-hits and controls persist as **PENDING un-licensed residue** (the negative
-space of the morphospace), never as "refuted." Because the hypotheses come from
+Non-hits persist as first-class residue, retained with their evidence trail (never
+erased): an **agreed-refuted** negative — both independent legs agree the effect
+fails the criterion (e.g. MGMT→Temozolomide, e≈0.78) — is terminal-**REJECTED** as a
+morphospace **forbidden region** (a high-confidence negative, demoted not deleted),
+while an **under-powered** hit (satisfies the criterion but below the e-LOND bar)
+stays **PENDING** on the empty-but-reachable frontier. Because the hypotheses come from
 GDSC and are tested on GDSC, stage 1 is honestly capped at **REPRODUCED** tier
 with **CONFIRMATORY** severity; genuine **REPLICATED** + held-out severity is a
 deliberate stage 2 over an independent screen (PRISM/CTRP).
@@ -42,7 +46,7 @@ make it *canonically* correct. Citations are to the repo docs/code as of this da
 | e-value / independence (`epistemology.md` §2, §7) | Severity = betting e-value; e-values multiply **only** across error-independent cohorts. | Single-leg betting e-value per claim; **no cross-tissue product** (tissues share the GDSC apparatus). |
 | Independence tiers (`grammar/.../licensing.py`, `GLOSSARY.md`) | REPLICATED needs ≥2 `dimnames_hash` **and** sub-τ shared-cause overlap. | Two legs / one dataset = **REPRODUCED**; `shared_cause_factors` populated so §E fires and correctly withholds REPLICATED. |
 | Measurement seam (`foundations/measurement-foundation.md`) | A criterion must be invariant under the assay scale's admissible transformations. | Licensing statistic is a median-split / rank test (monotone-invariant); linear `r_adj` is demoted to proposal ranking. |
-| Residualism (`foundations/residualism.md`) | Un-licensed ≠ false; residue is first-class, structured, queryable; never deleted. | Non-hits + MGMT land as PENDING residue retaining e-value + FDR history; morphospace occupied/empty/forbidden. |
+| Residualism (`foundations/residualism.md`) | Un-licensed ≠ false; residue is first-class, structured, queryable; never *deleted* (demotion, not erasure). | Under-powered non-hits → PENDING (frontier); agreed-refuted negatives (both legs, e<1 — e.g. MGMT) → REJECTED = forbidden region; both retained with e-value + FDR history. |
 | Verification philosophy (`canonical-spec §5`) | The gate licenses (warrant), it does not mean (truth); consistency is warrant-only. | License = REPRODUCED air-gap + e-LOND discovery; Duhem fold can demote but never refunds the license. |
 | Corpus / purity invariants | `Corpus` = exactly 4 collections; grammar/protocol pure + numpy-free. | All new code in the umbrella; zero grammar/protocol change; Corpus stays 4. |
 | Calibration = instrument (`canonical-spec §5c`) | Control/calibration machinery changes no claim status. | Control check is a publish guard + DEFINITIONAL-style calibration record only. |
@@ -143,10 +147,21 @@ Each licensable candidate becomes one `Claim` built by a new factory
 
 ## 6. Residue, controls, morphospace
 
-- **Residue.** Non-hits and MGMT→Temozolomide land as **PENDING un-licensed
-  residue** in the `claims` collection, retaining their e-value + FDR history —
-  queryable and method-diagnostic, never "refuted" (terminal). Rejected means
-  unwarranted-for-now, never false.
+- **Residue (two kinds, both retained — demotion, not erasure).** Non-hits stay in
+  the `claims` collection with their e-value + FDR history, queryable and
+  method-diagnostic. An **under-powered** hit — satisfies the criterion but its
+  e-value is below the e-LOND discovery bar — stays **PENDING**, on the empty-but-
+  reachable frontier. An **agreed-refuted** negative — both independent legs agree
+  the effect fails the criterion, so the betting e-value runs *against* it (e < 1) —
+  is terminal-**REJECTED** as a morphospace **forbidden region**: a high-confidence
+  negative / genuine constraint, not a mere absence. Confirmed on real data:
+  MGMT→Temozolomide → REJECTED (e≈0.78, wrong-direction gene-level signal). REJECTED
+  honors residualism because the claim is *demoted, not erased* (`residualism.md`:
+  "what is monotone is the audit trail, not the licensed set") — the forbidden region
+  is populated, not deleted. Distinguishing agreed-refuted (forbidden) from
+  under-powered (frontier) is exactly the discrimination `measurement-foundation.md`
+  §7 warns morphospace usually loses. (Earlier drafts said non-hits stay PENDING
+  "never refuted"; reconciled to the shipped, foundations-correct behavior.)
 - **Controls as instrument.** The batch computes MTAP→Palbociclib (must license)
   and MGMT→Temozolomide (must not) as a DEFINITIONAL-style calibration record and a
   **publish guard**: the runner refuses to publish the universe if the controls
@@ -205,7 +220,8 @@ This is surfaced, not hidden. The scientifically load-bearing result is stage 2:
    tissue-stratified mean-diff betting e-value for a `(drug, marker)` claim.
 4. `src/polymer_claims/strata_populate.py` + CLI `strata-populate` — the batch
    runner: mechanism scan → per-claim `register_test` → `run_cycle` with the two
-   legs + registry + per-claim evidence → land residue as PENDING → control
+   legs + registry + per-claim evidence → residue lands by kind (under-powered →
+   PENDING frontier, agreed-refuted → REJECTED forbidden-region) → control
    instrument / publish guard → seed the live Corpus + export topology.
 5. Wiring: a `[strata]`/`[serve]`-gated CLI subcommand; lazy imports so the core
    import stays clean without the extra.
@@ -225,8 +241,11 @@ Behavior, not implementation; stub/fixture-based, **no network in CI**.
   REPLICATED (the tier-trap regression).
 - **Pre-registration / multiplicity:** slots lock before the association; a fished
   hypothesis pays its slot.
-- **Residue:** a non-hit persists as PENDING with e-value + FDR history, never a
-  terminal reject.
+- **Residue:** an under-powered hit (below the e-LOND bar) persists as PENDING with
+  e-value + FDR history; an agreed-refuted null (both legs fail the criterion) is
+  terminal-REJECTED as a forbidden-region negative, retained (demoted, not erased).
+  A fast synthetic test should pin the agreed-refuted → REJECTED path (currently only
+  the real-data MGMT control exercises it) — the highest-value follow-up test.
 - **Control instrument:** on the real (gitignored) contract, MTAP→Palbociclib
   licenses and MGMT→Temozolomide does not — marked slow / data-gated, run behind the
   `[strata]` extra, excluded from core CI.
