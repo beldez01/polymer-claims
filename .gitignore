@@ -23,3 +23,7 @@ src/polymer_claims/contracts/tcga_laml_idh.betas.tsv
 # region-Δβ split sub-contracts (real betas: disc/test halves)
 src/polymer_claims/contracts/tcga_laml_idh_disc.*
 src/polymer_claims/contracts/tcga_laml_idh_test.*
+# immuno drive real-data contracts (Loyfer WGBS betas — local only)
+src/polymer_claims/contracts/hla_*_promoter*
+src/polymer_claims/contracts/line1_l1hs_*
+src/polymer_claims/contracts/hervk_ltr_*
