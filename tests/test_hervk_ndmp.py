@@ -68,6 +68,47 @@ def test_multi_union_across_two_chroms_and_single_window_agreement(tmp_path):
     assert multi_one.betas == single.betas
 
 
+def test_multi_nested_overlapping_windows_do_not_shadow_the_larger_window(tmp_path):
+    """Regression: _in_any_window used to bisect to the rightmost window with start<=pos and test
+    membership against THAT ONE window only. With windows [("chr1",100,500), ("chr1",200,220)],
+    a CpG at chr1:450 is inside the first (larger) window but the bisect picks the second, narrower,
+    later-starting window -> pos 450 falls outside it -> the CpG was silently dropped. Fix: merge
+    same-chrom windows into disjoint intervals before membership testing.
+    """
+    bed = tmp_path / "bed"
+    bed.mkdir()
+    _write_bed(bed / "A.hg38.bed.gz", [("chr1", 450, 0.42, 10)])
+    _write_bed(bed / "B.hg38.bed.gz", [("chr1", 450, 0.55, 10)])
+    man = tmp_path / "m.tsv"
+    _manifest(man, [("A", "Lymphoid"), ("B", "Myeloid")])
+
+    windows = [("chr1", 100, 500), ("chr1", 200, 220)]  # nested overlap: second window inside the first
+    m = extract_cpg_matrix_multi(bed, man, windows, min_cov=4)
+
+    assert m.probe_ids == ["chr1:450"]
+    assert m.samples == ["A", "B"]
+    assert m.betas == [[0.42, 0.55]]
+
+
+def test_multi_non_nested_overlapping_windows_union_correctly(tmp_path):
+    """Non-nested (partial) overlap: [("chr1",100,300), ("chr1",250,400)] should behave like the
+    single merged window [100,400) -- a CpG in the overlap region, and one in each non-overlapping
+    tail, must all be retained.
+    """
+    bed = tmp_path / "bed"
+    bed.mkdir()
+    _write_bed(bed / "A.hg38.bed.gz", [("chr1", 150, 0.1, 10), ("chr1", 275, 0.2, 10), ("chr1", 350, 0.3, 10)])
+    _write_bed(bed / "B.hg38.bed.gz", [("chr1", 150, 0.4, 10), ("chr1", 275, 0.5, 10), ("chr1", 350, 0.6, 10)])
+    man = tmp_path / "m.tsv"
+    _manifest(man, [("A", "Lymphoid"), ("B", "Myeloid")])
+
+    windows = [("chr1", 100, 300), ("chr1", 250, 400)]
+    m = extract_cpg_matrix_multi(bed, man, windows, min_cov=4)
+
+    assert m.probe_ids == ["chr1:150", "chr1:275", "chr1:350"]
+    assert m.betas == [[0.1, 0.4], [0.2, 0.5], [0.3, 0.6]]
+
+
 def test_hervk_ltr5_windows_parses_ucsc_rmsk_columns(tmp_path):
     # Tiny fake rmsk.txt: UCSC column order (0-indexed) genoName=5, genoStart=6, genoEnd=7,
     # repName=10, repClass=11. Two LTR5_Hs/LTR rows + one non-LTR5 row + one non-standard chrom.

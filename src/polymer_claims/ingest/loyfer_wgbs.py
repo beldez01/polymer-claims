@@ -213,20 +213,30 @@ def extract_cpg_matrix_multi(
     positions, same complete-case intersection, same "chrom:pos" probe ids (a test asserts agreement).
     Deterministic; no clock/random. Probe order is sorted (chrom, pos).
     """
-    # Index windows by chrom, sorted by start, with a parallel starts array for bisect lookup.
+    # Index windows by chrom, merged into disjoint (non-overlapping) intervals so the bisect
+    # membership test below is correct even when input windows overlap or nest: a plain
+    # "rightmost start <= pos" lookup against the RAW windows can pick a narrower nested window
+    # and miss a CpG that is inside a larger, earlier-starting window (see test_loyfer_cpg_matrix.py).
     by_chrom: dict[str, list[tuple[int, int]]] = {}
     for chrom, start, end in windows:
         by_chrom.setdefault(chrom, []).append((start, end))
-    starts: dict[str, list[int]] = {}
+    merged_by_chrom: dict[str, list[tuple[int, int]]] = {}
     for chrom, wl in by_chrom.items():
         wl.sort()
-        starts[chrom] = [s for s, _ in wl]
+        merged: list[list[int]] = []
+        for start, end in wl:
+            if merged and start <= merged[-1][1]:
+                merged[-1][1] = max(merged[-1][1], end)
+            else:
+                merged.append([start, end])
+        merged_by_chrom[chrom] = [(s, e) for s, e in merged]
+    starts: dict[str, list[int]] = {chrom: [s for s, _ in wl] for chrom, wl in merged_by_chrom.items()}
 
     def _in_any_window(chrom: str, pos: int) -> bool:
-        wl = by_chrom.get(chrom)
+        wl = merged_by_chrom.get(chrom)
         if not wl:
             return False
-        i = bisect.bisect_right(starts[chrom], pos) - 1  # rightmost window whose start <= pos
+        i = bisect.bisect_right(starts[chrom], pos) - 1  # rightmost merged interval whose start <= pos
         return i >= 0 and pos < wl[i][1]
 
     per_sample: list[dict[tuple[str, int], float]] = []
