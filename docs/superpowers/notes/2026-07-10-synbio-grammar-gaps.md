@@ -46,4 +46,20 @@ purity/backward-compat cost · byte-identical proof (once resolved).
   None is additive and should keep existing corpora byte-identical (must be *proven*: run the
   methyl/pharmaco/immuno suites + a serialization byte-diff before shipping).
 
-<!-- Task 4 appends GAP-3 (interval/range values); Task 5 appends GAP-4 (defeater provisionality). -->
+## GAP-3 — no interval / range value
+
+- **Constraint.** C3 (CAR threshold) is honestly a range spanning two decades (~10²–10⁴/cell):
+  killing ~10², full activation ~10⁴. C4 (endosomal escape) is 1–5%. A single `value` plus a
+  *symmetric* `uncertainty` cannot represent an asymmetric, multi-decade range without lying.
+- **Current IR behavior.** `QuantityLeaf` offers only `value` + symmetric `uncertainty`. The
+  probe records the representative point and sets `uncertainty=None` (refusing a fake bar); the
+  range is lost. Tripwire: `test_claims_intervals::test_c3_interval_gap` (xfail, strict).
+- **Candidate resolution (weigh in Phase 2).** (a) an additive `IntervalLeaf` variant in the
+  `Leaf` sum type (`low`, `high`, optional `scale`); or (b) optional `low`/`high` on
+  `QuantityLeaf`. (a) is cleaner (keeps `QuantityLeaf` a point); (b) is smaller.
+- **expansion_class:** **general** (every field has ranges), core primitive.
+- **Cost/backward-compat.** (a) adds a `Leaf` union member — additive, but the discriminated
+  union and every exhaustive leaf-kind switch must be checked. (b) adds two optional fields.
+  Either way: prove byte-identical against existing corpora before shipping.
+
+<!-- Task 5 appends GAP-4 (defeater provisionality). -->

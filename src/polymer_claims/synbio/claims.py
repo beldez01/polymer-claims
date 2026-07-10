@@ -77,3 +77,47 @@ def adar_dynamic_range_claim() -> Claim:
         status=Status.CONJECTURED,
         provenance=_reported_provenance("PLM-III"),
     )
+
+
+def car_threshold_claim() -> Claim:
+    """C3 — CAR triggering needs ~10²–10⁴ antigen molecules/cell (killing ~10², full
+    activation ~10⁴). A DERIVED count. We record the representative 1e3 and leave
+    `uncertainty=None` rather than fake a symmetric bar over two decades.
+
+    GAP (interval): the honest object is a range, not a point ± symmetric error. Logged general-class."""
+    return Claim(
+        id="synbio-c3-car-threshold",
+        title="CAR triggering threshold ≈ 10²–10⁴ antigen molecules/cell",
+        pattern=_REPORTED_QUANTITY,
+        leaves=(
+            QuantityLeaf(
+                value=1e3,
+                unit=None,
+                uncertainty=None,
+                measurement_basis=MeasurementBasis.DERIVED,
+                formula="antigen_copies_at_half_max_activation",
+            ),
+        ),
+        status=Status.CONJECTURED,
+        provenance=_reported_provenance("PLM-VI"),
+    )
+
+
+def endosomal_escape_claim() -> Claim:
+    """C4 — endosomal escape efficiency ≈ 1–5%: the multiplicative bottleneck that gates
+    read, write, and deliver simultaneously. A DERIVED fraction; representative value 0.03."""
+    return Claim(
+        id="synbio-c4-endosomal-escape",
+        title="Endosomal escape efficiency ≈ 1–5%",
+        pattern=_REPORTED_QUANTITY,
+        leaves=(
+            QuantityLeaf(
+                value=0.03,
+                unit=None,
+                measurement_basis=MeasurementBasis.DERIVED,
+                formula="cytosolic_fraction / endosomal_uptake",
+            ),
+        ),
+        status=Status.CONJECTURED,
+        provenance=_reported_provenance("PLM-XIII"),
+    )
