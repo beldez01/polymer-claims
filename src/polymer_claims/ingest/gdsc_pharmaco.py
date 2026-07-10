@@ -40,7 +40,7 @@ def build_pharmaco_contract(
         "assays": [{"name": "value", "ref": f"{uid_stem}.betas.tsv"}],
         "col_data": [{"sample_id": s, "Sample_Group": tissue[s], "tissue": tissue[s]} for s in samples],
         "row_data": [{"feature_id": f, "chr": "", "pos": 0} for f in feat_rows],
-        "metadata": {"source": "GDSC2", "kind": "pharmaco"},
+        "metadata": {"source": "GDSC2", "kind": "pharmaco", "genome_assembly": "hg38"},
     }
     (out_dir / f"{uid_stem}.json").write_text(json.dumps(manifest, indent=2))
 

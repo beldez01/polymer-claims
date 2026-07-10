@@ -1,7 +1,8 @@
 from polymer_claims import contracts
 from polymer_claims.ingest.gdsc_pharmaco import build_pharmaco_contract
 
-def test_build_pharmaco_contract_roundtrips(tmp_path):
+
+def test_build_pharmaco_contract_loads_via_load_contract(tmp_path):
     lines = ["L1", "L2", "L3", "L4"]
     betas = {"CDKN2A": dict(zip(lines, [0.1, 0.2, 0.8, 0.9])),
              "MTAP":   dict(zip(lines, [0.15, 0.25, 0.75, 0.85]))}
@@ -11,9 +12,18 @@ def test_build_pharmaco_contract_roundtrips(tmp_path):
                                   genes=["CDKN2A", "MTAP"], drugs=["Palbociclib"],
                                   out_dir=tmp_path)
     assert uid == "gdsc_pharmaco@1"
+
+    # The whole point of reusing the feature x sample shape: the real loader must read it.
+    # (Before genome_assembly was added to metadata, this raised KeyError: 'genome_assembly'.)
     contracts.clear_contract_cache()
-    # feature rows are prefixed; tissue rides col_data as Sample_Group
-    manifest_p = tmp_path / "gdsc_pharmaco.json"
-    text = manifest_p.read_text()
-    assert "meth::CDKN2A" in text and "auc::Palbociclib" in text
-    assert '"Sample_Group": "skin"' in text
+    with contracts.using_contract_root(tmp_path):
+        se = contracts.load_contract("se:" + uid)
+        manifest = contracts.load_manifest(se)
+
+    assert se.contract_uid == "gdsc_pharmaco@1"
+    assert se.genome_assembly == "hg38"
+    feature_ids = [r["feature_id"] for r in manifest["row_data"]]
+    assert "meth::CDKN2A" in feature_ids
+    assert "auc::Palbociclib" in feature_ids
+    groups = {c["sample_id"]: c["Sample_Group"] for c in manifest["col_data"]}
+    assert groups["L1"] == "skin"
