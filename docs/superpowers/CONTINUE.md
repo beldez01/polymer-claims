@@ -12,7 +12,44 @@
 
 ---
 
-## Current state (2026-07-08) — authoritative snapshot
+## Current state (2026-07-10) — authoritative snapshot
+
+> Session 2026-07-09 → 10. `main` = `47ddda5` (**local; ahead of `origin/main` `e58adf6` — not yet
+> pushed**). grammar/protocol stay pure + numpy-free; **Corpus = exactly 4 collections**. Also on `main`
+> (merged concurrently by another session): the **STRATA pharmacogenomic engine** (`[strata]` extra).
+
+**Immuno / ERV methylation licensing drive merged** (`feat/immuno-erv-drive` → merge `47ddda5`) — two
+genuine **licensed immuno nodes** on the real **Loyfer 2023 WGBS atlas** (GSE186458), via the **e-LOND
+count-enrichment** route, contrasting **Lymphoid (n=30) vs Myeloid (n=17)** lineages:
+- **MHC n-DMP** (`rip_mhc_ndmp`): chr6:29.9–33.1 Mb, 11,582 complete-case CpG probes; DMP count 4,682
+  (pooled-t) / 4,677 (rank-sum), both ≫ pre-registered k=1,738; **count e-value → ∞** ≫ e-LOND slot-1
+  bar 32.9 → **LICENSED**.
+- **HERV-K LTR n-DMP** (`rip_hervk_ndmp`): 630 real HML-2 `LTR5_Hs` elements, 2,587 probes; DMP
+  1,083 / 1,073 ≫ k=389; **e-value 3.25e274** → **LICENSED** (the ERV node).
+
+New umbrella pieces (all umbrella-side; grammar/protocol untouched): `ingest/loyfer_wgbs.py`
+(`extract_region`/`extract_regions_multi`/`extract_cpg_matrix`/`extract_cpg_matrix_multi` over Loyfer
+beds), `ingest/build_loyfer_contract.py` + `ingest/build_cpg_matrix_contract.py`, `panels/`
+(pre-registered locus panels + `assert_rmsk_hg38` + `coverage_precheck`), `ingest/hervk_loci.py`, three
+drivers (`rip_immuno` region-Δβ + the two n-DMP drivers), and `viewer/scripts/make_immuno_universe.py`
+→ `data/demo/immuno_universe.json` (the 2 blue nodes). `[wgbs]` optional extra (pysam; gzip fallback
+works without it). **No real betas committed** (local-only / gitignored).
+
+**Key finding:** region-Δβ licensed NOTHING on real data (betting e-value ~1 — a single scalar bet —
+far below the multiplicity bars), even at lineage power; the **e-LOND multiplicity gate was demonstrated
+to bite** (identical e-value licenses at an early slot, withheld at a deep slot; panel-order flip flips
+the verdict). **Count-enrichment** (evidence accumulated across thousands of probes) is what licenses —
+the same route as the TCGA n-DMP proof. Post-merge cleanup: dead `HodgesLehmannMeanDiffAdapter` /
+`immuno_independent_registry` removed (superseded by the `methyl_adapters` legs the drivers use).
+
+### NEXT — where to proceed
+- **Push `main` to origin** when ready — coordinate with the concurrent STRATA line (both are in local `main`).
+- More count-enrichment immuno claims (L1HS young-LINE-1 family; other MHC sub-regions); a **REPLICATED**
+  tier via a 2nd WGBS cohort. The neg2 backlog (below) + STRATA follow-ups remain open.
+
+---
+
+## Current state (2026-07-08) — historical (superseded by 2026-07-10 above)
 
 > Session 2026-07-07 → 08. `main` = `9643d8b`, **pushed to `origin`** (`origin/main == main`). All suites
 > green: **grammar 578 · protocol 497 · umbrella green**; ruff clean. grammar/protocol stay pure +

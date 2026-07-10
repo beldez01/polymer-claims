@@ -107,32 +107,6 @@ class StatsStdlibAdapter:
         return ExecValue(value=statistics.fmean(a) - statistics.fmean(b))
 
 
-class HodgesLehmannMeanDiffAdapter:
-    """Independent impl B — Hodges-Lehmann location shift: median of all pairwise a_i - b_j.
-    A rank-family estimator, algorithmically distinct from leg A's parametric mean difference
-    (StatsPure) and insensitive to skew/outliers, so the two legs agree only on a real, symmetric
-    location shift. Sign matches StatsPure (mean_a - mean_b)."""
-
-    identity = "meandiff-hodges-lehmann"
-
-    def execute(self, node, upstream, ctx):
-        a, b = _resolve(node)
-        diffs = sorted(x - y for x in a for y in b)
-        return ExecValue(value=float(statistics.median(diffs)))
-
-
-def immuno_independent_registry() -> AdapterRegistry:
-    """Air-gap for the immuno methylation drive: parametric Δmean (leg A) + Hodges-Lehmann rank
-    (leg B). Genuinely independent estimators (distinct owners + impl hashes), unlike the
-    StatsPure/StatsStdlib pair which are two spellings of one mean."""
-    return AdapterRegistry(credentials=(
-        AdapterCredential(identity="stats-pure", owner="owner-pure",
-                          implementation_hash=implementation_hash_for_adapter(StatsPureAdapter)),
-        AdapterCredential(identity="meandiff-hodges-lehmann", owner="owner-hl",
-                          implementation_hash=implementation_hash_for_adapter(HodgesLehmannMeanDiffAdapter)),
-    ))
-
-
 def mean_diff_claim(
     claim_id: str,
     *,
