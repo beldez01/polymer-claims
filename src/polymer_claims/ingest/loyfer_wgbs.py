@@ -4,6 +4,7 @@ Reads GEO-derived per-CpG bed.gz files (chr, start, end, beta, total_cov, total_
 plus a sample manifest, and returns QC-filtered per-sample mean methylation over a region.
 """
 from __future__ import annotations
+import bisect
 import gzip
 from dataclasses import dataclass
 from pathlib import Path
@@ -189,6 +190,80 @@ def extract_cpg_matrix(
         betas = [[pb.get(pos, float("nan")) for pb in per_sample] for pos in positions]
 
     probe_ids = [f"{chrom}:{pos}" for pos in positions]
+    samples = [stem for stem, _, _, _ in kept_meta]
+    sample_meta = [{"sample": stem, "cell_type": ct, "cell_type_broad": br, "lineage": ln}
+                   for stem, ct, br, ln in kept_meta]
+    return CpgMatrix(probe_ids=probe_ids, samples=samples, sample_meta=sample_meta, betas=betas)
+
+
+def extract_cpg_matrix_multi(
+    bed_dir: Path, manifest: Path, windows: list[tuple[str, int, int]],
+    *, min_cov: int = 4,
+) -> CpgMatrix:
+    """Complete-case CpG matrix over the UNION of CpGs falling in ANY of `windows`.
+
+    `windows` is a list of (chrom, start, end) half-open intervals (HERV-K LTR elements are scattered
+    genome-wide, so one probe matrix is gathered across MANY small windows). Each sample bed.gz is
+    scanned ONCE (there is no per-sample tabix index for this atlas, so a per-window fetch would rescan
+    the whole file W times); every CpG with cov>=min_cov landing in some window is collected, keyed by
+    (chrom, pos). Then the COMPLETE-CASE probe set is kept: positions covered in EVERY retained sample.
+    A sample with zero covered CpGs across all windows is dropped before the intersection.
+
+    On a single window this is identical to extract_cpg_matrix(require_all_samples=True): same covered
+    positions, same complete-case intersection, same "chrom:pos" probe ids (a test asserts agreement).
+    Deterministic; no clock/random. Probe order is sorted (chrom, pos).
+    """
+    # Index windows by chrom, sorted by start, with a parallel starts array for bisect lookup.
+    by_chrom: dict[str, list[tuple[int, int]]] = {}
+    for chrom, start, end in windows:
+        by_chrom.setdefault(chrom, []).append((start, end))
+    starts: dict[str, list[int]] = {}
+    for chrom, wl in by_chrom.items():
+        wl.sort()
+        starts[chrom] = [s for s, _ in wl]
+
+    def _in_any_window(chrom: str, pos: int) -> bool:
+        wl = by_chrom.get(chrom)
+        if not wl:
+            return False
+        i = bisect.bisect_right(starts[chrom], pos) - 1  # rightmost window whose start <= pos
+        return i >= 0 and pos < wl[i][1]
+
+    per_sample: list[dict[tuple[str, int], float]] = []
+    kept_meta: list[tuple[str, str, str, str]] = []
+    for stem, ct, br, ln in load_manifest(manifest):
+        bed = _find_bed(Path(bed_dir), stem)
+        if bed is None:
+            continue
+        pos_beta: dict[tuple[str, int], float] = {}
+        try:
+            with gzip.open(bed, "rt") as fh:
+                for line in fh:
+                    parsed = _parse_bed_line(line)
+                    if parsed is None:
+                        continue
+                    chrom, pos, beta, cov = parsed
+                    if cov < min_cov:
+                        continue
+                    if _in_any_window(chrom, pos):
+                        pos_beta[(chrom, pos)] = beta
+        except (OSError, EOFError):
+            continue  # truncated/corrupt source bed.gz for this sample: skip, don't crash the batch
+        if not pos_beta:
+            continue  # sample with zero covered CpGs across all windows: dropped
+        per_sample.append(pos_beta)
+        kept_meta.append((stem, ct, br, ln))
+
+    if not per_sample:
+        return CpgMatrix(probe_ids=[], samples=[], sample_meta=[], betas=[])
+
+    common = set(per_sample[0])
+    for pb in per_sample[1:]:
+        common &= set(pb)
+    keys = sorted(common)  # (chrom, pos) tuples: deterministic order
+    betas = [[pb[key] for pb in per_sample] for key in keys]
+
+    probe_ids = [f"{chrom}:{pos}" for chrom, pos in keys]
     samples = [stem for stem, _, _, _ in kept_meta]
     sample_meta = [{"sample": stem, "cell_type": ct, "cell_type_broad": br, "lineage": ln}
                    for stem, ct, br, ln in kept_meta]
