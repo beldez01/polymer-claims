@@ -43,7 +43,7 @@ export default function Header() {
           color: COLOR.text.tertiary,
         }}
       >
-        § STRATA — pharmacogenomic claims universe (GDSC)
+        § Polymer Claims — Unified Universe
       </span>
       <span style={{ flex: 1 }} />
       <span
@@ -55,7 +55,7 @@ export default function Header() {
           letterSpacing: '0.04em',
         }}
       >
-        696 claims · fruchterman-reingold
+        pharmaco · synbio · immuno · polymergenomics · fruchterman-reingold
       </span>
       <LiveControl />
     </header>

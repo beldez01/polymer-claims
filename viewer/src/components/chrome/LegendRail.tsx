@@ -132,6 +132,21 @@ export default function LegendRail() {
   const frame = useViewer((s) => s.frame);
   const interp = useInterpolatedFrame(timeline, frame);
 
+  // Arm breakdown — the merge facet, read straight off the loaded nodes (present only on
+  // the merged-universe bundle; older single-arm bundles have no `arm` field, so this
+  // section renders empty and is skipped).
+  const armCounts = useMemo<Record<string, number>>(() => {
+    const nodes = interp ? interp.nodes : (data?.nodes ?? []);
+    const out: Record<string, number> = {};
+    for (const n of nodes) {
+      const arm = (n as { arm?: string | null }).arm;
+      if (!arm) continue;
+      out[arm] = (out[arm] ?? 0) + 1;
+    }
+    return out;
+  }, [interp, data]);
+  const armEntries = Object.entries(armCounts).sort((a, b) => b[1] - a[1]);
+
   const counts = useMemo<Counts>(() => {
     if (interp) {
       const s = interp.stats;
@@ -189,6 +204,22 @@ export default function LegendRail() {
           </CheckRow>
         ))}
       </div>
+
+      {/* ARM — the merge facet (which universe's own gate produced this claim) */}
+      {armEntries.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <SectionMarker>§ Arm — provenance facet</SectionMarker>
+          {armEntries.map(([arm, n]) => (
+            <div
+              key={arm}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 4px' }}
+            >
+              <span style={{ ...rowLabel, flex: 1 }}>{arm}</span>
+              <span style={{ ...rowLabel, color: COLOR.text.faint }}>{n}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* FDR LEDGER OVERLAY */}
       <SectionMarker>§ FDR — outer ring</SectionMarker>

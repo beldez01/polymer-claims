@@ -42,6 +42,13 @@ export interface TopologyNode {
   severity_provenance?: string | null;
   shared_cause_overlap?: number | null;
   position: Vec3;
+  /** Which arm produced this claim (pharmaco/synbio/immuno/polymergenomics) — a FACET
+   *  the merged-universe bundler tags onto each node, never a separate universe. Absent
+   *  (undefined) on bundles that predate the merge (e.g. the single-arm pharmaco-only export). */
+  arm?: string | null;
+  /** The claim's realized measurement space (e.g. methylation_genebody, literature) — the
+   *  other merge facet, carried alongside `arm`. */
+  modality?: string | null;
 }
 
 export interface TopologyEdge {

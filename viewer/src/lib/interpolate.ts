@@ -45,6 +45,9 @@ export interface InterpNode {
   /** enter/exit growth in [0,1] — drives both mesh scale and material opacity. */
   scale: number;
   opacity: number;
+  /** merge facets — which arm produced this claim, and its measurement space. */
+  arm: string | null;
+  modality: string | null;
 }
 
 /** An edge resolved for a single animation instant. */
@@ -101,6 +104,8 @@ function makeInterpNode(src: TopologyNode, anim: NodeAnim): InterpNode {
     position: anim.position,
     scale: anim.scale,
     opacity: anim.opacity,
+    arm: src.arm ?? null,
+    modality: src.modality ?? null,
   };
 }
 

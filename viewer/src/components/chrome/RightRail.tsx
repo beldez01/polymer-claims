@@ -552,6 +552,13 @@ function NodePanel({ selectedId }: { selectedId: string }) {
         <StatusPill status={node.status} />
       </div>
 
+      {node.arm != null && (
+        <Field name="arm">
+          {node.arm}
+          {node.modality != null ? ` · ${node.modality}` : ''}
+        </Field>
+      )}
+
       <Field name="pattern_id">{node.pattern_id}</Field>
       <Field name="subject_kind">{node.subject_kind ?? '—'}</Field>
       <Field name="is_representation_revision">
