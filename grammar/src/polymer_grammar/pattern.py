@@ -69,6 +69,41 @@ registry.register(
     )
 )
 
+registry.register(
+    Pattern(
+        id="reported_quantity",
+        version="v1",
+        estimand="reported_scalar",
+        null_model="none_reported_prior",
+        scale="ratio_or_interval",
+        invariance_group="admissible_unit_transform",
+        intended_applications=[
+            "a reported point measurement (constant, floor, derived ratio) cited from literature",
+        ],
+        excluded_applications=[
+            "an adjusted or model-relative effect (use adjusted_effect)",
+            "a recomputed statistic that passes the licensing gate (use its analysis pattern)",
+        ],
+    )
+)
+
+registry.register(
+    Pattern(
+        id="mechanistic_law",
+        version="v1",
+        estimand="qualitative_law",
+        null_model="no_law_holds",
+        scale="ordinal_relation",
+        invariance_group="monotone_reparametrization",
+        intended_applications=[
+            "a reported mechanistic/relational principle serving as a prior or defeater",
+        ],
+        excluded_applications=[
+            "a quantitative statistical estimand (use reported_quantity or adjusted_effect)",
+        ],
+    )
+)
+
 
 def get_pattern(id: str, version: str) -> Pattern:
     return registry.get(id, version)
