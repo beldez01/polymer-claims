@@ -74,41 +74,41 @@ Sequenced **W1 → W2 → W3**, with **W4** in parallel after W2. Each has an en
 
 ## 3. The manifest schema (W3)
 
-One YAML file per chapter in `data/synbio_compendia/manifests/`. Each entry:
+One **JSON** file per chapter in `data/synbio_compendia/manifests/` (JSON, not YAML: PyYAML is not a repo dependency and self-containment favors zero new deps; JSON is stdlib, diffable, and reviewable). Each entry:
 
-```yaml
-- id: sb-<chapter>-<slug>            # stable, hyphen-id (matches the immuno/real-id convention)
-  title: <one-line claim statement>
-  tier: 1 | 2                        # Tier-3 entries are recorded as tier: 3, skip: true (not built)
-  topic: sensing|computing|writing|delivery|actuation|chassis|measurement|control|...
-  leaf:
-    kind: quantity | proposition
-    # quantity:
-    value: <float>
-    unit: <UCUM str | null>          # only for FUNDAMENTAL; DERIVED must be null + carry formula
-    uncertainty: <float | null>      # null when honestly a range, never a faked symmetric bar
-    measurement_basis: FUNDAMENTAL | DERIVED
-    formula: <str | null>            # required for DERIVED
-    context:                         # optional MeasurementContext (2a)
-      tissue: <str | null>
-      cell_line: <str | null>
-      assay: <str | null>
-      condition: <str | null>
-    # proposition:
-    data: <observation>
-    warrant: <mechanism>
-    rebuttal: <where it fails>
-    warrant_type: mechanistic_analogy
-  source: <SOURCES key>              # extend SOURCES with the chapter refs
-  schema_fit:                        # MANDATORY — the fixed-list input (§1)
-    status: clean | gap
-    # when gap:
-    constraint: <what could not be expressed>
-    current_ir_behavior: <what the IR does instead>
-    candidate_resolution: <the additive fix>
-    expansion_class: general | analysis | subject | domain
-    purity_cost: <what it touches; backward-compat obligation>
+```json
+{
+  "id": "sb-<chapter>-<slug>",
+  "title": "<one-line claim statement>",
+  "tier": 1,
+  "skip": false,
+  "topic": "sensing|computing|writing|delivery|actuation|chassis|measurement|control",
+  "leaf": {
+    "kind": "quantity|proposition",
+    "value": 2.0,
+    "unit": "<UCUM str, only for FUNDAMENTAL; DERIVED must be null + carry formula>",
+    "uncertainty": null,
+    "measurement_basis": "FUNDAMENTAL|DERIVED",
+    "formula": "<required for DERIVED>",
+    "context": {"tissue": null, "cell_line": null, "assay": null, "condition": null},
+    "data": "<proposition: observation>",
+    "warrant": "<proposition: mechanism>",
+    "rebuttal": "<proposition: where it fails>",
+    "warrant_type": "mechanistic_analogy"
+  },
+  "source": "<SOURCES key>",
+  "schema_fit": {
+    "status": "clean|gap",
+    "constraint": "<what could not be expressed>",
+    "current_ir_behavior": "<what the IR does instead>",
+    "candidate_resolution": "<the additive fix>",
+    "expansion_class": "general|analysis|subject|domain",
+    "purity_cost": "<what it touches; backward-compat obligation>"
+  }
+}
 ```
+
+A Tier-3 entry is recorded with `"tier": 3, "skip": true` and is not built (the anti-toy-questionnaire guard). Only the `leaf` sub-fields for the declared `kind` are read (`quantity` reads value/unit/uncertainty/measurement_basis/formula/context; `proposition` reads data/warrant/rebuttal/warrant_type). `schema_fit` fields beyond `status` are present only when `status: gap`.
 
 **Why decoupled.** The manifest is the reviewable judgment layer (is this a claim? is the number right? did it map cleanly?), diffable in git and independent of the mechanical build. `synbio/ingest.py` is deterministic and unit-tested: same manifests → same claims, byte-stable. This is the only ingestion form that keeps the "human-in-the-loop, provenance to primary refs" discipline while scaling past hand-written factories, and it refuses the non-deterministic/unauditable LLM-at-runtime route the foundations distrust (untrusted proposer).
 
