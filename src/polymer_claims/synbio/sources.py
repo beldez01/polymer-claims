@@ -4,13 +4,13 @@ A `ClaimSource` records where a reported (`LITERATURE_EXTRACTED`) claim comes fr
 `admissibility` firewall tag (Phase 0 spec §4 — the date-cutoff / conclusion-stripping
 decision) is populated in Phase 3 when the blinded seed is assembled; in Phase 1 it is None.
 
-Refs point at the treatise chapters in `Research/topics/programmable-living-medicines/`.
+Refs point at the treatise chapters in `data/synbio_compendia/programmable-living-medicines/`.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-_TREATISE = "Research/topics/programmable-living-medicines"
+_TREATISE = "data/synbio_compendia/programmable-living-medicines"
 
 
 @dataclass(frozen=True)
@@ -36,6 +36,14 @@ SOURCES: dict[str, ClaimSource] = {
     "PLM-VI": ClaimSource(
         ref=f"{_TREATISE}/06-computing-synthetic-circuits.md",
         title="Computing: Synthetic Gene Circuits and Cellular Logic",
+    ),
+    "PLM-VII": ClaimSource(
+        ref=f"{_TREATISE}/07-acting-cellular-effectors.md",
+        title="Acting: Cellular Effectors and Payloads",
+    ),
+    "PLM-VIII": ClaimSource(
+        ref=f"{_TREATISE}/08-delivery.md",
+        title="Delivery",
     ),
     "PLM-XIII": ClaimSource(
         ref=f"{_TREATISE}/13-research-agenda-open-problems.md",
