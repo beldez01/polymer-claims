@@ -47,6 +47,17 @@ sub-universe → a **blinded, pre-registered re-derivation of the Durendal genot
 
 ---
 
+## Current state (2026-07-10) — pharmacogenomic universe arm (parallel; all on `main`)
+
+> The STRATA→pharmaco methylation-marker→drug licensing engine. Spec `specs/2026-07-08-strata-pharmaco-licensing-design.md`, plan `plans/2026-07-09-strata-pharmaco-licensing.md`; module `src/polymer_claims/pharmaco/` + `pharmaco_adapters.py` + `pharmaco_populate.py` + `PHARMACO_ASSOC_CELL` + `[pharmaco]` extra. Capability summary in `ARCHITECTURE_CURRENT.md`. Full memory: `project_polymer_spc_demo`, `project_polymer_claims_knowledge_protocol`.
+
+- **Real-data proof (through the real gate):** `MTAP→Palbociclib` LICENSED @ REPRODUCED (betting e≈216); `MGMT→Temozolomide` REJECTED (e≈0.78, both legs refute). Residue taxonomy reconciled in the spec: an agreed-refuted null → REJECTED = morphospace forbidden region (retained, not erased); an under-powered hit → PENDING frontier.
+- **Scaled universe (`pharmaco-populate --full`, real GDSC):** 696 claims / 199 drugs → **4 LICENSED / 609 PENDING / 83 REJECTED** (top e-value: CDKN2A/CDKN2B×Palbociclib, CDKN2A×Nutlin-3a, BCL2L1×AZD5991 — coherent CDK4/6i-cell-cycle/p53 + apoptosis). Wired as the viewer's default bundle (`viewer/public/pharmaco-universe.json`; bundler `viewer/scripts/make_pharmaco_universe.py`), browser-verified. Launch: `cd viewer && npm run dev`.
+- **Two engine findings caught at scale:** (1) e-LOND **batch-ordering pathology** — alphabetical registration starved strong-but-late claims (bar grows ~32.9·t²) → 0 licensed; FIXED (umbrella-only) by registering in strength-rank order. (2) strength-rank is a **proxy** for the licensing betting e-value (correlated, not monotonic) → **e-BH** (order-independent batch FDR) flagged as the principled fix; and an accumulating store makes the FDR a true stream (see spec below).
+- **NEXT (pharmaco arm):** e-BH batch FDR; the accumulating faceted universe store (`specs/2026-07-10-accumulating-universe-store-design.md`); the re-parameterization evaluator (`specs/2026-07-10-reparameterization-evaluator-design.md` — needs a promoter-methylation SE-Contract; note `notes/2026-07-10-parameterization-rejection-reasoning.md`); re-point `check_controls` to CDKN2A→Palbociclib. **SPC demo Monday.**
+
+---
+
 ## Current state (2026-07-10, earlier) — immuno-erv arm (parallel, still valid; main hash `47ddda5` now an ancestor of `753c02d` above)
 
 > Session 2026-07-09 → 10. `main` was `47ddda5` at this snapshot (now an ancestor of `753c02d`; the
