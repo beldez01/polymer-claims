@@ -9,6 +9,8 @@ import json
 import math
 from pathlib import Path
 
+import pandas as pd
+
 
 def build_pharmaco_contract(
     betas: dict[str, dict[str, str | float]],
@@ -19,10 +21,13 @@ def build_pharmaco_contract(
     drugs: list[str],
     out_dir,
     uid_stem: str = "gdsc_pharmaco",
+    modality: str | None = None,
 ) -> str:
     """Write the manifest JSON + values TSV load_contract reads. Samples = union of lines with
     a tissue; features = meth::<gene> then auc::<drug> (sorted within each block). Missing
-    values -> 'nan' (adapters drop them)."""
+    values -> 'nan' (adapters drop them). ``modality`` optionally tags the measurement-space
+    dimension of the methylation rows (e.g. "methylation_genebody" / "methylation_promoter") in
+    manifest metadata -- omitted by default so the existing gene-level contract is unaffected."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     samples = sorted(tissue)
@@ -34,13 +39,17 @@ def build_pharmaco_contract(
             return "nan"
         return f"{float(v):.6f}"
 
+    metadata = {"source": "GDSC2", "kind": "pharmaco", "genome_assembly": "hg38"}
+    if modality is not None:
+        metadata["modality"] = modality
+
     manifest = {
         "uid": f"{uid_stem}@1",
         "dim": [len(feat_rows), len(samples)],
         "assays": [{"name": "value", "ref": f"{uid_stem}.betas.tsv"}],
         "col_data": [{"sample_id": s, "Sample_Group": tissue[s], "tissue": tissue[s]} for s in samples],
         "row_data": [{"feature_id": f, "chr": "", "pos": 0} for f in feat_rows],
-        "metadata": {"source": "GDSC2", "kind": "pharmaco", "genome_assembly": "hg38"},
+        "metadata": metadata,
     }
     (out_dir / f"{uid_stem}.json").write_text(json.dumps(manifest, indent=2))
 
@@ -82,6 +91,49 @@ def ingest_gdsc_pharmaco(data_dir: str | None = None) -> str:
         aucs[str(d)] = {str(r.COSMIC_ID): float(r.auc) for r in sub.itertuples() if str(r.COSMIC_ID) in tissue}
     uid = build_pharmaco_contract(betas, aucs, tissue, genes=gene_union, drugs=drugs,
                                   out_dir=Path(_contracts.__file__).parent)
+    _contracts.clear_contract_cache()
+    ref = _contracts.load_contract(f"se:{uid}")
+    return f"ingested {uid}: {ref.dimnames_hash[:16]}… ({len(tissue)} lines, {len(gene_union)} genes, {len(drugs)} drugs)"
+
+
+def ingest_gdsc_pharmaco_promoter(data_dir: str | None = None) -> str:
+    """Build se:gdsc_pharmaco_promoter@1 -- the SECOND measurement space: mirrors
+    ``ingest_gdsc_pharmaco`` exactly (same mechanism-gene union, same drugs, same tissue),
+    but the ``meth::<gene>`` rows are sourced from PROMOTER beta
+    (``gdsc.load_gdsc_promoter_methylation``) instead of gene-body-averaged beta. The
+    mechanism-gene union is restricted to genes actually present in the promoter matrix (its
+    gene-symbol column set differs slightly from the gene-level matrix's). Manifest metadata
+    carries ``"modality": "methylation_promoter"`` -- the first concrete instance of the
+    measurement-space/modality facet the re-parameterization evaluator design names."""
+    from polymer_claims import contracts as _contracts
+    from polymer_claims.pharmaco.data import gdsc
+    from polymer_claims.pharmaco.mechanism import PATHWAY_GENES, parse_targets
+
+    meth = gdsc.load_gdsc_promoter_methylation()   # lines x genes, PROMOTER beta
+    drug = gdsc.load_gdsc_drug_response()
+    ann = gdsc.load_gdsc_annotations()
+    meta = (pd.read_excel(gdsc.DRUG_RESPONSE_FILE,
+                          usecols=["DRUG_NAME", "PUTATIVE_TARGET", "PATHWAY_NAME"])
+            .drop_duplicates("DRUG_NAME"))
+
+    valid = set(meth.columns)                      # restricted to genes present in the PROMOTER matrix
+    gene_union: set[str] = set()
+    for _, mr in meta.iterrows():
+        tgt, pw = mr["PUTATIVE_TARGET"], mr["PATHWAY_NAME"]
+        gene_union |= set(parse_targets(tgt, valid))
+        gene_union |= {g for g in PATHWAY_GENES.get(pw, []) if g in valid}
+    gene_union = sorted(gene_union)
+    drugs = sorted(drug["drug_name"].unique().tolist())
+    lines = [str(x) for x in meth.index]
+    tissue = {s: str(ann["tissue"].get(s, "unknown")) for s in lines if s in ann.index}
+    betas = {g: {s: float(meth.loc[s, g]) for s in tissue if s in meth.index} for g in gene_union}
+    aucs: dict[str, dict[str, float]] = {}
+    for d, sub in drug.groupby("drug_name"):
+        aucs[str(d)] = {str(r.COSMIC_ID): float(r.auc) for r in sub.itertuples() if str(r.COSMIC_ID) in tissue}
+    uid = build_pharmaco_contract(betas, aucs, tissue, genes=gene_union, drugs=drugs,
+                                  out_dir=Path(_contracts.__file__).parent,
+                                  uid_stem="gdsc_pharmaco_promoter",
+                                  modality="methylation_promoter")
     _contracts.clear_contract_cache()
     ref = _contracts.load_contract(f"se:{uid}")
     return f"ingested {uid}: {ref.dimnames_hash[:16]}… ({len(tissue)} lines, {len(gene_union)} genes, {len(drugs)} drugs)"

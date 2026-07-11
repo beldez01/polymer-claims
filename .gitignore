@@ -20,6 +20,9 @@ docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md
 /data/pharmaco/
 src/polymer_claims/contracts/gdsc_pharmaco.json
 src/polymer_claims/contracts/gdsc_pharmaco.betas.tsv
+# promoter-methylation second measurement space (same GDSC lift, gitignored the same way)
+src/polymer_claims/contracts/gdsc_pharmaco_promoter.json
+src/polymer_claims/contracts/gdsc_pharmaco_promoter.betas.tsv
 # demo fixtures are public (no real data) — committed
 !/data/demo/
 src/polymer_claims/contracts/tcga_laml_idh.json

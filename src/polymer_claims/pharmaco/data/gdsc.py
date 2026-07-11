@@ -20,6 +20,7 @@ from polymer_claims.pharmaco.config import DATA_DIR
 GDSC_DIR = DATA_DIR / "gdsc"
 
 METHYLATION_FILE = GDSC_DIR / "methylation_imputed.csv.gz"
+PROMOTER_METHYLATION_FILE = GDSC_DIR / "methylation_promoter_bycosmic.csv.gz"
 DRUG_RESPONSE_FILE = GDSC_DIR / "GDSC2_fitted_dose_response_27Oct23.xlsx"
 MODEL_LIST_FILE = GDSC_DIR / "model_list_20260420.csv"
 
@@ -48,6 +49,28 @@ def load_gdsc_methylation() -> pd.DataFrame:
     keep = df.index.intersection(mapping.index)
     df = df.loc[keep]
     df.index = mapping.loc[keep].astype(str).values
+    df.index.name = "COSMIC_ID"
+
+    # Guard against accidental duplicate COSMIC_IDs (keep first).
+    df = df[~df.index.duplicated(keep="first")]
+    return df
+
+
+def load_gdsc_promoter_methylation() -> pd.DataFrame:
+    """Promoter-region methylation beta matrix keyed by COSMIC_ID.
+
+    Returns a DataFrame whose rows are COSMIC_ID (str) and whose columns are
+    gene symbols (str); values are promoter beta in [0, 1]. This is the second
+    measurement space alongside ``load_gdsc_methylation`` (gene-body-averaged):
+    a genuinely different assay dimension over the same cell lines, not an
+    admissible transform of the gene-level matrix.
+
+    Unlike the gene-level file, the source matrix is already indexed by
+    COSMIC_ID (as an integer) -- no SIDM remap is needed, only a cast to str
+    to match the drug/annotation keys.
+    """
+    df = pd.read_csv(PROMOTER_METHYLATION_FILE, index_col=0)
+    df.index = df.index.astype(str)
     df.index.name = "COSMIC_ID"
 
     # Guard against accidental duplicate COSMIC_IDs (keep first).

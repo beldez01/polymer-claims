@@ -2,6 +2,47 @@ from polymer_claims import contracts
 from polymer_claims.ingest.gdsc_pharmaco import build_pharmaco_contract
 
 
+def test_build_pharmaco_promoter_contract_loads_via_load_contract(tmp_path):
+    """The SECOND measurement space: same feature x sample shape as the gene-level
+    contract, sourced from a synthetic promoter beta matrix, tagged with
+    metadata.modality so the re-parameterization evaluator can distinguish it from
+    the gene-body contract."""
+    lines = ["L1", "L2", "L3", "L4"]
+    betas = {"MGMT": dict(zip(lines, [0.05, 0.10, 0.90, 0.95])),
+             "MTAP": dict(zip(lines, [0.15, 0.25, 0.75, 0.85]))}
+    aucs = {"Temozolomide": dict(zip(lines, [0.97, 0.95, 0.60, 0.55]))}
+    tissue = {"L1": "skin", "L2": "skin", "L3": "lung", "L4": "lung"}
+    uid = build_pharmaco_contract(betas, aucs, tissue,
+                                  genes=["MGMT", "MTAP"], drugs=["Temozolomide"],
+                                  out_dir=tmp_path, uid_stem="gdsc_pharmaco_promoter",
+                                  modality="methylation_promoter")
+    assert uid == "gdsc_pharmaco_promoter@1"
+
+    contracts.clear_contract_cache()
+    with contracts.using_contract_root(tmp_path):
+        se = contracts.load_contract("se:" + uid)
+        manifest = contracts.load_manifest(se)
+
+    assert se.contract_uid == "gdsc_pharmaco_promoter@1"
+    assert se.genome_assembly == "hg38"
+    assert manifest["metadata"]["modality"] == "methylation_promoter"
+    feature_ids = [r["feature_id"] for r in manifest["row_data"]]
+    assert "meth::MGMT" in feature_ids
+    assert "auc::Temozolomide" in feature_ids
+    groups = {c["sample_id"]: c["Sample_Group"] for c in manifest["col_data"]}
+    assert groups["L1"] == "skin"
+
+    # the gene-level contract (no modality kwarg) is unaffected -- metadata has no key.
+    uid2 = build_pharmaco_contract(betas, aucs, tissue,
+                                   genes=["MGMT", "MTAP"], drugs=["Temozolomide"],
+                                   out_dir=tmp_path, uid_stem="gdsc_pharmaco_genebody_probe")
+    contracts.clear_contract_cache()
+    with contracts.using_contract_root(tmp_path):
+        se2 = contracts.load_contract("se:" + uid2)
+        manifest2 = contracts.load_manifest(se2)
+    assert "modality" not in manifest2["metadata"]
+
+
 def test_build_pharmaco_contract_loads_via_load_contract(tmp_path):
     lines = ["L1", "L2", "L3", "L4"]
     betas = {"CDKN2A": dict(zip(lines, [0.1, 0.2, 0.8, 0.9])),
