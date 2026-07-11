@@ -12,6 +12,39 @@
 
 ---
 
+## Current state (2026-07-11) — UNIFIED UNIVERSE + promoter contract (latest; `origin/main == a32e6ed`)
+
+> **`main` PUSHED — `origin/main == a32e6ed`.** Clean linear lineage over the WAYLAND + pharmaco arcs
+> below (both ancestors, both still valid). Corpus = 4. grammar/protocol untouched this arc (all
+> umbrella/viewer/scripts-side; still numpy-free).
+
+**UNIFIED UNIVERSE (`a32e6ed`) — all four arms merged into ONE faceted universe** (the accumulating-store
+"one atom, many links" design; spec `docs/superpowers/specs/2026-07-10-accumulating-universe-store-design.md`).
+- `src/polymer_claims/merge_universes.py` + `viewer/scripts/make_merged_universe.py` → `viewer/public/merged-universe.json`;
+  viewer now DEFAULTS to it (`ClaimUniverse.tsx` loads `/merged-universe.json`, falls back to `/pharmaco-universe.json`).
+- **761 nodes** — pharmaco 696 · polymergenomics 58 · synbio 5 · immuno 2 — each carrying additive `arm`+`modality`
+  facets (node schema otherwise identical to the pharmaco bundle). Per-arm statuses PRESERVED verbatim (a UNION,
+  NOT a re-run of the gate): **8 licensed / 611 pending / 94 rejected / 48 conjectured**.
+- Verified: full suite **787 passed** (independent run) / 1 skip / 1 xfail; merge unit test 5/5; Playwright
+  browser-render (per-arm legend, licensed across arms, claim card shows `arm` facet; screenshots in `.superpowers/sdd/screenshots/`).
+- **Rough edges (follow-ups, not blockers):** immuno's 2 nodes reconstructed from grammar primitives (not a strict
+  `Corpus`; `inf` e-value capped 1e300); edges only within the polymergenomics sub-cluster; static snapshot (`n_cycles:0`).
+
+**PROMOTER SE-CONTRACT (`edb1322`) — reparam-evaluator step 0** (second measurement space). `se:gdsc_pharmaco_promoter@1`
+via `load_gdsc_promoter_methylation()` + `ingest_gdsc_pharmaco_promoter()`; `metadata.modality="methylation_promoter"`
+(first `modality` facet). Empirical: MGMT→TMZ direction FLIPS to mechanistically-correct over promoter (−0.069) but
+stays sub-threshold; CDK4/6i is gene-body-SPECIFIC (dies over promoter) → "which space is apt" is mechanism-dependent
+(validates the per-claim hybrid generator). See memory [[project_polymer_reparameterization_evaluator]].
+
+### NEXT — where to proceed (unified universe / reparam)
+- **Measurement-space registry** — the shared next step for BOTH the reparam evaluator and the accumulating store
+  (catalog of SE-Contract dimensions per assay). Spec `docs/superpowers/specs/2026-07-10-reparameterization-evaluator-design.md`.
+- **Follow-ups:** clean immuno into a real `Corpus`; re-point `check_controls` MTAP→CDKN2A→Palbociclib; the persistent
+  append-only content-addressed claim LOG (the merge today is a static union-into-one-bundle VIEW, not yet the persistent store).
+- e-BH RULED OUT (2026-07-11 — licenses ~0 for n=696; do not re-chase). "License more" = more data/modalities, not a different FDR.
+
+---
+
 ## Current state (2026-07-10, later) — authoritative snapshot (WAYLAND synbio arc)
 
 > `main` is **PUSHED to `origin/main`** (`origin/main == main` as of the Wayland arc, 2026-07-10;
