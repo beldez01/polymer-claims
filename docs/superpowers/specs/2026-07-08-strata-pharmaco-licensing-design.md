@@ -13,7 +13,7 @@ grounded in real data.
 ## 0. One-paragraph summary
 
 The STRATA engine (lifted from the `Hack` hackathon project into
-`src/polymer_claims/strata/`) proposes candidate `(drug, marker)` pairs from
+`src/polymer_claims/pharmaco/`) proposes candidate `(drug, marker)` pairs from
 GDSC cell-line data. It is **untrusted scaffolding** — a proposer, never a source
 of standing. A batch runner turns each candidate into a `Claim`, pre-registers
 it, and runs it through `run_cycle`, where **two independent adapter legs
@@ -59,13 +59,13 @@ Merged mechanically before this spec (verified: engine recovers MTAP→Palbocicl
 at L3, r_adj=−0.196, and MGMT→Temozolomide as a non-hit, on real GDSC data from
 inside the repo; ruff clean; core import unaffected):
 
-- `src/polymer_claims/strata/` — `engine/` (associate, annotate, cluster,
+- `src/polymer_claims/pharmaco/` — `engine/` (associate, annotate, cluster,
   features), `data/gdsc.py` (COSMIC-keyed loaders), `config.py` (env-overridable
-  `STRATA_DATA_ROOT`, no import side effects), `mechanism.py` (the refactored
+  `PHARMACO_DATA_ROOT`, no import side effects), `mechanism.py` (the refactored
   tissue-adjusted L0–L3 scorer + `positive_control`/`negative_control`).
 - `data/pharmaco/gdsc/` — gitignored, ~81M (methylation matrix, GDSC2
   dose-response xlsx, model list).
-- `pyproject.toml` — opt-in `[strata]` extra (pandas/scipy/statsmodels/
+- `pyproject.toml` — opt-in `[pharmaco]` extra (pandas/scipy/statsmodels/
   scikit-learn/lifelines/openpyxl) so the core wheel stays lean.
 
 The deployment surface (site/, api/, PDFs, `_archive/`) was intentionally left in
@@ -218,12 +218,12 @@ This is surfaced, not hidden. The scientifically load-bearing result is stage 2:
    - `marker_drug_claim(...)` factory.
 3. `src/polymer_claims/pharmaco_evidence.py` (or a helper in `evidence.py`) — the
    tissue-stratified mean-diff betting e-value for a `(drug, marker)` claim.
-4. `src/polymer_claims/strata_populate.py` + CLI `strata-populate` — the batch
+4. `src/polymer_claims/pharmaco_populate.py` + CLI `pharmaco-populate` — the batch
    runner: mechanism scan → per-claim `register_test` → `run_cycle` with the two
    legs + registry + per-claim evidence → residue lands by kind (under-powered →
    PENDING frontier, agreed-refuted → REJECTED forbidden-region) → control
    instrument / publish guard → seed the live Corpus + export topology.
-5. Wiring: a `[strata]`/`[serve]`-gated CLI subcommand; lazy imports so the core
+5. Wiring: a `[pharmaco]`/`[serve]`-gated CLI subcommand; lazy imports so the core
    import stays clean without the extra.
 
 ## 10. Testing strategy
@@ -248,8 +248,8 @@ Behavior, not implementation; stub/fixture-based, **no network in CI**.
   the real-data MGMT control exercises it) — the highest-value follow-up test.
 - **Control instrument:** on the real (gitignored) contract, MTAP→Palbociclib
   licenses and MGMT→Temozolomide does not — marked slow / data-gated, run behind the
-  `[strata]` extra, excluded from core CI.
-- `scripts/check-all.sh` green; `install-smoke` without `[strata]` green.
+  `[pharmaco]` extra, excluded from core CI.
+- `scripts/check-all.sh` green; `install-smoke` without `[pharmaco]` green.
 
 ## 11. Open questions / deferred
 

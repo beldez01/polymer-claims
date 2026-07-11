@@ -4,15 +4,15 @@
 
 **Goal:** Turn GDSC methylation-marker → drug-response associations into claims that pass the real licensing gate, populating the claims universe with computed, evidence-bearing science.
 
-**Architecture:** All new code is umbrella-side (`src/polymer_claims/`); `grammar`/`protocol` stay pure and numpy-free; `Corpus` stays 4 collections. The STRATA mechanism scan (already lifted to `src/polymer_claims/strata/`) is an **untrusted proposer** — it ranks `(drug, marker)` candidates. Two **independent adapter legs** re-compute the association on a content-addressed SE-Contract, and only `run_cycle`/`verify_stage` confers standing. The pharmaco data is modeled in the *existing* feature×sample SE-Contract shape by prefixing feature rows `meth::<gene>` and `auc::<drug>` over the same cell-line samples, so the methyl contract machinery is reused wholesale.
+**Architecture:** All new code is umbrella-side (`src/polymer_claims/`); `grammar`/`protocol` stay pure and numpy-free; `Corpus` stays 4 collections. The STRATA mechanism scan (already lifted to `src/polymer_claims/pharmaco/`) is an **untrusted proposer** — it ranks `(drug, marker)` candidates. Two **independent adapter legs** re-compute the association on a content-addressed SE-Contract, and only `run_cycle`/`verify_stage` confers standing. The pharmaco data is modeled in the *existing* feature×sample SE-Contract shape by prefixing feature rows `meth::<gene>` and `auc::<drug>` over the same cell-line samples, so the methyl contract machinery is reused wholesale.
 
-**Tech Stack:** Python 3.12, pydantic v2, numpy (umbrella only), the `[strata]` extra (pandas/scipy/statsmodels/scikit-learn/lifelines/openpyxl). Design reference: `docs/superpowers/specs/2026-07-08-strata-pharmaco-licensing-design.md`.
+**Tech Stack:** Python 3.12, pydantic v2, numpy (umbrella only), the `[pharmaco]` extra (pandas/scipy/statsmodels/scikit-learn/lifelines/openpyxl). Design reference: `docs/superpowers/specs/2026-07-08-strata-pharmaco-licensing-design.md`.
 
 ## Global Constraints
 
 - `grammar/` and `protocol/` stay **pure + numpy-free**; every new import of numpy/pandas/scipy lives under `src/polymer_claims/`.
 - `Corpus` has **exactly 4 collections** — never add one.
-- All heavy scientific deps stay behind the `[strata]` optional extra; core wheel import must succeed without it (lazy imports).
+- All heavy scientific deps stay behind the `[pharmaco]` optional extra; core wheel import must succeed without it (lazy imports).
 - The GDSC data and the built SE-Contract are **gitignored** — nothing real is committed.
 - Licensing statistic must be **scale-invariant** (median-split / rank), not the linear `r_adj` (which is proposal-ranking only).
 - The e-value comes from **one leg only** (leg A); the rank leg is a corroborating air-gap gate (`agreement_mode="both_satisfy_criterion"`). **Never** multiply per-tissue e-values.
@@ -38,9 +38,9 @@ The framework-mechanics of licensing real data end-to-end are already solved in-
 | Create `src/polymer_claims/ingest/gdsc_pharmaco.py` | Build `se:gdsc_pharmaco@1` from the lifted GDSC data (`meth::<gene>` + `auc::<drug>` rows, tissue in col_data). |
 | Create `src/polymer_claims/pharmaco_adapters.py` | `_load_pharmaco` contract-read, the two legs, `PHARMACO_ASSOC_CELL` usage, `marker_drug_claim`, `pharmaco_independent_registry`, `pharmaco_oracle_registry`. |
 | Create `src/polymer_claims/pharmaco_evidence.py` | `pharmaco_evalue(...)` — betting e-value over the within-tissue methylation split. |
-| Create `src/polymer_claims/strata_populate.py` | The batch runner: propose → pre-register → license → residue → control instrument → seed corpus. |
+| Create `src/polymer_claims/pharmaco_populate.py` | The batch runner: propose → pre-register → license → residue → control instrument → seed corpus. |
 | Modify `src/polymer_claims/capabilities.py` | Register `PHARMACO_ASSOC_CELL` + its trust binding. |
-| Modify `src/polymer_claims/cli.py` | Add the `strata-populate` subcommand (lazy, `[strata]`-gated). |
+| Modify `src/polymer_claims/cli.py` | Add the `pharmaco-populate` subcommand (lazy, `[pharmaco]`-gated). |
 | Modify `.gitignore` | Ignore the built `gdsc_pharmaco` contract files. |
 | Create `tests/pharmaco/test_*.py` | One test module per task. |
 
@@ -54,7 +54,7 @@ The framework-mechanics of licensing real data end-to-end are already solved in-
 - Modify: `.gitignore`
 
 **Interfaces:**
-- Consumes: `ingest.transform.build_contract`, `contracts.load_contract`/`clear_contract_cache`, `strata.mechanism.PATHWAY_GENES`/`parse_targets`, `strata.data.gdsc`.
+- Consumes: `ingest.transform.build_contract`, `contracts.load_contract`/`clear_contract_cache`, `pharmaco.mechanism.PATHWAY_GENES`/`parse_targets`, `pharmaco.data.gdsc`.
 - Produces: `build_pharmaco_contract(betas, aucs, tissue, *, genes, drugs, out_dir) -> str` (pure-ish, testable on synthetic dicts) and `ingest_gdsc_pharmaco(data_dir=None) -> str` (orchestrator over the real lifted data). Contract uid `gdsc_pharmaco@1`; feature ids `meth::<GENE>` and `auc::<DRUG>`; col_data per sample carries `Sample_Group` (tissue) + `tissue`.
 
 - [ ] **Step 1: Write the failing test** (synthetic 4-line contract, 2 genes, 1 drug)
@@ -150,8 +150,8 @@ def ingest_gdsc_pharmaco(data_dir: str | None = None) -> str:
     """Load the lifted GDSC data, restrict to the mechanism-gene union + all drugs, and build the
     contract into the package contracts/ dir (gitignored). Returns a one-line summary."""
     from polymer_claims import contracts as _contracts
-    from polymer_claims.strata.data import gdsc
-    from polymer_claims.strata.mechanism import PATHWAY_GENES, TARGET_ALIAS, parse_targets
+    from polymer_claims.pharmaco.data import gdsc
+    from polymer_claims.pharmaco.mechanism import PATHWAY_GENES, TARGET_ALIAS, parse_targets
 
     meth = gdsc.load_gdsc_methylation()            # lines x genes
     drug = gdsc.load_gdsc_drug_response()          # long: COSMIC_ID, drug_name, auc
@@ -238,7 +238,7 @@ def _contract(tmp_path):
                                    drugs=["Palbociclib"], out_dir=tmp_path)
 
 def test_both_legs_positive_on_planted_sensitivity(tmp_path, monkeypatch):
-    monkeypatch.setenv("STRATA_DATA_ROOT", str(tmp_path))  # not used; contract read is by path
+    monkeypatch.setenv("PHARMACO_DATA_ROOT", str(tmp_path))  # not used; contract read is by path
     ref = "se:" + _contract(tmp_path)
     contracts.clear_contract_cache()
     monkeypatch.setattr(contracts, "_CONTRACT_DIR", tmp_path, raising=False)
@@ -437,7 +437,7 @@ git commit -m "feat(pharmaco): marker->drug betting e-value (single leg, within-
   - `PHARMACO_ASSOC_CELL` (capability `pharmaco::assoc@v1`, `agreement_mode="both_satisfy_criterion"`, subject required kind `composite`, eligible adapters `("pharmaco-meandiff","pharmaco-rank")`, `data_ref_kind=SE_CONTRACT`).
   - `pharmaco_independent_registry() -> AdapterRegistry`.
   - `pharmaco_oracle_id() -> str` and `pharmaco_oracle_registry() -> OracleRegistry` (a BENCHMARKED apparatus whose `ApplicabilityDomain.subject_kinds=("composite",)` admits the gene/drug subject).
-  - `marker_drug_claim(claim_id, *, ref, marker, drug, drug_chebi_uri, tissue_adjusted=True, threshold=0.0, comparator=Comparator.GT, search_cardinality, agent_id="strata-mechanism-v1", prior_cohorts=(), strength=None) -> Claim`. **No `r_adj` parameter — STRATA's statistic never enters the claim.**
+  - `marker_drug_claim(claim_id, *, ref, marker, drug, drug_chebi_uri, tissue_adjusted=True, threshold=0.0, comparator=Comparator.GT, search_cardinality, agent_id="pharmaco-mechanism-v1", prior_cohorts=(), strength=None) -> Claim`. **No `r_adj` parameter — STRATA's statistic never enters the claim.**
 
 - [ ] **Step 1: Write the failing test**
 
@@ -462,7 +462,7 @@ def test_marker_drug_claim_shape():
     assert c.subject.kind == "composite" and len(c.subject.parts) == 2
     assert c.leaves[0].kind == "categorical"     # Polymer-native; no STRATA r_adj in the claim
     assert c.provenance.generated_by.value == "agent_generated"
-    assert c.provenance.agent_id == "strata-mechanism-v1"
+    assert c.provenance.agent_id == "pharmaco-mechanism-v1"
     # composite subject is admitted by the apparatus domain
     dom = pharmaco_oracle_registry().dossiers[0].applicability_domain
     assert "composite" in dom.subject_kinds
@@ -542,7 +542,7 @@ def pharmaco_independent_registry() -> AdapterRegistry:
 def marker_drug_claim(
     claim_id: str, *, ref: str, marker: str, drug: str, drug_chebi_uri: str,
     threshold: float = 0.0, comparator: Comparator = Comparator.GT,
-    search_cardinality: int, agent_id: str = "strata-mechanism-v1",
+    search_cardinality: int, agent_id: str = "pharmaco-mechanism-v1",
     prior_cohorts: tuple[str, ...] = (), preregistration_hash: str | None = None,
     strength: StrengthVector | None = None,
 ) -> Claim:
@@ -596,22 +596,22 @@ git commit -m "feat(pharmaco): capability cell, apparatus oracle, registry, and 
 ### Task 5: The batch runner core — propose, pre-register, residue
 
 **Files:**
-- Create: `src/polymer_claims/strata_populate.py` (proposal + pre-registration + residue; licensing wired in Task 6)
-- Test: `tests/pharmaco/test_strata_populate.py`
+- Create: `src/polymer_claims/pharmaco_populate.py` (proposal + pre-registration + residue; licensing wired in Task 6)
+- Test: `tests/pharmaco/test_pharmaco_populate.py`
 
 **Interfaces:**
-- Consumes: `strata.mechanism.rank_mechanism_opportunities`/`load_inputs`, `pharmaco_adapters.marker_drug_claim`, `grammar.fdr.{register_test}`, `grammar.commitment.commitment_hash`.
+- Consumes: `pharmaco.mechanism.rank_mechanism_opportunities`/`load_inputs`, `pharmaco_adapters.marker_drug_claim`, `grammar.fdr.{register_test}`, `grammar.commitment.commitment_hash`.
 - Produces:
-  - `propose_claims(res_df, *, ref, chebi_of, agent_id="strata-mechanism-v1") -> list[Claim]` — one `marker_drug_claim` per mechanism-scan row, `search_cardinality` = that drug's tested-gene count.
+  - `propose_claims(res_df, *, ref, chebi_of, agent_id="pharmaco-mechanism-v1") -> list[Claim]` — one `marker_drug_claim` per mechanism-scan row, `search_cardinality` = that drug's tested-gene count.
   - `preregister(corpus, claims) -> Corpus` — locks an e-LOND slot per claim via `register_test(ledger, claim.id, commitment_hash(claim))` **before** any e-value.
   - A CHEBI lookup shim `chebi_of: dict[str, str]` (drug → CHEBI uri); unknown drugs are skipped with a logged count (no silent drop).
 
 - [ ] **Step 1: Write the failing test** (synthetic scan rows; no network)
 
 ```python
-# tests/pharmaco/test_strata_populate.py
+# tests/pharmaco/test_pharmaco_populate.py
 import pandas as pd
-from polymer_claims.strata_populate import propose_claims
+from polymer_claims.pharmaco_populate import propose_claims
 
 def test_propose_sets_search_cardinality_and_skips_unknown_chebi(caplog):
     res = pd.DataFrame([
@@ -628,13 +628,13 @@ def test_propose_sets_search_cardinality_and_skips_unknown_chebi(caplog):
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `uv run pytest tests/pharmaco/test_strata_populate.py -v`
+Run: `uv run pytest tests/pharmaco/test_pharmaco_populate.py -v`
 Expected: FAIL — module missing.
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# src/polymer_claims/strata_populate.py  (Task 5 portion)
+# src/polymer_claims/pharmaco_populate.py  (Task 5 portion)
 """Batch runner: turn STRATA mechanism-scan rows into pre-registered, licensable claims.
 STRATA is an untrusted proposer; standing is conferred only in Task 6's run_cycle pass."""
 from __future__ import annotations
@@ -649,7 +649,7 @@ from .pharmaco_adapters import marker_drug_claim
 log = logging.getLogger(__name__)
 
 
-def propose_claims(res_df, *, ref, chebi_of, agent_id="strata-mechanism-v1"):
+def propose_claims(res_df, *, ref, chebi_of, agent_id="pharmaco-mechanism-v1"):
     """One marker_drug_claim per scan row whose drug has a CHEBI uri. search_cardinality =
     the row's n_genes_tested (falls back to 1). Skipped-for-no-CHEBI count is logged, not silent."""
     claims, skipped = [], 0
@@ -680,13 +680,13 @@ def preregister(corpus, claims):
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `uv run pytest tests/pharmaco/test_strata_populate.py -v`
+Run: `uv run pytest tests/pharmaco/test_pharmaco_populate.py -v`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/polymer_claims/strata_populate.py tests/pharmaco/test_strata_populate.py
+git add src/polymer_claims/pharmaco_populate.py tests/pharmaco/test_pharmaco_populate.py
 git commit -m "feat(pharmaco): batch proposal + pre-registration (untrusted proposer)"
 ```
 
@@ -695,8 +695,8 @@ git commit -m "feat(pharmaco): batch proposal + pre-registration (untrusted prop
 ### Task 6: License the batch — run_cycle wiring, REPRODUCED tier, residue
 
 **Files:**
-- Modify: `src/polymer_claims/strata_populate.py` (add `license_batch`)
-- Test: `tests/pharmaco/test_strata_license.py`
+- Modify: `src/polymer_claims/pharmaco_populate.py` (add `license_batch`)
+- Test: `tests/pharmaco/test_pharmaco_license.py`
 
 **Interfaces:**
 - Consumes: `protocol.run_cycle`, `pharmaco_adapters.{pharmaco_independent_registry, pharmaco_oracle_registry, PharmacoMeanDiffAdapter, PharmacoRankAdapter}`, `pharmaco_evidence.pharmaco_evalue`, `capabilities.CAPABILITY_CELLS`.
@@ -707,7 +707,7 @@ git commit -m "feat(pharmaco): batch proposal + pre-registration (untrusted prop
 - [ ] **Step 1: Write the failing test** (on a synthetic contract with a planted positive control and a planted null)
 
 ```python
-# tests/pharmaco/test_strata_license.py — behavior: planted signal licenses at REPRODUCED; null stays PENDING
+# tests/pharmaco/test_pharmaco_license.py — behavior: planted signal licenses at REPRODUCED; null stays PENDING
 from polymer_grammar import Status
 from polymer_grammar.licensing import IndependenceTier
 # ... build a synthetic gdsc_pharmaco contract with two markers/drugs (one strong, one null),
@@ -725,13 +725,13 @@ def test_signal_licenses_reproduced_null_pending(...):
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `uv run pytest tests/pharmaco/test_strata_license.py -v`
+Run: `uv run pytest tests/pharmaco/test_pharmaco_license.py -v`
 Expected: FAIL — `license_batch` not defined.
 
 - [ ] **Step 3: Write minimal implementation** (mirror `real_kernel_proof.py`)
 
 ```python
-# appended to src/polymer_claims/strata_populate.py
+# appended to src/polymer_claims/pharmaco_populate.py
 from .pharmaco_adapters import (
     PharmacoMeanDiffAdapter, PharmacoRankAdapter,
     pharmaco_independent_registry, pharmaco_oracle_registry,
@@ -779,7 +779,7 @@ def license_batch(corpus, claims, *, ref, shared_cause_factors):
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `uv run pytest tests/pharmaco/test_strata_license.py -v`
+Run: `uv run pytest tests/pharmaco/test_pharmaco_license.py -v`
 Expected: PASS — signal LICENSED @ REPRODUCED; null PENDING.
 
 - [ ] **Step 5: Add the tier-trap regression test**
@@ -794,7 +794,7 @@ def test_empty_shared_cause_never_mints_replicated(...):
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/polymer_claims/strata_populate.py tests/pharmaco/test_strata_license.py
+git add src/polymer_claims/pharmaco_populate.py tests/pharmaco/test_pharmaco_license.py
 git commit -m "feat(pharmaco): license the batch via run_cycle at REPRODUCED tier (no laundered REPLICATED)"
 ```
 
@@ -803,7 +803,7 @@ git commit -m "feat(pharmaco): license the batch via run_cycle at REPRODUCED tie
 ### Task 7: The control instrument + publish guard
 
 **Files:**
-- Modify: `src/polymer_claims/strata_populate.py` (add `check_controls` + `populate_universe`)
+- Modify: `src/polymer_claims/pharmaco_populate.py` (add `check_controls` + `populate_universe`)
 - Test: `tests/pharmaco/test_pharmaco_controls.py`
 
 **Interfaces:**
@@ -816,7 +816,7 @@ git commit -m "feat(pharmaco): license the batch via run_cycle at REPRODUCED tie
 ```python
 # tests/pharmaco/test_pharmaco_controls.py
 import pytest
-from polymer_claims.strata_populate import check_controls, ControlCheckFailed, populate_universe
+from polymer_claims.pharmaco_populate import check_controls, ControlCheckFailed, populate_universe
 
 def test_publish_guard_raises_when_positive_control_fails(monkeypatch, ...):
     # build a corpus where the positive control did NOT license
@@ -839,7 +839,7 @@ Expected: FAIL — names not defined.
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-# appended to src/polymer_claims/strata_populate.py
+# appended to src/polymer_claims/pharmaco_populate.py
 from polymer_grammar import Status
 
 
@@ -858,7 +858,7 @@ def check_controls(corpus, *, positive="pgx-MTAP-Palbociclib", negative="pgx-MGM
 
 
 def populate_universe(res_df, *, ref, chebi_of, shared_cause_factors, require_controls=True,
-                      agent_id="strata-mechanism-v1"):
+                      agent_id="pharmaco-mechanism-v1"):
     from polymer_protocol.corpus import Corpus  # empty seed corpus
     corpus = Corpus()  # or the project's canonical empty-corpus constructor
     claims = propose_claims(res_df, ref=ref, chebi_of=chebi_of, agent_id=agent_id)
@@ -881,7 +881,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/polymer_claims/strata_populate.py tests/pharmaco/test_pharmaco_controls.py
+git add src/polymer_claims/pharmaco_populate.py tests/pharmaco/test_pharmaco_controls.py
 git commit -m "feat(pharmaco): control instrument + publish guard (changes no claim status)"
 ```
 
@@ -890,35 +890,35 @@ git commit -m "feat(pharmaco): control instrument + publish guard (changes no cl
 ### Task 8: CLI wiring + the real-data control-recovery integration test
 
 **Files:**
-- Modify: `src/polymer_claims/cli.py` (add `strata-populate`)
-- Test: `tests/pharmaco/test_strata_cli.py` (help/smoke) and `tests/pharmaco/test_real_controls_slow.py` (data-gated)
+- Modify: `src/polymer_claims/cli.py` (add `pharmaco-populate`)
+- Test: `tests/pharmaco/test_pharmaco_cli.py` (help/smoke) and `tests/pharmaco/test_real_controls_slow.py` (data-gated)
 
 **Interfaces:**
-- Produces: CLI `polymer-claims strata-populate [--data-dir PATH] [--no-require-controls]` → ingests the contract (if absent), builds the drug→CHEBI map, runs `populate_universe`, prints a machine-clean JSON summary to stdout. Lazy imports so core import is clean without `[strata]`.
+- Produces: CLI `polymer-claims pharmaco-populate [--data-dir PATH] [--no-require-controls]` → ingests the contract (if absent), builds the drug→CHEBI map, runs `populate_universe`, prints a machine-clean JSON summary to stdout. Lazy imports so core import is clean without `[pharmaco]`.
 
 - [ ] **Step 1: Write the failing CLI smoke test**
 
 ```python
-# tests/pharmaco/test_strata_cli.py
+# tests/pharmaco/test_pharmaco_cli.py
 import subprocess, sys
-def test_strata_populate_in_help():
+def test_pharmaco_populate_in_help():
     out = subprocess.run([sys.executable, "-m", "polymer_claims.cli", "--help"],
                          capture_output=True, text=True)
-    assert "strata-populate" in out.stdout
+    assert "pharmaco-populate" in out.stdout
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `uv run pytest tests/pharmaco/test_strata_cli.py -v`
+Run: `uv run pytest tests/pharmaco/test_pharmaco_cli.py -v`
 Expected: FAIL — subcommand absent.
 
 - [ ] **Step 3: Add the subcommand to `cli.py`**
 
-Mirror the existing `verify-kernel`/`ingest` subcommand registration (parser at the `verify-kernel` block). Add a `strata-populate` subparser and a `_cmd_strata_populate(args)` that lazy-imports `strata_populate.populate_universe` + `ingest.gdsc_pharmaco.ingest_gdsc_pharmaco`, emits summaries to **stderr** and the JSON result to **stdout** (machine-clean convention — see the Tier-A audit note in `ARCHITECTURE_CURRENT.md`). Missing `[strata]` extra → stderr hint + exit 1 (mirror `run-cycle --llm`).
+Mirror the existing `verify-kernel`/`ingest` subcommand registration (parser at the `verify-kernel` block). Add a `pharmaco-populate` subparser and a `_cmd_pharmaco_populate(args)` that lazy-imports `pharmaco_populate.populate_universe` + `ingest.gdsc_pharmaco.ingest_gdsc_pharmaco`, emits summaries to **stderr** and the JSON result to **stdout** (machine-clean convention — see the Tier-A audit note in `ARCHITECTURE_CURRENT.md`). Missing `[pharmaco]` extra → stderr hint + exit 1 (mirror `run-cycle --llm`).
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `uv run pytest tests/pharmaco/test_strata_cli.py -v`
+Run: `uv run pytest tests/pharmaco/test_pharmaco_cli.py -v`
 Expected: PASS.
 
 - [ ] **Step 5: Add the data-gated real-control integration test**
@@ -928,33 +928,33 @@ Expected: PASS.
 import os, pytest
 pytestmark = pytest.mark.skipif(
     not os.path.exists(os.path.expanduser(
-        os.environ.get("STRATA_DATA_ROOT", "")) + "/gdsc/methylation_imputed.csv.gz")
+        os.environ.get("PHARMACO_DATA_ROOT", "")) + "/gdsc/methylation_imputed.csv.gz")
     and not os.path.exists(
-        __import__("polymer_claims.strata.config", fromlist=["DATA_DIR"]).DATA_DIR / "gdsc/methylation_imputed.csv.gz"),
+        __import__("polymer_claims.pharmaco.config", fromlist=["DATA_DIR"]).DATA_DIR / "gdsc/methylation_imputed.csv.gz"),
     reason="real GDSC data not present (gitignored)")
 
 def test_real_positive_control_licenses_negative_does_not():
     from polymer_claims.ingest.gdsc_pharmaco import ingest_gdsc_pharmaco
-    from polymer_claims.strata.mechanism import load_inputs, rank_mechanism_opportunities
-    from polymer_claims.strata_populate import populate_universe, check_controls
+    from polymer_claims.pharmaco.mechanism import load_inputs, rank_mechanism_opportunities
+    from polymer_claims.pharmaco_populate import populate_universe, check_controls
     ingest_gdsc_pharmaco()
     res = rank_mechanism_opportunities(*load_inputs())
     # ... build chebi_of for the controls, run populate_universe(require_controls=False),
     #     then assert check_controls(corpus)["ok"] is True.
 ```
 
-> This test is slow (loads the full matrix + reads the 21M xlsx) and data-gated; it must be excluded from core CI (mark `slow`, run only under the `[strata]` extra). It is the end-to-end proof that MTAP→Palbociclib licenses and MGMT→Temozolomide does not on real data.
+> This test is slow (loads the full matrix + reads the 21M xlsx) and data-gated; it must be excluded from core CI (mark `slow`, run only under the `[pharmaco]` extra). It is the end-to-end proof that MTAP→Palbociclib licenses and MGMT→Temozolomide does not on real data.
 
 - [ ] **Step 6: Run the full local suite**
 
 Run: `uv run ruff check src/polymer_claims/ tests/pharmaco/ && scripts/check-all.sh`
-Expected: ruff clean; grammar/protocol/umbrella suites green; core import works without `[strata]`.
+Expected: ruff clean; grammar/protocol/umbrella suites green; core import works without `[pharmaco]`.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/polymer_claims/cli.py tests/pharmaco/test_strata_cli.py tests/pharmaco/test_real_controls_slow.py
-git commit -m "feat(pharmaco): strata-populate CLI + data-gated real-control integration test"
+git add src/polymer_claims/cli.py tests/pharmaco/test_pharmaco_cli.py tests/pharmaco/test_real_controls_slow.py
+git commit -m "feat(pharmaco): pharmaco-populate CLI + data-gated real-control integration test"
 ```
 
 ---
