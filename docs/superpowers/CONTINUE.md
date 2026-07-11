@@ -14,8 +14,8 @@
 
 ## Current state (2026-07-10, later) — authoritative snapshot (WAYLAND synbio arc)
 
-> `main` = `753c02d` (**local; 10 commits ahead of `origin/main` `c0c8a11` — NOT pushed**; all 10 are
-> Wayland). Lineage is clean & linear — the immuno-erv arc (`47ddda5`) and the pharmacogenomic engine
+> `main` is **PUSHED to `origin/main`** (`origin/main == main` as of the Wayland arc, 2026-07-10;
+> tip `db5e05e` or later doc commits). Lineage is clean & linear — the immuno-erv arc (`47ddda5`) and the pharmacogenomic engine
 > are **ancestors** of HEAD (both already on `main`, both already pushed to origin at `c0c8a11`); the
 > immuno-erv snapshot below is a **still-valid parallel arm**, not superseded (different module). Corpus
 > = exactly 4 collections. **grammar/protocol note:** the grammar gained ONE additive field this arc
@@ -43,7 +43,7 @@ sub-universe → a **blinded, pre-registered re-derivation of the Durendal genot
 - **Phase 2c — ingestion**: markdown→claims extractor over the compendia (human-in-the-loop), reported-stratum at scale.
 - **Phase 2d — the licensed spine** (Phase-2 exit gate + "traction"): execution adapters over a real expression atlas → "RUNX1-RUNX1T1 clears the ~13 TPM floor in AML" LICENSED@REPRODUCED, reusing the SE-Contract seam + two-leg registry (STRATA/methyl). **DATA-GATED: needs real AML fusion-expression RNA-seq** — confirm availability before committing; warm up on PAX3-FOXO1. Uses 2a's `MeasurementContext(tissue="AML", assay="RNA-seq TPM")`.
 - **Phases 3-4**: blinded seed + pre-registration (firewall) → the Durendal re-derivation (headline). See program plan.
-- **Push coordination:** local `main` (Wayland) is unpushed and shares the checkout with other instances; the user is reconciling those. Do NOT push without the user.
+- **Push status:** `main` (through the Wayland arc) is PUSHED — `origin/main == main`. The checkout is shared with other instances; coordinate before pushing further unrelated local commits.
 
 ---
 
