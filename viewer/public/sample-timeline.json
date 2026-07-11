@@ -20,9 +20,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.489276,
-              -0.913625,
-              -0.834487
+              -0.20554,
+              -0.86564,
+              -0.742536
             ]
           },
           {
@@ -42,9 +42,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.053684,
-              -0.428571,
-              -0.891633
+              0.472048,
+              -0.111111,
+              -0.83143
             ]
           },
           {
@@ -64,9 +64,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.13061,
-              -0.689032,
-              -0.930187
+              0.352384,
+              -0.516272,
+              -0.891401
             ]
           },
           {
@@ -86,9 +86,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.131027,
-              -0.964286,
-              -0.842268
+              0.351735,
+              -0.944444,
+              -0.754639
             ]
           },
           {
@@ -108,9 +108,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.118089,
-              -0.889249,
-              -0.483679
+              0.371862,
+              -0.827721,
+              -0.196834
             ]
           },
           {
@@ -130,82 +130,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.428571,
-              -0.949918,
-              -0.846927
-            ]
-          },
-          {
-            "id": "hervk-ndmp",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": [
-              0.6,
-              0.6,
-              0.6,
-              0.7,
-              0.6,
-              0.5
-            ],
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": "reproduced",
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              0.735494,
-              -0.67663,
-              -0.71064
-            ]
-          },
-          {
-            "id": "hervk_ltr_chr12",
-            "status": "pending",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": null,
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              -0.722148,
-              -0.008716,
-              -0.699621
-            ]
-          },
-          {
-            "id": "hervk_ltr_chr5",
-            "status": "rejected",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": null,
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              -0.02384,
-              0.040084,
-              -0.686176
+              -0.111111,
+              -0.922094,
+              -0.761887
             ]
           },
           {
@@ -225,9 +152,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.519427,
-              -0.826279,
-              -0.751292
+              -0.252442,
+              -0.729768,
+              -0.61312
             ]
           },
           {
@@ -247,9 +174,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.62349,
-              -0.645819,
-              -0.608374
+              -0.414317,
+              -0.449052,
+              -0.390804
             ]
           },
           {
@@ -269,9 +196,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.677717,
-              -0.582463,
-              -0.521232
+              -0.498672,
+              -0.350498,
+              -0.25525
             ]
           },
           {
@@ -291,9 +218,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.695487,
-              -0.631698,
-              -0.497353
+              -0.526314,
+              -0.427087,
+              -0.218104
             ]
           },
           {
@@ -313,31 +240,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.703114,
-              -0.650862,
-              -0.428571
-            ]
-          },
-          {
-            "id": "hla_a_promoter",
-            "status": "pending",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": null,
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              0.689798,
-              -0.041504,
-              -0.691742
+              -0.538178,
+              -0.456897,
+              -0.111111
             ]
           },
           {
@@ -357,9 +262,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.794774,
-              -0.788558,
-              -0.512053
+              -0.680759,
+              -0.67109,
+              -0.240971
             ]
           },
           {
@@ -379,9 +284,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.866721,
-              -0.883293,
-              -0.600717
+              -0.792678,
+              -0.818456,
+              -0.378893
             ]
           },
           {
@@ -401,31 +306,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.907533,
-              -0.922541,
-              -0.739286
-            ]
-          },
-          {
-            "id": "hla_b_promoter",
-            "status": "rejected",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": null,
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              -0.67671,
-              0.684246,
-              -0.745142
+              -0.856163,
+              -0.879508,
+              -0.594445
             ]
           },
           {
@@ -445,75 +328,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.908874,
-              -0.893416,
-              -0.86687
-            ]
-          },
-          {
-            "id": "hla_c_promoter",
-            "status": "rejected",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": null,
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              -0.01401,
-              0.688909,
-              -0.700472
-            ]
-          },
-          {
-            "id": "hla_dqb1_promoter",
-            "status": "rejected",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": null,
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              0.712665,
-              0.709854,
-              -0.746989
-            ]
-          },
-          {
-            "id": "hla_drb1_promoter",
-            "status": "rejected",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": null,
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              -0.725708,
-              -0.711943,
-              0.037232
+              -0.858249,
+              -0.834202,
+              -0.792908
             ]
           },
           {
@@ -540,9 +357,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.87047,
-              -0.80548,
-              -0.927404
+              -0.798509,
+              -0.697413,
+              -0.887072
             ]
           },
           {
@@ -562,9 +379,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.02123,
-              -0.537509,
-              -0.428571
+              0.58858,
+              -0.28057,
+              -0.111111
             ]
           },
           {
@@ -591,53 +408,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.002735,
-              -0.756468,
-              0.010392
-            ]
-          },
-          {
-            "id": "line1_l1hs_chr2",
-            "status": "rejected",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": null,
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              0.699138,
-              -0.697342,
-              -0.033149
-            ]
-          },
-          {
-            "id": "line1_l1hs_chr9",
-            "status": "rejected",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": null,
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": null,
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              -0.687323,
-              0.022057,
-              0.03505
+              -0.55981,
+              0.489939,
+              -0.539391
             ]
           },
           {
@@ -657,38 +430,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.207753,
-              -0.202215,
-              -0.206708
-            ]
-          },
-          {
-            "id": "mhc-ndmp",
-            "status": "licensed",
-            "pattern_id": "adjusted_effect",
-            "subject_kind": "genomic_region",
-            "strength": [
-              0.6,
-              0.6,
-              0.6,
-              0.7,
-              0.6,
-              0.5
-            ],
-            "is_representation_revision": false,
-            "fdr_tested": false,
-            "fdr_discovery": false,
-            "fdr_retracted": false,
-            "fdr_index": null,
-            "fdr_e_value": null,
-            "fdr_alpha_allocated": null,
-            "independence_tier": "reproduced",
-            "severity_provenance": null,
-            "shared_cause_overlap": null,
-            "position": [
-              0.715645,
-              0.019431,
-              -0.042139
+              0.878727,
+              0.241,
+              -0.877102
             ]
           },
           {
@@ -708,9 +452,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.800165,
-              -0.687604,
-              -0.894288
+              -0.689145,
+              -0.514051,
+              -0.835559
             ]
           },
           {
@@ -730,9 +474,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.745566,
-              0.75021,
-              -0.006997
+              -0.604214,
+              -0.499673,
+              0.544671
             ]
           },
           {
@@ -752,9 +496,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.218676,
-              0.512255,
-              -0.218676
+              0.895719,
+              -0.869825,
+              0.215393
             ]
           },
           {
@@ -774,9 +518,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.285714,
-              0.512255,
-              -0.118347
+              1.0,
+              -0.869825,
+              0.371461
             ]
           },
           {
@@ -796,9 +540,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.218676,
-              0.714286,
-              0.218676
+              0.895719,
+              -0.555556,
+              0.895719
             ]
           },
           {
@@ -818,9 +562,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.118347,
-              0.916316,
-              0.285714
+              0.73965,
+              -0.241286,
+              1.0
             ]
           },
           {
@@ -840,9 +584,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.0,
-              1.0,
-              -0.0
+              0.555556,
+              -0.111111,
+              0.555556
             ]
           },
           {
@@ -862,9 +606,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.118347,
-              0.916316,
-              -0.285714
+              0.371461,
+              -0.241286,
+              0.111111
             ]
           },
           {
@@ -884,9 +628,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.218676,
-              0.714286,
-              -0.218676
+              0.215393,
+              -0.555556,
+              0.215393
             ]
           },
           {
@@ -906,9 +650,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.285714,
-              0.512255,
-              0.118347
+              0.111111,
+              -0.869825,
+              0.73965
             ]
           },
           {
@@ -928,9 +672,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.218676,
-              0.512255,
-              0.218676
+              0.215393,
+              -0.869825,
+              0.895719
             ]
           },
           {
@@ -950,9 +694,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.285714,
-              -0.75,
-              -0.685034
+              1.0,
+              -0.611111,
+              -0.510054
             ]
           },
           {
@@ -972,9 +716,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.285714,
-              -0.246638,
-              -0.195405
+              1.0,
+              0.171896,
+              -0.859519
             ]
           },
           {
@@ -994,9 +738,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.711503,
-              -0.522239,
-              -0.810153
+              -0.551227,
+              -0.256816,
+              -0.704683
             ]
           },
           {
@@ -1016,9 +760,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.261882,
-              -0.139451,
-              0.031095
+              0.962927,
+              0.338632,
+              -0.507185
             ]
           },
           {
@@ -1038,9 +782,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.223622,
-              0.0061,
-              0.236976
+              0.903413,
+              0.565045,
+              -0.186926
             ]
           },
           {
@@ -1060,9 +804,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.173044,
-              0.149973,
-              0.285714
+              0.824735,
+              0.788847,
+              -0.111111
             ]
           },
           {
@@ -1082,9 +826,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.112933,
-              0.252587,
-              0.144991
+              0.731229,
+              0.948469,
+              -0.330014
             ]
           },
           {
@@ -1104,9 +848,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.0466,
-              0.285714,
-              -0.091878
+              0.628045,
+              1.0,
+              -0.698477
             ]
           },
           {
@@ -1126,9 +870,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.0223,
-              0.24024,
-              -0.267822
+              0.520867,
+              0.929262,
+              -0.972167
             ]
           },
           {
@@ -1148,9 +892,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.089971,
-              0.128675,
-              -0.266168
+              0.415601,
+              0.755717,
+              -0.969595
             ]
           },
           {
@@ -1170,9 +914,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.187001,
-              -0.0224,
-              -0.107795
+              0.264665,
+              0.520712,
+              -0.723237
             ]
           },
           {
@@ -1192,9 +936,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.21768,
-              -0.107775,
-              0.054912
+              0.216942,
+              0.387906,
+              -0.470137
             ]
           },
           {
@@ -1214,9 +958,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.188097,
-              -0.121393,
-              0.133088
+              0.26296,
+              0.366721,
+              -0.348529
             ]
           },
           {
@@ -1236,9 +980,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.188097,
-              -0.121393,
-              0.133088
+              0.26296,
+              0.366721,
+              -0.348529
             ]
           },
           {
@@ -1258,9 +1002,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.21768,
-              -0.107775,
-              0.054912
+              0.216942,
+              0.387906,
+              -0.470137
             ]
           },
           {
@@ -1280,9 +1024,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              0.280456,
-              -0.815301,
-              -0.8629
+              0.991821,
+              -0.71269,
+              -0.786734
             ]
           },
           {
@@ -1302,9 +1046,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.711401,
-              -0.428571,
-              -0.957262
+              -0.551068,
+              -0.111111,
+              -0.933518
             ]
           },
           {
@@ -1324,9 +1068,9 @@
             "severity_provenance": null,
             "shared_cause_overlap": null,
             "position": [
-              -0.712014,
-              -0.472577,
-              -0.934474
+              -0.552021,
+              -0.179565,
+              -0.898071
             ]
           }
         ],
@@ -1721,30 +1465,19 @@
               "cost_expression_survives_full_confounder_control",
               "dual_channel_selection_hypothesis",
               "eqtl_positive_genes_stronger_biophysics_coupling",
-              "hervk-ndmp",
-              "hervk_ltr_chr12",
-              "hervk_ltr_chr5",
               "histogram_modes_map_to_serological_groups",
               "hla_a_cpg_density_vs_tpm",
               "hla_a_dg37_vs_tpm",
               "hla_a_erv_methylation_shadow_FALSIFIED",
               "hla_a_expression_prediction_robust_across_premise_sets",
-              "hla_a_promoter",
               "hla_a_ramsuran_pos224",
               "hla_b_bulk_biophysics_null",
               "hla_b_crc_polymorphic_cpg_cluster",
-              "hla_b_promoter",
               "hla_c_mir148a_canonical_absence",
-              "hla_c_promoter",
-              "hla_dqb1_promoter",
-              "hla_drb1_promoter",
               "hla_t_naive_promoter_methylation_bimodal",
               "human_ecoli_effect_ratio_consistent_with_ne_scaling",
               "kernel-ndmp-licensed",
-              "line1_l1hs_chr2",
-              "line1_l1hs_chr9",
               "ltr_fraction_expression_negative_gc_independent",
-              "mhc-ndmp",
               "nc_fraction_of_hla_variation",
               "rc05_p1_elm_beats_elastic_net_age_FALSIFIED",
               "recomb_a1_partial_correlations_109_signals",
@@ -1783,11 +1516,11 @@
       },
       "stats": {
         "cycle_index": 0,
-        "n_nodes": 59,
-        "n_licensed": 4,
-        "n_pending": 2,
+        "n_nodes": 48,
+        "n_licensed": 2,
+        "n_pending": 0,
         "n_conjectured": 42,
-        "n_rejected": 11,
+        "n_rejected": 4,
         "n_edges": 54,
         "n_effective_edges": 54,
         "n_provisional_edges": 0,

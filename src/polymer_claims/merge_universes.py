@@ -183,7 +183,7 @@ def collect_immuno(path: str | Path = _DEFAULT_IMMUNO_PATH) -> ArmSource:
     import json
     from math import isfinite
 
-    from polymer_grammar import MeasurementBasis, PatternRef, QuantityLeaf, Status
+    from polymer_grammar import CategoricalLeaf, MeasurementBasis, PatternRef, QuantityLeaf, Status
     from polymer_grammar.fdr import FDRTest
 
     raw = json.loads(Path(path).read_text())
@@ -191,21 +191,25 @@ def collect_immuno(path: str | Path = _DEFAULT_IMMUNO_PATH) -> ArmSource:
     fdr_tests: list[FDRTest] = []
     for i, node in enumerate(raw["claims"], start=1):
         status = Status(str(node["status"]).lower())
+        # Count-enrichment nodes carry a dmp_count -> a derived QuantityLeaf; the region-Δβ nodes
+        # (pending/rejected, no count) get a categorical leaf so the arm can hold both claim shapes.
+        dmp = node.get("dmp_count")
+        if dmp is not None:
+            leaf: object = QuantityLeaf(
+                value=float(dmp), unit=None, uncertainty=None,
+                measurement_basis=MeasurementBasis.DERIVED, formula="count_enrichment_dmp_count",
+            )
+        else:
+            leaf = CategoricalLeaf(ontology_term="differential_methylation")
         claims.append(
             Claim(
                 id=node["id"],
                 title=node["title"],
                 pattern=PatternRef(id=node["pattern"]["id"], version=node["pattern"]["version"]),
-                leaves=(
-                    QuantityLeaf(
-                        value=node.get("dmp_count"),
-                        unit=None,
-                        uncertainty=None,
-                        measurement_basis=MeasurementBasis.DERIVED,
-                        formula="count_enrichment_dmp_count",
-                    ),
-                ),
+                leaves=(leaf,),
                 status=status,
+                pending_reason=node.get("pending_reason"),
+                rejection_reason=node.get("rejection_reason"),
             )
         )
         e: float | None = None

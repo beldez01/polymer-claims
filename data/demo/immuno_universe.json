@@ -2,83 +2,618 @@
   "claims": [
     {
       "schema_version": "v1.3",
-      "id": "mhc_ndmp",
-      "title": "n-DMPs Lymphoid vs Myeloid over chr6:29,900,000-33,100,000",
+      "id": "mhc-ndmp",
+      "title": "MHC (chr6:29.9-33.1Mb) is differentially methylated between lymphoid and myeloid lineages (n-DMP count-enrichment, Loyfer WGBS)",
       "pattern": {
-        "id": "count_enrichment",
+        "id": "adjusted_effect",
         "version": "v1"
       },
       "leaves": [
         {
-          "kind": "quantity",
-          "value": 4682,
-          "unit": null,
-          "uncertainty": null,
-          "measurement_basis": "derived",
-          "formula": "count_enrichment_dmp_count",
-          "dimension": null
+          "kind": "categorical",
+          "ontology_term": "differential_methylation",
+          "assay": null
         }
       ],
-      "status": "LICENSED",
+      "status": "licensed",
       "pending_reason": null,
       "rejection_reason": null,
-      "strength": null,
+      "strength": {
+        "magnitude": 0.6,
+        "certainty": 0.6,
+        "evidence_against_null": 0.6,
+        "severity": 0.7,
+        "world_contact": 0.6,
+        "explanatory_virtue": 0.5
+      },
       "conclusion": null,
       "licensing": {
-        "semantic_run_id": "sha256:a71f3d329a9813b9b2a269dc1fecdebbce3d71ea0d07a6aed97359c298d50e5c"
+        "route": "severe_test",
+        "satisfactions": [
+          {
+            "verdict": "satisfied",
+            "materialization": {
+              "id": "M1",
+              "api_version": "v1",
+              "data_version": "loyfer_2023@1",
+              "note": null,
+              "semantic_run_id": "sha256:a71f3d329a9813b9b2a269dc1fecdebbce3d71ea0d07a6aed97359c298d50e5c",
+              "profile_hash": "sha256:617ecb0647f7b036316ac2d16b4e64f874bc1cb489778e69a202ddc9e113e89f",
+              "dimnames_hash": "sha256:5080b9e23f0c26fd04ce39e51775fe3ce7c0c557a314974258e4d041897f941e",
+              "shared_cause_factors": []
+            },
+            "credential_ids": [
+              "methyl-ndmp-ttest",
+              "methyl-ndmp-rank"
+            ],
+            "leg_evidence": {
+              "legs": [
+                {
+                  "identity": "methyl-ndmp-ttest",
+                  "value": 4682.0
+                },
+                {
+                  "identity": "methyl-ndmp-rank",
+                  "value": 4677.0
+                }
+              ],
+              "relative_divergence": 0.0010679196924391287
+            }
+          }
+        ],
+        "rival_set_closure": "open_acknowledged",
+        "rivals_considered": [],
+        "independence_tier": "reproduced",
+        "severity_provenance": null,
+        "shared_cause_overlap": null,
+        "note": null
       },
       "roles": null,
-      "subject": null,
-      "provenance": null,
+      "subject": {
+        "id": "chr6:29900000-33100000",
+        "display": "chr6:29,900,000-33,100,000",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr6",
+        "start": 29900000,
+        "end": 33100000,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 1,
+        "preregistration_hash": "8aa7e3f07b58510cfec32e2f83e5494cbaa535e753da5c8b4bef4ee2a7b18e88",
+        "rationale": null,
+        "prior_cohorts": []
+      },
       "governance": null,
       "evaluation_plan": null,
       "representation_revision": null,
-      "tier": "REPRODUCED",
-      "region": "chr6:29900000-33100000",
-      "n_probes": 11582,
       "dmp_count": 4682,
-      "e_value": "inf",
-      "semantic_run_id": "sha256:a71f3d329a9813b9b2a269dc1fecdebbce3d71ea0d07a6aed97359c298d50e5c"
+      "e_value": "inf"
     },
     {
       "schema_version": "v1.3",
-      "id": "hervk_ndmp",
-      "title": "n-DMPs Lymphoid vs Myeloid across 630 HERV-K LTR5_Hs elements",
+      "id": "hervk-ndmp",
+      "title": "HERV-K(HML-2) LTR5_Hs elements are differentially methylated between lymphoid and myeloid lineages (n-DMP count-enrichment, Loyfer WGBS)",
       "pattern": {
-        "id": "count_enrichment",
+        "id": "adjusted_effect",
         "version": "v1"
       },
       "leaves": [
         {
-          "kind": "quantity",
-          "value": 1083,
-          "unit": null,
-          "uncertainty": null,
-          "measurement_basis": "derived",
-          "formula": "count_enrichment_dmp_count",
-          "dimension": null
+          "kind": "categorical",
+          "ontology_term": "differential_methylation",
+          "assay": null
         }
       ],
-      "status": "LICENSED",
+      "status": "licensed",
       "pending_reason": null,
       "rejection_reason": null,
-      "strength": null,
+      "strength": {
+        "magnitude": 0.6,
+        "certainty": 0.6,
+        "evidence_against_null": 0.6,
+        "severity": 0.7,
+        "world_contact": 0.6,
+        "explanatory_virtue": 0.5
+      },
       "conclusion": null,
       "licensing": {
-        "semantic_run_id": "sha256:e193e5e10828e898d5034a6be077425d5e01ec5febd1494df711376c82c2e55e"
+        "route": "severe_test",
+        "satisfactions": [
+          {
+            "verdict": "satisfied",
+            "materialization": {
+              "id": "M1",
+              "api_version": "v1",
+              "data_version": "loyfer_2023@1",
+              "note": null,
+              "semantic_run_id": "sha256:e193e5e10828e898d5034a6be077425d5e01ec5febd1494df711376c82c2e55e",
+              "profile_hash": "sha256:617ecb0647f7b036316ac2d16b4e64f874bc1cb489778e69a202ddc9e113e89f",
+              "dimnames_hash": "sha256:40f76606bbce4e0a24ec308a1ee09dcf8b699e8ff781cf202c2180636d3d6fa0",
+              "shared_cause_factors": []
+            },
+            "credential_ids": [
+              "methyl-ndmp-ttest",
+              "methyl-ndmp-rank"
+            ],
+            "leg_evidence": {
+              "legs": [
+                {
+                  "identity": "methyl-ndmp-ttest",
+                  "value": 1083.0
+                },
+                {
+                  "identity": "methyl-ndmp-rank",
+                  "value": 1073.0
+                }
+              ],
+              "relative_divergence": 0.009233610341643583
+            }
+          }
+        ],
+        "rival_set_closure": "open_acknowledged",
+        "rivals_considered": [],
+        "independence_tier": "reproduced",
+        "severity_provenance": null,
+        "shared_cause_overlap": null,
+        "note": null
       },
       "roles": null,
-      "subject": null,
-      "provenance": null,
+      "subject": {
+        "id": "HERVK_LTR5_Hs:0-630",
+        "display": "HERVK_LTR5_Hs:0-630",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "HERVK_LTR5_Hs",
+        "start": 0,
+        "end": 630,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 1,
+        "preregistration_hash": "fa72c46239f17957c5fa1de714ff98da1898281accf89b9fa30b63e0f59d483c",
+        "rationale": null,
+        "prior_cohorts": []
+      },
       "governance": null,
       "evaluation_plan": null,
       "representation_revision": null,
-      "tier": "REPRODUCED",
-      "region": "HERVK_LTR5_Hs(630 elements)",
-      "n_probes": 2587,
       "dmp_count": 1083,
-      "e_value": "3.2507899878758665e+274",
-      "semantic_run_id": "sha256:e193e5e10828e898d5034a6be077425d5e01ec5febd1494df711376c82c2e55e"
+      "e_value": "3.2507899878758665e+274"
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "hla_a_promoter",
+      "title": "HLA-A class I promoter shore; methylated in lymphoid vs open in myeloid (lineage generalization of the T_naive>Monocyte anchor, real subset Delta-beta approx 0.35)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "hla",
+          "assay": null
+        }
+      ],
+      "status": "pending",
+      "pending_reason": "untested",
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": {
+        "id": "chr6:29940300-29941200",
+        "display": "chr6:29,940,300-29,941,200",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr6",
+        "start": 29940300,
+        "end": 29941200,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 2,
+        "preregistration_hash": "d192591b1b535ebdec86685519015d5b42ad12dba10354340630f74335f260ee",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "hla_b_promoter",
+      "title": "HLA-B class I promoter shore; lymphoid methylated vs myeloid open, same direction as HLA-A",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "hla",
+          "assay": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": {
+        "id": "chr6:31358500-31359500",
+        "display": "chr6:31,358,500-31,359,500",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr6",
+        "start": 31358500,
+        "end": 31359500,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 9,
+        "preregistration_hash": "e730466c3026c2703fecf6de40089af42c682f0a739f27385cab87fbab0f1d69",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "hla_c_promoter",
+      "title": "HLA-C class I promoter shore; lymphoid methylated vs myeloid open",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "hla",
+          "assay": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": {
+        "id": "chr6:31273400-31274400",
+        "display": "chr6:31,273,400-31,274,400",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr6",
+        "start": 31273400,
+        "end": 31274400,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 9,
+        "preregistration_hash": "0d87897b759510031aecde81554bd74b7969a86361a01306f38275269cfb7a41",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "hla_drb1_promoter",
+      "title": "HLA-DRB1 class II promoter shore; class II is OPEN/hypomethylated in antigen-presenting myeloid cells, so lymphoid (mostly T/NK) > myeloid methylation. CAVEAT: B cells (lymphoid) also express class II and dilute the lymphoid mean - direction corrected from the subset panel which had it backwards (e<1)",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "hla",
+          "assay": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": {
+        "id": "chr6:32591100-32592100",
+        "display": "chr6:32,591,100-32,592,100",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr6",
+        "start": 32591100,
+        "end": 32592100,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 9,
+        "preregistration_hash": "4f24658ad3e86ffce7ad509020b494a7df9ee312599c3833ba28b65c7053b8f2",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "hla_dqb1_promoter",
+      "title": "HLA-DQB1 class II promoter shore; same APC-hypomethylation logic as DRB1 (lymphoid > myeloid), same B-cell dilution caveat",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "hla",
+          "assay": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": {
+        "id": "chr6:32667950-32668950",
+        "display": "chr6:32,667,950-32,668,950",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr6",
+        "start": 32667950,
+        "end": 32668950,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 9,
+        "preregistration_hash": "cb1f52458e44af00e245d61acb1632388f6345cfc1721aa8ce1106612bf5c207",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "line1_l1hs_chr2",
+      "title": "L1HS young LINE-1 5'UTR/promoter (rmsk chr2:160114516-160120680 +strand); young L1 hypomethylated/derepressed in myeloid vs lymphoid, so lymphoid > myeloid",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "te",
+          "assay": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": {
+        "id": "chr2:160114516-160115516",
+        "display": "chr2:160,114,516-160,115,516",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr2",
+        "start": 160114516,
+        "end": 160115516,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 9,
+        "preregistration_hash": "29b4344abe5490d0884e8aae28479369eadbdadfec55770d86499060cb2bd2aa",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "line1_l1hs_chr9",
+      "title": "L1HS young LINE-1 5' end (rmsk chr9:2515633-2521964 -strand); myeloid-hypomethylation hypothesis, lymphoid > myeloid, independent locus from chr2",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "te",
+          "assay": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": {
+        "id": "chr9:2520964-2521964",
+        "display": "chr9:2,520,964-2,521,964",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr9",
+        "start": 2520964,
+        "end": 2521964,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 9,
+        "preregistration_hash": "eb869344f15c5dc3af4d27ed0e19734e8207c8dd99b1a0e73b1fd00bbc4210ec",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "hervk_ltr_chr5",
+      "title": "HERV-K(HML-2) 5' LTR5_Hs (rmsk full-length provirus chr5:30486652-30496098 -strand); HERV-K LTR derepression in myeloid, lymphoid > myeloid",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "te",
+          "assay": null
+        }
+      ],
+      "status": "rejected",
+      "pending_reason": null,
+      "rejection_reason": "refuted",
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": {
+        "id": "chr5:30495147-30496098",
+        "display": "chr5:30,495,147-30,496,098",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr5",
+        "start": 30495147,
+        "end": 30496098,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 9,
+        "preregistration_hash": "e7978a23747edb8ca292e130d301255202eddae4992a0c4763e819c3e1c0ad6a",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
+    },
+    {
+      "schema_version": "v1.3",
+      "id": "hervk_ltr_chr12",
+      "title": "HERV-K(HML-2) 5' LTR5_Hs (rmsk full-length provirus chr12:58327458-58336915 -strand); re-included from the subset panel where it was coverage-pruned at n=3/group - lineage n=30/17 should power it",
+      "pattern": {
+        "id": "adjusted_effect",
+        "version": "v1"
+      },
+      "leaves": [
+        {
+          "kind": "categorical",
+          "ontology_term": "te",
+          "assay": null
+        }
+      ],
+      "status": "pending",
+      "pending_reason": "untested",
+      "rejection_reason": null,
+      "strength": null,
+      "conclusion": null,
+      "licensing": null,
+      "roles": null,
+      "subject": {
+        "id": "chr12:58335947-58336915",
+        "display": "chr12:58,335,947-58,336,915",
+        "note": null,
+        "kind": "genomic_region",
+        "assembly": "hg38",
+        "chrom": "chr12",
+        "start": 58335947,
+        "end": 58336915,
+        "strand": "."
+      },
+      "provenance": {
+        "generated_by": "imported",
+        "agent_id": null,
+        "method": null,
+        "version": null,
+        "search_cardinality": 2,
+        "preregistration_hash": "fd1b27f22d06cff0924a0bd5bfc0f5aa330474c1674f79324f063f0ad75d06f4",
+        "rationale": null,
+        "prior_cohorts": []
+      },
+      "governance": null,
+      "evaluation_plan": null,
+      "representation_revision": null
     }
   ],
   "defeat_edges": [],
