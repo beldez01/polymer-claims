@@ -6,10 +6,9 @@ Every claim here is REPORTED (`GenerationMode.LITERATURE_EXTRACTED`) and therefo
 probe deliberately does not do. The point is to measure formalization yield and flush IR
 gaps, not to license.
 
-GAP (logged): a bare reported quantity has no home pattern in `pattern.registry` (which only
-carries `adjusted_effect@v1`). We reference a placeholder `PatternRef("reported_quantity",
-"v1")` — structurally valid because `Claim.pattern` is an unresolved id+version, not a
-registry lookup — and record the missing pattern as an analysis-class expansion (Task 6).
+`reported_quantity@v1` and `mechanistic_law@v1` are registered in the pure grammar
+(analysis-class); `patterns.py` re-exports their refs (plus the domain `sense_and_kill@v1`
+registered from this umbrella) so this module has a single import site.
 """
 from __future__ import annotations
 
@@ -20,15 +19,12 @@ from polymer_grammar.leaf import (
     PropositionLeaf,
     QuantityLeaf,
 )
-from polymer_grammar.pattern import PatternRef
 from polymer_grammar.provenance import GenerationMode, Provenance
 from polymer_grammar.status import Status
 
+from .patterns import MECHANISTIC_LAW as _MECHANISTIC_LAW
+from .patterns import REPORTED_QUANTITY as _REPORTED_QUANTITY
 from .sources import SOURCES
-
-# Placeholder patterns for content the registry has no home for yet (see gap report GAP-1).
-_REPORTED_QUANTITY = PatternRef(id="reported_quantity", version="v1")
-_MECHANISTIC_LAW = PatternRef(id="mechanistic_law", version="v1")
 
 
 def _reported_provenance(source_key: str) -> Provenance:
