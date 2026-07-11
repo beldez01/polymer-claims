@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sb-plm06-toggle-leak",
+    "title": "A synthetic toggle switch's OFF-state leak is ~1-5% of ON",
+    "tier": 1,
+    "skip": false,
+    "topic": "computing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 0.03,
+      "unit": null,
+      "uncertainty": null,
+      "measurement_basis": "DERIVED",
+      "formula": "off_state_expression / on_state_expression"
+    },
+    "source": "PLM-VI",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm06-narrative",
+    "title": "Decoupling as a recurring design move (narrative synthesis)",
+    "tier": 3,
+    "skip": true,
+    "topic": "computing",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-VI",
+    "schema_fit": {"status": "clean"}
+  }
+]
