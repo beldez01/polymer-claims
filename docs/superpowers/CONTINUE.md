@@ -12,7 +12,36 @@
 
 ---
 
-## Current state (2026-07-11) — UNIFIED UNIVERSE + promoter contract (latest; `origin/main == a32e6ed`)
+## Current state (2026-07-11, session close) — immuno first-class + naming/direction decisions (LATEST)
+
+> `origin/main == f3bf319`. **Supersedes the 761-node / immuno-2 figures below:** the immuno-arm cleanup
+> dropped 2 phantom duplicates, so the merged universe is now **759 nodes** (immuno 11 · pharmaco 696 ·
+> reference-corpus 47 · synbio 5), **6 unique licensed**. Corpus = 4; grammar/protocol untouched.
+
+**IMMUNO ARM MADE FIRST-CLASS (`f3bf319`)** — immuno now has its own canonical bundle
+`data/demo/immuno_universe.json` (11 nodes, real hyphen ids: 2 licensed count-enrichment MHC/HERV-K +
+9 refused region-Δβ), and those 11 were REMOVED from the reference seed where they'd been mis-tagged
+`arm=polymergenomics` and duplicating the old underscore-id stubs. `collect_immuno` patched to hold the
+non-count (region) nodes (categorical leaf + pending/rejection reasons). Merge unit tests 5/5; no betas.
+
+### Decisions to carry forward — NOT yet executed (for the next instance)
+1. **Rename the "polymergenomics" arm by SUBJECT — it's a project/dir name, not a subject.** DECIDED:
+   split the 47 reference claims into their 4 real subjects — **immunogenetics** (HLA substitution/
+   methylation/expression), **transposable-elements** (ERV/LINE silencing/methylation/oncoexaptation),
+   **dna-biophysics** (recombination, nucleosome, curvature), **molecular-evolution** (codon cost, COSMIC
+   signatures, Ti/Tv). Update `collect_polymergenomics` to emit 4 subject `ArmSource`s via a per-claim
+   subject map + adjust the `make_merged_universe` call; regenerate. **Stop labeling any arm "polymergenomics".**
+2. **Self-containment — stop tapping sibling directories.** The universe LOADS from in-repo JSON (fine);
+   only *regeneration* reaches out — the immuno drive reads the WGBS atlas in `~/Desktop/PolymerGenomicsAPI/`.
+   Going forward: pin the small extracted subsets we actually use into `polymer-claims/data/` so even
+   regeneration is self-contained; retrofit the immuno source when convenient.
+3. **Rebalance toward SYNTHETIC BIOLOGY (the priority).** Universe is pharmaco-heavy (696/759); synbio is 5.
+   The next instance's focus is RAMPING UP the synbio arm (WAYLAND). Pharmaco is over-represented relative
+   to intent — don't add more pharmaco claims for now.
+
+---
+
+## Current state (2026-07-11) — UNIFIED UNIVERSE + promoter contract (superseded by the session-close block above; `origin/main` was `a32e6ed`)
 
 > **`main` PUSHED — `origin/main == a32e6ed`.** Clean linear lineage over the WAYLAND + pharmaco arcs
 > below (both ancestors, both still valid). Corpus = 4. grammar/protocol untouched this arc (all
