@@ -12,11 +12,47 @@
 
 ---
 
-## Current state (2026-07-10) — authoritative snapshot
+## Current state (2026-07-10, later) — authoritative snapshot (WAYLAND synbio arc)
 
-> Session 2026-07-09 → 10. `main` = `47ddda5` (**local; ahead of `origin/main` `e58adf6` — not yet
-> pushed**). grammar/protocol stay pure + numpy-free; **Corpus = exactly 4 collections**. Also on `main`
-> (merged concurrently by another session): the **pharmacogenomic engine** (`[pharmaco]` extra).
+> `main` = `753c02d` (**local; 10 commits ahead of `origin/main` `c0c8a11` — NOT pushed**; all 10 are
+> Wayland). Lineage is clean & linear — the immuno-erv arc (`47ddda5`) and the pharmacogenomic engine
+> are **ancestors** of HEAD (both already on `main`, both already pushed to origin at `c0c8a11`); the
+> immuno-erv snapshot below is a **still-valid parallel arm**, not superseded (different module). Corpus
+> = exactly 4 collections. **grammar/protocol note:** the grammar gained ONE additive field this arc
+> (`MeasurementContext` on `QuantityLeaf`) — proven byte-identical (drop-when-None serializer); still
+> numpy-free.
+
+**WAYLAND — the synthetic-biology claims sub-universe** (new arc, this session). Goal: formalize the
+`Research/topics/{synthetic-biology,programmable-living-medicines}/` compendia into a licensed claims
+sub-universe → a **blinded, pre-registered re-derivation of the Durendal genotype-directed therapy**
+(RUNX1-RUNX1T1 t(8;21) AML) as proof the engine *derives*, not just verifies. Canonical docs:
+- Program plan: `docs/superpowers/plans/2026-07-10-synbio-claims-universe.md` (5-phase arc + Phase-1 tasks + **Progress Log**).
+- Phase 0 design: `docs/superpowers/specs/2026-07-10-synbio-claims-universe-design.md` (taxonomy, two-stratum rule, firewall, expansion doctrine).
+- Phase 2 design: `docs/superpowers/specs/2026-07-10-synbio-phase2-design.md` (decomposition 2a-2d).
+- Gap report (Phase-2 entry gate): `docs/superpowers/notes/2026-07-10-synbio-grammar-gaps.md`.
+- SDD ledger (commits per task): `.superpowers/sdd/progress.md` (WAYLAND sections).
+- Governing law: memory `feedback_ir_monotonic_expansion` (additive-or-nothing, proven byte-identical; general→core, domain→periphery).
+
+**Shipped (all merged to local `main`):**
+- **Phase 0 spec + Phase 1 probe** (`2bb5e11`..`3f44881`). New `src/polymer_claims/synbio/` pkg (umbrella-side). 5 reported claims C1-C5 (`claims.py`) validate through the real v1.3 grammar at **CONJECTURED** via `LITERATURE_EXTRACTED` — the **two-stratum rule**: reported priors never self-license; only recomputed claims (Phase 2d) join the licensed spine. `probe.py` = harness. Umbrella 779p, no regression; Opus review READY-TO-MERGE.
+- **Phase 2a — GAP-2 resolved** (`a811185`+`753c02d`), the **first core-grammar expansion** under the doctrine: optional structured `MeasurementContext` (tissue/cell_line/assay/condition, all-optional, all-None rejected) on `QuantityLeaf` + drop-when-None `@model_serializer` (mirrors `capability.py:188`). **Byte-identity + hash-stability PROVEN and Opus-independently-verified.** C2 re-expressed w/ assay context. grammar 588 / protocol 497 / umbrella 780p-1xfail.
+- **Grammar gap findings** (probe output): GAP-2 (context) RESOLVED; **GAP-3 (interval/range) DEFERRED** (YAGNI — no spine caller yet; xfail tripwire armed in `tests/synbio/test_claims_intervals.py`); GAP-1 (reported-quantity/mechanistic-law patterns → 2b registry) + GAP-4 (reported defeaters must be `provisional=True` → 2b wiring) open.
+
+### NEXT — where to proceed (WAYLAND)
+- **Phase 2b — patterns** (unblocked, fast, recommended next): register `reported_quantity`, `mechanistic_law` (retire the Phase-1 placeholder `PatternRef`s in `synbio/claims.py`), and the domain `sense_and_kill` pattern in the open `pattern.registry`. Additive, no core change.
+- **Phase 2c — ingestion**: markdown→claims extractor over the compendia (human-in-the-loop), reported-stratum at scale.
+- **Phase 2d — the licensed spine** (Phase-2 exit gate + "traction"): execution adapters over a real expression atlas → "RUNX1-RUNX1T1 clears the ~13 TPM floor in AML" LICENSED@REPRODUCED, reusing the SE-Contract seam + two-leg registry (STRATA/methyl). **DATA-GATED: needs real AML fusion-expression RNA-seq** — confirm availability before committing; warm up on PAX3-FOXO1. Uses 2a's `MeasurementContext(tissue="AML", assay="RNA-seq TPM")`.
+- **Phases 3-4**: blinded seed + pre-registration (firewall) → the Durendal re-derivation (headline). See program plan.
+- **Push coordination:** local `main` (Wayland) is unpushed and shares the checkout with other instances; the user is reconciling those. Do NOT push without the user.
+
+---
+
+## Current state (2026-07-10, earlier) — immuno-erv arm (parallel, still valid; main hash `47ddda5` now an ancestor of `753c02d` above)
+
+> Session 2026-07-09 → 10. `main` was `47ddda5` at this snapshot (now an ancestor of `753c02d`; the
+> "ahead of origin" note is stale — origin/main is now `c0c8a11`). grammar/protocol stay pure + numpy-free;
+> **Corpus = exactly 4 collections**. Also on `main` (merged concurrently by another session): the
+> **pharmacogenomic engine** (`[pharmaco]` extra).
 
 **Immuno / ERV methylation licensing drive merged** (`feat/immuno-erv-drive` → merge `47ddda5`) — two
 genuine **licensed immuno nodes** on the real **Loyfer 2023 WGBS atlas** (GSE186458), via the **e-LOND

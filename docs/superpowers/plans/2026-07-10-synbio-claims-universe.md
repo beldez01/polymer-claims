@@ -35,6 +35,18 @@ This is a **program plan**, not a single implementation plan. The writing-plans 
 
 ---
 
+## Progress Log
+
+> Authoritative status. Commits are on local `main` (unpushed). Detail in `.superpowers/sdd/progress.md`.
+
+- **2026-07-10 — Phase 0 (charter/design) DONE.** Spec `specs/2026-07-10-synbio-claims-universe-design.md`: claim taxonomy vs real IR, two-stratum rule (`LITERATURE_EXTRACTED` priors vs `AGENT_GENERATED` spine), firewall, expansion doctrine.
+- **2026-07-10 — Phase 1 (formalization probe) DONE & MERGED** (`c0c8a11..3f44881`). `src/polymer_claims/synbio/` pkg; C1-C5 validate through the real grammar at CONJECTURED; gap report written (Phase-2 entry gate). Umbrella 779p, no regression; Opus review READY-TO-MERGE (2 Minor fixed). Gaps: GAP-2 context / GAP-3 interval (general), GAP-1 patterns / GAP-4 provisional-defeater (contained).
+- **2026-07-10 — Phase 2 design DONE.** Spec `specs/2026-07-10-synbio-phase2-design.md` decomposes 2a-2d + DAG + gates. Decisions ratified: first slice = 2a; context shape = structured `MeasurementContext`; GAP-3 deferred (YAGNI).
+- **2026-07-10 — Phase 2a (GAP-2 context) DONE & MERGED** (`a811185`+`753c02d`). First core-grammar expansion: additive `MeasurementContext` on `QuantityLeaf` + drop-when-None serializer; **byte-identity + hash-stability proven & Opus-independently-verified**; grammar 588 / protocol 497 / umbrella 780p-1xfail. C2 re-expressed. GAP-2 RESOLVED. 1 review Minor fixed (all-None context rejected).
+- **▶ NEXT: Phase 2b (patterns)** — unblocked. Then 2c (ingestion), 2d (licensed spine — DATA-GATED on real AML fusion RNA-seq). Then Phases 3-4 (firewall + Durendal re-derivation).
+
+---
+
 ## 1. North star & thesis
 
 The Durendal design record is already a Polymer Claims corpus written in prose: a set of claims with strengths, a defeat graph (each rejected candidate — the SNV lane, FIP1L1-PDGFRA, BCR-ABL, tTA — is defeated by a specific principle), and a grounded extension (the surviving design). The two research bodies are the seed that graph grows from. **Wayland's deliverable is to make that collapse an explicit, auditable, re-runnable computation** instead of one expert's single pass — and to prove it by re-deriving Durendal *without having been shown the answer*.
