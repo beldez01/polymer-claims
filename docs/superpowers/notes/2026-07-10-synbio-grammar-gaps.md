@@ -147,6 +147,7 @@ W3 ships no `Leaf`/`StrengthVector` change). Numbering continues from GAP-4.
 
 ### GAP-11 [domain] — pooled prevalence needs per-indication stratification
 - **constraint:** "~10–20% HLA-LOH across many solid tumors" collapses to one figure with no tumor-type context. **candidate:** per-tumor-type `context.condition` once a breakdown exists.
+- **PARTIAL (2026-07-12):** the range facet is now carried honestly — `sb-plm06-hla-loh-prevalence` uses `low=10, high=20` (fabricated `15±5` dropped) via the GAP-3 low/high fields. GAP-11 stays **OPEN** for its defining residue: the pooled figure still lacks the per-tumor-type stratification (a `context` refinement, not an interval one).
 
 ### GAP-12 [general] — one-sided bound (floor) direction
 - **constraint:** ">10 weeks B-cell depletion" is a one-sided floor; `QuantityLeaf` has only a point `value` + symmetric `uncertainty`, so it collapses to `value=10` indistinguishable from an exact estimate.

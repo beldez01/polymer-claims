@@ -62,20 +62,22 @@
     "topic": "computing",
     "leaf": {
       "kind": "quantity",
-      "value": 15,
+      "value": 10,
       "unit": "%",
-      "uncertainty": 5,
+      "uncertainty": null,
       "measurement_basis": "FUNDAMENTAL",
-      "formula": null
+      "formula": null,
+      "low": 10,
+      "high": 20
     },
     "source": "PLM-VI",
     "schema_fit": {
       "status": "gap",
-      "constraint": "Chapter gives a pooled range (~10-20%) across 'many solid tumors' without specifying which tumor types or a per-indication estimate.",
-      "current_ir_behavior": "Collapses to a single point value (15%±5%) with no tumor-type context.",
-      "candidate_resolution": "Tag with per-tumor-type context (context.condition) once a per-indication breakdown is available, rather than one pooled figure.",
+      "constraint": "The pooled ~10-20% range is now carried honestly by low/high (GAP-3). The RESIDUAL gap is stratification: it is pooled across 'many solid tumors' with no per-tumor-type breakdown.",
+      "current_ir_behavior": "Carried as a low/high range with no tumor-type context; the pooled figure obscures per-indication variation.",
+      "candidate_resolution": "Tag with per-tumor-type context (context.condition) once a per-indication breakdown is available, rather than one pooled range.",
       "expansion_class": "domain",
-      "purity_cost": "A single prevalence figure obscures that LOH rate is tumor-type-dependent, which is exactly the clinical nuance a stratified context field would need to capture."
+      "purity_cost": "A single pooled range obscures that LOH rate is tumor-type-dependent, which a stratified context field would capture."
     }
   },
   {
