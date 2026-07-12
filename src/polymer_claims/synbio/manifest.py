@@ -33,6 +33,8 @@ class ManifestLeaf(_M):
     uncertainty: float | None = None
     measurement_basis: str | None = None  # "FUNDAMENTAL" | "DERIVED"
     formula: str | None = None
+    low: float | None = None
+    high: float | None = None
     context: dict | None = None  # {tissue,cell_line,assay,condition}
     # proposition
     data: str | None = None

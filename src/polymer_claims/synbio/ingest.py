@@ -52,6 +52,8 @@ def build_claim(entry: ManifestEntry) -> Claim:
             measurement_basis=MeasurementBasis[leaf_spec.measurement_basis],
             formula=leaf_spec.formula,
             context=_context(leaf_spec.context),
+            low=leaf_spec.low,
+            high=leaf_spec.high,
         )
         pattern = REPORTED_QUANTITY
     elif leaf_spec.kind == "proposition":
