@@ -78,7 +78,8 @@
       "current_ir_behavior": "The caveat can only be appended as free text inside title/context, not as a structured, queryable field distinguishing delivery-endpoint type from editing-endpoint type.",
       "candidate_resolution": "Add an endpoint_type or validity_caveat field to the quantity leaf (e.g. 'reporter_delivery' vs 'durable_editing') so measurement-type mismatches are queryable rather than buried in prose.",
       "expansion_class": "analysis",
-      "purity_cost": "Downstream consumers filtering by value/unit alone could conflate this delivery-efficiency figure with a true durable-editing-efficiency claim, overstating correction rates."
+      "purity_cost": "Downstream consumers filtering by value/unit alone could conflate this delivery-efficiency figure with a true durable-editing-efficiency claim, overstating correction rates.",
+      "gap_kind": "endpoint-type"
     }
   },
   {
@@ -124,7 +125,8 @@
       "current_ir_behavior": "Only the PEG-lipid figure (1.5 mol%) survives as a structured value; the other three ratio terms are demoted to unstructured text in context/title.",
       "candidate_resolution": "A composite/vector-valued quantity leaf kind (a list of named value+unit pairs) or a dedicated ratio/composition leaf type.",
       "expansion_class": "general",
-      "purity_cost": "A query over structured quantities cannot reconstruct or validate the full formulation ratio from this entry alone, only the isolated PEG-lipid figure."
+      "purity_cost": "A query over structured quantities cannot reconstruct or validate the full formulation ratio from this entry alone, only the isolated PEG-lipid figure.",
+      "gap_kind": "composite-quantity"
     }
   },
   {
@@ -147,7 +149,8 @@
       "current_ir_behavior": "All three formulation-outcome branches are flattened into one prose 'data' field.",
       "candidate_resolution": "Represent as a structured list of (formulation-perturbation, organ-outcome) tuples under one proposition, or as three linked propositions sharing a common warrant.",
       "expansion_class": "domain",
-      "purity_cost": "A query for 'what does an anionic SORT lipid do' cannot isolate the spleen-specific sub-claim without parsing prose, and the one-to-one perturbation-outcome correspondence is not machine-checkable."
+      "purity_cost": "A query for 'what does an anionic SORT lipid do' cannot isolate the spleen-specific sub-claim without parsing prose, and the one-to-one perturbation-outcome correspondence is not machine-checkable.",
+      "gap_kind": "categorical-mapping"
     }
   },
   {

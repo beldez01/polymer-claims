@@ -39,7 +39,7 @@ and spread-exclusivity (bounds XOR symmetric `uncertainty`); the wrap-serializer
   context sub-key), GAP-11 (per-tumor stratification), GAP-13 (endpoint-type), GAP-14 (composite/vector quantity),
   GAP-15 (structured categorical). Follow the same recipe when a real corpus demands one.
 - **Phase 2d licensed spine** (still the headline, data-gated): `synbio/spine.py` two-leg floor over real AML fusion RNA-seq.
-- **Aggregator precision follow-up:** `aggregate_gaps` dedup on a controlled `gap_kind` tag + reconcile vs canonical GAP-1..4.
+- **Aggregator precision follow-up (Task 2 shipped 2026-07-12):** `aggregate_gaps` dedup on a controlled `gap_kind` tag + reconcile vs canonical GAP-1..4 — six surviving open gaps (GAP-7/8/11/13/14/15) tagged with `gap_kind`, canonical ids confirmed via integration test.
 
 ---
 

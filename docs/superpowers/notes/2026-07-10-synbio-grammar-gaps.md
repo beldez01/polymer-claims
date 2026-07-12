@@ -176,11 +176,15 @@ W3 ships no `Leaf`/`StrengthVector` change). Numbering continues from GAP-4.
   GAP-11 (per-tumor stratification — its range facet is now expressible via low/high, but the
   stratification residue keeps it open), GAP-13 (endpoint-type), GAP-14 (composite/vector quantity),
   GAP-15 (structured categorical mapping).
-- **`aggregate_gaps` dedup is too literal (engine gap).** It keys on the normalized
+- **`aggregate_gaps` dedup is too literal (engine gap).** RESOLVED (2026-07-12). It keys on the normalized
   `(expansion_class, constraint)` *prose*, so the five interval-family gaps — phrased differently
   by five independent extractors — did **not** collapse; 11 raw → 11 canonical (zero merge). And
   it renumbers from 5 without reconciling against the canonical GAP-1..4, so interval strains
   surface as new GAP-9/10/12 rather than as instances of GAP-3. The "fixed list" is only as fixed
-  as the wording. *Candidate:* dedup on a small controlled `gap_kind` tag (extractor-assigned)
-  rather than free-text constraint, and seed the aggregator with the existing GAP-1..4 keys.
-  (Both logged, non-blocking — the aggregator shipped to spec; this is a precision follow-up.)
+  as the wording. **Resolution:** dedup on a controlled `gap_kind` tag (extractor-assigned, reconciled
+  against `CANONICAL_GAP_KINDS` registry) rather than free-text constraint, seeding the aggregator
+  with the existing GAP-1..4 mappings. Each of the six surviving open gaps (GAP-7, GAP-8, GAP-11, GAP-13,
+  GAP-14, GAP-15) is now tagged with its `gap_kind`, so `aggregate_gaps` over the corpus returns
+  the stable canonical ids (GAP-7/8/11/13/14/15) and paraphrases of one strain collapse to a single
+  canonical record. Collateral: any untagged entry (backward-compat) falls back to prose dedup, numbering
+  above the canonical ceiling (GAP-16+), a clean partitioning of tagged and untagged gaps.

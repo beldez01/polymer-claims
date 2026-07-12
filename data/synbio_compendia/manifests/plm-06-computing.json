@@ -77,7 +77,8 @@
       "current_ir_behavior": "Carried as a low/high range with no tumor-type context; the pooled figure obscures per-indication variation.",
       "candidate_resolution": "Tag with per-tumor-type context (context.condition) once a per-indication breakdown is available, rather than one pooled range.",
       "expansion_class": "domain",
-      "purity_cost": "A single pooled range obscures that LOH rate is tumor-type-dependent, which a stratified context field would capture."
+      "purity_cost": "A single pooled range obscures that LOH rate is tumor-type-dependent, which a stratified context field would capture.",
+      "gap_kind": "stratification"
     }
   },
   {

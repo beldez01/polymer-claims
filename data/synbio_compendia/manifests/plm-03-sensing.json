@@ -74,7 +74,8 @@
       "current_ir_behavior": "Forced into FUNDAMENTAL with unit='bits' so the required unit field is non-null, even though no physical measurement was performed.",
       "candidate_resolution": "Add a third measurement_basis value (e.g. 'ANALYTIC') for constants derived from combinatorics/information theory rather than instrumentation or data reduction.",
       "expansion_class": "domain",
-      "purity_cost": "Additive enum value on measurement_basis; existing FUNDAMENTAL/DERIVED entries are untouched and byte-identical."
+      "purity_cost": "Additive enum value on measurement_basis; existing FUNDAMENTAL/DERIVED entries are untouched and byte-identical.",
+      "gap_kind": "analytic-basis"
     }
   },
   {
@@ -127,7 +128,8 @@
       "current_ir_behavior": "Gene identity is folded into the free-text condition string as a workaround, so it is not a structured, queryable field.",
       "candidate_resolution": "Add an optional 'gene' (or 'target_locus') sub-key to leaf.context for claims whose defining stratification variable is a gene/locus rather than a tissue or cell line.",
       "expansion_class": "subject",
-      "purity_cost": "Additive optional context sub-key; existing entries that omit it are untouched and byte-identical."
+      "purity_cost": "Additive optional context sub-key; existing entries that omit it are untouched and byte-identical.",
+      "gap_kind": "gene-locus-context"
     }
   },
   {

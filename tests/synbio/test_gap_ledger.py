@@ -1,4 +1,4 @@
-from polymer_claims.synbio.manifest import ManifestEntry
+from polymer_claims.synbio.manifest import ManifestEntry, load_manifest
 from polymer_claims.synbio.gap_ledger import aggregate_gaps, CANONICAL_GAP_KINDS
 
 
@@ -43,3 +43,12 @@ def test_unknown_tagged_kind_gets_fresh_number():
     gaps = aggregate_gaps([_entry("z", "gap", "novel", "general", gap_kind="totally-new-kind")])
     assert len(gaps) == 1 and gaps[0].id.startswith("GAP-")
     assert gaps[0].gap_kind == "totally-new-kind"
+
+
+def test_real_manifests_aggregate_to_canonical_ids():
+    from pathlib import Path
+    paths = sorted((Path(__file__).resolve().parents[2]
+                    / "data/synbio_compendia/manifests").glob("*.json"))
+    gaps = aggregate_gaps([e for p in paths for e in load_manifest(p)])
+    assert {g.id for g in gaps} == {"GAP-7", "GAP-8", "GAP-11", "GAP-13", "GAP-14", "GAP-15"}
+    assert all(g.gap_kind for g in gaps)   # every surviving gap is now tagged
