@@ -23,6 +23,7 @@ class SchemaFit(_M):
     candidate_resolution: str | None = None
     expansion_class: str | None = None  # general | analysis | subject | domain
     purity_cost: str | None = None
+    gap_kind: str | None = None  # controlled dedup tag (see gap_ledger.CANONICAL_GAP_KINDS)
 
 
 class ManifestLeaf(_M):
