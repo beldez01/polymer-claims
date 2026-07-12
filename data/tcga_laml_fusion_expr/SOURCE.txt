@@ -1,0 +1,6 @@
+expression: https://gdc-hub.s3.us-east-1.amazonaws.com/download/TCGA-LAML.star_tpm.tsv.gz
+  unit: log2(TPM+1) (converted to raw TPM = 2^x - 1 in build_extract.py)
+  sha256: cf3c45d8be0899e71dc7d0decf4830deecc279d787e30a1fec3922b591298b05
+fusion_label: cBioPortal REST /api/studies/laml_tcga_pub/clinical-data ?clinicalDataType=PATIENT&attributeId=CYTOGENETICS (karyotype; fusion_pos iff 't(8;21)' in value)
+panel: RUNX1T1 ENSG00000079102, RUNX1 ENSG00000159216, ACTB ENSG00000075624, GAPDH ENSG00000111640
+fetched: 2026-07-12

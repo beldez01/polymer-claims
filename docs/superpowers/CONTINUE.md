@@ -12,7 +12,37 @@
 
 ---
 
-## Current state (2026-07-12, session close) — GAP-3 SHIPPED: interval/range/bound on QuantityLeaf (LATEST)
+## Current state (2026-07-12) — SPINE 2d-i SHIPPED: TCGA-LAML fusion-expression contract (LATEST)
+
+> On `main`. First step of the WAYLAND licensed spine (Phase 2d). Spec/plan
+> `docs/superpowers/{specs,plans}/2026-07-12-spine-2di-fusion-expr-contract*`. Corpus stays 4;
+> **no claim/licensing yet** (that is 2d-ii). First expression (RNA-seq) contract in the repo.
+
+**`se:tcga_laml_fusion_expr@1` BUILT + validated** (contract committed at
+`src/polymer_claims/contracts/tcga_laml_fusion_expr.{json,betas.tsv}`; dim `[4, 151]`). The measurement seam
+2d-ii's two-leg recompute will license against.
+- **Builder** `src/polymer_claims/ingest/tcga_laml_fusion_expr.py::build_fusion_expr_contract` (mirrors
+  `build_pharmaco_contract`; `expr::<GENE>` rows, fusion label under `Sample_Group`) — fixture-tested, reviewed clean.
+- **Real data** (one-shot fetch `data/tcga_laml_fusion_expr/build_extract.py`; big matrix + raw clinical json
+  gitignored, small extract pinned): TCGA-LAML STAR TPM (151 RNA-seq cases) — **the matrix is LOG2(TPM+1),
+  converted to raw TPM = 2^x−1** in the extract. Fusion label = cBioPortal CYTOGENETICS karyotype, `fusion_pos`
+  iff `t(8;21)` (**6 cases**: TCGA-AB-2819/2858/2875/2886/2937/2950; all 151 have karyotype, 0 dropped).
+- **HEADLINE SIGNAL:** RUNX1T1 fusion+ median **94.0 TPM** vs fusion− median **0.023 TPM** — a **4161× separation**;
+  the pre-registered ~13 TPM floor sits cleanly in the gap. Housekeeping (ACTB/GAPDH) flat by fusion status;
+  RUNX1 (partner) non-discriminating. 4-gene panel fixed (no gene-fishing).
+
+### NEXT — Phase 2d-ii (the licensed spine)
+- Wire `expression_floor_claim` to `se:tcga_laml_fusion_expr@1`; pre-register the literature-anchored ~13 TPM
+  floor (commit-before-data; confirm the exact value + citation from the compendia). Two INDEPENDENT recompute
+  legs (mean-diff + Hodges-Lehmann on the fusion group split, `agreement_mode="both_satisfy_criterion"`) +
+  single-leg betting e-value; `register_hypotheses` → `license_batch` via `run_cycle` → LICENSED@REPRODUCED.
+  Reuses the pharmaco MTAP→Palbociclib plumbing (`pharmaco_adapters.py`, `pharmaco_evidence.py`).
+- **Power caveat:** n=6 fusion+ is small, but the 4161× separation is enormous — likely clears the e-LOND
+  first-test bar (~33), though an honest PENDING is a possible outcome and is fine.
+
+---
+
+## Current state (2026-07-12, session close) — GAP-3 SHIPPED: interval/range/bound on QuantityLeaf (superseded as LATEST by the 2d-i block above)
 
 > On `main` (committed, not yet pushed as of this block; `origin/main` was `699a963` at the synbio-ramp push).
 > **First core-grammar expansion since Phase 2a.** SDD ledger `.superpowers/sdd/progress.md` (GAP-3 Tasks 1–5).
