@@ -5,7 +5,7 @@ _FIX = Path(__file__).parent / "fixtures" / "mini_manifest.json"
 
 def test_load_manifest_parses_entries():
     entries = load_manifest(_FIX)
-    assert len(entries) == 2
+    assert len(entries) == 4
     assert all(isinstance(e, ManifestEntry) for e in entries)
 
 def test_skip_and_tier_preserved():
