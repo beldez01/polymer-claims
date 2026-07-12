@@ -38,3 +38,7 @@ src/polymer_claims/contracts/hervk_ltr_*
 # Phase 2d-i raw upstream (fetched one-shot; not committed)
 data/tcga_laml_fusion_expr/TCGA-LAML.star_tpm.tsv.gz
 data/tcga_laml_fusion_expr/_cytogenetics.json
+
+# Phase 2d-iii TARGET-AML raw upstream (one-shot; not committed)
+data/target_aml_fusion_expr/TARGET-AML.star_tpm.tsv.gz
+data/target_aml_fusion_expr/_cyto.json

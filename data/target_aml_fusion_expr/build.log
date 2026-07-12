@@ -1,0 +1,6 @@
+expression: 3063 samples -> 2200 cases (log2->raw)
+cytogenetics: 886 patients, 123 t(8;21)
+universe=699  fusion_pos=90  fusion_neg=609
+built target_aml_fusion_expr@1: dim=[4, 699]  dimnames_hash=sha256:1564eebaf…
+distinct dimnames_hash vs TCGA: OK (REPLICATED-eligible)
+self-checks PASSED: n_pos=90, RUNX1T1 pos/neg median 19.2/0.013 TPM (1499x)

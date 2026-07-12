@@ -1,0 +1,6 @@
+expression: https://gdc-hub.s3.us-east-1.amazonaws.com/download/TARGET-AML.star_tpm.tsv.gz
+  unit: log2(TPM+1) -> raw = 2^x-1;  sha256: f007d2a6d1f29b3667003b57ab7c41083700f2664d80ab48cee9adf5328c7b91
+fusion_label: cBioPortal aml_target_2018_pub PRIMARY_CYTOGENETIC_CODE (fusion_pos iff 't(8;21)')
+cohort: TARGET-AML (pediatric) — the error-independent 2nd cohort for the RUNX1-RUNX1T1 spine (2d-iii)
+shared method w/ TCGA (documented, NOT a shared error cause): GDC STAR-Counts TPM, hg38, Ensembl.
+fetched: 2026-07-12
