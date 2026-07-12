@@ -19,15 +19,26 @@ categorical group in `col_data`. The loader (`contracts/__init__.py:117`) pins `
 **the fusion label lives under `Sample_Group`** (values `"fusion_pos"` / `"fusion_neg"`), with `Fusion_Status`
 and `tissue` as redundant self-documenting fields (mirrors pharmaco's parallel `tissue`).
 
-## Data sources (all reachable; pin the extracted subset into `data/`)
+## Data sources (probed reachable 2026-07-12; pin the extracted subset into `data/`)
 
-- **Expression:** `TCGA-LAML.star_tpm.tsv.gz` (GDC hub / UCSC Xena, HTTP 200). STAR gene-level TPM,
-  gene×sample. We extract only the small gene panel × LAML cases we use.
-- **Fusion label — primary:** cBioPortal `laml_tcga_pub/data_sv.txt` (HTTP 200) — the RUNX1-RUNX1T1
-  structural-variant call per sample.
-- **Fusion label — independent robustness check:** cBioPortal `laml_tcga_pub/data_clinical_*.txt` t(8;21)
-  cytogenetics/karyotype. Two methodologically independent calls of the same fusion; their agreement is a
-  hard self-check (like the IDH controls in `build_contract_xena.py:77-79`), NOT a second contract.
+- **Expression:** `TCGA-LAML.star_tpm.tsv.gz` (GDC hub / UCSC Xena, HTTP 200). STAR gene-level TPM. Header
+  `Ensembl_ID` + full sample barcodes (`TCGA-AB-2987-03A`); rows are **versioned Ensembl gene IDs**
+  (`ENSG00000079102.x`) — so the extract maps the panel symbols → Ensembl IDs and matches on the unversioned
+  prefix; sample columns → `case_id` (`TCGA-AB-2987`).
+- **Fusion label — single authoritative source: cytogenetic karyotype.** cBioPortal REST API
+  `GET /api/studies/laml_tcga_pub/clinical-data?clinicalDataType=PATIENT&attributeId=CYTOGENETICS` (works; no
+  LFS). Karyotype microscopy is the **diagnostic gold standard** for t(8;21) and is independent of RNA-seq. A
+  patient is `fusion_pos` iff the karyotype value contains `t(8;21)`; else `fusion_neg`. Probe result: **6 of
+  200 patients are t(8;21)** (e.g. `46,XX,t(8;21)(q22;q22)[17]`), consistent with the ~5-7% incidence.
+  - *Routes considered and rejected (documented so 2d-ii doesn't re-litigate):* the cBioPortal datahub
+    `data_sv.txt` / `data_clinical_*.txt` raw files are **Git LFS pointers** (not fetchable via raw GitHub);
+    `INFERRED_GENOMIC_REARRANGEMENT` (RNA-seq fusion call) returns **zero** RUNX1-RUNX1T1 for this study and is
+    RNA-seq-derived anyway (not independent of the readout). Karyotype is both cleaner and more independent, so
+    it is the sole label; the second-label agreement check is dropped. The load-bearing independence is 2d-ii's
+    two estimator legs, not two label routes.
+- **Case universe:** the intersection of (STAR-TPM samples) and (patients with a CYTOGENETICS karyotype). A
+  RNA-seq sample whose patient lacks a karyotype is DROPPED (never defaulted to `fusion_neg`) — the same
+  no-missing-default discipline as the IDH swap (`build_contract_xena.py`).
 
 **Self-containment (memory `feedback_...` + compute-boundary):** the multi-hundred-MB source matrices are
 fetched once and stay external/gitignored; regeneration reads only a **small pinned extract** committed to
@@ -51,10 +62,11 @@ a threshold. Keeping floor-selection out of 2d-i preserves commit-before-data fo
 ## Components (isolation boundaries)
 
 1. **Fetch + extract** (`data/tcga_laml_fusion_expr/build_extract.py`, local-only/gitignored raw, mirrors
-   `build_contract_xena.py`): stream the STAR TPM matrix (no full load), pull the panel genes for LAML cases;
-   parse `data_sv.txt` for RUNX1-RUNX1T1 → fusion+ case set; parse clinical for t(8;21) karyotype → robustness
-   set. Writes the **pinned extract**: `panel_tpm.tsv` (gene × case) + `fusion_labels.tsv`
-   (`case_id, fusion_status_sv, fusion_status_karyotype`). Sample ids `case_id`-normalized (`TCGA-AB-####`).
+   `build_contract_xena.py`): stream the STAR TPM matrix (no full load), pull the four panel genes (matched by
+   Ensembl prefix) for LAML samples, `case_id`-normalize columns; fetch the CYTOGENETICS karyotype from the
+   cBioPortal API → `fusion_pos` iff `t(8;21)` in the value, else `fusion_neg`; intersect to the case universe.
+   Writes the **pinned extract**: `panel_tpm.tsv` (gene × case) + `fusion_labels.tsv` (`case_id, fusion_status,
+   karyotype`). The karyotype string is retained for provenance/auditability.
 2. **Contract builder** (`src/polymer_claims/ingest/tcga_laml_fusion_expr.py::build_fusion_expr_contract`):
    reads the pinned extract → writes `contracts/tcga_laml_fusion_expr.json` + `.betas.tsv` in the exact loader
    format (`assays[0].name="tpm"`, ref `tcga_laml_fusion_expr.betas.tsv`; `row_data` `expr::<GENE>`; `col_data`
@@ -68,10 +80,10 @@ a threshold. Keeping floor-selection out of 2d-i preserves commit-before-data fo
   panel `expr::<GENE>`; every `col_data.Sample_Group ∈ {"fusion_pos","fusion_neg"}`; `dimnames_hash` is stable
   across two builds from the same extract (byte-determinism).
 - **Fusion+ count in a sane band:** t(8;21) is ~5–7% of AML → assert `3 <= n_fusion_pos <= 20` (abort-if-out,
-  mirroring the IDH band check) — guards against a labeling swap.
-- **Label agreement self-check:** for the cases where both a SV call and a karyotype call exist, they must
-  agree on fusion status **exactly** (zero mismatches). Any genuine discordance must be explicitly enumerated
-  in a documented whitelist in the extract step and asserted against by name — never silently tolerated.
+  mirroring the IDH band check) — guards against a labeling swap. Probe shows 6 in the cohort.
+- **Named-control self-check:** the six known t(8;21) cases from the probe (`TCGA-AB-2819`, `-2858`, `-2875`,
+  `-2886`, `-2937`, `-2950`) must each be labeled `fusion_pos` in the built contract — a hard assert against a
+  labeling regression (mirrors `build_contract_xena.py`'s named IDH-mut controls).
 - **Signal sanity (NOT a threshold):** median `RUNX1T1` TPM in fusion+ is ≥ 5× the fusion− median, while both
   housekeeping controls (`ACTB`, `GAPDH`) have a fusion+/fusion− median ratio within [0.5, 2.0] (no
   discrimination). Confirms the seam carries real, correctly-oriented signal — without setting the 2d-ii floor.
