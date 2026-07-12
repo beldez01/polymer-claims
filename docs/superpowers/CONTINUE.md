@@ -12,7 +12,47 @@
 
 ---
 
-## Current state (2026-07-12) — SPINE 2d-i SHIPPED: TCGA-LAML fusion-expression contract (LATEST)
+## Current state (2026-07-12) — SPINE 2d-ii SHIPPED: licensed expression-floor pipeline; real claim honest-PENDING at n=6 (LATEST)
+
+> On `main`. The WAYLAND licensed-spine machinery is REAL and validated end-to-end through `run_cycle`.
+> Spec/plan `docs/superpowers/{specs,plans}/2026-07-12-spine-2dii-licensed-floor*`. Corpus stays 4;
+> grammar/protocol untouched (the cell is a pure additive descriptor). Two-stratum preserved.
+
+**The expression-floor spine is BUILT (5 tasks, all reviewed).** Two mechanisms kept separate: the 13 TPM
+floor is the leg criterion (`QuantityLeaf(value=13, low=13)` + `reference_leaf_index` — the GAP-3 floor), the
+fusion+/− discrimination is a betting e-value (`fusion_neg/CAP` vs `fusion_pos/CAP`, CAP=100, NULL_GAP=0.1).
+Two independent legs (mean + Hodges-Lehmann) estimate the fusion+ location; both must clear 13
+(`both_satisfy_criterion`). New umbrella modules `expression_floor_{adapters,evidence,populate}.py` +
+`expression_floor_patterns.py` + `EXPRESSION_FLOOR_CELL` + `[spine]` extra; reuses the pharmaco
+preregister/license/`run_cycle` plumbing.
+- **Machinery VALIDATED** (planted-strong synthetic fixture): `floor-RUNX1T1` e=401.5 → LICENSED@REPRODUCED;
+  `floor-ACTB` (housekeeping, high in both groups) e=1.0 → PENDING. **The ACTB control is the guardrail** and it
+  holds — proves the license is *discrimination*, not *altitude*. Floor-robustness sweep {1,5,13,50,90} all
+  LICENSED (verdict is not floor-fished).
+- **REAL-DATA RESULT (`se:tcga_laml_fusion_expr@1`, n=6 t(8;21)):** `floor-RUNX1T1` **PENDING, e=9.86 vs bar
+  32.9** — an HONEST PENDING. The effect is real and favored (e≫1; RUNX1T1 94 vs 0.023 TPM = 4161×) but
+  UNEARNED at n=6 (not refuted). Mirrors the region-Δβ e=5.67 PENDING pattern. Path to LICENSED = more
+  fusion+ power: a larger AML cohort, or a SECOND independent cohort (§2E product e₁·e₂ → REPLICATED; each
+  cohort ≈ √32.9 ≈ 5.74, and n=6 already gives 9.86).
+- **INTEGRITY — the per-claim `license_batch` deviation is ADVERSARIALLY-VERIFIED HONEST (Opus).** `run_cycle`
+  runs once PER claim (not pharmaco's batched call) because `reference_leaf` criterion → `earned_strength.
+  _rel_margin=0` → the cardinality-scaled BH bar is DEGENERATE (blocks-all for ≥2 such claims, wrongly vetoing
+  the true e=401.5 discovery). Per-claim isolation bypasses only that degenerate bar; the **e-LOND (primary
+  registered FDR control) is preserved byte-identical both ways** (reviewer ran both). No FDR inflation. License
+  legitimate.
+
+### NEXT
+- **Protocol-gap follow-up (clean fix):** a 1-line exemption in `protocol/.../verify.py::_permitted_by_bar` —
+  treat `reference_leaf`/threshold-None claims as exempt (they're scored by e-LOND alone). Would let such claims
+  batch-license and allow reverting the per-claim workaround to the simpler shared `run_cycle`. Needs the
+  protocol byte-identity discipline (its own slice).
+- **Earn the license = more data:** a larger t(8;21) RNA-seq cohort or a second independent cohort (BEAT-AML /
+  TARGET-AML / a GEO t(8;21) series) → §2E REPLICATED product. n=6 gives e=9.86; ~2× the fusion+ n likely clears 32.9.
+- Then: PAX3-FOXO1 warm-up done implicitly; the Durendal headline re-derivation (later WAYLAND phase).
+
+---
+
+## Current state (2026-07-12) — SPINE 2d-i SHIPPED: TCGA-LAML fusion-expression contract (superseded as LATEST by the 2d-ii block above)
 
 > On `main`. First step of the WAYLAND licensed spine (Phase 2d). Spec/plan
 > `docs/superpowers/{specs,plans}/2026-07-12-spine-2di-fusion-expr-contract*`. Corpus stays 4;
