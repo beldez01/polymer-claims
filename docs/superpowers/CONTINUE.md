@@ -12,7 +12,58 @@
 
 ---
 
-## Current state (2026-07-11, session close) — immuno first-class + naming/direction decisions (LATEST)
+## Current state (2026-07-11, session close) — SYNBIO RAMP: arm grown 5→44, manifest ingestion + gap harvest (LATEST)
+
+> Branch **`feat/synbio-ramp`** (NOT yet merged/pushed; base `2c04afc`). SDD ledger:
+> `.superpowers/sdd/progress.md` (Tasks 1–10). Corpus stays **4**; grammar/protocol **untouched**
+> this arc (all additive umbrella-side + registry). The 759-node figure below is superseded:
+> the merged universe is now **798 nodes** (pharmaco 696 · reference/polymergenomics 47 · immuno 11 ·
+> **synthetic-biology 44**), **6 licensed** (synbio adds none — all CONJECTURED).
+
+**SYNBIO RAMP (WAYLAND breadth) — the synthetic-biology arm went from 5 probe claims to a 44-claim
+sub-universe via a manifest-driven ingestion pipeline.** Tasks 1–10 all shipped + reviewed on
+`feat/synbio-ramp`:
+- **Pipeline (Tasks 4–6):** JSON manifest schema (`synbio/manifest.py`) → deterministic
+  `build_manifest_claims` (`synbio/ingest.py`, reported-stratum, LITERATURE_EXTRACTED/CONJECTURED
+  only — nothing self-licenses) → `aggregate_gaps` gap-ledger (`synbio/gap_ledger.py`, dedup
+  schema_fit → canonical GAP-N). Patterns `reported_quantity`/`mechanistic_law`/`sense_and_kill`
+  registered (Tasks 2–3).
+- **Content (Task 7, human-review-gated):** 5 reviewed chapter manifests
+  (`data/synbio_compendia/manifests/plm-{02,03,06,07,08}`) = **39 buildable claims** (23 quantity /
+  16 proposition) across sensing 16 / computing 8 / actuation 7 / delivery 8, all built through the
+  real v1.3 grammar. Fidelity independently grep-verified vs source; extractors declined to
+  fabricate stated ranges (flagged as gaps instead). Operator approved the yield.
+- **Merged universe (Task 8):** arm **renamed `synbio` → `synthetic-biology`** (subject name, not a
+  dir name); per-claim **`topic` facet** threaded through `ArmFacet`/`ArmSource`/`merge_universes`
+  + `make_merged_universe.py`. Regenerated `viewer/public/merged-universe.json` → 798 nodes,
+  other arms byte-stable. **NOTE: regen is SLOW (~13 min — real GDSC pharmaco mechanism scan);
+  full `tests/` suite likewise. Use targeted tests for iteration.**
+- **Spine seam (Task 9, license DEFERRED):** `synbio/spine.py` — `expression_floor_claim` +
+  `two_leg_floor_agreement`, exercised on synthetic values, **no `run_cycle`, no data pinned,
+  status CONJECTURED.** DATA GATE for next session in the module docstring: pin real AML fusion
+  RNA-seq (TCGA-LAML TPM via UCSC Xena, or BLUEPRINT hematopoietic RSEM) → "RUNX1-RUNX1T1 clears the
+  ~13 TPM floor in AML" @REPRODUCED. Warm up on PAX3-FOXO1.
+- **Gap harvest (Task 10):** gap-log extended to **GAP-5..GAP-15** (11 new, none resolved —
+  core-primitive-adjacent, byte-identity-gated). **Headline finding:** the interval/range/floor/bound
+  family (GAP-5/6/9/10/12) is 5 of 11 and all reduce to the deferred **GAP-3 (interval)** — the real
+  corpus now demands un-deferring it (highest-value next core expansion). Also: `aggregate_gaps`
+  dedup is too literal (keys on constraint prose → 11 raw = 11 canonical, no collapse); reconcile
+  against GAP-1..4 + a controlled `gap_kind` tag. Details: `docs/superpowers/notes/2026-07-10-synbio-grammar-gaps.md`.
+
+### NEXT — where to proceed (synbio ramp)
+- **Un-defer GAP-3 (interval/range) + GAP-5/GAP-12 (floor/bound):** the corpus is demanding it; a
+  single core `QuantityLeaf` expansion (optional `value_range` / `value_relation` / `bound`, all
+  additive+optional, byte-identity-proven, drop-when-None serializer per the 2a `MeasurementContext`
+  recipe) retires 5 of the 11 new gaps at once. This is the next core-grammar slice.
+- **Phase 2d licensed spine (data-gated):** feed `spine.py`'s `two_leg_floor_agreement` real AML
+  fusion RNA-seq through the SE-Contract seam + two-leg registry; `run_cycle` mints the first
+  synbio LICENSE@REPRODUCED. Confirm data availability first.
+- **Aggregator precision follow-up** + **finish-branch:** merge `feat/synbio-ramp` (final
+  whole-branch review pending), then reconcile the gap ledger's dedup.
+
+---
+
+## Current state (2026-07-11, session close) — immuno first-class + naming/direction decisions (superseded by the synbio-ramp block above)
 
 > `origin/main == f3bf319`. **Supersedes the 761-node / immuno-2 figures below:** the immuno-arm cleanup
 > dropped 2 phantom duplicates, so the merged universe is now **759 nodes** (immuno 11 · pharmaco 696 ·
