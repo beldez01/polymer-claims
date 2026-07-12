@@ -146,6 +146,7 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
     from .methyl_adapters import methyl_independent_registry
     from .methyl_ndmp import ndmp_independent_registry
     from .pharmaco_adapters import pharmaco_independent_registry, pharmaco_oracle_registry
+    from .expression_floor_adapters import expression_floor_registry, expression_floor_oracle_registry
 
     methyl_oracles = profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public"))
     return {
@@ -163,6 +164,10 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
             adapter_registry=pharmaco_independent_registry(),
             oracle_registry=pharmaco_oracle_registry(),
             trust_profile="gdsc-pharmaco-recomputable-public"),
+        ("expression::floor", "v1"): CapabilityTrustBinding(
+            adapter_registry=expression_floor_registry(),
+            oracle_registry=expression_floor_oracle_registry(),
+            trust_profile="tcga-laml-fusion-expr-recomputable-public"),
     }
 
 

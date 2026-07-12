@@ -38,6 +38,8 @@ pharmaco = [
 ]
 # immuno/ERV WGBS drive: tabix reads of Loyfer per-CpG beds (optional; gzip fallback works without it).
 wgbs = ["pysam>=0.22"]
+# expression-floor spine (Phase 2d-ii): fusion-driven re-expression floor claims on TCGA-LAML.
+spine = ["numpy>=1.26"]
 
 [project.scripts]
 polymer-claims = "polymer_claims.cli:main"
