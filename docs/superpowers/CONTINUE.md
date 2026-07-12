@@ -12,7 +12,48 @@
 
 ---
 
-## Current state (2026-07-12) — SPINE 2d-ii SHIPPED: licensed expression-floor pipeline; real claim honest-PENDING at n=6 (LATEST)
+## Current state (2026-07-12) — 🎉 FIRST LICENSED SYNBIO CLAIM: RUNX1-RUNX1T1 @ REPLICATED (2d-iii, LATEST)
+
+> On `main`. The WAYLAND headline: the engine **derived** a licensed claim through the real gate, cross-cohort
+> replicated. Spec/plan `docs/superpowers/{specs,plans}/2026-07-12-spine-2diii-replicated*`. Corpus stays 4;
+> grammar/protocol untouched (§2E machinery already existed; we added an umbrella-side replication builder).
+
+**HEADLINE — RUNX1-RUNX1T1 LICENSED @ IndependenceTier.REPLICATED.** The claim "RUNX1-RUNX1T1+ (t(8;21)) AML
+clears the 13 TPM RUNX1T1 expression floor; fusion− does not" is now LICENSED, replicated across two
+independent real cohorts:
+- **Cohort A — TCGA-LAML** (adult, n=6 t(8;21)): e₁ = **9.86**.
+- **Cohort B — TARGET-AML** (pediatric, n=90 t(8;21)): e₂ = **8344.28**.
+- **Product e₁·e₂ = 82,260** ≫ 32.9 e-LOND bar → **LICENSED @ REPLICATED** (§2E: independent cohorts, the product
+  folds into the SINGLE e-LOND slot; one test, one discovery).
+- **ACTB control: PENDING** even in the replicated run — the guardrail holds (discrimination, not altitude).
+  `check_controls ok=True`.
+
+**How it was built (4 tasks, reviewed):**
+- **T1 — `se:target_aml_fusion_expr@1`**: reused the 2d-i `build_fusion_expr_contract`; real TARGET-AML STAR TPM
+  (log2→raw) + cBioPortal `PRIMARY_CYTOGENETIC_CODE` t(8;21) → 699 cases / **90 fusion+**, RUNX1T1 median 19.2 vs
+  0.013 TPM (1499×), distinct `dimnames_hash` from TCGA. Big matrix gitignored, extract pinned.
+- **T2 — `expression_floor_replication.py`**: the expression-floor analog of the methyl-only
+  `replication.py::build_replication_inputs`, adapted for the reference_leaf floor (floor = the leaf value; e2 =
+  `expression_floor_evalue`; **e1 computed directly, since `evidence_map` skips reference_leaf claims**). Both
+  legs must clear the floor on cohort B; the product applies only when `cohorts_error_independent`.
+- **T3 — `license_replicated`**: threads `evidence=e₁·e₂` + `replications={cid:(sat_b,)}` into the per-claim
+  `run_cycle` with **disjoint, non-empty** `shared_cause_factors` (empty ⇒ over-credit; overlap ⇒ silent
+  REPRODUCED cap — both tested). Reuses the 2d-ii per-claim isolation.
+- **Error-independence declaration (honest):** A=`(tcga-laml-cohort, adult-aml-population, tcga-karyotype)`,
+  B=`(target-aml-cohort, pediatric-aml-population, target-karyotype)` — Jaccard 0. The shared GDC-STAR/hg38/Ensembl
+  method is documented (`SOURCE.txt`), NOT tagged as a shared error cause (fusion-driven biology; distinct
+  populations/labs/batches are the error axes).
+
+### NEXT
+- **Protocol clean-up (logged since 2d-ii):** the 1-line `verify.py::_permitted_by_bar` exemption for
+  reference_leaf/threshold-None claims — would let them batch-license + retire the per-claim isolation.
+- **Durendal headline re-derivation** (the ultimate WAYLAND phase): blinded, pre-registered genotype-directed
+  therapy derivation now that the licensed-spine machinery is proven at REPLICATED.
+- **Broaden:** other fusions (PAX3-FOXO1 warm-up now implicit); more spine claims; push the aggregator/gap-log.
+
+---
+
+## Current state (2026-07-12) — SPINE 2d-ii SHIPPED: licensed expression-floor pipeline; real claim honest-PENDING at n=6 (superseded by the REPLICATED result above)
 
 > On `main`. The WAYLAND licensed-spine machinery is REAL and validated end-to-end through `run_cycle`.
 > Spec/plan `docs/superpowers/{specs,plans}/2026-07-12-spine-2dii-licensed-floor*`. Corpus stays 4;
