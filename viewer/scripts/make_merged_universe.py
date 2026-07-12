@@ -70,9 +70,11 @@ def main() -> None:
             n_untagged += 1
             node["arm"] = None
             node["modality"] = None
+            node["topic"] = None
         else:
             node["arm"] = facet.arm
             node["modality"] = facet.modality
+            node["topic"] = facet.topic
     if n_untagged:
         raise SystemExit(f"{n_untagged} merged node(s) have no arm facet — every claim must be tagged")
 

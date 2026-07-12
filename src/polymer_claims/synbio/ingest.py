@@ -84,3 +84,24 @@ def build_manifest_claims(paths: list[Path]) -> tuple[list[Claim], dict[str, str
             claims.append(build_claim(entry))
             topics[entry.id] = entry.topic
     return claims, topics
+
+
+def collect_all_synbio_claims() -> tuple[list[Claim], dict[str, str]]:
+    """The 5 probe factory claims + every non-skipped manifest claim, with a topic map.
+    Probe claims get a static topic; manifest claims carry their own."""
+    from .probe import build_all
+
+    _PROBE_TOPICS = {
+        "synbio-c1-mismatch-energy": "sensing",
+        "synbio-c2-adar-dynamic-range": "sensing",
+        "synbio-c3-car-threshold": "sensing",
+        "synbio-c4-endosomal-escape": "delivery",
+        "synbio-c5-affinity-discrimination-law": "sensing",
+    }
+    manifest_dir = Path(__file__).resolve().parents[3] / "data/synbio_compendia/manifests"
+    paths = sorted(manifest_dir.glob("*.json"))
+    m_claims, m_topics = build_manifest_claims(paths)
+
+    claims = list(build_all()) + m_claims
+    topics = {**_PROBE_TOPICS, **m_topics}
+    return claims, topics

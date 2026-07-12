@@ -109,3 +109,12 @@ def test_empty_sources_yields_empty_corpus():
     merged, facets = merge_universes([])
     assert merged.claims == ()
     assert facets == {}
+
+
+def test_synbio_arm_named_by_subject_with_topic_facet():
+    from polymer_claims.merge_universes import collect_synbio, merge_universes
+    src = collect_synbio()
+    assert src.arm == "synthetic-biology"
+    merged, facets = merge_universes([src])
+    assert any(f.arm == "synthetic-biology" for f in facets.values())
+    assert any(f.topic for f in facets.values())         # topic facet populated
