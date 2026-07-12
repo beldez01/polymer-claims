@@ -145,6 +145,54 @@ def license_batch(
     return acc
 
 
+def license_replicated(
+    corpus: Corpus, claims: list[Claim], *, ref_a: str, ref_b: str,
+    factors_a: tuple[str, ...], factors_b: tuple[str, ...],
+) -> Corpus:
+    """§2E two-cohort REPLICATED license: cohort A (`ref_a`) + an error-independent cohort B (`ref_b`).
+    `build_expr_replication_inputs` computes the product e1*e2 (folded into the SINGLE pre-registered
+    e-LOND slot) and cohort-B's Satisfaction (which promotes the tier to REPLICATED via the extra
+    distinct-`dimnames_hash` cohort). `factors_a`/`factors_b` MUST be non-empty (empty ⇒ the §E gate is
+    inert and over-credits) and should be disjoint (overlap ⇒ silent REPRODUCED cap). Reuses the 2d-ii
+    per-claim isolation. A claim whose cohort B does not air-gap falls back to its cohort-A REPRODUCED
+    license (its e1 is retained by the builder)."""
+    from .expression_floor_replication import build_expr_replication_inputs
+
+    if not factors_a or not factors_b:
+        raise ValueError("both cohorts need non-empty shared_cause_factors")
+    base = MaterializationContext(id="M", api_version="v1", data_version="d1")
+    ri = build_expr_replication_inputs(
+        corpus, base,
+        bindings={c.id: ref_b for c in claims if _terminal_node(c) is not None},
+        factors_a=factors_a, factors_b=factors_b)
+    try:
+        dimnames_a = load_contract(ref_a).dimnames_hash
+    except FileNotFoundError:
+        dimnames_a = None
+    batch_ids = {c.id for c in claims}
+    acc = corpus
+    for c in claims:
+        if _terminal_node(c) is None:
+            continue
+        solo_claims = tuple(x for x in acc.claims if x.id == c.id or x.id not in batch_ids)
+        solo = acc.model_copy(update={"claims": solo_claims})
+        mctx = MaterializationContext(
+            id=base.id, api_version=base.api_version, data_version=base.data_version,
+            dimnames_hash=dimnames_a, shared_cause_factors=factors_a)
+        result = run_cycle(
+            solo, (ExpressionFloorMeanAdapter(), ExpressionFloorHLAdapter()), base,
+            adapter_registry=expression_floor_registry(),
+            oracles=expression_floor_oracle_registry(),
+            materializations={c.id: mctx},
+            evidence={c.id: ri.evidence[c.id]} if c.id in ri.evidence else None,
+            replications={c.id: ri.replications[c.id]} if c.id in ri.replications else None,
+            capability_registry=CAPABILITY_CELLS)
+        updated = result.corpus.by_id().get(c.id, c)
+        acc_claims = tuple(updated if x.id == c.id else x for x in acc.claims)
+        acc = acc.model_copy(update={"claims": acc_claims, "fdr_ledger": result.corpus.fdr_ledger})
+    return acc
+
+
 class ControlCheckFailed(RuntimeError):
     """The publish guard: a control behaved wrong (positive did not license, or negative did)."""
 
