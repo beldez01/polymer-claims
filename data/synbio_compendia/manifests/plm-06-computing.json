@@ -24,21 +24,16 @@
     "topic": "computing",
     "leaf": {
       "kind": "quantity",
-      "value": 55,
+      "value": 10,
       "unit": null,
-      "uncertainty": 45,
+      "uncertainty": null,
       "measurement_basis": "DERIVED",
-      "formula": "ON expression ÷ OFF expression (dynamic range D) of a synthetic transcriptional gate"
+      "formula": "ON expression ÷ OFF expression (dynamic range D) of a synthetic transcriptional gate",
+      "low": 10,
+      "high": 100
     },
     "source": "PLM-VI",
-    "schema_fit": {
-      "status": "gap",
-      "constraint": "Chapter states an order-of-magnitude range (10-100x), not a point measurement.",
-      "current_ir_behavior": "Manifest schema requires a single value+uncertainty pair, forcing an arithmetic midpoint (55±45) onto what the chapter frames as a multiplicative/log-scale span.",
-      "candidate_resolution": "Add optional value_min/value_max fields (or a log-scale uncertainty representation) to the quantity leaf for order-of-magnitude claims.",
-      "expansion_class": "domain",
-      "purity_cost": "An arithmetic midpoint is not the geometric center implied by a 10-100x range, so the encoded value slightly misrepresents the claim's shape though it stays within the stated bounds."
-    }
+    "schema_fit": {"status": "clean"}
   },
   {
     "id": "sb-plm06-cascade-depth-ceiling",
@@ -48,21 +43,16 @@
     "topic": "computing",
     "leaf": {
       "kind": "quantity",
-      "value": 3.5,
+      "value": 3,
       "unit": "layers",
-      "uncertainty": 0.5,
+      "uncertainty": null,
       "measurement_basis": "FUNDAMENTAL",
-      "formula": null
+      "formula": null,
+      "low": 3,
+      "high": 4
     },
     "source": "PLM-VI",
-    "schema_fit": {
-      "status": "gap",
-      "constraint": "Chapter states a discrete range (3-4 layers), not a single measured depth.",
-      "current_ir_behavior": "Forces the range into a continuous value=3.5±0.5.",
-      "candidate_resolution": "Represent as an inclusive integer range [3,4] rather than a continuous value+uncertainty pair, since gate count is discrete.",
-      "expansion_class": "domain",
-      "purity_cost": "A continuous midpoint (3.5 layers) implies a precision the discrete claim doesn't have — a circuit cannot have 3.5 gate layers."
-    }
+    "schema_fit": {"status": "clean"}
   },
   {
     "id": "sb-plm06-hla-loh-prevalence",

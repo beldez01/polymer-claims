@@ -22,3 +22,21 @@ def test_c3_interval_gap():
     # C3 is re-expressed with explicit bounds (the candidate-(a) IntervalLeaf resolution, GAP-3).
     leaf = car_threshold_claim().leaves[0]
     assert getattr(leaf, "low", None) is not None and getattr(leaf, "high", None) is not None
+
+
+@pytest.mark.xfail(reason="GAP-9 deferred: no log/geometric-scale marker on QuantityLeaf (YAGNI, "
+                          "no consumer computes inside the interval yet)", strict=True)
+def test_gap9_logscale_marker_deferred():
+    from polymer_grammar.leaf import QuantityLeaf
+    leaf = QuantityLeaf(value=10.0, measurement_basis=MeasurementBasis.DERIVED, formula="f",
+                        low=10.0, high=100.0)
+    assert getattr(leaf, "scale", None) == "log"
+
+
+@pytest.mark.xfail(reason="GAP-10 deferred: no discrete-integer marker on QuantityLeaf (YAGNI, no "
+                          "consumer interpolates inside the interval yet)", strict=True)
+def test_gap10_discrete_marker_deferred():
+    from polymer_grammar.leaf import QuantityLeaf
+    leaf = QuantityLeaf(value=3.0, unit="layers", measurement_basis=MeasurementBasis.FUNDAMENTAL,
+                        low=3.0, high=4.0)
+    assert getattr(leaf, "discrete", None) is True

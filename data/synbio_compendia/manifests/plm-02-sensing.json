@@ -12,17 +12,11 @@
       "uncertainty": null,
       "measurement_basis": "FUNDAMENTAL",
       "formula": null,
+      "low": 2000,
       "context": {"condition": "CD19 CAR-T in B-ALL lymphoblasts; below this density, response is significantly less likely (Majzner et al., 2020)"}
     },
     "source": "PLM-II",
-    "schema_fit": {
-      "status": "gap",
-      "constraint": "The chapter states this as a floor/threshold (density *below* which response drops off), not a single measured data point. QuantityLeaf has no way to distinguish floor-vs-observation semantics -- value=2000 is stored exactly as a directly measured antigen count would be.",
-      "current_ir_behavior": "Stored as a plain FUNDAMENTAL quantity (value=2000, unit='molecules/cell'), indistinguishable from a point measurement.",
-      "candidate_resolution": "Add an optional `value_relation` enum on QuantityLeaf ('floor'|'ceiling'|'point'|'range') so floor/threshold semantics survive into the IR.",
-      "expansion_class": "general",
-      "purity_cost": "Additive and optional, defaulting to 'point' for byte-identity with all existing claims; touches only QuantityLeaf, not the core Claim/pattern grammar."
-    }
+    "schema_fit": {"status": "clean"}
   },
   {
     "id": "sb-plm02-cd3-itam-count",

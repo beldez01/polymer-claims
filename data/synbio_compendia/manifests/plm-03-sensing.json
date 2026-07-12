@@ -7,11 +7,13 @@
     "topic": "sensing",
     "leaf": {
       "kind": "quantity",
-      "value": 0.02,
+      "value": 0.01,
       "unit": null,
-      "uncertainty": 0.01,
+      "uncertainty": null,
       "measurement_basis": "DERIVED",
       "formula": "leaky_no_target_payload_expression / target_induced_payload_expression",
+      "low": 0.01,
+      "high": 0.03,
       "context": {
         "tissue": null,
         "cell_line": null,
@@ -20,14 +22,7 @@
       }
     },
     "source": "PLM-III",
-    "schema_fit": {
-      "status": "gap",
-      "constraint": "The chapter states leak as a range ('near 1-3%'; 'low single-digit percent') attributed jointly to two independent first-generation systems (CellREADR, RADARS), not a single measured value with a symmetric error bar.",
-      "current_ir_behavior": "The range midpoint is stored as value with a symmetric uncertainty half-width, which discards the multi-study provenance and the (likely asymmetric) shape of the reported range.",
-      "candidate_resolution": "Add an optional value_range: [low, high] array field on ManifestLeaf for quantities a chapter states as a floor/range spanning multiple independent measurements, instead of forcing a single value+uncertainty pair.",
-      "expansion_class": "general",
-      "purity_cost": "Additive optional field; existing single-value entries omit it and remain byte-identical."
-    }
+    "schema_fit": {"status": "clean"}
   },
   {
     "id": "sb-plm03-radars-277fold",

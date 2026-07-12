@@ -122,10 +122,12 @@ W3 ships no `Leaf`/`StrengthVector` change). Numbering continues from GAP-4.
 ### GAP-5 [general] — floor/threshold vs point-measurement
 - **constraint:** a value stated as a floor/threshold (e.g. CD19 <~2,000 molecules/cell *below which* response drops) is stored identically to a directly measured point.
 - **candidate:** optional `value_relation` enum (`floor|ceiling|point|range`) on `QuantityLeaf`, default `point` for byte-identity.
+- **RESOLVED (2026-07-12):** `QuantityLeaf.low`/`high` (additive, byte-identical when boundless). `sb-plm02-cd19-density-floor` now carries `low=2000` (open above); `schema_fit` → clean. See `docs/superpowers/specs/2026-07-12-gap3-interval-bounds-design.md`.
 
 ### GAP-6 [general] — multi-study range collapsed to symmetric error
 - **constraint:** a leak range ("1–3%") jointly attributed to two independent systems, forced into `value ± symmetric uncertainty`, discarding provenance and asymmetry.
 - **candidate:** optional `value_range: [low, high]` on the leaf.
+- **RESOLVED (2026-07-12):** `QuantityLeaf.low`/`high`. `sb-plm03-adar-leak-floor` now `low=0.01, high=0.03` (fabricated symmetric `uncertainty` dropped); `schema_fit` → clean.
 
 ### GAP-7 [domain] — no basis for an analytic constant
 - **constraint:** an information-theoretic constant (2 bits = log2(4)) is neither instrument-measured (FUNDAMENTAL) nor a data ratio (DERIVED); forced into FUNDAMENTAL with `unit="bits"`.
@@ -137,9 +139,11 @@ W3 ships no `Leaf`/`StrengthVector` change). Numbering continues from GAP-4.
 
 ### GAP-9 [domain] — order-of-magnitude (log-scale) range
 - **constraint:** a 10–100× span forced to an arithmetic midpoint (55±45), misrepresenting a multiplicative claim. **candidate:** `value_min`/`value_max` or log-scale uncertainty.
+- **RESOLVED (2026-07-12):** `QuantityLeaf.low`/`high`. `sb-plm06-transcriptional-gate-dynamic-range` now `low=10, high=100` (`value=10`, fake `55±45` gone); `schema_fit` → clean. The log/geometric-scale marker is **DEFERRED** (YAGNI — no consumer computes inside the interval), tripwire-armed: `test_gap9_logscale_marker_deferred`.
 
 ### GAP-10 [domain] — discrete integer range
 - **constraint:** "3–4 gate layers" forced to continuous `3.5±0.5` (a circuit cannot have 3.5 layers). **candidate:** inclusive integer range `[3,4]`.
+- **RESOLVED (2026-07-12):** `QuantityLeaf.low`/`high`. `sb-plm06-cascade-depth-ceiling` now `low=3, high=4` (`value=3`, fake `3.5±0.5` gone); `schema_fit` → clean. The discrete-integer marker is **DEFERRED** (YAGNI — no consumer interpolates), tripwire-armed: `test_gap10_discrete_marker_deferred`.
 
 ### GAP-11 [domain] — pooled prevalence needs per-indication stratification
 - **constraint:** "~10–20% HLA-LOH across many solid tumors" collapses to one figure with no tumor-type context. **candidate:** per-tumor-type `context.condition` once a breakdown exists.
@@ -147,6 +151,7 @@ W3 ships no `Leaf`/`StrengthVector` change). Numbering continues from GAP-4.
 ### GAP-12 [general] — one-sided bound (floor) direction
 - **constraint:** ">10 weeks B-cell depletion" is a one-sided floor; `QuantityLeaf` has only a point `value` + symmetric `uncertainty`, so it collapses to `value=10` indistinguishable from an exact estimate.
 - **candidate:** optional `bound: Literal['exact','floor','ceiling']` (or fold into the interval work), default `exact` for byte-identity. **Touches the core Leaf — standard byte-identity proof required.**
+- **RESOLVED (2026-07-12):** folded into the interval work — an open-ended `QuantityLeaf.low` *is* a floor. `sb-plm07-vivovec-bcell-depletion` now `low=10` (open above); `schema_fit` → clean. No separate `bound` enum needed.
 
 ### GAP-13 [analysis] — measured-endpoint ≠ clinically-relevant endpoint
 - **constraint:** a ~90% figure the chapter flags as *reporter/cargo delivery, not durable editing* has no structured field to encode the endpoint-type mismatch; the caveat survives only as prose. **candidate:** `endpoint_type`/`validity_caveat` field.
@@ -159,11 +164,17 @@ W3 ships no `Leaf`/`StrengthVector` change). Numbering continues from GAP-4.
 
 ### Harvest verdict + two aggregator findings
 
-- **The interval/range/floor/bound family dominates.** GAP-5, GAP-6, GAP-9, GAP-10, GAP-12
-  (5 of 11) are all facets of one strain: **the leaf cannot hold a range or a bound-direction.**
-  That is precisely the pre-existing **GAP-3 (interval/range)**, deferred as YAGNI with an armed
-  xfail tripwire (`tests/synbio/test_claims_intervals.py`). The real corpus now *demands* it —
-  this is the data-driven trigger to un-defer GAP-3, the highest-value next core expansion.
+- **The interval/range/floor/bound family — RETIRED 2026-07-12 (GAP-3 slice).** GAP-5, GAP-6,
+  GAP-9, GAP-10, GAP-12 (5 of 11) were all facets of one strain: **the leaf cannot hold a range or a
+  bound-direction.** That was precisely the pre-existing **GAP-3 (interval/range)**. The corpus demanded
+  it, so it was un-deferred and shipped: `QuantityLeaf.low`/`high` (additive, optional, byte-identical
+  when boundless; open ends encode floor/ceiling; `_bound_discipline` enforces ordering/containment/
+  spread-exclusivity). All five entries re-expressed with honest bounds; `schema_fit` → clean. Two
+  domain refinements (GAP-9 log-scale, GAP-10 discrete-integer) are DEFERRED with armed tripwires.
+  **Open gaps remaining (6):** GAP-7 (analytic measurement basis), GAP-8 (gene/locus context sub-key),
+  GAP-11 (per-tumor stratification — its range facet is now expressible via low/high, but the
+  stratification residue keeps it open), GAP-13 (endpoint-type), GAP-14 (composite/vector quantity),
+  GAP-15 (structured categorical mapping).
 - **`aggregate_gaps` dedup is too literal (engine gap).** It keys on the normalized
   `(expansion_class, constraint)` *prose*, so the five interval-family gaps — phrased differently
   by five independent extractors — did **not** collapse; 11 raw → 11 canonical (zero merge). And
