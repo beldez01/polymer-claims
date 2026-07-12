@@ -12,7 +12,38 @@
 
 ---
 
-## Current state (2026-07-11, session close) — SYNBIO RAMP: arm grown 5→44, manifest ingestion + gap harvest (LATEST)
+## Current state (2026-07-12, session close) — GAP-3 SHIPPED: interval/range/bound on QuantityLeaf (LATEST)
+
+> On `main` (committed, not yet pushed as of this block; `origin/main` was `699a963` at the synbio-ramp push).
+> **First core-grammar expansion since Phase 2a.** SDD ledger `.superpowers/sdd/progress.md` (GAP-3 Tasks 1–5).
+> Corpus stays **4**; grammar stays pure + numpy-free. Spec `docs/superpowers/specs/2026-07-12-gap3-interval-bounds-design.md`,
+> plan `docs/superpowers/plans/2026-07-12-gap3-interval-bounds.md`.
+
+**GAP-3 — `QuantityLeaf` gained optional `low`/`high` bounds** (additive, byte-identical when boundless).
+Either end may be open, so one representation covers point / closed-range / floor / ceiling. A new
+`_bound_discipline` validator enforces ordering (`low < high`), containment (`value` within present bounds),
+and spread-exclusivity (bounds XOR symmetric `uncertainty`); the wrap-serializer drops `low`/`high` when None
+(byte-identity proven — `test_leaf_context.py` baseline intact). Tasks 1–5, all per-task reviewed:
+- **T1 core grammar** (`grammar/src/polymer_grammar/leaf.py`): fields + validator + serializer; grammar 585→593.
+- **T2**: C3 `car_threshold_claim` re-expressed `low=1e2/high=1e4`; the armed `test_c3_interval_gap` xfail flipped to passing.
+- **T3**: manifest pipeline (`ManifestLeaf` + `build_claim`) carries the bounds.
+- **T4**: five interval-family entries re-expressed with honest bounds (`value=low`, fabricated `uncertainty` dropped) —
+  cd19 floor, adar range, gate range, cascade range, vivovec floor; **GAP-5/6/9/10/12 marked RESOLVED** in the gap-log;
+  gap-log now **6 open** (GAP-7/8/11/13/14/15). Two domain refinements DEFERRED with armed tripwires
+  (GAP-9 log-scale, GAP-10 discrete-integer). Universe regenerated: **798 nodes, synbio 44, all other arms + 6-licensed unchanged**.
+- **T5**: full gate + this continuity.
+
+### NEXT — where to proceed
+- **Push `main`** (synbio-ramp + GAP-3) once coordinated with the other instances (shared checkout).
+- **Remaining gaps** (data/consumer-gated, not yet demanded): GAP-7 (ANALYTIC measurement basis), GAP-8 (gene/locus
+  context sub-key), GAP-11 (per-tumor stratification), GAP-13 (endpoint-type), GAP-14 (composite/vector quantity),
+  GAP-15 (structured categorical). Follow the same recipe when a real corpus demands one.
+- **Phase 2d licensed spine** (still the headline, data-gated): `synbio/spine.py` two-leg floor over real AML fusion RNA-seq.
+- **Aggregator precision follow-up:** `aggregate_gaps` dedup on a controlled `gap_kind` tag + reconcile vs canonical GAP-1..4.
+
+---
+
+## Current state (2026-07-11, session close) — SYNBIO RAMP: arm grown 5→44, manifest ingestion + gap harvest (superseded by the GAP-3 block above)
 
 > **MERGED to local `main` via fast-forward (`main` now `3c8bd86`); branch `feat/synbio-ramp` deleted. NOT
 > PUSHED** — user chose local-only (shared checkout; `origin/main == c157d55`, local `main` is +13 ahead;
