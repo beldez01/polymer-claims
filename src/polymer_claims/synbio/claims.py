@@ -88,9 +88,8 @@ def adar_dynamic_range_claim() -> Claim:
 def car_threshold_claim() -> Claim:
     """C3 — CAR triggering needs ~10²–10⁴ antigen molecules/cell (killing ~10², full
     activation ~10⁴). A DERIVED count. We record the representative 1e3 and leave
-    `uncertainty=None` rather than fake a symmetric bar over two decades.
-
-    GAP (interval): the honest object is a range, not a point ± symmetric error. Logged general-class."""
+    `uncertainty=None` rather than fake a symmetric bar over two decades. The honest range
+    is now carried by explicit low/high bounds."""
     return Claim(
         id="synbio-c3-car-threshold",
         title="CAR triggering threshold ≈ 10²–10⁴ antigen molecules/cell",
@@ -102,6 +101,8 @@ def car_threshold_claim() -> Claim:
                 uncertainty=None,
                 measurement_basis=MeasurementBasis.DERIVED,
                 formula="antigen_copies_at_half_max_activation",
+                low=1e2,
+                high=1e4,
             ),
         ),
         status=Status.CONJECTURED,
