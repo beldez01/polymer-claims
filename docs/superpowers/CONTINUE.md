@@ -14,7 +14,9 @@
 
 ## Current state (2026-07-11, session close) — SYNBIO RAMP: arm grown 5→44, manifest ingestion + gap harvest (LATEST)
 
-> Branch **`feat/synbio-ramp`** (NOT yet merged/pushed; base `2c04afc`). SDD ledger:
+> **MERGED to local `main` via fast-forward (`main` now `3c8bd86`); branch `feat/synbio-ramp` deleted. NOT
+> PUSHED** — user chose local-only (shared checkout; `origin/main == c157d55`, local `main` is +13 ahead;
+> coordinate before pushing). Whole-branch review (Opus): READY TO MERGE YES; full suite 804p/1s/1xfail. SDD ledger:
 > `.superpowers/sdd/progress.md` (Tasks 1–10). Corpus stays **4**; grammar/protocol **untouched**
 > this arc (all additive umbrella-side + registry). The 759-node figure below is superseded:
 > the merged universe is now **798 nodes** (pharmaco 696 · reference/polymergenomics 47 · immuno 11 ·
