@@ -1,0 +1,149 @@
+[
+  {
+    "id": "sb-plm07-synapse-cleft",
+    "title": "The T/NK immune synapse spans a cleft of ~15 nm",
+    "tier": 1,
+    "skip": false,
+    "topic": "actuation",
+    "leaf": {
+      "kind": "quantity",
+      "value": 15,
+      "unit": "nm",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": null
+    },
+    "source": "PLM-VII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm07-serial-kill-rate",
+    "title": "~22% of CAR-T cells sequentially kill multiple targets (serial killing)",
+    "tier": 1,
+    "skip": false,
+    "topic": "actuation",
+    "leaf": {
+      "kind": "quantity",
+      "value": 0.22,
+      "unit": "fraction",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {"assay": "time-lapse single-cell live imaging", "condition": "over the first ~20 h"}
+    },
+    "source": "PLM-VII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm07-cd19-car-nk-orr",
+    "title": "Cord-blood CD19 CAR-NK cells achieved 73% (8/11) overall response in a Phase 1 trial",
+    "tier": 1,
+    "skip": false,
+    "topic": "actuation",
+    "leaf": {
+      "kind": "quantity",
+      "value": 0.73,
+      "unit": "fraction",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {"cell_line": "cord-blood-derived, IL-15-armored, suicide-gene-equipped CD19 CAR-NK", "assay": "Phase 1 clinical trial (n=11)"}
+    },
+    "source": "PLM-VII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm07-vivovec-bcell-depletion",
+    "title": "VivoVec lentiviral in-vivo CAR-T generation sustained B-cell depletion beyond 10 weeks in NHPs",
+    "tier": 1,
+    "skip": false,
+    "topic": "actuation",
+    "leaf": {
+      "kind": "quantity",
+      "value": 10,
+      "unit": "weeks",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {"tissue": "non-human primate", "condition": "in-vivo-generated CD20 CAR-T via VivoVec lentiviral vector"}
+    },
+    "source": "PLM-VII",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "The chapter reports a one-sided floor ('>10 weeks' B-cell depletion), not a point measurement or a symmetric-uncertainty interval.",
+      "current_ir_behavior": "QuantityLeaf carries only a point `value` plus an optional symmetric `uncertainty`; there is no bound-direction flag, so the reported floor collapses to value=10, indistinguishable from a point estimate of exactly 10 weeks.",
+      "candidate_resolution": "Add an optional `bound: Literal['exact','floor','ceiling']` to QuantityLeaf, or fold one-sided thresholds into the still-open interval/range Leaf work, so a reported floor is representable without lying.",
+      "expansion_class": "general",
+      "purity_cost": "An additive optional field defaulting to 'exact' preserves byte-identical serialization for every existing point-valued leaf, but it touches the core Leaf primitive and needs the standard byte-identity proof before shipping."
+    }
+  },
+  {
+    "id": "sb-plm07-actuator-decoupling",
+    "title": "The cellular effector is best modeled as a generic actuator decoupled from its targeting/sensing logic",
+    "tier": 2,
+    "skip": false,
+    "topic": "actuation",
+    "leaf": {
+      "kind": "proposition",
+      "data": "The cytotoxic or suppressive effector module (the kill/suppress machinery) is logically and architecturally separable from the sensing/targeting logic that triggers it.",
+      "warrant": "Universal/adapter CARs (anti-FITC, BBIR, UniCAR, SpyTag/SpyCatcher) route arbitrary targeting molecules to one fixed kill engine, and in-vivo CAR generation (LNP-mRNA, lentivirus) manufactures a generic effector in situ independent of any specific sensor — both independent 2024-2026 technology trends converge on the same sense/act decoupling.",
+      "rebuttal": null,
+      "warrant_type": "expert_judgment"
+    },
+    "source": "PLM-VII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm07-exhaustion-tonic-limit",
+    "title": "Cytotoxic CAR chassis are rate- and dose-limited by exhaustion and tonic signaling, not by per-kill potency",
+    "tier": 2,
+    "skip": false,
+    "topic": "actuation",
+    "leaf": {
+      "kind": "proposition",
+      "data": "CAR-T/NK killing capacity is bounded chiefly by chronic-stimulation exhaustion and antigen-independent tonic CD3zeta signaling, not by the intrinsic lethality of a single perforin/granzyme hit.",
+      "warrant": "Lynn et al. (2019) showed a tonically signaling high-affinity GD2 CAR (HA-28z) exhausts via scFv aggregation and an AP-1-imbalanced, chromatin-opened transcriptional state, and that overexpressing c-Jun rendered the cells exhaustion-resistant and restored potency, demonstrating the rate limit is a programmable circuit state rather than a fixed ceiling on per-kill lethality.",
+      "rebuttal": null,
+      "warrant_type": "mechanistic_analogy"
+    },
+    "source": "PLM-VII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm07-affinity-detuning",
+    "title": "The optimal CAR affinity is detuned, not maximized, because higher affinity increases tonic signaling and exhaustion",
+    "tier": 2,
+    "skip": false,
+    "topic": "actuation",
+    "leaf": {
+      "kind": "proposition",
+      "data": "Higher-affinity, more aggregation-prone scFvs signal harder and exhaust CAR cells faster, so the affinity that maximizes sustained killing is below the maximum achievable affinity.",
+      "warrant": "CAR synapses are disorganized/non-classical, with faster lytic-granule recruitment and faster target detachment than a TCR synapse, so a CAR's value depends on its off-rate from a dying cell as much as its affinity: too sticky and the killer is monogamous, and higher affinity independently drives more scFv-aggregation-induced tonic signaling and earlier exhaustion.",
+      "rebuttal": null,
+      "warrant_type": "mechanistic_analogy"
+    },
+    "source": "PLM-VII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm07-narrative-commodity",
+    "title": "The effector becomes a platform commodity rented by a library of sensors (narrative synthesis)",
+    "tier": 3,
+    "skip": true,
+    "topic": "actuation",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-VII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm07-narrative-treg-mirror",
+    "title": "Tregs as the chassis run in reverse: tolerance and cytotoxicity as two outputs of one programmable effector (narrative synthesis)",
+    "tier": 3,
+    "skip": true,
+    "topic": "actuation",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-VII",
+    "schema_fit": {"status": "clean"}
+  }
+]

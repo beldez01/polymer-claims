@@ -1,0 +1,175 @@
+[
+  {
+    "id": "sb-plm06-toehold-onoff-ratio",
+    "title": "Toehold switches achieve >400-fold average ON/OFF dynamic range",
+    "tier": 1,
+    "skip": false,
+    "topic": "computing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 400,
+      "unit": null,
+      "uncertainty": null,
+      "measurement_basis": "DERIVED",
+      "formula": "ON expression ÷ OFF expression (average across a toehold switch library)"
+    },
+    "source": "PLM-VI",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm06-transcriptional-gate-dynamic-range",
+    "title": "Synthetic transcriptional logic gates have ON/OFF dynamic range on the order of 10-100x",
+    "tier": 1,
+    "skip": false,
+    "topic": "computing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 55,
+      "unit": null,
+      "uncertainty": 45,
+      "measurement_basis": "DERIVED",
+      "formula": "ON expression ÷ OFF expression (dynamic range D) of a synthetic transcriptional gate"
+    },
+    "source": "PLM-VI",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "Chapter states an order-of-magnitude range (10-100x), not a point measurement.",
+      "current_ir_behavior": "Manifest schema requires a single value+uncertainty pair, forcing an arithmetic midpoint (55±45) onto what the chapter frames as a multiplicative/log-scale span.",
+      "candidate_resolution": "Add optional value_min/value_max fields (or a log-scale uncertainty representation) to the quantity leaf for order-of-magnitude claims.",
+      "expansion_class": "domain",
+      "purity_cost": "An arithmetic midpoint is not the geometric center implied by a 10-100x range, so the encoded value slightly misrepresents the claim's shape though it stays within the stated bounds."
+    }
+  },
+  {
+    "id": "sb-plm06-cascade-depth-ceiling",
+    "title": "The practical ceiling for cascaded genetic logic gates is 3-4 layers deep",
+    "tier": 1,
+    "skip": false,
+    "topic": "computing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 3.5,
+      "unit": "layers",
+      "uncertainty": 0.5,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null
+    },
+    "source": "PLM-VI",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "Chapter states a discrete range (3-4 layers), not a single measured depth.",
+      "current_ir_behavior": "Forces the range into a continuous value=3.5±0.5.",
+      "candidate_resolution": "Represent as an inclusive integer range [3,4] rather than a continuous value+uncertainty pair, since gate count is discrete.",
+      "expansion_class": "domain",
+      "purity_cost": "A continuous midpoint (3.5 layers) implies a precision the discrete claim doesn't have — a circuit cannot have 3.5 gate layers."
+    }
+  },
+  {
+    "id": "sb-plm06-hla-loh-prevalence",
+    "title": "HLA-A*02 loss of heterozygosity occurs in ~10-20% of many solid tumors",
+    "tier": 1,
+    "skip": false,
+    "topic": "computing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 15,
+      "unit": "%",
+      "uncertainty": 5,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null
+    },
+    "source": "PLM-VI",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "Chapter gives a pooled range (~10-20%) across 'many solid tumors' without specifying which tumor types or a per-indication estimate.",
+      "current_ir_behavior": "Collapses to a single point value (15%±5%) with no tumor-type context.",
+      "candidate_resolution": "Tag with per-tumor-type context (context.condition) once a per-indication breakdown is available, rather than one pooled figure.",
+      "expansion_class": "domain",
+      "purity_cost": "A single prevalence figure obscures that LOH rate is tumor-type-dependent, which is exactly the clinical nuance a stratified context field would need to capture."
+    }
+  },
+  {
+    "id": "sb-plm06-cascade-error-compounding",
+    "title": "Cascaded genetic logic gates degrade rather than sharpen because per-gate errors compound multiplicatively with depth",
+    "tier": 2,
+    "skip": false,
+    "topic": "computing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "Deep digital logic cascades in cells are fragile: because biology has no signal-restoring step analogous to a transistor pinning to rail voltages, each added genetic gate's error compounds onto the last, so effective classifier margin shrinks rather than staying constant with depth.",
+      "warrant": "With per-gate ON/OFF dynamic range D~10-100x and per-gate error rate ε of a few percent, the effective signal contrast across k series gates falls roughly as the product of per-stage contrasts and error accumulates super-linearly, making 3-4 layers the practical ceiling before OFF-state leak floods the output — the chapter's stated reason every clinically advanced logic-gated cell therapy uses only two, at most three, inputs.",
+      "rebuttal": null,
+      "warrant_type": "deductive"
+    },
+    "source": "PLM-VI",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm06-retroactivity-loading",
+    "title": "Wiring a downstream circuit module to an upstream one loads and changes the upstream module's behavior (retroactivity)",
+    "tier": 2,
+    "skip": false,
+    "topic": "computing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "In synthetic gene circuits, connecting a downstream module to an upstream one is not free: the downstream binding sites sequester upstream signal, changing the upstream module's own behavior — the biomolecular analog of electrical impedance/fan-out loading.",
+      "warrant": "Formalized by Del Vecchio, Ninfa & Sontag as retroactivity in modular cell biology, and compounded by resource competition (circuits sharing ribosomes, RNA polymerase, and amino acids throttle each other), so a wired circuit is never the clean, independent-gate diagram drawn on a whiteboard.",
+      "rebuttal": null,
+      "warrant_type": "mechanistic_analogy"
+    },
+    "source": "PLM-VI",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm06-antithetic-integral-feedback",
+    "title": "Robust perfect adaptation in a synthetic circuit requires integral feedback, minimally realized as antithetic integral control",
+    "tier": 2,
+    "skip": false,
+    "topic": "computing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "Holding a circuit's output at a fixed setpoint despite arbitrary, persistent disturbances and parameter variation (robust perfect adaptation) requires integral feedback; the minimal biomolecular implementation is the antithetic integral feedback motif, in which two controller species mutually annihilate so that their difference integrates the error.",
+      "warrant": "This is a control-theory necessity result imported into synthetic biology by Khammash and colleagues (Briat, Gupta & Khammash, Cell Systems 2016) and subsequently realized as a working mammalian proportional-integral feedback circuit (Frei et al., PNAS 2022), meaning a therapeutic circuit that must hold a precise output in a variable in-vivo environment cannot rely on open-loop tuning.",
+      "rebuttal": null,
+      "warrant_type": "deductive"
+    },
+    "source": "PLM-VI",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm06-loh-escape-resistance",
+    "title": "A NOT-gate keyed to a genomic loss event (LOH) is more escape-resistant than one keyed to antigen gain",
+    "tier": 2,
+    "skip": false,
+    "topic": "computing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "Keying a logic-gated cell therapy's inhibitory (NOT) input to a somatic genomic deletion — such as loss of the germline HLA-A*02 allele via loss of heterozygosity — is more escape-resistant than keying it to an expressed antigen, because a tumor cannot re-express what it has irreversibly deleted, unlike antigen-loss escape from an activating CAR.",
+      "warrant": "A2 Bio's Tmod platform implements kill = activator (CEA/mesothelin/EGFR) AND NOT HLA-A*02: normal cells retain both HLA-A*02 copies and are protected by the veto, while tumor cells that underwent HLA-A*02 LOH lose the veto and are killed; this logic is in clinical testing as A2B530 (EVEREST-1, NCT05736731), A2B694, and A2B395.",
+      "rebuttal": null,
+      "warrant_type": "deductive"
+    },
+    "source": "PLM-VI",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm06-tmod-clinical-narrative",
+    "title": "Narrative: logic-gated cell therapies moving from bacterial reporter demos into the clinic",
+    "tier": 3,
+    "skip": true,
+    "topic": "computing",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-VI",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm06-circuit-ip-narrative",
+    "title": "Narrative: circuit topology, not the antigen binder, is becoming the defensible IP in cell therapy",
+    "tier": 3,
+    "skip": true,
+    "topic": "computing",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-VI",
+    "schema_fit": {"status": "clean"}
+  }
+]

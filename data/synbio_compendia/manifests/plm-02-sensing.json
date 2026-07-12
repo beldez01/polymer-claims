@@ -1,0 +1,165 @@
+[
+  {
+    "id": "sb-plm02-cd19-density-floor",
+    "title": "CD19 density floor of ~2,000 molecules/cell for CAR-T response in B-ALL",
+    "tier": 1,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 2000,
+      "unit": "molecules/cell",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {"condition": "CD19 CAR-T in B-ALL lymphoblasts; below this density, response is significantly less likely (Majzner et al., 2020)"}
+    },
+    "source": "PLM-II",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "The chapter states this as a floor/threshold (density *below* which response drops off), not a single measured data point. QuantityLeaf has no way to distinguish floor-vs-observation semantics -- value=2000 is stored exactly as a directly measured antigen count would be.",
+      "current_ir_behavior": "Stored as a plain FUNDAMENTAL quantity (value=2000, unit='molecules/cell'), indistinguishable from a point measurement.",
+      "candidate_resolution": "Add an optional `value_relation` enum on QuantityLeaf ('floor'|'ceiling'|'point'|'range') so floor/threshold semantics survive into the IR.",
+      "expansion_class": "general",
+      "purity_cost": "Additive and optional, defaulting to 'point' for byte-identity with all existing claims; touches only QuantityLeaf, not the core Claim/pattern grammar."
+    }
+  },
+  {
+    "id": "sb-plm02-cd3-itam-count",
+    "title": "The CD3 complex contributes 10 ITAMs to TCR signaling",
+    "tier": 1,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 10,
+      "unit": "ITAMs",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": null
+    },
+    "source": "PLM-II",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm02-hla-a0201-frequency",
+    "title": "HLA-A*02:01 allele-level prevalence is ~27% in individuals of European descent",
+    "tier": 1,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 27,
+      "unit": "%",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {"condition": "rigorous allele-level estimate, European descent (Tano-Menka et al., 2023)"}
+    },
+    "source": "PLM-II",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm02-immtac-affinity-fold",
+    "title": "ImmTAC (tebentafusp) was engineered to ~1,000,000-fold higher pMHC affinity than a natural TCR",
+    "tier": 1,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 1000000,
+      "unit": null,
+      "uncertainty": null,
+      "measurement_basis": "DERIVED",
+      "formula": "affinity_ImmTAC_engineered_TCR / affinity_natural_TCR",
+      "context": {"condition": "soluble ImmTAC reagent, gp100/HLA-A*02:01, tebentafusp"}
+    },
+    "source": "PLM-II",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm02-kinetic-proofreading-law",
+    "title": "Synapse discrimination is a kinetic bond-lifetime measurement via kinetic proofreading, not an affinity measurement",
+    "tier": 2,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "Discrimination at the immune synapse is a measurement of bond lifetime (dwell time, tau = 1/k_off) processed through kinetic proofreading, not a measurement of equilibrium binding affinity (K_D).",
+      "warrant": "Kinetic proofreading requires a bound ligand to survive a chain of slow, energy-consuming modification steps (TCR ITAM phosphorylation by Lck, ZAP-70 recruitment and its own multi-step activation) before the signal fires; because the probability of completing all steps scales supralinearly (near-exponentially) with dwell time, a small difference in tau produces a large difference in output, giving sharp self/non-self discrimination that a simple equilibrium K_D readout cannot provide.",
+      "rebuttal": "At high ligand density and fast k_off, serial triggering can let a single pMHC sequentially engage and trigger many TCRs, amplifying signal from very few ligands by a route other than completed proofreading.",
+      "warrant_type": "deductive"
+    },
+    "source": "PLM-II",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm02-affinity-paradox",
+    "title": "Increasing receptor affinity beyond the kinetic optimum degrades, not improves, antigen discrimination",
+    "tier": 2,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "Increasing TCR/CAR receptor affinity beyond an optimal dwell-time sweet spot does not improve, and actively degrades, antigen discrimination.",
+      "warrant": "Pushing K_D low enough slows k_off so far that serial triggering collapses (each receptor stays occupied by one ligand it cannot release), the proofreading chain completes even for low-density/self engagements because bond lifetime now always outlasts the proofreading delay, and the sigmoidal density-response saturates and flattens -- erasing the density threshold that produced tumor/normal selectivity.",
+      "rebuttal": "Soluble bridging reagents such as ImmTAC are exempt from this paradox because they do not rely on synapse-level kinetic proofreading for discrimination; discrimination is instead delegated to the specificity of the engineered binding interface and the requirement to cross-link CD3, so million-fold affinity gains remain beneficial for a soluble reagent even though they would be catastrophic for a cellular receptor.",
+      "warrant_type": "deductive"
+    },
+    "source": "PLM-II",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm02-car-signal-short-circuit",
+    "title": "A second-generation CAR hardwires Signal 1 and Signal 2 into one chain, deleting the natural Signal-2 checkpoint",
+    "tier": 2,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "A second-generation CAR fuses antigen recognition (Signal 1, via scFv) and costimulation (Signal 2, via a CD28 or 4-1BB domain) into a single polypeptide triggered by one binding event, deleting the independent Signal-2 checkpoint that a natural T cell uses to prevent autoreactive activation.",
+      "warrant": "A natural T cell requires independent engagement of CD28 by CD80/CD86 on a professional antigen-presenting cell as a separate licensing signal; Signal 1 without Signal 2 drives anergy, a built-in safety interlock. Because the CAR fuses scFv -> hinge -> transmembrane -> costimulatory domain -> CD3zeta into one chain, a single binding event supplies both signals simultaneously, so the independent-context requirement (and the anergy interlock it enforces) is structurally removed.",
+      "rebuttal": "synNotch-gated CAR-deployment schemes (synNotch(antigen A) -> CAR(antigen B)) partially restore a Signal-2-like contextual check by requiring a second, independent antigen-recognition event before the CAR is even expressed.",
+      "warrant_type": "deductive"
+    },
+    "source": "PLM-II",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm02-hla-restriction-ceiling",
+    "title": "HLA restriction is a population-genetic ceiling on pMHC-directed therapies, not an engineering bug",
+    "tier": 2,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "HLA restriction is not an engineering bug to be optimized away; it is a thermodynamic and population-genetic ceiling on the entire surface-pMHC-directed therapeutic strategy.",
+      "warrant": "Each TCR or TCR-mimic product is locked to one peptide displayed on one HLA allele; allele frequency varies sharply by ancestry (e.g., ~27% for HLA-A*02:01 in European descent, lower in African and many Asian populations), and even in an HLA-matched patient tumors can further evade by downregulating or deleting MHC-I (beta2-microglobulin mutation, HLA LOH) -- so no single allele-restricted product, however well engineered, can achieve population-wide coverage or evade acquired HLA loss.",
+      "rebuttal": "Multi-allele product portfolios can raise aggregate population coverage without solving the ceiling for any single product, and the ceiling does not apply to non-HLA-restricted approaches such as native-surface-protein CARs, which read protein directly rather than through pMHC.",
+      "warrant_type": "deductive"
+    },
+    "source": "PLM-II",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm02-summary-narrative",
+    "title": "Chapter summary: from synapse physics to programmable surface sensing (narrative synthesis)",
+    "tier": 3,
+    "skip": true,
+    "topic": "sensing",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-II",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm02-connections-narrative",
+    "title": "Forward/backward pointers to sibling chapters and Part III (narrative connections)",
+    "tier": 3,
+    "skip": true,
+    "topic": "sensing",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-II",
+    "schema_fit": {"status": "clean"}
+  }
+]

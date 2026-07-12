@@ -1,0 +1,189 @@
+[
+  {
+    "id": "sb-plm08-endosomal-escape-fraction",
+    "title": "Only ~1-2% of internalized LNP-siRNA cargo escapes into the cytosol",
+    "tier": 1,
+    "skip": false,
+    "topic": "delivery",
+    "leaf": {
+      "kind": "quantity",
+      "value": 1.5,
+      "unit": "%",
+      "uncertainty": 0.5,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {"assay": "quantitative image-based analysis of LNP-mediated siRNA intracellular trafficking and endosomal escape"}
+    },
+    "source": "PLM-VIII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm08-aav-packaging-limit",
+    "title": "AAV has a genome packaging limit of ~4.7 kb",
+    "tier": 1,
+    "skip": false,
+    "topic": "delivery",
+    "leaf": {
+      "kind": "quantity",
+      "value": 4.7,
+      "unit": "kb",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": null
+    },
+    "source": "PLM-VIII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm08-evlp-base-editing-efficiency",
+    "title": "Fourth-generation eVLPs achieve up to ~95% base editing in cultured cells",
+    "tier": 1,
+    "skip": false,
+    "topic": "delivery",
+    "leaf": {
+      "kind": "quantity",
+      "value": 95,
+      "unit": "%",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {"assay": "base editing efficiency of fourth-generation engineered virus-like particles in cultured cells"}
+    },
+    "source": "PLM-VIII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm08-ckit-lnp-hspc-transfection",
+    "title": "Anti-CD117-targeted LNP at high dose (~20 ug mRNA) transfects ~90% of HSPCs and LT-HSCs",
+    "tier": 1,
+    "skip": false,
+    "topic": "delivery",
+    "leaf": {
+      "kind": "quantity",
+      "value": 90,
+      "unit": "%",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {
+        "assay": "reporter/Cre mRNA delivery to HSPCs and LT-HSCs via anti-CD117-targeted LNP, in vivo",
+        "condition": "single IV dose, ~20 ug mRNA (high dose)"
+      }
+    },
+    "source": "PLM-VIII",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "The chapter explicitly cautions that the ~90% figure is reporter/cargo delivery at high dose, not durable editing efficiency, but the quantity leaf has no field to encode that this measured endpoint differs from the clinically relevant one.",
+      "current_ir_behavior": "The caveat can only be appended as free text inside title/context, not as a structured, queryable field distinguishing delivery-endpoint type from editing-endpoint type.",
+      "candidate_resolution": "Add an endpoint_type or validity_caveat field to the quantity leaf (e.g. 'reporter_delivery' vs 'durable_editing') so measurement-type mismatches are queryable rather than buried in prose.",
+      "expansion_class": "analysis",
+      "purity_cost": "Downstream consumers filtering by value/unit alone could conflate this delivery-efficiency figure with a true durable-editing-efficiency claim, overstating correction rates."
+    }
+  },
+  {
+    "id": "sb-plm08-ntla2001-ttr-knockdown",
+    "title": "NTLA-2001 produces ~50%+ serum TTR knockdown from a single infusion",
+    "tier": 1,
+    "skip": false,
+    "topic": "delivery",
+    "leaf": {
+      "kind": "quantity",
+      "value": 50,
+      "unit": "%",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {
+        "assay": "serum transthyretin (TTR) knockdown following in vivo hepatic CRISPR editing (NTLA-2001)",
+        "condition": "single infusion"
+      }
+    },
+    "source": "PLM-VIII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm08-lnp-four-component-molar-ratio",
+    "title": "A representative mRNA-LNP formulation uses an ionizable:DSPC:cholesterol:PEG-lipid molar ratio of ~50:10:38.5:1.5",
+    "tier": 1,
+    "skip": false,
+    "topic": "delivery",
+    "leaf": {
+      "kind": "quantity",
+      "value": 1.5,
+      "unit": "mol%",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {"condition": "representative four-component mRNA-LNP formulation; molar ratio ionizable:DSPC:cholesterol:PEG-lipid ≈ 50:10:38.5:1.5"}
+    },
+    "source": "PLM-VIII",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "The load-bearing fact is the joint four-component molar ratio (ionizable:DSPC:cholesterol:PEG ≈ 50:10:38.5:1.5), but the quantity leaf carries exactly one scalar value+unit.",
+      "current_ir_behavior": "Only the PEG-lipid figure (1.5 mol%) survives as a structured value; the other three ratio terms are demoted to unstructured text in context/title.",
+      "candidate_resolution": "A composite/vector-valued quantity leaf kind (a list of named value+unit pairs) or a dedicated ratio/composition leaf type.",
+      "expansion_class": "general",
+      "purity_cost": "A query over structured quantities cannot reconstruct or validate the full formulation ratio from this entry alone, only the isolated PEG-lipid figure."
+    }
+  },
+  {
+    "id": "sb-plm08-sort-lipid-biodistribution",
+    "title": "SORT: a fifth charged lipid systematically redirects LNP biodistribution among liver, lung, and spleen",
+    "tier": 2,
+    "skip": false,
+    "topic": "delivery",
+    "leaf": {
+      "kind": "proposition",
+      "data": "Adding a fifth, charged 'SORT' lipid to the four-component LNP formulation shifts biodistribution in a charge-dependent way: a permanently cationic lipid (e.g., DOTAP) redirects delivery to lung, an anionic lipid (e.g., 18PA) redirects delivery to spleen, and an ionizable-only formulation stays in liver; the effect holds for mRNA, Cas9 mRNA/sgRNA, and Cas9 ribonucleoprotein cargo.",
+      "warrant": "Net particle surface charge determines which serum opsonins adsorb and form the protein corona, and that corona composition dictates which organ-specific receptor/uptake pathway captures the particle, so tuning one physicochemical parameter (charge) is sufficient to reassign organ tropism without any targeting ligand.",
+      "rebuttal": null,
+      "warrant_type": "mechanistic_analogy"
+    },
+    "source": "PLM-VIII",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "The finding is a three-way categorical mapping (cationic→lung, anionic→spleen, neutral/ionizable-only→liver), but the proposition leaf holds exactly one data string and one warrant string.",
+      "current_ir_behavior": "All three formulation-outcome branches are flattened into one prose 'data' field.",
+      "candidate_resolution": "Represent as a structured list of (formulation-perturbation, organ-outcome) tuples under one proposition, or as three linked propositions sharing a common warrant.",
+      "expansion_class": "domain",
+      "purity_cost": "A query for 'what does an anionic SORT lipid do' cannot isolate the spleen-specific sub-claim without parsing prose, and the one-to-one perturbation-outcome correspondence is not machine-checkable."
+    }
+  },
+  {
+    "id": "sb-plm08-ionizable-lipid-ph-escape",
+    "title": "Ionizable lipids are pH-switched: neutral in circulation, cationic and membrane-disrupting in the acidifying endosome",
+    "tier": 2,
+    "skip": false,
+    "topic": "delivery",
+    "leaf": {
+      "kind": "proposition",
+      "data": "Ionizable lipids are engineered to be near-neutral at physiological pH, reducing toxicity and opsonization in circulation, but to protonate in the acidifying endosome (~pH 6-6.5), where the resulting cationic charge disrupts the endosomal membrane and forces a fraction of the cargo into the cytosol.",
+      "warrant": "A charge state that switches with pH lets the particle stay inert in blood and become membrane-disruptive only once inside the acidifying endosome, so the lipid's protonation behavior (pKa) is the tunable variable converting a generic endocytic uptake event into cytosolic cargo release.",
+      "rebuttal": "Even the most advanced clinical ionizable lipids (SM-102, ALC-0315) remain in the low-single-digit-percent escape regime, so pH-triggered protonation alone has not been sufficient to raise escape efficiency much beyond the ~1-2% ceiling.",
+      "warrant_type": "mechanistic_analogy"
+    },
+    "source": "PLM-VIII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm08-address-is-the-moat",
+    "title": "Narrative: the program is cheap, the address is the moat (2025-2026 delivery-platform M&A)",
+    "tier": 3,
+    "skip": true,
+    "topic": "delivery",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-VIII",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm08-exvivo-invivo-cogs",
+    "title": "Narrative: ex vivo vs in vivo delivery as the trade space that decides COGS",
+    "tier": 3,
+    "skip": true,
+    "topic": "delivery",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-VIII",
+    "schema_fit": {"status": "clean"}
+  }
+]
