@@ -25,6 +25,8 @@ from polymer_claims.merge_universes import (
     collect_pharmaco,
     collect_polymergenomics,
     collect_synbio,
+    collect_transposable_elements,
+    collect_transposable_elements_enrichment,
     merge_universes,
 )
 
@@ -43,11 +45,18 @@ def main() -> None:
     immuno = collect_immuno()
     print(f"  immuno: {len(immuno.claims)} claims", file=sys.stderr)
 
+    te_ndmp = collect_transposable_elements()
+    print(f"  transposable-elements (n-DMP): {len(te_ndmp.claims)} claims", file=sys.stderr)
+
+    te_enrichment = collect_transposable_elements_enrichment()
+    print(f"  transposable-elements-enrichment: {len(te_enrichment.claims)} claims", file=sys.stderr)
+
     print("  pharmaco: running the real GDSC mechanism scan (~1-2 min)...", file=sys.stderr)
     pharmaco = collect_pharmaco()
     print(f"  pharmaco: {len(pharmaco.claims)} claims", file=sys.stderr)
 
-    merged, facets = merge_universes([pharmaco, synbio, immuno, polymergenomics])
+    merged, facets = merge_universes(
+        [pharmaco, synbio, immuno, polymergenomics, te_ndmp, te_enrichment])
 
     n_by_arm = Counter(f.arm for f in facets.values())
     n_by_status = Counter(c.status.value for c in merged.claims)

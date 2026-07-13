@@ -150,6 +150,54 @@ def test_collect_transposable_elements_lifts_a_strict_corpus_bundle(tmp_path):
         "te-hervk_ltr5-ndmp": 1e6, "te-l1hs-ndmp": 0.5}
 
 
+def test_collect_transposable_elements_enrichment_lifts_and_coexists_with_ndmp():
+    """The TE ENRICHMENT bundle is also a strict Corpus — a clean load_corpus + from_corpus lift under
+    a DISTINCT arm facet. Its ids (te-*-enrich) never collide with the n-DMP arm (te-*-ndmp), so both
+    TE families coexist as separate atoms in the merged universe."""
+    from polymer_grammar import FDRLedger
+    from polymer_protocol import Corpus
+
+    from polymer_claims.io import dump_corpus
+    from polymer_claims.merge_universes import (
+        collect_transposable_elements, collect_transposable_elements_enrichment,
+    )
+
+    ndmp = Corpus(
+        claims=(_claim("te-hervk_ltr5-ndmp", Status.LICENSED),),
+        fdr_ledger=FDRLedger(target_fdr=0.05, tests=(
+            FDRTest(index=1, claim_id="te-hervk_ltr5-ndmp", e_value=1e6,
+                    alpha_allocated=0.05, discovery=True),)),
+    )
+    enrich = Corpus(
+        claims=(_claim("te-hervk_ltr5-enrich", Status.PENDING),
+                _claim("te-l1hs-enrich", Status.REJECTED)),
+        fdr_ledger=FDRLedger(target_fdr=0.05, tests=(
+            FDRTest(index=1, claim_id="te-hervk_ltr5-enrich", e_value=6.9e4,
+                    alpha_allocated=0.03, discovery=True),)),
+    )
+    import tempfile
+    from pathlib import Path
+    with tempfile.TemporaryDirectory() as d:
+        nb, eb = Path(d) / "ndmp.json", Path(d) / "enrich.json"
+        nb.write_text(dump_corpus(ndmp))
+        eb.write_text(dump_corpus(enrich))
+
+        esrc = collect_transposable_elements_enrichment(eb)
+        assert esrc.arm == "transposable-elements-enrichment"
+        assert esrc.modality == "methylation"
+        assert {c.id for c in esrc.claims} == {"te-hervk_ltr5-enrich", "te-l1hs-enrich"}
+
+        merged, facets = merge_universes([collect_transposable_elements(nb), esrc])
+
+    # both TE arms coexist (distinct ids, distinct arm facets), statuses preserved verbatim
+    assert len(merged.claims) == 3
+    assert facets["te-hervk_ltr5-ndmp"].arm == "transposable-elements"
+    assert facets["te-hervk_ltr5-enrich"].arm == "transposable-elements-enrichment"
+    by_id = {c.id: c for c in merged.claims}
+    assert by_id["te-hervk_ltr5-enrich"].status == Status.PENDING
+    assert by_id["te-l1hs-enrich"].status == Status.REJECTED
+
+
 def test_synbio_arm_named_by_subject_with_topic_facet():
     from polymer_claims.merge_universes import collect_synbio, merge_universes
     src = collect_synbio()

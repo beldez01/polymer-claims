@@ -35,6 +35,7 @@ __all__ = [
     "collect_polymergenomics",
     "collect_synbio",
     "collect_transposable_elements",
+    "collect_transposable_elements_enrichment",
     "merge_universes",
 ]
 
@@ -42,6 +43,9 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _DEFAULT_IMMUNO_PATH = _REPO_ROOT / "data" / "demo" / "immuno_universe.json"
 _DEFAULT_POLYMERGENOMICS_PATH = _REPO_ROOT / "data" / "demo" / "polymergenomics_universe.json"
 _DEFAULT_TE_PATH = _REPO_ROOT / "data" / "demo" / "transposable_elements_universe.json"
+_DEFAULT_TE_ENRICHMENT_PATH = (
+    _REPO_ROOT / "data" / "demo" / "transposable_elements_enrichment_universe.json"
+)
 
 
 @dataclass(frozen=True)
@@ -261,3 +265,22 @@ def collect_transposable_elements(path: str | Path = _DEFAULT_TE_PATH) -> ArmSou
 
     corpus = load_corpus(path)
     return ArmSource.from_corpus("transposable-elements", "methylation", corpus)
+
+
+def collect_transposable_elements_enrichment(
+    path: str | Path = _DEFAULT_TE_ENRICHMENT_PATH,
+) -> ArmSource:
+    """Facet: arm="transposable-elements-enrichment", modality="methylation".
+
+    The honest recast of the TE arm: the SAME six families re-tested as fold-enrichment-over-a-matched-
+    genomic-background claims (`te_enrichment.run_te_enrichment_sweep`), serialized to
+    `data/demo/transposable_elements_enrichment_universe.json` by `scripts/rip_te_enrichment.py`. A
+    strict Corpus, so a clean load_corpus + from_corpus lift. Distinct arm facet + distinct claim ids
+    (`te-*-enrich`, `background_enrichment` pattern) from the n-DMP arm (`te-*-ndmp`, `adjusted_effect`),
+    so both TE claim-families coexist as separate atoms — the "beyond-chance" and "enriched-over-
+    background" readings sit side by side in the unified universe (0/6 enriched: 5 REJECTED, HERV-K
+    PENDING)."""
+    from .io import load_corpus
+
+    corpus = load_corpus(path)
+    return ArmSource.from_corpus("transposable-elements-enrichment", "methylation", corpus)
