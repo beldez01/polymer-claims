@@ -51,16 +51,38 @@ standing later (Slices 2–3); in Slice 1 they are honest conjectures that conne
    *pure* piece is the `TopologyEdge` contract in the protocol; the numpy signed-Laplacian in the umbrella
    consumes it.
 
+### 0.2 Corrections folded in from the 2026-07-13 *second* review pass
+
+7. **Byte-identity needs an explicit serializer.** `_Model` is `extra="forbid", frozen=True` with **no
+   `exclude_none`**, and exports use `model_dump_json()`. A `model_serializer` on `TopologyEdge` (and the
+   new grammar types) omits unset fields — the `capability.py` precedent (§1, §9, §10).
+8. **Relata are sorted `tuple`s, not `frozenset`** — matching the subject schema's deterministic
+   content-addressing (`CompositeSubject.parts`) (§1, §4).
+9. **The relation leaf is concrete** — a named `RelationLeaf` in the `Leaf` union, since a `Claim` requires
+   ≥1 leaf (`Field(min_length=1)`) (§4).
+10. **Signed-edge aggregation is defined** — sum-then-clamp with status weighting, so a tension edge can't
+    be erased by the current `max()` collapse (§6).
+11. **`restriction_map` scope is consistent** — Slice 1 *defines + renders* it only; the sheaf-suppression
+    behavior is Slice 2 (§5, §11).
+12. **Protocol-lane guard** — relation claims are excluded from SELECT/EXECUTE/FDR by an explicit
+    `is_relation` guard, not by convention (§9).
+
 ## 1. Architecture & placement (corrected layering)
 
-- **Grammar (pure).** A new `ClaimSetSubject(_SubjectBase)` (subject = an ordered pair of claim-id sets)
-  + a **relation pattern/leaf** carrying `tier`, `kind: RelationKind`, signed `severity ∈ [−1, +1]`. A
-  relation is therefore an ordinary `Claim(subject=ClaimSetSubject(...), …)` → lives in `Corpus.claims`,
+- **Grammar (pure).** A new `ClaimSetSubject(_SubjectBase)` whose relata are **sorted `tuple[str, ...]`**
+  (`source_set`, `target_set`) — tuples, not `frozenset`, matching the subject schema's deterministic
+  content-addressing (`CompositeSubject.parts` is a tuple), with a validator enforcing sorted + disjoint.
+  Plus a new **`RelationLeaf`** in the `Leaf` union carrying `tier`, `kind: RelationKind`, signed
+  `severity ∈ [−1, +1]` — a `Claim` requires ≥1 `Leaf`, so the relation's nature is a concrete leaf, not
+  vague metadata. A relation is therefore an ordinary
+  `Claim(subject=ClaimSetSubject(...), leaves=(RelationLeaf(...),))` → lives in `Corpus.claims`,
   **Corpus stays 4 collections**. Additive; byte-identical when absent.
 - **Protocol (pure).** `TopologyEdge` gains optional `tier`, `signed_weight`, and `relation_status`
-  fields (drop-when-None → byte-identical when absent) — a **versioned topology contract** (`v?→v?+1`).
-  `export_topology` learns to **project** each relation `Claim` into signed `TopologyEdge`s (§6). This is
-  pure data; both the viewer and the eigenmap read it.
+  fields — a **versioned topology contract** (`v?→v?+1`). Byte-identity is **not** automatic: `_Model` is
+  `extra="forbid", frozen=True` with **no `exclude_none`**, and exports use `model_dump_json()`. So we add
+  an explicit **`model_serializer` on `TopologyEdge`** that omits the new fields when unset, mirroring the
+  byte-identity serializer precedent (`capability.py`). `export_topology` learns to **project** each
+  relation `Claim` into signed `TopologyEdge`s (§6). Pure data; viewer + eigenmap both read it.
 - **Umbrella (impure, numpy).** `embedding.py` extends `KIND_WEIGHT`/`build_graph` to honor
   `signed_weight` (true negative weights for tension), generalizing today's `polar`/`RHO` hack. Plus the
   **proposer** (candidate-gen + agent reasoning). All reasoning and numpy stay here.
@@ -94,11 +116,13 @@ and earns through the appropriate test.
 ## 4. The relation meta-claim (concrete additive schema)
 
 A relation is a `Claim` with:
-- **`subject: ClaimSetSubject`** — an ordered pair `(source_set, target_set)`, `frozenset[str]` each.
-  Order is canonicalized/ignored for symmetric kinds (`coheres`/`tension`) and is `source→target` for the
-  directional `restriction_map`. Validator: **disjoint** sets (no claim on both sides, no self-relation).
-- **A relation pattern/leaf** carrying `tier: {COMPUTATIONAL, BIOLOGICAL}`, `kind: RelationKind`, and
-  signed `severity ∈ [−1, +1]` (`+` coherence, `−` tension; binary is the `±1` endpoint).
+- **`subject: ClaimSetSubject`** — `source_set`, `target_set`, each a **sorted `tuple[str, ...]`** (tuples
+  for deterministic content-addressing, matching `CompositeSubject.parts`; a validator enforces sorted +
+  **disjoint** — no claim on both sides, no self-relation). Symmetric kinds (`coheres`/`tension`)
+  canonicalize the two tuples into a stable order; `restriction_map` keeps `source→target`.
+- **A new `RelationLeaf`** (added to the `Leaf` union — a `Claim` requires ≥1 leaf) carrying
+  `tier: {COMPUTATIONAL, BIOLOGICAL}`, `kind: RelationKind`, and signed `severity ∈ [−1, +1]` (`+`
+  coherence, `−` tension; binary is the `±1` endpoint).
 - The `Claim`'s own `status` (starts `CONJECTURED`), `licensing`, provenance (proposer id, rationale, the
   candidate signal) — i.e. it earns its license through the *existing* `Claim` lifecycle.
 
@@ -120,8 +144,10 @@ An **explicit `tier`** pairs with a **new `RelationKind`** (distinct from the at
 - `coheres` — Tier-1 or Tier-2 support (positive severity); **non-attack**, never tombstones.
 - `tension` — conflict needing reconciliation (negative severity); **non-attack**, flags for testing,
   never tombstones.
-- `restriction_map` — the Tier-1 non-contradiction edge the reparam evaluator needs (tells the sheaf that
-  "REJECTED over gene-body" and "LICENSED over promoter" are not a contradiction); **non-attack**.
+- `restriction_map` — the Tier-1 non-contradiction edge the reparam evaluator will need; **non-attack**.
+  **In Slice 1 it is only *defined and rendered*** — the semantics it is *intended* to carry (telling the
+  sheaf that "REJECTED over gene-body" and "LICENSED over promoter" are not a contradiction) is **wired in
+  Slice 2**, not active here (§11).
 
 Tombstone/null-bearing behavior is unchanged and stays on the *attack* `DefeatEdgeKind`s; **no
 `RelationKind` tombstones or de-licenses.** Tier is not permanent: a `BIOLOGICAL` `tension` can **resolve
@@ -137,9 +163,14 @@ on the same relation, preserving provenance.
   its relata so it localizes at the seam. All-pairs (not a hub node) so a **tension** pair genuinely
   repels rather than being pulled together by two positive hub edges. Pure, ordered, byte-stable.
 - **Umbrella (`embedding.py`):** `build_graph` reads `signed_weight` and builds a **truly signed**
-  adjacency (negative entries for tension), replacing the assumption that all kinds attract; the existing
-  `polar`/`RHO` opposite-`direction` `rebut` repulsion becomes a special case of the general signed rule.
-  `spectral_layout` is otherwise unchanged.
+  adjacency (negative entries for tension), replacing the current all-attract assumption and the `max()`
+  collapse. **Signed aggregation rule:** per unordered pair, **sum** the signed contributions then **clamp
+  to [−1, 1]** — *not* `max()`, which would let any positive edge silently erase a negative tension. Because
+  CONJECTURED relations are down-weighted (`status_factor < 1`), a speculative tension cannot fully cancel a
+  strong legacy (equivalence/entails) attraction — legacy structure is protected. (Alternative: `separate
+  channels` — a distinct relation-Laplacian combined at embed time — if sum-clamp proves too blunt; decided
+  in the plan.) The existing `polar`/`RHO` `rebut` repulsion becomes a special case. `spectral_layout`
+  otherwise unchanged.
 - **Viewer:** reads the same `TopologyEdge`s → renders relations dashed/weak while CONJECTURED, colored by
   `tier`, coherence-vs-tension by sign.
 
@@ -176,19 +207,26 @@ proposer (candidate-gen → agent reasoning)
 
 - Relations are **CONJECTURED/defeasible**; `RelationKind` is **non-attack** — a relation can never
   de-license or tombstone, and can never masquerade as an earned computational adjudication.
-- **Nothing charges the FDR ledger in Slice 1** — relations earn only in Slices 2–3.
+- **Protocol-lane guard.** Relation claims carry a `RelationLeaf`/`ClaimSetSubject`, have **no
+  `evaluation_plan`**, and are filtered out of SELECT / EXECUTE / the FDR ledger by an explicit
+  `is_relation` guard (subject/leaf-type check) — so **"nothing charges the FDR ledger in Slice 1"** is
+  enforced mechanically, not by convention. Relations earn via a dedicated path in Slices 2–3.
 - Proposer liberality bounded + fully audited.
-- **Purity:** grammar (`ClaimSetSubject` + pattern) and protocol (`TopologyEdge` contract + projection)
-  stay pure + numpy-free; the numpy signed eigenmap and all reasoning stay umbrella-side (`embedding.py`,
-  proposer).
-- **Byte-identity proven** for any corpus with no relation claims (new fields absent/defaulted).
+- **Purity:** grammar (`ClaimSetSubject` + `RelationLeaf`) and protocol (`TopologyEdge` contract +
+  projection) stay pure + numpy-free; the numpy signed eigenmap and all reasoning stay umbrella-side
+  (`embedding.py`, proposer).
+- **Byte-identity proven** for any corpus with no relation claims — via the explicit `model_serializer`
+  (§1), not default drop-when-None.
 
 ## 10. Testing (behavioral)
 
 - **Grammar:** `ClaimSetSubject` round-trip; relation pattern validators (disjoint sets, `severity`
   bounds, `pending_reason` iff pending); **byte-identical serialization** for a relation-free corpus.
-- **Protocol:** `export_topology` projects the right all-pairs signed `TopologyEdge`s + weights; new edge
-  fields drop-when-None (byte-identity); versioned contract bump asserted.
+- **Protocol:** `export_topology` projects the right all-pairs signed `TopologyEdge`s + weights; the
+  `model_serializer` omits unset new fields so a relation-free export is **byte-identical** (assert against
+  a golden); signed aggregation (sum-clamp) — a positive legacy edge + a CONJECTURED tension nets the
+  expected sign and a strong tension is not erased; the `is_relation` lane guard keeps relation claims out
+  of SELECT/EXECUTE/FDR; versioned contract bump asserted.
 - **Umbrella eigenmap:** a `coheres` relation pulls two components together; a `tension` relation pushes
   them apart (behavioral, on a tiny fixture) — the true-signed behavior that does **not** exist today.
 - **Proposer:** on a known-biology fixture (two TP53 claims) candidate-gen pairs them and the agent emits

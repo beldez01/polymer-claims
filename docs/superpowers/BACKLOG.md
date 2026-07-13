@@ -44,6 +44,15 @@ ruled out 2026-07-11); generic per-attack e-value combination ("largely a mirage
 - [ ] **Promoter-methylation SE-Contract (2nd measurement dimension)** · `BUILD` · reparam §7 pre-req 0
   — Second contract dimension so MGMT→TMZ and promoter-localized claims can be re-tested over promoter
   β-space. Buildable/unit-testable on synthetic contracts now; **data-gated** on `methylation_promoter_bycosmic.csv.gz` / CCLE RRBS for the live run.
+- [x] **Cross-arm relations spec hardening** · `HARDEN` · `specs/2026-07-13-cross-arm-relations-design.md`
+  — **Resolved 2026-07-13** across two review passes, folded into the spec. §0.1 (first pass): true signed
+  projection is a Slice-1 addition (not assumed); relations project into a versioned `TopologyEdge` so the
+  viewer sees them; concrete `ClaimSetSubject` IR (Corpus stays 4); dropped "singletons reproduce legacy
+  edges"; new non-attack `RelationKind` instead of overloading `REINTERPRET`; corrected purity layering.
+  §0.2 (second pass): explicit `model_serializer` for byte-identity (`_Model` has no `exclude_none`);
+  sorted-`tuple` relata (not `frozenset`); concrete `RelationLeaf` in the `Leaf` union; signed-edge
+  **sum-clamp** aggregation (not `max()`); `restriction_map` is define/render-only in Slice 1 (sheaf
+  wiring → Slice 2); explicit `is_relation` protocol-lane guard. Ready for writing-plans pending final sign-off.
 
 ## 2. Warrant / independence / trust hardening
 *Instrument the correlated bias, external testimony, drift horizons, and licensed negatives the gate
