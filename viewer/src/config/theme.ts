@@ -140,6 +140,12 @@ export const EDGE_COLOR: Record<string, string> = {
   // structural
   equivalence: '#A1A1AA',
   entails:     '#0F62FE',
+  // cross-arm relations (Task 6+) — coheres reads positive/green, tension reads
+  // negative/red (distinct from the defeat-family rose), restriction_map reads
+  // structural like entails but in a distinguishable hue (cyan vs blue).
+  coheres:         '#24A148', // Carbon Green 50
+  tension:         '#A2191F', // Carbon Red 60 — darker/warmer than defeat's rose
+  restriction_map: '#1192E8', // Carbon Cyan 50
 };
 
 export const DEFEAT_KINDS = [

@@ -58,6 +58,10 @@ export interface InterpEdge {
   effective: boolean;
   provisional: boolean;
   opacity: number;
+  /** Relation-claim facets (Task 6+) — see TopologyEdge. Undefined on base edges. */
+  tier?: string | null;
+  signed_weight?: number | null;
+  relation_status?: string | null;
 }
 
 export interface InterpFrame {
@@ -228,6 +232,9 @@ export function interpolateFrame(
       effective: eb.effective,
       provisional: eb.provisional,
       opacity: inA ? 1 : t, // entering edge fades in
+      tier: eb.tier,
+      signed_weight: eb.signed_weight,
+      relation_status: eb.relation_status,
     });
   }
   for (const ea of A.edges) {
@@ -240,6 +247,9 @@ export function interpolateFrame(
       effective: ea.effective,
       provisional: ea.provisional,
       opacity: 1 - t, // leaving edge fades out
+      tier: ea.tier,
+      signed_weight: ea.signed_weight,
+      relation_status: ea.relation_status,
     });
   }
 

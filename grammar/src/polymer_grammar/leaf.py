@@ -130,7 +130,25 @@ class PropositionLeaf(_Model):
     ] = "mechanistic_analogy"
 
 
+class Tier(str, Enum):
+    COMPUTATIONAL = "computational"
+    BIOLOGICAL = "biological"
+
+
+class RelationKind(str, Enum):
+    COHERES = "coheres"
+    TENSION = "tension"
+    RESTRICTION_MAP = "restriction_map"
+
+
+class RelationLeaf(_Model):
+    kind: Literal["relation"] = "relation"
+    tier: Tier
+    relation_kind: RelationKind
+    severity: float = Field(ge=-1.0, le=1.0)  # + coherence, - tension
+
+
 Leaf = Annotated[
-    Union[QuantityLeaf, CategoricalLeaf, ExistenceLeaf, PropositionLeaf],
+    Union[QuantityLeaf, CategoricalLeaf, ExistenceLeaf, PropositionLeaf, RelationLeaf],
     Field(discriminator="kind"),
 ]

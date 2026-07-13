@@ -11,6 +11,9 @@ from .leaf import (
     MeasurementBasis,
     PropositionLeaf,
     QuantityLeaf,
+    RelationKind,
+    RelationLeaf,
+    Tier,
 )
 from .status import PendingReason, RejectionReason, Status
 from .strength import AXES, StrengthVector, licensed
@@ -91,6 +94,7 @@ from .subject import (
     Cohort,
     CohortDefinition,
     CohortSourceDataset,
+    ClaimSetSubject,
     CompositeSubject,
     GeneOrProtein,
     GeneOrProteinIdentifiers,
@@ -106,6 +110,7 @@ from .subject import (
     VariantVRS,
 )
 from .provenance import GenerationMode, Provenance
+from .relation import is_relation, make_relation_claim
 from .governance import (
     AccessScope,
     Governance,
@@ -204,6 +209,9 @@ __all__ = [
     "ExistenceLeaf",
     "Leaf",
     "MeasurementBasis",
+    "RelationKind",
+    "RelationLeaf",
+    "Tier",
     "NeighborEdge",
     "NeighborEdgeKind",
     "Pattern",
@@ -277,6 +285,7 @@ __all__ = [
     "Cohort",
     "CohortDefinition",
     "CohortSourceDataset",
+    "ClaimSetSubject",
     "CompositeSubject",
     "GeneOrProtein",
     "GeneOrProteinIdentifiers",
@@ -292,6 +301,8 @@ __all__ = [
     "VariantVRS",
     "GenerationMode",
     "Provenance",
+    "is_relation",
+    "make_relation_claim",
     "AccessScope",
     "Governance",
     "HazardClass",

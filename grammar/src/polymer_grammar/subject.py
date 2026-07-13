@@ -172,6 +172,28 @@ class CompositeSubject(_SubjectBase):
     ]
 
 
+class ClaimSetSubject(_SubjectBase):
+    kind: Literal["claim_set"] = "claim_set"
+    source_set: tuple[str, ...] = Field(min_length=1)
+    target_set: tuple[str, ...] = Field(min_length=1)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _sort_sets(cls, data):
+        if isinstance(data, dict):
+            if "source_set" in data and data["source_set"] is not None:
+                data["source_set"] = tuple(sorted(data["source_set"]))
+            if "target_set" in data and data["target_set"] is not None:
+                data["target_set"] = tuple(sorted(data["target_set"]))
+        return data
+
+    @model_validator(mode="after")
+    def _disjoint(self) -> ClaimSetSubject:
+        if set(self.source_set) & set(self.target_set):
+            raise ValueError("ClaimSetSubject source_set/target_set must be disjoint")
+        return self
+
+
 Subject = Annotated[
     Union[
         GenomicRegion,
@@ -184,9 +206,11 @@ Subject = Annotated[
         Cohort,
         LiteralSubject,
         CompositeSubject,
+        ClaimSetSubject,
     ],
     Field(discriminator="kind"),
 ]
 
 # CompositeSubject.parts references the Subject union defined above; resolve the forward ref.
 CompositeSubject.model_rebuild()
+ClaimSetSubject.model_rebuild()

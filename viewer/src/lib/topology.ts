@@ -57,6 +57,14 @@ export interface TopologyEdge {
   kind: string;
   effective: boolean;
   provisional: boolean;
+  /** Relation-claim facets (Task 6+): "computational" | "biological". Present only
+   *  on edges projected from a relation claim (kind coheres/tension/restriction_map);
+   *  absent on base defeat/equivalence/entails edges. */
+  tier?: string | null;
+  /** Severity-derived weight; sign encodes coherence (+) vs tension (-). Relation-only. */
+  signed_weight?: number | null;
+  /** The relation claim's own lifecycle status (e.g. "conjectured"). Relation-only. */
+  relation_status?: string | null;
 }
 
 export interface TopologyCluster {

@@ -13,12 +13,13 @@ import hashlib
 import math
 from enum import Enum
 
-from pydantic import model_validator
+from pydantic import model_serializer, model_validator
 
 from polymer_grammar import (
     AXES,
     NeighborEdgeKind,
     effective_defeats,
+    is_relation,
     is_representation_revision,
 )
 
@@ -29,6 +30,11 @@ from .sheaf import ConsistencyHeadline
 # Bump when the topology/timeline wire shape changes incompatibly, so the viewer can
 # detect drift against a contract it was built for (audit #10).
 CONTRACT_VERSION = "1.0"
+# Stamped instead of CONTRACT_VERSION only when an export actually carries cross-arm
+# relation edges (TopologyEdge.tier/signed_weight/relation_status set) — Task 6 wires the
+# conditional. A relation-free export stays on CONTRACT_VERSION "1.0", byte-identical to
+# today's output.
+CONTRACT_VERSION_RELATIONS = "1.1"
 
 
 class Layout(str, Enum):
@@ -73,6 +79,20 @@ class TopologyEdge(_Model):
     kind: str
     effective: bool
     provisional: bool
+    # Cross-arm relation annotations (Task 5/6). Additive and unset by default; the
+    # serializer below drops all three keys when unset so a relation-free export's
+    # model_dump stays byte-identical to a pre-Task-5 TopologyEdge.
+    tier: str | None = None
+    signed_weight: float | None = None
+    relation_status: str | None = None
+
+    @model_serializer(mode="wrap")
+    def _drop_relation_fields_when_unset(self, handler):
+        d = handler(self)
+        if self.tier is None and self.signed_weight is None and self.relation_status is None:
+            for k in ("tier", "signed_weight", "relation_status"):
+                d.pop(k, None)
+        return d
 
 
 class TopologyCluster(_Model):
@@ -193,6 +213,45 @@ def _extract_edges(corpus: Corpus) -> tuple[TopologyEdge, ...]:
             )
 
     return tuple(sorted(edges, key=lambda e: (e.source, e.target, e.kind)))
+
+
+def _relation_edges(corpus: Corpus) -> list[TopologyEdge]:
+    """Project each relation claim (Task 3's `RelationLeaf` over a `ClaimSetSubject`)
+    into TopologyEdges: an all-pairs edge per (source_set x target_set) member carrying
+    the relation's signed weight, plus weak localization edges from the relation claim's
+    own id to every relatum (so the relation node itself is placeable in the graph).
+
+    Deterministic: iterates `corpus.claims` in order; `source_set`/`target_set` are
+    already sorted tuples (ClaimSetSubject invariant), so nested iteration order is stable.
+    """
+    out: list[TopologyEdge] = []
+    for c in corpus.claims:
+        if not is_relation(c):
+            continue
+        lf = c.leaves[0]  # RelationLeaf: .tier, .relation_kind, .severity
+        s = c.subject  # ClaimSetSubject: .source_set, .target_set (sorted tuples)
+        conj = c.status.value == "conjectured"
+        factor = 0.3 if conj else 1.0
+        n = max(1, len(s.source_set) * len(s.target_set))
+        w = round(lf.severity * factor / n, 6)
+        for a in s.source_set:
+            for b in s.target_set:
+                out.append(
+                    TopologyEdge(
+                        source=a, target=b, kind=lf.relation_kind.value,
+                        effective=False, provisional=conj, tier=lf.tier.value,
+                        signed_weight=w, relation_status=c.status.value,
+                    )
+                )
+        for m in (*s.source_set, *s.target_set):  # localize the relation node at the seam
+            out.append(
+                TopologyEdge(
+                    source=c.id, target=m, kind="coheres", effective=False,
+                    provisional=True, tier=lf.tier.value, signed_weight=0.1,
+                    relation_status=c.status.value,
+                )
+            )
+    return out
 
 
 def _extract_clusters(corpus: Corpus) -> tuple[TopologyCluster, ...]:
@@ -347,12 +406,19 @@ def export_topology(
     `positions` (when supplied) overrides both: each node takes its coordinate from the dict (a
     missing id → origin), `layout_id="external:spectral-v1"`, and `layout`/`seed_positions` are
     ignored — this is the seam an external embedder (e.g. the umbrella spectral layout) injects
-    through. Nodes/edges/clusters are sorted for byte-stable output.
+    through. Nodes/edges/clusters are sorted for byte-stable output — except relation edges
+    (Task 6), which are appended after the sorted base edges in deterministic claim-order
+    rather than folded into that sort; the overall output is still deterministic (identical
+    inputs -> identical output), just not globally sorted once relation edges are present.
 
     `seed_positions` warm-starts FORCE_DIRECTED from a prior frame's positions; the default-None
     path leaves the no-seed output byte-identical. Determinism: identical inputs → identical output.
     """
     edges = _extract_edges(corpus)
+    rel_edges = _relation_edges(corpus)
+    # Appended in deterministic claim-order (see _relation_edges), not merged back into the
+    # (source, target, kind) sort above — the base edges stay sorted, relation edges trail them.
+    edges = edges + tuple(rel_edges)
     clusters = _extract_clusters(corpus)
     node_ids = [c.id for c in corpus.claims]
 
@@ -367,5 +433,6 @@ def export_topology(
 
     nodes = _extract_nodes(corpus, layout_positions)
     return TopologyExport(
-        nodes=nodes, edges=edges, clusters=clusters, layout_id=layout_id
+        nodes=nodes, edges=edges, clusters=clusters, layout_id=layout_id,
+        contract_version=(CONTRACT_VERSION_RELATIONS if rel_edges else CONTRACT_VERSION),
     )

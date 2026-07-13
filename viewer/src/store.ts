@@ -9,7 +9,8 @@ import { STATUS_ORDER, DEFEAT_KINDS } from '@/config/theme';
 
 export interface Filters {
   statuses: Set<string>;
-  // edge-kind buckets: 'defeat' (rose family) | 'equivalence' | 'entails'
+  // edge-kind buckets: 'defeat' (rose family) | 'equivalence' | 'entails' |
+  // 'coheres' | 'tension' | 'restriction_map' (cross-arm relations, Task 6+)
   edgeKinds: Set<string>;
   showProvisional: boolean;
 }
@@ -144,14 +145,28 @@ export function findNode(
   return data.nodes.find((n) => n.id === id) ?? null;
 }
 
-/** Map a raw edge kind to its filter bucket. */
-export function edgeBucket(kind: string): 'defeat' | 'equivalence' | 'entails' {
+/** Map a raw edge kind to its filter bucket. Relation kinds (coheres/tension/
+ *  restriction_map) already have distinct EDGE_COLOR entries, so each is its
+ *  own bucket rather than folded into 'entails'. */
+export function edgeBucket(
+  kind: string,
+): 'defeat' | 'equivalence' | 'entails' | 'coheres' | 'tension' | 'restriction_map' {
   if ((DEFEAT_KINDS as readonly string[]).includes(kind)) return 'defeat';
   if (kind === 'equivalence') return 'equivalence';
+  if (kind === 'coheres') return 'coheres';
+  if (kind === 'tension') return 'tension';
+  if (kind === 'restriction_map') return 'restriction_map';
   return 'entails';
 }
 
-export const EDGE_BUCKETS = ['defeat', 'equivalence', 'entails'] as const;
+export const EDGE_BUCKETS = [
+  'defeat',
+  'equivalence',
+  'entails',
+  'coheres',
+  'tension',
+  'restriction_map',
+] as const;
 
 let _liveHandle: LiveHandle | null = null;
 

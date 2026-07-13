@@ -17,6 +17,10 @@ const EDGE_BUCKET_META: Record<string, { label: string; color: string; dashed?: 
   defeat: { label: 'defeat', color: EDGE_COLOR.rebut },
   equivalence: { label: 'equivalence', color: EDGE_COLOR.equivalence },
   entails: { label: 'entails', color: EDGE_COLOR.entails },
+  // cross-arm relations (Task 6+)
+  coheres: { label: 'coheres', color: EDGE_COLOR.coheres },
+  tension: { label: 'tension', color: EDGE_COLOR.tension },
+  restriction_map: { label: 'restriction map', color: EDGE_COLOR.restriction_map },
 };
 
 function SectionMarker({ children }: { children: React.ReactNode }) {

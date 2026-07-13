@@ -38,6 +38,9 @@ export default function Edges() {
         effective: e.effective,
         provisional: e.provisional,
         opacity: 1,
+        tier: e.tier,
+        signed_weight: e.signed_weight,
+        relation_status: e.relation_status,
       }));
     }
     return [];
@@ -77,23 +80,36 @@ export default function Edges() {
 
         const color = edgeColor(e.kind);
 
-        // provisional → dashed, ghosted; effective → solid full; else faint
-        // solid — then scaled by the enter/exit fade opacity of the frame.
-        const provisional = e.provisional;
-        const baseOpacity = provisional ? 0.35 : e.effective ? 0.9 : 0.45;
+        // relation edges (Task 6+) carry tier/signed_weight/relation_status;
+        // base defeat/equivalence/entails edges leave all three undefined, so
+        // every branch below is a no-op for them and rendering is unchanged.
+        const conjectured = e.relation_status === 'conjectured';
+        const isTension = e.signed_weight != null && e.signed_weight < 0;
+        const biological = e.tier === 'biological';
+
+        // provisional or conjectured → dashed, ghosted; effective → solid full;
+        // else faint solid — then scaled by the enter/exit fade opacity of the frame.
+        const dashed = e.provisional || conjectured;
+        const baseOpacity = dashed ? 0.35 : e.effective ? 0.9 : 0.45;
         const opacity = baseOpacity * e.opacity;
+
+        // sign styles line weight (tension reads heavier/warmer); tier styles
+        // the dash cadence when dashed (biological = finer dash than computational).
+        const lineWidth = 1 + (biological ? 0.4 : 0) + (isTension ? 0.4 : 0);
+        const dashSize = biological ? 0.06 : 0.12;
+        const gapSize = biological ? 0.045 : 0.08;
 
         return (
           <Line
             key={`${e.source}-${e.target}-${e.kind}-${i}`}
             points={[a, b]}
             color={color}
-            lineWidth={1}
+            lineWidth={lineWidth}
             transparent
             opacity={opacity}
-            dashed={provisional}
-            dashSize={0.12}
-            gapSize={0.08}
+            dashed={dashed}
+            dashSize={dashSize}
+            gapSize={gapSize}
           />
         );
       })}
