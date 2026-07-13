@@ -71,6 +71,22 @@ def propose_spine_claims(ref: str, *, floor: float = FLOOR) -> list[Claim]:
     ]
 
 
+def propose_cbf_family_claims(ref: str, *, floor: float = FLOOR) -> list[Claim]:
+    """The CBF-AML 2x2 fusion-marker family + ACTB control (all against a 3-valued Sample_Group
+    ∈ {t821, inv16, other}). A/B are over-expression floors (RUNX1T1 in t(8;21), MN1 in inv(16));
+    C/D are the cross-fusion specificity claims (comparator = the OTHER fusion)."""
+    def _c(cid, gene, la, lb):
+        return expression_floor_claim(cid, ref=ref, gene=gene, floor=floor, tissue="AML",
+                                      level_a=la, level_b=lb, search_cardinality=1)
+    return [
+        _c("floor-RUNX1T1-t821-vs-other", "RUNX1T1", "t821", "other"),   # A
+        _c("floor-MN1-inv16-vs-other", "MN1", "inv16", "other"),         # B
+        _c("floor-RUNX1T1-t821-vs-inv16", "RUNX1T1", "t821", "inv16"),   # C specificity
+        _c("floor-MN1-inv16-vs-t821", "MN1", "inv16", "t821"),           # D specificity
+        _c("floor-ACTB-inv16-vs-other", "ACTB", "inv16", "other"),       # control (must NOT license)
+    ]
+
+
 def _evidence_for(claims: list[Claim]) -> dict[str, float]:
     """Per-claim e-value from the fusion+/fusion- discrimination gap (expression_floor_evalue).
     Skips claims whose contract read fails."""
