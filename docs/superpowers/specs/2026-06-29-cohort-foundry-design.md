@@ -6,8 +6,8 @@
 the *claim types* and their *adapter pairs*; this doc defines how the system assembles the
 *validation cohorts* that those claims need, and the provenance trail that assembly produces.
 
-**Concrete ancestor:** [`2026-06-18-replicated-second-cohort-design.md`](./2026-06-18-replicated-second-cohort-design.md)
-and its [implementation plan](../plans/2026-06-18-replicated-second-cohort.md) are the hand-wired
+**Concrete ancestor:** [`2026-06-18-replicated-second-cohort-design.md`](../archive/specs/2026-06-18-replicated-second-cohort-design.md)
+and its [implementation plan](../archive/plans/2026-06-18-replicated-second-cohort.md) are the hand-wired
 precursor. They illustrate one instance; this document is about the reusable platform capability,
 not that cohort's implementation details.
 

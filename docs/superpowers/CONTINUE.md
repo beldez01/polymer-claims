@@ -339,7 +339,7 @@ sub-universe → a **blinded, pre-registered re-derivation of the Durendal genot
 
 ## Current state (2026-07-10) — pharmacogenomic universe arm (parallel; all on `main`)
 
-> The STRATA→pharmaco methylation-marker→drug licensing engine. Spec `specs/2026-07-08-strata-pharmaco-licensing-design.md`, plan `plans/2026-07-09-strata-pharmaco-licensing.md`; module `src/polymer_claims/pharmaco/` + `pharmaco_adapters.py` + `pharmaco_populate.py` + `PHARMACO_ASSOC_CELL` + `[pharmaco]` extra. Capability summary in `ARCHITECTURE_CURRENT.md`. Full memory: `project_polymer_spc_demo`, `project_polymer_claims_knowledge_protocol`.
+> The STRATA→pharmaco methylation-marker→drug licensing engine. Spec `archive/specs/2026-07-08-strata-pharmaco-licensing-design.md`, plan `archive/plans/2026-07-09-strata-pharmaco-licensing.md`; module `src/polymer_claims/pharmaco/` + `pharmaco_adapters.py` + `pharmaco_populate.py` + `PHARMACO_ASSOC_CELL` + `[pharmaco]` extra. Capability summary in `ARCHITECTURE_CURRENT.md`. Full memory: `project_polymer_spc_demo`, `project_polymer_claims_knowledge_protocol`.
 
 - **Real-data proof (through the real gate):** `MTAP→Palbociclib` LICENSED @ REPRODUCED (betting e≈216); `MGMT→Temozolomide` REJECTED (e≈0.78, both legs refute). Residue taxonomy reconciled in the spec: an agreed-refuted null → REJECTED = morphospace forbidden region (retained, not erased); an under-powered hit → PENDING frontier.
 - **Scaled universe (`pharmaco-populate --full`, real GDSC):** 696 claims / 199 drugs → **4 LICENSED / 609 PENDING / 83 REJECTED** (top e-value: CDKN2A/CDKN2B×Palbociclib, CDKN2A×Nutlin-3a, BCL2L1×AZD5991 — coherent CDK4/6i-cell-cycle/p53 + apoptosis). Wired as the viewer's default bundle (`viewer/public/pharmaco-universe.json`; bundler `viewer/scripts/make_pharmaco_universe.py`), browser-verified. Launch: `cd viewer && npm run dev`.
@@ -540,7 +540,7 @@ remains the local gate until one mirroring it is added).
   Slice 3 (defeat/drift/reinstatement/replay-over-time + tamper depth + downgraded-oracle); the ~14
   triaged Minor findings (all DEFER — coverage/cosmetic; recorded in `.superpowers/sdd/progress.md`).
 - **Audit-driven cleanup + docs consolidation (2026-06-28→29).** A multi-agent tidiness/correctness
-  audit (`CLEANUP_AUDIT.md`) applied as ~110 verified changes: **2 real correctness fixes** — the MDL
+  audit (`docs/superpowers/archive/CLEANUP_AUDIT.md`) applied as ~110 verified changes: **2 real correctness fixes** — the MDL
   meta-tier gate could be fooled by zero-structural-slot claims (a load-bearing pattern DEPRECATE
   wrongly cleared the bar), and `anchored_resolutions` emitted records in non-deterministic order
   (→ a non-deterministic signed certificate digest) — plus condensation/refactors across all packages
@@ -784,7 +784,7 @@ manifest** so sex-chrom QC bites + a real platform `profile_hash`; (c) **north-s
 DONE 2026-06-18.]
 
 **▶ §2E REPLICATED (move a) — STAGED, BLOCKED on data access (key finding 2026-06-18).** Attempted on
-branch `feat/replicated-second-cohort` (spec+plan committed: `docs/superpowers/{specs,plans}/2026-06-18-replicated-second-cohort*`).
+branch `feat/replicated-second-cohort` (spec+plan committed: `docs/superpowers/archive/{specs,plans}/2026-06-18-replicated-second-cohort*`).
 Cohort B = **GSE86409** (Study Alliance Leukemia adult-AML, HM450, n=79) — its 419k-probe betas are
 public + downloaded, BUT a hunt across GEO returned a hard lesson: **no open independent HM450 adult-AML
 cohort exposes machine-readable per-sample IDH status.** GSE86409 / GSE159907 keep IDH only in paper
@@ -891,7 +891,7 @@ Rhythm: `superpowers:brainstorming` (2–3 forks → spec → plan) →
   (SAL adult-AML HM450); betas downloaded, ingestion + run scripts staged (`data/sal_aml/`, gitignored).
   Key finding: no open HM450 adult-AML cohort exposes machine-readable IDH → blocked on a real
   `idh_status.tsv` (user-supplied; no genotype fabrication). spec+plan
-  `docs/superpowers/{specs,plans}/2026-06-18-replicated-second-cohort*`.
+  `docs/superpowers/archive/{specs,plans}/2026-06-18-replicated-second-cohort*`.
 - ✅ **Phase D slice 1 — pre-registration ledger** (2026-06-19) — closes the §5a multiplicity leak:
   grammar `commitment_hash` + `register_test`/`resolve_test` (charge+lock the e-LOND α at REGISTRATION,
   strict no-refund) + `RejectionReason.HYPOTHESIS_ALTERED`; protocol `register_hypotheses` REGISTER stage
