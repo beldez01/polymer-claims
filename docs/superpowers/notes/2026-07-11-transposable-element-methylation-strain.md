@@ -182,16 +182,61 @@ real-vs-permuted gap is so large that verdicts are unaffected, but it is a real 
 (see follow-ups). This control validates *reality of signal*; it does **not** test *TE-vs-background
 enrichment* — that remains the matched-window follow-up.
 
+## ENRICHMENT RECAST — DONE (2026-07-12): the background-null pattern, built and run
+
+The HEADLINE follow-up is shipped. A new **`background_enrichment`** claim pattern turns the informal
+matched-background control into a first-class licensable null, and the 6 TE families were re-run through
+it. Additive only — no `grammar/`/`protocol/` edits (same playbook as `expression_floor`):
+`background_enrichment_patterns.py` (Pattern), `background_enrichment.py` (two fold-returning adapters +
+claim builder), `BACKGROUND_ENRICHMENT_CELL` + trust binding in `capabilities.py`, one append-only branch
+in `evidence.py`, and the `te_enrichment.py` driver + `scripts/rip_te_enrichment.py`.
+
+**Design.** H0 = "region-class per-probe lineage-DMP rate ≤ matched-background rate." Two independent legs
+(pooled-t, rank-sum) each return a **fold** = family DMP rate / that-leg's pre-registered background rate;
+a family licenses iff **both** legs clear fold ≥ 1 (`both_satisfy_criterion`) **and** the count e-value
+clears the e-LOND bar. Crucially the e-value is the *same* `count_enrichment_evalue` as the n-DMP arm —
+only the null moves, `p0 = background_rate` instead of `p0 = alpha`. The background rate is estimated from
+5×6000 random 1500 bp windows (blind to the families), a legitimate pre-registered floor.
+
+**RESULT (real Loyfer 2023 atlas, Lymphoid vs Myeloid). Matched background: t-leg 36.8%, rank-leg 44.5%.**
+
+| family | probes | t-DMP% | fold_t | rank-DMP% | fold_r | e-value | e-LOND bar | verdict |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| HERV-K LTR5_Hs | 2587 | 41.9% | **1.14×** | 41.5% | **0.93×** | 6.9e4 | 32.9 | **PENDING** |
+| L1HS | 2516 | 23.7% | 0.64× | 29.8% | 0.67× | 0.95 | 132 | **REJECTED** |
+| HERV-H LTR7 | 4306 | 27.5% | 0.75× | 35.6% | 0.80× | 0.63 | 296 | **REJECTED** |
+| HERV-W LTR17 | 2098 | 23.9% | 0.65× | 33.9% | 0.76× | 0.40 | 526 | **REJECTED** |
+| SVA_D | 2841 | 24.8% | 0.67× | 22.9% | 0.52× | 0.85 | 822 | **REJECTED** |
+| AluYa5 | 3151 | 20.3% | 0.55× | 21.5% | 0.48× | 0.84 | 1180 | **REJECTED** |
+
+**0 of 6 license as enrichment** (`data/demo/transposable_elements_enrichment_universe.json`). This is the
+honest arm the count-vs-chance gate could not express:
+- The five young families are **REJECTED** — depleted on both legs (folds 0.48–0.80×), and their e-values
+  sit **below 1** (no evidence of any excess over background). Constitutive lineage-invariant silencing.
+- **HERV-K is held PENDING, not licensed.** Its t-leg excess over background is statistically real (e-value
+  6.9e4 ≫ 32.9 — the lone e-LOND discovery), but the **rank leg (0.93×) fails the both-legs-enriched
+  criterion**, so the two-leg air-gap denies the enrichment license. The naive "6 TE hotspots" reading is
+  fully refuted; HERV-K's status is exactly "≈ baseline, not robustly enriched."
+
+**Integrity note (confirmatory, not blind).** The fold numbers were already known from the earlier control
+script, so this recast is a *confirmatory formalization*, not a fresh pre-registration. The background rate
+itself is still computed from family-blind random windows, and the pattern/threshold (fold ≥ 1) is
+parameter-free (no cutoff tuned to the data). The n-DMP arm's beyond-chance licenses are **not** retracted —
+these are a different (stronger) null; "differentially methylated beyond chance" and "enriched over a
+matched background" are distinct claims, and the engine now carries both.
+
+**Minor engine observation (logged):** the e-LOND ledger counts HERV-K as 1 discovery (its e-value cleared
+its slot) even though the claim does not license (the two-leg agreement gate vetoes it). The agreement gate
+only ever *reduces* licenses below the e-value-discovery count, so the realized FDR stays conservative — but
+`n_discoveries` (1) and `n_licensed` (0) diverging is worth surfacing, not hiding. (See
+`feedback_flag_engine_gaps`.)
+
 ## Follow-ups (deferred — do not block this strain)
 
-- **HEADLINE (engine): add a background-null / fold-enrichment claim pattern.** The matched-background
-  control (DONE) proved the count-vs-chance gate cannot answer "is region-class X special." The grammar
-  needs a claim pattern whose null is a matched genomic background (fold-enrichment ≥ threshold), not
-  chance. That pattern would let the TE arm assert the *actual* finding (HERV-K ≈ baseline; young families
-  depleted) as a first-class licensed claim instead of the semantically-weaker beyond-chance claim.
-- **Recast the 6 claims once the pattern exists.** The current bundle's 6 licenses are valid-but-weak
-  (beyond-chance). With a background-null pattern, re-express as fold-enrichment claims — most would come
-  back CONJECTURED/REJECTED (depleted), HERV-K borderline. That is the honest arm.
+- **~~HEADLINE (engine): add a background-null / fold-enrichment claim pattern.~~ DONE** — see the
+  ENRICHMENT RECAST section above (`background_enrichment` pattern + `te_enrichment` sweep).
+- **~~Recast the 6 claims once the pattern exists.~~ DONE** — 0/6 license as enrichment (5 REJECTED, HERV-K
+  PENDING); the honest arm, bundled in `transposable_elements_enrichment_universe.json`.
 - **Engine gap: per-probe n-DMP test is mildly anti-conservative under permutation** (permuted DMP counts
   ~1.5–2× the nominal α·N, esp. the rank-sum leg on n≈small groups). Verdicts here are unaffected (huge
   margin), but on borderline claims this matters — worth a calibration pass on the rank-sum small-sample
