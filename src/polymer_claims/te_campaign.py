@@ -40,6 +40,26 @@ from .profiles import CANONICAL_EPICV2_V1
 from .rip_mhc_ndmp import preregistered_k
 from .te_ndmp import PANEL, TeFamilySpec
 
+# The campaign family panel EXTENDS the committed 6-family n-DMP PANEL (te_ndmp.PANEL) — append-only, so
+# the original six keep their locked e-LOND slots (1-6) and the six new families (verified present in
+# rmsk, all tractable <5k elements) take later, stricter slots (7-12). The extension spans within-family
+# AGE GRADIENTS (L1HS->L1PA2, AluYa5->AluYb8, SVA_D->SVA_F, LTR5_Hs->LTR5B) and new regulatory LTRs
+# (LTR7Y youngest HERV-H; LTR12C HERV9/ERV1 enhancer) — a fixed, principled set chosen before any byte.
+CAMPAIGN_PANEL: tuple[TeFamilySpec, ...] = PANEL + (
+    TeFamilySpec("l1pa2", "L1PA2", "LINE", "L1PA2 (older primate L1 lineage)",
+                 "next-youngest L1 after L1HS — age-gradient control for LINE silencing"),
+    TeFamilySpec("aluyb8", "AluYb8", "SINE", "AluYb8 (young active Alu subfamily)",
+                 "second young Alu lineage, distinct from AluYa5"),
+    TeFamilySpec("sva_f", "SVA_F", "Retroposon", "SVA_F (youngest SVA subfamily)",
+                 "youngest SVA (vs SVA_D) — CpG-rich composite retroelement"),
+    TeFamilySpec("ltr7y", "LTR7Y", "LTR", "HERV-H LTR7Y (youngest LTR7 variant)",
+                 "youngest HERV-H LTR; pluripotency/regulatory"),
+    TeFamilySpec("ltr5b", "LTR5B", "LTR", "HERV-K LTR5B (older HERV-K LTR)",
+                 "older HERV-K promoter LTR — age gradient vs LTR5_Hs"),
+    TeFamilySpec("ltr12c", "LTR12C", "LTR", "HERV9/ERV1 LTR12C",
+                 "strong enhancer/regulatory LTR; immune-relevant"),
+)
+
 _CTX = MaterializationContext(id="M1", api_version="v1", data_version="loyfer_2023@1")
 _NDMP_ADAPTERS = (NDmpTTestAdapter(), NDmpRankAdapter())
 _ENR_ADAPTERS = (EnrichmentTTestAdapter(), EnrichmentRankAdapter())
@@ -60,6 +80,8 @@ class Contrast:
 # atlas byte is read. Lymphoid-vs-Myeloid is the baseline (already reported); the rest partition the
 # hematopoietic tree along established axes (lymphoid subsets, T differentiation, myeloid maturation,
 # erythroid-vs-myeloid, cross-lineage cell types). Order is fixed; do not reorder to chase a license.
+# The second block (v2, appended 2026-07-13) EXTENDS the panel with more cross- and within-lineage pairs
+# plus one cell_type-level split — append-only, so the original 12 contrasts' results are unchanged.
 CONTRASTS: tuple[Contrast, ...] = (
     Contrast("lymphoid_vs_myeloid", "lineage", "Lymphoid", "Myeloid", "primary lineage split (baseline)"),
     Contrast("tcell_vs_bcell", "cell_type_broad", "T_cell", "B_cell", "lymphoid: T vs B"),
@@ -73,6 +95,19 @@ CONTRASTS: tuple[Contrast, ...] = (
     Contrast("erythroid_vs_monocyte", "cell_type_broad", "Erythroid", "Monocyte", "erythroid vs monocyte"),
     Contrast("nk_vs_monocyte", "cell_type_broad", "NK", "Monocyte", "lymphoid vs myeloid cell type"),
     Contrast("tcell_vs_monocyte", "cell_type_broad", "T_cell", "Monocyte", "T vs monocyte"),
+    # --- v2 extension (append-only) ---
+    Contrast("tcell_vs_granulocyte", "cell_type_broad", "T_cell", "Granulocyte", "lymphoid vs granulocyte"),
+    Contrast("tcell_vs_macrophage", "cell_type_broad", "T_cell", "Macrophage", "T vs macrophage"),
+    Contrast("tcell_vs_erythroid", "cell_type_broad", "T_cell", "Erythroid", "lymphoid vs erythroid"),
+    Contrast("bcell_vs_monocyte", "cell_type_broad", "B_cell", "Monocyte", "B vs monocyte"),
+    Contrast("bcell_vs_macrophage", "cell_type_broad", "B_cell", "Macrophage", "B vs macrophage"),
+    Contrast("nk_vs_granulocyte", "cell_type_broad", "NK", "Granulocyte", "NK vs granulocyte"),
+    Contrast("nk_vs_macrophage", "cell_type_broad", "NK", "Macrophage", "NK vs macrophage"),
+    Contrast("erythroid_vs_macrophage", "cell_type_broad", "Erythroid", "Macrophage", "erythroid vs macrophage"),
+    Contrast("tmemory_vs_bcell", "cell_type_broad", "T_memory", "B_cell", "memory-T vs B"),
+    Contrast("tmemory_vs_nk", "cell_type_broad", "T_memory", "NK", "memory-T vs NK"),
+    Contrast("bcell_vs_bmemory", "cell_type_broad", "B_cell", "B_memory", "B differentiation"),
+    Contrast("tcd4_vs_tcd8", "cell_type", "T_CD4", "T_CD8", "cell-type: CD4 vs CD8 T"),
 )
 
 
@@ -199,7 +234,7 @@ def run_te_campaign(
     contracts_dir,
     *,
     contrasts: tuple[Contrast, ...] = CONTRASTS,
-    panel: tuple[TeFamilySpec, ...] = PANEL,
+    panel: tuple[TeFamilySpec, ...] = CAMPAIGN_PANEL,
     bg_reps: int = 5,
     bg_windows: int = 6000,
     bg_window_size: int = 1500,
