@@ -13,7 +13,7 @@ import hashlib
 import math
 from enum import Enum
 
-from pydantic import model_validator
+from pydantic import model_serializer, model_validator
 
 from polymer_grammar import (
     AXES,
@@ -29,6 +29,11 @@ from .sheaf import ConsistencyHeadline
 # Bump when the topology/timeline wire shape changes incompatibly, so the viewer can
 # detect drift against a contract it was built for (audit #10).
 CONTRACT_VERSION = "1.0"
+# Stamped instead of CONTRACT_VERSION only when an export actually carries cross-arm
+# relation edges (TopologyEdge.tier/signed_weight/relation_status set) — Task 6 wires the
+# conditional. A relation-free export stays on CONTRACT_VERSION "1.0", byte-identical to
+# today's output.
+CONTRACT_VERSION_RELATIONS = "1.1"
 
 
 class Layout(str, Enum):
@@ -73,6 +78,20 @@ class TopologyEdge(_Model):
     kind: str
     effective: bool
     provisional: bool
+    # Cross-arm relation annotations (Task 5/6). Additive and unset by default; the
+    # serializer below drops all three keys when unset so a relation-free export's
+    # model_dump stays byte-identical to a pre-Task-5 TopologyEdge.
+    tier: str | None = None
+    signed_weight: float | None = None
+    relation_status: str | None = None
+
+    @model_serializer(mode="wrap")
+    def _drop_relation_fields_when_unset(self, handler):
+        d = handler(self)
+        if self.tier is None and self.signed_weight is None and self.relation_status is None:
+            for k in ("tier", "signed_weight", "relation_status"):
+                d.pop(k, None)
+        return d
 
 
 class TopologyCluster(_Model):
