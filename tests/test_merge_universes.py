@@ -109,3 +109,42 @@ def test_empty_sources_yields_empty_corpus():
     merged, facets = merge_universes([])
     assert merged.claims == ()
     assert facets == {}
+
+
+def test_collect_transposable_elements_lifts_a_strict_corpus_bundle(tmp_path):
+    """The TE arm bundle is a REAL strict Corpus (unlike the hand-built immuno bundle), so the
+    collector is a clean load_corpus + from_corpus lift that preserves per-family status + e-values."""
+    from polymer_grammar import FDRLedger
+    from polymer_protocol import Corpus
+
+    from polymer_claims.io import dump_corpus
+    from polymer_claims.merge_universes import collect_transposable_elements
+
+    ledger = FDRLedger(
+        target_fdr=0.05,
+        tests=(
+            FDRTest(index=1, claim_id="te-hervk_ltr5-ndmp", e_value=1e6,
+                    alpha_allocated=0.05, discovery=True),
+            FDRTest(index=2, claim_id="te-l1hs-ndmp", e_value=0.5,
+                    alpha_allocated=0.03, discovery=False),
+        ),
+    )
+    corpus = Corpus(
+        claims=(_claim("te-hervk_ltr5-ndmp", Status.LICENSED), _claim("te-l1hs-ndmp", Status.PENDING)),
+        fdr_ledger=ledger,
+    )
+    bundle = tmp_path / "te_bundle.json"
+    bundle.write_text(dump_corpus(corpus))
+
+    src = collect_transposable_elements(bundle)
+    assert src.arm == "transposable-elements"
+    assert src.modality == "methylation"
+    assert {c.id for c in src.claims} == {"te-hervk_ltr5-ndmp", "te-l1hs-ndmp"}
+    # statuses + e-values survive the lift verbatim (union never re-runs the gate)
+    merged, facets = merge_universes([src])
+    assert all(f.arm == "transposable-elements" for f in facets.values())
+    by_id = {c.id: c for c in merged.claims}
+    assert by_id["te-hervk_ltr5-ndmp"].status == Status.LICENSED
+    assert by_id["te-l1hs-ndmp"].status == Status.PENDING
+    assert {t.claim_id: t.e_value for t in merged.fdr_ledger.tests} == {
+        "te-hervk_ltr5-ndmp": 1e6, "te-l1hs-ndmp": 0.5}

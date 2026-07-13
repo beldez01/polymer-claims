@@ -34,12 +34,14 @@ __all__ = [
     "collect_pharmaco",
     "collect_polymergenomics",
     "collect_synbio",
+    "collect_transposable_elements",
     "merge_universes",
 ]
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _DEFAULT_IMMUNO_PATH = _REPO_ROOT / "data" / "demo" / "immuno_universe.json"
 _DEFAULT_POLYMERGENOMICS_PATH = _REPO_ROOT / "data" / "demo" / "polymergenomics_universe.json"
+_DEFAULT_TE_PATH = _REPO_ROOT / "data" / "demo" / "transposable_elements_universe.json"
 
 
 @dataclass(frozen=True)
@@ -240,3 +242,19 @@ def collect_polymergenomics(path: str | Path = _DEFAULT_POLYMERGENOMICS_PATH) ->
 
     corpus = load_corpus(path)
     return ArmSource.from_corpus("polymergenomics", None, corpus)
+
+
+def collect_transposable_elements(path: str | Path = _DEFAULT_TE_PATH) -> ArmSource:
+    """Facet: arm="transposable-elements", modality="methylation".
+
+    The TE-family n-DMP sweep (`te_ndmp.run_te_family_sweep`) already produced a strict,
+    already-decided grammar `Corpus` (per-family PENDING/LICENSED/REJECTED via the shared
+    e-LOND gate over the real Loyfer 2023 WGBS atlas), serialized to
+    `data/demo/transposable_elements_universe.json` by `scripts/rip_te_families_ndmp.py`.
+    Unlike the hand-built immuno bundle, it validates as a real Corpus, so this is the
+    clean `load_corpus` + `from_corpus` lift — no reconstruction. Turns the dormant
+    "transposable-elements" reference subject into a data-licensed arm."""
+    from .io import load_corpus
+
+    corpus = load_corpus(path)
+    return ArmSource.from_corpus("transposable-elements", "methylation", corpus)
