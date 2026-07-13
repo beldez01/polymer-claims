@@ -45,20 +45,37 @@ def build_graph(
         for c in corpus.claims
     }
 
-    W: dict[frozenset[str], float] = {}
+    # Two aggregation channels per unordered pair (see spec §2 + Task 8):
+    #   legacy   — MAX over edges with no signed_weight, using KIND_WEIGHT (exactly the
+    #              pre-Task-8 behavior: the strongest typed relation wins, weak ones don't dilute).
+    #   relation — SUM over cross-arm relation edges (signed_weight set), which accumulate: a pair
+    #              can carry several relation claims, and a tension contributes NEGATIVELY.
+    # The final weight is legacy_max + relation_sum, clamped to [-1, 1]. For a relation-free pair
+    # relation_sum is 0 and legacy_max ∈ [0, 1], so W[key] == legacy_max EXACTLY as before →
+    # byte-identical spectral output. A tension can drive the sum negative → repulsion in the
+    # (unchanged) signed-Laplacian _embed_component.
+    legacy: dict[frozenset[str], float] = {}
+    relation: dict[frozenset[str], float] = {}
     polar: set[frozenset[str]] = set()
     for e in export.edges:
         if e.source == e.target or e.source not in valid or e.target not in valid:
             continue  # skip self-loops and synthetic ':'-source nodes
+        key = frozenset((e.source, e.target))
+        if e.signed_weight is not None:
+            relation[key] = relation.get(key, 0.0) + e.signed_weight
+            continue
         w = KIND_WEIGHT.get(e.kind)
         if w is None:
             continue
-        key = frozenset((e.source, e.target))
-        W[key] = max(W.get(key, 0.0), w)  # strongest relation wins; weak doesn't dilute
+        legacy[key] = max(legacy.get(key, 0.0), w)  # strongest relation wins; weak doesn't dilute
         if e.kind == "rebut":
             ds, dt = direction_by_id.get(e.source), direction_by_id.get(e.target)
             if {ds, dt} == {Direction.POSITIVE, Direction.NEGATIVE}:
                 polar.add(key)
+    W: dict[frozenset[str], float] = {}
+    for key in legacy.keys() | relation.keys():
+        combined = legacy.get(key, 0.0) + relation.get(key, 0.0)
+        W[key] = max(-1.0, min(1.0, combined))
     return node_ids, W, polar
 
 
