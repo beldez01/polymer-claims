@@ -233,29 +233,33 @@ only ever *reduces* licenses below the e-value-discovery count, so the realized 
 
 ## MULTI-CONTRAST CAMPAIGN — DONE (2026-07-13): the pattern holds across the whole hematopoietic tree
 
-Scaled both gates from one contrast to a PRE-REGISTERED panel of **12 lineage / cell_type_broad contrasts**
-(`te_campaign.run_te_campaign` + `scripts/rip_te_campaign.py`). Extract-ONCE (the family + background
-matrices, all 47 samples, all grouping columns in every contract) then run each contrast x {n-DMP,
-enrichment} x 6 families through its own e-LOND ledger. Not fishing: the contrast panel, family panel, and
-family order are all fixed in source before any byte is read. **144 claims** generated (72 n-DMP + 72
-enrichment); crash-safe running summary + two combined bundles in `data/demo/campaign/`.
+Scaled both gates from one contrast to a PRE-REGISTERED panel of **24 lineage / cell_type_broad / cell_type
+contrasts × 12 TE families** (`te_campaign.run_te_campaign` + `scripts/rip_te_campaign.py`). Extract-ONCE
+(the family + background matrices, all 47 samples, all grouping columns in every contract) then run each
+contrast x {n-DMP, enrichment} x 12 families through its own e-LOND ledger. Not fishing: the contrast panel,
+family panel, and family order are all fixed in source before any byte is read; the v2 extension (6 more
+families — L1PA2/AluYb8/SVA_F/LTR7Y/LTR5B/LTR12C — and 12 more contrasts) is APPEND-ONLY, so the original
+combos reproduce verdict-for-verdict (verified: lymphoid↔myeloid still licenses its first six families).
+**576 claims** generated (288 n-DMP + 288 enrichment); crash-safe running summary in `data/demo/campaign/`
+(the two 18 MB combined bundles are gitignored/regenerable; the summary + merged-universe carry the record).
 
 **Result:**
-- **n-DMP (beyond-chance): 18 LICENSED / 17 PENDING / 37 REJECTED.** Licenses concentrate ENTIRELY in the
-  three most globally-divergent contrasts — lymphoid↔myeloid (bg 37%/44%), memory↔naïve T (70%/64%),
-  T↔monocyte (50%/46%) — each licensing 6/6. The beyond-chance gate tracks GLOBAL lineage divergence, not
-  TE specialness. Finer/closely-related contrasts (macrophage↔monocyte 8%/6%) reject; small-n contrasts
-  (3v3) are PENDING/REJECTED because the rank-sum leg cannot reach α=0.05 at n=3 (an honest power floor,
-  visible e.g. in erythroid↔granulocyte where the t-leg background is 83% but the rank leg calls nothing).
-- **Enrichment (vs matched background): 0 LICENSED / 13 PENDING / 59 REJECTED — 0 of 72 across ALL 12
-  contrasts.** No young TE family is enriched for lineage-DMPs above a matched genomic background in ANY
-  hematopoietic contrast tested. This is the decisive, systematic confirmation of the strain's thesis: TE
-  families inherit whatever global lineage difference exists (so they clear beyond-chance whenever the
-  contrast is globally divergent), but they are never a TE-SPECIFIC hotspot. "Differentially methylated"
-  ≠ "enriched" — proven now across the tree, not just one split.
+- **n-DMP (beyond-chance): 108 LICENSED / 62 PENDING / 118 REJECTED.** All 108 licenses come from the **9
+  contrasts that are both globally-divergent AND adequately powered** — each licenses 12/12: lymphoid↔myeloid,
+  memory↔naïve T, T↔monocyte/granulocyte/macrophage/erythroid, erythroid↔macrophage, memory-T↔B, memory-T↔NK.
+  The gate tracks GLOBAL divergence (high-background contrasts) gated by POWER. Closely-related pairs
+  (macrophage↔monocyte 8%/6%) reject; **3v3 contrasts are PENDING/REJECTED even at 83–88% background** because
+  the rank-sum leg cannot reach α=0.05 at n=3 — a 3v8 contrast at 88% (erythroid↔macrophage) DOES license
+  12/12, isolating the rank-leg power floor as the binding constraint, not effect size.
+- **Enrichment (vs matched background): 0 LICENSED / 50 PENDING / 238 REJECTED — 0 of 288 across ALL 24
+  contrasts and all 12 families.** No TE family — young or age-gradient (L1PA2, LTR5B), no regulatory LTR
+  (LTR7Y, LTR12C) — is enriched for lineage-DMPs above a matched genomic background in ANY hematopoietic
+  contrast. The decisive, systematic result: TE families inherit whatever global lineage difference exists
+  (clearing beyond-chance whenever divergence + power allow), but are NEVER a TE-specific hotspot.
+  "Differentially methylated" ≠ "enriched" — now proven across 24 contrasts × 12 families, not one split.
 
 Folded into the unified viewer (`viewer/scripts/add_te_arms_to_merged.py`, no-pharmaco path): the merged
-universe is now **954 nodes across 8 arms** (te-campaign-ndmp 72, te-campaign-enrichment 72, plus the two
+universe is now **1,386 nodes across 8 arms** (te-campaign-ndmp 288, te-campaign-enrichment 288, plus the
 headline single-contrast arms), each TE bundle an offset island, colored by verdict.
 
 ## Follow-ups (deferred — do not block this strain)

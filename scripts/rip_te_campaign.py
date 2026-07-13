@@ -13,7 +13,7 @@ from pathlib import Path
 
 from polymer_claims.io import dump_corpus
 from polymer_claims.merge_universes import ArmSource, merge_universes
-from polymer_claims.te_campaign import CONTRASTS, run_te_campaign
+from polymer_claims.te_campaign import CAMPAIGN_PANEL, CONTRASTS, run_te_campaign
 
 _ATLAS = Path.home() / "Desktop/PolymerGenomicsAPI/data/wgbs/loyfer_2023"
 _RMSK = Path.home() / "Desktop/PolymerGenomicsAPI/data/repeatmasker/rmsk.txt"
@@ -63,7 +63,8 @@ def main() -> None:
     running = {"contrasts": []}
 
     print("\n=== TE multi-contrast campaign — Loyfer 2023 WGBS atlas ===", flush=True)
-    print(f"{len(CONTRASTS)} pre-registered contrasts x 2 gates x 6 TE families\n", flush=True)
+    print(f"{len(CONTRASTS)} pre-registered contrasts x 2 gates x {len(CAMPAIGN_PANEL)} TE families\n",
+          flush=True)
 
     def on_contrast(cr):
         running["contrasts"].append(_serialize(cr))
@@ -76,8 +77,10 @@ def main() -> None:
         en = "/".join(f"{v.verdict[0]}" for v in cr.enrichment)
         nl = sum(v.verdict == "LICENSED" for v in cr.ndmp)
         el = sum(v.verdict == "LICENSED" for v in cr.enrichment)
+        nf = len(cr.ndmp)
         print(f"[{c.key:<26}] n={cr.n_a}v{cr.n_b}  bg t={100*cr.bg_rate_ttest:.0f}%/r="
-              f"{100*cr.bg_rate_rank:.0f}%  n-DMP[{nd}] {nl}/6 lic  ENR[{en}] {el}/6 lic", flush=True)
+              f"{100*cr.bg_rate_rank:.0f}%  n-DMP[{nd}] {nl}/{nf} lic  ENR[{en}] {el}/{nf} lic",
+              flush=True)
 
     res = run_te_campaign(
         _RMSK, _ATLAS / "bed_hg38", _ATLAS / "sample_manifest.tsv", contracts_dir,
