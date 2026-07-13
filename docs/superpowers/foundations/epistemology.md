@@ -63,8 +63,12 @@ engine of the replication crisis (correlated error).
 
 **Guard: the common-cause DAG.** Shared inputs, methods, references, libraries,
 and statistical conventions are modeled as edges; a license requires **low
-shared-cause overlap**. Independence stops being an asserted premise and becomes
-a *measured, evidenced* property (Reichenbach screening-off). What we want is
+shared-cause overlap**. The aim is for independence to stop being an asserted
+premise and become a *measured, evidenced* property (Reichenbach screening-off).
+*(As built, the gate measures overlap of operator-**declared** factor labels against
+a fixed threshold — evidenced by declaration. Turning that into a **measured**
+error-correlation `ρ` (→ `N_eff = 2/(1+ρ)`) is still the unbuilt hardening step;
+until then, "measured, evidenced" is the target, not the current state.)* What we want is
 **conceptual replication** (different algorithm, different assumptions, *fails for
 different reasons* — Wimsatt robustness), not **direct replication** (same method
 twice, which tests only reproducibility).

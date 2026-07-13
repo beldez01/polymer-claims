@@ -1,9 +1,33 @@
 # The Compute Boundary — Polymer certifies, it does not serve compute
 
-**Status:** Foundational boundary. Load-bearing. This is a constraint on every other doc, not a
-feature of any one of them.
+**Status:** Foundational orientation — **a strong default, no longer an absolute law** (softened
+2026-07-13). This still constrains every other doc, but as the reasoned default position, not an
+inviolable constraint.
 **Date:** 2026-06-29 · **Updated:** 2026-06-30 (added: existence-vs-correctness, the verification
-ladder, the four-part spine, the Science Claw)
+ladder, the four-part spine, the Science Claw) · **Amended:** 2026-07-13 (doctrine → default).
+
+---
+
+## Amendment (2026-07-13) — from doctrine to default
+
+The "never host or serve compute" rule below was written as an absolute. **It is now the strong
+default, not a law.** The trust-first thesis and the V1→Galaxy lesson (owning the runtime *pulls* you
+toward hosted compute — "gravity, not a choice") remain the reason to *default* to certifying compute
+that runs elsewhere. What has changed: some viable **business models** may require hosting *some*
+compute — e.g. a claims API a user pings to have us compute a concordance/consistency metric.
+
+Where the line actually falls is **downstream of an unresolved product-identity decision** (active as
+of this amendment): is Polymer
+
+1. **local software** that extracts meaning from a user's own data (line stays where this doc drew it),
+2. an **open-source public claims world** where claims are submitted and adjudicated in the open,
+3. a **hosted claims/concordance API** (users ping; we compute a bounded metric), or
+4. an **in-house drug-discovery engine** for a first-party bioAI company (the boundary is internal)?
+
+Each puts the compute line in a different place. Until that fork resolves, treat hosting as a **graded
+policy decision** — permitted where a real capability or business model requires it, defaulting to
+trust-first otherwise — rather than a forbidden act. The body below is preserved **as the argument for
+the default**, not as a prohibition. (Tracked in `BACKLOG.md` §9 as a strategic decision.)
 
 ---
 
@@ -148,8 +172,10 @@ assumption, and resolve it in three moves:
 
 ## The four-part spine
 
-The platform is four parts, and the boundary runs through all of them. Three are below; the fourth,
-the Foundry, is the boundary test that already had a section, now joined by the Claw.
+The platform is **designed as** four parts, and the boundary runs through all of them. Three are below;
+the fourth, the Foundry, is the boundary test that already had a section, now joined by the Claw.
+*(Status: the Verification stack and Viewer are built; the **Science Claw and Cohort Foundry are horizon
+— no code yet**. This is the intended spine, not four shipped components.)*
 
 | Part | Its job | Stays on the right side of the boundary because |
 |---|---|---|

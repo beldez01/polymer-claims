@@ -99,6 +99,9 @@ third-party compute, not capex datacenters.
    (Sigstore/Rekor at planetary scale), independently mirrorable and **witnessed**
    (multiple parties co-signing checkpoints, à la Certificate Transparency), so
    trust lives in the log, not in the company. Grows monotonically forever →
+   *(Shipped today: a **local, single-signer, inclusion-only** log — no consistency
+   proofs and no external witnesses yet. The planetary-scale, multi-party-witnessed
+   version described here is the target, not the current state.)*
    geo-replicated WORM storage + the live Merkle service. (Timestamp anchoring is
    fine; a token economy is explicitly out — Goodhart.)
 
