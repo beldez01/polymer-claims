@@ -18,6 +18,7 @@ from polymer_grammar import (
     GenerationMode,
     Provenance,
     Status,
+    is_relation,
     requires_safety_review,
 )
 
@@ -41,6 +42,11 @@ def cell_of(claim: Claim) -> str:
 
 
 def _is_candidate(claim: Claim) -> bool:
+    # Defense-in-depth (spec §9): relation meta-claims must never enter the SELECT/EXECUTE/FDR
+    # lane, mechanically — not merely because today's construction leaves them CONJECTURED with
+    # no plan (the PENDING+plan check below would already exclude them incidentally).
+    if is_relation(claim):
+        return False
     if claim.status != Status.PENDING or claim.evaluation_plan is None:
         return False
     if claim.governance is not None and requires_safety_review(claim.governance):
