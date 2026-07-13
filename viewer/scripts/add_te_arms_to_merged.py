@@ -1,13 +1,18 @@
-"""Append the two transposable-element arms to the EXISTING merged-universe.json in place.
+"""Fold the transposable-element arms into the EXISTING merged-universe.json in place (no pharmaco rerun).
 
-The canonical rebuild (make_merged_universe.py) re-runs pharmaco's live GDSC mechanism scan, which needs
-the `pharmaco` extra AND the raw GDSC data on disk — neither is present in every environment. This script
-is the no-pharmaco path: it takes the already-built merged-universe.json (pharmaco/synbio/immuno/
-polymergenomics baked in) and folds in the TE n-DMP + TE enrichment arms, which load cleanly from their
-committed strict-Corpus bundles. The existing arms' force-directed layout CANNOT be recomputed without the
-pharmaco corpus, so the TE nodes are laid out on their own and TRANSLATED to a distinct island beside the
-main cloud (honest: an appended region, not a co-optimized layout). Idempotent — re-running replaces the
-TE island rather than duplicating it.
+The canonical rebuild (make_merged_universe.py) re-runs pharmaco's live GDSC scan, which needs the
+`pharmaco` extra AND raw GDSC data on disk — absent in many environments. This is the no-pharmaco path: it
+takes the already-built merged-universe.json (pharmaco/synbio/immuno/polymergenomics baked in) and folds in
+the TE arms, each of which loads cleanly from a committed strict-Corpus bundle. The existing arms'
+force-directed layout CANNOT be recomputed without the pharmaco corpus, so each TE bundle is laid out on
+its OWN and translated to a distinct island beside the main cloud (honest: appended regions, not a
+co-optimized layout). Idempotent — re-running replaces the TE islands rather than duplicating them.
+
+Islands folded in (curated headline arms + the full multi-contrast campaign):
+  * transposable-elements                (6 n-DMP families, lymphoid-vs-myeloid, LICENSED)
+  * transposable-elements-enrichment     (6 enrichment families, 0 licensed — the honest recast)
+  * te-campaign-ndmp                      (72 n-DMP claims across 12 contrasts)
+  * te-campaign-enrichment               (72 enrichment claims across 12 contrasts, 0 licensed)
 
 RUN (from the umbrella env):
     cd /Users/zbb2/Desktop/polymer-claims \
@@ -22,35 +27,38 @@ from pathlib import Path
 
 from polymer_protocol import Layout, export_topology
 
-from polymer_claims.merge_universes import (
-    collect_transposable_elements,
-    collect_transposable_elements_enrichment,
-    merge_universes,
+from polymer_claims.io import load_corpus
+
+_VIEWER = Path(__file__).resolve().parents[1]
+_MERGED = _VIEWER / "public" / "merged-universe.json"
+_DEMO = _VIEWER.parents[0] / "data" / "demo"
+
+# (arm label, bundle path, island translation). Offsets park each island clear of the [-3.5, 3.5] main
+# cloud AND of each other; the campaign islands (72 nodes) get wider separation than the 6-node headliners.
+_ISLANDS: tuple[tuple[str, Path, tuple[float, float, float]], ...] = (
+    ("transposable-elements", _DEMO / "transposable_elements_universe.json", (9.0, 3.5, 0.0)),
+    ("transposable-elements-enrichment", _DEMO / "transposable_elements_enrichment_universe.json",
+     (9.0, -3.5, 0.0)),
+    ("te-campaign-ndmp", _DEMO / "campaign" / "te_campaign_ndmp_universe.json", (17.0, 9.0, 0.0)),
+    ("te-campaign-enrichment", _DEMO / "campaign" / "te_campaign_enrichment_universe.json",
+     (17.0, -9.0, 0.0)),
 )
-
-_MERGED = Path(__file__).resolve().parents[1] / "public" / "merged-universe.json"
-_TE_ARMS = ("transposable-elements", "transposable-elements-enrichment")
-_ISLAND_OFFSET = (9.0, 0.0, 0.0)     # translate the TE cloud clear of the existing [-3,3] universe
+_TE_ARM_LABELS = frozenset(a for a, _, _ in _ISLANDS)
 
 
-def _te_nodes_and_edges() -> tuple[list[dict], list[dict]]:
-    """Build the two TE arms, lay them out, and return arm-tagged node + edge dicts (island-offset)."""
-    merged, facets = merge_universes([
-        collect_transposable_elements(),
-        collect_transposable_elements_enrichment(),
-    ])
-    topo = export_topology(merged, layout=Layout.FORCE_DIRECTED)
-    dumped = topo.model_dump(mode="json")
-    nodes = dumped["nodes"]
+def _island_nodes(arm: str, bundle: Path, offset) -> list[dict]:
+    """Lay out one bundle on its own and return arm-tagged, island-offset node dicts."""
+    corpus = load_corpus(str(bundle))
+    topo = export_topology(corpus, layout=Layout.FORCE_DIRECTED)
+    nodes = topo.model_dump(mode="json")["nodes"]
     for n in nodes:
-        f = facets.get(n["id"])
-        n["arm"] = f.arm if f else None
-        n["modality"] = f.modality if f else None
-        n["topic"] = f.topic if f else None
+        n["arm"] = arm
+        n["modality"] = "methylation"
+        n["topic"] = None
         pos = n.get("position")
         if isinstance(pos, list) and len(pos) == 3:
-            n["position"] = [pos[i] + _ISLAND_OFFSET[i] for i in range(3)]
-    return nodes, dumped.get("edges", [])
+            n["position"] = [pos[i] + offset[i] for i in range(3)]
+    return nodes
 
 
 def main() -> None:
@@ -59,23 +67,27 @@ def main() -> None:
     doc = json.loads(_MERGED.read_text())
     topo = doc["frames"][0]["topology"]
 
-    # Idempotent: drop any prior TE island (by arm tag) + edges touching those ids.
-    prior_te_ids = {n["id"] for n in topo["nodes"] if n.get("arm") in _TE_ARMS}
-    topo["nodes"] = [n for n in topo["nodes"] if n.get("arm") not in _TE_ARMS]
+    # Idempotent: drop any prior TE islands (by arm label) + edges touching them.
+    prior = {n["id"] for n in topo["nodes"] if n.get("arm") in _TE_ARM_LABELS}
+    topo["nodes"] = [n for n in topo["nodes"] if n.get("arm") not in _TE_ARM_LABELS]
     topo["edges"] = [e for e in topo["edges"]
-                     if e.get("source") not in prior_te_ids and e.get("target") not in prior_te_ids]
+                     if e.get("source") not in prior and e.get("target") not in prior]
 
-    te_nodes, te_edges = _te_nodes_and_edges()
     existing_ids = {n["id"] for n in topo["nodes"]}
-    te_nodes = [n for n in te_nodes if n["id"] not in existing_ids]  # never shadow an existing atom
-
-    topo["nodes"].extend(te_nodes)
-    topo["edges"].extend(te_edges)
+    added = 0
+    for arm, bundle, offset in _ISLANDS:
+        if not bundle.exists():
+            print(f"  (skip missing bundle {bundle.name})", file=sys.stderr)
+            continue
+        nodes = [n for n in _island_nodes(arm, bundle, offset) if n["id"] not in existing_ids]
+        existing_ids.update(n["id"] for n in nodes)
+        topo["nodes"].extend(nodes)
+        st = Counter(n.get("status") for n in nodes)
+        print(f"  +{len(nodes):>3} {arm:<34} {dict(st)}", file=sys.stderr)
+        added += len(nodes)
 
     by_arm = Counter(n.get("arm") for n in topo["nodes"])
-    by_te_status = Counter(n.get("status") for n in te_nodes)
-    print(f"added {len(te_nodes)} TE nodes ({dict(by_te_status)}), {len(te_edges)} TE edges",
-          file=sys.stderr)
+    print(f"added {added} TE nodes total", file=sys.stderr)
     print(f"merged-universe now: {len(topo['nodes'])} nodes; by arm: {dict(sorted(by_arm.items()))}",
           file=sys.stderr)
 

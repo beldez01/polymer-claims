@@ -1,0 +1,1962 @@
+{
+  "contrasts": [
+    {
+      "contrast": {
+        "key": "lymphoid_vs_myeloid",
+        "group_col": "lineage",
+        "level_a": "Lymphoid",
+        "level_b": "Myeloid",
+        "note": "primary lineage split (baseline)"
+      },
+      "n_a": 30,
+      "n_b": 17,
+      "skipped": null,
+      "bg_rate_ttest": 0.3682140750406664,
+      "bg_rate_rank": 0.444792020449386,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2587,
+          "count_ttest": 1083,
+          "count_rank": 1073,
+          "e_value": 3.2507899878758665e+274,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2516,
+          "count_ttest": 597,
+          "count_rank": 750,
+          "e_value": 2.0862680407721724e+118,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 4306,
+          "count_ttest": 1185,
+          "count_rank": 1533,
+          "e_value": 1.3785536080464612e+255,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2098,
+          "count_ttest": 502,
+          "count_rank": 712,
+          "e_value": 1.8491349421033676e+100,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2841,
+          "count_ttest": 704,
+          "count_rank": 651,
+          "e_value": 1.0201363665354337e+144,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 3151,
+          "count_ttest": 639,
+          "count_rank": 678,
+          "e_value": 9.005826579771517e+114,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2587,
+          "count_ttest": 1083,
+          "count_rank": 1073,
+          "e_value": 69415.88002534416,
+          "bar": 32.89868133696453,
+          "fold_ttest": 1.1369245447513383,
+          "fold_rank": 0.9324945577152639
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 597,
+          "count_rank": 750,
+          "e_value": 0.9546266589859247,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.6444115397269891,
+          "fold_rank": 0.6701833579562527
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 1185,
+          "count_rank": 1533,
+          "e_value": 0.632675652009519,
+          "bar": 296.08813203268073,
+          "fold_ttest": 0.7473842463729192,
+          "fold_rank": 0.8004074862273695
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 502,
+          "count_rank": 712,
+          "e_value": 0.3966630523212935,
+          "bar": 526.3789013914325,
+          "fold_ttest": 0.6498271432188416,
+          "fold_rank": 0.7629876745954671
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 704,
+          "count_rank": 651,
+          "e_value": 0.8500788942080878,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.6729782677926684,
+          "fold_rank": 0.5151726128969958
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 639,
+          "count_rank": 678,
+          "e_value": 0.8353672500777348,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.5507469104200968,
+          "fold_rank": 0.4837537039259316
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "tcell_vs_bcell",
+        "group_col": "cell_type_broad",
+        "level_a": "T_cell",
+        "level_b": "B_cell",
+        "note": "lymphoid: T vs B"
+      },
+      "n_a": 11,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.18843286917040558,
+      "bg_rate_rank": 0.1579643565772304,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2587,
+          "count_ttest": 485,
+          "count_rank": 396,
+          "e_value": 6.04627629432233e+81,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 301,
+          "count_rank": 234,
+          "e_value": 1.6482602678491226e+31,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 588,
+          "count_rank": 480,
+          "e_value": 1.466090005483166e+72,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 264,
+          "count_rank": 236,
+          "e_value": 5.773006862199591e+29,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 269,
+          "count_rank": 235,
+          "e_value": 1.0852570355915336e+17,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 312,
+          "count_rank": 284,
+          "e_value": 1.2494367795267525e+22,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 485,
+          "count_rank": 396,
+          "e_value": 0.4778982712404042,
+          "bar": 32.89868133696453,
+          "fold_ttest": 0.9949211173589481,
+          "fold_rank": 0.969035426171167
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 301,
+          "count_rank": 234,
+          "e_value": 0.6967294417293489,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.6348910397070191,
+          "fold_rank": 0.5887706030055376
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 588,
+          "count_rank": 480,
+          "e_value": 0.5283047046608139,
+          "bar": 296.08813203268073,
+          "fold_ttest": 0.7246806073506965,
+          "fold_rank": 0.7056804874114511
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 264,
+          "count_rank": 236,
+          "e_value": 0.7976152009139852,
+          "bar": 526.3789013914325,
+          "fold_ttest": 0.6677928765544072,
+          "fold_rank": 0.712110543965796
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 269,
+          "count_rank": 235,
+          "e_value": 0.9731645310458161,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.5024864849631457,
+          "fold_rank": 0.5236456808169963
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 312,
+          "count_rank": 284,
+          "e_value": 0.9906025283745914,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.5254719400809239,
+          "fold_rank": 0.5705724973404033
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "tcell_vs_nk",
+        "group_col": "cell_type_broad",
+        "level_a": "T_cell",
+        "level_b": "NK",
+        "note": "lymphoid: T vs NK"
+      },
+      "n_a": 11,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.2272134136531827,
+      "bg_rate_rank": 0.15182417818136318,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2587,
+          "count_ttest": 442,
+          "count_rank": 327,
+          "e_value": 1.1421365691665087e+68,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2516,
+          "count_ttest": 429,
+          "count_rank": 274,
+          "e_value": 1.4983315938840675e+67,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 4306,
+          "count_ttest": 830,
+          "count_rank": 518,
+          "e_value": 9.285702281953899e+143,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2098,
+          "count_ttest": 352,
+          "count_rank": 227,
+          "e_value": 1.6299874125570793e+54,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 249,
+          "count_rank": 174,
+          "e_value": 13380989102996.896,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 316,
+          "count_rank": 207,
+          "e_value": 2.446077836364467e+23,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 442,
+          "count_rank": 327,
+          "e_value": 0.6961698561062208,
+          "bar": 32.89868133696453,
+          "fold_ttest": 0.7519550391403165,
+          "fold_rank": 0.8325501146662347
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 429,
+          "count_rank": 274,
+          "e_value": 0.6586513416866685,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.7504343220617221,
+          "fold_rank": 0.7172969547553573
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 830,
+          "count_rank": 518,
+          "e_value": 0.5575451749578746,
+          "bar": 296.08813203268073,
+          "fold_ttest": 0.8483403036447507,
+          "fold_rank": 0.7923458640033767
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 352,
+          "count_rank": 227,
+          "e_value": 0.5668731625605543,
+          "bar": 526.3789013914325,
+          "fold_ttest": 0.7384195954368431,
+          "fold_rank": 0.7126551605688711
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 249,
+          "count_rank": 174,
+          "e_value": 1.0,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.3857395298304431,
+          "fold_rank": 0.4034010976404156
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 316,
+          "count_rank": 207,
+          "e_value": 0.9796922497470735,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.44137193310526684,
+          "fold_rank": 0.4326941297746366
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "bcell_vs_nk",
+        "group_col": "cell_type_broad",
+        "level_a": "B_cell",
+        "level_b": "NK",
+        "note": "lymphoid: B vs NK"
+      },
+      "n_a": 3,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.09212055127540532,
+      "bg_rate_rank": 0.0,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 207,
+          "count_rank": 0,
+          "e_value": 101022697.8475732,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 106,
+          "count_rank": 0,
+          "e_value": 0.6974382163808627,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 209,
+          "count_rank": 0,
+          "e_value": 0.4819098085260294,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 83,
+          "count_rank": 0,
+          "e_value": 0.6128748290205841,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 135,
+          "count_rank": 0,
+          "e_value": 0.5220128998156348,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 155,
+          "count_rank": 0,
+          "e_value": 0.4240817533330669,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 207,
+          "count_rank": 0,
+          "e_value": 0.3890460205389225,
+          "bar": 32.89868133696453,
+          "fold_ttest": 0.8685951268983828,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 106,
+          "count_rank": 0,
+          "e_value": 0.9497996694996617,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.4573394869709767,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 209,
+          "count_rank": 0,
+          "e_value": 0.9904464506469044,
+          "bar": 296.08813203268073,
+          "fold_ttest": 0.5268848758353116,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 83,
+          "count_rank": 0,
+          "e_value": 0.7696133202996427,
+          "bar": 526.3789013914325,
+          "fold_ttest": 0.4294534344711726,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 135,
+          "count_rank": 0,
+          "e_value": 0.8385129219451641,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.5158292992254985,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 155,
+          "count_rank": 0,
+          "e_value": 0.8702646983298329,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.5339821833408427,
+          "fold_rank": 0.0
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "tmemory_vs_tnaive",
+        "group_col": "cell_type_broad",
+        "level_a": "T_memory",
+        "level_b": "T_naive",
+        "note": "T differentiation: memory vs naive"
+      },
+      "n_a": 8,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.6991223209338077,
+      "bg_rate_rank": 0.6435568346352537,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2587,
+          "count_ttest": 1385,
+          "count_rank": 1200,
+          "e_value": Infinity,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2516,
+          "count_ttest": 1637,
+          "count_rank": 1462,
+          "e_value": Infinity,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 4306,
+          "count_ttest": 3061,
+          "count_rank": 2806,
+          "e_value": Infinity,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2098,
+          "count_ttest": 1504,
+          "count_rank": 1395,
+          "e_value": Infinity,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2841,
+          "count_ttest": 1213,
+          "count_rank": 1032,
+          "e_value": Infinity,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 3151,
+          "count_ttest": 1534,
+          "count_rank": 1389,
+          "e_value": Infinity,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 1385,
+          "count_rank": 1200,
+          "e_value": 0.267675129662395,
+          "bar": 32.89868133696453,
+          "fold_ttest": 0.765773223696421,
+          "fold_rank": 0.7207720054015276
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 1637,
+          "count_rank": 1462,
+          "e_value": 0.00861722330052195,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.9306467703371989,
+          "fold_rank": 0.9029211560008032
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 4306,
+          "count_ttest": 3061,
+          "count_rank": 2806,
+          "e_value": 0.4465693074974455,
+          "bar": 296.08813203268073,
+          "fold_ttest": 1.0168014011545947,
+          "fold_rank": 1.0125739126401818
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2098,
+          "count_ttest": 1504,
+          "count_rank": 1395,
+          "e_value": 0.043079710758962365,
+          "bar": 526.3789013914325,
+          "fold_ttest": 1.0253902516313533,
+          "fold_rank": 1.0331938605312136
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 1213,
+          "count_rank": 1032,
+          "e_value": 0.775,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.6107119232510299,
+          "fold_rank": 0.5644449042792773
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 1534,
+          "count_rank": 1389,
+          "e_value": 0.6260643066764124,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.6963439205624601,
+          "fold_rank": 0.6849627208837251
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "macrophage_vs_monocyte",
+        "group_col": "cell_type_broad",
+        "level_a": "Macrophage",
+        "level_b": "Monocyte",
+        "note": "myeloid maturation"
+      },
+      "n_a": 8,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.08263768478630035,
+      "bg_rate_rank": 0.06190229340578803,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 240,
+          "count_rank": 162,
+          "e_value": 136824681336231.03,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 148,
+          "count_rank": 100,
+          "e_value": 2.079502999903768,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 272,
+          "count_rank": 188,
+          "e_value": 406.28874855245283,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 146,
+          "count_rank": 101,
+          "e_value": 294.4000063179569,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 275,
+          "count_rank": 191,
+          "e_value": 5.333497271715456e+17,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 257,
+          "count_rank": 176,
+          "e_value": 43357182519.21234,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2587,
+          "count_ttest": 240,
+          "count_rank": 162,
+          "e_value": 1.6271713634701985,
+          "bar": 32.89868133696453,
+          "fold_ttest": 1.122630072440774,
+          "fold_rank": 1.0116070478785004
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 148,
+          "count_rank": 100,
+          "e_value": 0.8597747971676404,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.7118245091677163,
+          "fold_rank": 0.6420703627307898
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 272,
+          "count_rank": 188,
+          "e_value": 0.8919950403999068,
+          "bar": 296.08813203268073,
+          "fold_ttest": 0.7643930632585975,
+          "fold_rank": 0.7053051977114849
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 146,
+          "count_rank": 101,
+          "e_value": 0.8257572142847693,
+          "bar": 526.3789013914325,
+          "fold_ttest": 0.8421107872994623,
+          "fold_rank": 0.7776947201892154
+        },
+        {
+          "key": "sva_d",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2841,
+          "count_ttest": 275,
+          "count_rank": 191,
+          "e_value": 7.3025251097425015,
+          "bar": 822.4670334241131,
+          "fold_ttest": 1.171340929376654,
+          "fold_rank": 1.0860639395721836
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 257,
+          "count_rank": 176,
+          "e_value": 0.5624472373684697,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.9869759697092201,
+          "fold_rank": 0.9023136456458185
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "monocyte_vs_granulocyte",
+        "group_col": "cell_type_broad",
+        "level_a": "Monocyte",
+        "level_b": "Granulocyte",
+        "note": "myeloid subsets"
+      },
+      "n_a": 3,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.0819226712904206,
+      "bg_rate_rank": 0.0,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 155,
+          "count_rank": 0,
+          "e_value": 5.498062678993184,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 93,
+          "count_rank": 0,
+          "e_value": 0.6787996795493634,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 287,
+          "count_rank": 0,
+          "e_value": 28276.48164552497,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 138,
+          "count_rank": 0,
+          "e_value": 32.36650577848633,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 175,
+          "count_rank": 0,
+          "e_value": 13.435053012231926,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 150,
+          "count_rank": 0,
+          "e_value": 0.45440940623905524,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 155,
+          "count_rank": 0,
+          "e_value": 0.8972633780196686,
+          "bar": 32.89868133696453,
+          "fold_ttest": 0.731359933321081,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 93,
+          "count_rank": 0,
+          "e_value": 0.8659658035190583,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.4511990812801995,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 287,
+          "count_rank": 0,
+          "e_value": 0.571158811635291,
+          "bar": 296.08813203268073,
+          "fold_ttest": 0.8135865608872386,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 138,
+          "count_rank": 0,
+          "e_value": 0.6459326389478164,
+          "bar": 526.3789013914325,
+          "fold_ttest": 0.8029148631729937,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 175,
+          "count_rank": 0,
+          "e_value": 0.9175613392854205,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.7519045447713467,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 150,
+          "count_rank": 0,
+          "e_value": 0.6882828766450708,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.5810837770400498,
+          "fold_rank": 0.0
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "macrophage_vs_granulocyte",
+        "group_col": "cell_type_broad",
+        "level_a": "Macrophage",
+        "level_b": "Granulocyte",
+        "note": "myeloid: mac vs gran"
+      },
+      "n_a": 8,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.10894124376597608,
+      "bg_rate_rank": 0.08691882809288025,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 315,
+          "count_rank": 238,
+          "e_value": 2.453925856238265e+32,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 135,
+          "count_rank": 93,
+          "e_value": 0.3664504917586813,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 342,
+          "count_rank": 248,
+          "e_value": 36632031585803.1,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 142,
+          "count_rank": 97,
+          "e_value": 83.51653345672709,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 343,
+          "count_rank": 254,
+          "e_value": 2.6951004292047815e+34,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 297,
+          "count_rank": 208,
+          "e_value": 2.3944092502113567e+18,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2587,
+          "count_ttest": 315,
+          "count_rank": 238,
+          "e_value": 2.3558652809885157,
+          "bar": 32.89868133696453,
+          "fold_ttest": 1.117691107994582,
+          "fold_rank": 1.05844102855587
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 135,
+          "count_rank": 93,
+          "e_value": 0.8916765794658588,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.4925278610689275,
+          "fold_rank": 0.4252638333176667
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 342,
+          "count_rank": 248,
+          "e_value": 0.7614479615322896,
+          "bar": 296.08813203268073,
+          "fold_ttest": 0.7290540910524543,
+          "fold_rank": 0.6626188602738811
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 142,
+          "count_rank": 97,
+          "e_value": 0.9316999383096402,
+          "bar": 526.3789013914325,
+          "fold_ttest": 0.6212845178117355,
+          "fold_rank": 0.5319274324181924
+        },
+        {
+          "key": "sva_d",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2841,
+          "count_ttest": 343,
+          "count_rank": 254,
+          "e_value": 2.5995574523019624,
+          "bar": 822.4670334241131,
+          "fold_ttest": 1.1082316705597965,
+          "fold_rank": 1.0286049754377011
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 297,
+          "count_rank": 208,
+          "e_value": 0.7195199725065082,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.8651984184667495,
+          "fold_rank": 0.7594532930746268
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "erythroid_vs_granulocyte",
+        "group_col": "cell_type_broad",
+        "level_a": "Erythroid",
+        "level_b": "Granulocyte",
+        "note": "erythroid vs myeloid"
+      },
+      "n_a": 3,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.8325438392649661,
+      "bg_rate_rank": 0.0,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2587,
+          "count_ttest": 1935,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2516,
+          "count_ttest": 2102,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 4306,
+          "count_ttest": 3671,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2098,
+          "count_ttest": 1785,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2841,
+          "count_ttest": 2085,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 3151,
+          "count_ttest": 2357,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 1935,
+          "count_rank": 0,
+          "e_value": 0.3393960552078229,
+          "bar": 32.89868133696453,
+          "fold_ttest": 0.8984158996394085,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "l1hs",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2516,
+          "count_ttest": 2102,
+          "count_rank": 0,
+          "e_value": 0.004844673549794872,
+          "bar": 131.59472534785812,
+          "fold_ttest": 1.0034944236649268,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 4306,
+          "count_ttest": 3671,
+          "count_rank": 0,
+          "e_value": 3.7616661238909415,
+          "bar": 296.08813203268073,
+          "fold_ttest": 1.024007759585484,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2098,
+          "count_ttest": 1785,
+          "count_rank": 0,
+          "e_value": 0.1619312501024447,
+          "bar": 526.3789013914325,
+          "fold_ttest": 1.0219405338110523,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 2085,
+          "count_rank": 0,
+          "e_value": 0.4300618224657074,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.8815109555785681,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 2357,
+          "count_rank": 0,
+          "e_value": 0.055090671924764203,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.8984710082750272,
+          "fold_rank": 0.0
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "erythroid_vs_monocyte",
+        "group_col": "cell_type_broad",
+        "level_a": "Erythroid",
+        "level_b": "Monocyte",
+        "note": "erythroid vs monocyte"
+      },
+      "n_a": 3,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.8358150260086159,
+      "bg_rate_rank": 0.0,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2587,
+          "count_ttest": 1970,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2516,
+          "count_ttest": 2099,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 4306,
+          "count_ttest": 3650,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2098,
+          "count_ttest": 1785,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2841,
+          "count_ttest": 2070,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 3151,
+          "count_ttest": 2328,
+          "count_rank": 0,
+          "e_value": Infinity,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 1970,
+          "count_rank": 0,
+          "e_value": 0.1132809143572828,
+          "bar": 32.89868133696453,
+          "fold_ttest": 0.9110865239674305,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 2099,
+          "count_rank": 0,
+          "e_value": 0.01826645294730887,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.9981403843665225,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 4306,
+          "count_ttest": 3650,
+          "count_rank": 0,
+          "e_value": 0.03250175940786073,
+          "bar": 296.08813203268073,
+          "fold_ttest": 1.0141651074629263,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2098,
+          "count_ttest": 1785,
+          "count_rank": 0,
+          "e_value": 0.05195668594821311,
+          "bar": 526.3789013914325,
+          "fold_ttest": 1.0179408948682527,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 2070,
+          "count_rank": 0,
+          "e_value": 0.7681195569952055,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.8717439404572186,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 2328,
+          "count_rank": 0,
+          "e_value": 0.3093160954357004,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.8839432795822957,
+          "fold_rank": 0.0
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "nk_vs_monocyte",
+        "group_col": "cell_type_broad",
+        "level_a": "NK",
+        "level_b": "Monocyte",
+        "note": "lymphoid vs myeloid cell type"
+      },
+      "n_a": 3,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.11863861430384498,
+      "bg_rate_rank": 0.0,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 379,
+          "count_rank": 0,
+          "e_value": 6.101443146790291e+49,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 97,
+          "count_rank": 0,
+          "e_value": 0.8006513825918222,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 273,
+          "count_rank": 0,
+          "e_value": 560.0404276323509,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 101,
+          "count_rank": 0,
+          "e_value": 0.7777369555904571,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 218,
+          "count_rank": 0,
+          "e_value": 8455879.090836715,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 191,
+          "count_rank": 0,
+          "e_value": 8.382130080505563,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "PENDING",
+          "status": "pending",
+          "n_probes": 2587,
+          "count_ttest": 379,
+          "count_rank": 0,
+          "e_value": 1059.2179117501305,
+          "bar": 32.89868133696453,
+          "fold_ttest": 1.2348571359014566,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 97,
+          "count_rank": 0,
+          "e_value": 1.0,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.32496383549082763,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 273,
+          "count_rank": 0,
+          "e_value": 0.875065770376985,
+          "bar": 296.08813203268073,
+          "fold_ttest": 0.5343952091684914,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 101,
+          "count_rank": 0,
+          "e_value": 1.0,
+          "bar": 526.3789013914325,
+          "fold_ttest": 0.40577924002037863,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 218,
+          "count_rank": 0,
+          "e_value": 0.9052876166707218,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.6467838905303892,
+          "fold_rank": 0.0
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 191,
+          "count_rank": 0,
+          "e_value": 0.999617637126222,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.510927052868604,
+          "fold_rank": 0.0
+        }
+      ]
+    },
+    {
+      "contrast": {
+        "key": "tcell_vs_monocyte",
+        "group_col": "cell_type_broad",
+        "level_a": "T_cell",
+        "level_b": "Monocyte",
+        "note": "T vs monocyte"
+      },
+      "n_a": 11,
+      "n_b": 3,
+      "skipped": null,
+      "bg_rate_ttest": 0.49769408147578786,
+      "bg_rate_rank": 0.4561607350338738,
+      "ndmp": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2587,
+          "count_ttest": 1036,
+          "count_rank": 935,
+          "e_value": 1.6670498343708715e+259,
+          "bar": 32.89868133696453,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "l1hs",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2516,
+          "count_ttest": 940,
+          "count_rank": 839,
+          "e_value": 1.3696357205277454e+231,
+          "bar": 131.59472534785812,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 4306,
+          "count_ttest": 1892,
+          "count_rank": 1690,
+          "e_value": Infinity,
+          "bar": 296.08813203268073,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2098,
+          "count_ttest": 911,
+          "count_rank": 820,
+          "e_value": 1.8640711231302452e+234,
+          "bar": 526.3789013914325,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "sva_d",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 2841,
+          "count_ttest": 711,
+          "count_rank": 629,
+          "e_value": 1.4496894706494214e+146,
+          "bar": 822.4670334241131,
+          "fold_ttest": null,
+          "fold_rank": null
+        },
+        {
+          "key": "aluya5",
+          "verdict": "LICENSED",
+          "status": "licensed",
+          "n_probes": 3151,
+          "count_ttest": 771,
+          "count_rank": 705,
+          "e_value": 2.7024824819411267e+156,
+          "bar": 1184.352528130723,
+          "fold_ttest": null,
+          "fold_rank": null
+        }
+      ],
+      "enrichment": [
+        {
+          "key": "hervk_ltr5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2587,
+          "count_ttest": 1036,
+          "count_rank": 935,
+          "e_value": 0.775841655557174,
+          "bar": 32.89868133696453,
+          "fold_ttest": 0.804638577502899,
+          "fold_rank": 0.7923139133710191
+        },
+        {
+          "key": "l1hs",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2516,
+          "count_ttest": 940,
+          "count_rank": 839,
+          "e_value": 0.18118258091291328,
+          "bar": 131.59472534785812,
+          "fold_ttest": 0.7506798190422992,
+          "fold_rank": 0.7310270112029124
+        },
+        {
+          "key": "hervh_ltr7",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 4306,
+          "count_ttest": 1892,
+          "count_rank": 1690,
+          "e_value": 0.3198177567319786,
+          "bar": 296.08813203268073,
+          "fold_ttest": 0.8828453428546322,
+          "fold_rank": 0.8603888613762407
+        },
+        {
+          "key": "hervw_ltr17",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2098,
+          "count_ttest": 911,
+          "count_rank": 820,
+          "e_value": 0.3937554252518229,
+          "bar": 526.3789013914325,
+          "fold_ttest": 0.8724698278559098,
+          "fold_rank": 0.8568217232559033
+        },
+        {
+          "key": "sva_d",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 2841,
+          "count_ttest": 711,
+          "count_rank": 629,
+          "e_value": 1.0,
+          "bar": 822.4670334241131,
+          "fold_ttest": 0.5028470316749092,
+          "fold_rank": 0.4853572396016805
+        },
+        {
+          "key": "aluya5",
+          "verdict": "REJECTED",
+          "status": "rejected",
+          "n_probes": 3151,
+          "count_ttest": 771,
+          "count_rank": 705,
+          "e_value": 0.549770476481372,
+          "bar": 1184.352528130723,
+          "fold_ttest": 0.49163579864944507,
+          "fold_rank": 0.49048170640778926
+        }
+      ]
+    }
+  ],
+  "tally": {
+    "ndmp": {
+      "LICENSED": 18,
+      "PENDING": 17,
+      "REJECTED": 37
+    },
+    "enrichment": {
+      "LICENSED": 0,
+      "PENDING": 13,
+      "REJECTED": 59
+    },
+    "claims": 144,
+    "skipped": 0
+  }
+}
