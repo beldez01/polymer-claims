@@ -962,6 +962,9 @@ serve = [
 sign = [
     { name = "cryptography" },
 ]
+spine = [
+    { name = "numpy" },
+]
 wgbs = [
     { name = "pysam" },
 ]
@@ -987,6 +990,7 @@ requires-dist = [
     { name = "numpy", marker = "extra == 'calibrate'", specifier = ">=1.26" },
     { name = "numpy", marker = "extra == 'embed'", specifier = ">=1.26" },
     { name = "numpy", marker = "extra == 'pharmaco'", specifier = ">=1.26" },
+    { name = "numpy", marker = "extra == 'spine'", specifier = ">=1.26" },
     { name = "openpyxl", marker = "extra == 'pharmaco'", specifier = ">=3.1" },
     { name = "pandas", marker = "extra == 'pharmaco'", specifier = ">=2" },
     { name = "polymer-grammar", editable = "grammar" },
@@ -999,7 +1003,7 @@ requires-dist = [
     { name = "statsmodels", marker = "extra == 'pharmaco'", specifier = ">=0.14" },
     { name = "uvicorn", marker = "extra == 'serve'", specifier = ">=0.27" },
 ]
-provides-extras = ["serve", "llm", "embed", "calibrate", "sign", "pharmaco", "wgbs"]
+provides-extras = ["serve", "llm", "embed", "calibrate", "sign", "pharmaco", "wgbs", "spine"]
 
 [package.metadata.requires-dev]
 dev = [

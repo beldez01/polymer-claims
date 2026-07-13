@@ -6,10 +6,9 @@ Every claim here is REPORTED (`GenerationMode.LITERATURE_EXTRACTED`) and therefo
 probe deliberately does not do. The point is to measure formalization yield and flush IR
 gaps, not to license.
 
-GAP (logged): a bare reported quantity has no home pattern in `pattern.registry` (which only
-carries `adjusted_effect@v1`). We reference a placeholder `PatternRef("reported_quantity",
-"v1")` — structurally valid because `Claim.pattern` is an unresolved id+version, not a
-registry lookup — and record the missing pattern as an analysis-class expansion (Task 6).
+`reported_quantity@v1` and `mechanistic_law@v1` are registered in the pure grammar
+(analysis-class); `patterns.py` re-exports their refs (plus the domain `sense_and_kill@v1`
+registered from this umbrella) so this module has a single import site.
 """
 from __future__ import annotations
 
@@ -20,15 +19,12 @@ from polymer_grammar.leaf import (
     PropositionLeaf,
     QuantityLeaf,
 )
-from polymer_grammar.pattern import PatternRef
 from polymer_grammar.provenance import GenerationMode, Provenance
 from polymer_grammar.status import Status
 
+from .patterns import MECHANISTIC_LAW as _MECHANISTIC_LAW
+from .patterns import REPORTED_QUANTITY as _REPORTED_QUANTITY
 from .sources import SOURCES
-
-# Placeholder patterns for content the registry has no home for yet (see gap report GAP-1).
-_REPORTED_QUANTITY = PatternRef(id="reported_quantity", version="v1")
-_MECHANISTIC_LAW = PatternRef(id="mechanistic_law", version="v1")
 
 
 def _reported_provenance(source_key: str) -> Provenance:
@@ -92,9 +88,8 @@ def adar_dynamic_range_claim() -> Claim:
 def car_threshold_claim() -> Claim:
     """C3 — CAR triggering needs ~10²–10⁴ antigen molecules/cell (killing ~10², full
     activation ~10⁴). A DERIVED count. We record the representative 1e3 and leave
-    `uncertainty=None` rather than fake a symmetric bar over two decades.
-
-    GAP (interval): the honest object is a range, not a point ± symmetric error. Logged general-class."""
+    `uncertainty=None` rather than fake a symmetric bar over two decades. The honest range
+    is now carried by explicit low/high bounds."""
     return Claim(
         id="synbio-c3-car-threshold",
         title="CAR triggering threshold ≈ 10²–10⁴ antigen molecules/cell",
@@ -106,6 +101,8 @@ def car_threshold_claim() -> Claim:
                 uncertainty=None,
                 measurement_basis=MeasurementBasis.DERIVED,
                 formula="antigen_copies_at_half_max_activation",
+                low=1e2,
+                high=1e4,
             ),
         ),
         status=Status.CONJECTURED,

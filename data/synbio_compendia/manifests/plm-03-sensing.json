@@ -1,0 +1,203 @@
+[
+  {
+    "id": "sb-plm03-adar-leak-floor",
+    "title": "ADAR RNA-sensor basal leak sits near 1-3% of the induced ('on') signal",
+    "tier": 1,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 0.01,
+      "unit": null,
+      "uncertainty": null,
+      "measurement_basis": "DERIVED",
+      "formula": "leaky_no_target_payload_expression / target_induced_payload_expression",
+      "low": 0.01,
+      "high": 0.03,
+      "context": {
+        "tissue": null,
+        "cell_line": null,
+        "assay": "ADAR RNA sensor (CellREADR/RADARS) payload reporter expression",
+        "condition": "basal (no-target) expression relative to full target-induced expression"
+      }
+    },
+    "source": "PLM-III",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm03-radars-277fold",
+    "title": "RADARS (Jiang et al. 2023) achieved up to ~277-fold reporter activation",
+    "tier": 1,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 277,
+      "unit": null,
+      "uncertainty": null,
+      "measurement_basis": "DERIVED",
+      "formula": "target_induced_payload_signal / off_target_baseline_payload_signal",
+      "context": {
+        "tissue": null,
+        "cell_line": null,
+        "assay": "RADARS ADAR sensor (Jiang et al., Nat Biotechnol 2023)",
+        "condition": "systematic sensor engineering optimization"
+      }
+    },
+    "source": "PLM-III",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm03-snv-two-bits",
+    "title": "A somatic point mutation carries 2 bits of information (one of four bases at one position)",
+    "tier": 1,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 2,
+      "unit": "bits",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {
+        "tissue": null,
+        "cell_line": null,
+        "assay": null,
+        "condition": "information content of a single-nucleotide substitution among 4 possible bases (log2(4)), before any channel bottleneck"
+      }
+    },
+    "source": "PLM-III",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "measurement_basis only distinguishes an empirically measured physical quantity (FUNDAMENTAL) from a computed ratio/fold-change over experimental data (DERIVED); it has no category for an analytically derived information-theoretic constant (log2(4) possible bases at one position) that is neither instrument-measured nor a data-derived ratio.",
+      "current_ir_behavior": "Forced into FUNDAMENTAL with unit='bits' so the required unit field is non-null, even though no physical measurement was performed.",
+      "candidate_resolution": "Add a third measurement_basis value (e.g. 'ANALYTIC') for constants derived from combinatorics/information theory rather than instrumentation or data reduction.",
+      "expansion_class": "domain",
+      "purity_cost": "Additive enum value on measurement_basis; existing FUNDAMENTAL/DERIVED entries are untouched and byte-identical.",
+      "gap_kind": "analytic-basis"
+    }
+  },
+  {
+    "id": "sb-plm03-bp-rise-0-34nm",
+    "title": "A DNA base pair spans ~0.34 nm within a ~3.2-billion-bp genome",
+    "tier": 1,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 0.34,
+      "unit": "nm",
+      "uncertainty": null,
+      "measurement_basis": "FUNDAMENTAL",
+      "formula": null,
+      "context": {
+        "tissue": null,
+        "cell_line": null,
+        "assay": null,
+        "condition": "rise per base pair in chromatinized double-stranded DNA, against a ~3.2-billion-bp genome (the '0.34 nm-in-3.2 Gb problem' for live genomic-DNA SNV imaging)"
+      }
+    },
+    "source": "PLM-III",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm03-tet2-truncating-fraction",
+    "title": "~77% of TET2 somatic lesions are truncating mutations",
+    "tier": 1,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "quantity",
+      "value": 0.77,
+      "unit": null,
+      "uncertainty": null,
+      "measurement_basis": "DERIVED",
+      "formula": "truncating_TET2_mutations / all_TET2_mutations",
+      "context": {
+        "tissue": null,
+        "cell_line": null,
+        "assay": null,
+        "condition": "TET2 somatic lesion spectrum; truncating class is exactly the NMD-susceptible class that degrades before an RNA sensor can act on it"
+      }
+    },
+    "source": "PLM-III",
+    "schema_fit": {
+      "status": "gap",
+      "constraint": "leaf.context only allows tissue/cell_line/assay/condition sub-keys; there is no 'gene' or 'target_locus' key to record that this 77% figure is a property of the TET2 locus specifically, not of a tissue, cell line, or assay.",
+      "current_ir_behavior": "Gene identity is folded into the free-text condition string as a workaround, so it is not a structured, queryable field.",
+      "candidate_resolution": "Add an optional 'gene' (or 'target_locus') sub-key to leaf.context for claims whose defining stratification variable is a gene/locus rather than a tissue or cell line.",
+      "expansion_class": "subject",
+      "purity_cost": "Additive optional context sub-key; existing entries that omit it are untouched and byte-identical.",
+      "gap_kind": "gene-locus-context"
+    }
+  },
+  {
+    "id": "sb-plm03-report-not-bind",
+    "title": "Catalytic reporting, not thermodynamic binding, is the tractable strategy for live-nucleus single-base sensing",
+    "tier": 2,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "A chromophore that physically binds a single genomic base would have to win a thermodynamic discrimination contest -- the free-energy gap between a perfectly matched probe and a single-mismatch duplex -- against body-temperature noise, inside a chromatinized, protein-occluded nucleus, at single-copy abundance.",
+      "warrant": "The escape is to replace binding with catalytic reporting: an enzyme (ADAR, Cas13) performs a sequence-specific reaction only when its guide finds the cognate target, and that reaction gates the synthesis of an amplifiable output, so the cell becomes its own signal amplifier.",
+      "rebuttal": null,
+      "warrant_type": "deductive"
+    },
+    "source": "PLM-III",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm03-cca-edit-context-rule",
+    "title": "ADAR's nearest-neighbor sequence preference (the CCA edit-context rule) gates which SNVs a sensor can discriminate",
+    "tier": 2,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "ADAR disfavors a 5' guanosine adjacent to the target adenosine (5' preference U > A > C > G) and favors a 3' G (3' preference G > C ~ A > U); sensor designs exploit a triggering C-A mismatch at the edit site and the design heuristic that the target supply an effective CCA at the editing position.",
+      "warrant": "Because ADAR editing efficiency is dictated by nearest-neighbor sequence context (mapped to catalytic-domain residues E488/T490/V493), the discriminating base of a variant-sensing guide must sit at or adjacent to the editing-critical position, where a single mismatch maximally perturbs editing -- so not every somatic SNV falls in a compatible context.",
+      "rebuttal": "A specific steric clash with a 5' guanosine is sometimes attributed to a flipping-loop glycine, but the chapter flags this exact mechanistic detail as unverified against the primary structural literature.",
+      "warrant_type": "mechanistic_analogy"
+    },
+    "source": "PLM-III",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm03-nmd-lof-sensing-limit",
+    "title": "RNA-sensor detectability is asymmetric: strong for missense/in-frame variants, weak for NMD-prone truncating LOF variants",
+    "tier": 2,
+    "skip": false,
+    "topic": "sensing",
+    "leaf": {
+      "kind": "proposition",
+      "data": "Truncating mutations (nonsense, frameshift) introduce premature termination codons that flag the transcript for nonsense-mediated decay (NMD), destroying the very mutant mRNA the sensor needs; RNA sensing is strongest for missense and in-frame variants (stable full-length transcript, one clean discriminating base) and weakest for the truncating LOF lesions that dominate tumor-suppressor genes.",
+      "warrant": "An ADAR/Cas13 sensor can only report a transcript that survives to be translated; because NMD selectively degrades premature-termination-codon-bearing mRNA before the reporter payload can be produced, truncating/frameshift variants systematically evade RNA-based genotype sensing while missense variants remain detectable.",
+      "rebuttal": "A substantial minority of NMD substrates escape (last-exon and very-5' PTCs are spared) and NMD efficiency varies by transcript, tissue, and individual; the often-quoted '~one-third escape' figure is an approximation, not a fixed rate, and is unverified as a universal figure.",
+      "warrant_type": "deductive"
+    },
+    "source": "PLM-III",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm03-narrative-reporter-payload",
+    "title": "Counterintuitive-applications narrative: a translated sensor payload can be swapped for any therapeutic effector",
+    "tier": 3,
+    "skip": true,
+    "topic": "sensing",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-III",
+    "schema_fit": {"status": "clean"}
+  },
+  {
+    "id": "sb-plm03-narrative-epigenome-white-space",
+    "title": "Narrative aside: the epigenome as the sensing frontier's 'white space'",
+    "tier": 3,
+    "skip": true,
+    "topic": "sensing",
+    "leaf": {"kind": "quantity"},
+    "source": "PLM-III",
+    "schema_fit": {"status": "clean"}
+  }
+]

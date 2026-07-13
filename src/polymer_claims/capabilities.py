@@ -10,6 +10,7 @@ from polymer_grammar.pattern import PatternRef
 
 from .analysis_profile import profile_oracle_id
 from .benchmark_capability import EVAL_BENCHMARK_ADVANTAGE_CELL  # noqa: E402 (breaks cycle safely)
+from .expression_floor_patterns import EXPRESSION_FLOOR
 from .profiles import CANONICAL_EPICV2_V1
 
 _Q = ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED)
@@ -84,9 +85,22 @@ PHARMACO_ASSOC_CELL = CapabilityCell(
     criterion_target="threshold", agreement_mode="both_satisfy_criterion",
 )
 
+EXPRESSION_FLOOR_CELL = CapabilityCell(
+    capability_id="expression::floor", capability_version="v1", operation_impl="expression::floor",
+    title="group expression clears a floor", pattern=EXPRESSION_FLOOR,
+    subject=SubjectRequirement(mode="required", kind="gene_or_protein"),
+    param_schema=(_STR(name="gene", codec="string"), _STR(name="group_col", codec="string"),
+                  _STR(name="level_a", codec="string"), _STR(name="level_b", codec="string")),
+    produced=_Q, allowed_comparators=_ALL_CMP,
+    eligible_adapter_identities=("expr-floor-mean", "expr-floor-hl"),
+    oracle=OracleRequirement(default_oracle_id="expression_floor_apparatus", required=True),
+    data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("quantity",),
+    criterion_target="reference_leaf", agreement_mode="both_satisfy_criterion",
+)
+
 CAPABILITY_CELLS = CapabilityRegistry(cells=(
     MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL, N_DMPS_CELL, EVAL_BENCHMARK_ADVANTAGE_CELL,
-    PHARMACO_ASSOC_CELL,
+    PHARMACO_ASSOC_CELL, EXPRESSION_FLOOR_CELL,
 ))
 
 # ---------------------------------------------------------------------------
@@ -132,6 +146,7 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
     from .methyl_adapters import methyl_independent_registry
     from .methyl_ndmp import ndmp_independent_registry
     from .pharmaco_adapters import pharmaco_independent_registry, pharmaco_oracle_registry
+    from .expression_floor_adapters import expression_floor_registry, expression_floor_oracle_registry
 
     methyl_oracles = profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public"))
     return {
@@ -149,6 +164,10 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
             adapter_registry=pharmaco_independent_registry(),
             oracle_registry=pharmaco_oracle_registry(),
             trust_profile="gdsc-pharmaco-recomputable-public"),
+        ("expression::floor", "v1"): CapabilityTrustBinding(
+            adapter_registry=expression_floor_registry(),
+            oracle_registry=expression_floor_oracle_registry(),
+            trust_profile="tcga-laml-fusion-expr-recomputable-public"),
     }
 
 

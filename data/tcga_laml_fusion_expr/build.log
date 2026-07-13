@@ -1,0 +1,5 @@
+expression: 151 samples -> 151 cases (log2->raw TPM converted)
+cytogenetics: 200 patients, 6 t(8;21)
+universe=151  fusion_pos=6  fusion_neg=145  dropped_no_karyotype=0
+built tcga_laml_fusion_expr@1: dim=[4, 151]  dimnames_hash=sha256:1fdb53478…
+self-checks PASSED: n_pos=6, RUNX1T1 pos/neg median ratio=4161x (pos median 94.0 TPM, neg median 0.023 TPM)

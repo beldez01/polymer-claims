@@ -59,14 +59,17 @@ class QuantityLeaf(_Model):
     formula: str | None = None
     dimension: Dimension | None = None
     context: MeasurementContext | None = None
+    low: float | None = None
+    high: float | None = None
 
     @model_serializer(mode="wrap")
     def _serialize(self, handler) -> dict:
-        """Drop `context` when None so a context-less leaf serializes byte-identically to the
-        pre-field grammar (no new key). Mirrors the additive-field pattern in capability.py."""
+        """Drop optional None-valued fields so a leaf without them serializes byte-identically to
+        the pre-field grammar (no new key). Mirrors the additive-field pattern in capability.py."""
         data = handler(self)
-        if data.get("context") is None:
-            data.pop("context", None)
+        for key in ("context", "low", "high"):
+            if data.get(key) is None:
+                data.pop(key, None)
         return data
 
     @model_validator(mode="after")
@@ -80,6 +83,23 @@ class QuantityLeaf(_Model):
             )
         if self.measurement_basis == MeasurementBasis.DERIVED and not self.formula:
             raise ValueError("DERIVED quantity must carry its generating `formula`")
+        return self
+
+    @model_validator(mode="after")
+    def _bound_discipline(self) -> "QuantityLeaf":
+        lo, hi = self.low, self.high
+        if lo is None and hi is None:
+            return self
+        if lo is not None and hi is not None and not lo < hi:
+            raise ValueError(f"interval requires low < high; got low={lo}, high={hi}")
+        if lo is not None and self.value < lo:
+            raise ValueError(f"value {self.value} is below low bound {lo}")
+        if hi is not None and self.value > hi:
+            raise ValueError(f"value {self.value} is above high bound {hi}")
+        if self.uncertainty is not None:
+            raise ValueError(
+                "uncertainty and explicit bounds are two spread encodings; set only one"
+            )
         return self
 
 

@@ -108,3 +108,83 @@ purity/backward-compat cost · byte-identical proof (once resolved).
 **Yield verdict:** all five Tier-1/Tier-2 claims formalized and validated through the real
 grammar with no core change; the two *general* gaps (context, interval) are the highest-value
 finds — they compound across every field, exactly the doctrine's intended payoff.
+
+---
+
+## Ramp gaps (2026-07-11, GAP-5+) — the manifest-ingestion harvest
+
+Source: `aggregate_gaps` over the five reviewed chapter manifests
+(`data/synbio_compendia/manifests/plm-{02,03,06,07,08}-*.json`, 39 buildable claims). **11
+canonical gaps, none resolved this session** — every one is core-primitive-adjacent and
+byte-identity-gated, so all are *logged, not patched* (per the ramp's Global Constraints:
+W3 ships no `Leaf`/`StrengthVector` change). Numbering continues from GAP-4.
+
+### GAP-5 [general] — floor/threshold vs point-measurement
+- **constraint:** a value stated as a floor/threshold (e.g. CD19 <~2,000 molecules/cell *below which* response drops) is stored identically to a directly measured point.
+- **candidate:** optional `value_relation` enum (`floor|ceiling|point|range`) on `QuantityLeaf`, default `point` for byte-identity.
+- **RESOLVED (2026-07-12):** `QuantityLeaf.low`/`high` (additive, byte-identical when boundless). `sb-plm02-cd19-density-floor` now carries `low=2000` (open above); `schema_fit` → clean. See `docs/superpowers/specs/2026-07-12-gap3-interval-bounds-design.md`.
+
+### GAP-6 [general] — multi-study range collapsed to symmetric error
+- **constraint:** a leak range ("1–3%") jointly attributed to two independent systems, forced into `value ± symmetric uncertainty`, discarding provenance and asymmetry.
+- **candidate:** optional `value_range: [low, high]` on the leaf.
+- **RESOLVED (2026-07-12):** `QuantityLeaf.low`/`high`. `sb-plm03-adar-leak-floor` now `low=0.01, high=0.03` (fabricated symmetric `uncertainty` dropped); `schema_fit` → clean.
+
+### GAP-7 [domain] — no basis for an analytic constant
+- **constraint:** an information-theoretic constant (2 bits = log2(4)) is neither instrument-measured (FUNDAMENTAL) nor a data ratio (DERIVED); forced into FUNDAMENTAL with `unit="bits"`.
+- **candidate:** a third `measurement_basis` value (`ANALYTIC`).
+
+### GAP-8 [subject] — no gene/locus context sub-key
+- **constraint:** a "77% of TET2 lesions are truncating" figure is a property of the *locus*, but `MeasurementContext` has only tissue/cell_line/assay/condition; gene identity leaks into free-text `condition`.
+- **candidate:** optional `gene`/`target_locus` sub-key on `MeasurementContext`.
+
+### GAP-9 [domain] — order-of-magnitude (log-scale) range
+- **constraint:** a 10–100× span forced to an arithmetic midpoint (55±45), misrepresenting a multiplicative claim. **candidate:** `value_min`/`value_max` or log-scale uncertainty.
+- **RESOLVED (2026-07-12):** `QuantityLeaf.low`/`high`. `sb-plm06-transcriptional-gate-dynamic-range` now `low=10, high=100` (`value=10`, fake `55±45` gone); `schema_fit` → clean. The log/geometric-scale marker is **DEFERRED** (YAGNI — no consumer computes inside the interval), tripwire-armed: `test_gap9_logscale_marker_deferred`.
+
+### GAP-10 [domain] — discrete integer range
+- **constraint:** "3–4 gate layers" forced to continuous `3.5±0.5` (a circuit cannot have 3.5 layers). **candidate:** inclusive integer range `[3,4]`.
+- **RESOLVED (2026-07-12):** `QuantityLeaf.low`/`high`. `sb-plm06-cascade-depth-ceiling` now `low=3, high=4` (`value=3`, fake `3.5±0.5` gone); `schema_fit` → clean. The discrete-integer marker is **DEFERRED** (YAGNI — no consumer interpolates), tripwire-armed: `test_gap10_discrete_marker_deferred`.
+
+### GAP-11 [domain] — pooled prevalence needs per-indication stratification
+- **constraint:** "~10–20% HLA-LOH across many solid tumors" collapses to one figure with no tumor-type context. **candidate:** per-tumor-type `context.condition` once a breakdown exists.
+- **PARTIAL (2026-07-12):** the range facet is now carried honestly — `sb-plm06-hla-loh-prevalence` uses `low=10, high=20` (fabricated `15±5` dropped) via the GAP-3 low/high fields. GAP-11 stays **OPEN** for its defining residue: the pooled figure still lacks the per-tumor-type stratification (a `context` refinement, not an interval one).
+
+### GAP-12 [general] — one-sided bound (floor) direction
+- **constraint:** ">10 weeks B-cell depletion" is a one-sided floor; `QuantityLeaf` has only a point `value` + symmetric `uncertainty`, so it collapses to `value=10` indistinguishable from an exact estimate.
+- **candidate:** optional `bound: Literal['exact','floor','ceiling']` (or fold into the interval work), default `exact` for byte-identity. **Touches the core Leaf — standard byte-identity proof required.**
+- **RESOLVED (2026-07-12):** folded into the interval work — an open-ended `QuantityLeaf.low` *is* a floor. `sb-plm07-vivovec-bcell-depletion` now `low=10` (open above); `schema_fit` → clean. No separate `bound` enum needed.
+
+### GAP-13 [analysis] — measured-endpoint ≠ clinically-relevant endpoint
+- **constraint:** a ~90% figure the chapter flags as *reporter/cargo delivery, not durable editing* has no structured field to encode the endpoint-type mismatch; the caveat survives only as prose. **candidate:** `endpoint_type`/`validity_caveat` field.
+
+### GAP-14 [general] — composite/vector quantity
+- **constraint:** a joint 4-component LNP molar ratio (50:10:38.5:1.5) is load-bearing, but the leaf carries one scalar; only the PEG term survives structured. **candidate:** a composite/vector quantity leaf (list of named value+unit pairs).
+
+### GAP-15 [domain] — structured categorical mapping
+- **constraint:** a 3-way SORT-lipid→organ mapping (cationic→lung, anionic→spleen, neutral→liver) flattened into one `PropositionLeaf` `data` string. **candidate:** a structured list of (perturbation, outcome) tuples, or three linked propositions sharing a warrant.
+
+### Harvest verdict + two aggregator findings
+
+- **The interval/range/floor/bound family — RETIRED 2026-07-12 (GAP-3 slice).** GAP-5, GAP-6,
+  GAP-9, GAP-10, GAP-12 (5 of 11) were all facets of one strain: **the leaf cannot hold a range or a
+  bound-direction.** That was precisely the pre-existing **GAP-3 (interval/range)**. The corpus demanded
+  it, so it was un-deferred and shipped: `QuantityLeaf.low`/`high` (additive, optional, byte-identical
+  when boundless; open ends encode floor/ceiling; `_bound_discipline` enforces ordering/containment/
+  spread-exclusivity). All five entries re-expressed with honest bounds; `schema_fit` → clean. Two
+  domain refinements (GAP-9 log-scale, GAP-10 discrete-integer) are DEFERRED with armed tripwires.
+  **Open gaps remaining (6):** GAP-7 (analytic measurement basis), GAP-8 (gene/locus context sub-key),
+  GAP-11 (per-tumor stratification — its range facet is now expressible via low/high, but the
+  stratification residue keeps it open), GAP-13 (endpoint-type), GAP-14 (composite/vector quantity),
+  GAP-15 (structured categorical mapping).
+- **`aggregate_gaps` dedup is too literal (engine gap).** RESOLVED (2026-07-12). It keys on the normalized
+  `(expansion_class, constraint)` *prose*, so the five interval-family gaps — phrased differently
+  by five independent extractors — did **not** collapse; 11 raw → 11 canonical (zero merge). And
+  it renumbers from 5 without reconciling against the canonical GAP-1..4, so interval strains
+  surface as new GAP-9/10/12 rather than as instances of GAP-3. The "fixed list" is only as fixed
+  as the wording. **Resolution:** dedup on a controlled `gap_kind` tag (extractor-assigned, reconciled
+  against `CANONICAL_GAP_KINDS` registry) rather than free-text constraint, seeding the aggregator
+  with the existing GAP-1..4 mappings. Each of the six surviving open gaps (GAP-7, GAP-8, GAP-11, GAP-13,
+  GAP-14, GAP-15) is now tagged with its `gap_kind`, so `aggregate_gaps` over the corpus returns
+  the stable canonical ids (GAP-7/8/11/13/14/15) and paraphrases of one strain collapse to a single
+  canonical record. Collateral: any untagged entry (backward-compat) falls back to prose dedup, numbering
+  above the canonical ceiling (GAP-16+), a clean partitioning of tagged and untagged gaps.

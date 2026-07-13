@@ -1,0 +1,3 @@
+cohort: TCGA-LAML; Sample_Group t821/inv16/other; panel RUNX1T1/MN1/ACTB/GAPDH
+expression matrix sha256: cf3c45d8be0899e71dc7d0decf4830deecc279d787e30a1fec3922b591298b05
+unit: log2(TPM+1) -> raw 2^x-1. MN1 = validated CBFB-MYH11 target (prior lit); MYH11 fails at gene level.

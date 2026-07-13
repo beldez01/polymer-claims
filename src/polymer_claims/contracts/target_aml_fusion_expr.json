@@ -1,0 +1,4236 @@
+{
+  "uid": "target_aml_fusion_expr@1",
+  "dim": [
+    4,
+    699
+  ],
+  "assays": [
+    {
+      "name": "tpm",
+      "ref": "target_aml_fusion_expr.betas.tsv"
+    }
+  ],
+  "col_data": [
+    {
+      "sample_id": "TARGET-20-PABLDZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PADYIR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PADZCG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PADZKD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAEAKL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAECBZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAECCE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PAEDKB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAEERJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAEEYP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAEFGR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAEFGT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PAEFHC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAEGRE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAEGRI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAEIKD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAERAH",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PAKERZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PAKIWK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAKIYW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAKKBK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAKLPD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAKSMZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PAKTCX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAKVGI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PALGKX",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PAMVKZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PAMVVP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAMYAS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAMYGX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAMYJX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANAEV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANBYS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANBZH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANCSC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANDER",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PANDIX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANFMG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PANGCM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANGDN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANGJY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANGTF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANHWD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANHYK",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PANINI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANJGR",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PANJVI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANKFG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PANKFZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PANKKE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANKNB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANLIR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANLIZ",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PANLJK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANLJN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANLKB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANLLX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANLRE",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PANLXK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PANLXM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANNBM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANNHB",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PANNJI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANPKN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PANPLS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PANPSV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PANPTM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANSBH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANSJB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANTNA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANTPW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PANTRL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PANTWV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PANUTB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANUUA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANVBP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PANVGE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANVGP",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PANVUF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANWHP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANXAF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PANYGP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANYNR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PANYSN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PANZKA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PANZWB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAPAJE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAPAWN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPBEJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAPSCM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAPUEM",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPUNR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAPUSR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAPVCN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPVDV",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPVET",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PAPVGE",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPVKG",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPVZK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPWFN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAPWHS",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPWIU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAPWYK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPWZR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAPXAZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAPXRJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAPXUF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAPXWI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPYUI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPZCL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAPZFV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAPZIZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAPZJT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAPZLT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PAPZTC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PAPZXN",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PAPZYS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAPZZE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARAEF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARAEG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARAFA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARAHF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARAIC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARAJX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARANT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARASV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARAUM",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARBCV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARBEL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARBFJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARBFZ",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARBIU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARBLP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARBLV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARBRA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARBTC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARBTV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARBVE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARBXE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARBZJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARCAU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARCCH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARCEC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARCEV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARCHW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARCIN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARCRW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARCUK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARCVP",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARCVS",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARCZL",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARDDA",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARDDY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARDLW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARDMG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARDRM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARDZW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PAREFM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PAREHK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARENB",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARERV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARFAL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARFGK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARFIW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARFJN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARFKS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARFLB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARFMY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARFWM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARFXF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARFZP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARGDB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARGMH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARGTL",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARGVC",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARGXP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PARGYS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARHBA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARHJA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARHJV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARHKY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARHPP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARHSA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARHUP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARHVI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARHVK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARHYP",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARIEG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARIFD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARIHK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARILH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARIMT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARIYP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARIZR",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARJCR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARJET",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARJGD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARJLW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARJRG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARJWH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARJYP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARKCX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARKFB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARKGB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARKHV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARKJZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARKLC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARLHW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARLMY",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARLSW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARLVL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARMGH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARMHD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARMME",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARMMN",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARMZC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARMZF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARNFZ",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARNIA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARNIL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARNJC",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARNNT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARNPC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARNRS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PARNTM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARPBF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARPDS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARPEK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARPHH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARPLC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARPVZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARPWL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARPZP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARRAD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARRFC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARRHB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARRTH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PARSAA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARSAN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARSFK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARSGS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARSHM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARSIN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARSXZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARTAL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARTBN",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARTST",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARTVG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARTWN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARTXH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARTYK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARTYV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARUAD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARUBE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARUBT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARUCB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARUDL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARUEX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARUNX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARURW",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARUSN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARUTH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARUUB",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARUWX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARUXJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARUZS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARVAI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARVSF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARVUA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARVUC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARVXT",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARVZU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARWCG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARWDZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARWWW",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARWXU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARXBT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARXDI",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARXEC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARXJW",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARXMP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARXNG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARXNP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARXVI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARYCG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARYEB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARYFN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARYGA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARYHR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARYTI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARYVW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARYXV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARZGM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARZHI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARZHT",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARZMZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PARZPD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PARZUU",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PARZVA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PARZWH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARZYF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PARZYL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASADG",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASAFH",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASAFM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASAMY",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASANH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASANW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASARK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASARM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASASN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASAUN",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASAXB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASAYA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASBAX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASBBE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASBBF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASBGZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASBHI",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASBNA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASBPK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASBPW",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASBSB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PASBYL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASCAF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASCBW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASCCS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASCFS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASCFW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASCGC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASCGR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASCRP",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASCRZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASDET",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASDGX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASDIR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASDTY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PASDUD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASDVA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASDXR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASECW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASEFD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASEGC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASELF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASEYM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASFEW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASFFS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASFIE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASFIT",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASFJB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASFLG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PASFLM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASFNP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASFRD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASFTR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASFVP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASFWI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASFYF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PASFZN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PASGAE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASGCE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASGEM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASGGK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASGKA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASGML",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASGMZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASGWH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASGZK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASGZS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASGZV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASHHH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASHWN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASHYZ",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASHZX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASIBG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASICM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASIEJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASIEP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASILA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASINA",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASINN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASIZX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASJCL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASJEJ",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASJGZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASJIM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASJPW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASJRD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASJTM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASJXN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASJYX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASJZX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASKAS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASKFN",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASKGH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASKNV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASKPI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASKRJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASKUA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASLDL",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASLGD",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASLPE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASLPU",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASLSD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASLTF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASLTS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASLYX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASMGW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASMHY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASMPC",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASMRU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASMTB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASMYS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASNAL",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASNDA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASNDH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASNIY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASNKC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASNLR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASNYB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASPFE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASPGA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASPIX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASPKE",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASPLH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASPLU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASPSV",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASPTM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASPTW",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASPWC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASPWZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASPYR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASREH",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASRIN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASRJL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASRLS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASRRL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASRSS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASRSY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASRTP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASRUJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASRZX",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASSBI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASSDX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASSHZ",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASSNX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASSSI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASSUW",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASSVI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASSWG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASSYV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASTEI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASTHA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASTIE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASTJT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASTPU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASTSH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASTTJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASTTW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASTUH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASTVM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASTWE",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASTXM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASTZU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASUAF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASUCA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASUGU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASUHK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASULX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASUMD",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASURM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASURR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASUUD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASUUP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASUVD",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASVAN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASVMU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASVPC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASVSS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASVTP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASVVM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASVVS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASVWW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASVYA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASVYL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASVZC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASWAJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASWAT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASWER",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASWGL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASWGS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASWIM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASWLN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASWMP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASWNZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASWPD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PASWPT",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASWTY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASWVH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASWWD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASXAH",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASXAP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASXDS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASXIS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASXJY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASXKT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASXLJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASXNR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASXSF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASXSS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASXVC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASXWN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASXYG",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASYDC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASYJI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASYJL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASYRR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASYTG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASYTW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASYWA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASYWV",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PASYYW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASZAF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASZBM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASZEB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASZJC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PASZJR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASZJT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PASZLJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASZNB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PASZUT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PASZYU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PASZZE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATABK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATAEA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATAER",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATAIJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATAIY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATAKC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATANY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATAST",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATAVF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATAWB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATBFL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATBHG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATBIP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATBIR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATBIZ",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATBNP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATBPW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATBUR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATBVJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATBVX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATBWH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PATBXU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PATBYV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATCBV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATCLR",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATCPY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATCTM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATCVL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATCWP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PATCXL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATCYP",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATCYY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATDFZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATDHA",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATDIC",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATDLH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATDLI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATDLZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATDMY",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATDNN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATDRL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATDVM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATEEA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATEIA",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATEID",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATELT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATELV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATEMK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATEMV",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATENX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATESX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATETC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATEUF",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATEWX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATFDF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATFGK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATFGL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATFMR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATFNK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATFRY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATFYN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATFZR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATGAN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATGBX",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATGDZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATGGI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATGGY",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATGHV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATGIG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATGIY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATGRP",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATGUB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATGXE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATGXW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATHAE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATHIW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATHMB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATHVG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATHWS",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATHZC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATHZL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATIAB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATIAK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATIDY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATIGE",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATIHH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATIII",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATIIM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATILU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATIRW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATISD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATISV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATIVW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATJES",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATJHJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATJIC",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATJKC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATJLP",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATJMY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATJNI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATJPY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATJUT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATJWG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PATJWN",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATJXZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATJYT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATKAH",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATKEA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATKGM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATKJB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATKKI",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATKKJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATKLS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-20-PATKMB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATKPC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATKUG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATKWH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATKYC",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATKYT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATLBC",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-20-PATLDB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATLFJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATLHB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATLIG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATLJF",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATLKU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATLMH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATLVC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-20-PATLVK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATLZB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATLZC",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATMCW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-20-PATMDJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-20-PATMFM",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATMIK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "inv(16)"
+    },
+    {
+      "sample_id": "TARGET-20-PATMNY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PAMXZY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PAMYMA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PANVPB",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PANZLR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PARBTV",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PARHRS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PARLSL",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PARNAW",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PARXYR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PARZIA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PASDKZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PASDXR",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PASFHK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PASFJJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PASFLG",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Unknown"
+    },
+    {
+      "sample_id": "TARGET-21-PASIGA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-21-PASLZE",
+      "Sample_Group": "fusion_pos",
+      "tissue": "AML",
+      "karyotype": "t(8;21)"
+    },
+    {
+      "sample_id": "TARGET-21-PASNKZ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PASSLT",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-21-PASTZK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PASVJS",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PASYEJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PASYWA",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PATAIJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "MLL"
+    },
+    {
+      "sample_id": "TARGET-21-PATHIU",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PATISD",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PATJMY",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    },
+    {
+      "sample_id": "TARGET-21-PATKBK",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PATKKJ",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Other"
+    },
+    {
+      "sample_id": "TARGET-21-PATKWH",
+      "Sample_Group": "fusion_neg",
+      "tissue": "AML",
+      "karyotype": "Normal"
+    }
+  ],
+  "row_data": [
+    {
+      "feature_id": "expr::ACTB",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::GAPDH",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::RUNX1",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::RUNX1T1",
+      "chr": "",
+      "pos": 0
+    }
+  ],
+  "metadata": {
+    "source": "TCGA-LAML",
+    "kind": "expression",
+    "genome_assembly": "hg38"
+  }
+}

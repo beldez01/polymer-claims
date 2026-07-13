@@ -33,3 +33,15 @@ def test_pattern_ref_round_trips():
 def test_coverage_metric_reports_registry_size_not_closure():
     assert registry.coverage()["n_patterns"] >= 1
     assert registry.coverage()["closed"] is False
+
+
+def test_reported_quantity_pattern_registered():
+    p = get_pattern("reported_quantity", "v1")
+    assert p.estimand == "reported_scalar"
+    assert p.excluded_applications  # >=1, pins the Newman hole
+
+
+def test_mechanistic_law_pattern_registered():
+    p = get_pattern("mechanistic_law", "v1")
+    assert p.estimand == "qualitative_law"
+    assert p.excluded_applications

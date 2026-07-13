@@ -1,0 +1,6 @@
+case_id	fusion_status	karyotype
+TCGA-AB-2819	fusion_pos	46,XX,t(8;21)(q22;q22)[17]/46,XX[3]
+TCGA-AB-2937	fusion_pos	46,XX,t(8;21)(q22;q22)[20]
+TCGA-AB-2802	fusion_neg	46,XY[20]
+TCGA-AB-2803	fusion_neg	46,XX[20]
+TCGA-AB-2804	fusion_neg	47,XY,+8[20]

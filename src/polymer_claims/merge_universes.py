@@ -18,7 +18,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from polymer_grammar import Claim, DefeatEdge, EquivalenceClaim, FDRLedger
@@ -52,6 +52,7 @@ class ArmFacet:
 
     arm: str
     modality: str | None
+    topic: str | None = None
 
 
 @dataclass(frozen=True)
@@ -66,6 +67,7 @@ class ArmSource:
     defeat_edges: tuple[DefeatEdge, ...] = ()
     equivalences: tuple[EquivalenceClaim, ...] = ()
     fdr_tests: tuple[FDRTest, ...] = ()
+    topics: dict[str, str] = field(default_factory=dict)
 
     @staticmethod
     def from_corpus(arm: str, modality: str | None, corpus: Corpus) -> "ArmSource":
@@ -127,7 +129,7 @@ def merge_universes(
                 continue  # dedup: same atom (or a losing conflict) already registered
             claims_by_id[c.id] = c
             hash_by_id[c.id] = h
-            facets[c.id] = ArmFacet(arm=src.arm, modality=src.modality)
+            facets[c.id] = ArmFacet(arm=src.arm, modality=src.modality, topic=src.topics.get(c.id))
         defeat_edges.extend(src.defeat_edges)
         equivalences.extend(src.equivalences)
         fdr_tests.extend(src.fdr_tests)
@@ -158,12 +160,13 @@ def collect_pharmaco(**kwargs) -> ArmSource:
 
 
 def collect_synbio() -> ArmSource:
-    """Facet: arm="synbio", modality="literature" (all 5 probe claims are
-    LITERATURE_EXTRACTED / CONJECTURED — no measurement space, no recompute)."""
-    from .synbio.probe import build_all
+    """Facet: arm="synthetic-biology", modality="literature" (reported CONJECTURED claims),
+    per-claim topic facet (sensing/computing/writing/delivery/actuation/...)."""
+    from .synbio.ingest import collect_all_synbio_claims
 
-    claims = tuple(build_all())
-    return ArmSource(arm="synbio", modality="literature", claims=claims)
+    claims, topics = collect_all_synbio_claims()
+    return ArmSource(arm="synthetic-biology", modality="literature",
+                     claims=tuple(claims), topics=topics)
 
 
 def collect_immuno(path: str | Path = _DEFAULT_IMMUNO_PATH) -> ArmSource:
