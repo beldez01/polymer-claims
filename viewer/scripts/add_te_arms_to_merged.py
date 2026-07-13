@@ -91,6 +91,23 @@ def main() -> None:
     print(f"merged-universe now: {len(topo['nodes'])} nodes; by arm: {dict(sorted(by_arm.items()))}",
           file=sys.stderr)
 
+    # Recompute the frame stats from the FINAL node/edge set. The base bundle's stats were computed by
+    # make_merged_universe before these islands were folded in; without this the HUD under-reports
+    # (e.g. n_nodes/n_licensed frozen at the pre-fold values). Mirrors polymer_protocol.frame_stats.
+    stats = doc["frames"][0].setdefault("stats", {})
+    st = Counter(n.get("status") for n in topo["nodes"])
+    stats.update(
+        n_nodes=len(topo["nodes"]),
+        n_licensed=st.get("licensed", 0),
+        n_pending=st.get("pending", 0),
+        n_conjectured=st.get("conjectured", 0),
+        n_rejected=st.get("rejected", 0),
+        n_edges=len(topo["edges"]),
+        n_effective_edges=sum(1 for e in topo["edges"] if e.get("effective")),
+        n_provisional_edges=sum(1 for e in topo["edges"] if e.get("provisional")),
+    )
+    print(f"recomputed stats: {dict(st)}", file=sys.stderr)
+
     _MERGED.write_text(json.dumps(doc, indent=2) + "\n")
     print(f"wrote {_MERGED}", file=sys.stderr)
 
