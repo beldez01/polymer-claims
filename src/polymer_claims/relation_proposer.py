@@ -6,8 +6,20 @@ key. Umbrella module (may import polymer_grammar/polymer_protocol) but this stag
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
+from typing import Any
 
-from polymer_grammar import Claim, GeneOrProtein, GenomicRegion, OntologyTerm, PathwayRef, is_relation
+from polymer_grammar import (
+    Claim,
+    GeneOrProtein,
+    GenomicRegion,
+    OntologyTerm,
+    PathwayRef,
+    RelationKind,
+    Tier,
+    is_relation,
+    make_relation_claim,
+)
 from polymer_protocol.corpus import Corpus
 
 log = logging.getLogger(__name__)
@@ -91,3 +103,127 @@ def candidate_pairs(corpus: Corpus, *, max_pairs: int) -> list[tuple[str, str]]:
         )
         ordered = ordered[:max_pairs]
     return ordered
+
+
+def propose_relations(
+    corpus: Corpus, agent: Any, *, max_pairs: int, threshold: float
+) -> list[Claim]:
+    """Judge every Task-9 candidate pair with `agent.judge(claim_a, claim_b)` and emit a
+    CONJECTURED relation `Claim` (via `make_relation_claim`) for judgments clearing `threshold`
+    on absolute severity. `agent.judge` returns either `None` (decline) or a dict
+    `{"tier", "kind", "severity", "rationale"}`. Every judgment -- emitted or declined, whether
+    the agent returned `None` or a below-threshold verdict -- is audit-logged so nothing is
+    silent."""
+    pairs = candidate_pairs(corpus, max_pairs=max_pairs)
+    by_id = corpus.by_id()
+    relations: list[Claim] = []
+    for a, b in pairs:
+        judgment = agent.judge(by_id[a], by_id[b])
+        if judgment is None:
+            log.info("propose_relations: declined (no judgment) for pair (%s, %s)", a, b)
+            continue
+        severity = judgment["severity"]
+        if abs(severity) < threshold:
+            log.info(
+                "propose_relations: declined (|severity|=%.3f < threshold=%.3f) for pair "
+                "(%s, %s): rationale=%r",
+                abs(severity), threshold, a, b, judgment.get("rationale"),
+            )
+            continue
+        relation = make_relation_claim(
+            id=f"rel:{a}~{b}",
+            source_ids=[a],
+            target_ids=[b],
+            tier=Tier(judgment["tier"]),
+            relation_kind=RelationKind(judgment["kind"]),
+            severity=severity,
+            rationale=judgment["rationale"],
+        )
+        log.info(
+            "propose_relations: emitted %s for pair (%s, %s): tier=%s kind=%s severity=%.3f",
+            relation.id, a, b, judgment["tier"], judgment["kind"], severity,
+        )
+        relations.append(relation)
+    return relations
+
+
+class LLMRelationAgent:
+    """A relation-judging agent whose verdicts come from an injected `complete` (real model
+    OUTSIDE the pure core). Mirrors `_GenerationAdapterBase`'s complete/anthropic plumbing
+    (`llm_adapter.py`) but judges a *pair* of existing claims instead of generating new ones.
+
+    The real-model path (`.anthropic(...)`) is a live tripwire -- it makes a real network call
+    and must never be exercised by a unit test."""
+
+    def __init__(
+        self, complete: Callable[[str], str], *, identity: str = "llm-relation-agent"
+    ) -> None:
+        self.complete = complete
+        self.identity = identity
+
+    def judge(self, claim_a: Claim, claim_b: Claim) -> dict[str, Any] | None:
+        return self._parse(self.complete(self._build_prompt(claim_a, claim_b)))
+
+    def _build_prompt(self, claim_a: Claim, claim_b: Claim) -> str:
+        def describe(c: Claim) -> str:
+            concl = getattr(c.conclusion, "descriptor", None)
+            return f"- {c.id} [{c.pattern.id}] {c.title}" + (f" :: {concl}" if concl else "")
+
+        schema = (
+            '{"tier":"computational|biological","kind":"coheres|tension|restriction_map",'
+            '"severity":number,"rationale":str}'
+        )
+        return (
+            "You are a scientific-relation judge comparing two claims drawn from different "
+            "arms of a corpus. Decide whether they COHERE, are in TENSION, or one is a "
+            "RESTRICTION_MAP of the other. severity is a number in [-1, 1]: positive means "
+            "coherence, negative means tension, magnitude is your confidence. If no defensible "
+            'relationship exists, decline by returning the literal JSON {"relation": null}. '
+            "Otherwise return STRICT JSON ONLY (no prose, no markdown) matching:\n"
+            f"{schema}\n\n"
+            f"Claim A:\n{describe(claim_a)}\n\nClaim B:\n{describe(claim_b)}\n"
+        )
+
+    def _parse(self, raw: str) -> dict[str, Any] | None:
+        from .llm_adapter import _extract_json
+
+        obj = _extract_json(raw)
+        if obj is None:
+            return None  # unparseable -> decline
+        if "relation" in obj and obj["relation"] is None:
+            return None  # explicit {"relation": null} -> decline
+        try:
+            tier = str(obj["tier"]).strip()
+            kind = str(obj["kind"]).strip()
+            severity = float(obj["severity"])
+            rationale = str(obj.get("rationale") or "").strip()
+            Tier(tier)
+            RelationKind(kind)
+        except (KeyError, ValueError, TypeError):
+            return None
+        if not rationale or not (-1.0 <= severity <= 1.0):
+            return None
+        return {"tier": tier, "kind": kind, "severity": severity, "rationale": rationale}
+
+    @classmethod
+    def anthropic(cls, *, model: str = "claude-sonnet-4-6", api_key: str | None = None, **kw):
+        """Build an agent backed by the Anthropic SDK (needs the [llm] extra). Lazy import,
+        matching `_GenerationAdapterBase.anthropic` -- LIVE TRIPWIRE, exercised via CLI/live-smoke
+        only, never by unit tests."""
+        try:
+            import anthropic
+        except ModuleNotFoundError as e:  # pragma: no cover - exercised via CLI, not unit tests
+            raise RuntimeError(
+                "the LLM relation agent needs the optional extra: pip install 'polymer-claims[llm]'"
+            ) from e
+        client = anthropic.Anthropic(api_key=api_key)
+
+        def complete(prompt: str) -> str:  # pragma: no cover - real network
+            msg = client.messages.create(
+                model=model,
+                max_tokens=512,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return "".join(getattr(b, "text", "") for b in msg.content)
+
+        return cls(complete, **kw)
