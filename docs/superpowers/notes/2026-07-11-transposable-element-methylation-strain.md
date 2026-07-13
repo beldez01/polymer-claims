@@ -251,12 +251,34 @@ combos reproduce verdict-for-verdict (verified: lymphoid↔myeloid still license
   (macrophage↔monocyte 8%/6%) reject; **3v3 contrasts are PENDING/REJECTED even at 83–88% background** because
   the rank-sum leg cannot reach α=0.05 at n=3 — a 3v8 contrast at 88% (erythroid↔macrophage) DOES license
   12/12, isolating the rank-leg power floor as the binding constraint, not effect size.
-- **Enrichment (vs matched background): 0 LICENSED / 50 PENDING / 238 REJECTED — 0 of 288 across ALL 24
-  contrasts and all 12 families.** No TE family — young or age-gradient (L1PA2, LTR5B), no regulatory LTR
-  (LTR7Y, LTR12C) — is enriched for lineage-DMPs above a matched genomic background in ANY hematopoietic
-  contrast. The decisive, systematic result: TE families inherit whatever global lineage difference exists
-  (clearing beyond-chance whenever divergence + power allow), but are NEVER a TE-specific hotspot.
-  "Differentially methylated" ≠ "enriched" — now proven across 24 contrasts × 12 families, not one split.
+- **Enrichment (vs matched background): 0 LICENSED / 50 PENDING / 238 REJECTED.** No family clears the
+  licensing bar — but the first-pass framing "0 across the tree, NEVER a hotspot" was **OVERSTATED, and
+  adversarial verification caught it** (see the CORRECTION below). It is not a flat null: 9 enrichment
+  claims are e-LOND DISCOVERIES (betting-e up to 4×10¹⁶) and 4 satisfy BOTH legs' fold≥1 criterion — and
+  they are **all in the HERV-K family** (LTR5_Hs + its sibling LTR5B) plus HERV-H (LTR7), directionally
+  enriched **fold 1.05–1.37×** over a matched background in myeloid/erythroid contrasts (nk↔macrophage,
+  tcell↔erythroid, erythroid↔macrophage). They do NOT license because the **selective-inference bar imposes
+  an effective fold floor ≈ 1.29×** (see below), not because the signal is absent. Honest result: the
+  **young non-LTR families (L1, Alu, SVA) show no enrichment anywhere**, while the **known-active HERV-K
+  family is the lone boundary case** — directionally enriched with strong evidence but below the effect-size
+  threshold, exactly as its regulatory biology predicts. "Differentially methylated" ≠ "strongly enriched".
+
+### CORRECTION (adversarial verification, 2026-07-13) — why 0 licenses ≠ 0 enrichment
+
+An independent verification pass on the committed 576-claim result found enrichment claims that are e-LOND
+discoveries (e ≫ bar) with both fold-legs > 1, yet held at PENDING. Tracing `protocol/.../verify.py`
+resolved it: `LICENSED` = (both legs satisfy criterion) AND (e-LOND: e ≥ 1/α) AND (`_permitted_by_bar`, the
+cardinality-scaled BH bar) — and the BH bar is computed from the **point-estimate margin over the
+threshold**, not the e-value. With `pseudo-p = exp(−8·rel_margin)` and cutoff 0.10, ANY threshold claim
+needs `rel_margin ≥ −ln(0.1)/8 ≈ 0.288` to license → an **effective enrichment fold floor of ≈ 1.29×**,
+independent of the e-value and cardinality (`verify.py` `_permitted_by_bar`/`BH_Q=0.10`,
+`earned_strength.py` `_rel_margin`/`K=8.0`). HERV-K's fold 1.23 (rel_margin 0.23) sits just under it. This
+is **correct, conservative behavior** — a ~1.2× enrichment across 12 families should not be a confident
+discovery — the same bar also holds back 3 tiny-margin n-DMP claims (e.g. bcell↔macrophage/LTR5B, rank
+count 262 = k exactly). Two genuine gaps surfaced: (i) BH-withheld claims mislabel `pending_reason=UNTESTED`
+(they WERE evaluated) — a reporting defect; (ii) the enrichment criterion's nominal threshold (fold ≥ 1.0)
+is misleading given the ~1.29× effective floor — a future run should set the pre-registered threshold to
+the honest effective value. The licensing conclusion (0) stands; the INTERPRETATION is corrected above.
 
 Folded into the unified viewer (`viewer/scripts/add_te_arms_to_merged.py`, no-pharmaco path): the merged
 universe is now **1,386 nodes across 8 arms** (te-campaign-ndmp 288, te-campaign-enrichment 288, plus the
