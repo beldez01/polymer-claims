@@ -127,7 +127,10 @@ What the system *produces*:
   contract, streamed over SSE.
 - **The live 3-D universe** — the corpus rendered as a spatial map (the signed-Laplacian spectral
   eigenmap, Procrustes-aligned so it grows smoothly), watchable as the node generates, licenses, and
-  revises claims in real time.
+  revises claims in real time. The demo universe now unifies **four subject arms** —
+  pharmacogenomics, polymergenomics, immuno/ERV methylation, and synthetic-biology — into one
+  faceted corpus (~800 claims) carrying additive `arm` / `modality` / `topic` facets, so a single map
+  spans multiple sciences (a union of per-arm bundles, with each arm's statuses preserved verbatim).
 
 ---
 
@@ -166,7 +169,14 @@ standards-native, and alive**, in three arcs:
 
 1. **The epistemic core (the moat)** — the e-value / online-FDR / defeat unification, grounded
    argumentation with hysteresis, and a rigorous, *measurable* definition of "independent"
-   (conceptual replication, not just two runs of the same method). *Largely built.*
+   (conceptual replication, not just two runs of the same method). *Largely built — and now
+   exercised end-to-end on real cross-cohort data: the WAYLAND synthetic-biology arm derived a
+   licensed **expression-floor spine** (RUNX1-RUNX1T1 in t(8;21), plus a four-claim CBF
+   fusion-marker family with 2×2 specificity) at **REPLICATED** across two real AML RNA-seq cohorts
+   (TCGA-LAML + TARGET-AML) — the first claims the engine licensed by recomputation through the real
+   gate rather than by ingesting a citation. The licensing criterion there is literally an interval
+   **bound** on a quantity leaf (`low`/`high`, added to the grammar in 2026-07 as an additive,
+   byte-identical-when-boundless expansion).*
 2. **The standards skin (the adoption moat)** — re-express the content-address / apparatus / run
    model as the standards that already exist (GA4GH DRS/WES/TRS, Workflow Run RO-Crate,
    in-toto/SLSA/Sigstore). The strategic inversion: **don't integrate the world's data and compute —
@@ -183,10 +193,13 @@ standards-native, and alive**, in three arcs:
 
 The project's discipline is **honesty over polish** — caveats travel with every claim until earned:
 
-- **The kernel is real**; the data is partly synthetic. The methylation apparatus licenses on a
-  *computed* region-Δβ from two independent legs — but over **synthetic betas** for now, so the
-  recomputable-public tier is *exercised, not earned*. A self-contained swap for real GEO/ENA data is
-  the deferred next step.
+- **The kernel is real, and it now licenses on real data.** The genome-wide **n-DMP count** licenses
+  at **REPRODUCED** on a real TCGA-LAML HM450 cohort (IDH-mut vs WT; two independent legs agree; full
+  content-address recorded), and the WAYLAND expression-floor spine (above) licenses at
+  **REPLICATED** across two real AML RNA-seq cohorts. Still honest about the edges: the finer
+  **region-Δβ** methylation reduction remains **PENDING** on real data (held-out e-value 5.672, below
+  the e-LOND first-test bar) — power-limited, not refuted — and some earlier demos still stand on
+  synthetic betas until their real-cohort swap lands.
 - **Independence is partly operator-authored.** Local registries derive `implementation_hash` from adapter
   bytecode, and licensed satisfactions record the credential pair that justified the air gap. Owner/trust
   metadata still comes from the operator registry.
