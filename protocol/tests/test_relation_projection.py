@@ -79,3 +79,68 @@ def test_relation_free_corpus_stays_on_v1(relation_free_corpus):
 def test_relation_bearing_export_stamps_v1_1(tiny_relation_corpus):
     topo = export_topology(tiny_relation_corpus, layout=Layout.NONE)
     assert topo.contract_version == CONTRACT_VERSION_RELATIONS == "1.1"
+
+
+@pytest.fixture
+def multi_relation_corpus() -> Corpus:
+    """A 2x2 relation: source_set={a, b}, target_set={c, d}."""
+    a = make_claim("a", status=Status.PENDING)
+    b = make_claim("b", status=Status.PENDING)
+    c = make_claim("c", status=Status.PENDING)
+    d = make_claim("d", status=Status.PENDING)
+    r = make_relation_claim(
+        "r2", ["a", "b"], ["c", "d"], Tier.COMPUTATIONAL, RelationKind.RESTRICTION_MAP, 0.8,
+        rationale="multi",
+    )
+    return Corpus(claims=(a, b, c, d, r), fdr_ledger=_LEDGER)
+
+
+def test_multi_element_all_pairs_projects_four_edges(multi_relation_corpus):
+    topo = export_topology(multi_relation_corpus, layout=Layout.NONE)
+    rel = [e for e in topo.edges if e.kind == "restriction_map"]
+    # 2 (source_set) x 2 (target_set) = 4 all-pairs edges.
+    assert len(rel) == 4
+    assert {(e.source, e.target) for e in rel} == {
+        ("a", "c"), ("a", "d"), ("b", "c"), ("b", "d"),
+    }
+    # CONJECTURED (the relation's default status) -> status_factor 0.3; n = |source_set|*|target_set| = 4.
+    expected_weight = round(0.8 * 0.3 / 4, 6)
+    assert all(e.signed_weight == pytest.approx(expected_weight) for e in rel)
+
+
+def test_multi_element_localization_edges_from_relation_id_to_relata(multi_relation_corpus):
+    topo = export_topology(multi_relation_corpus, layout=Layout.NONE)
+    loc = [e for e in topo.edges if e.kind == "coheres" and e.source == "r2"]
+    # |source_set| + |target_set| = 2 + 2 = 4 weak localization edges, one per relatum.
+    assert len(loc) == 4
+    assert {e.target for e in loc} == {"a", "b", "c", "d"}
+    assert all(e.signed_weight == pytest.approx(0.1) for e in loc)
+    assert all(e.provisional is True and e.effective is False for e in loc)
+
+
+@pytest.fixture
+def licensed_relation_corpus() -> Corpus:
+    """A relation claim with a non-CONJECTURED status (LICENSED), so factor=1.0.
+
+    `Claim._licensing_only_when_licensed` (grammar/src/polymer_grammar/claim.py) only
+    forbids the `licensing` field on a NON-LICENSED claim; LICENSED itself does not
+    require `licensing` to be set. So `make_relation_claim(..., status=Status.LICENSED)`
+    constructs cleanly without needing a Licensing object.
+    """
+    a = make_claim("a", status=Status.PENDING)
+    b = make_claim("b", status=Status.PENDING)
+    r = make_relation_claim(
+        "r3", ["a"], ["b"], Tier.BIOLOGICAL, RelationKind.TENSION, -0.6,
+        rationale="licensed", status=Status.LICENSED,
+    )
+    return Corpus(claims=(a, b, r), fdr_ledger=_LEDGER)
+
+
+def test_non_conjectured_status_uses_full_weight_factor(licensed_relation_corpus):
+    topo = export_topology(licensed_relation_corpus, layout=Layout.NONE)
+    rel = next(e for e in topo.edges if e.kind == "tension")
+    # LICENSED (non-CONJECTURED) -> status_factor 1.0, not the 0.3 CONJECTURED attenuation.
+    assert rel.signed_weight == pytest.approx(round(-0.6 * 1.0 / 1, 6))
+    assert rel.relation_status == "licensed"
+    assert rel.provisional is False
+    assert topo.contract_version == "1.1"

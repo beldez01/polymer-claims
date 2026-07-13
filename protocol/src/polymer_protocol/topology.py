@@ -406,13 +406,18 @@ def export_topology(
     `positions` (when supplied) overrides both: each node takes its coordinate from the dict (a
     missing id → origin), `layout_id="external:spectral-v1"`, and `layout`/`seed_positions` are
     ignored — this is the seam an external embedder (e.g. the umbrella spectral layout) injects
-    through. Nodes/edges/clusters are sorted for byte-stable output.
+    through. Nodes/edges/clusters are sorted for byte-stable output — except relation edges
+    (Task 6), which are appended after the sorted base edges in deterministic claim-order
+    rather than folded into that sort; the overall output is still deterministic (identical
+    inputs -> identical output), just not globally sorted once relation edges are present.
 
     `seed_positions` warm-starts FORCE_DIRECTED from a prior frame's positions; the default-None
     path leaves the no-seed output byte-identical. Determinism: identical inputs → identical output.
     """
     edges = _extract_edges(corpus)
     rel_edges = _relation_edges(corpus)
+    # Appended in deterministic claim-order (see _relation_edges), not merged back into the
+    # (source, target, kind) sort above — the base edges stay sorted, relation edges trail them.
     edges = edges + tuple(rel_edges)
     clusters = _extract_clusters(corpus)
     node_ids = [c.id for c in corpus.claims]
