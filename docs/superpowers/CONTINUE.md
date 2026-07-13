@@ -12,7 +12,40 @@
 
 ---
 
-## Current state (2026-07-12) — 🎉 FIRST LICENSED SYNBIO CLAIM: RUNX1-RUNX1T1 @ REPLICATED (2d-iii, LATEST)
+## Current state (2026-07-12) — 🎉 CBF FUSION-MARKER FAMILY: 4 REPLICATED licensed claims (2e, LATEST)
+
+> On `main`. Extends the licensed spine to a *family* from the SAME two cohorts. Spec/plan
+> `docs/superpowers/{specs,plans}/2026-07-12-spine-2e-cbf-fusion-family*`. Corpus stays 4; grammar/protocol
+> untouched. Reuses the entire 2d pipeline (`build_fusion_expr_contract`, `expression_floor_claim`, `license_replicated`).
+
+**FAMILY LICENSED — 4 of 4 CBF-AML fusion-marker claims @ IndependenceTier.REPLICATED** across TCGA-LAML + TARGET-AML:
+- **A** RUNX1T1 clears the 13 TPM floor in t(8;21) vs other — product 6.7e4.
+- **B** MN1 clears the floor in inv(16) vs other — product **3.5e13** (TARGET n=97 inv(16) → e₂≈4.7e12).
+- **C** RUNX1T1 in t(8;21) vs **inv(16)** (specificity) — product 9.0e4.
+- **D** MN1 in inv(16) vs **t(8;21)** (specificity) — product 2.6e11.
+- ACTB control PENDING (product 0.997) — held. `check_controls ok=True`.
+The 2×2 specificity holds: each CBF fusion's marker (RUNX1T1 for t(8;21), MN1 for inv(16)) is elevated in its OWN
+fusion, not the other's. Built via 3-valued `Sample_Group ∈ {t821,inv16,other}` CBF contracts
+(`se:{tcga_laml,target_aml}_cbf_expr@1`, panel RUNX1T1/MN1/ACTB/GAPDH) + `propose_cbf_family_claims`.
+
+**HONEST-SCIENCE PIVOT (recorded):** the design first proposed **MYH11** (the inv(16) fusion partner) — but gene-level
+MYH11 does NOT mark inv(16) (median ~6 TPM in inv(16) ≈ other; the CBFB-MYH11 fusion carries only MYH11's 3′ exons +
+smooth-muscle background). A genuine negative result. The marker **MN1** was instead nominated from PRIOR literature
+(a validated direct CBFB-MYH11 transcriptional target — knockdown downregulates MN1) THEN verified (TCGA inv(16)
+median 93 TPM 10/10 clear; TARGET 69) — commit-before-data preserved (not fished from the licensing cohorts).
+
+**e-LOND NOTE (why the family needs replication):** 5 pre-registered claims get FRONT-LOADED bars (32.9, 131, 296,
+526, 800; α locked at registration, D=0). Single-cohort e-values (~100) clear only the first; the two-cohort PRODUCT
+(1e4–1e13) clears all. Replication isn't just for confidence — it's what earns a multi-claim family under honest FDR.
+
+### NEXT
+- **Durendal blinded genotype-directed re-derivation** (the ultimate WAYLAND phase) — the licensed-spine + family machinery is proven.
+- **Protocol clean-up** (logged): the 1-line `verify.py::_permitted_by_bar` reference_leaf exemption.
+- More markers/fusions as the data supports (honest — verify before licensing, per the MYH11→MN1 lesson).
+
+---
+
+## Current state (2026-07-12) — 🎉 FIRST LICENSED SYNBIO CLAIM: RUNX1-RUNX1T1 @ REPLICATED (2d-iii, superseded as LATEST by the family above)
 
 > On `main`. The WAYLAND headline: the engine **derived** a licensed claim through the real gate, cross-cohort
 > replicated. Spec/plan `docs/superpowers/{specs,plans}/2026-07-12-spine-2diii-replicated*`. Corpus stays 4;
