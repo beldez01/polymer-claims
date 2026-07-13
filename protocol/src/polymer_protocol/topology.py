@@ -19,6 +19,7 @@ from polymer_grammar import (
     AXES,
     NeighborEdgeKind,
     effective_defeats,
+    is_relation,
     is_representation_revision,
 )
 
@@ -214,6 +215,45 @@ def _extract_edges(corpus: Corpus) -> tuple[TopologyEdge, ...]:
     return tuple(sorted(edges, key=lambda e: (e.source, e.target, e.kind)))
 
 
+def _relation_edges(corpus: Corpus) -> list[TopologyEdge]:
+    """Project each relation claim (Task 3's `RelationLeaf` over a `ClaimSetSubject`)
+    into TopologyEdges: an all-pairs edge per (source_set x target_set) member carrying
+    the relation's signed weight, plus weak localization edges from the relation claim's
+    own id to every relatum (so the relation node itself is placeable in the graph).
+
+    Deterministic: iterates `corpus.claims` in order; `source_set`/`target_set` are
+    already sorted tuples (ClaimSetSubject invariant), so nested iteration order is stable.
+    """
+    out: list[TopologyEdge] = []
+    for c in corpus.claims:
+        if not is_relation(c):
+            continue
+        lf = c.leaves[0]  # RelationLeaf: .tier, .relation_kind, .severity
+        s = c.subject  # ClaimSetSubject: .source_set, .target_set (sorted tuples)
+        conj = c.status.value == "conjectured"
+        factor = 0.3 if conj else 1.0
+        n = max(1, len(s.source_set) * len(s.target_set))
+        w = round(lf.severity * factor / n, 6)
+        for a in s.source_set:
+            for b in s.target_set:
+                out.append(
+                    TopologyEdge(
+                        source=a, target=b, kind=lf.relation_kind.value,
+                        effective=False, provisional=conj, tier=lf.tier.value,
+                        signed_weight=w, relation_status=c.status.value,
+                    )
+                )
+        for m in (*s.source_set, *s.target_set):  # localize the relation node at the seam
+            out.append(
+                TopologyEdge(
+                    source=c.id, target=m, kind="coheres", effective=False,
+                    provisional=True, tier=lf.tier.value, signed_weight=0.1,
+                    relation_status=c.status.value,
+                )
+            )
+    return out
+
+
 def _extract_clusters(corpus: Corpus) -> tuple[TopologyCluster, ...]:
     by_pattern: dict[str, list[str]] = {}
     for c in corpus.claims:
@@ -372,6 +412,8 @@ def export_topology(
     path leaves the no-seed output byte-identical. Determinism: identical inputs → identical output.
     """
     edges = _extract_edges(corpus)
+    rel_edges = _relation_edges(corpus)
+    edges = edges + tuple(rel_edges)
     clusters = _extract_clusters(corpus)
     node_ids = [c.id for c in corpus.claims]
 
@@ -386,5 +428,6 @@ def export_topology(
 
     nodes = _extract_nodes(corpus, layout_positions)
     return TopologyExport(
-        nodes=nodes, edges=edges, clusters=clusters, layout_id=layout_id
+        nodes=nodes, edges=edges, clusters=clusters, layout_id=layout_id,
+        contract_version=(CONTRACT_VERSION_RELATIONS if rel_edges else CONTRACT_VERSION),
     )
