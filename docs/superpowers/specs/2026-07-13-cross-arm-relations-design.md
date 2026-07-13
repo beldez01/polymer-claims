@@ -1,15 +1,15 @@
 # Cross-Arm Relations — Slice 1: proposer + meta-claim promotion + spectral projection (design)
 
-**Status:** approved (brainstorm 2026-07-13). First slice of a three-slice program that gives the
-merged claims universe genuine cross-arm connectivity — so the *existing* signed-Laplacian spectral
-layout finally renders biological/computational argument structure instead of a disconnected dust of
-islands. **Slice 2** = Tier-1 statistical adjudication (which null/background is right); **Slice 3** =
-Tier-2 experiment resolution (SELECT the cheapest test that resolves a biological tension). Each is its
-own spec → plan.
+**Status:** approved direction, **hardened 2026-07-13 after code review** (see §0.1). First slice of a
+three-slice program that gives the merged claims universe genuine cross-arm connectivity — so a
+**true** signed-Laplacian spectral layout renders biological/computational argument structure instead of
+a disconnected dust of islands. **Slice 2** = Tier-1 statistical adjudication (which null/background is
+right); **Slice 3** = Tier-2 experiment resolution (SELECT the cheapest test that resolves a biological
+tension). Each is its own spec → plan.
 
-**Related:** backlog §1 (accumulating-universe cross-links), `measurement-foundation.md §5.3`
-(cross-assay relationships as licensable meta-claims), `residualism.md` (tension as structured,
-queryable, to-be-tested residue), and the documented `equivalence.py` promotion
+**Related:** backlog §1 (accumulating-universe cross-links + this spec's own hardening row),
+`measurement-foundation.md §5.3` (cross-assay relationships as licensable meta-claims), `residualism.md`
+(tension as structured, queryable, to-be-tested residue), and the documented `equivalence.py` promotion
 ("*promotable to a full meta-claim once 'subject = set of claims' exists*").
 
 ---
@@ -17,192 +17,209 @@ queryable, to-be-tested residue), and the documented `equivalence.py` promotion
 ## 0. One-paragraph summary
 
 The merged universe is a union of independently-decided arms: 1,386 claims, 54 within-arm edges, 96.7%
-of nodes edgeless. Spectral layout is the signed-Laplacian eigenmap of the claim graph, so on this
-graph it is meaningless (a lattice of singletons). The fix is *edges the engine can defend*, not layout
-scaffolding. We model a **claim-to-claim relation** as a first-class, defeasible **meta-claim** whose
-relata are **sets of claims**, carrying a **tier** (computational vs biological), a **kind** (reusing
-the existing `DefeatEdgeKind` taxonomy), and a **graded signed severity** (coherence `+` ↔ tension `−`).
-An umbrella **proposer** reasons over candidate claim pairings and emits these relations as
-**CONJECTURED** (defeasible, provisional, never tombstoning). `build_graph` **projects** each relation
-into signed graph edges; the existing spectral layout then pulls coherent claims together and pushes
-claims in tension apart. Relations *earn* their standing later (Slices 2–3); in Slice 1 they are honest
-conjectures that connect the universe.
+of nodes edgeless. Spectral layout is the signed-Laplacian eigenmap of the claim graph, so on this graph
+it is meaningless. The fix is *edges the engine can defend*, not layout scaffolding. We model a
+**claim-to-claim relation** as a first-class, defeasible **meta-claim** — a `Claim` whose subject is a
+**pair of claim sets** (a new `ClaimSetSubject`) — carrying a **tier** (computational vs biological), a
+**relation kind** (its own enum, *not* the attack `DefeatEdgeKind`), and a **graded signed severity**
+(coherence `+` ↔ tension `−`). An umbrella **proposer** reasons over candidate claim pairings and emits
+these as **CONJECTURED**. `export_topology` **projects** each relation into signed `TopologyEdge`s (a
+versioned contract change, so the viewer and the eigenmap both see them); the umbrella eigenmap gains
+**true signed weights** so coherent claims attract and claims in tension repel. Relations *earn* their
+standing later (Slices 2–3); in Slice 1 they are honest conjectures that connect the universe.
 
-## 1. The problem
+### 0.1 Corrections folded in from the 2026-07-13 review
 
-- **Spectral == the defeat/equivalence graph.** `embedding.py:build_graph` sources edges from the
-  resolved topology export (`entails ∪ equivalence ∪ defeat`), weights equivalence/entails **positive**
-  and defeat **negative**, and `spectral_layout` embeds **per connected component**, placing components
-  on a deterministic lattice. With 96.7% singletons the eigenmap has almost no graph to reflect — hence
-  the merged bundle ships force-directed instead.
-- **Arms don't link.** `merge_universes` concatenates each arm's *within-arm* edges; nothing proposes
-  *cross-arm* relations. Connectivity is zero by construction.
-- **The trap.** We must not fabricate edges to make the picture connected. An edge has to be a genuine
-  relationship the engine can later test and be wrong about.
+1. **Signed projection is new, not assumed.** `embedding.py:KIND_WEIGHT` gives *every* kind a **positive**
+   (attraction) weight; the only repulsion today is a narrow `polar` case (opposite-`direction` `rebut`,
+   `RHO=0.3`). Slice 1 **introduces** genuine signed weights (negative for tension).
+2. **Edges must be in the topology contract, not just the layout.** Projecting only inside `build_graph`
+   would move nodes but hide tier/sign/status from `export_topology` and the viewer. Relations project
+   into a **versioned `TopologyEdge`** so both consumers see them.
+3. **Concrete IR shape.** A new **`ClaimSetSubject`** Subject variant + a **relation pattern/leaf**; the
+   relation is a `Claim` in `Corpus.claims`. No new collection (Corpus stays 4).
+4. **No "reproduces existing types exactly."** Relations are a *new additive object*; `EquivalenceClaim`
+   and `DefeatEdge` are untouched. Byte-identity holds because the new Subject variant, pattern, and
+   `TopologyEdge` fields are absent/defaulted in old corpora — *not* because a singleton relation equals a
+   legacy edge. An explicit **lowering rule** is defined only if we later want a relation to also emit a
+   legacy edge (opt-in, §4.1).
+5. **No REINTERPRET overload.** A relation's kind is a **new `RelationKind`** enum (`coheres`, `tension`,
+   `restriction_map`) that is **non-attack** (never de-licenses/tombstones). `DefeatEdgeKind.REINTERPRET`
+   stays what it is — an attack/de-license edge — and the restriction-map the reparam evaluator needs is a
+   `RelationKind`, resolving the backlog §1 name collision instead of repeating it.
+6. **Purity layering fixed.** `embedding.py` is **umbrella / numpy** by design (its own docstring). The
+   *pure* piece is the `TopologyEdge` contract in the protocol; the numpy signed-Laplacian in the umbrella
+   consumes it.
+
+## 1. Architecture & placement (corrected layering)
+
+- **Grammar (pure).** A new `ClaimSetSubject(_SubjectBase)` (subject = an ordered pair of claim-id sets)
+  + a **relation pattern/leaf** carrying `tier`, `kind: RelationKind`, signed `severity ∈ [−1, +1]`. A
+  relation is therefore an ordinary `Claim(subject=ClaimSetSubject(...), …)` → lives in `Corpus.claims`,
+  **Corpus stays 4 collections**. Additive; byte-identical when absent.
+- **Protocol (pure).** `TopologyEdge` gains optional `tier`, `signed_weight`, and `relation_status`
+  fields (drop-when-None → byte-identical when absent) — a **versioned topology contract** (`v?→v?+1`).
+  `export_topology` learns to **project** each relation `Claim` into signed `TopologyEdge`s (§6). This is
+  pure data; both the viewer and the eigenmap read it.
+- **Umbrella (impure, numpy).** `embedding.py` extends `KIND_WEIGHT`/`build_graph` to honor
+  `signed_weight` (true negative weights for tension), generalizing today's `polar`/`RHO` hack. Plus the
+  **proposer** (candidate-gen + agent reasoning). All reasoning and numpy stay here.
 
 ## 2. The two-tier model (what a cross-arm relation *is*)
 
-Relations come in two tiers, distinguished by *what "testing" means* to resolve them:
+- **Tier-1 — computational.** Two claim sets engage the **same target** via **different statistical
+  setups** (nulls/backgrounds/controls/parameterizations). Concordant angles corroborate; discordant
+  angles are **adjudicable**. Resolved by statistical adjudication (Slice 2).
+- **Tier-2 — biological.** Claims related "in the greater network sense" — computations don't engage but
+  the biology does (TP53 dominant-negative activity *coheres* with TP53 → apoptosis-resistance; an
+  epigenetic differentiation-bias claim is in *tension* with the same change raising apoptosis
+  susceptibility). Resolved by a **new experiment** (Slice 3).
 
-- **Tier-1 — computational.** Two claims (sets) engage the **same target** via **different statistical
-  setups** — different null ranges, background scopes, negative controls, parameterizations. Concordant
-  angles corroborate; discordant angles are **adjudicable** (one setup is the right lens). Resolved by
-  statistical adjudication (Slice 2; the re-parameterization / background-null machinery).
-- **Tier-2 — biological.** Claims related "in the greater network sense" — the computations don't
-  directly engage, but the biology does (e.g. *TP53 dominant-negative activity* coheres with
-  *TP53 → apoptosis resistance*; an epigenetic differentiation-bias claim is in *tension* with the same
-  change raising apoptosis susceptibility). Resolved by a **new experiment** (Slice 3; SELECT).
+Same object, two resolution engines: a typed, signed, graded, defeasible relation that starts CONJECTURED
+and earns through the appropriate test.
 
-Both are the same object viewed through different resolution engines: a typed, signed, graded,
-defeasible relation that starts as a conjecture and earns standing through the appropriate test.
+## 3. What already exists (reuse) vs. what Slice 1 adds (build)
 
-## 3. What already exists (reuse, do not reinvent)
+| Concept | State today | Slice 1 |
+|---|---|---|
+| Graph feeds spectral | `build_graph` reads `export_topology(...).edges`; the eigenmap embeds per component | reuse — but see signs below |
+| Edge signs | **all positive** (`KIND_WEIGHT` 0.4–1.0); only opposite-`direction` `rebut` repels via `polar`/`RHO` | **add** true `signed_weight` (negative for tension) |
+| Relation-as-defeasible-claim | `EquivalenceClaim` (symmetric, `severity ∈ [0,1]`, `status`) | **generalize** into a signed, set-relata meta-`Claim` |
+| Graded magnitude | `EquivalenceClaim.severity` (nonnegative); defeat ungraded | **add** signed `severity ∈ [−1,1]` on the relation |
+| Set-relata / meta-claim | documented, **not built** (`Subject` has no claim-set variant) | **build** `ClaimSetSubject` |
+| Relation kinds | `DefeatEdgeKind` are all **attacks/support** | **add** non-attack `RelationKind` (`coheres`/`tension`/`restriction_map`) |
+| Topology edge fields | `source,target,kind,effective,provisional` only | **add** `tier,signed_weight,relation_status` (versioned) |
+| The proposer | **absent** | **build** |
 
-| Concept | Already in the codebase |
-|---|---|
-| Signed graph for spectral | `embedding.py:build_graph` reads `entails ∪ equivalence ∪ defeat`; equivalence/entails `+`, defeat `−`. |
-| Syntax(computational)/semantics(biological) split | `DefeatEdgeKind`: `undermine`/`rebut` are null-bearing (tombstone); `undercut`/`reclassify`/`reinterpret` = "meaning moved, statistics unchanged" (never tombstone); `evidence_for` = support. |
-| Graded magnitude | `EquivalenceClaim.severity ∈ [0,1]`; defeat graded via claims' `StrengthVector` Pareto order. |
-| Relation as a defeasible, status-bearing claim | `EquivalenceClaim` (`status`, `pending_reason`, `severity`). |
-| Provisional / earns-through-testing | `DefeatEdge.provisional` — "inert until its source claim is LICENSED". |
-| Set-relata → meta-claim | Documented anticipated promotion (`equivalence.py`, `measurement-foundation.md §5.3`). |
-| The proposer | **Absent** — the real new work of Slice 1. |
+## 4. The relation meta-claim (concrete additive schema)
 
-## 4. The relation meta-claim (grammar promotion)
+A relation is a `Claim` with:
+- **`subject: ClaimSetSubject`** — an ordered pair `(source_set, target_set)`, `frozenset[str]` each.
+  Order is canonicalized/ignored for symmetric kinds (`coheres`/`tension`) and is `source→target` for the
+  directional `restriction_map`. Validator: **disjoint** sets (no claim on both sides, no self-relation).
+- **A relation pattern/leaf** carrying `tier: {COMPUTATIONAL, BIOLOGICAL}`, `kind: RelationKind`, and
+  signed `severity ∈ [−1, +1]` (`+` coherence, `−` tension; binary is the `±1` endpoint).
+- The `Claim`'s own `status` (starts `CONJECTURED`), `licensing`, provenance (proposer id, rationale, the
+  candidate signal) — i.e. it earns its license through the *existing* `Claim` lifecycle.
 
-A relation is a first-class **meta-claim** in `Corpus.claims` (**Corpus stays exactly 4 collections**),
-executing the documented `subject = set of claims` promotion. Fields:
+**Additive per the IR-monotonic-expansion doctrine.** New `Subject` variant + new pattern + new
+`TopologyEdge` fields are all optional/defaulted → **byte-identical** for any corpus without relations.
+Classify the schema strain: `ClaimSetSubject` and `RelationKind` are `subject`/`relation`-class additions,
+not general-core changes.
 
-- **`relata`** — an **ordered** pair of claim-id sets `(source_set, target_set)`, `frozenset[str]` each.
-  Order is **canonicalized and ignored for symmetric kinds** (coherence/tension/equivalence) but is
-  **`source → target` for the directional attack kinds** (`undermine`/`undercut`/`rebut`/`reclassify`/
-  `reinterpret`), matching today's `DefeatEdge.source`/`target`. Singleton sets reproduce today's pairwise
-  `EquivalenceClaim` / `DefeatEdge` exactly.
-- **`tier`** — `COMPUTATIONAL | BIOLOGICAL` (§5).
-- **`kind`** — the existing `DefeatEdgeKind` taxonomy (`evidence_for`, `undermine`, `undercut`, `rebut`,
-  `reclassify`, `reinterpret`), refining *how* the relation acts within its tier.
-- **`sign` / `severity`** — a graded **signed** scalar in **[−1, +1]**: `+` coherence/support, `−`
-  tension/conflict. Binary is the endpoint case (`±1`). `EquivalenceClaim.severity`/kind fold in as the
-  singleton special case.
-- **`status`** — starts `CONJECTURED`; later earns `LICENSED`, *resolves into* a genuine Tier-1
-  defeat/equivalence, or is defeated and dissolved (Slices 2–3).
-- **`pending_reason`**, **provenance** (proposer id, rationale text, the candidate signal that paired
-  the relata).
+### 4.1 Lowering rule (optional, explicit)
 
-**Additive per the IR-monotonic-expansion doctrine.** Validators mirror the existing ones (**disjoint**
-relata sets — no claim on both sides, no self-relation; `severity` bounds; `pending_reason` iff pending). **Proof
-gate:** serialization is **byte-identical** to today when relata are singletons and no relation
-meta-claims are present. Whether this lands as a new `RelationClaim` type or a generalization of
-`EquivalenceClaim` is an implementation choice for the plan; the field set above is the contract.
+Slice 1 does **not** claim a singleton relation equals a legacy `EquivalenceClaim`/`DefeatEdge`. If a
+relation should *also* appear as a legacy edge (e.g. a Tier-1 `restriction_map` that a later slice wants
+the sheaf to read), we define an explicit, opt-in lowering `relation → {EquivalenceClaim | DefeatEdge}` —
+a deliberate projection, tested for the intended semantics, never an implicit identity.
 
-## 5. The tier model
+## 5. The tier model + relation kinds
 
-An **explicit `tier` field** pairs with the existing `kind`. The **null-bearing / tombstone behavior
-keys off `(tier, kind)`** exactly as today: a `COMPUTATIONAL` + `rebut`/`undermine` relation *can*
-tombstone once it earns; a `BIOLOGICAL` relation **never** tombstones — it only clusters (coherence) or
-flags for reconciliation (tension). Tier is not a permanent label: a `BIOLOGICAL` tension **can resolve
-into** a `COMPUTATIONAL` relation when Slice 2 picks the null that adjudicates it — represented as a
-status transition on the same relation, preserving its provenance and audit trail.
+An **explicit `tier`** pairs with a **new `RelationKind`** (distinct from the attack `DefeatEdgeKind`):
+- `coheres` — Tier-1 or Tier-2 support (positive severity); **non-attack**, never tombstones.
+- `tension` — conflict needing reconciliation (negative severity); **non-attack**, flags for testing,
+  never tombstones.
+- `restriction_map` — the Tier-1 non-contradiction edge the reparam evaluator needs (tells the sheaf that
+  "REJECTED over gene-body" and "LICENSED over promoter" are not a contradiction); **non-attack**.
 
-## 6. Set-to-set projection into the signed graph
+Tombstone/null-bearing behavior is unchanged and stays on the *attack* `DefeatEdgeKind`s; **no
+`RelationKind` tombstones or de-licenses.** Tier is not permanent: a `BIOLOGICAL` `tension` can **resolve
+into** a `COMPUTATIONAL` relation (or a genuine attack) when Slice 2 adjudicates it — a status transition
+on the same relation, preserving provenance.
 
-`build_graph` learns to project each relation meta-claim into signed edges:
+## 6. Projection into signed `TopologyEdge`s (protocol) + signed eigenmap (umbrella)
 
-- **Direct all-pairs signed edges** between the two relata sets, weight
-  `w = severity × status_factor / normalizer`, where `status_factor` down-weights CONJECTURED relations
-  (so unearned conjectures nudge, not dominate) and `normalizer` divides by `|A|·|B|` so a large set
-  can't overpower the graph. **Coherence → positive** (sets attract, cluster); **tension → negative**
-  (sets repel, separate). All-pairs is chosen over a synthetic hub node precisely because a hub with two
-  positive edges would wrongly pull a *tension* pair together.
-- The **meta-claim node itself** (it is a claim, hence a node) gets weak positive edges to its relata so
-  it localizes at the seam it describes.
-- Determinism/byte-stability: projection is pure, ordered, and rounded like the rest of `embedding.py`;
-  **byte-identical when no relation meta-claims exist.**
+- **Protocol (`export_topology`):** for each relation `Claim`, emit **all-pairs** `TopologyEdge`s between
+  the two relata sets with `kind = relation.kind`, `signed_weight = severity × status_factor /
+  (|A|·|B|)`, `tier`, `relation_status`. `status_factor` down-weights CONJECTURED relations; the
+  `|A|·|B|` normalizer stops a big set dominating. The relation node itself gets weak positive edges to
+  its relata so it localizes at the seam. All-pairs (not a hub node) so a **tension** pair genuinely
+  repels rather than being pulled together by two positive hub edges. Pure, ordered, byte-stable.
+- **Umbrella (`embedding.py`):** `build_graph` reads `signed_weight` and builds a **truly signed**
+  adjacency (negative entries for tension), replacing the assumption that all kinds attract; the existing
+  `polar`/`RHO` opposite-`direction` `rebut` repulsion becomes a special case of the general signed rule.
+  `spectral_layout` is otherwise unchanged.
+- **Viewer:** reads the same `TopologyEdge`s → renders relations dashed/weak while CONJECTURED, colored by
+  `tier`, coherence-vs-tension by sign.
 
 ## 7. The proposer (umbrella)
 
-Two stages, because ~1M pairs over 1,386 claims is infeasible to reason over directly.
+Two stages (≈1M pairs over 1,386 claims is infeasible to reason over directly):
 
-1. **Candidate generation** — cheap, deterministic blocking into candidate pairings:
-   - *Tier-1 candidates:* claims engaging the **same target** (normalized subject/entity + comparable
-     measurement space) via **different statistical setups**.
-   - *Tier-2 candidates:* claims sharing **biological entities/pathways/topics** (subject overlap,
-     shared ontology terms, topic facets).
-   - Requires a **normalized subject identity**, which the thin topology nodes lack — so candidate-gen
-     reads the **source claims** (leaves, `ontology_term`, ids, topics) and extracts a pragmatic entity
-     key. **Primary feasibility risk:** weak normalization → weak candidates (§12). v1 uses a
-     lightweight extractor; deeper entity resolution ties into the backlog's measurement-space/entity-axis
-     work.
-2. **Agent reasoning** — an LLM adapter (mirroring `LLMGenerationAdapter`): per candidate pairing it
-   emits a relation meta-claim (`tier`, `kind`, signed `severity`, **rationale**) or declines. All
-   **CONJECTURED**.
+1. **Candidate generation** — cheap, deterministic blocking. *Tier-1:* claims engaging the same target
+   (normalized subject/entity + comparable measurement space) via different statistical setups. *Tier-2:*
+   claims sharing biological entities/pathways/topics. Needs a **normalized subject identity** the thin
+   topology nodes lack, so it reads the **source claims** (their `Subject` — `GeneOrProtein`,
+   `OntologyTerm`, `PathwayRef`, `GenomicRegion` — plus topics). **Primary feasibility risk** (§12); v1
+   uses a lightweight extractor over the existing `Subject` variants, deeper resolution ties to the
+   backlog entity-axis work.
+2. **Agent reasoning** — an LLM adapter (mirroring `LLMGenerationAdapter`): per candidate pairing emit a
+   relation meta-claim (`tier`, `kind`, signed `severity`, **rationale**) or decline. All **CONJECTURED**.
 
-**Liberality guardrail:** a proposal threshold + a required rationale; because every relation is
-CONJECTURED/provisional, an over-eager proposal is a *testable mistake*, not a false fact. All proposals
-and rationales are audit-logged.
+**Liberality guardrail:** a proposal threshold + required rationale; because every relation is
+CONJECTURED/provisional, an over-eager proposal is a *testable mistake*, not a false fact. All proposals +
+rationales are audit-logged.
 
 ## 8. Data flow
 
 ```
 proposer (candidate-gen → agent reasoning)
-  → relation meta-claims (CONJECTURED) into Corpus.claims
-  → build_graph projects all-pairs signed edges (+ meta-claim node localization)
+  → relation Claims (CONJECTURED, ClaimSetSubject) into Corpus.claims
+  → export_topology projects all-pairs signed TopologyEdges (tier/signed_weight/relation_status)
+  → build_graph (umbrella) builds a truly signed adjacency
   → spectral_layout embeds the now-connected graph
-  → topology export (relation nodes + projected edges tagged tier/sign/status)
-  → viewer renders: dashed/weak while CONJECTURED, colored by tier, coherence vs tension by sign
+  → viewer renders relation nodes + edges: dashed/weak (CONJECTURED), colored by tier, signed by coherence/tension
 ```
-
-The merged bundle switches to (or offers) spectral layout, since it is now meaningfully connected.
 
 ## 9. Integrity guardrails
 
-- Relations are **CONJECTURED/defeasible**; `(tier, kind)`-typed so a biological coherence can never
-  masquerade as an earned computational adjudication.
-- **Nothing tombstones or charges the FDR ledger in Slice 1** — relations only earn in Slices 2–3.
-- Proposer liberality is bounded and fully audited (every relation carries its rationale + candidate
-  signal).
-- **Purity preserved:** the meta-claim (grammar) and the projection (protocol) stay pure + numpy-free;
-  all reasoning and I/O live in the umbrella.
-- **Byte-identity proven** when relata are singletons / no relation meta-claims exist.
+- Relations are **CONJECTURED/defeasible**; `RelationKind` is **non-attack** — a relation can never
+  de-license or tombstone, and can never masquerade as an earned computational adjudication.
+- **Nothing charges the FDR ledger in Slice 1** — relations earn only in Slices 2–3.
+- Proposer liberality bounded + fully audited.
+- **Purity:** grammar (`ClaimSetSubject` + pattern) and protocol (`TopologyEdge` contract + projection)
+  stay pure + numpy-free; the numpy signed eigenmap and all reasoning stay umbrella-side (`embedding.py`,
+  proposer).
+- **Byte-identity proven** for any corpus with no relation claims (new fields absent/defaulted).
 
 ## 10. Testing (behavioral)
 
-- **Grammar:** byte-identical serialization for singleton relata (the doctrine proof); set-relata
-  round-trip; validators (distinct relata sets, severity bounds, pending-reason-iff-pending).
-- **Protocol:** all-pairs projection yields the correct signed edges + weights; a relation genuinely
-  joins two previously-disconnected components; coherence pulls / tension pushes on a tiny fixture
-  (behavioral, not implementation-coupled).
-- **Proposer:** on a known-biology fixture (two TP53 claims) candidate-gen pairs them and the agent
-  emits a coherence relation + rationale; it declines on unrelated claims. Agent mocked for determinism;
-  a live smoke sits behind a data/key tripwire.
-- **Property:** whole-bundle byte-identity when no relations are present (no regression).
+- **Grammar:** `ClaimSetSubject` round-trip; relation pattern validators (disjoint sets, `severity`
+  bounds, `pending_reason` iff pending); **byte-identical serialization** for a relation-free corpus.
+- **Protocol:** `export_topology` projects the right all-pairs signed `TopologyEdge`s + weights; new edge
+  fields drop-when-None (byte-identity); versioned contract bump asserted.
+- **Umbrella eigenmap:** a `coheres` relation pulls two components together; a `tension` relation pushes
+  them apart (behavioral, on a tiny fixture) — the true-signed behavior that does **not** exist today.
+- **Proposer:** on a known-biology fixture (two TP53 claims) candidate-gen pairs them and the agent emits
+  a `coheres` relation + rationale; declines on unrelated claims (agent mocked; live smoke behind a
+  tripwire).
+- **Property:** whole-bundle byte-identity when no relations present (no regression).
 
 ## 11. Scope / YAGNI — what Slice 1 does *not* do
 
-- No **Tier-1 adjudication** (which null/background is right — Slice 2).
-- No **Tier-2 experiment resolution** (SELECT the cheapest resolving test — Slice 3).
-- No **license-earning / FDR-charging** — relations stay CONJECTURED (the earning lifecycle is designed
-  here but its gate is Slices 2–3).
-- No **viewer interactions** beyond rendering the new nodes/edges (colors + dashed conjectured).
+No Tier-1 adjudication (Slice 2); no Tier-2 experiment resolution (Slice 3); no license-earning /
+FDR-charging (relations stay CONJECTURED); the `restriction_map` kind is *defined and rendered* but its
+sheaf-suppression wiring is Slice 2; no viewer interactions beyond rendering the new nodes/edges.
 
 ## 12. Open questions / risks
 
-1. **Subject normalization** is the load-bearing risk: candidate-gen is only as good as the entity key
-   it extracts from source claims. If arms share little normalizable biology, connectivity stays thin
-   even with a perfect agent. Mitigation: start with the arms known to share subjects (e.g. AML/RUNX1
-   across synbio + fusion-expression); measure realized connectivity before scaling the proposer.
-2. **Proposer calibration** — the liberality knob has no ground truth yet in Slice 1 (relations don't
-   earn until Slice 2). Interim: cap proposals per candidate, require rationale, and eyeball the audit
-   log; treat the CONJECTURED graph as a hypothesis set, not a result.
-3. **Projection weight tuning** — `status_factor` and the `|A|·|B|` normalizer are layout hyper-params;
-   pick defaults, expose them, and validate on the fixture rather than the full universe.
+1. **Subject normalization** is load-bearing: candidate-gen is only as good as the entity key it extracts
+   from source-claim `Subject`s. Mitigation: start with arms known to share subjects (AML/RUNX1 across
+   synbio + fusion-expression); measure realized connectivity before scaling.
+2. **Proposer calibration** has no ground truth in Slice 1 (relations don't earn until Slice 2). Interim:
+   cap proposals per candidate, require rationale, eyeball the audit log; treat the CONJECTURED graph as a
+   hypothesis set, not a result.
+3. **Projection hyper-params** (`status_factor`, the `|A|·|B|` normalizer, per-kind base weights incl.
+   negative magnitudes) are layout knobs; pick defaults, expose them, validate on the fixture.
+4. **Topology contract version** — bumping `TopologyEdge` touches every bundle consumer; confirm the
+   drop-when-None serializer keeps existing bundles byte-identical and the viewer tolerates absent fields.
 
 ## 13. References
 
-- `grammar/src/polymer_grammar/{defeat,equivalence,proposition}.py` — the reused relation schema.
-- `src/polymer_claims/embedding.py` — `build_graph` (signed graph) + `spectral_layout` (per-component
-  eigenmap); the projection extends `build_graph`.
-- `docs/superpowers/foundations/measurement-foundation.md §5.3` — cross-assay relationships as
-  licensable meta-claims.
-- `docs/superpowers/foundations/residualism.md` — tension as structured, queryable, to-be-tested residue.
-- `docs/superpowers/BACKLOG.md §1` — accumulating-universe cross-links (the home of this program).
+- `grammar/src/polymer_grammar/{subject,claim,defeat,equivalence,proposition}.py` — the reused/extended schema.
+- `protocol/src/polymer_protocol/{corpus,topology}.py` — `Corpus` (4 collections), `TopologyEdge` (the
+  versioned contract), `export_topology` (the projection site).
+- `src/polymer_claims/embedding.py` — umbrella/numpy `build_graph` (`KIND_WEIGHT`, `polar`/`RHO`) +
+  `spectral_layout`; gains true signed weights.
+- `docs/superpowers/foundations/measurement-foundation.md §5.3`; `residualism.md`; `BACKLOG.md §1`.
