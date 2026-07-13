@@ -14,6 +14,7 @@ import numpy as np
 from polymer_grammar import Comparator, DataHandle
 from polymer_protocol.corpus import Corpus
 
+from .background_enrichment import _ENRICH_IMPL, _bg_rate
 from .methyl_adapters import _IMPL, _region_group_means
 from .methyl_ndmp import _NDMP_IMPL, _alpha, dmp_indicators
 
@@ -140,6 +141,15 @@ def evidence_map(corpus: Corpus) -> dict[str, float]:
                 # inside the try (and catch ZeroDivisionError) so a bad p0 (e.g. alpha=0,
                 # which divides by zero in the e-value) skips the claim like other bad contracts
                 out[c.id] = count_enrichment_evalue(indicators, p0=p0)
+            except (FileNotFoundError, KeyError, ValueError, ZeroDivisionError):
+                continue
+        elif node.impl == _ENRICH_IMPL:
+            try:
+                # SAME count-enrichment e-value as n-DMP, but the null is the matched-BACKGROUND rate
+                # (p0 = bg_rate_ttest, the pre-registered t-leg background) instead of chance (alpha).
+                # Leg-A view (dmp_indicators, pooled-t) matches EnrichmentTTestAdapter's DMP call.
+                out[c.id] = count_enrichment_evalue(dmp_indicators(node),
+                                                    p0=_bg_rate(node, "bg_rate_ttest"))
             except (FileNotFoundError, KeyError, ValueError, ZeroDivisionError):
                 continue
     return out

@@ -9,6 +9,7 @@ from polymer_grammar.operations import Comparator, MeasurementBasis, ProducedLea
 from polymer_grammar.pattern import PatternRef
 
 from .analysis_profile import profile_oracle_id
+from .background_enrichment_patterns import BACKGROUND_ENRICHMENT
 from .benchmark_capability import EVAL_BENCHMARK_ADVANTAGE_CELL  # noqa: E402 (breaks cycle safely)
 from .expression_floor_patterns import EXPRESSION_FLOOR
 from .profiles import CANONICAL_EPICV2_V1
@@ -98,9 +99,29 @@ EXPRESSION_FLOOR_CELL = CapabilityCell(
     criterion_target="reference_leaf", agreement_mode="both_satisfy_criterion",
 )
 
+BACKGROUND_ENRICHMENT_CELL = CapabilityCell(
+    capability_id="methyl::enrichment", capability_version="v1", operation_impl="methyl::enrichment",
+    title="region-class DMP-rate fold-enrichment over matched background",
+    pattern=BACKGROUND_ENRICHMENT,
+    subject=SubjectRequirement(mode="required", kind="genomic_region"),
+    param_schema=(_STR(name="probes", codec="csv"), _STR(name="group_col", codec="string"),
+                  _STR(name="level_a", codec="string"), _STR(name="level_b", codec="string"),
+                  _STR(name="alpha", codec="float"),
+                  _STR(name="bg_rate_ttest", codec="float"), _STR(name="bg_rate_rank", codec="float")),
+    produced=_Q, allowed_comparators=_ALL_CMP,
+    eligible_adapter_identities=("methyl-enrichment-ttest", "methyl-enrichment-rank"),
+    oracle=OracleRequirement(default_oracle_id=_METHYL_ORACLE, required=True),
+    data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("categorical",),
+    # A between-lineage FOLD over a matched background: the two legs (pooled-t vs rank-sum DMP rate)
+    # can clear fold>=1 by different amounts on skewed betas, so the honest agreement bar is "both
+    # legs independently satisfy fold>=1", not numeric closeness on the fold. The count-enrichment
+    # e-value (evidence.py) carries the statistical severity with p0 = the matched-background rate.
+    criterion_target="threshold", agreement_mode="both_satisfy_criterion",
+)
+
 CAPABILITY_CELLS = CapabilityRegistry(cells=(
     MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL, N_DMPS_CELL, EVAL_BENCHMARK_ADVANTAGE_CELL,
-    PHARMACO_ASSOC_CELL, EXPRESSION_FLOOR_CELL,
+    PHARMACO_ASSOC_CELL, EXPRESSION_FLOOR_CELL, BACKGROUND_ENRICHMENT_CELL,
 ))
 
 # ---------------------------------------------------------------------------
@@ -145,6 +166,7 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
     from .exec_adapters import apparatus_oracle_registry, independent_registry
     from .methyl_adapters import methyl_independent_registry
     from .methyl_ndmp import ndmp_independent_registry
+    from .background_enrichment import enrichment_independent_registry
     from .pharmaco_adapters import pharmaco_independent_registry, pharmaco_oracle_registry
     from .expression_floor_adapters import expression_floor_registry, expression_floor_oracle_registry
 
@@ -158,6 +180,9 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
             trust_profile="bundled-recomputable-public"),
         ("methyl::n_dmps", "v1"): CapabilityTrustBinding(
             adapter_registry=ndmp_independent_registry(), oracle_registry=methyl_oracles,
+            trust_profile="bundled-recomputable-public"),
+        ("methyl::enrichment", "v1"): CapabilityTrustBinding(
+            adapter_registry=enrichment_independent_registry(), oracle_registry=methyl_oracles,
             trust_profile="bundled-recomputable-public"),
         ("eval::benchmark_advantage", "v1"): _benchmark_binding(),
         ("pharmaco::assoc", "v1"): CapabilityTrustBinding(

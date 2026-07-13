@@ -278,3 +278,101 @@ def extract_cpg_matrix_multi(
     sample_meta = [{"sample": stem, "cell_type": ct, "cell_type_broad": br, "lineage": ln}
                    for stem, ct, br, ln in kept_meta]
     return CpgMatrix(probe_ids=probe_ids, samples=samples, sample_meta=sample_meta, betas=betas)
+
+
+def _merged_membership(windows: list[tuple[str, int, int]]):
+    """Merge (chrom,start,end) windows into disjoint intervals and return a `(chrom,pos)->bool`
+    membership test. Same merge+bisect logic as extract_cpg_matrix_multi (nested/overlapping windows
+    are merged so a plain rightmost-start bisect can't shadow a larger enclosing window)."""
+    by_chrom: dict[str, list[tuple[int, int]]] = {}
+    for chrom, start, end in windows:
+        by_chrom.setdefault(chrom, []).append((start, end))
+    merged_by_chrom: dict[str, list[tuple[int, int]]] = {}
+    for chrom, wl in by_chrom.items():
+        wl.sort()
+        merged: list[list[int]] = []
+        for start, end in wl:
+            if merged and start <= merged[-1][1]:
+                merged[-1][1] = max(merged[-1][1], end)
+            else:
+                merged.append([start, end])
+        merged_by_chrom[chrom] = [(s, e) for s, e in merged]
+    starts = {chrom: [s for s, _ in wl] for chrom, wl in merged_by_chrom.items()}
+
+    def _in(chrom: str, pos: int) -> bool:
+        wl = merged_by_chrom.get(chrom)
+        if not wl:
+            return False
+        i = bisect.bisect_right(starts[chrom], pos) - 1
+        return i >= 0 and pos < wl[i][1]
+
+    return _in
+
+
+def _complete_case_matrix(per_sample, kept_meta) -> CpgMatrix:
+    """The shared tail of the multi-window extractors: complete-case intersection over the samples
+    that had >=1 covered CpG, in sorted (chrom,pos) order. Identical to extract_cpg_matrix_multi's."""
+    if not per_sample:
+        return CpgMatrix(probe_ids=[], samples=[], sample_meta=[], betas=[])
+    common = set(per_sample[0])
+    for pb in per_sample[1:]:
+        common &= set(pb)
+    keys = sorted(common)
+    betas = [[pb[key] for pb in per_sample] for key in keys]
+    return CpgMatrix(
+        probe_ids=[f"{chrom}:{pos}" for chrom, pos in keys],
+        samples=[stem for stem, _, _, _ in kept_meta],
+        sample_meta=[{"sample": s, "cell_type": ct, "cell_type_broad": br, "lineage": ln}
+                     for s, ct, br, ln in kept_meta],
+        betas=betas,
+    )
+
+
+def extract_cpg_matrices_multi_families(
+    bed_dir: Path, manifest: Path, family_windows: dict[str, list[tuple[str, int, int]]],
+    *, min_cov: int = 4,
+) -> dict[str, CpgMatrix]:
+    """Complete-case CpG matrices for MANY families in ONE pass over the atlas.
+
+    `family_windows` maps family-key -> its list of (chrom,start,end) windows. Each sample bed.gz is
+    scanned ONCE; every CpG with cov>=min_cov is routed to EACH family whose windows contain it. Then,
+    PER FAMILY, the complete-case probe set is taken (positions covered in every sample that had >=1
+    covered CpG in THAT family). The result for family F is byte-identical to
+    `extract_cpg_matrix_multi(bed_dir, manifest, family_windows[F], min_cov=min_cov)` — the only change
+    is that the ~47 sample BEDs are decompressed once total instead of once per family (a ~N_families
+    speedup, since gzip decompression dominates). A global-union pre-filter keeps the common case (a CpG
+    in no family's windows) at one bisect.
+    """
+    fams = list(family_windows)
+    fam_member = {f: _merged_membership(family_windows[f]) for f in fams}
+    all_windows = [w for f in fams for w in family_windows[f]]
+    in_union = _merged_membership(all_windows)  # cheap pre-filter: skip CpGs in no window at all
+
+    per_family_samples: dict[str, list[dict[tuple[str, int], float]]] = {f: [] for f in fams}
+    per_family_meta: dict[str, list[tuple[str, str, str, str]]] = {f: [] for f in fams}
+
+    for stem, ct, br, ln in load_manifest(manifest):
+        bed = _find_bed(Path(bed_dir), stem)
+        if bed is None:
+            continue
+        fam_pos_beta: dict[str, dict[tuple[str, int], float]] = {f: {} for f in fams}
+        try:
+            with gzip.open(bed, "rt") as fh:
+                for line in fh:
+                    parsed = _parse_bed_line(line)
+                    if parsed is None:
+                        continue
+                    chrom, pos, beta, cov = parsed
+                    if cov < min_cov or not in_union(chrom, pos):
+                        continue
+                    for f in fams:
+                        if fam_member[f](chrom, pos):
+                            fam_pos_beta[f][(chrom, pos)] = beta
+        except (OSError, EOFError):
+            continue  # truncated/corrupt source bed.gz: skip, don't crash the batch
+        for f in fams:
+            if fam_pos_beta[f]:  # per-family sample drop: identical to the single-family path
+                per_family_samples[f].append(fam_pos_beta[f])
+                per_family_meta[f].append((stem, ct, br, ln))
+
+    return {f: _complete_case_matrix(per_family_samples[f], per_family_meta[f]) for f in fams}
