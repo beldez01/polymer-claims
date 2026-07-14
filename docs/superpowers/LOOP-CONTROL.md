@@ -45,57 +45,17 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `8b6c710`, clean tree, **33 commits ahead of origin (NOT pushed — policy)**.
-- **B1 + B2(primitive) + B3 DONE (merged 8b6c710). Next: B4 — promoter-methylation SE-contract** (buildable machinery now;
-  the live run is DATA-GATED on `methylation_promoter_bycosmic.csv.gz` / CCLE RRBS — build+unit-test on
-  synthetic/fixture contracts, mark the live run BLOCKED). Note: `se:gdsc_pharmaco_promoter@1` ALREADY EXISTS as a
-  committed contract (used by B1/B3) — so B4 may be largely DONE already; verify what's real vs. what the live
-  MGMT→TMZ reparam proof still needs, then likely check off B4 + move to **C1** (adapter-independence Step 0 probe,
-  the cheap do-now in §2) and onward.
-- **B3 KEY PIVOT (2026-07-14):** the "reinterpret" non-contradiction edge the spec (§4) flagged as a NEEDED
-  grammar change **ALREADY EXISTS** — `RelationKind.RESTRICTION_MAP` in `grammar/src/polymer_grammar/leaf.py:138`
-  (added by the cross-arm relations work; a non-attack relation CLAIM, stored in Corpus.claims via `is_relation`,
-  NOT a new collection → Corpus stays 4). So B3 = **NO grammar change**; instead: (a) PROTOCOL sheaf/Duhem
-  suppression hook — treat two claims linked by a RESTRICTION_MAP relation as NOT a contradiction (this is the
-  cross-arm "Slice 2 sheaf wiring" that was deferred; pure-protocol, byte-identity when no such relation);
-  (b) UMBRELLA evaluator: trigger REJECTED+REFUTED → hybrid LLM generator (grounded by B1 `resolve_space`, mirror
-  `relation_proposer.py`'s injected-client + `.anthropic` tripwire) → declare-and-charge K e-LOND slots upfront →
-  re-test each alternate via the UNCHANGED gate → emit a RESTRICTION_MAP relation claim linking original↔alternate.
-  Retain original REJECTED verbatim (residualism); depth-1; synthetic two-space fixtures (real MGMT→TMZ = B4-gated).
-  DECOMPOSE across fires: (B3a) protocol suppression hook → (B3b) umbrella evaluator.
-- **B3a DONE (committed on branch, not yet merged):** `sheaf.py` `_restriction_map_pairs` + skip equivalence/defeat
-  edges bridged by a RESTRICTION_MAP relation (non-comparable → no contradiction). Pure-protocol, numpy-free,
-  byte-identical when no such relation (509 existing tests unchanged). 3 new tests
-  (`protocol/tests/test_restriction_map_suppression.py`): defeat+equiv frustrate; RESTRICTION_MAP suppresses;
-  COHERES does NOT. protocol 512, grammar 602, ruff clean.
-- **B3b NEXT (the umbrella evaluator, on the SAME branch `feat/reparam-evaluator`):** build
-  `src/polymer_claims/reparam_evaluator.py`. Grounding (from the code map): trigger = iterate corpus.claims for
-  `status==REJECTED and rejection_reason==RejectionReason.REFUTED`. Hybrid generator = mirror
-  `relation_proposer.LLMRelationAgent` (injected `complete` callable; `_build_prompt` from the refuted claim's
-  `provenance.rationale`/`conclusion.descriptor`/`roles`; `_parse` re-validates an untrusted proposed Modality;
-  `.anthropic` live tripwire). Ground the proposal via `measurement_space.resolve_space(modality, exclude=<orig
-  space>)` → K apt-AVAILABLE alternates (never fabricates). Declare-and-charge = pre-register ALL K e-LOND slots
-  upfront via `fdr.register_test` (non-adaptive) BEFORE testing. Re-test each alternate = rebuild the claim with a
-  new `data_ref` (build_evaluation_plan; NOTE a different measurement space may need a different CapabilityCell —
-  handle for the synthetic case) via the UNCHANGED gate. Depth-1 (a rejected alternate does not recurse). RETAIN
-  the original REJECTED claim verbatim. Emit a `make_relation_claim(..., RelationKind.RESTRICTION_MAP, ...)` linking
-  original↔alternate (the B3a hook consumes it). Build+test on SYNTHETIC two-space fixtures (spec §10); real
-  MGMT→TMZ is B4-data-gated (mark blocked). Then merge the whole B3 branch to local main, check off B3.
-- **NEW follow-up queued:** B2-integration (wire real populate_universe + viewer at the store) — SLOW-pipeline-gated,
-  deferred by the loop; see BACKLOG §1.
-- Foundations digest DONE → `notes/2026-07-14-foundations-digest-for-loop.md` (read it; it grounds B2/§2).
-- **B2 grounding done:** accumulating-store spec read in full (`specs/2026-07-10-accumulating-universe-store-design.md`).
-  Store = append-only content-addressed JSONL (source of truth) + DuckDB facet layer; persists the WHOLE Corpus
-  incl. `fdr_ledger`; load→propose→dedup→register→license→persist-back; re-run mints 0 claims. Cheapest first move
-  (§6): JSONL record (modality on contract) → `populate_universe` appends → census query → viewer facets.
-- **B2 next-fire notes:** the registry (B1) is now available — the store's census (Spec 1 §5) can query
-  `measurement_space.coverage()`/`available_spaces()`. Real ground truth (from B1's code map): a "space" =
-  `(contract_uid, row_prefix)`; `SEContractRef` carries no modality; `Provenance` has NO modality/parameterization
-  field (Spec 1 §4's choice-vs-realized split is unimplemented — the store may need to decide how to carry the
-  realized-modality facet: cleanest is to derive it from the claim's `data_ref` contract via the registry, not a
-  new grammar field). Check DuckDB availability (optional dep) before committing to the SQL layer; a pure-python
-  facet layer is an acceptable v1 fallback if DuckDB isn't wanted as a dep. Watch: `populate_universe` today
-  starts a FRESH fdr_ledger each run — the store must persist + reload it (the highest-value regression test).
+- **On `main`** at `8a81bc8`, clean tree, **34 commits ahead of origin (NOT pushed — policy)**.
+- **§1 CLUSTER COMPLETE** — B1 registry ✓ · B2 store primitive ✓ · B3 reparam evaluator ✓ · B4 promoter contract ✓
+  (verified pre-built at `edb1322`; real MGMT→TMZ-over-promoter finding recorded: flips-but-sub-threshold).
+- **Next: §2 / C1 — adapter-independence Step 0 probe.** Likely DATA-GATED (needs ClinVar labels + AlphaMissense +
+  ESM1v scores): build the error-correlation-probe MACHINERY + unit-test on synthetic score pairs (measured ρ →
+  `N_eff = 2/(1+ρ)`); mark the live run BLOCKED with the exact data. Entry probe for the measured-ρ-independence arc
+  (foundations §2.B / neg-whisper ② / §9 "independence as measured error-correlation"). Plan:
+  `plans/2026-07-07-adapter-independence-hardening-plan.md` §3.
+- **Deferred follow-ups (tracked in BACKLOG, not lost):** B2-integration (wire real populate_universe + viewer at
+  the store — slow-pipeline-gated); reconcile `merge_universes` hard-coded modality strings to the B1 controlled vocab.
+- Foundations digest: `notes/2026-07-14-foundations-digest-for-loop.md` (read for §2/§9 grounding).
 
 ## Test/gate cadence
 - Fast gate (per change): `cd grammar && uv run pytest -q` (~0.5s, 602) · `cd protocol && uv run pytest -q` (~2s, 509)

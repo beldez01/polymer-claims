@@ -80,9 +80,17 @@ ruled out 2026-07-11); generic per-attack e-value combination ("largely a mirage
   tests over real contract ids. **Real MGMT→TMZ numerical proof is B4-data-gated** (promoter contract live run).
   ⚠ **Name collision (resolved):** `DefeatEdgeKind.REINTERPRET` is an *attack* edge — correctly NOT reused; the
   non-contradiction edge is `RelationKind.RESTRICTION_MAP` (opposite polarity), exactly as this warning required.
-- [ ] **Promoter-methylation SE-Contract (2nd measurement dimension)** · `BUILD` · reparam §7 pre-req 0
+- [x] **Promoter-methylation SE-Contract (2nd measurement dimension)** · `BUILD` · reparam §7 pre-req 0
   — Second contract dimension so MGMT→TMZ and promoter-localized claims can be re-tested over promoter
   β-space. Buildable/unit-testable on synthetic contracts now; **data-gated** on `methylation_promoter_bycosmic.csv.gz` / CCLE RRBS for the live run.
+  — **ALREADY SHIPPED (`edb1322`, verified by loop 2026-07-14).** `ingest_gdsc_pharmaco_promoter` +
+  `load_gdsc_promoter_methylation` build `se:gdsc_pharmaco_promoter@1` (metadata.modality=methylation_promoter);
+  unit-tested (`tests/pharmaco/test_gdsc_pharmaco_contract.py::test_build_pharmaco_promoter_contract_loads_via_load_contract`,
+  synthetic promoter matrix); in the B1 registry. **Live real-data finding already recorded:** MGMT→TMZ direction
+  FLIPS to mechanistically-correct over promoter (r_adj +0.078→−0.069) but stays sub-threshold (e~0.81; compressed
+  TMZ AUC + smaller cohort) — the honest "reparam over the right space, still doesn't license" outcome (spec §8).
+  Real promoter betas gitignored (local-only subset). Nothing to build. The B3b evaluator can drive this end-to-end
+  through the real gate as a slow-pipeline follow-up (finding already known).
 - [x] **Cross-arm relations spec hardening** · `HARDEN` · `specs/2026-07-13-cross-arm-relations-design.md`
   — **Resolved 2026-07-13** across two review passes, folded into the spec. §0.1 (first pass): true signed
   projection is a Slice-1 addition (not assumed); relations project into a versioned `TopologyEdge` so the
