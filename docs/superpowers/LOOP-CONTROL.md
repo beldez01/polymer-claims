@@ -45,7 +45,7 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `01782e5` (about to merge §7 hygiene), clean tree, **NOT pushed — policy**.
+- **On `main`** at `0c8da0d`, clean tree, **52 commits ahead of origin (NOT pushed — policy)**.
 - **§3: placeholder guard ✓** (strength=None audit FLAGGED, deferred; `LLMPatternGenerationAdapter` = PHANTOM/done).
   **§7 hygiene: CI workflow ✓ · doc-dangle fixes ✓ · test-skip visibility ✓** (this fire).
 - **Next safe §7 items:** GDSC drug→CHEBI resolver (`pharmaco_populate.py:62` — HARDEN, the scaling bottleneck;
