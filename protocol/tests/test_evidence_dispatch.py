@@ -352,6 +352,51 @@ def test_unregistered_evidence_claim_skipped():
     assert evidence_executions == ()
 
 
+def test_commitment_hash_mismatch_skipped():
+    """Gate-1 hash guard (execute.py:154): a claim whose CURRENT plan does not match its
+    pending FDR test's commitment_hash is NOT dispatched — no record, no evidence execution.
+
+    This is the pre-registration airtightness: a hypothesis mutated AFTER its α-slot was
+    registered (so the plan now hashes to H' != the committed H) must not ride the slot
+    reserved for the original hypothesis (post-hoc alteration / p-hacking). Companion to
+    test_unregistered_evidence_claim_skipped (which pins the *missing-test* branch); together
+    they close both no-dispatch branches of Gate-1 at the execute_ground level.
+    """
+    ctx = MaterializationContext(id="M1", api_version="v1", data_version="d1")
+
+    descriptor = _make_descriptor()
+    policy = _make_policy(descriptor.content_hash)
+    cell = _make_cell(policy.content_hash)
+    claim = _make_evidence_claim(cell, policy.content_hash)
+
+    # Register the α-slot under a commitment hash that is NOT this claim's plan hash.
+    real_ch = commitment_hash(claim)
+    wrong_ch = f"sha256:{'d' * 64}"
+    assert real_ch != wrong_ch  # sanity
+    ledger = register_test(FDRLedger(target_fdr=0.05), claim.id, wrong_ch)
+    corpus = Corpus(claims=(claim,), fdr_ledger=ledger)
+    corpus = commit(corpus)
+
+    # Runtime is otherwise fully valid — every downstream check WOULD pass; only Gate-1 stops it.
+    trust_entry = ExecutorTrustEntry(
+        descriptor_ref=descriptor.content_hash, owner="test-org", trusted=True, version="v1",
+    )
+    runtime = EvidenceRuntime(
+        capability_registry=CapabilityRegistry(cells=(cell,)),
+        evidence_policy_registry=EvidencePolicyRegistry(policies=(policy,)),
+        executor_descriptor_registry=ExecutorDescriptorRegistry(descriptors=(descriptor,)),
+        executor_trust_registry=ExecutorTrustRegistry(entries=(trust_entry,)),
+        executor=_StubExecutor(descriptor.content_hash, None),  # type: ignore[arg-type]
+    )
+
+    _out, records, evidence_executions = execute_ground(
+        corpus, (), ctx, evidence_runtime=runtime,
+    )
+    # Commitment mismatch → skipped BEFORE any pre-dispatch check → no record, no execution.
+    assert records == ()
+    assert evidence_executions == ()
+
+
 def test_credential_mismatch_produces_predispatch_failure():
     """Executor with wrong credential → EvidenceExecution with pre_dispatch credential_mismatch."""
     corpus, cell, policy, descriptor, ctx, runtime = _build_full_setup()

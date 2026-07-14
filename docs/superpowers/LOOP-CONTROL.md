@@ -190,6 +190,15 @@ now built; it needs your scientific curation + review.
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — §3 (gate audit): evidence-dispatch bypass CONFIRMED airtight** (direct to main → origin `pending push`).
+  Audited the alternate licensing route (`execute.py:146`, single-execution capability cells that skip the 2-adapter
+  gate). Finding: airtight — Gate-1 needs a pending non-retracted FDR test + `commitment_hash(c)==test.commitment_hash`
+  (binds the whole evaluation_plan incl. threshold), then 8 pre-dispatch checks; `pending_by_claim` last-wins is only
+  ever more-conservative. Closed the one un-pinned branch (Gate-1 hash-mismatch skip) with
+  `test_commitment_hash_mismatch_skipped`. Test-only → byte-identical. protocol 531. BACKLOG line 237 checked off.
+- **2026-07-14 — post-mandate operator decisions recorded + pushed** (`11a1f9e`, `449d691`). Product-identity fork
+  RESOLVED (in-house drug-discovery engine; Durendal→Polymer Biologics; federated deferred); GPU-determinism deferred;
+  #4 value-ordering RESOLVED (ratify strict Pareto as v1's single audience; audience-relative VAF hook deferred, no code).
 - **2026-07-14 — §3 strength=None exemption: RESOLVED (finding + characterization)** (`feat/strength-none-exemption-guard` → local main → origin).
   Found the untrusted-license path is already closed by the air-gap (`verify.py:305`); pinned the exemption scope
   (2 tests, protocol 530). No source change → byte-identical. (Mandate item 2, safe path.)

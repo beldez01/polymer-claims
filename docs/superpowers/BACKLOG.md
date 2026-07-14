@@ -234,9 +234,19 @@ can't yet see. Plan-ready; each gated on a small first probe.*
 - [ ] **Retire the per-claim `run_cycle` isolation workaround** · `HARDEN` · `CONTINUE.md` "NEXT" (logged since spine 2d-ii); `verify.py::_permitted_by_bar`
   — Exempt reference_leaf/threshold-None claims (scored by e-LOND alone) so they batch-license, removing
   the per-claim isolation the licensed-spine build needed. The one concrete logged cleanup.
-- [ ] **Verify the evidence-dispatch bypass of the 2-adapter gate** · `HARDEN` · `protocol/.../execute.py:146`
+- [x] **Verify the evidence-dispatch bypass of the 2-adapter gate — AUDITED airtight (2026-07-14)** · `HARDEN` · `protocol/.../execute.py:146`
   — Single-execution capability cells skip 2-adapter agreement, gated instead by a pending FDR test +
-  matching `commitment_hash`. Confirm the hash/FDR guards are airtight (it's an alternate licensing route).
+  matching `commitment_hash`. **Finding: the guards are airtight.** Gate-1 requires (a) a pending, non-retracted
+  FDR test for the claim_id AND (b) `commitment_hash(c) == fdr_test.commitment_hash`, where `commitment_hash`
+  binds the ENTIRE `evaluation_plan` (region + criterion + threshold + group levels); a post-registration
+  hypothesis mutation changes the hash → no dispatch. Then 8 pre-dispatch checks (policy resolves + ref
+  consistency + `capability_descriptor_ref==cell.content_hash` + executor descriptor + credential + trust +
+  claim-shape + `threshold==policy.theta0`). The `pending_by_claim` "last-wins" selection is only ever *more*
+  conservative (a stale slot with a non-matching hash makes Gate-1 skip). The only previously-UNPINNED branch —
+  execute_ground's Gate-1 hash-mismatch skip (`execute.py:154`) — is now covered by
+  `test_commitment_hash_mismatch_skipped` (companion to the missing-test test). protocol 531. No source change
+  (test-only → byte-identical). This route is a deliberate ALTERNATIVE to replication (pre-registration + one
+  trusted executor), not an independence loophole — it only fires for cells whose author set `execution=="single"`.
 - [ ] **Per-unit concordance in two-adapter agreement** · `HARDEN` · `grammar/.../evaluate.py:364`
   — Agreement only checks both legs cross the same threshold, not that the *same units* drove the count
   (two n-DMP legs can agree on count while flagging different probes). Deliberately deferred; strengthen.
