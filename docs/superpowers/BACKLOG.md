@@ -105,9 +105,18 @@ ruled out 2026-07-11); generic per-attack e-value combination ("largely a mirage
 *Instrument the correlated bias, external testimony, drift horizons, and licensed negatives the gate
 can't yet see. Plan-ready; each gated on a small first probe.*
 
-- [ ] **Adapter-independence Step 0 probe** · `DEBUG` · `plans/2026-07-07-adapter-independence-hardening-plan.md` §3
+- [x] **Adapter-independence Step 0 probe** · `DEBUG` · `plans/2026-07-07-adapter-independence-hardening-plan.md` §3
   — 1-day falsifiable experiment: do AlphaMissense vs ESM1v errors correlate on ClinVar? **Non-data-blocked, do-now.**
   Gates whether the D4 air-gap warrant is real or hollow, and sets the priority of R2–R5 below.
+  — **PROBE MACHINERY SHIPPED 2026-07-14 (loop)** on `feat/adapter-independence-probe`.
+  `src/polymer_claims/adapter_independence.py` (pure stdlib, no numpy): `signed_errors` (score−label),
+  `error_correlation` (Pearson ρ), `n_eff_from_rho` (`N_eff = 2/(1+ρ)`), `set_overlap_neff` (φ of two flag-sets —
+  the claim-shape variant per §R2: a single N_eff does NOT cap everything), and `independence_report` (ρ, N_eff,
+  per-class ρ, 2×2 correctness confusion). 7 synthetic tests (identical errors→ρ1/N_eff1; orthogonal→ρ0/N_eff2;
+  anti→N_eff>2; constant→nan; report+confusion; set-overlap). grammar/protocol untouched; Corpus 4. **LIVE run
+  DATA-GATED/BLOCKED** (`run_variant_effect_probe` raises with the exact spec): needs ClinVar variant_summary +
+  AlphaMissense_hg38 + ESM1v LLR tables, post-training-cutoff variants (leakage guard), threshold calibrated on a
+  held-out split. The instrument is the entry point for the measured-ρ independence arc (foundations §2.B / §9).
 - [ ] **Adapter-independence R1–R5 arc** · `HARDEN` · hardening plan §4 / `specs/2026-06-29-adapter-independence-hardening-notes.md`
   — Replace the hand-set organizational tier with measured error-correlation → `N_eff = 2/(1+ρ)`.
   R1 provenance lineage on `AdapterCredential` (ship-now); R2 decorrelation battery (after Step 0);

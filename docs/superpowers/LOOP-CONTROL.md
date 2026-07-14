@@ -67,6 +67,12 @@ update docs. The user is away; act on established work, don't invent scope or ma
   accumulating on local main.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — C1: adapter-independence Step-0 probe** (`feat/adapter-independence-probe` → local main, ff).
+  `adapter_independence.py` (pure stdlib): error-correlation ρ → `N_eff=2/(1+ρ)`, set-overlap φ variant (claim-shape),
+  `independence_report` (ρ/N_eff/per-class/2×2 confusion). 7 synthetic tests; grammar/protocol untouched; Corpus 4.
+  Live ClinVar/AlphaMissense/ESM1v run DATA-GATED (documented). Entry instrument for the measured-ρ independence arc.
+- **2026-07-14 — B4 verified pre-built** (`edb1322`): promoter SE-contract machinery + unit test; MGMT→TMZ-over-promoter
+  finding recorded (flips-but-sub-threshold). §1 cluster complete. (Doc-only checkoff.)
 - **2026-07-14 — B3: re-parameterization evaluator** (`feat/reparam-evaluator` → local main, ff). NO grammar change
   (reused `RelationKind.RESTRICTION_MAP`). B3a: `sheaf.py` suppresses equivalence/defeat edges bridged by a
   RESTRICTION_MAP relation (byte-identical when absent; 509 protocol tests unchanged; 3 new). B3b:
