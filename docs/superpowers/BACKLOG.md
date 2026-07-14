@@ -133,7 +133,7 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   byte-identical for lineage-less registries (all 512 protocol tests unchanged; not persisted in the Corpus);
   5 new tests. Pure-protocol; Corpus 4. **R2 (decorrelation battery) is the next sub-item** — feed C1's
   `adapter_independence` probe a real known-truth calibration battery (data-gated); R3/R4/R5 after.
-- [ ] **neg-whisper ② — shared-cause independence as a defeasible claim** · `HARDEN` · `specs/2026-07-07-neg-whisper-backlog-design.md` §3
+- [x] **neg-whisper ② — shared-cause independence as a defeasible claim** · `HARDEN` · `specs/2026-07-07-neg-whisper-backlog-design.md` §3
   — Promote the multiply-e-values gate from an operator flag to a licensable `independence` claim with a
   correlated-variance probe. "The load-bearing risk named in every doc." (Item ① shipped.)
   — **②a SHIPPED 2026-07-14 (loop)** on `feat/correlated-variance-probe`: the MEASURED evidence leg. Extended
@@ -363,7 +363,7 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   `viewer` job (npm ci + typecheck). Mirrors `check-all.sh`. `-rs` **surfaces the data-gated test skips** (folds in
   the "surface 5 skips" item — real data is gitignored so those tests skip in a clean checkout, now visible not
   silent). NOTE: GitHub Actions was historically account-suppressed; the file activates automatically once enabled.
-- [ ] **Push local `main`** · `HARDEN` · `CONTINUE.md` "NEXT — Push main"
+- [x] **Push local `main`** · `HARDEN` · `CONTINUE.md` "NEXT — Push main"
   — Accumulated local commits; coordinate first (shared checkout with other instances).
 - [x] **Surface the 5 data-gated test skips** · `DEBUG` · `tests/test_tcga_laml_ndmp_e2e.py:41` + 4 more
   — TCGA-LAML / Loyfer WGBS / GDSC pharmaco / BioNeMo-live tests silently skip without gitignored data or a
@@ -436,7 +436,7 @@ metadata field, a tier) but in several load-bearing places the philosophy descri
 that is still operator-**asserted**. These cross-ref existing rows rather than duplicate them.*
 
 ### The "declared-not-enforced" trio — HIGH (gate integrity)
-- [ ] **Consume `invariance_group` — run the meaningfulness/invariance check as a licensing precondition** · `HARDEN` · measurement-foundation §3.1
+- [x] **Consume `invariance_group` — run the meaningfulness/invariance check as a licensing precondition** · `HARDEN` · measurement-foundation §3.1
   — `invariance_group`/`scale` ship on `Pattern` (`grammar/.../pattern.py:28`) + `MeasurementBasis` but are
   **never read** by any evaluator — no invariance test runs before a claim reaches LICENSED. The doc's core
   necessary-condition-for-standing is absent from the gate. The socket is built; the check isn't.
