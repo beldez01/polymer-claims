@@ -202,6 +202,14 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   — Any executed claim with `strength=None` skips the cardinality-scaled BH selective-inference bar and
   always licenses. By design (live/generated claims ride it), but it's the single widest path past the
   bar — add an explicit guard/test that nothing *untrusted* reaches it with `strength=None`.
+  — **LOOP ANALYSIS 2026-07-14 (flagged, not built — gate-touching):** grounded `verify.py:93`
+  `{c.id for c in executed if c.strength is None and c.id not in earned}`. The exemption skips ONLY the BH
+  MULTIPLICITY bar — a strength=None claim STILL faces the air-gap (two independent trusted adapters must agree)
+  + e-value to actually license, so it is NOT a free-license path, just a skip-the-multiplicity-bar path. Two ways
+  to harden: (a) a CHARACTERIZATION test pinning the exact scope (strength=None+not-earned → exempt; earned → scored;
+  strength!=None → scored) — safe but needs `ExecRecord`/`VerifiedEvaluation` fixtures; (b) an explicit
+  untrusted-cannot-ride GUARD keyed on a trust tag — **GATE-TOUCHING (changes which claims are exempt), FLAG for
+  operator**. Deferred by the loop as gate-critical; do (a) first with care, treat (b) like the ②b wire-in.
 - [ ] **Retire the per-claim `run_cycle` isolation workaround** · `HARDEN` · `CONTINUE.md` "NEXT" (logged since spine 2d-ii); `verify.py::_permitted_by_bar`
   — Exempt reference_leaf/threshold-None claims (scored by e-LOND alone) so they batch-license, removing
   the per-claim isolation the licensed-spine build needed. The one concrete logged cleanup.

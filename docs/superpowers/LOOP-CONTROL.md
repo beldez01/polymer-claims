@@ -45,18 +45,20 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `54be240`, clean tree, **48 commits ahead of origin (NOT pushed — policy)**.
-- **§1 COMPLETE** + **§2 neg-whisper arc COMPLETE: C1 ✓ · R1 ✓ · ②a ✓ · ②b-logic ✓ (wire-in FLAGGED) · ③ ✓ · ④ ✓ · ⑤-repr ✓.**
-  (① shipped pre-loop. ②b live wire-in + ⑤ real-EWAS-non-effect licensing + ⑤ viewer are the remaining §2 seams —
-  the first FLAGGED, the latter two data/viewer-gated.)
-- **Next: §2 tail then §3.** Remaining §2 items: **adapter-independence R2–R5** (R2 decorrelation battery = feed C1's
-  probe a real calibration set — DATA-GATED; R3 red-team; R4 heterodox third witness; R5.2 shape-dependent cap) and
-  **v2 Slice 2/3** (attestation chain + defeat/drift/reinstatement hardening — `specs/2026-06-29-v2-evidence-licensed-capability-design.md` §13).
-  Then **§3 gate-integrity code debts** (several concrete HARDEN items incl. the logged `verify.py::_permitted_by_bar`
-  reference_leaf exemption / retire per-claim run_cycle). Assess each for data-gating; build machinery + mark BLOCKED
-  where gated. Each: branch → TDD → byte-identity proof → merge local. Keep flagging any gate-behavior change.
-- **Deferred follow-ups (tracked in BACKLOG, not lost):** B2-integration (wire real populate_universe + viewer at
-  the store — slow-pipeline-gated); reconcile `merge_universes` hard-coded modality strings to the B1 controlled vocab.
+- **On `main`** at `01782e5`, clean tree, **50 commits ahead of origin (NOT pushed — policy)**.
+- **§3 started: placeholder operator_id guard ✓.** strength=None/`_permitted_by_bar` audit ANALYZED + FLAGGED
+  (gate-touching; see BACKLOG §3) — deferred. Next §3/hygiene targets (cleaner): **(2) `LLMPatternGenerationAdapter`
+  prompt/claim builders** (`src/.../llm_adapter.py:114,117` — concrete subclass, injected-complete-testable);
+  **§7 quick wins** (very safe): fix stale/dangling doc references (BACKLOG §7 last item), surface the 5 data-gated
+  test skips visibly, add a CI workflow mirroring `check-all.sh`. Prefer these safe items; keep FLAGGING gate changes.
+- **DONE:** §1 cluster (B1/B2p/B3/B4) · §2 neg-whisper arc (C1/R1/②a/②b-logic/③/④/⑤-repr) · §3 placeholder guard.
+- **Remaining (still open in BACKLOG):** §2 tail — adapter-independence R2–R5 (R2 = C1 probe on a real battery,
+  DATA-GATED; R3/R4/R5) + v2 Slice 2/3 (attestation chain / defeat-drift-reinstatement, `specs/2026-06-29-v2-evidence-licensed-capability-design.md` §13);
+  §3 remaining gate-integrity debts; §4 attested-calibration §11; §5 synbio capstone (Phase 3 firewall + Phase 4
+  Durendal — BIG); §6 wedge/real-data (mostly data-gated); §7 infra/hygiene (safe quick wins); §9 foundations-concordance.
+- **FLAGGED for user (see "Flagged" section):** ②b live multiply wire-in; strength=None untrusted-guard (both gate-touching).
+- **Deferred follow-ups (in BACKLOG, not lost):** B2-integration (real populate/viewer at the store, slow-pipeline);
+  reconcile `merge_universes` modality strings to B1 vocab; ⑤ real-EWAS-non-effect licensing + viewer rendering.
 - Foundations digest: `notes/2026-07-14-foundations-digest-for-loop.md` (read for §2/§9 grounding).
 
 ## Test/gate cadence
@@ -77,6 +79,9 @@ update docs. The user is away; act on established work, don't invent scope or ma
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — §3: placeholder operator_id guard** (`feat/placeholder-operator-id-guard` → local main, ff).
+  `PLACEHOLDER_OPERATOR_ID` constant + `bridge_proposer` refuses an adapter whose identity IS the placeholder.
+  3 tests; byte-identical; protocol 528; Corpus 4.
 - **2026-07-14 — neg-whisper ⑤ (representation): licensed-negative morphospace** (`feat/licensed-negative-morphospace` → local main, ff).
   Grammar `Pattern.asserts_absence=False` (registry-side → byte-identical) + `bounded_absence@v1` pattern; pure
   `morphospace.py` — `MorphospaceState` {OCCUPIED/FORBIDDEN/UNOBSERVED/OTHER} + classifier + `FIREWALL_STATEMENT`
