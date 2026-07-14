@@ -45,8 +45,8 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `feat/reparam-evaluator`** (B3 COMPLETE — B3a+B3b — about to ff-merge to local main). main is `b80957c`.
-- **B1 + B2(primitive) + B3 DONE. Next: B4 — promoter-methylation SE-contract** (buildable machinery now;
+- **On `main`** at `8b6c710`, clean tree, **33 commits ahead of origin (NOT pushed — policy)**.
+- **B1 + B2(primitive) + B3 DONE (merged 8b6c710). Next: B4 — promoter-methylation SE-contract** (buildable machinery now;
   the live run is DATA-GATED on `methylation_promoter_bycosmic.csv.gz` / CCLE RRBS — build+unit-test on
   synthetic/fixture contracts, mark the live run BLOCKED). Note: `se:gdsc_pharmaco_promoter@1` ALREADY EXISTS as a
   committed contract (used by B1/B3) — so B4 may be largely DONE already; verify what's real vs. what the live
