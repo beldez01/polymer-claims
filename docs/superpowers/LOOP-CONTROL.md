@@ -45,7 +45,7 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `3a140fe` (about to merge ③), clean tree, **NOT pushed — policy**.
+- **On `main`** at `7957c82`, clean tree, **44 commits ahead of origin (NOT pushed — policy)**.
 - **§1 COMPLETE** (B1/B2p/B3/B4) + **§2: C1 ✓ · R1 ✓ · ②a ✓ · ②b-logic ✓ (wire-in FLAGGED) · ③ ✓.**
 - **Next: neg-whisper ④** — stamp corpus `q` with a drift-epoch / validity window so the actuarial framing carries
   its stationarity assumption; `q` expires when a watched dependency drifts. Spec `2026-07-07-neg-whisper-backlog-design.md`
