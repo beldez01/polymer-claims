@@ -44,7 +44,35 @@ update docs. The user is away; act on established work, don't invent scope or ma
   (invariance_group check, measured-ρ independence, attested-log floor).
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
-## ⏹ LOOP STOPPED 2026-07-14 — autonomously-completable work is done; the rest needs YOU.
+## ▶ LOOP RESUMED 2026-07-14 — user-authorized mandate (answers given interactively).
+
+**User decisions:** (1) **APPLY ALL THREE gate wire-ins** — ②b multiply-gate, §3 strength=None guard, §9
+invariance precondition (they are now AUTHORIZED; apply + test, no longer just flag). (2) **PUSH DONE** —
+origin/main == main (`ae24fe2`). (3) **Durendal:** build the pre-registration MECHANICS (commitment_hash +
+α-slot lock + seed-assembly wiring); user curates the seed + does the independent review. (4) **Data:** user
+will supply **ClinVar + AlphaMissense + ESM1v** → build the adapter-independence LIVE run; loader reads from
+`data/adapter_independence/` (gitignored) — files: `clinvar_variant_summary.tsv[.gz]`, `AlphaMissense_hg38.tsv.gz`,
+`esm1v_llr.tsv[.gz]`. Build the loader now (ready); live run runs when files land.
+
+**Design calls to make during the wire-ins (documented, since the direction is authorized):**
+- **②b keying:** the replication multiply is over two COHORTS of one claim (`e1*e2`). Key the independence
+  claim on the two cohort identifiers (`contract_a.contract_uid`, `contract_b.contract_uid`). Thread an OPTIONAL
+  `independence_claims`/verdict-map into `build_replication_inputs` + `expression_floor_replication` (default
+  empty → verdict None → `multiply_allowed(cohorts_verdict, None)` == today → BYTE-IDENTICAL). Prove via existing
+  replication tests unchanged.
+- **§9 purity:** `verify.py` is PROTOCOL (pure) and `invariance.py` is UMBRELLA (imports measurement_space) — do
+  NOT import umbrella into protocol. Wire the invariance precondition as an UMBRELLA-side gate wrapper around the
+  license path (or a pre-`run_cycle` admission filter), not inside protocol verify.py. Byte-identical when every
+  claim is COHERENT/UNCHECKED (the default for today's corpora).
+- **§3 strength=None:** add the untrusted-cannot-ride guard in protocol; "untrusted" = keyed on the adapter
+  credential/trust signal already threaded into verify (not a new umbrella dep). Byte-identical for trusted
+  reference-leaf claims. If a clean trust signal isn't reachable at `_permitted_by_bar`, do the characterization
+  test + narrow the exemption additively.
+
+**Execution order:** ②b (umbrella, cleanest) → §3 → §9 (umbrella wrapper) → Durendal pre-reg mechanics → ClinVar
+loader (+ live run when files land). Each: branch → TDD → byte-identity proof → per-item review → merge local → PUSH.
+
+## ⏹ (prior stop note — superseded by the mandate above) autonomously-completable work was done; the rest needed the user.
 
 **Why stopped (honest):** the entire tranche of clean, safe, additive backlog work is shipped (~19 items, below).
 Everything that REMAINS is one of: (a) the **Durendal headline scientific work** (synbio Phase 3 seed-curation +
