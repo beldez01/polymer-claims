@@ -67,7 +67,7 @@ push). And the **Durendal capstone** (synbio Phase 3/4) is the highest-value rem
 now built; it needs your scientific curation + review.
 
 ## State (as of stop)
-- **On `main`** at `<about-to-merge firewall>`, clean tree, **NOT pushed — policy**.
+- **On `main`** at `cfeeba2`, clean tree, **61 commits ahead of origin (NOT pushed — coordinate then push)**.
 - **PHASE SHIFT (honest):** the clean, fast, safe/additive wins are now essentially DONE (§1 cluster · §2 neg-whisper
   arc · §3 placeholder guard · §7 CI/doc/skip + immuno drift-guard · §9 invariance-check). The remaining backlog is
   the "hard remainder": (i) 3 GATE-TOUCHING items FLAGGED for the user; (ii) DATA-GATED (R2 battery, wedge H1.A2,
