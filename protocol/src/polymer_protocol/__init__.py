@@ -71,6 +71,14 @@ from .oracle_validation import OracleDecay, OracleValidationRecord, SpotProbe, o
 from .plan_synthesis import mirror_criterion, transplant_plan
 from .proposers import frontier_attack, rival_generation
 from .represent import represent
+from .residue import (
+    ResidueEntry,
+    conversion_candidates,
+    query_residue,
+    reason_needs_external_input,
+    residue_census,
+    residue_graveyard,
+)
 from .safety import safety_gate
 from .select import ValueWeights, cell_of, select_stage
 from .stakes import dependency_cone, stakes
@@ -141,6 +149,13 @@ __all__ = [
     "Adapter",
     "MaterializationContext",
     "SelfLicensingError",
+    # ── residue graveyard query surface (residualism R2/R3) ───────────────
+    "ResidueEntry",
+    "residue_census",
+    "residue_graveyard",
+    "query_residue",
+    "conversion_candidates",
+    "reason_needs_external_input",
     # ── runtime stages (composed by run_cycle; callable directly) ──────────
     "represent",
     "canonicalize",

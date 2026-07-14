@@ -190,6 +190,12 @@ now built; it needs your scientific curation + review.
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — residualism R3: PENDING residue-graveyard query surface** (direct to main → origin).
+  `protocol/.../residue.py` — read-only query over Corpus: census (shape by pending-reason), graveyard
+  (ResidueEntry: testable/needs_external_input/dependents), facet filters, and the R3 `conversion_candidates`
+  worklist (testable ∧ convertible, ranked by defeat-graph leverage). Pure protocol; read-only → Corpus 4, no
+  IR field; never licenses (conversion re-runs the existing cycle). 6 tests; protocol 537; grammar 608 unchanged.
+  BACKLOG residue-query item checked off.
 - **2026-07-14 — §3 (gate audit): evidence-dispatch bypass CONFIRMED airtight** (direct to main → origin `pending push`).
   Audited the alternate licensing route (`execute.py:146`, single-execution capability cells that skip the 2-adapter
   gate). Finding: airtight — Gate-1 needs a pending non-retracted FDR test + `commitment_hash(c)==test.commitment_hash`

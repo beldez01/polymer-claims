@@ -498,9 +498,16 @@ that is still operator-**asserted**. These cross-ref existing rows rather than d
   byte-identical when unset. CONSTRAINT for whoever builds it: `strength.py` explicitly rejects "hidden scalar /
   Arrow-style aggregation", so the audience must be a **lexicographic ordering** over the axes, NOT a weighted
   sum. residualism §7's VAF language remains the true north-star design; v1 implements its Pareto special case.
-- [ ] **Query / convert surface for the PENDING residue graveyard** · `BUILD` · residualism §7 (R3)
+- [x] **Query / convert surface for the PENDING residue graveyard — BUILT (2026-07-14)** · `BUILD` · residualism §7 (R3)
   — neg-whisper ③ funds only *scheduling* re-exam (a weight); the doc's "queryable" graveyard + R3 active
-  conversion implies an inspection/re-conversion surface not yet listed.
+  conversion implies an inspection/re-conversion surface not yet listed. **Built `protocol/.../residue.py`** —
+  read-only query over Corpus: `residue_census` (graveyard shape by pending-reason), `residue_graveyard`
+  (inspectable `ResidueEntry` per PENDING claim: testable / needs_external_input / dependents), `query_residue`
+  (facet filters), `conversion_candidates` (R3 worklist = testable ∧ convertible, ranked by defeat-graph
+  leverage), `reason_needs_external_input` (small auditable terminal-reason set: ontology-obsolete /
+  definitional-contested / governance-unreproducible). Pure protocol (no umbrella/numpy); read-only → Corpus
+  stays 4, no IR field; NEVER licenses (conversion re-runs the existing cycle). 6 tests; protocol 537; exported
+  from `polymer_protocol`.
 
 ### Compute / infra (reframed — stance softened 2026-07-13, no rigid never-host caveats)
 - [x] **STRATEGIC — product-identity fork RESOLVED (operator decision 2026-07-14)** · drives where the compute line falls
