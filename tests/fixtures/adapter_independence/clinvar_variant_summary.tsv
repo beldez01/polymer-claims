@@ -1,0 +1,7 @@
+##ClinVar variant_summary fixture (tiny; real file is gitignored)
+#Assembly	Type	ClinicalSignificance	Chromosome	PositionVCF	ReferenceAlleleVCF	AlternateAlleleVCF
+GRCh38	single nucleotide variant	Pathogenic	1	100	A	T
+GRCh38	single nucleotide variant	Benign	1	200	C	G
+GRCh38	single nucleotide variant	Likely pathogenic	2	300	G	A
+GRCh38	single nucleotide variant	Uncertain significance	2	400	T	C
+GRCh37	single nucleotide variant	Pathogenic	1	100	A	T

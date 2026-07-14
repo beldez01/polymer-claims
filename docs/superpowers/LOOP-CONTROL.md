@@ -44,6 +44,26 @@ update docs. The user is away; act on established work, don't invent scope or ma
   (invariance_group check, measured-ρ independence, attested-log floor).
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
+## ✅ MANDATE COMPLETE 2026-07-14 — all 5 user-authorized items shipped + pushed. Loop STOPPED.
+
+**All five done, each byte-identical-when-off + tested, on `origin/main`:**
+1. ✅ **②b multiply-gate wire-in** — an independence claim's verdict caps the replication multiply (refuted → withdraw).
+2. ✅ **§3 strength=None audit** — RESOLVED: the untrusted path is already closed by the air-gap (`verify.py:305`); pinned the exemption scope.
+3. ✅ **§9 invariance precondition** — `admit_by_invariance` drops scale-INCOHERENT (ordinal-as-metric) claims at both `preregister` seams (umbrella-side, purity-safe).
+4. ✅ **Durendal pre-registration mechanics** — `synbio/preregistration.py` seals a blinded seed + plan (deterministic commitment_hash + locked α-slot). Machinery only.
+5. ✅ **ClinVar/AlphaMissense/ESM1v loader + live path** — `adapter_independence_data.py` (parsing fixture-tested; live run skipif-guarded on `data/adapter_independence/`).
+
+**WHAT STILL NEEDS YOU (nothing else is autonomously buildable — this is the true remainder):**
+- **Drop the 3 ClinVar/AlphaMissense/ESM1v files** into `data/adapter_independence/` → the live adapter-independence
+  ρ/N_eff experiment runs (loader is built + tested). Prefer post-training-cutoff variants (leakage caveat).
+- **Durendal (the headline):** curate the real blinded seed (which synbio claims), do the independent no-leakage
+  review, decide the Phase-4 framing (strong vs human-proposed fallback) BEFORE the run, then run it. Mechanics ready.
+- **Other data-gated** items (2nd AML cohort + IDH → §2E REPLICATED / wedge H1.A2; GDSC→CHEBI; ⑤ real EWAS) — supply data.
+- **DEFER** items (§8 + several §3/§4/§9) — you marked these don't-build.
+- Optional: tighten §9 to also refuse UNDECLARED once every licensable pattern declares invariance.
+
+To resume any of this, `/loop` again. Below is the prior mandate detail (historical).
+
 ## ▶ LOOP RESUMED 2026-07-14 — user-authorized mandate (answers given interactively).
 
 **User decisions:** (1) **APPLY ALL THREE gate wire-ins** — ②b multiply-gate, §3 strength=None guard, §9

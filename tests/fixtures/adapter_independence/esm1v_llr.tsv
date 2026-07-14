@@ -1,0 +1,4 @@
+chrom	pos	ref	alt	esm1v
+1	100	A	T	-5.0
+1	200	C	G	-0.5
+2	300	G	A	-4.0

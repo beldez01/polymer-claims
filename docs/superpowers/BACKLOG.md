@@ -113,10 +113,15 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   `error_correlation` (Pearson ρ), `n_eff_from_rho` (`N_eff = 2/(1+ρ)`), `set_overlap_neff` (φ of two flag-sets —
   the claim-shape variant per §R2: a single N_eff does NOT cap everything), and `independence_report` (ρ, N_eff,
   per-class ρ, 2×2 correctness confusion). 7 synthetic tests (identical errors→ρ1/N_eff1; orthogonal→ρ0/N_eff2;
-  anti→N_eff>2; constant→nan; report+confusion; set-overlap). grammar/protocol untouched; Corpus 4. **LIVE run
-  DATA-GATED/BLOCKED** (`run_variant_effect_probe` raises with the exact spec): needs ClinVar variant_summary +
-  AlphaMissense_hg38 + ESM1v LLR tables, post-training-cutoff variants (leakage guard), threshold calibrated on a
-  held-out split. The instrument is the entry point for the measured-ρ independence arc (foundations §2.B / §9).
+  anti→N_eff>2; constant→nan; report+confusion; set-overlap). grammar/protocol untouched; Corpus 4.
+  — **LOADER + LIVE PATH SHIPPED 2026-07-14 (USER-AUTHORIZED)** on `feat/adapter-independence-data`:
+  `src/polymer_claims/adapter_independence_data.py` — parses ClinVar variant_summary + AlphaMissense_hg38 + ESM1v
+  LLR (robust TSV, `##`/`#`-header aware, gz-aware), aligns on the normalized `(chrom,pos,ref,alt)` GRCh38 key,
+  negates the ESM1v LLR to match AlphaMissense's direction, and feeds C1 `independence_report`. Parsing unit-tested
+  on a tiny COMMITTED fixture (`tests/fixtures/adapter_independence/`, 5 tests); `run_adapter_independence_live` +
+  a **skipif-guarded live test** run ONLY when the operator drops the real files into `data/adapter_independence/`
+  (gitignored) — never fabricates scores; missing files raise. **LIVE RUN: DROP THE 3 FILES → the real ρ / N_eff
+  verdict prints.** (Leakage caveat is the operator's: prefer post-training-cutoff variants.)
 - [ ] **Adapter-independence R1–R5 arc** · `HARDEN` · hardening plan §4 / `specs/2026-06-29-adapter-independence-hardening-notes.md`
   — Replace the hand-set organizational tier with measured error-correlation → `N_eff = 2/(1+ρ)`.
   R1 provenance lineage on `AdapterCredential` (ship-now); R2 decorrelation battery (after Step 0);
