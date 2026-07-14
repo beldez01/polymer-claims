@@ -142,6 +142,16 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   (`cohorts_error_independent`, `grammar/.../licensing.py:156`) — ADDITIVE + BYTE-IDENTICAL when no independence
   claim present (default multiply behavior preserved); a defeat on the independence claim withdraws the multiply →
   single-leg standing. Do with byte-identity proof (existing licensing outcomes unchanged).
+  — **②b LOGIC SHIPPED 2026-07-14 (loop)** on `feat/independence-claim` (standalone; live gate NOT wired — flagged):
+  `src/polymer_claims/independence_claim.py`: `make_independence_claim` (a PENDING PropositionLeaf claim over a leg
+  pair — TWO-STRATUM: carries the ②a correlated-variance verdict + e-value as evidence but is NOT self-licensed;
+  bias residue as its standing rebuttal), `is_independence_claim`, `independence_verdict_for` (LICENSED→True /
+  REJECTED→False / else None), and `multiply_allowed(cohorts_verdict, independence_verdict)` — the gate decision,
+  PROVEN byte-identical to today when no independence claim (`multiply_allowed(v, None) == (v is not False)`).
+  7 tests; grammar 602 / protocol 517 UNCHANGED (zero licensing source touched). **REMAINS: the live wire-in**
+  (thread the corpus/verdict into `replication.py:130` + `expression_floor_replication.py:99` and replace
+  `cohorts_error_independent(...) is not False` with `multiply_allowed(...)`) — a licensing-behavior change,
+  **FLAGGED for operator review in LOOP-CONTROL**, not applied autonomously.
 - [ ] **neg-whisper ③ — residue budget for the PENDING graveyard** · `HARDEN` · neg-whisper §4
   — Residue-value term in `SchedulerWeights`/`economics.py` so PENDING (esp. `duhem_underdetermined`)
   earns scheduled re-examination instead of silently accreting. Byte-identical when weight = 0.

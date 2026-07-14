@@ -68,10 +68,23 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - Full gate (item close only, SLOW ~13–63 min): `bash scripts/check-all.sh`. Note when skipped.
 
 ## Flagged for the user (decisions / blockers I will NOT resolve autonomously)
-- **Push to origin** is deferred (25 commits ahead) — needs your coordination (shared checkout). Loop will keep
+- **Push to origin** is deferred (many commits ahead) — needs your coordination (shared checkout). Loop keeps
   accumulating on local main.
+- **neg-whisper ②b LIVE GATE WIRE-IN (licensing-behavior change — needs your sign-off).** The independence-claim
+  machinery is built + tested (`independence_claim.py`), byte-identical when off. ACTIVATING it means editing the
+  two multiply sites — `replication.py:130` and `expression_floor_replication.py:99` — to thread the corpus and
+  replace `if cohorts_error_independent((sat_a,sat_b)) is not False:` with
+  `if multiply_allowed(cohorts_error_independent((sat_a,sat_b)), independence_verdict_for(corpus.claims, leg_a, leg_b)):`,
+  plus a populate step that mints + gate-licenses the independence claim from the ②a correlated-variance probe. This
+  WITHDRAWS a multiply (drops REPLICATED→single-leg) whenever a REJECTED/defeated independence claim covers the pair
+  — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — neg-whisper ②b (logic): independence as a defeasible claim** (`feat/independence-claim` → local main, ff).
+  `independence_claim.py`: `make_independence_claim` (PENDING, two-stratum, ②a evidence + bias-residue rebuttal),
+  `independence_verdict_for` (LICENSED→True/REJECTED→False/else None), `multiply_allowed` (gate decision, PROVEN
+  byte-identical when off). 7 tests; grammar 602/protocol 517 UNCHANGED, zero licensing source touched. The LIVE
+  multiply wire-in is FLAGGED for operator review (above), not applied.
 - **2026-07-14 — neg-whisper ②a: correlated-variance probe** (`feat/correlated-variance-probe` → local main, ff).
   Extended `adapter_independence.py`: `correlated_variance_probe` (shared-input perturbation → joint-movement ρ →
   independence verdict) — the measured evidence leg for the multiply gate; correlated-BIAS named as an open defeater
