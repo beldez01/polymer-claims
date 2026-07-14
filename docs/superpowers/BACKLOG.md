@@ -176,9 +176,20 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   stationarity claim. 5 new tests; protocol 520→525; grammar untouched; Corpus 4. Does NOT forecast the future
   (scope guard). Umbrella wiring (extract the real frontier from a corpus's licenses' MaterializationContexts +
   detect drift → call stamp_stationarity at report time) is a thin follow-up — the mechanism is in place.
-- [ ] **neg-whisper ⑤ — severity-backed licensed negative (forbidden vs unobserved)** · `BUILD` · neg-whisper §6
+- [x] **neg-whisper ⑤ — severity-backed licensed negative (forbidden vs unobserved)** · `BUILD` · neg-whisper §6
   — New pattern licensing a severe test for *absence*; maps morphospace occupied/empty/forbidden to real
   corpus states. Touches the licensing-not-meaning firewall. (Largest of the four remaining seams.)
+  — **REPRESENTATION SHIPPED 2026-07-14 (loop)** on `feat/licensed-negative-morphospace` — additive, NO licensing
+  change (the gate is untouched; a negative claim licenses via the existing bound-below-threshold criterion): grammar
+  `Pattern.asserts_absence: bool = False` (default = presence; registry-side, NOT in the Corpus → byte-identical) +
+  a concrete `bounded_absence@v1` pattern; new pure `morphospace.py` — `MorphospaceState`
+  {OCCUPIED/FORBIDDEN/UNOBSERVED/OTHER} + `morphospace_state`/`morphospace_state_of` classifier (LICENSED presence →
+  OCCUPIED; LICENSED severe negative [severity ≥ floor] → FORBIDDEN; PENDING untested → UNOBSERVED — the
+  operational separation the measurement doc asks for) + `FIREWALL_STATEMENT` (licensed-negative = warranted absence
+  at severity, NOT impossibility — a licensing status, not meaning). 6 tests; grammar 602→608 (existing unchanged =
+  byte-identical); protocol 525 unchanged; Corpus 4. **Follow-ups (not this slice):** license a negative on a REAL
+  EWAS non-effect through the gate (bounded-absence adapter/e-value — DATA-GATED), and viewer rendering of FORBIDDEN
+  vs EMPTY (viewer). The firewall statement + operational trichotomy — the crux of doing ⑤ — are in place.
 - [ ] **v2 Slice 2 — attestation chain + certificate/SLSA `resolvedDependencies`** · `BUILD` · `specs/2026-06-29-v2-evidence-licensed-capability-design.md` §13
   — Full attestation chain for the evidence-licensed route (Slice 1 shipped `9b8848c`).
 - [ ] **v2 Slice 3 — defeat/drift/reinstatement/replay hardening** · `BUILD` · v2 design §13

@@ -26,6 +26,12 @@ from .shared_cause import (
     shared_cause_jaccard,
     shared_cause_overlap,
 )
+from .morphospace import (
+    FIREWALL_STATEMENT,
+    MorphospaceState,
+    morphospace_state,
+    morphospace_state_of,
+)
 from .pattern import Pattern, PatternRef, get_pattern, registry
 from .claim import Claim
 from .proposition import Direction, NeighborEdge, NeighborEdgeKind, Proposition
@@ -215,6 +221,10 @@ __all__ = [
     "NeighborEdge",
     "NeighborEdgeKind",
     "Pattern",
+    "MorphospaceState",
+    "morphospace_state",
+    "morphospace_state_of",
+    "FIREWALL_STATEMENT",
     "PatternRef",
     "PendingReason",
     "RejectionReason",

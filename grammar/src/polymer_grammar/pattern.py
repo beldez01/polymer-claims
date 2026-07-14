@@ -30,6 +30,13 @@ class Pattern(_Model):
     # >=1 excluded_application pins the relation (closes the Newman hole)
     excluded_applications: tuple[str, ...] = Field(min_length=1)
     merged_from: tuple[str, ...] = ()
+    # neg-whisper ⑤ — a licensed-NEGATIVE pattern: its criterion is a severe test for ABSENCE (the
+    # effect is bounded BELOW a threshold). A claim LICENSED under such a pattern is a morphospace
+    # FORBIDDEN region (warranted absence at severity) — distinct from PENDING-untested UNOBSERVED.
+    # FIREWALL: a licensed negative asserts EARNED WARRANT FOR ABSENCE AT A SEVERITY, never
+    # metaphysical impossibility — a licensing status, not a meaning verdict. Default False (a
+    # presence pattern), so every existing pattern is unchanged.
+    asserts_absence: bool = False
 
 
 class _Registry:
@@ -101,6 +108,27 @@ registry.register(
         excluded_applications=[
             "a quantitative statistical estimand (use reported_quantity or adjusted_effect)",
         ],
+    )
+)
+
+
+registry.register(
+    Pattern(
+        id="bounded_absence",
+        version="v1",
+        estimand="effect_bounded_below_threshold",
+        null_model="effect_at_or_above_threshold",
+        scale="standardized",
+        invariance_group="monotone_reparametrization",
+        intended_applications=[
+            "a severe test that an effect is bounded BELOW a threshold — a licensed negative / "
+            "morphospace FORBIDDEN region (warranted absence at severity, NOT impossibility)",
+        ],
+        excluded_applications=[
+            "an effect-PRESENCE claim (use adjusted_effect)",
+            "an untested/unobserved region (that is PENDING untested, not a licensed negative)",
+        ],
+        asserts_absence=True,
     )
 )
 
