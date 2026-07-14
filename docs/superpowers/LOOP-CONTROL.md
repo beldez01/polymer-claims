@@ -45,7 +45,15 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `0633ed8`, clean tree, **54 commits ahead of origin (NOT pushed — policy)**.
+- **On `main`** at `0633ed8` (about to merge immuno guard), clean tree, **NOT pushed — policy**.
+- **PHASE SHIFT (honest):** the clean, fast, safe/additive wins are now essentially DONE (§1 cluster · §2 neg-whisper
+  arc · §3 placeholder guard · §7 CI/doc/skip + immuno drift-guard · §9 invariance-check). The remaining backlog is
+  the "hard remainder": (i) 3 GATE-TOUCHING items FLAGGED for the user; (ii) DATA-GATED (R2 battery, wedge H1.A2,
+  GDSC→CHEBI, ⑤ real EWAS) — already marked BLOCKED with the exact data; (iii) BIG multi-fire BUILDS that are NOT
+  data-gated (v2 Slice 2/3 = attestation chain + defeat/drift/reinstatement, `specs/2026-06-29-v2-evidence-licensed-capability-design.md`
+  §13; §5 synbio Phase 3 firewall → Phase 4 Durendal); (iv) DEFER (§8 + several §3/§4). **Next: the big buildable
+  BUILDs (v2 Slice 2, then synbio Phase 3), done as multi-fire spec→plan→TDD arcs — the last category with real
+  autonomous runway.** Consider a longer wakeup delay (fires are now bigger). Do NOT force gated/flagged/DEFER items.
 - **§9 invariance-check ✓** (advisory; gate-wiring flagged). **Note on remaining backlog:** the clean safe/additive
   wins are largely done. What's left is mostly (i) GATE-TOUCHING → FLAG (3 already flagged: ②b, strength=None,
   invariance-wiring); (ii) DATA-GATED → build machinery + mark BLOCKED (R2 battery, wedge/real-data, GDSC→CHEBI,
@@ -90,6 +98,9 @@ update docs. The user is away; act on established work, don't invent scope or ma
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — §7: immuno reconstruction drift-guard** (`feat/immuno-corpus-guard` → local main, ff).
+  `test_immuno_corpus_guard.py` pins that `collect_immuno()`'s reconstructed 11 claims form a strict,
+  JSON-round-trippable Corpus (drift guard vs the hand-built viewer bundle). 1 test; no code/bundle change.
 - **2026-07-14 — §9: invariance-consistency check (consume invariance_group)** (`feat/invariance-check` → local main, ff).
   `invariance.py` — first consumer of Pattern.invariance_group/scale; maps Pattern.scale → Stevens class, cross-checks
   vs the B1 registry's ScaleType, catches ordinal-as-metric (INCOHERENT). Advisory `invariance_ok`; gate-precondition

@@ -340,9 +340,17 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   real CHEBI id. The noted scaling bottleneck for the pharmaco arm.
 - [ ] **`profiles.py` placeholder registry values** · `DEFER` · `src/.../profiles.py:14`
   — Example profile registry carries invented values, not real analysis-engine params.
-- [ ] **immuno bundle fails strict `Corpus` validation** · `HARDEN` · `src/.../merge_universes.py:181`
+- [x] **immuno bundle fails strict `Corpus` validation** · `HARDEN` · `src/.../merge_universes.py:181`
   — `immuno_universe.json` (2 reconstructed nodes) is hand-rebuilt around strict grammar validation → drift
   risk between viewer bundle and real corpus schema. Clean into a real Corpus.
+  — **DRIFT-GUARD SHIPPED 2026-07-14 (loop)** on `feat/immuno-corpus-guard`. (Count corrected: the bundle is **11**
+  nodes — 2 licensed count-enrichment + 2 pending + 7 rejected region-Δβ — not 2.) Rather than churn the viewer
+  bundle format, pinned the reconstruction's contract: `test_immuno_corpus_guard.py` asserts `collect_immuno()`'s
+  reconstructed claims + fdr tests form a **strict, JSON-round-trippable `Corpus`** (unique ids, referential
+  integrity, valid leaves/statuses; the `"inf"` MHC e-value capped to a finite sentinel) — so any drift between the
+  hand-built bundle and the grammar schema, or a collector regression, now fails a test. 1 test; umbrella-only;
+  no bundle/collector change → no merged-universe regression. (A deeper "make the raw JSON itself a strict Corpus"
+  is a viewer-format follow-up; the drift risk the item names is now guarded.)
 - [ ] **Regenerate `merged-universe.json` with all arms** · `HARDEN` · TE note §Follow-ups
   — Resolve the `merge_universes.py` synbio→synthetic-biology rename; pharmaco regen needs the `pandas` extra (~13 min).
 - [ ] **Pre-release context scrub** · `HARDEN` · `CONTINUE.md` "Open follow-ups"
