@@ -45,15 +45,15 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `3a140fe`, clean tree, **42 commits ahead of origin (NOT pushed — policy)**.
-- **§1 CLUSTER COMPLETE** (B1/B2-primitive/B3/B4) + **§2 so far: C1 ✓ · R1 ✓ · neg-whisper ②a ✓ · ②b-logic ✓** (live
-  multiply wire-in FLAGGED for user, not applied).
-- **Next: neg-whisper ③** — residue budget for the PENDING graveyard: a residue-value term in
-  `SchedulerWeights`/`protocol/.../economics.py` so PENDING (esp. `duhem_underdetermined`) earns SCHEDULED
-  re-examination instead of silently accreting. Spec `2026-07-07-neg-whisper-backlog-design.md` §4. **Byte-identical
-  when weight = 0** (default off). GROUND on `economics.py` SchedulerWeights + how PENDING claims are (not) rescheduled.
-  Then ④ (q stationarity horizon), ⑤ (severity-backed licensed negative — forbidden vs unobserved), → v2 slices 2/3 →
-  §3 gate-integrity debts. Each: branch → TDD → byte-identity proof for grammar/protocol → merge local.
+- **On `main`** at `3a140fe` (about to merge ③), clean tree, **NOT pushed — policy**.
+- **§1 COMPLETE** (B1/B2p/B3/B4) + **§2: C1 ✓ · R1 ✓ · ②a ✓ · ②b-logic ✓ (wire-in FLAGGED) · ③ ✓.**
+- **Next: neg-whisper ④** — stamp corpus `q` with a drift-epoch / validity window so the actuarial framing carries
+  its stationarity assumption; `q` expires when a watched dependency drifts. Spec `2026-07-07-neg-whisper-backlog-design.md`
+  §5. GROUND on where `q` is computed/stored (grep `q_`/`feeds_headline_q`/calibration certificate/`q` in
+  `src/polymer_claims/` — the calibration ledger). Additive + byte-identity when the window is unset. Then ⑤
+  (severity-backed licensed-negative: forbidden vs unobserved — §6, largest of the four; touches licensing-not-meaning
+  firewall — scope carefully, may need a flag) → v2 slices 2/3 → §3 gate-integrity debts. Each: branch → TDD →
+  byte-identity proof → merge local.
 - **Deferred follow-ups (tracked in BACKLOG, not lost):** B2-integration (wire real populate_universe + viewer at
   the store — slow-pipeline-gated); reconcile `merge_universes` hard-coded modality strings to the B1 controlled vocab.
 - Foundations digest: `notes/2026-07-14-foundations-digest-for-loop.md` (read for §2/§9 grounding).
@@ -76,6 +76,11 @@ update docs. The user is away; act on established work, don't invent scope or ma
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — neg-whisper ③: residue budget for the PENDING graveyard** (`feat/residue-budget` → local main, ff).
+  `economics.py`: `SchedulerWeights.residue=0.0` (default off) + `ActionKind.RESIDUE_REEXAM` + dependency-degree
+  residue-value → `next_action` schedules high-dependency PENDING (duhem) ahead of isolated untested when enabled.
+  Byte-identical at weight 0 (economics 15 / protocol 517→520). Pure-protocol; Corpus 4. Enabling requires caller
+  to handle the new action kind (noted).
 - **2026-07-14 — neg-whisper ②b (logic): independence as a defeasible claim** (`feat/independence-claim` → local main, ff).
   `independence_claim.py`: `make_independence_claim` (PENDING, two-stratum, ②a evidence + bias-residue rebuttal),
   `independence_verdict_for` (LICENSED→True/REJECTED→False/else None), `multiply_allowed` (gate decision, PROVEN

@@ -30,6 +30,7 @@ class ActionKind(str, Enum):
     DRIFT = "drift"
     ORACLE_VALIDATION = "oracle_validation"
     RED_TEAM = "red_team"
+    RESIDUE_REEXAM = "residue_reexam"  # neg-whisper ③: re-examine a high-dependency PENDING residue
 
 
 _KIND_ORDER = {
@@ -37,6 +38,7 @@ _KIND_ORDER = {
     ActionKind.DRIFT: 1,
     ActionKind.ORACLE_VALIDATION: 2,
     ActionKind.RED_TEAM: 3,
+    ActionKind.RESIDUE_REEXAM: 4,
 }
 
 
@@ -62,6 +64,12 @@ class SchedulerWeights(_Model):
     oracle: float = 0.01
     red_team: float = 0.01
     generation_base: float = 0.1
+    # neg-whisper ③: attention budget for the PENDING residue graveyard. 0.0 (default) => OFF and
+    # byte-identical (no RESIDUE_REEXAM action is ever proposed). >0 => a PENDING claim with
+    # dependents (defeat/equivalence edges = how many claims lean on its contested region) earns a
+    # scheduled re-examination proportional to that dependency, so the graveyard stops being
+    # write-only. A budget, not a mandate — it schedules attention, it never auto-relicenses.
+    residue: float = 0.0
 
 
 class SchedulerConfig(_Model):
@@ -89,6 +97,16 @@ def _red_teamable(corpus: Corpus):
 
 def _candidate(kind: ActionKind, value: float, cost: float, rationale: str) -> ScheduledAction:
     return ScheduledAction(kind=kind, estimated_value=value, estimated_cost=cost, rationale=rationale)
+
+
+def _residue_value(corpus: Corpus, claim) -> float:
+    """A PENDING claim's residue-value = its dependency degree: the number of defeat/equivalence
+    edges incident to it (how much of the corpus leans on its contested region). An isolated
+    `untested` PENDING claim scores 0; a `duhem_underdetermined` claim in a frustrated cycle scores
+    by its connectivity. (v1 signal; staleness-vs-drift is a later refinement — spec §4.)"""
+    deg = sum(1 for e in corpus.defeat_edges if claim.id in (e.source, e.target))
+    deg += sum(1 for eq in corpus.equivalences if claim.id in (eq.left, eq.right))
+    return float(deg)
 
 
 def next_action(
@@ -138,6 +156,21 @@ def next_action(
     if state.red_team_enabled and rt:
         candidates.append(_candidate(ActionKind.RED_TEAM, w.red_team * len(rt), config.daemon_cost,
                                      f"{len(rt)} claim(s) not yet red-teamed"))
+
+    # RESIDUE-REEXAM — attention for the PENDING graveyard (neg-whisper ③). OFF (byte-identical) at
+    # the default residue weight of 0. Targets the PENDING claim with the most dependents, so a
+    # duhem_underdetermined claim in a contested region is scheduled ahead of an isolated untested one.
+    if w.residue > 0:
+        residue = [
+            (c, _residue_value(corpus, c)) for c in corpus.claims if c.status == Status.PENDING
+        ]
+        residue = [(c, v) for c, v in residue if v > 0]  # a zero-dependency residue earns no re-exam
+        if residue:
+            best_c, best_v = max(residue, key=lambda cv: (cv[1], cv[0].id))
+            candidates.append(_candidate(
+                ActionKind.RESIDUE_REEXAM, w.residue * best_v, config.daemon_cost,
+                f"re-examine PENDING residue {best_c.id} ({int(best_v)} dependent(s))",
+            ))
 
     affordable = [c for c in candidates if c.estimated_cost <= budget]
     if not affordable:

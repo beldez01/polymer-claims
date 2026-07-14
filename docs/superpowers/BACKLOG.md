@@ -152,9 +152,17 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   (thread the corpus/verdict into `replication.py:130` + `expression_floor_replication.py:99` and replace
   `cohorts_error_independent(...) is not False` with `multiply_allowed(...)`) — a licensing-behavior change,
   **FLAGGED for operator review in LOOP-CONTROL**, not applied autonomously.
-- [ ] **neg-whisper ③ — residue budget for the PENDING graveyard** · `HARDEN` · neg-whisper §4
+- [x] **neg-whisper ③ — residue budget for the PENDING graveyard** · `HARDEN` · neg-whisper §4
   — Residue-value term in `SchedulerWeights`/`economics.py` so PENDING (esp. `duhem_underdetermined`)
   earns scheduled re-examination instead of silently accreting. Byte-identical when weight = 0.
+  — **SHIPPED 2026-07-14 (loop)** on `feat/residue-budget`: `SchedulerWeights.residue: float = 0.0` (default OFF) +
+  `ActionKind.RESIDUE_REEXAM` + `_residue_value` (a PENDING claim's dependency degree = defeat/equivalence edges
+  incident to it). When `residue>0`, `next_action` earns a re-examination targeting the highest-dependency PENDING
+  claim, so a `duhem_underdetermined` claim in a contested region is scheduled ahead of an isolated `untested` one;
+  a zero-dependency residue earns none (a budget, not a mandate — never auto-relicenses). **Byte-identical at
+  weight 0** (economics 15 + protocol 517 unchanged → 520 with 3 new tests). Pure-protocol, numpy-free; Corpus 4.
+  Note: a caller that ENABLES the residue weight must handle the new `RESIDUE_REEXAM` action kind (scheduler is
+  recommend-only; today's callers key on RUN_CYCLE/DRIFT, so default-off is unaffected).
 - [ ] **neg-whisper ④ — stationarity horizon on `q`** · `HARDEN` · neg-whisper §5
   — Stamp corpus `q` with a drift-epoch / validity window so the actuarial framing carries its
   stationarity assumption explicitly; `q` expires when a watched dependency drifts.
