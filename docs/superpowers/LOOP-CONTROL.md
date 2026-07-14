@@ -45,7 +45,7 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `0633ed8` (about to merge immuno guard), clean tree, **NOT pushed — policy**.
+- **On `main`** at `74ce099`, clean tree, **56 commits ahead of origin (NOT pushed — policy)**.
 - **PHASE SHIFT (honest):** the clean, fast, safe/additive wins are now essentially DONE (§1 cluster · §2 neg-whisper
   arc · §3 placeholder guard · §7 CI/doc/skip + immuno drift-guard · §9 invariance-check). The remaining backlog is
   the "hard remainder": (i) 3 GATE-TOUCHING items FLAGGED for the user; (ii) DATA-GATED (R2 battery, wedge H1.A2,
