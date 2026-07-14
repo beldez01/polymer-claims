@@ -478,10 +478,16 @@ that is still operator-**asserted**. These cross-ref existing rows rather than d
   — e.g. methylation→expression as a *claim* with its own bar, not asserted infrastructure.
 
 ### Residualism-driven
-- [ ] **Audited/configurable audience value-ordering for defeat — or correct the doc** · `HARDEN` · residualism §7 vs `grammar/.../defeat.py:94`
+- [x] **Audience value-ordering for defeat — RESOLVED for v1 (operator 2026-07-14)** · `HARDEN` · residualism §7 vs `grammar/.../defeat.py:94`
   — The doc commits (twice) to defeat "relative to an audience's ordering over values" as "an explicit,
-  audited parameter"; the code hard-codes strength-Pareto dominance. Either make the ordering selectable/
-  audited, or amend `residualism.md` to say the strength-Pareto order *is* the fixed audience.
+  audited parameter"; the code hard-codes strength-Pareto dominance. **Decision: KEEP strict Pareto as v1's
+  single, audience-NEUTRAL order** — it only overturns a claim when the winner dominates on every axis, so it
+  adjudicates no trade-off and needs no value judgment. The audience-relative VAF hook is NOT built (no current
+  caller; "we don't need the multi-audience thing yet"). **Deferred seam (DEFER-until-multi-audience/federated):**
+  a selectable `audience` param on `effective_defeats`/`grounded_extension`, defaulted to Pareto so it's
+  byte-identical when unset. CONSTRAINT for whoever builds it: `strength.py` explicitly rejects "hidden scalar /
+  Arrow-style aggregation", so the audience must be a **lexicographic ordering** over the axes, NOT a weighted
+  sum. residualism §7's VAF language remains the true north-star design; v1 implements its Pareto special case.
 - [ ] **Query / convert surface for the PENDING residue graveyard** · `BUILD` · residualism §7 (R3)
   — neg-whisper ③ funds only *scheduling* re-exam (a weight); the doc's "queryable" graveyard + R3 active
   conversion implies an inspection/re-conversion surface not yet listed.
