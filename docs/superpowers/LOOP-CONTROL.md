@@ -45,10 +45,20 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `654726f`, clean tree, **29 commits ahead of origin (NOT pushed — policy)**.
-- **B1 + B2(primitive) DONE (merged 654726f). Next: B3 — re-parameterization evaluator** (needs B1 registry ✓ + an
-  additive "reinterpret" non-contradiction restriction-map edge — that edge is the one grammar change B3 needs;
-  spec `2026-07-10-reparameterization-evaluator-design.md` §4 flags it). Then B4 (promoter SE-contract, data-gated).
+- **On `feat/reparam-evaluator`** (B3 in progress, grounding). main is `b80957c` (30 ahead of origin, NOT pushed).
+- **B1 + B2(primitive) DONE. IN PROGRESS: B3 — re-parameterization evaluator.**
+- **B3 KEY PIVOT (2026-07-14):** the "reinterpret" non-contradiction edge the spec (§4) flagged as a NEEDED
+  grammar change **ALREADY EXISTS** — `RelationKind.RESTRICTION_MAP` in `grammar/src/polymer_grammar/leaf.py:138`
+  (added by the cross-arm relations work; a non-attack relation CLAIM, stored in Corpus.claims via `is_relation`,
+  NOT a new collection → Corpus stays 4). So B3 = **NO grammar change**; instead: (a) PROTOCOL sheaf/Duhem
+  suppression hook — treat two claims linked by a RESTRICTION_MAP relation as NOT a contradiction (this is the
+  cross-arm "Slice 2 sheaf wiring" that was deferred; pure-protocol, byte-identity when no such relation);
+  (b) UMBRELLA evaluator: trigger REJECTED+REFUTED → hybrid LLM generator (grounded by B1 `resolve_space`, mirror
+  `relation_proposer.py`'s injected-client + `.anthropic` tripwire) → declare-and-charge K e-LOND slots upfront →
+  re-test each alternate via the UNCHANGED gate → emit a RESTRICTION_MAP relation claim linking original↔alternate.
+  Retain original REJECTED verbatim (residualism); depth-1; synthetic two-space fixtures (real MGMT→TMZ = B4-gated).
+  DECOMPOSE across fires: (B3a) protocol suppression hook → (B3b) umbrella evaluator. Confirm suppression-wired
+  status from the Explore agent's map before building.
 - **NEW follow-up queued:** B2-integration (wire real populate_universe + viewer at the store) — SLOW-pipeline-gated,
   deferred by the loop; see BACKLOG §1.
 - Foundations digest DONE → `notes/2026-07-14-foundations-digest-for-loop.md` (read it; it grounds B2/§2).
