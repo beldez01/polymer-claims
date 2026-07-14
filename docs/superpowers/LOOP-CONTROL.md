@@ -45,7 +45,13 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `0c8da0d`, clean tree, **52 commits ahead of origin (NOT pushed — policy)**.
+- **On `main`** at `0633ed8`, clean tree, **54 commits ahead of origin (NOT pushed — policy)**.
+- **§9 invariance-check ✓** (advisory; gate-wiring flagged). **Note on remaining backlog:** the clean safe/additive
+  wins are largely done. What's left is mostly (i) GATE-TOUCHING → FLAG (3 already flagged: ②b, strength=None,
+  invariance-wiring); (ii) DATA-GATED → build machinery + mark BLOCKED (R2 battery, wedge/real-data, GDSC→CHEBI,
+  ⑤ real EWAS); (iii) BIG multi-fire (§5 Durendal Phase 3/4, v2 slices 2/3); (iv) DEFER (§8, several §3). Keep
+  picking genuinely-completable concrete items (immuno strict-Corpus cleanup; more §9 concordance reads; §4 attested
+  §11 buildable bits); scope+mark the data-gated ones; flag gate changes. Don't force-build gated/flagged items.
 - **§3: placeholder guard ✓** (strength=None audit FLAGGED, deferred; `LLMPatternGenerationAdapter` = PHANTOM/done).
   **§7 hygiene: CI workflow ✓ · doc-dangle fixes ✓ · test-skip visibility ✓** (this fire).
 - **Next safe §7 items:** GDSC drug→CHEBI resolver (`pharmaco_populate.py:62` — HARDEN, the scaling bottleneck;
