@@ -45,8 +45,8 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `feat/measurement-space-registry`** (B1 built, about to ff-merge to local main). main was `37e3b40`.
-- **B1 DONE. Next: B2 — accumulating-universe store.**
+- **On `main`** at `ef40c32`, clean tree, **27 commits ahead of origin (NOT pushed — policy)**.
+- **B1 DONE (merged ef40c32). Next: B2 — accumulating-universe store.**
 - Foundations digest DONE → `notes/2026-07-14-foundations-digest-for-loop.md` (read it; it grounds B2/§2).
 - **B2 grounding done:** accumulating-store spec read in full (`specs/2026-07-10-accumulating-universe-store-design.md`).
   Store = append-only content-addressed JSONL (source of truth) + DuckDB facet layer; persists the WHOLE Corpus
