@@ -72,9 +72,16 @@ will supply **ClinVar + AlphaMissense + ESM1v** → build the adapter-independen
 **Execution order:** ②b (umbrella, cleanest) → §3 → §9 (umbrella wrapper) → Durendal pre-reg mechanics → ClinVar
 loader (+ live run when files land). Each: branch → TDD → byte-identity proof → per-item review → merge local → PUSH.
 
-**MANDATE PROGRESS:** ✅ **1. ②b multiply-gate wire-in — DONE + pushed** (both replication sites cap the multiply by
-`independence_verdict_for(corpus.claims, contract_a.contract_uid, contract_b.contract_uid)`; byte-identical for
-today's corpora; a refuted independence claim withdraws the multiply). NEXT: **2. §3 strength=None untrusted-guard.**
+**MANDATE PROGRESS:**
+✅ **1. ②b multiply-gate wire-in — DONE + pushed** (both replication sites cap the multiply by
+`independence_verdict_for(corpus.claims, contract_a/b.contract_uid)`; byte-identical; a refuted independence claim
+withdraws the multiply).
+✅ **2. §3 strength=None — RESOLVED via the safe path (DONE + pushed).** FINDING: the untrusted-license path is
+ALREADY closed by the air-gap (`verify.py:305` forces an untrusted claim to PENDING `ADAPTER_NOT_INDEPENDENT`
+regardless of the exemption, which skips only the BH multiplicity bar) — so a redundant `_permitted_by_bar` guard was
+unnecessary + the registry is correctly not threaded there. Pinned the exemption scope with a characterization test
+(protocol 530). No source change → byte-identical.
+NEXT: **3. §9 invariance precondition (UMBRELLA-side wrapper — do NOT import umbrella into protocol).**
 
 ## ⏹ (prior stop note — superseded by the mandate above) autonomously-completable work was done; the rest needed the user.
 
@@ -158,6 +165,11 @@ now built; it needs your scientific curation + review.
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — §3 strength=None exemption: RESOLVED (finding + characterization)** (`feat/strength-none-exemption-guard` → local main → origin).
+  Found the untrusted-license path is already closed by the air-gap (`verify.py:305`); pinned the exemption scope
+  (2 tests, protocol 530). No source change → byte-identical. (Mandate item 2, safe path.)
+- **2026-07-14 — ②b multiply-gate wire-in (USER-AUTHORIZED)** (`feat/independence-multiply-wire` → local main → origin `e96823c`).
+  Both replication sites cap the multiply by the independence-claim verdict; byte-identical for today's corpora. (Mandate item 1.)
 - **2026-07-14 — synbio Phase 3 (firewall harness): pre-registration conceptual-leakage guard** (`feat/synbio-phase3-firewall` → local main, ff).
   `synbio/firewall.py` — `check_admissibility` (conclusion-stripping + optional date-cutoff, tags the deciding rule)
   + `assemble_blinded_seed`. Additive, umbrella-side, NOT the gate. 6 tests; Corpus 4. Seed curation + Durendal

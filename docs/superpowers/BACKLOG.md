@@ -213,18 +213,19 @@ can't yet see. Plan-ready; each gated on a small first probe.*
 ## 3. Gate-integrity & core-grammar code debts
 *Correctness/robustness of the licensing machinery itself — where a silent failure is most costly.*
 
-- [ ] **Audit the `strength=None` / `_permitted_by_bar` exemption** · `HARDEN` · `protocol/.../verify.py:93`, `src/.../seed.py:73`, `src/.../exec_adapters.py:51`
+- [x] **Audit the `strength=None` / `_permitted_by_bar` exemption** · `HARDEN` · `protocol/.../verify.py:93`, `src/.../seed.py:73`, `src/.../exec_adapters.py:51`
   — Any executed claim with `strength=None` skips the cardinality-scaled BH selective-inference bar and
   always licenses. By design (live/generated claims ride it), but it's the single widest path past the
   bar — add an explicit guard/test that nothing *untrusted* reaches it with `strength=None`.
-  — **LOOP ANALYSIS 2026-07-14 (flagged, not built — gate-touching):** grounded `verify.py:93`
-  `{c.id for c in executed if c.strength is None and c.id not in earned}`. The exemption skips ONLY the BH
-  MULTIPLICITY bar — a strength=None claim STILL faces the air-gap (two independent trusted adapters must agree)
-  + e-value to actually license, so it is NOT a free-license path, just a skip-the-multiplicity-bar path. Two ways
-  to harden: (a) a CHARACTERIZATION test pinning the exact scope (strength=None+not-earned → exempt; earned → scored;
-  strength!=None → scored) — safe but needs `ExecRecord`/`VerifiedEvaluation` fixtures; (b) an explicit
-  untrusted-cannot-ride GUARD keyed on a trust tag — **GATE-TOUCHING (changes which claims are exempt), FLAG for
-  operator**. Deferred by the loop as gate-critical; do (a) first with care, treat (b) like the ②b wire-in.
+  — **RESOLVED 2026-07-14 (USER-AUTHORIZED; safe path chosen — a redundant guard was unnecessary)** on
+  `feat/strength-none-exemption-guard`. KEY FINDING: the untrusted-license path is ALREADY CLOSED one layer up —
+  the exemption skips only the BH MULTIPLICITY bar, but an UNTRUSTED claim (no registry-independent credential pair)
+  is forced to PENDING (`ADAPTER_NOT_INDEPENDENT`) by the air-gap in `verify_stage` (`verify.py` ~:305) REGARDLESS of
+  strength/exemption — proven by the existing `test_adapter_independence_gate` tests. So an untrusted strength=None
+  claim cannot ride the exemption to a LICENSE; the `adapter_registry` is (correctly) NOT threaded to `_permitted_by_bar`,
+  and a redundant guard there would double-gate. Instead pinned the exemption's exact scope with a characterization
+  test (`test_permitted_by_bar_exemption.py`, 2 tests): a strength=None+not-earned claim is exempt from a BH bar that
+  excludes scored claims; an earned claim is scored, not auto-exempt. protocol 528→530; test-only, byte-identical.
 - [ ] **Retire the per-claim `run_cycle` isolation workaround** · `HARDEN` · `CONTINUE.md` "NEXT" (logged since spine 2d-ii); `verify.py::_permitted_by_bar`
   — Exempt reference_leaf/threshold-None claims (scored by e-LOND alone) so they batch-license, removing
   the per-claim isolation the licensed-spine build needed. The one concrete logged cleanup.
