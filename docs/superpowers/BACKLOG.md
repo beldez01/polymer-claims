@@ -212,8 +212,14 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   golden bundle unchanged. 3 new tests. Umbrella-only (attestation.py); grammar/protocol untouched; Corpus 4.
   — **Slice-2 follow-ups (not this core):** a "meaningful benchmark" fixture/demo + an optional `content` field on
   `ResourceDescriptor` (inline small artifacts). The attestation chain / SLSA resolvedDependencies — the heart — is done.
-- [ ] **v2 Slice 3 — defeat/drift/reinstatement/replay hardening** · `BUILD` · v2 design §13
-  — Defeat/drift/reinstatement/replay-over-time + tamper depth + downgraded-oracle for evidence claims.
+- [ ] **v2 Slice 3 — replay/tamper-depth/downgraded-oracle** (defeat/drift/reinstatement ✅ AUDITED 2026-07-14) · `BUILD` · v2 design §13
+  — **Audited: defeat/drift/reinstatement over the EVIDENCE_LICENSED route need NO special-casing** — an
+  evidence claim's `.licensing` is a plain `Licensing(route=EVIDENCE_LICENSED, satisfactions=(…))`, so the
+  route-agnostic machinery already covers it: defeat/grounded-out pinned by `test_evidence_grounded_out_rejected`;
+  reinstatement selects on `DEFEAT_GROUNDED_OUT` (route-blind); **drift now pinned end-to-end** by
+  `test_evidence_licensed_claim_drifts_and_reopens` (flagged → reopened MATERIALIZATION_DRIFTED → e-LOND
+  discovery retracted). protocol 540. **Remaining Slice-3 build:** replay-over-time, tamper/boundary depth
+  (adversarial provenance-chain), downgraded-oracle for evidence claims — a multi-fire spec→plan→TDD arc.
 
 ## 3. Gate-integrity & core-grammar code debts
 *Correctness/robustness of the licensing machinery itself — where a silent failure is most costly.*

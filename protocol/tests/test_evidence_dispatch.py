@@ -812,3 +812,39 @@ def test_criterion_threshold_mismatch_predispatch_failure():
     assert c.status == Status.PENDING, f"expected PENDING, got {c.status}"
     assert c.pending_reason == PendingReason.EXECUTION_ERROR
     assert c.licensing is None
+
+
+# ---------------------------------------------------------------------------
+# v2 Slice 3 (audit): defeat/drift/reinstatement over the EVIDENCE_LICENSED route
+# ---------------------------------------------------------------------------
+# The evidence claim's licensing is a plain Licensing (route=EVIDENCE_LICENSED) carrying
+# satisfactions[].materialization, so the route-agnostic post-licensing machinery covers it with
+# NO special-casing: defeat/grounded-out is already pinned by test_evidence_grounded_out_rejected;
+# reinstatement selects on RejectionReason.DEFEAT_GROUNDED_OUT (route-blind). The one dimension not
+# yet exercised through the evidence route is drift — pinned here.
+
+
+def test_evidence_licensed_claim_drifts_and_reopens():
+    """An EVIDENCE_LICENSED claim whose materialization no longer matches the current context is
+    flagged by drift_pass and re-opened to PENDING/MATERIALIZATION_DRIFTED, with its e-LOND
+    discovery retracted — i.e. drift is route-agnostic and needs no evidence special case."""
+    from polymer_grammar import PendingReason
+    from polymer_protocol.drift import drift_pass, reopen_drifted
+
+    corpus, runtime, ctx = _build_setup_with_e_value(e_value=100.0)
+    result = run_cycle(corpus, (), ctx, evidence_runtime=runtime)
+    lic = result.corpus.by_id()["ev1"]
+    assert lic.status == Status.LICENSED and lic.licensing.route == LicenseRoute.EVIDENCE_LICENSED
+
+    # Advance data_version → the licensed materialization (d1) is stale.
+    newer = MaterializationContext(id="M2", api_version="v1", data_version="d2")
+    _, rec = drift_pass(result.corpus, current=newer)
+    assert "ev1" in {f.claim_id for f in rec.drifted}  # flagged, not skipped
+
+    reopened = reopen_drifted(result.corpus, rec)
+    ev = reopened.by_id()["ev1"]
+    assert ev.status == Status.PENDING
+    assert ev.pending_reason == PendingReason.MATERIALIZATION_DRIFTED
+    assert ev.licensing is None
+    # LICENSED <=> live e-LOND discovery: reopening must retract the discovery.
+    assert all(t.retracted for t in reopened.fdr_ledger.tests if t.claim_id == "ev1")

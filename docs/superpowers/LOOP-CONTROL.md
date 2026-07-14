@@ -190,6 +190,12 @@ now built; it needs your scientific curation + review.
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — v2 Slice 3 (audit): defeat/drift/reinstatement cover the EVIDENCE_LICENSED route** (direct to main → origin).
+  Evidence claims carry a plain `Licensing(route=EVIDENCE_LICENSED, satisfactions=(…))`, so the route-agnostic
+  post-licensing machinery needs no special case: defeat/grounded-out already tested; reinstatement selects on
+  DEFEAT_GROUNDED_OUT (route-blind); drift now pinned end-to-end (`test_evidence_licensed_claim_drifts_and_reopens`
+  — flagged → reopened MATERIALIZATION_DRIFTED → discovery retracted). Test-only; protocol 540. BACKLOG item
+  narrowed: remaining Slice-3 = replay-over-time + tamper/boundary depth + downgraded-oracle (multi-fire arc).
 - **2026-07-14 — GAP-8: `MeasurementContext.target_locus` (gene/locus sub-key)** (direct to main → origin).
   Optional gene/locus identity (nominal, relabeling-invariant) that previously leaked into free-text
   `condition`. Additive + byte-identical via a drop-when-None `@model_serializer` (every pre-field context
