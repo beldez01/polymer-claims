@@ -148,10 +148,14 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   bias residue as its standing rebuttal), `is_independence_claim`, `independence_verdict_for` (LICENSED→True /
   REJECTED→False / else None), and `multiply_allowed(cohorts_verdict, independence_verdict)` — the gate decision,
   PROVEN byte-identical to today when no independence claim (`multiply_allowed(v, None) == (v is not False)`).
-  7 tests; grammar 602 / protocol 517 UNCHANGED (zero licensing source touched). **REMAINS: the live wire-in**
-  (thread the corpus/verdict into `replication.py:130` + `expression_floor_replication.py:99` and replace
-  `cohorts_error_independent(...) is not False` with `multiply_allowed(...)`) — a licensing-behavior change,
-  **FLAGGED for operator review in LOOP-CONTROL**, not applied autonomously.
+  7 tests; grammar 602 / protocol 517 UNCHANGED (zero licensing source touched).
+  — **②b WIRE-IN APPLIED 2026-07-14 (USER-AUTHORIZED)** on `feat/independence-multiply-wire`: `replication.py:130`
+  + `expression_floor_replication.py:99` now `multiply_allowed(cohorts_error_independent((sat_a,sat_b)),
+  independence_verdict_for(corpus.claims, contract_a.contract_uid, contract_b.contract_uid))` — the multiply is
+  capped by a licensed/refuted `independence` claim keyed on the two COHORT contract_uids (both files already take
+  `corpus`, so no threading needed). **BYTE-IDENTICAL** for today's corpora (no independence claim → verdict None →
+  `multiply_allowed(v,None) == v is not False`): grammar 608 / protocol 528 + 4 existing replication tests unchanged;
+  1 new test proves a REFUTED independence claim withdraws the multiply (REPLICATED→single-leg e1). ② is now COMPLETE.
 - [x] **neg-whisper ③ — residue budget for the PENDING graveyard** · `HARDEN` · neg-whisper §4
   — Residue-value term in `SchedulerWeights`/`economics.py` so PENDING (esp. `duhem_underdetermined`)
   earns scheduled re-examination instead of silently accreting. Byte-identical when weight = 0.

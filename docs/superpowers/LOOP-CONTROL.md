@@ -72,6 +72,10 @@ will supply **ClinVar + AlphaMissense + ESM1v** → build the adapter-independen
 **Execution order:** ②b (umbrella, cleanest) → §3 → §9 (umbrella wrapper) → Durendal pre-reg mechanics → ClinVar
 loader (+ live run when files land). Each: branch → TDD → byte-identity proof → per-item review → merge local → PUSH.
 
+**MANDATE PROGRESS:** ✅ **1. ②b multiply-gate wire-in — DONE + pushed** (both replication sites cap the multiply by
+`independence_verdict_for(corpus.claims, contract_a.contract_uid, contract_b.contract_uid)`; byte-identical for
+today's corpora; a refuted independence claim withdraws the multiply). NEXT: **2. §3 strength=None untrusted-guard.**
+
 ## ⏹ (prior stop note — superseded by the mandate above) autonomously-completable work was done; the rest needed the user.
 
 **Why stopped (honest):** the entire tranche of clean, safe, additive backlog work is shipped (~19 items, below).

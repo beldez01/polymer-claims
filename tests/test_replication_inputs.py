@@ -45,6 +45,32 @@ def test_replication_produces_satisfaction_and_product_evalue():
     assert rep.evidence["c1"] == e1 * e2
 
 
+def test_refuted_independence_claim_withdraws_the_multiply():
+    # neg-whisper ②b: a REJECTED `independence` claim for the cohort pair caps the multiply -> the
+    # dependent license drops to single-leg standing (e1 only), even though the shared-cause factor
+    # gate would allow the multiply.
+    from polymer_grammar import RejectionReason, Status
+
+    from polymer_claims.independence_claim import make_independence_claim
+
+    claim = region_delta_beta_claim("c1")
+    refuted_indep = make_independence_claim(
+        "epicv2_casectrl_demo@1", "epicv2_casectrl_demo_b@1",
+        rho_cv=0.9, e_value=0.2, independent=False,
+    ).model_copy(update={
+        "status": Status.REJECTED, "pending_reason": None,
+        "rejection_reason": RejectionReason.REFUTED,
+    })
+    corpus = Corpus(claims=(claim, refuted_indep), fdr_ledger=FDRLedger(target_fdr=0.05))
+    rep = build_replication_inputs(corpus, _BASE, bindings={"c1": _REF_B})
+
+    node = claim.evaluation_plan.graph.nodes[0]
+    comparator = claim.evaluation_plan.criterion.comparator
+    a1, b1 = _region_group_means(node)
+    e1 = betting_evalue(a1, b1, threshold=0.10, comparator=comparator)
+    assert rep.evidence["c1"] == e1  # multiply WITHDRAWN (single-leg), not e1*e2
+
+
 def test_same_cohort_binding_is_not_replication():
     claim = region_delta_beta_claim("c2")  # cohort A = epicv2_casectrl_demo@1
     corpus = _corpus(claim)

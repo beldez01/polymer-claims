@@ -12,6 +12,7 @@ from polymer_protocol.corpus import Corpus
 from .claim_detail import _compare
 from .contracts import load_contract
 from .evidence import _terminal_node, evidence_map
+from .independence_claim import independence_verdict_for, multiply_allowed
 from .expression_floor_adapters import ExpressionFloorHLAdapter, ExpressionFloorMeanAdapter
 from .expression_floor_evidence import expression_floor_evalue
 from .replication import ReplicationInputs, _rebind
@@ -96,7 +97,14 @@ def build_expr_replication_inputs(
                 id=f"{base_ctx.id}-primary-{contract_a.contract_uid}",
                 api_version=base_ctx.api_version, data_version=base_ctx.data_version,
                 dimnames_hash=contract_a.dimnames_hash, shared_cause_factors=factors_a))
-        if cohorts_error_independent((sat_a, sat_b)) is not False:
+        # neg-whisper ②b: cap the multiply by BOTH the shared-cause gate AND any independence CLAIM
+        # for this cohort pair (None when absent -> byte-identical to the bare gate).
+        if multiply_allowed(
+            cohorts_error_independent((sat_a, sat_b)),
+            independence_verdict_for(
+                corpus.claims, contract_a.contract_uid, contract_b.contract_uid
+            ),
+        ):
             evidence[cid] = evidence[cid] * e2
 
     return ReplicationInputs(replications=replications, evidence=evidence)

@@ -26,6 +26,7 @@ from polymer_protocol.corpus import Corpus
 from .claim_detail import _compare
 from .contracts import load_contract
 from .evidence import _terminal_node, betting_evalue, evidence_map
+from .independence_claim import independence_verdict_for, multiply_allowed
 from .methyl_adapters import (
     RegionHodgesLehmannAdapter,
     RegionMeanDiffAdapter,
@@ -127,7 +128,15 @@ def build_replication_inputs(
                 shared_cause_factors=contract_a.shared_cause_factors,
             ),
         )
-        if cohorts_error_independent((sat_a, sat_b)) is not False:
+        # neg-whisper ②b: the multiply is capped by BOTH the shared-cause-factor gate AND any
+        # licensed/refuted `independence` CLAIM in the corpus for this cohort pair. No such claim
+        # (today's corpora) -> verdict None -> multiply_allowed(v, None) == (v is not False) -> byte-identical.
+        if multiply_allowed(
+            cohorts_error_independent((sat_a, sat_b)),
+            independence_verdict_for(
+                corpus.claims, contract_a.contract_uid, contract_b.contract_uid
+            ),
+        ):
             evidence[cid] = evidence[cid] * e2
 
     return ReplicationInputs(replications=replications, evidence=evidence)
