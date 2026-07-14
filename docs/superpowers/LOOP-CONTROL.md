@@ -45,19 +45,15 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `1556758`, clean tree, **40 commits ahead of origin (NOT pushed — policy)**.
-- **§1 CLUSTER COMPLETE** (B1/B2-primitive/B3/B4) + **§2 so far: C1 probe ✓ · R1 lineage ✓ · neg-whisper ②a ✓.**
-- **Next: neg-whisper ②b (GATE-TOUCHING — take care).** Make independence a licensable CLAIM whose verdict caps the
-  multiply-e-values decision. Grounding done: the multiply site is `replication.py:130` +
-  `expression_floor_replication.py:99` — `if cohorts_error_independent((sat_a,sat_b)) is not False: evidence[cid]*=e2`.
-  `cohorts_error_independent` is in `grammar/src/polymer_grammar/licensing.py:156`; shared-cause τ/jaccard in
-  `grammar/.../shared_cause.py` (`SHARED_CAUSE_TAU=0.5`; the strength-cap pattern to mirror is
-  `CONFIRMATORY_SEVERITY_CEILING`). ②a's `correlated_variance_probe` (`adapter_independence.py`) is the measured
-  evidence to plug in. **HARD REQ: additive + BYTE-IDENTICAL when no independence claim present** (every existing
-  licensing outcome unchanged — this changes the multiply gate, so prove it). A defeat on the independence claim →
-  withdraw multiply → single-leg standing. Correlated-BIAS stays a named open defeater (②a's `CORRELATED_BIAS_DEFEATER`).
-  Likely spans fires; decompose (grammar independence-claim representation → umbrella evidence wiring → replication gate).
-  Then neg-whisper ③④⑤ → v2 slices 2/3 → §3 gate-integrity debts.
+- **On `main`** at `3a140fe`, clean tree, **42 commits ahead of origin (NOT pushed — policy)**.
+- **§1 CLUSTER COMPLETE** (B1/B2-primitive/B3/B4) + **§2 so far: C1 ✓ · R1 ✓ · neg-whisper ②a ✓ · ②b-logic ✓** (live
+  multiply wire-in FLAGGED for user, not applied).
+- **Next: neg-whisper ③** — residue budget for the PENDING graveyard: a residue-value term in
+  `SchedulerWeights`/`protocol/.../economics.py` so PENDING (esp. `duhem_underdetermined`) earns SCHEDULED
+  re-examination instead of silently accreting. Spec `2026-07-07-neg-whisper-backlog-design.md` §4. **Byte-identical
+  when weight = 0** (default off). GROUND on `economics.py` SchedulerWeights + how PENDING claims are (not) rescheduled.
+  Then ④ (q stationarity horizon), ⑤ (severity-backed licensed negative — forbidden vs unobserved), → v2 slices 2/3 →
+  §3 gate-integrity debts. Each: branch → TDD → byte-identity proof for grammar/protocol → merge local.
 - **Deferred follow-ups (tracked in BACKLOG, not lost):** B2-integration (wire real populate_universe + viewer at
   the store — slow-pipeline-gated); reconcile `merge_universes` hard-coded modality strings to the B1 controlled vocab.
 - Foundations digest: `notes/2026-07-14-foundations-digest-for-loop.md` (read for §2/§9 grounding).
