@@ -45,7 +45,7 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `e88aec2` (about to merge ⑤), clean tree, **NOT pushed — policy**.
+- **On `main`** at `54be240`, clean tree, **48 commits ahead of origin (NOT pushed — policy)**.
 - **§1 COMPLETE** + **§2 neg-whisper arc COMPLETE: C1 ✓ · R1 ✓ · ②a ✓ · ②b-logic ✓ (wire-in FLAGGED) · ③ ✓ · ④ ✓ · ⑤-repr ✓.**
   (① shipped pre-loop. ②b live wire-in + ⑤ real-EWAS-non-effect licensing + ⑤ viewer are the remaining §2 seams —
   the first FLAGGED, the latter two data/viewer-gated.)
