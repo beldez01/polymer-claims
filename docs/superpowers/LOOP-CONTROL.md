@@ -45,7 +45,7 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `7957c82` (about to merge ④), clean tree, **NOT pushed — policy**.
+- **On `main`** at `e88aec2`, clean tree, **46 commits ahead of origin (NOT pushed — policy)**.
 - **§1 COMPLETE** (B1/B2p/B3/B4) + **§2: C1 ✓ · R1 ✓ · ②a ✓ · ②b-logic ✓ (wire-in FLAGGED) · ③ ✓ · ④ ✓.**
 - **Next: neg-whisper ⑤** — distinguish "forbidden" from "unobserved": a severity-backed LICENSED-NEGATIVE claim
   path so the morphospace "forbidden region" is separable from "not yet looked." Spec §6 (the LARGEST of the four).
