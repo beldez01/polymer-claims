@@ -131,6 +131,73 @@ def independence_report(
     )
 
 
+# --- Correlated-VARIANCE probe (neg-whisper ② evidence leg) -----------------------------------
+#
+# The shared-cause / multiply-e-values gate (replication.py) today decides independence from
+# operator-ASSERTED factor-tag Jaccard vs a fixed τ. This probe supplies the MEASURED evidence the
+# spec asks for: perturb a SHARED input and measure how JOINTLY the two legs' outputs move. High
+# joint movement ⇒ the legs share a variance source ⇒ their errors are NOT independent, so their
+# e-values must not multiply. This is the correlated-VARIANCE axis only.
+#
+# CORRELATED-BIAS RESIDUE (spec §3 scope guard): correlated BIAS — both legs wrong in the SAME
+# direction from a shared prior/reference, invisible to agreement — is UN-INSTRUMENTABLE from within
+# (it needs an EXTERNAL anchor: a third heterodox witness, R4). It is recorded as a NAMED OPEN
+# DEFEATER, never silently absorbed.
+CORRELATED_BIAS_DEFEATER = "correlated_bias:needs_external_anchor"
+
+# |ρ_cv| ≥ τ ⇒ the two legs share a variance source ⇒ NOT independent (mirrors SHARED_CAUSE_TAU).
+SHARED_VARIANCE_TAU: float = 0.5
+
+
+def perturbation_responses(outputs: Sequence[float], baseline: float) -> tuple[float, ...]:
+    """Each perturbed output's deviation from the leg's unperturbed baseline (its response to the
+    shared-input perturbation battery)."""
+    return tuple(o - baseline for o in outputs)
+
+
+def correlated_variance(responses_a: Sequence[float], responses_b: Sequence[float]) -> float:
+    """Joint movement of two legs under a battery of SHARED-input perturbations = Pearson ρ of their
+    response vectors. |ρ|→1 ⇒ they move together (shared variance source); ρ≈0 ⇒ independent."""
+    return _pearson(responses_a, responses_b)
+
+
+def variance_independent(rho_cv: float, *, tau: float = SHARED_VARIANCE_TAU) -> bool | None:
+    """Independence verdict from the correlated-variance ρ: ``|ρ| < τ`` ⇒ independent. ``None`` when
+    ρ is undefined (a leg that never moved under perturbation — no measurable shared variance)."""
+    if math.isnan(rho_cv):
+        return None
+    return abs(rho_cv) < tau
+
+
+@dataclass(frozen=True)
+class CorrelatedVarianceReport:
+    rho_cv: float
+    independent: bool | None
+    n_eff: float
+    bias_residue: str = CORRELATED_BIAS_DEFEATER  # the un-instrumentable axis, named not hidden
+
+
+def correlated_variance_probe(
+    outputs_a: Sequence[float],
+    baseline_a: float,
+    outputs_b: Sequence[float],
+    baseline_b: float,
+    *,
+    tau: float = SHARED_VARIANCE_TAU,
+) -> CorrelatedVarianceReport:
+    """The shared-input perturbation probe: given both legs' outputs across a shared-input
+    perturbation battery (and each leg's unperturbed baseline), measure correlated variance ρ, the
+    independence verdict, and ``N_eff``. Records the correlated-bias residue as an open defeater."""
+    ra = perturbation_responses(outputs_a, baseline_a)
+    rb = perturbation_responses(outputs_b, baseline_b)
+    rho = _pearson(ra, rb)
+    return CorrelatedVarianceReport(
+        rho_cv=rho,
+        independent=variance_independent(rho, tau=tau),
+        n_eff=n_eff_from_rho(abs(rho)) if not math.isnan(rho) else math.nan,
+    )
+
+
 def run_variant_effect_probe(*_args, **_kwargs):  # pragma: no cover - data-gated
     """The live AlphaMissense-vs-ESM1v-on-ClinVar Step-0 experiment. **DATA-GATED / BLOCKED** — needs
     external data NOT in this repo:

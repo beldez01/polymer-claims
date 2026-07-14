@@ -131,6 +131,17 @@ can't yet see. Plan-ready; each gated on a small first probe.*
 - [ ] **neg-whisper ② — shared-cause independence as a defeasible claim** · `HARDEN` · `specs/2026-07-07-neg-whisper-backlog-design.md` §3
   — Promote the multiply-e-values gate from an operator flag to a licensable `independence` claim with a
   correlated-variance probe. "The load-bearing risk named in every doc." (Item ① shipped.)
+  — **②a SHIPPED 2026-07-14 (loop)** on `feat/correlated-variance-probe`: the MEASURED evidence leg. Extended
+  `adapter_independence.py` with the correlated-VARIANCE perturbation probe — `perturbation_responses` (deviation
+  from baseline), `correlated_variance` (Pearson ρ of two legs' joint movement under a SHARED-input perturbation
+  battery), `variance_independent` (|ρ|<τ), `correlated_variance_probe`→`CorrelatedVarianceReport`. The
+  correlated-BIAS axis is recorded as a NAMED OPEN DEFEATER (`CORRELATED_BIAS_DEFEATER` — un-instrumentable from
+  within, needs an external anchor / R4), never silently absorbed (spec §3 scope guard). 5 tests; umbrella-only,
+  no gate change; Corpus 4. **②b REMAINS (gate-touching, next):** make independence a licensable CLAIM whose verdict
+  (from this probe's e-value) caps the multiply in `replication.py:130` / `expression_floor_replication.py:99`
+  (`cohorts_error_independent`, `grammar/.../licensing.py:156`) — ADDITIVE + BYTE-IDENTICAL when no independence
+  claim present (default multiply behavior preserved); a defeat on the independence claim withdraws the multiply →
+  single-leg standing. Do with byte-identity proof (existing licensing outcomes unchanged).
 - [ ] **neg-whisper ③ — residue budget for the PENDING graveyard** · `HARDEN` · neg-whisper §4
   — Residue-value term in `SchedulerWeights`/`economics.py` so PENDING (esp. `duhem_underdetermined`)
   earns scheduled re-examination instead of silently accreting. Byte-identical when weight = 0.

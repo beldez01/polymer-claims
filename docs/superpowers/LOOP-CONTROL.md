@@ -45,15 +45,19 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `32ba8ed`, clean tree, **38 commits ahead of origin (NOT pushed — policy)**.
-- **§1 CLUSTER COMPLETE** (B1/B2-primitive/B3/B4) + **§2 so far: C1 probe ✓ · R1 lineage ✓.**
-- **Next: neg-whisper ②** — promote the shared-cause / multiply-e-values gate from an operator-asserted flag to a
-  licensable `independence` claim with a correlated-variance probe (now C1 `adapter_independence` supplies the ρ
-  instrument + R1 supplies lineage tags). Spec `specs/2026-07-07-neg-whisper-backlog-design.md` §3. GROUND FIRST on
-  the real `shared_cause.py` (grammar) + `cohorts_error_independent` (`verify.py`/`replication.py`) — foundations
-  digest §3: today it overlaps operator-DECLARED factor labels vs a fixed τ, not measured ρ. Decide scope: likely a
-  grammar `independence` claim pattern (additive, byte-identity) + wiring the ρ probe as its evidence; keep it
-  minimal, may span fires. Then neg-whisper ③④⑤ → v2 slices 2/3 → §3 gate-integrity debts. Data-gated → machinery + mark BLOCKED.
+- **On `main`** at `32ba8ed` (about to merge ②a), clean tree, **NOT pushed — policy**.
+- **§1 CLUSTER COMPLETE** (B1/B2-primitive/B3/B4) + **§2 so far: C1 probe ✓ · R1 lineage ✓ · neg-whisper ②a ✓.**
+- **Next: neg-whisper ②b (GATE-TOUCHING — take care).** Make independence a licensable CLAIM whose verdict caps the
+  multiply-e-values decision. Grounding done: the multiply site is `replication.py:130` +
+  `expression_floor_replication.py:99` — `if cohorts_error_independent((sat_a,sat_b)) is not False: evidence[cid]*=e2`.
+  `cohorts_error_independent` is in `grammar/src/polymer_grammar/licensing.py:156`; shared-cause τ/jaccard in
+  `grammar/.../shared_cause.py` (`SHARED_CAUSE_TAU=0.5`; the strength-cap pattern to mirror is
+  `CONFIRMATORY_SEVERITY_CEILING`). ②a's `correlated_variance_probe` (`adapter_independence.py`) is the measured
+  evidence to plug in. **HARD REQ: additive + BYTE-IDENTICAL when no independence claim present** (every existing
+  licensing outcome unchanged — this changes the multiply gate, so prove it). A defeat on the independence claim →
+  withdraw multiply → single-leg standing. Correlated-BIAS stays a named open defeater (②a's `CORRELATED_BIAS_DEFEATER`).
+  Likely spans fires; decompose (grammar independence-claim representation → umbrella evidence wiring → replication gate).
+  Then neg-whisper ③④⑤ → v2 slices 2/3 → §3 gate-integrity debts.
 - **Deferred follow-ups (tracked in BACKLOG, not lost):** B2-integration (wire real populate_universe + viewer at
   the store — slow-pipeline-gated); reconcile `merge_universes` hard-coded modality strings to the B1 controlled vocab.
 - Foundations digest: `notes/2026-07-14-foundations-digest-for-loop.md` (read for §2/§9 grounding).
@@ -68,6 +72,11 @@ update docs. The user is away; act on established work, don't invent scope or ma
   accumulating on local main.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — neg-whisper ②a: correlated-variance probe** (`feat/correlated-variance-probe` → local main, ff).
+  Extended `adapter_independence.py`: `correlated_variance_probe` (shared-input perturbation → joint-movement ρ →
+  independence verdict) — the measured evidence leg for the multiply gate; correlated-BIAS named as an open defeater
+  (`CORRELATED_BIAS_DEFEATER`). 5 tests; umbrella-only, NO gate change; Corpus 4. ②b (wire verdict into the
+  replication multiply gate, byte-identically) remains.
 - **2026-07-14 — R1: provenance-lineage on AdapterCredential** (`feat/adapter-lineage` → local main, ff).
   `AdapterCredential.lineage: tuple[str,...]=()` + `adapters_independent` refusal QUAD (shared lineage tag →
   not independent, even with distinct owner+hash). Additive, byte-identical for lineage-less registries (512

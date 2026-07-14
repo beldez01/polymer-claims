@@ -8,12 +8,19 @@ from __future__ import annotations
 
 import math
 
+import pytest
+
 from polymer_claims.adapter_independence import (
+    CORRELATED_BIAS_DEFEATER,
+    correlated_variance,
+    correlated_variance_probe,
     error_correlation,
     independence_report,
     n_eff_from_rho,
+    perturbation_responses,
     set_overlap_neff,
     signed_errors,
+    variance_independent,
 )
 
 
@@ -65,6 +72,42 @@ def test_independence_report_rho_neff_confusion_and_per_class():
     # per-class rho is computed where the class has variance (may be nan if degenerate)
     assert rep.rho_pathogenic is not None
     assert rep.rho_benign is not None
+
+
+def test_perturbation_responses_are_deviations_from_baseline():
+    assert perturbation_responses((1.2, 0.8, 1.5), 1.0) == (
+        pytest.approx(0.2), pytest.approx(-0.2), pytest.approx(0.5),
+    )
+
+
+def test_correlated_variance_high_when_legs_move_together():
+    # both legs respond to the shared perturbation in lockstep -> high rho -> NOT independent
+    a = (0.1, 0.2, 0.3, 0.4)
+    b = (0.2, 0.4, 0.6, 0.8)  # = 2*a: perfectly correlated response
+    rho = correlated_variance(a, b)
+    assert math.isclose(rho, 1.0, abs_tol=1e-9)
+    assert variance_independent(rho) is False
+
+
+def test_correlated_variance_low_when_legs_move_independently():
+    a = (1.0, -1.0, 1.0, -1.0)
+    b = (1.0, 1.0, -1.0, -1.0)  # orthogonal responses
+    rho = correlated_variance(a, b)
+    assert math.isclose(rho, 0.0, abs_tol=1e-9)
+    assert variance_independent(rho) is True
+
+
+def test_variance_independent_none_when_a_leg_never_moves():
+    # a leg with no response variance -> undefined rho -> None (not a false "independent")
+    assert variance_independent(correlated_variance((0.0, 0.0, 0.0), (1.0, 2.0, 3.0))) is None
+
+
+def test_correlated_variance_probe_report():
+    # leg A baseline 1.0, moves; leg B baseline 2.0, moves in lockstep -> dependent
+    rep = correlated_variance_probe((1.1, 1.2, 1.3), 1.0, (2.2, 2.4, 2.6), 2.0)
+    assert rep.independent is False
+    assert rep.rho_cv > 0.9
+    assert rep.bias_residue == CORRELATED_BIAS_DEFEATER  # residue named, not hidden
 
 
 def test_set_overlap_neff_claim_shape():
