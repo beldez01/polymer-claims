@@ -45,7 +45,7 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `32ba8ed` (about to merge ②a), clean tree, **NOT pushed — policy**.
+- **On `main`** at `1556758`, clean tree, **40 commits ahead of origin (NOT pushed — policy)**.
 - **§1 CLUSTER COMPLETE** (B1/B2-primitive/B3/B4) + **§2 so far: C1 probe ✓ · R1 lineage ✓ · neg-whisper ②a ✓.**
 - **Next: neg-whisper ②b (GATE-TOUCHING — take care).** Make independence a licensable CLAIM whose verdict caps the
   multiply-e-values decision. Grounding done: the multiply site is `replication.py:130` +
