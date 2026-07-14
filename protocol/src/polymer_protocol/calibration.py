@@ -11,7 +11,7 @@ import math
 from collections import defaultdict
 from enum import Enum
 
-from pydantic import Field, model_validator
+from pydantic import Field, model_serializer, model_validator
 
 from .base import _Model
 from .corpus import Corpus
@@ -162,6 +162,26 @@ class CalibrationReport(_Model):
     definitional: TierStat
     anchored: TierStat
     attested: TierStat
+    # neg-whisper ④ — stationarity horizon. `q` is an actuarial rate; the world is non-stationary
+    # (residualism §4), so a reported q is "valid as of" a content-address frontier and EXPIRES when a
+    # watched dependency drifts. `validity_frontier` = the content-addresses (dimnames_hashes /
+    # data-versions) whose drift would invalidate this q; `as_of_current` = True iff none has drifted,
+    # False once a watched hash has (stale, not wrong — mirrors a re-opened license). Both UNSET
+    # (default) => byte-identical to the pre-field report (dropped by the serializer below), so the
+    # signed certificate is unchanged until a caller stamps a horizon.
+    validity_frontier: tuple[str, ...] = ()
+    as_of_current: bool | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler) -> dict:
+        """Drop the ④ horizon fields when unset so an unstamped report serializes byte-identically to
+        the pre-field grammar (no new key in the certificate). Mirrors leaf.py/capability.py."""
+        data = handler(self)
+        if not self.validity_frontier:
+            data.pop("validity_frontier", None)
+        if self.as_of_current is None:
+            data.pop("as_of_current", None)
+        return data
 
 
 _Z = 1.959963984540054  # 95% normal quantile
@@ -292,6 +312,29 @@ def calibration_summary(ledger: CalibrationLedger, *, target_q: float) -> Calibr
         anchored=_anchored_stat(recs, target_q),
         attested=_attested_stat(recs, target_q),
     )
+
+
+def stamp_stationarity(
+    report: CalibrationReport,
+    *,
+    frontier: tuple[str, ...],
+    drifted: tuple[str, ...] = (),
+) -> CalibrationReport:
+    """Stamp `report`'s stationarity horizon (neg-whisper ④): `frontier` = the content-addresses
+    (materialization dimnames_hashes / data-versions) whose drift would invalidate this q; `drifted`
+    = the watched hashes observed to have drifted so far. `as_of_current` is True iff none of the
+    frontier has drifted, False once a watched hash has (q EXPIRED — stale, not wrong).
+
+    Pure. Deterministic (frontier sorted). An empty `frontier` returns the report unchanged (fields
+    stay unset ⇒ byte-identical) — an unstamped q makes no stationarity claim rather than a false one.
+    """
+    if not frontier:
+        return report
+    fset = set(frontier)
+    return report.model_copy(update={
+        "validity_frontier": tuple(sorted(fset)),
+        "as_of_current": fset.isdisjoint(drifted),
+    })
 
 
 class PressureContext(_Model):

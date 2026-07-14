@@ -163,9 +163,19 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   weight 0** (economics 15 + protocol 517 unchanged → 520 with 3 new tests). Pure-protocol, numpy-free; Corpus 4.
   Note: a caller that ENABLES the residue weight must handle the new `RESIDUE_REEXAM` action kind (scheduler is
   recommend-only; today's callers key on RUN_CYCLE/DRIFT, so default-off is unaffected).
-- [ ] **neg-whisper ④ — stationarity horizon on `q`** · `HARDEN` · neg-whisper §5
+- [x] **neg-whisper ④ — stationarity horizon on `q`** · `HARDEN` · neg-whisper §5
   — Stamp corpus `q` with a drift-epoch / validity window so the actuarial framing carries its
   stationarity assumption explicitly; `q` expires when a watched dependency drifts.
+  — **SHIPPED 2026-07-14 (loop)** on `feat/q-stationarity-horizon`: `CalibrationReport` (protocol `calibration.py`)
+  gained optional `validity_frontier: tuple[str,...]` (content-addresses whose drift invalidates this q) +
+  `as_of_current: bool | None`, with a drop-when-unset `@model_serializer` (the leaf.py recipe) so an unstamped
+  report is BYTE-IDENTICAL to pre-④ (the signed certificate embeds CalibrationReport — 143 umbrella
+  calibration/attestation tests + 21 protocol calibration tests unchanged). Pure `stamp_stationarity(report,
+  frontier, drifted)` sets the frontier (sorted) + `as_of_current = frontier.isdisjoint(drifted)` — a drift on a
+  constituent hash marks q EXPIRED (stale, not wrong; mirrors a re-opened license); empty frontier makes no
+  stationarity claim. 5 new tests; protocol 520→525; grammar untouched; Corpus 4. Does NOT forecast the future
+  (scope guard). Umbrella wiring (extract the real frontier from a corpus's licenses' MaterializationContexts +
+  detect drift → call stamp_stationarity at report time) is a thin follow-up — the mechanism is in place.
 - [ ] **neg-whisper ⑤ — severity-backed licensed negative (forbidden vs unobserved)** · `BUILD` · neg-whisper §6
   — New pattern licensing a severe test for *absence*; maps morphospace occupied/empty/forbidden to real
   corpus states. Touches the licensing-not-meaning firewall. (Largest of the four remaining seams.)
