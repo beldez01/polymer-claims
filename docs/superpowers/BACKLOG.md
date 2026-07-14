@@ -190,8 +190,19 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   byte-identical); protocol 525 unchanged; Corpus 4. **Follow-ups (not this slice):** license a negative on a REAL
   EWAS non-effect through the gate (bounded-absence adapter/e-value — DATA-GATED), and viewer rendering of FORBIDDEN
   vs EMPTY (viewer). The firewall statement + operational trichotomy — the crux of doing ⑤ — are in place.
-- [ ] **v2 Slice 2 — attestation chain + certificate/SLSA `resolvedDependencies`** · `BUILD` · `specs/2026-06-29-v2-evidence-licensed-capability-design.md` §13
+- [x] **v2 Slice 2 — attestation chain + certificate/SLSA `resolvedDependencies`** · `BUILD` · `specs/2026-06-29-v2-evidence-licensed-capability-design.md` §13
   — Full attestation chain for the evidence-licensed route (Slice 1 shipped `9b8848c`).
+  — **CORE SHIPPED 2026-07-14 (loop)** on `feat/v2-slice2`. The gap: an EVIDENCE_LICENSED claim's SLSA
+  `resolvedDependencies` was built only from cohort hashes (empty for a benchmark claim), so the attestation chain
+  was blind to what produced the e-value; the real artifacts sat on `claim.licensing.evidence_provenance`, IGNORED by
+  attestation.py. Added `_evidence_resolved_dependencies(licensing)` — maps every `EvidenceProvenance` ref (benchmark
+  / executor-descriptor / evidence-policy / baseline-predictions / configs / capability / execution-contract /
+  optional oracle) to a `ResourceDescriptor{name, digest.sha256, role}` using the ALREADY-COMPUTED content addresses
+  (never fabricated; `bench:` prefix stripped), appended in `_statement` before the deterministic sort. **BYTE-IDENTICAL**
+  for the recompute route (no `evidence_provenance` → empty) — PROVEN: 76 attestation/certificate tests + the pinned
+  golden bundle unchanged. 3 new tests. Umbrella-only (attestation.py); grammar/protocol untouched; Corpus 4.
+  — **Slice-2 follow-ups (not this core):** a "meaningful benchmark" fixture/demo + an optional `content` field on
+  `ResourceDescriptor` (inline small artifacts). The attestation chain / SLSA resolvedDependencies — the heart — is done.
 - [ ] **v2 Slice 3 — defeat/drift/reinstatement/replay hardening** · `BUILD` · v2 design §13
   — Defeat/drift/reinstatement/replay-over-time + tamper depth + downgraded-oracle for evidence claims.
 

@@ -383,10 +383,47 @@ def _dep_sort_key(d) -> tuple:
     return (role, d.name, d.uri or "", sha, first_rid, raw_ph or "")
 
 
+def _evidence_resolved_dependencies(licensing) -> tuple[ResourceDescriptor, ...]:
+    """v2 Slice 2 — SLSA `resolvedDependencies` for the EVIDENCE_LICENSED route.
+
+    The cohort-based `_resolved_dependencies` yields nothing for a benchmark-evidence claim (no
+    `dimnames_hash`), leaving the attestation chain blind to what actually produced the e-value. This
+    lists the route's REAL, already-computed content-addressed artifacts from `evidence_provenance`
+    (benchmark / executor / baseline-predictions / evidence-policy / execution-contract / capability /
+    configs / optional oracle) — never fabricated. Empty for the recompute route (no
+    `evidence_provenance`), so those certificates stay byte-identical.
+    """
+    ep = getattr(licensing, "evidence_provenance", None)
+    if ep is None:
+        return ()
+
+    def _dep(name: str, ref: str | None, role: str) -> ResourceDescriptor | None:
+        if not ref:
+            return None
+        canonical = ref[len("bench:"):] if ref.startswith("bench:") else ref
+        return ResourceDescriptor(
+            name=name, digest=_digest_or_none(canonical), annotations=Annotations(role=role)
+        )
+
+    specs = (
+        ("evidence:benchmark", ep.benchmark_ref, "benchmark"),
+        ("evidence:executor-descriptor", ep.executor_descriptor_ref, "executor"),
+        ("evidence:evidence-policy", ep.evidence_policy_ref, "evidence-policy"),
+        ("evidence:baseline-predictions", ep.baseline_predictions_ref, "predictions"),
+        ("evidence:baseline-config", ep.baseline_config_ref, "config"),
+        ("evidence:predictor-config", ep.predictor_config_ref, "config"),
+        ("evidence:capability-descriptor", ep.capability_descriptor_ref, "capability"),
+        ("evidence:execution-contract", ep.execution_contract_digest, "execution-contract"),
+        ("evidence:oracle-dossier", ep.oracle_dossier_ref, "oracle"),
+    )
+    return tuple(d for d in (_dep(n, r, role) for n, r, role in specs) if d is not None)
+
+
 def _statement(claim, ledger, contract_index, registry) -> tuple[Statement, tuple[DrsObject, ...], tuple[str, ...]]:
     lic = claim.licensing
     reps = distinct_cohort_reps(lic)
     deps, drs_objects, unresolved = _resolved_dependencies(lic, contract_index, reps=reps)
+    deps = deps + _evidence_resolved_dependencies(lic)  # Slice 2: attest the evidence-route artifacts
     deps = tuple(sorted(deps, key=_dep_sort_key))
     builder, witnessed = _builder(lic, registry)
     invocation_id = reps[0].materialization.semantic_run_id if reps else None

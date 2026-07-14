@@ -54,14 +54,12 @@ update docs. The user is away; act on established work, don't invent scope or ma
   §13; §5 synbio Phase 3 firewall → Phase 4 Durendal); (iv) DEFER (§8 + several §3/§4). **Next: the big buildable
   BUILDs (v2 Slice 2, then synbio Phase 3), done as multi-fire spec→plan→TDD arcs — the last category with real
   autonomous runway.** Consider a longer wakeup delay (fires are now bigger). Do NOT force gated/flagged/DEFER items.
-- **IN PROGRESS: v2 Slice 2 arc** (branch `feat/v2-slice2`) — full attestation chain + certificate/SLSA
-  `resolvedDependencies` for the Slice-1 evidence-licensed route. NOT gate-touching (extends the certificate/notary
-  output, not the licensing gate) and NOT data-gated → a legit big buildable arc. Slice-2 design is THIN in the v2
-  spec (1 line) → AUTHOR it. Grounding agent dispatched (attestation.py certificate/DSSE structures + how the
-  evidence route attests + where SLSA resolvedDependencies attach + byte-identity/golden constraints). Next-fire:
-  use its map → write the Slice-2 spec/plan → decompose TDD tasks → build task 1 (likely: an additive, optional,
-  drop-when-unset `resolvedDependencies` ResourceDescriptor list on the certificate — byte-identical when absent,
-  PROVE via the pinned attestation-digest goldens). Per-task commits on the branch; merge at arc close.
+- **v2 Slice 2 CORE ✓** (attestation chain / SLSA resolvedDependencies for the evidence route; byte-identical,
+  golden unchanged). Follow-ups (meaningful-benchmark fixture, ResourceDescriptor.content) noted in BACKLOG.
+  **Next big buildable: v2 Slice 3** (defeat/drift/reinstatement/replay-over-time — v2 §13; assess gate-touching vs
+  additive) OR **§5 synbio Phase 3** (blinded seed + pre-registration firewall — `plans/2026-07-10-synbio-claims-universe.md`
+  §Phase 3; firewall admissibility + conclusion-stripping + commitment-hash/α-lock; Durendal is Phase 4). Both big,
+  buildable, not data-gated. Ground first; flag gate changes.
 - **§9 invariance-check ✓** (advisory; gate-wiring flagged). **Note on remaining backlog:** the clean safe/additive
   wins are largely done. What's left is mostly (i) GATE-TOUCHING → FLAG (3 already flagged: ②b, strength=None,
   invariance-wiring); (ii) DATA-GATED → build machinery + mark BLOCKED (R2 battery, wedge/real-data, GDSC→CHEBI,
@@ -106,6 +104,11 @@ update docs. The user is away; act on established work, don't invent scope or ma
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — v2 Slice 2 (core): evidence-route SLSA resolvedDependencies** (`feat/v2-slice2` → local main, ff).
+  `attestation.py::_evidence_resolved_dependencies` lists an EVIDENCE_LICENSED claim's real evidence artifacts
+  (benchmark/executor/predictions/policy/contract/capability/configs/oracle) as ResourceDescriptors with their
+  already-computed content addresses. Byte-identical for the recompute route (76 attestation + golden tests
+  unchanged). 3 tests; umbrella-only; grammar/protocol untouched; Corpus 4.
 - **2026-07-14 — §7: immuno reconstruction drift-guard** (`feat/immuno-corpus-guard` → local main, ff).
   `test_immuno_corpus_guard.py` pins that `collect_immuno()`'s reconstructed 11 claims form a strict,
   JSON-round-trippable Corpus (drift guard vs the hand-built viewer bundle). 1 test; no code/bundle change.
