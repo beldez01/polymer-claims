@@ -81,7 +81,12 @@ ALREADY closed by the air-gap (`verify.py:305` forces an untrusted claim to PEND
 regardless of the exemption, which skips only the BH multiplicity bar) — so a redundant `_permitted_by_bar` guard was
 unnecessary + the registry is correctly not threaded there. Pinned the exemption scope with a characterization test
 (protocol 530). No source change → byte-identical.
-NEXT: **3. §9 invariance precondition (UMBRELLA-side wrapper — do NOT import umbrella into protocol).**
+✅ **3. §9 invariance precondition — APPLIED + pushed.** `admit_by_invariance` (umbrella-side, purity-safe) wired
+into both `preregister` seams; drops INCOHERENT (ordinal-as-metric) claims before standing. Relations never gated,
+UNDECLARED logged-not-refused → byte-identical for today (grammar 608 / protocol 530 + spine 26 + pharmaco-fast 19
+unchanged; 2 new tests).
+NEXT: **4. Durendal pre-registration MECHANICS** (commitment_hash + α-slot lock + `firewall.assemble_blinded_seed`
+wiring; additive; two-stratum; Corpus 4). Then **5. ClinVar loader + skipif live test.**
 
 ## ⏹ (prior stop note — superseded by the mandate above) autonomously-completable work was done; the rest needed the user.
 

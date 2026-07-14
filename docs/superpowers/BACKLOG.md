@@ -435,8 +435,16 @@ that is still operator-**asserted**. These cross-ref existing rows rather than d
   registry's `ScaleType` for the space(s) the claim reads → `InvarianceVerdict` {COHERENT / UNCHECKED / INCOHERENT
   / UNDECLARED}. Catches the load-bearing "ordinal-as-metric" error (an ordinal-scale pattern reading a ratio/interval
   space). `invariance_ok(claim)` is the advisory precondition. 4 tests; umbrella-only; grammar/protocol untouched;
-  Corpus 4. **REMAINS (gate-touching → FLAGGED for operator):** wire `invariance_ok` as a HARD licensing precondition
-  in `verify.py` (reject INCOHERENT/UNDECLARED before LICENSED) — changes licensing outcomes; do like the ②b wire-in.
+  Corpus 4.
+  — **PRECONDITION APPLIED 2026-07-14 (USER-AUTHORIZED)** on `feat/invariance-precondition`: `admit_by_invariance(claims)
+  -> (admitted, refused)` (umbrella-side — PURITY-SAFE, NOT in protocol `verify.py`) wired into BOTH `preregister`
+  seams (`pharmaco_populate` + `expression_floor_populate`), dropping any claim whose pattern scale-class is
+  INCOHERENT with its measurement space before it can earn standing (so the ordinal-as-metric error never LICENSES).
+  Conservative: relations are never gated + UNDECLARED is LOGGED-not-refused (refusing it would drop
+  relation/unregistered-pattern claims + break byte-identity) — only the unambiguous INCOHERENT verdict is refused.
+  **BYTE-IDENTICAL for today's corpora** (all licensable claims are COHERENT metric-over-metric or UNCHECKED): grammar
+  608 / protocol 530 + spine 26 + pharmaco-fast 19 unchanged; 2 new tests (INCOHERENT refused; coherent pass-through
+  unchanged). Operator can tighten to also refuse UNDECLARED once every licensable pattern declares its invariance.
 - [ ] **Independence as MEASURED error-correlation, not asserted-label Jaccard** · `HARDEN` · epistemology §2.B — *same work as §2 adapter-independence R1–R5 + Step 0 + neg-whisper ②*
   — `grammar/.../shared_cause.py:54` overlaps operator-declared factor *labels* vs a fixed τ (comment:
   "operator-asserted factors"), not measured ρ. This row records that **the foundations doc overstates it

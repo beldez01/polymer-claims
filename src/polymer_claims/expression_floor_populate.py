@@ -16,6 +16,7 @@ from polymer_protocol import Corpus, run_cycle
 from .capabilities import CAPABILITY_CELLS
 from .contracts import load_contract
 from .evidence import _terminal_node
+from .invariance import admit_by_invariance
 from .expression_floor_adapters import (
     ExpressionFloorHLAdapter,
     ExpressionFloorMeanAdapter,
@@ -48,6 +49,9 @@ def preregister(corpus: Corpus, claims: list[Claim]) -> Corpus:
     bury a strong-but-late-alphabet signal (e.g. MTAP→Palbociclib) behind a ~10^6 threshold. The
     locked α is honored at verify: pre-registered claims resolve via resolve_test (verify.py
     Phase D) against the α locked HERE, never re-sorted by elond_decisions."""
+    # §9 invariance precondition (umbrella-side): drop scale-INCOHERENT claims before standing.
+    # Byte-identical when nothing is refused (spine claims are metric patterns over metric spaces).
+    claims, _refused_invariance = admit_by_invariance(claims)
     admitted = corpus.model_copy(update={"claims": corpus.claims + tuple(claims)})
     ledger = admitted.fdr_ledger
     pending = {t.claim_id for t in ledger.tests if t.e_value is None and not t.retracted}

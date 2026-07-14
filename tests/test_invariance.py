@@ -24,6 +24,7 @@ from polymer_grammar import (
 from polymer_claims.invariance import (
     InvarianceVerdict,
     ScaleClass,
+    admit_by_invariance,
     invariance_ok,
     invariance_report,
 )
@@ -73,6 +74,29 @@ def test_no_measurement_space_is_unchecked_not_failed():
     rep = invariance_report(_claim("c", _METRIC_PATTERN))  # no data_ref
     assert rep.verdict is InvarianceVerdict.UNCHECKED  # declared, nothing to cross-check
     assert invariance_ok(_claim("c", _METRIC_PATTERN))
+
+
+def test_admit_by_invariance_refuses_incoherent_admits_the_rest():
+    from polymer_grammar import RelationKind, Tier, make_relation_claim
+
+    coherent = _claim("coh", _METRIC_PATTERN, ref="se:gdsc_pharmaco@1")       # metric/metric -> COHERENT
+    incoherent = _claim("inc", _ORDINAL_PATTERN, ref="se:tcga_laml_fusion_expr@1")  # ordinal/metric -> INCOHERENT
+    unchecked = _claim("unc", _METRIC_PATTERN)                                 # no ref -> UNCHECKED
+    relation = make_relation_claim(
+        "rel", ["a"], ["b"], Tier.BIOLOGICAL, RelationKind.COHERES, 0.5, rationale="r",
+    )  # relations are never invariance-gated
+
+    admitted, refused = admit_by_invariance([coherent, incoherent, unchecked, relation])
+    assert {c.id for c in admitted} == {"coh", "unc", "rel"}
+    assert [c.id for c, _ in refused] == ["inc"]
+    assert refused[0][1].verdict is InvarianceVerdict.INCOHERENT
+
+
+def test_admit_by_invariance_byte_identical_when_nothing_incoherent():
+    # today's shape: all-coherent/unchecked -> nothing refused -> claims list passes through unchanged
+    claims = [_claim("a", _METRIC_PATTERN, ref="se:gdsc_pharmaco@1"), _claim("b", _METRIC_PATTERN)]
+    admitted, refused = admit_by_invariance(claims)
+    assert [c.id for c in admitted] == ["a", "b"] and refused == []
 
 
 def test_registered_patterns_all_declare_invariance_metadata():

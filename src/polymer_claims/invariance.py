@@ -14,13 +14,17 @@ review (see LOOP-CONTROL / BACKLOG §9). Pure read of grammar + the B1 registry;
 """
 from __future__ import annotations
 
+import logging
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
 
-from polymer_grammar import Claim, get_pattern
+from polymer_grammar import Claim, get_pattern, is_relation
 
 from polymer_claims import measurement_space as ms
 from polymer_claims.accumulating_store import contract_uids
+
+_log = logging.getLogger(__name__)
 
 
 class ScaleClass(str, Enum):
@@ -109,3 +113,36 @@ def invariance_ok(claim: Claim) -> bool:
         InvarianceVerdict.COHERENT,
         InvarianceVerdict.UNCHECKED,
     )
+
+
+def admit_by_invariance(claims: Iterable[Claim]) -> tuple[list[Claim], list[tuple[Claim, InvarianceReport]]]:
+    """Umbrella-side LICENSING PRECONDITION (measurement-foundation §3.1): drop any claim whose
+    pattern scale-class is INCOHERENT with the measurement space it reads (e.g. an ordinal-scale
+    pattern over a ratio/interval space — the ordinal-as-metric error) so it can never LICENSE.
+
+    Conservative + BYTE-IDENTICAL for today's corpora: relations are never invariance-gated, and
+    UNDECLARED is LOGGED-not-refused (refusing it would drop relation / unregistered-pattern claims
+    and break byte-identity). Only the unambiguous INCOHERENT verdict is refused — and no existing
+    licensable claim is INCOHERENT (registered metric patterns read metric spaces; unregistered
+    spaces are UNCHECKED). Tighten to also refuse UNDECLARED with the operator once every licensable
+    pattern declares its invariance. Returns ``(admitted, refused)``.
+    """
+    admitted: list[Claim] = []
+    refused: list[tuple[Claim, InvarianceReport]] = []
+    for c in claims:
+        if is_relation(c):
+            admitted.append(c)
+            continue
+        rep = invariance_report(c)
+        if rep.verdict is InvarianceVerdict.INCOHERENT:
+            _log.warning(
+                "invariance precondition: refusing %s — pattern scale-class %s conflicts with "
+                "measurement space class(es) %s",
+                c.id, rep.pattern_scale_class.value, rep.space_scale_classes,
+            )
+            refused.append((c, rep))
+            continue
+        if rep.verdict is InvarianceVerdict.UNDECLARED:
+            _log.info("invariance precondition: %s UNDECLARED (admitted; pattern lacks scale/invariance)", c.id)
+        admitted.append(c)
+    return admitted, refused
