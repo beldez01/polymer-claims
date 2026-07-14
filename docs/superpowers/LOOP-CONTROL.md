@@ -44,8 +44,30 @@ update docs. The user is away; act on established work, don't invent scope or ma
   (invariance_group check, measured-ρ independence, attested-log floor).
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
-## State (update every fire)
-- **On `main`** at `76e4b7b`, clean tree, **59 commits ahead of origin (NOT pushed — policy)**.
+## ⏹ LOOP STOPPED 2026-07-14 — autonomously-completable work is done; the rest needs YOU.
+
+**Why stopped (honest):** the entire tranche of clean, safe, additive backlog work is shipped (~19 items, below).
+Everything that REMAINS is one of: (a) the **Durendal headline scientific work** (synbio Phase 3 seed-curation +
+Phase 4 derivation + framing decision) — the plan itself requires an *independent human reviewer* + a *pre-run
+framing decision*, so it is explicitly NOT autonomous; (b) **3 gate-touching changes I built + FLAGGED for your
+sign-off** (they'd silently change licensing); (c) **data-gated** items (need real ClinVar/EWAS/CHEBI/2nd-AML-cohort
+data — never fabricated); (d) **DEFER** (§8 + several §3/§4/§9); (e) v2 Slice 3 (likely gate-touching). Per the
+loop's own stop-condition, I stopped rather than spin / rather than make headline scientific or licensing decisions
+that are yours. Restart anytime with `/loop`.
+
+**FIRST thing when you return — 3 gate-touching decisions (all built + proven byte-identical when off; see "Flagged"
+section below for the exact one-line wire-ins):**
+  1. **neg-whisper ②b** — wire the independence-claim verdict into the `replication.py` multiply gate.
+  2. **§3 strength=None** — an untrusted-cannot-ride guard on the `_permitted_by_bar` exemption.
+  3. **§9 invariance** — wire `invariance_ok` as a hard licensing precondition in `verify.py`.
+  Each WITHDRAWS/CHANGES a license in specific cases — correct behavior, but your call to activate.
+
+**Also:** local `main` is **60 commits ahead of `origin`, NOT pushed** (shared-checkout policy — coordinate, then
+push). And the **Durendal capstone** (synbio Phase 3/4) is the highest-value remaining work — its firewall harness is
+now built; it needs your scientific curation + review.
+
+## State (as of stop)
+- **On `main`** at `<about-to-merge firewall>`, clean tree, **NOT pushed — policy**.
 - **PHASE SHIFT (honest):** the clean, fast, safe/additive wins are now essentially DONE (§1 cluster · §2 neg-whisper
   arc · §3 placeholder guard · §7 CI/doc/skip + immuno drift-guard · §9 invariance-check). The remaining backlog is
   the "hard remainder": (i) 3 GATE-TOUCHING items FLAGGED for the user; (ii) DATA-GATED (R2 battery, wedge H1.A2,
@@ -104,6 +126,10 @@ update docs. The user is away; act on established work, don't invent scope or ma
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — synbio Phase 3 (firewall harness): pre-registration conceptual-leakage guard** (`feat/synbio-phase3-firewall` → local main, ff).
+  `synbio/firewall.py` — `check_admissibility` (conclusion-stripping + optional date-cutoff, tags the deciding rule)
+  + `assemble_blinded_seed`. Additive, umbrella-side, NOT the gate. 6 tests; Corpus 4. Seed curation + Durendal
+  pre-registration + independent no-leakage review remain the operator's (headline scientific work).
 - **2026-07-14 — v2 Slice 2 (core): evidence-route SLSA resolvedDependencies** (`feat/v2-slice2` → local main, ff).
   `attestation.py::_evidence_resolved_dependencies` lists an EVIDENCE_LICENSED claim's real evidence artifacts
   (benchmark/executor/predictions/policy/contract/capability/configs/oracle) as ResourceDescriptors with their

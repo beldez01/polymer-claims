@@ -276,6 +276,15 @@ can't yet see. Plan-ready; each gated on a small first probe.*
 - [ ] **Phase 3 — blinded seed + pre-registration firewall** · `BUILD` · `plans/2026-07-10-synbio-claims-universe.md` §Phase 3
   — Firewall admissibility + conclusion-stripping + independent leakage review + `commitment_hash`/α-slot
   lock. Own spec+plan not yet authored. *Gate to the headline.*
+  — **FIREWALL HARNESS SHIPPED 2026-07-14 (loop)** on `feat/synbio-phase3-firewall`: `src/polymer_claims/synbio/firewall.py`
+  — the PROCESS-enforced conceptual-leakage guard (Phase 0 §4). `check_admissibility` = conclusion-stripping (an
+  answer-leaking claim is inadmissible even if old) + optional date-cutoff, each admitted claim tagged with the
+  deciding rule; `assemble_blinded_seed` partitions candidates deterministically. `DEFAULT_FORBIDDEN_ANSWER_TOKENS`
+  (RUNX1-RUNX1T1 / opto-car / genotype-directed-cytotoxicity / direct-caspase / topology-rejection) — configurable.
+  6 tests; additive, umbrella-side, NOT the licensing gate; Corpus 4. **REMAINS FOR THE OPERATOR (headline scientific
+  work — NOT autonomous):** the blinded-seed CURATION (which real synbio claims go in), the Durendal derivation-plan
+  pre-registration (`commitment_hash` + α-slot lock), and the exit-gate **independent-reviewer no-leakage confirmation**
+  — the harness is the tool; the human review + the framing decision (Phase 4 "decide before the run") are yours.
 - [ ] **Phase 4 — the Durendal derivation run (the forge) [HEADLINE]** · `BUILD` · synbio plan §Phase 4
   — Re-derive Durendal (RUNX1-RUNX1T1 + topology-rejection + direct-caspase) as a grounded extension under
   the locked plan, *without having been shown the answer*. Human-proposed fallback framing decided pre-run.
