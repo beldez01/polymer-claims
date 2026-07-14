@@ -286,10 +286,16 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   answer-leaking claim is inadmissible even if old) + optional date-cutoff, each admitted claim tagged with the
   deciding rule; `assemble_blinded_seed` partitions candidates deterministically. `DEFAULT_FORBIDDEN_ANSWER_TOKENS`
   (RUNX1-RUNX1T1 / opto-car / genotype-directed-cytotoxicity / direct-caspase / topology-rejection) — configurable.
-  6 tests; additive, umbrella-side, NOT the licensing gate; Corpus 4. **REMAINS FOR THE OPERATOR (headline scientific
-  work — NOT autonomous):** the blinded-seed CURATION (which real synbio claims go in), the Durendal derivation-plan
-  pre-registration (`commitment_hash` + α-slot lock), and the exit-gate **independent-reviewer no-leakage confirmation**
-  — the harness is the tool; the human review + the framing decision (Phase 4 "decide before the run") are yours.
+  6 tests; additive, umbrella-side, NOT the licensing gate; Corpus 4.
+  — **PRE-REGISTRATION MECHANICS SHIPPED 2026-07-14 (USER-AUTHORIZED)** on `feat/synbio-preregistration`:
+  `src/polymer_claims/synbio/preregistration.py` — `seal_preregistration(blinded_seed, plan, *, ledger,
+  derivation_id) -> (PreRegistration, new_ledger)`: a deterministic `commitment_hash` (`canonical_sha256`) over the
+  {firewall-ADMITTED seed ids+tags + the plan}, and a locked e-LOND α-slot via `register_test` (commit-before-data).
+  The `PreRegistration` records the seed ids, admissibility tags, n_excluded, and the charged α — an auditable seal.
+  Two-stratum (seed = CONJECTURED priors; the derivation earns standing only through the gate); Corpus 4 (only charges
+  an FDR slot). 3 tests (deterministic seal; different seed/plan → different hash; leaking candidate excluded).
+  **STILL THE OPERATOR'S (headline scientific work — NOT autonomous):** curate the real blinded seed, do the
+  independent no-leakage review, and run the Phase-4 Durendal derivation (decide the framing before the run).
 - [ ] **Phase 4 — the Durendal derivation run (the forge) [HEADLINE]** · `BUILD` · synbio plan §Phase 4
   — Re-derive Durendal (RUNX1-RUNX1T1 + topology-rejection + direct-caspase) as a grounded extension under
   the locked plan, *without having been shown the answer*. Human-proposed fallback framing decided pre-run.
