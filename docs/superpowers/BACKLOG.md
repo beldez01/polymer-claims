@@ -30,9 +30,19 @@ ruled out 2026-07-11); generic per-attack e-value combination ("largely a mirage
 - [ ] **Accumulating-universe store (persistent claim log)** · `BUILD` · `specs/2026-07-10-accumulating-universe-store-design.md` §6
   — Append-only content-addressed JSONL + facet layer so re-runs mint 0 new claims and the `fdr_ledger`
   accumulates. Today the merge is a static union / fresh `Corpus` per run, not a persistent store.
-- [ ] **Measurement-space registry** · `BUILD` · accumulating-store §7 + reparam-evaluator §7
+- [x] **Measurement-space registry** · `BUILD` · accumulating-store §7 + reparam-evaluator §7
   — Keyed catalog of available SE-Contract dimensions per assay. *Shared prerequisite of the store AND
   the evaluator ("one registry, two consumers").*
+  — **SHIPPED 2026-07-14 (loop)** on `feat/measurement-space-registry`. Both specs deferred the schema →
+  authored `specs/2026-07-14-measurement-space-registry-design.md`. Umbrella-side
+  `src/polymer_claims/measurement_space.py`: a space = `(contract_uid, row_prefix)`; catalog of the 9
+  real committed contract spaces (pharmaco gene-body/promoter meth+auc, fusion/cbf expr ×4, idh cg).
+  Controlled `Modality` + Stevens `ScaleType` + `invariance_group` per space — the registry is the home
+  for the scale/invariance metadata that lived nowhere (advances §9). Query API: `all_spaces`,
+  `spaces_for_modality/contract`, `available_spaces` (grounds to contracts that resolve via
+  `load_contract`), `resolve_space` (evaluator grounding — never fabricates), `coverage` (census).
+  grammar/protocol untouched; Corpus 4; 11 tests. Follow-ups noted in spec §5 (entries→meta-claims,
+  reconcile `merge_universes` modality strings).
 - [ ] **Re-parameterization evaluator** · `BUILD` · `specs/2026-07-10-reparameterization-evaluator-design.md` §9
   — On REJECTED/REFUTED, LLM-propose + registry-ground alternate measurement spaces, declare-and-charge
   FDR, re-test; separates a true negative from a mis-parameterization. Only Step 0 (promoter SE-contract)

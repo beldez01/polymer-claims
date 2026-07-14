@@ -45,17 +45,21 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `d69c03a`, clean tree, **25 commits ahead of origin (NOT pushed — policy)**.
-- Phase A DONE. Next: **B1 — measurement-space registry**.
-- Foundations digest DONE → `notes/2026-07-14-foundations-digest-for-loop.md` (read it; it grounds B1/B2/§2).
+- **On `feat/measurement-space-registry`** (B1 built, about to ff-merge to local main). main was `37e3b40`.
+- **B1 DONE. Next: B2 — accumulating-universe store.**
+- Foundations digest DONE → `notes/2026-07-14-foundations-digest-for-loop.md` (read it; it grounds B2/§2).
 - **B2 grounding done:** accumulating-store spec read in full (`specs/2026-07-10-accumulating-universe-store-design.md`).
   Store = append-only content-addressed JSONL (source of truth) + DuckDB facet layer; persists the WHOLE Corpus
   incl. `fdr_ledger`; load→propose→dedup→register→license→persist-back; re-run mints 0 claims. Cheapest first move
   (§6): JSONL record (modality on contract) → `populate_universe` appends → census query → viewer facets.
-- **B1 next-fire TODO:** read `specs/2026-07-10-reparameterization-evaluator-design.md` §7 for the registry design
-  BEFORE building (registry = "one registry, two consumers": store + evaluator; keyed by assay → SE-Contract
-  dimensions, each entry a licensable meta-claim per measurement-foundation — key by scale-type + invariance group).
-  Then brainstorm→spec→plan→TDD→review→merge-local. Corpus stays 4; umbrella-side; grammar/protocol untouched.
+- **B2 next-fire notes:** the registry (B1) is now available — the store's census (Spec 1 §5) can query
+  `measurement_space.coverage()`/`available_spaces()`. Real ground truth (from B1's code map): a "space" =
+  `(contract_uid, row_prefix)`; `SEContractRef` carries no modality; `Provenance` has NO modality/parameterization
+  field (Spec 1 §4's choice-vs-realized split is unimplemented — the store may need to decide how to carry the
+  realized-modality facet: cleanest is to derive it from the claim's `data_ref` contract via the registry, not a
+  new grammar field). Check DuckDB availability (optional dep) before committing to the SQL layer; a pure-python
+  facet layer is an acceptable v1 fallback if DuckDB isn't wanted as a dep. Watch: `populate_universe` today
+  starts a FRESH fdr_ledger each run — the store must persist + reload it (the highest-value regression test).
 
 ## Test/gate cadence
 - Fast gate (per change): `cd grammar && uv run pytest -q` (~0.5s, 602) · `cd protocol && uv run pytest -q` (~2s, 509)
@@ -67,6 +71,12 @@ update docs. The user is away; act on established work, don't invent scope or ma
   accumulating on local main.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — B1: measurement-space registry** (`feat/measurement-space-registry` → local main, ff).
+  Authored the deferred spec (`specs/2026-07-14-measurement-space-registry-design.md`) + umbrella module
+  `src/polymer_claims/measurement_space.py`: catalog of 9 real contract spaces keyed `(contract_uid, row_prefix)`,
+  each declaring controlled `Modality` + Stevens `ScaleType` + `invariance_group` (the scale/invariance metadata
+  that lived nowhere — advances §9). `resolve_space` grounds the reparam evaluator's proposals to contracts that
+  actually resolve (never fabricates). 11 tests; grammar/protocol untouched; Corpus 4.
 - **2026-07-14 — Phase A: `feat/cross-arm-relations` merged to local main** (`d69c03a`, ff). Restored the real
   1386-node bundle (discarded the 46-node demo), fixed 1 branch-introduced ruff (unused `FDRLedger` import),
   reconfirmed grammar 602 + protocol 509 + relations e2e 3/3 green. Branch deleted. (Not a numbered backlog line —
