@@ -224,9 +224,14 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   — No Δ/Σ/Π migration; schema evolution can't remap existing corpus claims.
 - [ ] **Semantic/EIG dedup in the representation layer (SELECT #3)** · `DEFER` · `protocol/.../canonicalize.py:6` (spec §6.1)
   — Canonicalize does syntactic dedup only; semantic/expected-info-gain dedup is unbuilt. *(Daemons ARE built.)*
-- [ ] **Reference-adapter placeholder `operator_id` guard** · `HARDEN` · `protocol/.../red_team.py:53`, `generation_adapter.py:85`
+- [x] **Reference-adapter placeholder `operator_id` guard** · `HARDEN` · `protocol/.../red_team.py:53`, `generation_adapter.py:85`
   — Reference proposers ship `UNSET`/placeholder ids relying on `bridge_proposer` to overwrite; add a
   guard/test that no path emits a proposal with the placeholder intact. (Low risk; comment says forced.)
+  — **SHIPPED 2026-07-14 (loop)** on `feat/placeholder-operator-id-guard`: named the sentinel
+  `PLACEHOLDER_OPERATOR_ID = "UNSET"` (used by both reference adapters + red_team) and made `bridge_proposer`
+  REFUSE (ValueError) an adapter whose `identity` IS the placeholder — the one way the un-forced sentinel could
+  reach a credit-governed path. 3 tests (both adapters emit it; bridge forces it away; bridge refuses a
+  placeholder-identity adapter). Byte-identical (value unchanged); protocol 525→528. Pure-protocol; Corpus 4.
 - [ ] **`LLMPatternGenerationAdapter` prompt/claim builders** · `BUILD` · `src/.../llm_adapter.py:114,117`
   — Base-class hooks raise `NotImplementedError`; a concrete subclass must implement them before the
   LLM-pattern generation surface works.

@@ -16,6 +16,11 @@ from .generate import Proposer, _corpus_fingerprint, _gen_id
 
 _ALLOWED = (Status.CONJECTURED, Status.PENDING)
 
+# Reference proposers emit this sentinel operator_id, relying on bridge_proposer to force it to the
+# real adapter identity before the proposal reaches any credit-governed path. It must NEVER survive
+# bridging — bridge_proposer refuses an adapter that (mis)uses it as an actual identity.
+PLACEHOLDER_OPERATOR_ID = "UNSET"
+
 
 class GenerationAdapter(Protocol):
     """The generation boundary. `identity` becomes the Proposal operator_id (credit-governed)."""
@@ -61,6 +66,13 @@ def bridge_proposer(adapters: tuple[GenerationAdapter, ...]) -> Proposer:
     each adapter's identity, run compile_untrusted, drop rejected. Plugs into
     run_cycle(proposers=...). Bridge-internal rejections are dropped (not in GenerationRecord;
     compile_untrusted is independently unit-tested)."""
+    for a in adapters:
+        if a.identity == PLACEHOLDER_OPERATOR_ID:
+            raise ValueError(
+                f"generation adapter identity may not be the placeholder {PLACEHOLDER_OPERATOR_ID!r} "
+                "(it would let the un-forced sentinel reach a credit-governed path)"
+            )
+
     def _proposer(corpus: Corpus, frontier: tuple[str, ...]) -> tuple[Proposal, ...]:
         fp = _corpus_fingerprint(corpus)
         out: list[Proposal] = []
@@ -100,5 +112,5 @@ class TemplateGenerationAdapter:
                 leaves=(CategoricalLeaf(ontology_term=f"template-elaboration-{c.id}"),),
                 status=Status.CONJECTURED,
             )
-            props.append(Proposal(operator_id="UNSET", claim=claim))
+            props.append(Proposal(operator_id=PLACEHOLDER_OPERATOR_ID, claim=claim))
         return tuple(props)

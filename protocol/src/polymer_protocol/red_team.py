@@ -22,6 +22,7 @@ from polymer_grammar import (
 
 from .corpus import Corpus, Proposal
 from .generate import _gen_id
+from .generation_adapter import PLACEHOLDER_OPERATOR_ID
 
 
 class RepresentationRedTeamAdapter:
@@ -51,5 +52,5 @@ class RepresentationRedTeamAdapter:
                 representation_revision=revision,
             )
             # placeholder operator_id; bridge_proposer forces it to self.identity
-            props.append(Proposal(operator_id="UNSET", claim=claim))
+            props.append(Proposal(operator_id=PLACEHOLDER_OPERATOR_ID, claim=claim))
         return tuple(props)
