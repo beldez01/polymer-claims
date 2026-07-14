@@ -45,12 +45,14 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `01782e5`, clean tree, **50 commits ahead of origin (NOT pushed — policy)**.
-- **§3 started: placeholder operator_id guard ✓.** strength=None/`_permitted_by_bar` audit ANALYZED + FLAGGED
-  (gate-touching; see BACKLOG §3) — deferred. Next §3/hygiene targets (cleaner): **(2) `LLMPatternGenerationAdapter`
-  prompt/claim builders** (`src/.../llm_adapter.py:114,117` — concrete subclass, injected-complete-testable);
-  **§7 quick wins** (very safe): fix stale/dangling doc references (BACKLOG §7 last item), surface the 5 data-gated
-  test skips visibly, add a CI workflow mirroring `check-all.sh`. Prefer these safe items; keep FLAGGING gate changes.
+- **On `main`** at `01782e5` (about to merge §7 hygiene), clean tree, **NOT pushed — policy**.
+- **§3: placeholder guard ✓** (strength=None audit FLAGGED, deferred; `LLMPatternGenerationAdapter` = PHANTOM/done).
+  **§7 hygiene: CI workflow ✓ · doc-dangle fixes ✓ · test-skip visibility ✓** (this fire).
+- **Next safe §7 items:** GDSC drug→CHEBI resolver (`pharmaco_populate.py:62` — HARDEN, the scaling bottleneck;
+  scope it), immuno bundle strict-Corpus cleanup (`merge_universes.py:181`), pre-release context scrub. Then §9
+  foundations-concordance HARDEN items (consume `invariance_group` at license time — but that's gate-touching → assess);
+  §4 attested-calibration §11 deferrals; §5 synbio capstone (Phase 3/4 = big, partly data-gated). Prefer safe/additive;
+  FLAG gate changes; mark data-gated BLOCKED.
 - **DONE:** §1 cluster (B1/B2p/B3/B4) · §2 neg-whisper arc (C1/R1/②a/②b-logic/③/④/⑤-repr) · §3 placeholder guard.
 - **Remaining (still open in BACKLOG):** §2 tail — adapter-independence R2–R5 (R2 = C1 probe on a real battery,
   DATA-GATED; R3/R4/R5) + v2 Slice 2/3 (attestation chain / defeat-drift-reinstatement, `specs/2026-06-29-v2-evidence-licensed-capability-design.md` §13);
@@ -79,6 +81,11 @@ update docs. The user is away; act on established work, don't invent scope or ma
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — §7 hygiene: CI workflow + doc-dangle fixes + test-skip visibility** (`feat/ci-and-doc-hygiene` → local main, ff).
+  `.github/workflows/ci.yml` (grammar/protocol/umbrella pytest `-rs` + ruff; viewer typecheck; mirrors check-all.sh;
+  `-rs` surfaces data-gated skips). Fixed the REAL doc dangles (reparam→archive path; attested-ingestion cozy-growing-naur
+  + calibration-ledger refs → git history). PHANTOMS confirmed: `foundations/GLOSSARY.md` (only in BACKLOG text) +
+  `LLMPatternGenerationAdapter` (no such class — `LLMGenerationAdapter` already implements the base hooks). Doc-only + CI file.
 - **2026-07-14 — §3: placeholder operator_id guard** (`feat/placeholder-operator-id-guard` → local main, ff).
   `PLACEHOLDER_OPERATOR_ID` constant + `bridge_proposer` refuses an adapter whose identity IS the placeholder.
   3 tests; byte-identical; protocol 528; Corpus 4.

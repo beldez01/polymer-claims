@@ -3,8 +3,8 @@
 **Status:** Design / draft for review. v0.1
 **Date:** 2026-06-22
 **Author:** Z. Belden (brainstormed with Claude)
-**Roadmap:** calibration follow-up **slice 4/5** (`docs/superpowers/plans/` + the in-session roadmap
-`.claude/plans/cozy-growing-naur.md`). Slices 1,2,3,5 shipped; this is the last and deepest.
+**Roadmap:** calibration follow-up **slice 4/5** (the in-session roadmap that guided it is now in git
+history — see `git log` around the 2026-06-22 calibration ledger/certificate commits). Slices 1,2,3,5 shipped; this is the last and deepest.
 
 > **One line.** Let **external determinations** about a LICENSED claim's standing enter the
 > calibration ledger as the **ATTESTED** tier — recorded as *defeasible corpus claims*, typed by
@@ -211,8 +211,9 @@ claim is forced non-LICENSED by the untrusted-proposal seam.
 - `docs/superpowers/2026-06-12-phase-2-north-star.md` §5 (credence layer), §2(C) (credence-primary)
 - `docs/superpowers/foundations/epistemology.md` §1–3 (the anchor/recomputation tether; resolvability)
 - `docs/superpowers/2026-06-16-linchpin-thesis-three-layer-arc.md` §6.2 (epistemic underwriting)
-- `docs/superpowers/specs/2026-06-22-calibration-ledger-and-certificate-design.md` §1 (warrant tiers,
-  anti-laundering), §7 (certificate)
+- the 2026-06-22 calibration-ledger-and-certificate design §1 (warrant tiers, anti-laundering), §7
+  (certificate) — that per-feature spec was consolidated into git history (see `git log`); the shipped
+  substrate is `protocol/.../calibration.py` + `src/polymer_claims/{calibration_store,attestation}.py`
 - Existing substrate: `protocol/.../calibration.py` (`ResolutionRecord`, `_attested_stat`),
   `src/polymer_claims/calibration_store.py`, `src/polymer_claims/attestation.py`, the
   `compile_untrusted` injection seam.

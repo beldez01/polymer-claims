@@ -240,9 +240,14 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   REFUSE (ValueError) an adapter whose `identity` IS the placeholder — the one way the un-forced sentinel could
   reach a credit-governed path. 3 tests (both adapters emit it; bridge forces it away; bridge refuses a
   placeholder-identity adapter). Byte-identical (value unchanged); protocol 525→528. Pure-protocol; Corpus 4.
-- [ ] **`LLMPatternGenerationAdapter` prompt/claim builders** · `BUILD` · `src/.../llm_adapter.py:114,117`
+- [x] **`LLMPatternGenerationAdapter` prompt/claim builders** · `BUILD` · `src/.../llm_adapter.py:114,117`
   — Base-class hooks raise `NotImplementedError`; a concrete subclass must implement them before the
   LLM-pattern generation surface works.
+  — **PHANTOM / ALREADY SATISFIED (verified 2026-07-14, loop):** there is no `LLMPatternGenerationAdapter` class.
+  `llm_adapter.py` has `_GenerationAdapterBase` (an ABSTRACT base whose `_build_prompt`/`_build_claim` raise
+  `NotImplementedError` BY DESIGN) and the CONCRETE `LLMGenerationAdapter(_GenerationAdapterBase)` (`:120`) which
+  implements both hooks + maps a constrained DSL into executable PENDING+plan grammar Claims. The generation
+  surface works; the base-class `NotImplementedError` is the correct abstract-base pattern, not a gap.
 
 ## 4. Attested calibration hardening (slice-4 §11 deferrals)
 *MVP shipped; these are the deferred trust-boundary pieces.*
@@ -314,14 +319,22 @@ can't yet see. Plan-ready; each gated on a small first probe.*
 
 ## 7. Infra / tooling / hygiene
 
-- [ ] **Add a CI workflow** · `HARDEN` · `scripts/check-all.sh:11`
+- [x] **Add a CI workflow** · `HARDEN` · `scripts/check-all.sh:11`
   — No working CI (GitHub account was flagged → now resolved, `beldez01`). Mirror `check-all.sh`
   (tests + lint + viewer build) so regressions can't land unnoticed. `.github/` currently absent.
+  — **SHIPPED 2026-07-14 (loop)** on `feat/ci-and-doc-hygiene`: `.github/workflows/ci.yml` — a `python` job
+  (grammar + protocol + umbrella pytest **with `-rs`** + ruff on all three, via `astral-sh/setup-uv`, py3.12) and a
+  `viewer` job (npm ci + typecheck). Mirrors `check-all.sh`. `-rs` **surfaces the data-gated test skips** (folds in
+  the "surface 5 skips" item — real data is gitignored so those tests skip in a clean checkout, now visible not
+  silent). NOTE: GitHub Actions was historically account-suppressed; the file activates automatically once enabled.
 - [ ] **Push local `main`** · `HARDEN` · `CONTINUE.md` "NEXT — Push main"
   — Accumulated local commits; coordinate first (shared checkout with other instances).
-- [ ] **Surface the 5 data-gated test skips** · `DEBUG` · `tests/test_tcga_laml_ndmp_e2e.py:41` + 4 more
+- [x] **Surface the 5 data-gated test skips** · `DEBUG` · `tests/test_tcga_laml_ndmp_e2e.py:41` + 4 more
   — TCGA-LAML / Loyfer WGBS / GDSC pharmaco / BioNeMo-live tests silently skip without gitignored data or a
   live key, so the real-biology paths are unexercised in a clean checkout. Make the skip visible in CI output.
+  — **DONE 2026-07-14 (loop)** — folded into the new CI workflow: every pytest invocation runs with `-rs`, which
+  prints the skip reasons (each skip already carries a clear `reason=`), so the data-gated paths are visibly
+  reported in CI output instead of silently passing.
 - [ ] **GDSC drug→CHEBI resolver** · `HARDEN` · `src/.../pharmaco_populate.py:62`
   — Unmapped drugs fall back to a synthetic `urn:pharmaco:drug:<slug>` under an "other" ontology instead of a
   real CHEBI id. The noted scaling bottleneck for the pharmaco arm.
@@ -335,12 +348,18 @@ can't yet see. Plan-ready; each gated on a small first probe.*
 - [ ] **Pre-release context scrub** · `HARDEN` · `CONTINUE.md` "Open follow-ups"
   — Genericize remaining PolymerGenomics/Boris/PlumberClient refs; strip `~/Desktop/Research/...` absolute
   paths from specs. Before any public release.
-- [ ] **Fix stale/dangling doc references** · `DEBUG` · (discovery findings)
+- [x] **Fix stale/dangling doc references** · `DEBUG` · (discovery findings)
   — `specs/2026-07-10-reparameterization-evaluator-design.md` cites `2026-07-07-duhem-consistency-fold-design.md`
   at a `specs/` path (now in `archive/specs/`); attested-ingestion header cites the missing
   `.claude/plans/cozy-growing-naur.md` and §12 cites a missing `2026-06-22-calibration-ledger-and-certificate-design.md`;
   several specs cite `GLOSSARY.md` as `foundations/GLOSSARY.md` (it's at repo root). Also update `CONTINUE.md`'s
   stale "slice 4 next" claim (attested MVP is built — see corrections above).
+  — **DONE 2026-07-14 (loop)** — fixed the REAL dangles (verified by grep/ls): reparam spec duhem ref →
+  `archive/specs/…`; attested-ingestion header `.claude/plans/cozy-growing-naur.md` + the missing
+  calibration-ledger-and-certificate spec ref → redirected to git history / the shipped substrate. **Two were
+  PHANTOMS:** `foundations/GLOSSARY.md` appears ONLY in this BACKLOG's own description (no spec actually cites it;
+  GLOSSARY.md is at repo root), and the CONTINUE "slice 4 next" claim was already corrected. CONTINUE.md scrub +
+  §11 deferrals left as-is.
 
 ## 8. Deferred by choice / horizon — don't build yet
 

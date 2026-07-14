@@ -1,0 +1,48 @@
+# CI — mirrors scripts/check-all.sh so regressions can't land unnoticed.
+#
+# NOTE: GitHub Actions was historically suppressed account-wide (flagged account); this workflow may
+# not execute until that is resolved. The file is committed now so CI activates automatically once
+# Actions is enabled. `-rs` surfaces the data-gated test skips (real TCGA/Loyfer/GDSC/BioNeMo data is
+# gitignored, so those tests skip in a clean checkout — the report makes that visible instead of silent).
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: grammar (pure IR)
+        working-directory: grammar
+        run: |
+          uv run pytest -q -rs
+          uv run ruff check src tests
+      - name: protocol (pure runtime)
+        working-directory: protocol
+        run: |
+          uv run pytest -q -rs
+          uv run ruff check src tests
+      - name: umbrella (impure; data-gated tests skip without gitignored real data)
+        run: |
+          uv run --project . pytest tests/ -q -rs
+          uv run --project . ruff check src tests
+
+  viewer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: viewer typecheck
+        working-directory: viewer
+        run: |
+          npm ci
+          npm run typecheck
