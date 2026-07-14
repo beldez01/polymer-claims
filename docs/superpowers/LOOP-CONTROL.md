@@ -45,14 +45,14 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `8a81bc8`, clean tree, **34 commits ahead of origin (NOT pushed — policy)**.
-- **§1 CLUSTER COMPLETE** — B1 registry ✓ · B2 store primitive ✓ · B3 reparam evaluator ✓ · B4 promoter contract ✓
-  (verified pre-built at `edb1322`; real MGMT→TMZ-over-promoter finding recorded: flips-but-sub-threshold).
-- **Next: §2 / C1 — adapter-independence Step 0 probe.** Likely DATA-GATED (needs ClinVar labels + AlphaMissense +
-  ESM1v scores): build the error-correlation-probe MACHINERY + unit-test on synthetic score pairs (measured ρ →
-  `N_eff = 2/(1+ρ)`); mark the live run BLOCKED with the exact data. Entry probe for the measured-ρ-independence arc
-  (foundations §2.B / neg-whisper ② / §9 "independence as measured error-correlation"). Plan:
-  `plans/2026-07-07-adapter-independence-hardening-plan.md` §3.
+- **On `main`** at `932f1e4`, clean tree, **36 commits ahead of origin (NOT pushed — policy)**.
+- **§1 CLUSTER COMPLETE** (B1/B2-primitive/B3/B4) + **C1 probe DONE** (measured-ρ instrument shipped).
+- **Next: §2 continuation.** Recommended order: **R1** (provenance lineage on `AdapterCredential` — the "cheap prior,
+  ship regardless of Step 0", plan §R1/§4) → then **neg-whisper ②** (promote the shared-cause/multiply gate from an
+  operator flag to a licensable `independence` claim with a correlated-variance probe — now that C1 supplies the ρ
+  instrument; specs `2026-07-07-neg-whisper-backlog-design.md` §3) → neg-whisper ③④⑤ → v2 slices 2/3. Grep the real
+  `AdapterCredential`/`shared_cause`/`cohorts_error_independent` code first (foundations digest §3 flags these as the
+  declared-not-enforced gap). Data-gated live runs → machinery + mark BLOCKED. Each: branch → TDD → merge local.
 - **Deferred follow-ups (tracked in BACKLOG, not lost):** B2-integration (wire real populate_universe + viewer at
   the store — slow-pipeline-gated); reconcile `merge_universes` hard-coded modality strings to the B1 controlled vocab.
 - Foundations digest: `notes/2026-07-14-foundations-digest-for-loop.md` (read for §2/§9 grounding).
