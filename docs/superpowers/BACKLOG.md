@@ -334,8 +334,15 @@ can't yet see. Plan-ready; each gated on a small first probe.*
 ### TE-methylation engine gaps (honestly logged; DEBUG/HARDEN residue, not blockers)
 - [ ] **Rank-sum small-sample calibration** · `DEBUG` · `notes/2026-07-11-transposable-element-methylation-strain.md`
   — Per-probe n-DMP test mildly anti-conservative under permutation (~1.5–2× nominal) on small n.
-- [ ] **BH-withheld claims mislabel `pending_reason=UNTESTED`** · `DEBUG` · TE note §CORRECTION
-  — Claims withheld by the ~1.29× effective BH fold-floor report `UNTESTED` though they *were* evaluated.
+- [x] **BH-withheld claims mislabel `pending_reason=UNTESTED` — FIXED (2026-07-14)** · `DEBUG` · TE note §CORRECTION
+  — Claims withheld by the ~1.29× effective BH fold-floor reported `UNTESTED` though they *were* evaluated.
+  **Fix:** new `PendingReason.MULTIPLICITY_WITHHELD` + a precise `verify.py` elif — an evaluated e-LOND
+  discovery (satisfied ∧ grounded ∧ `_e_ok` ∧ provenance) that is `not in permitted` (⇔ held only by the
+  cardinality-scaled BH bar — the exemptions make "not permitted" logically equivalent to a genuine BH
+  withhold) is now labeled honestly. Status unchanged (still PENDING, no license) → a *reporting* fix, not a
+  gate change. The label is convertible+testable, so it correctly appears in `residue.conversion_candidates`.
+  2 tests; grammar 608 (enum-set test updated 14→15), protocol 539; immuno α-shrink bar test unaffected
+  (that path fails `_e_ok`, so the elif never fires). Full umbrella suite not run (slow); covered at verify_stage.
 - [ ] **Pre-register the honest enrichment threshold** · `HARDEN` · TE note §CORRECTION
   — Nominal `fold≥1.0` is misleading vs the ~1.29× effective floor from `_permitted_by_bar`/K=8.
 - [ ] **Single-pass rmsk bucketing (perf)** · `DEBUG` · TE note §Follow-ups

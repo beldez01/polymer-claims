@@ -391,6 +391,17 @@ def verify_stage(
                 c, status=Status.REJECTED, licensing=None, pending_reason=None,
                 rejection_reason=RejectionReason.DEFEAT_GROUNDED_OUT,
             ))
+        elif (ev.satisfaction is not None and c.id in in_ext
+                and c.provenance is not None and _e_ok(c.id)
+                and c.id not in permitted):
+            # Evaluated e-LOND discovery (satisfied + grounded + e >= bar) WITHHELD only by the
+            # cardinality-scaled BH multiplicity bar. It WAS tested — label it honestly instead of
+            # leaving the stale incoming UNTESTED (TE-note CORRECTION gap i). Status unchanged
+            # (still PENDING, no license); this is a reporting fix, not a gate change.
+            new_claims.append(_with_status(
+                c, status=Status.PENDING,
+                pending_reason=PendingReason.MULTIPLICITY_WITHHELD, licensing=None,
+            ))
         else:
             new_claims.append(c)  # stays PENDING — already carries a valid pending_reason
     return corpus.model_copy(update={"claims": tuple(new_claims), "fdr_ledger": new_ledger})

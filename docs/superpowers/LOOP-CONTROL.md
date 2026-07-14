@@ -190,6 +190,12 @@ now built; it needs your scientific curation + review.
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — DEBUG: BH-withheld claims mislabeled UNTESTED → `MULTIPLICITY_WITHHELD`** (direct to main → origin).
+  TE-note CORRECTION gap (i): an evaluated e-LOND discovery held back only by the cardinality-scaled BH bar
+  kept its stale UNTESTED. New `PendingReason.MULTIPLICITY_WITHHELD` + a precise `verify.py` elif (satisfied ∧
+  grounded ∧ `_e_ok` ∧ provenance ∧ `not in permitted`). Reporting fix — status unchanged (still PENDING, no
+  license), so byte-identical for every non-BH-withheld claim. 2 tests; grammar 608 (enum-set 14→15), protocol
+  539; immuno α-shrink test unaffected (fails `_e_ok`). BACKLOG + TE note updated.
 - **2026-07-14 — residualism R3: PENDING residue-graveyard query surface** (direct to main → origin).
   `protocol/.../residue.py` — read-only query over Corpus: census (shape by pending-reason), graveyard
   (ResidueEntry: testable/needs_external_input/dependents), facet filters, and the R3 `conversion_candidates`

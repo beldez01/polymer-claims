@@ -276,7 +276,8 @@ independent of the e-value and cardinality (`verify.py` `_permitted_by_bar`/`BH_
 is **correct, conservative behavior** — a ~1.2× enrichment across 12 families should not be a confident
 discovery — the same bar also holds back 3 tiny-margin n-DMP claims (e.g. bcell↔macrophage/LTR5B, rank
 count 262 = k exactly). Two genuine gaps surfaced: (i) BH-withheld claims mislabel `pending_reason=UNTESTED`
-(they WERE evaluated) — a reporting defect; (ii) the enrichment criterion's nominal threshold (fold ≥ 1.0)
+(they WERE evaluated) — a reporting defect **[FIXED 2026-07-14: `PendingReason.MULTIPLICITY_WITHHELD` now
+stamped in `verify.py` for the withheld-only-by-the-BH-bar case; status unchanged]**; (ii) the enrichment criterion's nominal threshold (fold ≥ 1.0)
 is misleading given the ~1.29× effective floor — a future run should set the pre-registered threshold to
 the honest effective value. The licensing conclusion (0) stands; the INTERPRETATION is corrected above.
 

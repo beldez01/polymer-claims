@@ -34,6 +34,10 @@ class PendingReason(str, Enum):
     SHARED_CAUSE_CONFIRMATORY = "shared_cause_confirmatory"
     # the evidence execution pipeline raised an unrecoverable error
     EXECUTION_ERROR = "execution_error"
+    # an evaluated e-LOND discovery (satisfied + grounded + e >= bar) held back by the
+    # cardinality-scaled BH multiplicity bar — it WAS tested, so NOT "untested". See
+    # verify.py::_permitted_by_bar. Convertible: a stronger margin can clear the bar on re-run.
+    MULTIPLICITY_WITHHELD = "multiplicity_withheld"
 
 
 class RejectionReason(str, Enum):
