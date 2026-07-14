@@ -396,6 +396,14 @@ that is still operator-**asserted**. These cross-ref existing rows rather than d
   — `invariance_group`/`scale` ship on `Pattern` (`grammar/.../pattern.py:28`) + `MeasurementBasis` but are
   **never read** by any evaluator — no invariance test runs before a claim reaches LICENSED. The doc's core
   necessary-condition-for-standing is absent from the gate. The socket is built; the check isn't.
+  — **CHECK SHIPPED 2026-07-14 (loop)** on `feat/invariance-check` (advisory; gate-wiring FLAGGED, not applied):
+  `src/polymer_claims/invariance.py` — the FIRST consumer of `Pattern.invariance_group`/`scale`. Maps the 5
+  free-form `Pattern.scale` strings to a Stevens scale-CLASS and cross-checks it against the B1 measurement-space
+  registry's `ScaleType` for the space(s) the claim reads → `InvarianceVerdict` {COHERENT / UNCHECKED / INCOHERENT
+  / UNDECLARED}. Catches the load-bearing "ordinal-as-metric" error (an ordinal-scale pattern reading a ratio/interval
+  space). `invariance_ok(claim)` is the advisory precondition. 4 tests; umbrella-only; grammar/protocol untouched;
+  Corpus 4. **REMAINS (gate-touching → FLAGGED for operator):** wire `invariance_ok` as a HARD licensing precondition
+  in `verify.py` (reject INCOHERENT/UNDECLARED before LICENSED) — changes licensing outcomes; do like the ②b wire-in.
 - [ ] **Independence as MEASURED error-correlation, not asserted-label Jaccard** · `HARDEN` · epistemology §2.B — *same work as §2 adapter-independence R1–R5 + Step 0 + neg-whisper ②*
   — `grammar/.../shared_cause.py:54` overlaps operator-declared factor *labels* vs a fixed τ (comment:
   "operator-asserted factors"), not measured ρ. This row records that **the foundations doc overstates it

@@ -71,6 +71,9 @@ update docs. The user is away; act on established work, don't invent scope or ma
 ## Flagged for the user (decisions / blockers I will NOT resolve autonomously)
 - **Push to origin** is deferred (many commits ahead) — needs your coordination (shared checkout). Loop keeps
   accumulating on local main.
+- **§9 invariance-check gate-wiring (licensing-behavior change — needs your sign-off).** `invariance.py::invariance_ok`
+  is built + tested (catches ordinal-as-metric). Wiring it as a HARD precondition in `verify.py` (reject
+  INCOHERENT/UNDECLARED before LICENSED) would change licensing outcomes — left advisory, flagged like ②b.
 - **neg-whisper ②b LIVE GATE WIRE-IN (licensing-behavior change — needs your sign-off).** The independence-claim
   machinery is built + tested (`independence_claim.py`), byte-identical when off. ACTIVATING it means editing the
   two multiply sites — `replication.py:130` and `expression_floor_replication.py:99` — to thread the corpus and
@@ -81,6 +84,10 @@ update docs. The user is away; act on established work, don't invent scope or ma
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — §9: invariance-consistency check (consume invariance_group)** (`feat/invariance-check` → local main, ff).
+  `invariance.py` — first consumer of Pattern.invariance_group/scale; maps Pattern.scale → Stevens class, cross-checks
+  vs the B1 registry's ScaleType, catches ordinal-as-metric (INCOHERENT). Advisory `invariance_ok`; gate-precondition
+  wiring FLAGGED. 4 tests; umbrella-only; grammar/protocol untouched; Corpus 4.
 - **2026-07-14 — §7 hygiene: CI workflow + doc-dangle fixes + test-skip visibility** (`feat/ci-and-doc-hygiene` → local main, ff).
   `.github/workflows/ci.yml` (grammar/protocol/umbrella pytest `-rs` + ruff; viewer typecheck; mirrors check-all.sh;
   `-rs` surfaces data-gated skips). Fixed the REAL doc dangles (reparam→archive path; attested-ingestion cozy-growing-naur
