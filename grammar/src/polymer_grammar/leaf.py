@@ -22,6 +22,11 @@ from .units import Dimension
 class MeasurementBasis(str, Enum):
     FUNDAMENTAL = "fundamental"
     DERIVED = "derived"
+    # A constant fixed by definition/mathematics (e.g. 2 bits = log2(4)) — neither instrument-measured
+    # (FUNDAMENTAL) nor a data ratio (DERIVED). Carries its generating `formula` and MAY carry a
+    # definitional `unit` (e.g. "bits"); exact by construction. Claim-authoring basis only — operation
+    # OUTPUTS (ProducedLeafSpec, operations.py) are never ANALYTIC (they compute a measured/derived value).
+    ANALYTIC = "analytic"
     CONVENTIONAL = "conventional"
     ORDINAL = "ordinal"
     NOMINAL = "nominal"
@@ -74,14 +79,23 @@ class QuantityLeaf(_Model):
 
     @model_validator(mode="after")
     def _basis_discipline(self) -> QuantityLeaf:
-        if self.measurement_basis == MeasurementBasis.FUNDAMENTAL:
+        b = self.measurement_basis
+        if b == MeasurementBasis.FUNDAMENTAL:
+            return self  # instrument-measured: a unit is meaningful, no formula required
+        if b == MeasurementBasis.ANALYTIC:
+            # definitional constant: MUST show its generating expression; a unit MAY be definitional.
+            if not self.formula:
+                raise ValueError(
+                    "ANALYTIC quantity must carry its generating `formula` (e.g. 'log2(4)')"
+                )
             return self
+        # DERIVED: a data statistic — a bare unit is not meaningful, and it must show its formula.
         if self.unit is not None:
             raise ValueError(
                 f"unit is only meaningful for FUNDAMENTAL quantities; "
                 f"got unit={self.unit!r} with basis={self.measurement_basis.value}"
             )
-        if self.measurement_basis == MeasurementBasis.DERIVED and not self.formula:
+        if not self.formula:
             raise ValueError("DERIVED quantity must carry its generating `formula`")
         return self
 

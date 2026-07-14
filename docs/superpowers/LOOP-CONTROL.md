@@ -190,6 +190,12 @@ now built; it needs your scientific curation + review.
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — GAP-7: `MeasurementBasis.ANALYTIC` (analytic-constant basis)** (direct to main → origin).
+  Third measurement basis for definitional constants (2 bits = log2(4)) — neither FUNDAMENTAL nor DERIVED.
+  Additive enum member (existing bases byte-identical, no serializer touched); discipline = formula required,
+  unit allowed. `_basis_discipline` restructured provably behavior-preserving for FUNDAMENTAL/DERIVED. Claim-
+  authoring only (operations.py output-spec check untouched). 4 tests; grammar 612; protocol 539 unchanged.
+  Gaps note: 6 open → 5. Re-expressing a real analytic-constant claim is a mechanical follow-up.
 - **2026-07-14 — DEBUG: BH-withheld claims mislabeled UNTESTED → `MULTIPLICITY_WITHHELD`** (direct to main → origin).
   TE-note CORRECTION gap (i): an evaluated e-LOND discovery held back only by the cardinality-scaled BH bar
   kept its stale UNTESTED. New `PendingReason.MULTIPLICITY_WITHHELD` + a precise `verify.py` elif (satisfied ∧
