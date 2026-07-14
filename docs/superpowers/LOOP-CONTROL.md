@@ -45,13 +45,29 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- Branch: `feat/cross-arm-relations` (12/12 tasks done, whole-branch review READY-TO-MERGE).
-- In flight: **A** — restoring the real merged-universe bundle, then merge to local main.
-- Foundations digest: dispatched (agent), pending.
-- Nothing merged by the loop yet.
+- **On `main`** at `d69c03a`, clean tree, **25 commits ahead of origin (NOT pushed — policy)**.
+- Phase A DONE. Next: **B1 — measurement-space registry**.
+- Foundations digest DONE → `notes/2026-07-14-foundations-digest-for-loop.md` (read it; it grounds B1/B2/§2).
+- **B2 grounding done:** accumulating-store spec read in full (`specs/2026-07-10-accumulating-universe-store-design.md`).
+  Store = append-only content-addressed JSONL (source of truth) + DuckDB facet layer; persists the WHOLE Corpus
+  incl. `fdr_ledger`; load→propose→dedup→register→license→persist-back; re-run mints 0 claims. Cheapest first move
+  (§6): JSONL record (modality on contract) → `populate_universe` appends → census query → viewer facets.
+- **B1 next-fire TODO:** read `specs/2026-07-10-reparameterization-evaluator-design.md` §7 for the registry design
+  BEFORE building (registry = "one registry, two consumers": store + evaluator; keyed by assay → SE-Contract
+  dimensions, each entry a licensable meta-claim per measurement-foundation — key by scale-type + invariance group).
+  Then brainstorm→spec→plan→TDD→review→merge-local. Corpus stays 4; umbrella-side; grammar/protocol untouched.
+
+## Test/gate cadence
+- Fast gate (per change): `cd grammar && uv run pytest -q` (~0.5s, 602) · `cd protocol && uv run pytest -q` (~2s, 509)
+  · targeted umbrella `uv run --project . pytest tests/<file> -q` · `ruff check` touched files.
+- Full gate (item close only, SLOW ~13–63 min): `bash scripts/check-all.sh`. Note when skipped.
 
 ## Flagged for the user (decisions / blockers I will NOT resolve autonomously)
-- (none yet)
+- **Push to origin** is deferred (25 commits ahead) — needs your coordination (shared checkout). Loop will keep
+  accumulating on local main.
 
 ## Shipped by the loop (newest first)
-- (none yet)
+- **2026-07-14 — Phase A: `feat/cross-arm-relations` merged to local main** (`d69c03a`, ff). Restored the real
+  1386-node bundle (discarded the 46-node demo), fixed 1 branch-introduced ruff (unused `FDRLedger` import),
+  reconfirmed grammar 602 + protocol 509 + relations e2e 3/3 green. Branch deleted. (Not a numbered backlog line —
+  closing in-flight work to get a clean main to branch from.)
