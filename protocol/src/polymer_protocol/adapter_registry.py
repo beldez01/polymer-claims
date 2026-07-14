@@ -19,6 +19,12 @@ class AdapterCredential(_Model):
     implementation_hash: str
     version: str = "v1"
     trusted: bool = True
+    # R1 (adapter-independence hardening): provenance-lineage tags — the shared roots that make two
+    # differently-owned adapters fail on the SAME inputs (org, model family, training corpus, shared
+    # reference DB, e.g. "org:deepmind" / "trained_on:clinvar"). Two adapters sharing ANY lineage tag
+    # are NOT independent even with distinct owner + implementation_hash. Empty (default) => no
+    # constraint, so existing registries are unaffected. Never persisted in the Corpus.
+    lineage: tuple[str, ...] = ()
 
 
 class AdapterRegistry(_Model):
@@ -39,12 +45,16 @@ class AdapterRegistry(_Model):
 
 def adapters_independent(a: AdapterCredential, b: AdapterCredential) -> bool:
     """Two adapters are INDEPENDENT iff both trusted AND different owner AND different
-    implementation lineage. (The audit's refusal triad: same owner OR same implementation
-    lineage OR untrusted => NOT independent.)"""
+    implementation lineage AND no SHARED provenance-lineage tag. (The refusal quad: same owner OR
+    same implementation lineage OR a shared lineage tag OR untrusted => NOT independent.) A shared
+    lineage tag (same org / training corpus / reference DB) makes two differently-owned adapters fail
+    together, defeating the air-gap even when owner and implementation_hash differ. Empty lineage on
+    either side shares nothing, so registries without lineage behave exactly as before."""
     return (
         a.trusted and b.trusted
         and a.owner != b.owner
         and a.implementation_hash != b.implementation_hash
+        and set(a.lineage).isdisjoint(b.lineage)
     )
 
 

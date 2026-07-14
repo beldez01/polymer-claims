@@ -67,6 +67,10 @@ update docs. The user is away; act on established work, don't invent scope or ma
   accumulating on local main.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — R1: provenance-lineage on AdapterCredential** (`feat/adapter-lineage` → local main, ff).
+  `AdapterCredential.lineage: tuple[str,...]=()` + `adapters_independent` refusal QUAD (shared lineage tag →
+  not independent, even with distinct owner+hash). Additive, byte-identical for lineage-less registries (512
+  protocol tests unchanged; credential never persisted). 5 tests. Pure-protocol; Corpus 4. R2–R5 remain.
 - **2026-07-14 — C1: adapter-independence Step-0 probe** (`feat/adapter-independence-probe` → local main, ff).
   `adapter_independence.py` (pure stdlib): error-correlation ρ → `N_eff=2/(1+ρ)`, set-overlap φ variant (claim-shape),
   `independence_report` (ρ/N_eff/per-class/2×2 confusion). 7 synthetic tests; grammar/protocol untouched; Corpus 4.

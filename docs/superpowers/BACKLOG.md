@@ -121,6 +121,13 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   — Replace the hand-set organizational tier with measured error-correlation → `N_eff = 2/(1+ρ)`.
   R1 provenance lineage on `AdapterCredential` (ship-now); R2 decorrelation battery (after Step 0);
   R3 decorrelation red-team; R4 heterodox third witness; R5.2 shape-dependent strength cap.
+  — **R1 SHIPPED 2026-07-14 (loop)** on `feat/adapter-lineage`: `AdapterCredential.lineage: tuple[str,...] = ()`
+  (provenance-lineage tags: org / model family / training corpus / shared reference DB) + `adapters_independent`
+  strengthened to a refusal QUAD — two adapters sharing ANY lineage tag are NOT independent even with distinct
+  owner + implementation_hash (a shared training corpus makes differently-owned models fail together). Additive,
+  byte-identical for lineage-less registries (all 512 protocol tests unchanged; not persisted in the Corpus);
+  5 new tests. Pure-protocol; Corpus 4. **R2 (decorrelation battery) is the next sub-item** — feed C1's
+  `adapter_independence` probe a real known-truth calibration battery (data-gated); R3/R4/R5 after.
 - [ ] **neg-whisper ② — shared-cause independence as a defeasible claim** · `HARDEN` · `specs/2026-07-07-neg-whisper-backlog-design.md` §3
   — Promote the multiply-e-values gate from an operator flag to a licensable `independence` claim with a
   correlated-variance probe. "The load-bearing risk named in every doc." (Item ① shipped.)
