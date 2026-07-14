@@ -45,8 +45,13 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `feat/reparam-evaluator`** (B3 in progress, grounding). main is `b80957c` (30 ahead of origin, NOT pushed).
-- **B1 + B2(primitive) DONE. IN PROGRESS: B3 — re-parameterization evaluator.**
+- **On `feat/reparam-evaluator`** (B3 COMPLETE — B3a+B3b — about to ff-merge to local main). main is `b80957c`.
+- **B1 + B2(primitive) + B3 DONE. Next: B4 — promoter-methylation SE-contract** (buildable machinery now;
+  the live run is DATA-GATED on `methylation_promoter_bycosmic.csv.gz` / CCLE RRBS — build+unit-test on
+  synthetic/fixture contracts, mark the live run BLOCKED). Note: `se:gdsc_pharmaco_promoter@1` ALREADY EXISTS as a
+  committed contract (used by B1/B3) — so B4 may be largely DONE already; verify what's real vs. what the live
+  MGMT→TMZ reparam proof still needs, then likely check off B4 + move to **C1** (adapter-independence Step 0 probe,
+  the cheap do-now in §2) and onward.
 - **B3 KEY PIVOT (2026-07-14):** the "reinterpret" non-contradiction edge the spec (§4) flagged as a NEEDED
   grammar change **ALREADY EXISTS** — `RelationKind.RESTRICTION_MAP` in `grammar/src/polymer_grammar/leaf.py:138`
   (added by the cross-arm relations work; a non-attack relation CLAIM, stored in Corpus.claims via `is_relation`,
@@ -102,6 +107,13 @@ update docs. The user is away; act on established work, don't invent scope or ma
   accumulating on local main.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — B3: re-parameterization evaluator** (`feat/reparam-evaluator` → local main, ff). NO grammar change
+  (reused `RelationKind.RESTRICTION_MAP`). B3a: `sheaf.py` suppresses equivalence/defeat edges bridged by a
+  RESTRICTION_MAP relation (byte-identical when absent; 509 protocol tests unchanged; 3 new). B3b:
+  `reparam_evaluator.py` — trigger REJECTED+REFUTED → untrusted `ReparamAgent` (LLM, grounded by B1 registry, never
+  fabricates) → declare-and-charge K e-LOND slots upfront → re-test via UNCHANGED gate (injected) → RESTRICTION_MAP
+  relation linking original↔alternate; depth-1; original retained; idempotent; two-stratum. 8 synthetic tests.
+  Real MGMT→TMZ proof B4-data-gated. grammar 602 / protocol 512 / Corpus 4.
 - **2026-07-14 — B2 (store primitive): accumulating-universe store** (`feat/accumulating-store` → local main, ff).
   `src/polymer_claims/accumulating_store.py`: `corpus.json` whole-Corpus snapshot (reuses io.py → ledger position
   round-trips) + append-only content-addressed `claims.jsonl`; `accumulate` load→dedup→register(injected)→persist

@@ -60,14 +60,26 @@ ruled out 2026-07-11); generic per-attack e-value combination ("largely a mirage
   `load_contract`), `resolve_space` (evaluator grounding — never fabricates), `coverage` (census).
   grammar/protocol untouched; Corpus 4; 11 tests. Follow-ups noted in spec §5 (entries→meta-claims,
   reconcile `merge_universes` modality strings).
-- [ ] **Re-parameterization evaluator** · `BUILD` · `specs/2026-07-10-reparameterization-evaluator-design.md` §9
+- [x] **Re-parameterization evaluator** · `BUILD` · `specs/2026-07-10-reparameterization-evaluator-design.md` §9
   — On REJECTED/REFUTED, LLM-propose + registry-ground alternate measurement spaces, declare-and-charge
   FDR, re-test; separates a true negative from a mis-parameterization. Only Step 0 (promoter SE-contract)
   is built. Deps: registry (above) + an additive grammar "reinterpret edge" (§4, still open).
-  ⚠ **Name collision:** `DefeatEdgeKind.REINTERPRET` already exists but is an *attack/de-license* edge
-  (`grammar/.../defeat.py:118`) — opposite polarity to the *non-contradiction restriction-map* edge this
-  needs (tells the sheaf that "REJECTED over gene-body" and "LICENSED over promoter" aren't a contradiction).
-  Don't reuse it; the additive change is genuinely still open.
+  — **SHIPPED 2026-07-14 (loop)** on `feat/reparam-evaluator`. **NO grammar change needed** — the "reinterpret"
+  non-contradiction edge already exists as `RelationKind.RESTRICTION_MAP` (cross-arm work; a relation CLAIM,
+  Corpus stays 4). Two slices:
+  **B3a (protocol)** — `sheaf.py` drops any equivalence/defeat edge whose endpoints are bridged by a
+  RESTRICTION_MAP relation (non-comparable → no contradiction), completing the cross-arm Slice-1 "define/render-only"
+  restriction_map into real sheaf/Duhem behavior. Pure, numpy-free, byte-identical when absent (509 tests unchanged);
+  3 tests (frustrate → RESTRICTION_MAP suppresses → COHERES doesn't).
+  **B3b (umbrella)** — `src/polymer_claims/reparam_evaluator.py`: trigger=REJECTED+REFUTED; `ReparamAgent` untrusted
+  LLM (injected `complete` + `.anthropic` tripwire) proposes modalities re-validated to the controlled vocab,
+  GROUNDED by the B1 registry to apt-AVAILABLE spaces (never fabricates); declare-and-charge all K e-LOND slots
+  upfront (non-adaptive) via `register_test`+`commitment_hash`; re-test via the UNCHANGED gate (injected);
+  depth-1; original REFUTED retained verbatim; emits a RESTRICTION_MAP relation linking original↔alternate
+  (B3a consumes it). Two-stratum: LLM only narrows which re-test; only the gate licenses. Idempotent. 8 synthetic
+  tests over real contract ids. **Real MGMT→TMZ numerical proof is B4-data-gated** (promoter contract live run).
+  ⚠ **Name collision (resolved):** `DefeatEdgeKind.REINTERPRET` is an *attack* edge — correctly NOT reused; the
+  non-contradiction edge is `RelationKind.RESTRICTION_MAP` (opposite polarity), exactly as this warning required.
 - [ ] **Promoter-methylation SE-Contract (2nd measurement dimension)** · `BUILD` · reparam §7 pre-req 0
   — Second contract dimension so MGMT→TMZ and promoter-localized claims can be re-tested over promoter
   β-space. Buildable/unit-testable on synthetic contracts now; **data-gated** on `methylation_promoter_bycosmic.csv.gz` / CCLE RRBS for the live run.
