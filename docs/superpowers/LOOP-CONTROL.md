@@ -45,8 +45,12 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `ef40c32`, clean tree, **27 commits ahead of origin (NOT pushed — policy)**.
-- **B1 DONE (merged ef40c32). Next: B2 — accumulating-universe store.**
+- **On `feat/accumulating-store`** (B2 store primitive built + green, about to ff-merge). main was `9435607`.
+- **B1 + B2(primitive) DONE. Next: B3 — re-parameterization evaluator** (needs B1 registry ✓ + an
+  additive "reinterpret" non-contradiction restriction-map edge — that edge is the one grammar change B3 needs;
+  spec `2026-07-10-reparameterization-evaluator-design.md` §4 flags it). Then B4 (promoter SE-contract, data-gated).
+- **NEW follow-up queued:** B2-integration (wire real populate_universe + viewer at the store) — SLOW-pipeline-gated,
+  deferred by the loop; see BACKLOG §1.
 - Foundations digest DONE → `notes/2026-07-14-foundations-digest-for-loop.md` (read it; it grounds B2/§2).
 - **B2 grounding done:** accumulating-store spec read in full (`specs/2026-07-10-accumulating-universe-store-design.md`).
   Store = append-only content-addressed JSONL (source of truth) + DuckDB facet layer; persists the WHOLE Corpus
@@ -71,6 +75,12 @@ update docs. The user is away; act on established work, don't invent scope or ma
   accumulating on local main.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — B2 (store primitive): accumulating-universe store** (`feat/accumulating-store` → local main, ff).
+  `src/polymer_claims/accumulating_store.py`: `corpus.json` whole-Corpus snapshot (reuses io.py → ledger position
+  round-trips) + append-only content-addressed `claims.jsonl`; `accumulate` load→dedup→register(injected)→persist
+  mints 0 on re-run; `census()` (subject×modality×status, modality via B1 registry) reports coverage gaps. Pure-python
+  (no DuckDB dep). 8 synthetic tests; grammar/protocol untouched; Corpus 4. Live populate/viewer wiring deferred
+  (B2-integration, slow-pipeline-gated).
 - **2026-07-14 — B1: measurement-space registry** (`feat/measurement-space-registry` → local main, ff).
   Authored the deferred spec (`specs/2026-07-14-measurement-space-registry-design.md`) + umbrella module
   `src/polymer_claims/measurement_space.py`: catalog of 9 real contract spaces keyed `(contract_uid, row_prefix)`,

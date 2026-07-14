@@ -27,9 +27,26 @@ ruled out 2026-07-11); generic per-attack e-value combination ("largely a mirage
 ## 1. Near-term critical cluster — persistence & parameterization
 *Interdependent, mostly approved-but-unbuilt, each unlocks the next. Highest actionable leverage.*
 
-- [ ] **Accumulating-universe store (persistent claim log)** · `BUILD` · `specs/2026-07-10-accumulating-universe-store-design.md` §6
+- [x] **Accumulating-universe store (persistent claim log)** · `BUILD` · `specs/2026-07-10-accumulating-universe-store-design.md` §6
   — Append-only content-addressed JSONL + facet layer so re-runs mint 0 new claims and the `fdr_ledger`
   accumulates. Today the merge is a static union / fresh `Corpus` per run, not a persistent store.
+  — **STORE PRIMITIVE SHIPPED 2026-07-14 (loop)** on `feat/accumulating-store`.
+  `src/polymer_claims/accumulating_store.py`: `AccumulatingStore(root)` = `corpus.json` authoritative
+  whole-Corpus snapshot (reuses `io.load_corpus/dump_corpus`, so the live `fdr_ledger` position round-trips
+  verbatim) + append-only content-addressed `claims.jsonl` (audit/dedup/census). `accumulate(proposed,
+  register_license)` load→dedup(by id, vs log+corpus+within-batch)→register+license(INJECTED, generic)→
+  persist-back — **re-run mints 0** (tested), ledger appends as a stream (tested, first wave byte-identical
+  after 2nd). `census()` = (subject×modality×status) coverage over the snapshot, modality derived from
+  `data_ref` via the B1 registry (no grammar field), reports coverage-gap cells. DuckDB not a dep → pure-python
+  census. 8 tests on synthetic corpora; grammar/protocol untouched; Corpus 4.
+  — Deferred (noted in module/spec): two-file crash-atomicity (self-correcting via corpus-id dedup),
+  subject-CLASS coarsening (v1 is exact-subject), pure-JSONL-as-sole-source (v1 = snapshot+log).
+- [ ] **B2-integration: wire the real `populate_universe` + viewer at the store** · `BUILD` · store spec §6.2–6.4
+  — Point `pharmaco_populate.populate_universe` (and the methyl/spine populate paths + CLI) at
+  `AccumulatingStore` instead of a fresh `Corpus()` each run; regenerate the viewer bundle from the store with
+  facet filters. **SLOW-PIPELINE-GATED** (the ~13-min real GDSC scan) — the loop deferred it to keep the store
+  primitive fast+fully-tested; do it behind the full-gate discipline. This is what closes the "code is ephemeral
+  per run" gap in the LIVE pipeline (the primitive already closes it structurally + is proven on synthetic runs).
 - [x] **Measurement-space registry** · `BUILD` · accumulating-store §7 + reparam-evaluator §7
   — Keyed catalog of available SE-Contract dimensions per assay. *Shared prerequisite of the store AND
   the evaluator ("one registry, two consumers").*
