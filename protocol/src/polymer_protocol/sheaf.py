@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections import deque
 
-from polymer_grammar import ATTACK_KINDS, Status, effective_defeats
+from polymer_grammar import ATTACK_KINDS, RelationKind, Status, effective_defeats, is_relation
 
 from .base import _Model
 from .corpus import Corpus
@@ -129,6 +129,29 @@ def _attacker_evalue(latest: dict, claim_id: str) -> float:
     return float(t.e_value)
 
 
+def _restriction_map_pairs(corpus: Corpus) -> set[frozenset[str]]:
+    """Unordered claim-id pairs bridged by a ``RESTRICTION_MAP`` relation claim.
+
+    The re-parameterization "reinterpret" semantics: a restriction map declares two claims to be
+    over DIFFERENT measurement spaces — non-comparable — so an equivalence/defeat edge between them
+    is NOT a contradiction and must be dropped from the sheaf (otherwise the Duhem layer would fire
+    spurious frustration between e.g. "REJECTED over gene-body" and "LICENSED over promoter").
+    Empty — hence byte-identical to prior behavior — when the corpus has no such relation.
+    """
+    pairs: set[frozenset[str]] = set()
+    for c in corpus.claims:
+        if not is_relation(c):
+            continue
+        if c.leaves[0].relation_kind is not RelationKind.RESTRICTION_MAP:
+            continue
+        s = c.subject  # ClaimSetSubject — is_relation guarantees the relation shape
+        for a in s.source_set:
+            for b in s.target_set:
+                if a != b:
+                    pairs.add(frozenset((a, b)))
+    return pairs
+
+
 def extract_sheaf(
     corpus: Corpus,
     *,
@@ -165,6 +188,7 @@ def extract_sheaf(
         )
 
     vmap = {v.claim_id: v for v in vertices}
+    restriction_pairs = _restriction_map_pairs(corpus)  # non-comparable pairs -> drop their edges
     edges: list[SheafEdge] = []
     flags: list[DataQualityFlag] = []
 
@@ -173,6 +197,8 @@ def extract_sheaf(
             continue
         if eq.left not in vmap or eq.right not in vmap:
             continue
+        if frozenset((eq.left, eq.right)) in restriction_pairs:
+            continue  # non-comparable via a restriction map — no agreement edge
         a, b = vmap[eq.left], vmap[eq.right]
         if not _check_commensurable(a, b, eq.left, eq.right, flags):
             continue
@@ -191,6 +217,8 @@ def extract_sheaf(
     for src, tgt in sorted(defeat_pairs):
         if src not in vmap or tgt not in vmap:
             continue                                            # synthetic ':' source or non-quantity endpoint
+        if frozenset((src, tgt)) in restriction_pairs:
+            continue                                            # non-comparable via a restriction map — no attack edge
         a, b = vmap[src], vmap[tgt]
         if not _check_commensurable(a, b, src, tgt, flags):
             continue

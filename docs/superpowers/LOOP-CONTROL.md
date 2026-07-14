@@ -57,8 +57,25 @@ update docs. The user is away; act on established work, don't invent scope or ma
   `relation_proposer.py`'s injected-client + `.anthropic` tripwire) → declare-and-charge K e-LOND slots upfront →
   re-test each alternate via the UNCHANGED gate → emit a RESTRICTION_MAP relation claim linking original↔alternate.
   Retain original REJECTED verbatim (residualism); depth-1; synthetic two-space fixtures (real MGMT→TMZ = B4-gated).
-  DECOMPOSE across fires: (B3a) protocol suppression hook → (B3b) umbrella evaluator. Confirm suppression-wired
-  status from the Explore agent's map before building.
+  DECOMPOSE across fires: (B3a) protocol suppression hook → (B3b) umbrella evaluator.
+- **B3a DONE (committed on branch, not yet merged):** `sheaf.py` `_restriction_map_pairs` + skip equivalence/defeat
+  edges bridged by a RESTRICTION_MAP relation (non-comparable → no contradiction). Pure-protocol, numpy-free,
+  byte-identical when no such relation (509 existing tests unchanged). 3 new tests
+  (`protocol/tests/test_restriction_map_suppression.py`): defeat+equiv frustrate; RESTRICTION_MAP suppresses;
+  COHERES does NOT. protocol 512, grammar 602, ruff clean.
+- **B3b NEXT (the umbrella evaluator, on the SAME branch `feat/reparam-evaluator`):** build
+  `src/polymer_claims/reparam_evaluator.py`. Grounding (from the code map): trigger = iterate corpus.claims for
+  `status==REJECTED and rejection_reason==RejectionReason.REFUTED`. Hybrid generator = mirror
+  `relation_proposer.LLMRelationAgent` (injected `complete` callable; `_build_prompt` from the refuted claim's
+  `provenance.rationale`/`conclusion.descriptor`/`roles`; `_parse` re-validates an untrusted proposed Modality;
+  `.anthropic` live tripwire). Ground the proposal via `measurement_space.resolve_space(modality, exclude=<orig
+  space>)` → K apt-AVAILABLE alternates (never fabricates). Declare-and-charge = pre-register ALL K e-LOND slots
+  upfront via `fdr.register_test` (non-adaptive) BEFORE testing. Re-test each alternate = rebuild the claim with a
+  new `data_ref` (build_evaluation_plan; NOTE a different measurement space may need a different CapabilityCell —
+  handle for the synthetic case) via the UNCHANGED gate. Depth-1 (a rejected alternate does not recurse). RETAIN
+  the original REJECTED claim verbatim. Emit a `make_relation_claim(..., RelationKind.RESTRICTION_MAP, ...)` linking
+  original↔alternate (the B3a hook consumes it). Build+test on SYNTHETIC two-space fixtures (spec §10); real
+  MGMT→TMZ is B4-data-gated (mark blocked). Then merge the whole B3 branch to local main, check off B3.
 - **NEW follow-up queued:** B2-integration (wire real populate_universe + viewer at the store) — SLOW-pipeline-gated,
   deferred by the loop; see BACKLOG §1.
 - Foundations digest DONE → `notes/2026-07-14-foundations-digest-for-loop.md` (read it; it grounds B2/§2).
