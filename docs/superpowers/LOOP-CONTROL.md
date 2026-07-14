@@ -45,8 +45,8 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `feat/accumulating-store`** (B2 store primitive built + green, about to ff-merge). main was `9435607`.
-- **B1 + B2(primitive) DONE. Next: B3 — re-parameterization evaluator** (needs B1 registry ✓ + an
+- **On `main`** at `654726f`, clean tree, **29 commits ahead of origin (NOT pushed — policy)**.
+- **B1 + B2(primitive) DONE (merged 654726f). Next: B3 — re-parameterization evaluator** (needs B1 registry ✓ + an
   additive "reinterpret" non-contradiction restriction-map edge — that edge is the one grammar change B3 needs;
   spec `2026-07-10-reparameterization-evaluator-design.md` §4 flags it). Then B4 (promoter SE-contract, data-gated).
 - **NEW follow-up queued:** B2-integration (wire real populate_universe + viewer at the store) — SLOW-pipeline-gated,
