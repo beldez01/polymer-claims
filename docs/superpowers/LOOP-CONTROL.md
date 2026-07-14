@@ -45,14 +45,15 @@ update docs. The user is away; act on established work, don't invent scope or ma
 - **SKIP:** §8 (all DEFER), the product-identity fork + other strategic items (flag for user).
 
 ## State (update every fire)
-- **On `main`** at `932f1e4`, clean tree, **36 commits ahead of origin (NOT pushed — policy)**.
-- **§1 CLUSTER COMPLETE** (B1/B2-primitive/B3/B4) + **C1 probe DONE** (measured-ρ instrument shipped).
-- **Next: §2 continuation.** Recommended order: **R1** (provenance lineage on `AdapterCredential` — the "cheap prior,
-  ship regardless of Step 0", plan §R1/§4) → then **neg-whisper ②** (promote the shared-cause/multiply gate from an
-  operator flag to a licensable `independence` claim with a correlated-variance probe — now that C1 supplies the ρ
-  instrument; specs `2026-07-07-neg-whisper-backlog-design.md` §3) → neg-whisper ③④⑤ → v2 slices 2/3. Grep the real
-  `AdapterCredential`/`shared_cause`/`cohorts_error_independent` code first (foundations digest §3 flags these as the
-  declared-not-enforced gap). Data-gated live runs → machinery + mark BLOCKED. Each: branch → TDD → merge local.
+- **On `main`** at `32ba8ed`, clean tree, **38 commits ahead of origin (NOT pushed — policy)**.
+- **§1 CLUSTER COMPLETE** (B1/B2-primitive/B3/B4) + **§2 so far: C1 probe ✓ · R1 lineage ✓.**
+- **Next: neg-whisper ②** — promote the shared-cause / multiply-e-values gate from an operator-asserted flag to a
+  licensable `independence` claim with a correlated-variance probe (now C1 `adapter_independence` supplies the ρ
+  instrument + R1 supplies lineage tags). Spec `specs/2026-07-07-neg-whisper-backlog-design.md` §3. GROUND FIRST on
+  the real `shared_cause.py` (grammar) + `cohorts_error_independent` (`verify.py`/`replication.py`) — foundations
+  digest §3: today it overlaps operator-DECLARED factor labels vs a fixed τ, not measured ρ. Decide scope: likely a
+  grammar `independence` claim pattern (additive, byte-identity) + wiring the ρ probe as its evidence; keep it
+  minimal, may span fires. Then neg-whisper ③④⑤ → v2 slices 2/3 → §3 gate-integrity debts. Data-gated → machinery + mark BLOCKED.
 - **Deferred follow-ups (tracked in BACKLOG, not lost):** B2-integration (wire real populate_universe + viewer at
   the store — slow-pipeline-gated); reconcile `merge_universes` hard-coded modality strings to the B1 controlled vocab.
 - Foundations digest: `notes/2026-07-14-foundations-digest-for-loop.md` (read for §2/§9 grounding).
