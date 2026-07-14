@@ -487,13 +487,21 @@ that is still operator-**asserted**. These cross-ref existing rows rather than d
   conversion implies an inspection/re-conversion surface not yet listed.
 
 ### Compute / infra (reframed — stance softened 2026-07-13, no rigid never-host caveats)
-- [ ] **STRATEGIC — resolve the product-identity fork (your active decision)** · drives where the compute line falls
+- [x] **STRATEGIC — product-identity fork RESOLVED (operator decision 2026-07-14)** · drives where the compute line falls
   — local meaning-extraction tool · open public claims world · hosted concordance API · in-house
   drug-discovery engine. `compute-boundary.md` softened from doctrine → default (2026-07-13) pending this.
+  — **DECISION: build as an IN-HOUSE DRUG-DISCOVERY ENGINE** (most practical for immediate purposes; the Durendal /
+  **"Polymer Biologics"** capstone). **Keep the surface OPEN** for the federated future (open public claims world /
+  meaning-extraction tool) — do NOT foreclose it; the compute-boundary "default" stance stands. Downstream:
+  real-auth / multi-tenant (§9) stays deferred (federated-only). NOTE: operator renamed **Durendal → Polymer
+  Biologics**; a repo-wide doc rename is NOT done here (coordinate — the operator is specifying the plan in another
+  instance).
   Federation / Cohort Foundry / a managed compute tier are now spectrum **options**, not violations.
 - [ ] **Cross-hardware determinism / tolerance criterion** · `HARDEN` · scaled-infrastructure ("the core systems problem")
   — Under FP/GPU nondeterminism, "re-run and compare" needs principled tolerances vs bit-exactness. Adjacent
   to two-adapter/per-unit concordance but named as *the* hard systems problem; no dedicated row until now.
+  — **DEFER until GPU adoption (operator 2026-07-14):** not relevant at current CPU capacities (no GPU
+  non-determinism yet); decide the bit-exactness-vs-tolerance criterion when GPU compute is actually in use.
 - [ ] **Real auth / multi-tenant surface** · `HARDEN` · scaled-infrastructure ("local-only → federated gap")
   — Needed by any hosted/federated form; today the node's mutating routes are unauthenticated by design
   (`src/.../server.py:171`).
