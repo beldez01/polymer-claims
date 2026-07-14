@@ -321,8 +321,8 @@ can't yet see. Plan-ready; each gated on a small first probe.*
   — Add more CBF/other fusion markers as data supports; verify each vs data first (the MYH11→MN1 lesson).
 - [ ] **Synbio 2c ingestion at scale** · `HARDEN` · `specs/2026-07-10-synbio-phase2-design.md` §3
   — Extend the reviewed markdown→claims extractor beyond the 5 reviewed manifests / 39 claims.
-- [ ] **Open IR grammar gaps GAP-8/11/13/14/15** (GAP-7 ✅ DONE 2026-07-14) · `BUILD` · `notes/2026-07-10-synbio-grammar-gaps.md`
-  — ~~GAP-7 ANALYTIC basis~~ **✅ `MeasurementBasis.ANALYTIC` shipped (grammar 612)**; GAP-8 gene/locus sub-key; GAP-11 per-tumor stratification; GAP-13 endpoint_type;
+- [ ] **Open IR grammar gaps GAP-11/13/14/15** (GAP-7 + GAP-8 ✅ DONE 2026-07-14) · `BUILD` · `notes/2026-07-10-synbio-grammar-gaps.md`
+  — ~~GAP-7 ANALYTIC basis~~ **✅ `MeasurementBasis.ANALYTIC`**; ~~GAP-8 gene/locus sub-key~~ **✅ `MeasurementContext.target_locus` (grammar 615)**; GAP-11 per-tumor stratification; GAP-13 endpoint_type;
   **GAP-14 composite/vector leaf** (`QuantityVectorLeaf` — a DMP is vector-valued); GAP-15 structured
   categorical mapping. Each core-adjacent, byte-identity-gated, needs a real caller to demand it.
   ⚠ **Measurement-foundation caveats (see §9):** GAP-14 for *compositional* data (a molar ratio) needs a

@@ -45,10 +45,23 @@ class MeasurementContext(_Model):
     cell_line: str | None = None   # e.g. the ADAR reporter line
     assay: str | None = None       # e.g. "RNA-seq TPM", "luciferase ratio"
     condition: str | None = None   # free-form residual (temperature, timepoint)
+    # GAP-8: the gene/genomic locus this measurement is a property of (e.g. "TET2" for "77% of TET2
+    # lesions are truncating") — previously leaked into free-text `condition`. Nominal scale (a locus
+    # identifier); invariance group = relabeling (bijective renaming preserves meaning).
+    target_locus: str | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler) -> dict:
+        """Drop `target_locus` when unset so a context that predates the field serializes byte-identically
+        (no new key). The other fields keep their pre-existing null emission — this drops ONLY the addition."""
+        data = handler(self)
+        if data.get("target_locus") is None:
+            data.pop("target_locus", None)
+        return data
 
     @model_validator(mode="after")
     def _at_least_one_field(self) -> MeasurementContext:
-        if not any((self.tissue, self.cell_line, self.assay, self.condition)):
+        if not any((self.tissue, self.cell_line, self.assay, self.condition, self.target_locus)):
             raise ValueError(
                 "MeasurementContext must set at least one field; use context=None for no context"
             )

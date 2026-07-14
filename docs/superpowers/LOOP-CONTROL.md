@@ -190,6 +190,11 @@ now built; it needs your scientific curation + review.
   — a deliberate, correct change to real licensing outcomes. Left unwired so the loop never silently alters the gate.
 
 ## Shipped by the loop (newest first)
+- **2026-07-14 — GAP-8: `MeasurementContext.target_locus` (gene/locus sub-key)** (direct to main → origin).
+  Optional gene/locus identity (nominal, relabeling-invariant) that previously leaked into free-text
+  `condition`. Additive + byte-identical via a drop-when-None `@model_serializer` (every pre-field context
+  serializes exactly as before; other fields keep their null-emission); `_at_least_one_field` accepts a
+  locus-only context. 3 tests; grammar 615; protocol 539 unchanged. Gaps note 5 open → 4.
 - **2026-07-14 — GAP-7: `MeasurementBasis.ANALYTIC` (analytic-constant basis)** (direct to main → origin).
   Third measurement basis for definitional constants (2 bits = log2(4)) — neither FUNDAMENTAL nor DERIVED.
   Additive enum member (existing bases byte-identical, no serializer touched); discipline = formula required,

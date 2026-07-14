@@ -137,6 +137,7 @@ W3 ships no `Leaf`/`StrengthVector` change). Numbering continues from GAP-4.
 ### GAP-8 [subject] — no gene/locus context sub-key
 - **constraint:** a "77% of TET2 lesions are truncating" figure is a property of the *locus*, but `MeasurementContext` has only tissue/cell_line/assay/condition; gene identity leaks into free-text `condition`.
 - **candidate:** optional `gene`/`target_locus` sub-key on `MeasurementContext`.
+- **RESOLVED (2026-07-14):** `MeasurementContext.target_locus` added (nominal scale, relabeling-invariant). Additive + byte-identical: a `@model_serializer` drops the key when unset, so every pre-field context serializes exactly as before (the other fields keep their pre-existing null-emission); `_at_least_one_field` now accepts a locus-only context. 3 tests; grammar 615. Re-expressing the real TET2 claim off free-text `condition` is a mechanical follow-up.
 
 ### GAP-9 [domain] — order-of-magnitude (log-scale) range
 - **constraint:** a 10–100× span forced to an arithmetic midpoint (55±45), misrepresenting a multiplicative claim. **candidate:** `value_min`/`value_max` or log-scale uncertainty.
@@ -173,8 +174,8 @@ W3 ships no `Leaf`/`StrengthVector` change). Numbering continues from GAP-4.
   when boundless; open ends encode floor/ceiling; `_bound_discipline` enforces ordering/containment/
   spread-exclusivity). All five entries re-expressed with honest bounds; `schema_fit` → clean. Two
   domain refinements (GAP-9 log-scale, GAP-10 discrete-integer) are DEFERRED with armed tripwires.
-  **Open gaps remaining (5) [GAP-7 RESOLVED 2026-07-14 via `MeasurementBasis.ANALYTIC`]:** GAP-8 (gene/locus
-  context sub-key), GAP-11 (per-tumor stratification — its range facet is now expressible via low/high, but the
+  **Open gaps remaining (4) [GAP-7 + GAP-8 RESOLVED 2026-07-14 — `MeasurementBasis.ANALYTIC`, `MeasurementContext.target_locus`]:**
+  GAP-11 (per-tumor stratification — its range facet is now expressible via low/high, but the
   stratification residue keeps it open), GAP-13 (endpoint-type), GAP-14 (composite/vector quantity),
   GAP-15 (structured categorical mapping).
 - **`aggregate_gaps` dedup is too literal (engine gap).** RESOLVED (2026-07-12). It keys on the normalized
