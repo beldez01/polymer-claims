@@ -139,3 +139,54 @@ def expression_floor_claim(
                               search_cardinality=int(search_cardinality),
                               preregistration_hash=preregistration_hash, prior_cohorts=prior_cohorts,
                               rationale=f"fusion-driven re-expression floor: {gene} in {tissue}"))
+
+
+def expression_floor_feature_oracle_id() -> str:
+    return "expression_floor_feature_apparatus"
+
+
+def expression_floor_feature_oracle_registry() -> OracleRegistry:
+    """Broader applicability than the gene_or_protein floor oracle: the feature lane licenses
+    non-human / region / literal subjects (viral transcripts, LTR-oncogene junctions)."""
+    return OracleRegistry(dossiers=(OracleDossier(
+        oracle_id="expression_floor_feature_apparatus", validation_tier=ValidationTier.BENCHMARKED,
+        applicability_domain=ApplicabilityDomain(
+            subject_kinds=("gene_or_protein", "genomic_region", "literal")),
+        anchor="ebv-lymphoma-expr-v1"),))
+
+
+def expression_floor_feature_claim(
+    claim_id: str, *, ref: str, feature: str, subject, floor: float, tissue: str,
+    level_a: str, level_b: str, search_cardinality: int,
+    agent_id: str = "expression-floor-feature-v1", prior_cohorts: tuple[str, ...] = (),
+    preregistration_hash: str | None = None, strength: StrengthVector | None = None,
+) -> Claim:
+    """Generalized over-expression floor for a NON-HUMAN / region / literal feature (a viral
+    transcript, an LTR-oncogene junction). Takes an explicit `subject` (ANY legal Subject) and a
+    `feature` row key (``expr::<feature>``), so it is NOT constrained to an HGNC gene like
+    expression_floor_claim. Reuses the mean/HL adapter engine + the between-group discrimination
+    e-value; only the subject requirement (via EXPRESSION_FLOOR_FEATURE_CELL) is relaxed."""
+    from polymer_grammar.capability import build_evaluation_plan
+
+    from .capabilities import EXPRESSION_FLOOR_FEATURE_CELL
+    from .expression_floor_patterns import EXPRESSION_FLOOR
+
+    plan = build_evaluation_plan(
+        EXPRESSION_FLOOR_FEATURE_CELL,
+        params={"gene": feature, "group_col": "Sample_Group", "level_a": level_a, "level_b": level_b},
+        data_ref=ref,
+        criterion=SatisfactionCriterion(comparator=Comparator.GE, reference_leaf_index=0),
+        oracle_ref="expression_floor_feature_apparatus")
+    leaf = QuantityLeaf(value=float(floor), low=float(floor),
+                        measurement_basis=MeasurementBasis.DERIVED,
+                        formula="feature_pos_group_expression >= floor_tpm",
+                        context=MeasurementContext(tissue=tissue, assay="RNA-seq TPM"))
+    return Claim(
+        id=claim_id, title=f"{feature} clears the {floor:g} TPM floor in {tissue} ({level_a})",
+        pattern=EXPRESSION_FLOOR, leaves=(leaf,),
+        status=Status.PENDING, pending_reason=PendingReason.UNTESTED, strength=strength,
+        subject=subject, evaluation_plan=plan,
+        provenance=Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id=agent_id,
+                              search_cardinality=int(search_cardinality),
+                              preregistration_hash=preregistration_hash, prior_cohorts=prior_cohorts,
+                              rationale=f"presence/absence over-expression floor: {feature} in {tissue}"))

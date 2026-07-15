@@ -135,9 +135,28 @@ EXPRESSION_ABSENCE_CELL = CapabilityCell(
     criterion_target="reference_leaf", agreement_mode="both_satisfy_criterion",
 )
 
+# Sibling of EXPRESSION_FLOOR_CELL for NON-HUMAN / region / literal features (viral transcripts,
+# LTR-oncogene junctions). Same operation_impl (routes to the mean/HL adapters) + same criterion;
+# only the subject requirement is relaxed (kind=None ⇒ any subject) and the oracle is broadened.
+# Keeps the human EXPRESSION_FLOOR_CELL byte-identical.
+EXPRESSION_FLOOR_FEATURE_CELL = CapabilityCell(
+    capability_id="expression::floor_feature", capability_version="v1",
+    operation_impl="expression::floor",
+    title="feature expression clears a floor (non-human / region subject)", pattern=EXPRESSION_FLOOR,
+    subject=SubjectRequirement(mode="required", kind=None),
+    param_schema=(_STR(name="gene", codec="string"), _STR(name="group_col", codec="string"),
+                  _STR(name="level_a", codec="string"), _STR(name="level_b", codec="string")),
+    produced=_Q, allowed_comparators=_ALL_CMP,
+    eligible_adapter_identities=("expr-floor-mean", "expr-floor-hl"),
+    oracle=OracleRequirement(default_oracle_id="expression_floor_feature_apparatus", required=True),
+    data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("quantity",),
+    criterion_target="reference_leaf", agreement_mode="both_satisfy_criterion",
+)
+
 CAPABILITY_CELLS = CapabilityRegistry(cells=(
     MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL, N_DMPS_CELL, EVAL_BENCHMARK_ADVANTAGE_CELL,
     PHARMACO_ASSOC_CELL, EXPRESSION_FLOOR_CELL, BACKGROUND_ENRICHMENT_CELL, EXPRESSION_ABSENCE_CELL,
+    EXPRESSION_FLOOR_FEATURE_CELL,
 ))
 
 # ---------------------------------------------------------------------------
@@ -184,7 +203,10 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
     from .methyl_ndmp import ndmp_independent_registry
     from .background_enrichment import enrichment_independent_registry
     from .pharmaco_adapters import pharmaco_independent_registry, pharmaco_oracle_registry
-    from .expression_floor_adapters import expression_floor_registry, expression_floor_oracle_registry
+    from .expression_floor_adapters import (
+        expression_floor_registry, expression_floor_oracle_registry,
+        expression_floor_feature_oracle_registry,
+    )
     from .expression_absence_adapters import (
         expression_absence_registry, expression_absence_oracle_registry,
     )
@@ -216,6 +238,10 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
             adapter_registry=expression_absence_registry(),
             oracle_registry=expression_absence_oracle_registry(),
             trust_profile="gtex-healthy-expr-recomputable-public"),
+        ("expression::floor_feature", "v1"): CapabilityTrustBinding(
+            adapter_registry=expression_floor_registry(),
+            oracle_registry=expression_floor_feature_oracle_registry(),
+            trust_profile="ebv-lymphoma-expr-recomputable-public"),
     }
 
 
