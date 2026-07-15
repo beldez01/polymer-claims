@@ -4,7 +4,7 @@ from __future__ import annotations
 from polymer_grammar.provenance import GenerationMode
 from polymer_grammar.status import Status
 
-from polymer_claims.optocart_tables import ch4_recurrence_claims
+from polymer_claims.optocart_tables import ch4_recurrence_claims, ch5_burden_claims
 
 
 def test_ch4_recurrence_is_two_stratum_and_cited():
@@ -26,3 +26,16 @@ def test_ch4_values_and_ranges_match_the_docs():
     assert npm1.low == 0.30 and npm1.high == 0.35                           # 30–35% range carried honestly
     # disease context is attached, not fabricated into the value.
     assert by_id["ch4-asxl1-dupg"].leaves[0].context.condition == "ASXL1 CHIP"
+
+
+def test_ch5_burden_is_real_seer_data_two_stratum():
+    claims = ch5_burden_claims()
+    by_id = {c.id: c for c in claims}
+    # the two SEER cancers fetched 2026-07-15 (AML + PDAC incidence + survival).
+    assert by_id["ch5-aml-incidence"].leaves[0].value == 4.4
+    assert by_id["ch5-pdac-incidence"].leaves[0].value == 13.9
+    assert by_id["ch5-pdac-survival"].leaves[0].value == 0.137
+    for c in claims:
+        assert c.status is Status.CONJECTURED                          # two-stratum reported
+        assert c.provenance.generated_by is GenerationMode.LITERATURE_EXTRACTED
+        assert "seer.cancer.gov" in c.provenance.method                # real fetched source cited

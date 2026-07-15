@@ -35,6 +35,39 @@ def _row(key, title, value, disease, source_ref, *, low=None, high=None):
     )
 
 
+def ch5_burden_claims():
+    """Ch5 — disease burden. Real SEER Cancer Stat Facts figures FETCHED 2026-07-15 (age-adjusted
+    incidence per 100k/yr, 2019–2023; 5-yr relative survival 2016–2022) for the two candidate-universe
+    cancers in SEER: AML and pancreatic (PDAC). Two-stratum CONJECTURED reported claims; ids `ch5-<key>`.
+
+    GAP (flagged, NOT fabricated): MPN (PV/ET/PMF — JAK2/CALR), CHIP (ASXL1), and EBV+ PTLD are not in
+    SEER stat-facts pages and need targeted registry/literature sources; left unmaterialized here."""
+    seer = "SEER Cancer Stat Facts (seer.cancer.gov; incidence 2019–2023, survival 2016–2022)"
+    rows = [
+        dict(key="aml-incidence", title="AML age-adjusted incidence ≈ 4.4 / 100k / yr (SEER)",
+             value=4.4, formula="age_adjusted_new_cases_per_100k_per_year",
+             context=MeasurementContext(condition="acute myeloid leukemia"),
+             source_ref="SEER Cancer Stat Facts: AML (seer.cancer.gov/statfacts/html/amyl.html, 2019–2023)",
+             source_title=seer),
+        dict(key="aml-survival", title="AML 5-yr relative survival ≈ 33.4% (SEER)",
+             value=0.334, formula="five_year_relative_survival",
+             context=MeasurementContext(condition="acute myeloid leukemia"),
+             source_ref="SEER Cancer Stat Facts: AML (seer.cancer.gov/statfacts/html/amyl.html, 2016–2022)",
+             source_title=seer),
+        dict(key="pdac-incidence", title="Pancreatic cancer age-adjusted incidence ≈ 13.9 / 100k / yr (SEER)",
+             value=13.9, formula="age_adjusted_new_cases_per_100k_per_year",
+             context=MeasurementContext(condition="pancreatic cancer"),
+             source_ref="SEER Cancer Stat Facts: Pancreas (seer.cancer.gov/statfacts/html/pancreas.html, 2019–2023)",
+             source_title=seer),
+        dict(key="pdac-survival", title="Pancreatic cancer 5-yr relative survival ≈ 13.7% (SEER)",
+             value=0.137, formula="five_year_relative_survival",
+             context=MeasurementContext(condition="pancreatic cancer"),
+             source_ref="SEER Cancer Stat Facts: Pancreas (seer.cancer.gov/statfacts/html/pancreas.html, 2016–2022)",
+             source_title=seer),
+    ]
+    return materialize_reference_table(rows, id_prefix="ch5")
+
+
 def ch4_recurrence_claims():
     """Ch4 — recurrence fractions for the candidate universe (feature → fraction of a disease's
     cases). Values from CANDIDATE-RESCREEN + part-08 (primary cites in those docs). One reported
