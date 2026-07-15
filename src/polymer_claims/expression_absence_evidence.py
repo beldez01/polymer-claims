@@ -1,18 +1,21 @@
 """The safety-absence e-value for the expression::absence capability (Ch2 GTEx safety atlas).
 
-A one-sample betting e-value on the FRACTIONAL HEADROOM below a pre-registered ceiling:
-X_i = clip(1 - expr_i/ceiling, 0, 1) ∈ [0,1], tested against H0: E[headroom] <= margin (reusing
-evidence._capital_onesample, the same primitive count_enrichment uses). A large e-value = evidence
-the target sits, on average, at least `margin` of the ceiling below it across healthy tissues.
+WORST-TISSUE-AWARE by construction (audit): the e-value is 0 unless EVERY tissue clears the ceiling
+(worst tissue = max ≤ ceiling). When it does, the severity is a one-sample betting e-value on the
+FRACTIONAL HEADROOM X_i = clip(1 - expr_i/ceiling, 0, 1) ∈ [0,1], tested against H0: E[headroom] <=
+margin (reusing evidence._capital_onesample, the primitive count_enrichment uses). So the estimand is
+"below the ceiling in ALL tissues" — matching the safety claim — not "mean headroom alone".
 
-Rescaling by the CEILING (not a fixed TPM cap) is the scale-appropriate choice for a veto: a target
-absent across tissues has X≈1 (full headroom → strong e-value) regardless of the ceiling's TPM value,
-whereas a fixed cap would compress a realistic ~13 TPM ceiling to ~0.13, barely above the margin.
+Why the max gate (not just the mean): without it, a vetoed target with one tissue far above the
+ceiling still produced a huge mean-headroom e-value that resolved its FDR test as a discovery and
+inflated the e-LOND budget even though the license was withheld. Gating on the (near-deterministic,
+per-tissue-median) max makes the e-value refuse to support an unsafe target. Rescaling by the CEILING
+(not a fixed TPM cap) keeps a genuinely-safe target's severity strong at realistic ceilings.
 
-The HARD worst-tissue veto is NOT this e-value — it is the LE criterion on the max-returning adapter
-(expression_absence_adapters.ExpressionAbsenceMaxAdapter): a single tissue above the ceiling fails
-the criterion regardless of the e-value. This e-value supplies the statistical discrimination that
-the headroom is real, not chance.
+Two independent gates enforce safety, defence-in-depth: (1) the LE criterion on the max-returning
+adapter (`ExpressionAbsenceMaxAdapter`) is the hard licensing veto; (2) this e-value refuses to
+witness safety when the worst tissue exceeds the ceiling. Protocol-side, verify_stage additionally
+retracts any non-licensed claim's discovery, so the FDR invariant holds for every capability.
 
 Umbrella/impure (numpy). NOT re-exported from __init__.
 """
@@ -26,8 +29,8 @@ NULL_GAP = 0.1   # margin: mean fractional headroom below the ceiling under H0 �
 
 
 def expression_absence_evalue(exprs, *, ceiling: float, margin: float = NULL_GAP) -> float:
-    """Worst-tissue-aware safety e-value: evidence the target sits below `ceiling` in ALL healthy
-    tissues. A single tissue at/above the ceiling REFUTES safety, so the e-value returns 0.0 there —
+    """Worst-tissue-aware safety e-value: evidence the target sits at or below `ceiling` in ALL healthy
+    tissues. A single tissue strictly above the ceiling REFUTES safety, so the e-value returns 0.0 —
     otherwise a vetoed (unsafe) target's headroom-mean e-value would clear the e-LOND bar and inflate
     the FDR discovery budget even though the max-leg criterion withholds the license (audit finding 1/2).
 

@@ -40,6 +40,8 @@ def _read_gct_panel(gct_path: Path, genes: set[str]) -> tuple[list[str], dict[st
                     fv = float(v)
                 except ValueError:
                     continue
+                if not math.isfinite(fv):               # NaN/inf must not hide a later high finite value
+                    continue
                 prev = row.get(t)                       # aggregate duplicate rows by MAX (conservative)
                 row[t] = fv if prev is None else max(prev, fv)
     return tissues, out

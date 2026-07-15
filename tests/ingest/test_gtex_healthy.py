@@ -49,6 +49,19 @@ def test_duplicate_symbol_aggregates_by_max_not_first(tmp_path):
     assert panel["DUP"] == {"TissueA": 9.0, "TissueB": 2.0}   # per-tissue MAX across duplicate rows
 
 
+def test_duplicate_max_is_nan_safe(tmp_path):
+    # AUDIT r2 finding 2: a NaN in the first duplicate row must not hide a later high finite value.
+    p = tmp_path / "nan.gct.gz"
+    rows = [
+        "#1.2", "2\t1", "Name\tDescription\tTissueA",
+        "ENSG1a\tDUP\tnan",            # NaN first — must be skipped, not max'd
+        "ENSG1b\tDUP\t9.0",            # the real high value
+    ]
+    p.write_bytes(gzip.compress(("\n".join(rows) + "\n").encode()))
+    _tissues, panel = _read_gct_panel(p, {"DUP"})
+    assert panel["DUP"] == {"TissueA": 9.0}   # NaN skipped, finite value kept (not nan)
+
+
 def test_builder_writes_a_resolvable_contract(tmp_path):
     build_gtex_healthy_contract(_synthetic_gct(tmp_path), genes=["GENEHI", "GENELO"], out_dir=tmp_path)
     with _c.using_contract_root(tmp_path):

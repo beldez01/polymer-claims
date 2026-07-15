@@ -31,6 +31,7 @@ from polymer_grammar import (
     meets_meta_tier_bar,
     referenced_oracle_ids,
     resolve_test,
+    retract_tests,
     severity_provenance_of,
 )
 from polymer_grammar.commitment import commitment_hash
@@ -404,4 +405,17 @@ def verify_stage(
             ))
         else:
             new_claims.append(c)  # stays PENDING — already carries a valid pending_reason
+
+    # Enforce the LICENSED <=> live e-LOND discovery invariant (the same one drift.reopen_drifted
+    # restores). A hypothesis resolved as a discovery THIS cycle (its e-value cleared the e-LOND bar)
+    # but that did NOT end LICENSED — because it failed the criterion/satisfaction, defeat/extension,
+    # independence, or the BH permit gate — must not stay a live discovery, or it inflates D_{t-1} and
+    # loosens future alpha for a claim the 4-way gate rejected. Retract those tests (audit finding).
+    resolved_discoveries = {cid for cid, d in reg_decisions.items() if d} | {
+        cid for cid, d in e_decisions.items() if d
+    }
+    licensed_ids_final = {c.id for c in new_claims if c.status == Status.LICENSED}
+    inflated = resolved_discoveries - licensed_ids_final
+    if inflated:
+        new_ledger = retract_tests(new_ledger, inflated)
     return corpus.model_copy(update={"claims": tuple(new_claims), "fdr_ledger": new_ledger})
