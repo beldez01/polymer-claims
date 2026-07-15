@@ -287,6 +287,14 @@ def verify_stage(
             new_claims.append(c)
             continue
         ev = rec.evaluation
+        # A node/adapter error (e.g. a corrupt/truncated contract that the loaders now reject) must
+        # surface as EXECUTION_ERROR, not masquerade as an UNTESTED claim that hides the corruption
+        # (audit: malformed contract was reported as PENDING/UNTESTED).
+        if any(r.status == "error" for r in ev.results):
+            new_claims.append(_with_status(
+                c, status=Status.PENDING, pending_reason=PendingReason.EXECUTION_ERROR, licensing=None,
+            ))
+            continue
         # ev.results is non-empty in the normal pipeline (verify requires >=2 adapters);
         # the truthiness guard is defensive.
         agreed_refuted = (

@@ -7,7 +7,7 @@ tests/spine/test_expression_floor_license.py.
 """
 from __future__ import annotations
 
-from polymer_grammar import FDRLedger, Status
+from polymer_grammar import FDRLedger, PendingReason, Status
 from polymer_protocol import Corpus
 
 from polymer_claims import contracts as _c
@@ -62,3 +62,23 @@ def test_single_high_tissue_vetoes_the_target(tmp_path):
     spike_test = next(t for t in out.fdr_ledger.tests if t.claim_id == "absence-SPIKE")
     assert spike_test.discovery is False
     assert out.fdr_ledger.n_discoveries == 0
+
+
+def test_truncated_contract_surfaces_as_execution_error(tmp_path):
+    # AUDIT (final): a corrupt/truncated contract must report EXECUTION_ERROR, not masquerade as an
+    # UNTESTED claim that hides the data corruption.
+    ref = _atlas(tmp_path)
+    betas = tmp_path / "tcga_laml_fusion_expr.betas.tsv"        # _atlas builds under this uid
+    lines = betas.read_text().splitlines()
+    lines[1] = "\t".join(lines[1].split("\t")[:-1])             # drop the last cell of the first gene row
+    betas.write_text("\n".join(lines) + "\n")
+    _c.clear_contract_cache()
+    from polymer_claims.expression_absence_adapters import expression_absence_claim
+    from polymer_claims.expression_absence_populate import license_batch, preregister
+    with _c.using_contract_root(tmp_path):
+        claims = [expression_absence_claim("absence-SAFEG", ref=ref, gene="SAFEG",
+                                           ceiling=_CEILING, search_cardinality=1)]
+        out = license_batch(preregister(Corpus(fdr_ledger=FDRLedger(target_fdr=0.05)), claims), claims, ref=ref)
+    c = out.by_id()["absence-SAFEG"]
+    assert c.status is not Status.LICENSED
+    assert c.pending_reason is PendingReason.EXECUTION_ERROR
