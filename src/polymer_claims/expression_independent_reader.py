@@ -35,13 +35,18 @@ def independent_feature_row(node: OperationNode, feature: str) -> tuple[dict[str
     se = load_contract(handle.ref)
     manifest = load_manifest(se)
     group_col = p["group_col"]
-    manifest_samples = {c["sample_id"] for c in manifest["col_data"]}
+    manifest_list = [c["sample_id"] for c in manifest["col_data"]]
+    if len(manifest_list) != len(set(manifest_list)):
+        raise ValueError("independent-read integrity: duplicate manifest col_data sample ids")
+    manifest_samples = set(manifest_list)
     group_of = {c["sample_id"]: c[group_col] for c in manifest["col_data"]}
 
     row_key = f"expr::{feature}"
     path = Path(se.access_methods[0].access_url)
     with open(path) as fh:
         tsv_samples = fh.readline().rstrip("\n").split("\t")[1:]
+        if len(tsv_samples) != len(set(tsv_samples)):
+            raise ValueError("independent-read integrity: duplicate TSV sample columns")
         if set(tsv_samples) != manifest_samples:
             raise ValueError(
                 "independent-read integrity: contract TSV columns != manifest col_data samples"
@@ -51,6 +56,12 @@ def independent_feature_row(node: OperationNode, feature: str) -> tuple[dict[str
             cells = line.rstrip("\n").split("\t")
             if cells[0] != row_key:
                 continue
+            # A truncated/ragged row would let `zip` silently DROP a trailing (possibly high) sample,
+            # erasing the worst tissue from a safety veto (audit finding 1). Require exact width.
+            if len(cells) != len(tsv_samples) + 1:
+                raise ValueError(
+                    "independent-read integrity: row width != header (truncated/ragged matrix)"
+                )
             for name, v in zip(tsv_samples, cells[1:]):
                 try:
                     fv = float(v)

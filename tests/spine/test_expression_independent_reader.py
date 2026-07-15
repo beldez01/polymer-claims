@@ -61,3 +61,32 @@ def test_integrity_check_catches_tsv_manifest_mismatch(tmp_path):
     with _c.using_contract_root(tmp_path):  # noqa: SIM117
         with pytest.raises(ValueError, match="integrity"):
             independent_feature_row(_node(ref), "RUNX1T1")
+
+
+def test_truncated_row_is_rejected(tmp_path):
+    # AUDIT r3 finding 1: a row missing its trailing (possibly high) sample must NOT be silently
+    # zipped short — it would erase the worst tissue from a safety veto. Require exact row width.
+    ref = _contract(tmp_path)
+    betas = tmp_path / "tcga_laml_fusion_expr.betas.tsv"
+    lines = betas.read_text().splitlines()
+    lines[1] = "\t".join(lines[1].split("\t")[:-1])       # drop the last cell of the RUNX1T1 row
+    betas.write_text("\n".join(lines) + "\n")
+    _c.clear_contract_cache()
+    with _c.using_contract_root(tmp_path):  # noqa: SIM117
+        with pytest.raises(ValueError, match="row width"):
+            independent_feature_row(_node(ref), "RUNX1T1")
+
+
+def test_duplicate_tsv_columns_rejected(tmp_path):
+    # AUDIT r3 finding 3: duplicate sample columns collapse under set-equality and overwrite values.
+    ref = _contract(tmp_path)
+    betas = tmp_path / "tcga_laml_fusion_expr.betas.tsv"
+    lines = betas.read_text().splitlines()
+    header = lines[0].split("\t")
+    header[2] = header[1]                                  # duplicate a sample column name
+    lines[0] = "\t".join(header)
+    betas.write_text("\n".join(lines) + "\n")
+    _c.clear_contract_cache()
+    with _c.using_contract_root(tmp_path):  # noqa: SIM117
+        with pytest.raises(ValueError, match="duplicate TSV"):
+            independent_feature_row(_node(ref), "RUNX1T1")

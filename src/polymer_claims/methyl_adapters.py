@@ -62,6 +62,9 @@ def _load_betas(
     beta: dict[str, dict[str, float]] = {}
     for ln in lines[1:]:
         cells = ln.split("\t")
+        # A truncated/ragged row would let `zip` silently drop trailing samples (audit finding 1).
+        if len(cells) != len(header) + 1:
+            raise ValueError(f"{node.impl}: contract row width != header (truncated/ragged matrix)")
         beta[cells[0]] = {sid: float(v) for sid, v in zip(header, cells[1:])}
     return beta, sample_ids, group_of, p
 

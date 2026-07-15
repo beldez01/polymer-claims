@@ -48,11 +48,19 @@ def _agreement_mode_for(
     is purely an opt-in per-capability override."""
     if capability_registry is None or claim.evaluation_plan is None:
         return "tight_numeric"
+    # Prefer the exact (capability_id, version) from the plan's execution_contract: operation_impl is
+    # NOT unique (e.g. expression::floor and expression::floor_feature share it), so matching by impl
+    # could pick the wrong cell's agreement mode (audit finding 4). Byte-identical where impl is unique.
+    contract = claim.evaluation_plan.execution_contract
+    if contract is not None:
+        cell = capability_registry.resolve(contract.capability_id, contract.capability_version)
+        if cell is not None:
+            return cell.agreement_mode
     graph = claim.evaluation_plan.graph
     node = next((n for n in graph.nodes if n.id == graph.terminal), None)
     if node is None:
         return "tight_numeric"
-    for cell in capability_registry.cells:
+    for cell in capability_registry.cells:               # fallback for contract-less plans
         if cell.operation_impl == node.impl:
             return cell.agreement_mode
     return "tight_numeric"
