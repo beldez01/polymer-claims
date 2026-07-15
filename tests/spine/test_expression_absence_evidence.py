@@ -25,9 +25,10 @@ def test_one_hot_tissue_lowers_the_evalue_vs_all_absent():
 
 
 def test_bigger_margin_below_ceiling_is_more_evidence():
-    # deeper headroom (further below the ceiling) -> more evidence of safety.
-    shallow = expression_absence_evalue([15.0] * 20, ceiling=20.0)   # just under
-    deep = expression_absence_evalue([1.0] * 20, ceiling=20.0)       # far under
+    # deeper headroom (further below the ceiling) -> more evidence of safety. Few samples so the
+    # betting capital does not saturate at its cap (which would tie both at the ceiling numerically).
+    shallow = expression_absence_evalue([17.0] * 5, ceiling=20.0)   # just under (X=0.15)
+    deep = expression_absence_evalue([2.0] * 5, ceiling=20.0)       # far under (X=0.90)
     assert deep > shallow
 
 

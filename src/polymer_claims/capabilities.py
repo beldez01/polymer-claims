@@ -11,6 +11,7 @@ from polymer_grammar.pattern import PatternRef
 from .analysis_profile import profile_oracle_id
 from .background_enrichment_patterns import BACKGROUND_ENRICHMENT
 from .benchmark_capability import EVAL_BENCHMARK_ADVANTAGE_CELL  # noqa: E402 (breaks cycle safely)
+from .expression_absence_patterns import EXPRESSION_ABSENCE
 from .expression_floor_patterns import EXPRESSION_FLOOR
 from .profiles import CANONICAL_EPICV2_V1
 
@@ -119,9 +120,24 @@ BACKGROUND_ENRICHMENT_CELL = CapabilityCell(
     criterion_target="threshold", agreement_mode="both_satisfy_criterion",
 )
 
+EXPRESSION_ABSENCE_CELL = CapabilityCell(
+    capability_id="expression::absence", capability_version="v1",
+    operation_impl="expression::absence",
+    title="target stays below a ceiling across healthy tissues", pattern=EXPRESSION_ABSENCE,
+    subject=SubjectRequirement(mode="required", kind="gene_or_protein"),
+    param_schema=(_STR(name="gene", codec="string"), _STR(name="group_col", codec="string")),
+    produced=_Q, allowed_comparators=_ALL_CMP,
+    eligible_adapter_identities=("expr-absence-max", "expr-absence-rankq"),
+    oracle=OracleRequirement(default_oracle_id="expression_absence_apparatus", required=True),
+    data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("quantity",),
+    # The safety veto: the LE criterion on the max-returning leg is the hard gate (one tissue above
+    # the ceiling → withheld); the absence e-value (expression_absence_evidence) carries the severity.
+    criterion_target="reference_leaf", agreement_mode="both_satisfy_criterion",
+)
+
 CAPABILITY_CELLS = CapabilityRegistry(cells=(
     MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL, N_DMPS_CELL, EVAL_BENCHMARK_ADVANTAGE_CELL,
-    PHARMACO_ASSOC_CELL, EXPRESSION_FLOOR_CELL, BACKGROUND_ENRICHMENT_CELL,
+    PHARMACO_ASSOC_CELL, EXPRESSION_FLOOR_CELL, BACKGROUND_ENRICHMENT_CELL, EXPRESSION_ABSENCE_CELL,
 ))
 
 # ---------------------------------------------------------------------------
@@ -169,6 +185,9 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
     from .background_enrichment import enrichment_independent_registry
     from .pharmaco_adapters import pharmaco_independent_registry, pharmaco_oracle_registry
     from .expression_floor_adapters import expression_floor_registry, expression_floor_oracle_registry
+    from .expression_absence_adapters import (
+        expression_absence_registry, expression_absence_oracle_registry,
+    )
 
     methyl_oracles = profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public"))
     return {
@@ -193,6 +212,10 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
             adapter_registry=expression_floor_registry(),
             oracle_registry=expression_floor_oracle_registry(),
             trust_profile="tcga-laml-fusion-expr-recomputable-public"),
+        ("expression::absence", "v1"): CapabilityTrustBinding(
+            adapter_registry=expression_absence_registry(),
+            oracle_registry=expression_absence_oracle_registry(),
+            trust_profile="gtex-healthy-expr-recomputable-public"),
     }
 
 

@@ -81,9 +81,11 @@ def test_benchmark_cell_evidence_policy_ref_is_sha256():
     assert len(ref) == len("sha256:") + 64
 
 
-def test_six_cells_registered():
-    # 6 = the original five + expression::floor (added with the §2E expression-floor spine).
-    assert len(CAPABILITY_CELLS.cells) == 6
+def test_cells_registered():
+    # 8 = original five + expression::floor + methyl::enrichment + expression::absence.
+    # (Was stale at 6 after methyl::enrichment landed; corrected with the expression::absence spine.)
+    ids = {c.capability_id for c in CAPABILITY_CELLS.cells}
+    assert len(CAPABILITY_CELLS.cells) == 8
     assert CAPABILITY_CELLS.resolve("eval::benchmark_advantage", "v1") is not None
     assert CAPABILITY_CELLS.resolve("pharmaco::assoc", "v1") is not None
-    assert "expression::floor" in {c.capability_id for c in CAPABILITY_CELLS.cells}
+    assert {"expression::floor", "methyl::enrichment", "expression::absence"} <= ids

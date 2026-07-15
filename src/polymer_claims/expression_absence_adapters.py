@@ -10,7 +10,22 @@ methyl_adapters._load_betas); NOT re-exported from __init__ (base import stays n
 from __future__ import annotations
 
 import numpy as np
-from polymer_grammar import ExecValue, OperationNode
+from polymer_grammar import (
+    Claim,
+    Comparator,
+    ExecValue,
+    GeneOrProtein,
+    GeneOrProteinIdentifiers,
+    GenerationMode,
+    OperationNode,
+    PendingReason,
+    Provenance,
+    QuantityLeaf,
+    SatisfactionCriterion,
+    Status,
+    StrengthVector,
+)
+from polymer_grammar.leaf import MeasurementBasis, MeasurementContext
 from polymer_grammar.oracle import ApplicabilityDomain, OracleDossier, ValidationTier
 from polymer_protocol import AdapterCredential, AdapterRegistry, OracleRegistry
 
@@ -83,3 +98,42 @@ def expression_absence_registry() -> AdapterRegistry:
         AdapterCredential(identity="expr-absence-rankq", owner="owner-expr-absence-rankq",
                           implementation_hash=implementation_hash_for_adapter(ExpressionAbsenceRankQAdapter)),
     ))
+
+
+def expression_absence_claim(
+    claim_id: str, *, ref: str, gene: str, ceiling: float, tissue: str = "healthy atlas",
+    group_col: str = "Sample_Group", search_cardinality: int,
+    agent_id: str = "expression-absence-v1", prior_cohorts: tuple[str, ...] = (),
+    preregistration_hash: str | None = None, strength: StrengthVector | None = None,
+) -> Claim:
+    """PENDING claim: `gene`'s upper-summary expression across the healthy atlas stays <= `ceiling`
+    TPM (a GAP-3 `high` bound on a QuantityLeaf). The COMPUTED upper summary never enters the leaf —
+    the leaf carries the pre-registered ceiling; the max leg's LE criterion is the hard veto and the
+    absence e-value carries the severity."""
+    from polymer_grammar.capability import build_evaluation_plan
+
+    from .capabilities import EXPRESSION_ABSENCE_CELL
+    from .expression_absence_patterns import EXPRESSION_ABSENCE
+
+    plan = build_evaluation_plan(
+        EXPRESSION_ABSENCE_CELL,
+        params={"gene": gene, "group_col": group_col},
+        data_ref=ref,
+        criterion=SatisfactionCriterion(comparator=Comparator.LE, reference_leaf_index=0),
+        oracle_ref=_ORACLE_ID)
+    leaf = QuantityLeaf(value=float(ceiling), high=float(ceiling),
+                        measurement_basis=MeasurementBasis.DERIVED,
+                        formula="max_healthy_tissue_expression <= ceiling_tpm",
+                        context=MeasurementContext(tissue=tissue, assay="RNA-seq TPM"))
+    subject = GeneOrProtein(id=f"HGNC:{gene}", display=gene, entity_type="gene",
+                            identifiers=GeneOrProteinIdentifiers(hgnc=gene, symbol=gene))
+    return Claim(
+        id=claim_id,
+        title=f"{gene} stays below the {ceiling:g} TPM safety ceiling across {tissue}",
+        pattern=EXPRESSION_ABSENCE, leaves=(leaf,),
+        status=Status.PENDING, pending_reason=PendingReason.UNTESTED, strength=strength,
+        subject=subject, evaluation_plan=plan,
+        provenance=Provenance(generated_by=GenerationMode.AGENT_GENERATED, agent_id=agent_id,
+                              search_cardinality=int(search_cardinality),
+                              preregistration_hash=preregistration_hash, prior_cohorts=prior_cohorts,
+                              rationale=f"on-target/off-tumor safety ceiling: {gene} across {tissue}"))
