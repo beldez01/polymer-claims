@@ -53,6 +53,7 @@ REGION_DELTA_BETA_CELL = CapabilityCell(
     # claim's criterion", not numeric closeness on the point estimate. See
     # CapabilityCell.agreement_mode / evaluate._check_agreement.
     agreement_mode="both_satisfy_criterion",
+    requires_evidence=True,  # data-channel severe test: license only with a resolved e-LOND test
 )
 
 N_DMPS_CELL = CapabilityCell(
@@ -72,6 +73,7 @@ N_DMPS_CELL = CapabilityCell(
     # independently satisfy the claim's criterion" (both counts >= k), not numeric closeness on
     # the integer count. See CapabilityCell.agreement_mode / evaluate._check_agreement.
     agreement_mode="both_satisfy_criterion",
+    requires_evidence=True,  # data-channel severe test: license only with a resolved e-LOND test
 )
 
 PHARMACO_ASSOC_CELL = CapabilityCell(
@@ -85,6 +87,7 @@ PHARMACO_ASSOC_CELL = CapabilityCell(
     oracle=OracleRequirement(default_oracle_id="gdsc_pharmaco_apparatus", required=True),
     data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("categorical",),
     criterion_target="threshold", agreement_mode="both_satisfy_criterion",
+    requires_evidence=True,  # data-channel severe test: license only with a resolved e-LOND test
 )
 
 EXPRESSION_FLOOR_CELL = CapabilityCell(
@@ -119,6 +122,7 @@ BACKGROUND_ENRICHMENT_CELL = CapabilityCell(
     # legs independently satisfy fold>=1", not numeric closeness on the fold. The count-enrichment
     # e-value (evidence.py) carries the statistical severity with p0 = the matched-background rate.
     criterion_target="threshold", agreement_mode="both_satisfy_criterion",
+    requires_evidence=True,  # data-channel severe test: license only with a resolved e-LOND test
 )
 
 EXPRESSION_ABSENCE_CELL = CapabilityCell(

@@ -36,7 +36,8 @@ def _row(key, title, value, disease, source_ref, *, low=None, high=None):
 
 def ch6_car_reader_claims():
     """Ch6 — the CAR-T reader landscape (Track B / slide 13): effector → tag/antigen it reads, clinical
-    maturity, IP/trial. Curated from `magnum-opus/part-04-actuation-surface-tags.md` + `seed-report §12`.
+    maturity, IP/trial. Curated from `supporting-research/magnum-opus/part-04-actuation-surface-tags.md`
+    (+ `supporting-research/seed-report.md` §12 for the competitive/IP landscape).
     Reported CONJECTURED proposition claims (categorical, not scalar); ids `ch6-<key>`. The one
     quantitative prior — CAR triggering ≈ 10²–10⁴ molecules/cell — is already `synbio-c3`."""
     src = ("supporting-research/magnum-opus/part-04-actuation-surface-tags.md",
