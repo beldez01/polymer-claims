@@ -1,0 +1,403 @@
+{
+  "uid": "gtex_healthy@1",
+  "dim": [
+    8,
+    68
+  ],
+  "assays": [
+    {
+      "name": "tpm",
+      "ref": "gtex_healthy.betas.tsv"
+    }
+  ],
+  "col_data": [
+    {
+      "sample_id": "Adipose_Subcutaneous",
+      "Sample_Group": "healthy",
+      "tissue": "Adipose_Subcutaneous"
+    },
+    {
+      "sample_id": "Adipose_Visceral_Omentum",
+      "Sample_Group": "healthy",
+      "tissue": "Adipose_Visceral_Omentum"
+    },
+    {
+      "sample_id": "Adrenal_Gland",
+      "Sample_Group": "healthy",
+      "tissue": "Adrenal_Gland"
+    },
+    {
+      "sample_id": "Artery_Aorta",
+      "Sample_Group": "healthy",
+      "tissue": "Artery_Aorta"
+    },
+    {
+      "sample_id": "Artery_Coronary",
+      "Sample_Group": "healthy",
+      "tissue": "Artery_Coronary"
+    },
+    {
+      "sample_id": "Artery_Tibial",
+      "Sample_Group": "healthy",
+      "tissue": "Artery_Tibial"
+    },
+    {
+      "sample_id": "Bladder",
+      "Sample_Group": "healthy",
+      "tissue": "Bladder"
+    },
+    {
+      "sample_id": "Brain_Amygdala",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Amygdala"
+    },
+    {
+      "sample_id": "Brain_Anterior_cingulate_cortex_BA24",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Anterior_cingulate_cortex_BA24"
+    },
+    {
+      "sample_id": "Brain_Caudate_basal_ganglia",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Caudate_basal_ganglia"
+    },
+    {
+      "sample_id": "Brain_Cerebellar_Hemisphere",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Cerebellar_Hemisphere"
+    },
+    {
+      "sample_id": "Brain_Cerebellum",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Cerebellum"
+    },
+    {
+      "sample_id": "Brain_Cortex",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Cortex"
+    },
+    {
+      "sample_id": "Brain_Frontal_Cortex_BA9",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Frontal_Cortex_BA9"
+    },
+    {
+      "sample_id": "Brain_Hippocampus",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Hippocampus"
+    },
+    {
+      "sample_id": "Brain_Hypothalamus",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Hypothalamus"
+    },
+    {
+      "sample_id": "Brain_Nucleus_accumbens_basal_ganglia",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Nucleus_accumbens_basal_ganglia"
+    },
+    {
+      "sample_id": "Brain_Putamen_basal_ganglia",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Putamen_basal_ganglia"
+    },
+    {
+      "sample_id": "Brain_Spinal_cord_cervical_c-1",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Spinal_cord_cervical_c-1"
+    },
+    {
+      "sample_id": "Brain_Substantia_nigra",
+      "Sample_Group": "healthy",
+      "tissue": "Brain_Substantia_nigra"
+    },
+    {
+      "sample_id": "Breast_Mammary_Tissue",
+      "Sample_Group": "healthy",
+      "tissue": "Breast_Mammary_Tissue"
+    },
+    {
+      "sample_id": "Cells_Cultured_fibroblasts",
+      "Sample_Group": "healthy",
+      "tissue": "Cells_Cultured_fibroblasts"
+    },
+    {
+      "sample_id": "Cells_EBV-transformed_lymphocytes",
+      "Sample_Group": "healthy",
+      "tissue": "Cells_EBV-transformed_lymphocytes"
+    },
+    {
+      "sample_id": "Cervix_Ectocervix",
+      "Sample_Group": "healthy",
+      "tissue": "Cervix_Ectocervix"
+    },
+    {
+      "sample_id": "Cervix_Endocervix",
+      "Sample_Group": "healthy",
+      "tissue": "Cervix_Endocervix"
+    },
+    {
+      "sample_id": "Colon_Sigmoid",
+      "Sample_Group": "healthy",
+      "tissue": "Colon_Sigmoid"
+    },
+    {
+      "sample_id": "Colon_Transverse",
+      "Sample_Group": "healthy",
+      "tissue": "Colon_Transverse"
+    },
+    {
+      "sample_id": "Colon_Transverse_Mixed_Cell",
+      "Sample_Group": "healthy",
+      "tissue": "Colon_Transverse_Mixed_Cell"
+    },
+    {
+      "sample_id": "Colon_Transverse_Mucosa",
+      "Sample_Group": "healthy",
+      "tissue": "Colon_Transverse_Mucosa"
+    },
+    {
+      "sample_id": "Colon_Transverse_Muscularis",
+      "Sample_Group": "healthy",
+      "tissue": "Colon_Transverse_Muscularis"
+    },
+    {
+      "sample_id": "Esophagus_Gastroesophageal_Junction",
+      "Sample_Group": "healthy",
+      "tissue": "Esophagus_Gastroesophageal_Junction"
+    },
+    {
+      "sample_id": "Esophagus_Mucosa",
+      "Sample_Group": "healthy",
+      "tissue": "Esophagus_Mucosa"
+    },
+    {
+      "sample_id": "Esophagus_Muscularis",
+      "Sample_Group": "healthy",
+      "tissue": "Esophagus_Muscularis"
+    },
+    {
+      "sample_id": "Fallopian_Tube",
+      "Sample_Group": "healthy",
+      "tissue": "Fallopian_Tube"
+    },
+    {
+      "sample_id": "Heart_Atrial_Appendage",
+      "Sample_Group": "healthy",
+      "tissue": "Heart_Atrial_Appendage"
+    },
+    {
+      "sample_id": "Heart_Left_Ventricle",
+      "Sample_Group": "healthy",
+      "tissue": "Heart_Left_Ventricle"
+    },
+    {
+      "sample_id": "Kidney_Cortex",
+      "Sample_Group": "healthy",
+      "tissue": "Kidney_Cortex"
+    },
+    {
+      "sample_id": "Kidney_Medulla",
+      "Sample_Group": "healthy",
+      "tissue": "Kidney_Medulla"
+    },
+    {
+      "sample_id": "Liver",
+      "Sample_Group": "healthy",
+      "tissue": "Liver"
+    },
+    {
+      "sample_id": "Liver_Hepatocyte",
+      "Sample_Group": "healthy",
+      "tissue": "Liver_Hepatocyte"
+    },
+    {
+      "sample_id": "Liver_Mixed_Cell",
+      "Sample_Group": "healthy",
+      "tissue": "Liver_Mixed_Cell"
+    },
+    {
+      "sample_id": "Liver_Portal_Tract",
+      "Sample_Group": "healthy",
+      "tissue": "Liver_Portal_Tract"
+    },
+    {
+      "sample_id": "Lung",
+      "Sample_Group": "healthy",
+      "tissue": "Lung"
+    },
+    {
+      "sample_id": "Minor_Salivary_Gland",
+      "Sample_Group": "healthy",
+      "tissue": "Minor_Salivary_Gland"
+    },
+    {
+      "sample_id": "Muscle_Skeletal",
+      "Sample_Group": "healthy",
+      "tissue": "Muscle_Skeletal"
+    },
+    {
+      "sample_id": "Nerve_Tibial",
+      "Sample_Group": "healthy",
+      "tissue": "Nerve_Tibial"
+    },
+    {
+      "sample_id": "Ovary",
+      "Sample_Group": "healthy",
+      "tissue": "Ovary"
+    },
+    {
+      "sample_id": "Pancreas",
+      "Sample_Group": "healthy",
+      "tissue": "Pancreas"
+    },
+    {
+      "sample_id": "Pancreas_Acini",
+      "Sample_Group": "healthy",
+      "tissue": "Pancreas_Acini"
+    },
+    {
+      "sample_id": "Pancreas_Islets",
+      "Sample_Group": "healthy",
+      "tissue": "Pancreas_Islets"
+    },
+    {
+      "sample_id": "Pancreas_Mixed_Cell",
+      "Sample_Group": "healthy",
+      "tissue": "Pancreas_Mixed_Cell"
+    },
+    {
+      "sample_id": "Pituitary",
+      "Sample_Group": "healthy",
+      "tissue": "Pituitary"
+    },
+    {
+      "sample_id": "Prostate",
+      "Sample_Group": "healthy",
+      "tissue": "Prostate"
+    },
+    {
+      "sample_id": "Skin_Not_Sun_Exposed_Suprapubic",
+      "Sample_Group": "healthy",
+      "tissue": "Skin_Not_Sun_Exposed_Suprapubic"
+    },
+    {
+      "sample_id": "Skin_Sun_Exposed_Lower_leg",
+      "Sample_Group": "healthy",
+      "tissue": "Skin_Sun_Exposed_Lower_leg"
+    },
+    {
+      "sample_id": "Small_Intestine_Terminal_Ileum",
+      "Sample_Group": "healthy",
+      "tissue": "Small_Intestine_Terminal_Ileum"
+    },
+    {
+      "sample_id": "Small_Intestine_Terminal_Ileum_Lymphode_Aggregate",
+      "Sample_Group": "healthy",
+      "tissue": "Small_Intestine_Terminal_Ileum_Lymphode_Aggregate"
+    },
+    {
+      "sample_id": "Small_Intestine_Terminal_Ileum_Mixed_Cell",
+      "Sample_Group": "healthy",
+      "tissue": "Small_Intestine_Terminal_Ileum_Mixed_Cell"
+    },
+    {
+      "sample_id": "Spleen",
+      "Sample_Group": "healthy",
+      "tissue": "Spleen"
+    },
+    {
+      "sample_id": "Stomach",
+      "Sample_Group": "healthy",
+      "tissue": "Stomach"
+    },
+    {
+      "sample_id": "Stomach_Mixed_Cell",
+      "Sample_Group": "healthy",
+      "tissue": "Stomach_Mixed_Cell"
+    },
+    {
+      "sample_id": "Stomach_Mucosa",
+      "Sample_Group": "healthy",
+      "tissue": "Stomach_Mucosa"
+    },
+    {
+      "sample_id": "Stomach_Muscularis",
+      "Sample_Group": "healthy",
+      "tissue": "Stomach_Muscularis"
+    },
+    {
+      "sample_id": "Testis",
+      "Sample_Group": "healthy",
+      "tissue": "Testis"
+    },
+    {
+      "sample_id": "Thyroid",
+      "Sample_Group": "healthy",
+      "tissue": "Thyroid"
+    },
+    {
+      "sample_id": "Uterus",
+      "Sample_Group": "healthy",
+      "tissue": "Uterus"
+    },
+    {
+      "sample_id": "Vagina",
+      "Sample_Group": "healthy",
+      "tissue": "Vagina"
+    },
+    {
+      "sample_id": "Whole_Blood",
+      "Sample_Group": "healthy",
+      "tissue": "Whole_Blood"
+    }
+  ],
+  "row_data": [
+    {
+      "feature_id": "expr::ACTB",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::CD19",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::CEACAM5",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::CLDN18",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::GAPDH",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::MAGEA4",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::MS4A1",
+      "chr": "",
+      "pos": 0
+    },
+    {
+      "feature_id": "expr::MSLN",
+      "chr": "",
+      "pos": 0
+    }
+  ],
+  "metadata": {
+    "source": "GTEx v10 (gene median TPM)",
+    "kind": "expression",
+    "genome_assembly": "GRCh38",
+    "note": "healthy-tissue safety atlas"
+  }
+}

@@ -47,3 +47,4 @@ data/target_aml_fusion_expr/_cyto.json
 data/demo/campaign/te_campaign_ndmp_universe.json
 data/demo/campaign/te_campaign_enrichment_universe.json
 data/adapter_independence/
+/data/gtex/

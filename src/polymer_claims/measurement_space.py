@@ -111,6 +111,8 @@ _CATALOG: tuple[MeasurementSpace, ...] = (
     _expr_space("target_aml_fusion_expr@1", "TARGET-AML fusion-panel RNA-seq TPM."),
     _expr_space("tcga_laml_cbf_expr@1", "TCGA-LAML CBF-fusion-panel RNA-seq TPM."),
     _expr_space("target_aml_cbf_expr@1", "TARGET-AML CBF-fusion-panel RNA-seq TPM."),
+    _expr_space("gtex_healthy@1", "GTEx v10 healthy-tissue median TPM (Ch2 on-target/off-tumor "
+                "safety atlas; per-tissue columns, panel built on demand via ingest.gtex_healthy)."),
     MeasurementSpace(
         contract_uid="tcga_laml_idh@2", row_prefix="cg",
         modality=Modality.METHYLATION_CPG, scale_type=ScaleType.RATIO,
