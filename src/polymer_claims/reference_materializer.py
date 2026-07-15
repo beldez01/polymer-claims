@@ -17,13 +17,14 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from polymer_grammar.claim import Claim
-from polymer_grammar.leaf import MeasurementBasis, MeasurementContext, QuantityLeaf
+from polymer_grammar.leaf import MeasurementBasis, MeasurementContext, PropositionLeaf, QuantityLeaf
 from polymer_grammar.pattern import PatternRef
 from polymer_grammar.provenance import GenerationMode, Provenance
 from polymer_grammar.status import Status
 
-# Registered in the pure grammar (pattern.py) — the analysis-class "a reported quantity" pattern.
+# Registered in the pure grammar (pattern.py) — the analysis-class reported patterns.
 REPORTED_QUANTITY = PatternRef(id="reported_quantity", version="v1")
+REPORTED_PROPOSITION = PatternRef(id="mechanistic_law", version="v1")   # the proposition-carrying pattern
 
 
 def reference_quantity_claim(
@@ -41,6 +42,24 @@ def reference_quantity_claim(
     )
     return Claim(
         id=claim_id, title=title, pattern=REPORTED_QUANTITY, leaves=(leaf,),
+        status=Status.CONJECTURED, subject=subject,
+        provenance=Provenance(
+            generated_by=GenerationMode.LITERATURE_EXTRACTED,
+            method=source_ref, version=source_title, search_cardinality=1,
+        ),
+    )
+
+
+def reference_proposition_claim(
+    *, claim_id: str, title: str, data: str, warrant: str, source_ref: str, source_title: str,
+    subject=None,
+) -> Claim:
+    """A reported CATEGORICAL/qualitative reference fact (e.g. a CAR-reader landscape entry) as a
+    CONJECTURED two-stratum claim carrying a `PropositionLeaf` — warrant-capped, defeasible, never
+    self-licensing. For reference values that are not scalar quantities."""
+    leaf = PropositionLeaf(data=data, warrant=warrant, warrant_type="expert_judgment")
+    return Claim(
+        id=claim_id, title=title, pattern=REPORTED_PROPOSITION, leaves=(leaf,),
         status=Status.CONJECTURED, subject=subject,
         provenance=Provenance(
             generated_by=GenerationMode.LITERATURE_EXTRACTED,

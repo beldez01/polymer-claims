@@ -4,7 +4,11 @@ from __future__ import annotations
 from polymer_grammar.provenance import GenerationMode
 from polymer_grammar.status import Status
 
-from polymer_claims.optocart_tables import ch4_recurrence_claims, ch5_burden_claims
+from polymer_claims.optocart_tables import (
+    ch4_recurrence_claims,
+    ch5_burden_claims,
+    ch6_car_reader_claims,
+)
 
 
 def test_ch4_recurrence_is_two_stratum_and_cited():
@@ -39,3 +43,15 @@ def test_ch5_burden_is_real_seer_data_two_stratum():
         assert c.status is Status.CONJECTURED                          # two-stratum reported
         assert c.provenance.generated_by is GenerationMode.LITERATURE_EXTRACTED
         assert "seer.cancer.gov" in c.provenance.method                # real fetched source cited
+
+
+def test_ch6_car_reader_landscape_is_two_stratum_propositions():
+    claims = ch6_car_reader_claims()
+    by_id = {c.id: c for c in claims}
+    # the two in-human adaptor CARs the plan leads with are present.
+    assert "ch6-anti-fitc" in by_id and "ch6-unicar" in by_id
+    assert "ENLIGHten-01" in by_id["ch6-anti-fitc"].leaves[0].data
+    for c in claims:
+        assert c.status is Status.CONJECTURED                          # two-stratum reported
+        assert c.provenance.generated_by is GenerationMode.LITERATURE_EXTRACTED
+        assert c.leaves[0].kind == "proposition"                       # categorical, not a scalar

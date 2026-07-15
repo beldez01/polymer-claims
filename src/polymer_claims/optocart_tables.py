@@ -10,15 +10,14 @@ Scope (honest):
   * Ch4 recurrence — quantitative fractions, well-covered → built here.
   * Ch5 burden — mostly qualitative unmet-need in the prose; hard incidence/prevalence (per 100k)
     is NOT on disk → a SEER/GLOBOCAN lookup, not materializable from the docs.
-  * Ch6 CAR-reader landscape — mostly CATEGORICAL (tag/maturity/IP); the one quantitative prior
-    (CAR triggering ~10²–10⁴) is already `synbio-c3`. The landscape table is reference metadata, not
-    a quantity claim.
+  * Ch6 CAR-reader landscape — CATEGORICAL (tag/maturity/IP), built here as `PropositionLeaf` reported
+    claims (`ch6_car_reader_claims`); the one quantitative prior (CAR triggering ~10²–10⁴) is `synbio-c3`.
 """
 from __future__ import annotations
 
 from polymer_grammar.leaf import MeasurementContext
 
-from .reference_materializer import materialize_reference_table
+from .reference_materializer import materialize_reference_table, reference_proposition_claim
 
 # Source shorthand: the curated screen docs (which themselves cite the primary literature).
 _RESCREEN = "supporting-research/CANDIDATE-RESCREEN-2026-06.md"
@@ -33,6 +32,43 @@ def _row(key, title, value, disease, source_ref, *, low=None, high=None):
         context=MeasurementContext(condition=disease),
         source_ref=source_ref, source_title=_TITLE,
     )
+
+
+def ch6_car_reader_claims():
+    """Ch6 — the CAR-T reader landscape (Track B / slide 13): effector → tag/antigen it reads, clinical
+    maturity, IP/trial. Curated from `magnum-opus/part-04-actuation-surface-tags.md` + `seed-report §12`.
+    Reported CONJECTURED proposition claims (categorical, not scalar); ids `ch6-<key>`. The one
+    quantitative prior — CAR triggering ≈ 10²–10⁴ molecules/cell — is already `synbio-c3`."""
+    src = ("supporting-research/magnum-opus/part-04-actuation-surface-tags.md",
+           "OptoCART actuation landscape (curated)")
+
+    def _r(key, title, data):
+        return reference_proposition_claim(
+            claim_id=f"ch6-{key}", title=title, data=data,
+            warrant="literature-curated CAR-reader landscape (part-04)",
+            source_ref=src[0], source_title=src[1])
+
+    return [
+        _r("anti-fitc", "anti-FITC CAR — FITC tag, IN-HUMAN (ENLIGHten-01)",
+           "Reads a fluorescein (FITC) tag via an anti-FITC scFv bridged by a FITC-conjugate adaptor; "
+           "strictly AND-gated on tag+antigen. Clinical: IN-HUMAN — ENLIGHten-01 Phase 1 (NCT05312411, "
+           "FITC-E2 CAR + folate-fluorescein, osteosarcoma; Tamada 2012, Ahmed 2023). Prototype "
+           "clinically-validated tag-reader; FITC is xenobiotic (no endogenous targets)."),
+        _r("unicar", "UniCAR / La-epitope — E5B9 tag, IN-HUMAN, built-in OFF switch",
+           "Reads a short La-derived peptide (E5B9) target module; antigen-agnostic. Clinical: IN-HUMAN. "
+           "Fast pharmacologic OFF: cells idle until a short-half-life module is infused and auto-shut-off "
+           "on clearance (Bachmann 2019). Cleanest off-the-shelf fit; the SensorKit payload registry "
+           "names the UniCAR/La-epitope lead."),
+        _r("supra-zipcar", "SUPRA / zipCAR — leucine-zipper tag (preclinical)",
+           "Reads a leucine-zipper tag via a zipFv adaptor; combinatorial/tunable. Clinical: preclinical."),
+        _r("spytag", "SpyTag/SpyCatcher — covalent tag (preclinical)",
+           "Reads a SpyTag via a covalent SpyCatcher bond; irreversible pairing. Clinical: preclinical."),
+        _r("biotin-bbir", "biotin-BBIR — biotin tag (preclinical)",
+           "Biotin-binding immune receptor reads biotinylated adaptors. Clinical: preclinical."),
+        _r("conventional", "Conventional CARs (CD19/CD20/BCMA/CD33/CD123/GD2) — native antigen, most mature",
+           "Read a native surface antigen directly; MOST clinically mature but antigen-SPECIFIC — the "
+           "payload must display that native ectodomain as a mini-antigen, not a swappable tag."),
+    ]
 
 
 def ch5_burden_claims():
