@@ -25,6 +25,7 @@ from polymer_grammar.oracle import ApplicabilityDomain, OracleDossier, Validatio
 from polymer_protocol import AdapterCredential, AdapterRegistry, OracleRegistry
 
 from .adapter_identity import implementation_hash_for_adapter
+from .expression_independent_reader import independent_feature_row
 from .methyl_adapters import _load_betas
 
 _IMPL = "expression::floor"
@@ -74,12 +75,29 @@ class ExpressionFloorMeanAdapter:
         return ExecValue(value=float(np.mean(pos)))
 
 
+def _expr_split_independent(node: OperationNode) -> tuple[list[float], list[float]]:
+    """Leg-B independent read+split (audit F3): reads the level_a/level_b TPMs through
+    `independent_feature_row` (a separate parser with a TSV<->manifest integrity check), NOT the shared
+    `_load_betas`. Same values as `_expr_split` on a correct contract; diverges on a loader bug."""
+    if node.impl != _IMPL:
+        raise ValueError(f"{_IMPL} adapter cannot execute impl {node.impl!r}")
+    p = {k: v for k, v in node.params}
+    row, group_of = independent_feature_row(node, p["gene"])
+    a_lvl, b_lvl = p["level_a"], p["level_b"]
+    pos = [v for s, v in row.items() if group_of.get(s) == a_lvl]
+    neg = [v for s, v in row.items() if group_of.get(s) == b_lvl]
+    if not pos or not neg:
+        raise ValueError("empty fusion split group")
+    return pos, neg
+
+
 class ExpressionFloorHLAdapter:
-    """Leg B — Hodges-Lehmann pseudo-median of fusion_pos TPM. Rank-family; independent of leg A."""
+    """Leg B — Hodges-Lehmann pseudo-median of fusion_pos TPM. Rank-family AND an INDEPENDENT
+    data-reading path (audit F3): reads via `_expr_split_independent`, not the shared `_load_betas`."""
     identity = "expr-floor-hl"
 
     def execute(self, node, upstream, ctx) -> ExecValue:
-        pos, _ = _expr_split(node)
+        pos, _ = _expr_split_independent(node)
         return ExecValue(value=_hodges_lehmann(pos))
 
 

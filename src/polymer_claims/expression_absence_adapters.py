@@ -30,6 +30,7 @@ from polymer_grammar.oracle import ApplicabilityDomain, OracleDossier, Validatio
 from polymer_protocol import AdapterCredential, AdapterRegistry, OracleRegistry
 
 from .adapter_identity import implementation_hash_for_adapter
+from .expression_independent_reader import independent_feature_row
 from .methyl_adapters import _load_betas
 
 _IMPL = "expression::absence"
@@ -70,14 +71,28 @@ class ExpressionAbsenceMaxAdapter:
         return ExecValue(value=float(max(_tissue_values(node))))
 
 
+def _tissue_values_independent(node: OperationNode) -> list[float]:
+    """Leg-B independent read (audit F3): the target's tissue values through `independent_feature_row`
+    (a separate parser with a TSV<->manifest integrity check), NOT the shared `_load_betas`."""
+    if node.impl != _IMPL:
+        raise ValueError(f"{_IMPL} adapter cannot execute impl {node.impl!r}")
+    p = {k: v for k, v in node.params}
+    row, _group = independent_feature_row(node, p["gene"])
+    vals = list(row.values())
+    if not vals:
+        raise ValueError("no expression values for absence")
+    return vals
+
+
 class ExpressionAbsenceRankQAdapter:
-    """Leg B — the high-quantile (q99) upper summary. Rank-family; an independent estimator of the
-    upper tail from Leg A's max (the axis of operationalization that makes their agreement meaningful)."""
+    """Leg B — the high-quantile (q99) upper summary. Rank-family AND an INDEPENDENT data-reading path
+    (audit F3): reads via `_tissue_values_independent`, not the shared `_load_betas` — so a loader/
+    orientation bug can't corrupt both legs identically."""
 
     identity = "expr-absence-rankq"
 
     def execute(self, node, upstream, ctx) -> ExecValue:
-        return ExecValue(value=_high_quantile(_tissue_values(node), q=_Q_DEFAULT))
+        return ExecValue(value=_high_quantile(_tissue_values_independent(node), q=_Q_DEFAULT))
 
 
 def expression_absence_oracle_id() -> str:
