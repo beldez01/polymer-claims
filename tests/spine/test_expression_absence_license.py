@@ -57,3 +57,8 @@ def test_single_high_tissue_vetoes_the_target(tmp_path):
         out = license_batch(corpus, claims, ref=ref)
     # Absent in 39/40 tissues, but one tissue at 3000 TPM -> max > ceiling -> the veto fires.
     assert out.by_id()["absence-SPIKE"].status is not Status.LICENSED
+    # AUDIT finding 1: the refuted claim must NOT become a live FDR discovery (else it inflates the
+    # e-LOND budget). The worst-tissue-aware e-value returns 0 -> discovery=False.
+    spike_test = next(t for t in out.fdr_ledger.tests if t.claim_id == "absence-SPIKE")
+    assert spike_test.discovery is False
+    assert out.fdr_ledger.n_discoveries == 0

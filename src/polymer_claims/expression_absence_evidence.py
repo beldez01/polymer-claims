@@ -26,15 +26,24 @@ NULL_GAP = 0.1   # margin: mean fractional headroom below the ceiling under H0 �
 
 
 def expression_absence_evalue(exprs, *, ceiling: float, margin: float = NULL_GAP) -> float:
-    """betting e-value that healthy-tissue expression sits, on average, at least `margin` of the
-    ceiling below it. Fractional headroom X_i = clip(1 - expr_i/ceiling, 0, 1); H0: E[X] <= margin;
-    e >> 1 rejects it -> evidence of safety. A tissue at/above the ceiling contributes X=0. A
-    non-positive ceiling or an empty atlas -> 0.0 (never fabricated)."""
+    """Worst-tissue-aware safety e-value: evidence the target sits below `ceiling` in ALL healthy
+    tissues. A single tissue at/above the ceiling REFUTES safety, so the e-value returns 0.0 there —
+    otherwise a vetoed (unsafe) target's headroom-mean e-value would clear the e-LOND bar and inflate
+    the FDR discovery budget even though the max-leg criterion withholds the license (audit finding 1/2).
+
+    On per-tissue median-TPM data the max is (near-)deterministic, so gating on it is the honest
+    estimand — "below the ceiling everywhere", not "mean headroom". When the worst tissue clears the
+    ceiling, the margin severity is the fractional-headroom betting e-value: X_i = clip(1 - expr_i/
+    ceiling, 0, 1), H0: E[X] <= margin. Non-positive ceiling / empty atlas -> 0.0 (never fabricated)."""
     ceiling = float(ceiling)
     if ceiling <= 0.0:
         return 0.0
-    x = np.clip(1.0 - np.asarray(list(exprs), dtype=float) / ceiling, 0.0, 1.0)
-    if x.size == 0:
+    arr = np.asarray(list(exprs), dtype=float)
+    arr = arr[~np.isnan(arr)]
+    if arr.size == 0:
         return 0.0
+    if float(arr.max()) > ceiling:      # worst tissue exceeds the ceiling -> not safe -> no support
+        return 0.0
+    x = np.clip(1.0 - arr / ceiling, 0.0, 1.0)
     es = [_capital_onesample(x, margin, s) for s in _SEEDS]
     return float(sum(es) / len(es))

@@ -356,48 +356,64 @@
     {
       "feature_id": "expr::ACTB",
       "chr": "",
-      "pos": 0
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
     },
     {
       "feature_id": "expr::CD19",
       "chr": "",
-      "pos": 0
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
     },
     {
       "feature_id": "expr::CEACAM5",
       "chr": "",
-      "pos": 0
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
     },
     {
       "feature_id": "expr::CLDN18",
       "chr": "",
-      "pos": 0
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
     },
     {
       "feature_id": "expr::GAPDH",
       "chr": "",
-      "pos": 0
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
     },
     {
       "feature_id": "expr::MAGEA4",
       "chr": "",
-      "pos": 0
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
     },
     {
       "feature_id": "expr::MS4A1",
       "chr": "",
-      "pos": 0
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
     },
     {
       "feature_id": "expr::MSLN",
       "chr": "",
-      "pos": 0
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
     }
   ],
   "metadata": {
     "source": "GTEx v10 (gene median TPM)",
     "kind": "expression",
     "genome_assembly": "GRCh38",
-    "note": "healthy-tissue safety atlas"
+    "note": "healthy-tissue safety atlas; duplicate symbols aggregated by MAX; check row_data tissues_covered for missingness before trusting a low verdict"
   }
 }

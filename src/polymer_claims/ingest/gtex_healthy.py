@@ -17,7 +17,10 @@ from pathlib import Path
 
 def _read_gct_panel(gct_path: Path, genes: set[str]) -> tuple[list[str], dict[str, dict[str, float]]]:
     """Return (tissues, {gene_symbol: {tissue: tpm}}) for the requested gene SYMBOLS (GCT Description
-    column). First matching row per symbol wins. Genes not present are simply absent from the result."""
+    column). FAIL-SAFE for a safety veto (audit finding 5): a symbol with MULTIPLE GCT rows is
+    aggregated per-tissue by MAX (never drop the highest-expression row), not "first wins" — so a
+    high-expression duplicate can never be silently discarded. Non-numeric cells are skipped and the
+    resulting per-gene tissue COVERAGE is recorded by the caller so missingness is auditable."""
     opener = gzip.open if str(gct_path).endswith(".gz") else open
     with opener(gct_path, "rt") as fh:
         fh.readline()                                   # "#1.2"
@@ -27,20 +30,18 @@ def _read_gct_panel(gct_path: Path, genes: set[str]) -> tuple[list[str], dict[st
         out: dict[str, dict[str, float]] = {}
         want = set(genes)
         for line in fh:
-            if not want:
-                break
             parts = line.rstrip("\n").split("\t")
             sym = parts[1]
             if sym not in want:
                 continue
-            vals = {}
+            row = out.setdefault(sym, {})
             for t, v in zip(tissues, parts[2:]):
                 try:
-                    vals[t] = float(v)
+                    fv = float(v)
                 except ValueError:
                     continue
-            out[sym] = vals
-            want.discard(sym)                           # first match per symbol
+                prev = row.get(t)                       # aggregate duplicate rows by MAX (conservative)
+                row[t] = fv if prev is None else max(prev, fv)
     return tissues, out
 
 
@@ -68,9 +69,17 @@ def build_gtex_healthy_contract(
             {"sample_id": t, "Sample_Group": "healthy", "tissue": t}
             for t in tissues
         ],
-        "row_data": [{"feature_id": f, "chr": "", "pos": 0} for f in features],
+        # coverage per gene: how many of the tissues carry a finite value (audit finding 5 — a safety
+        # veto must make missingness visible; a low-coverage gene's max may understate true expression).
+        "row_data": [
+            {"feature_id": f"expr::{g}", "chr": "", "pos": 0,
+             "tissues_covered": len(panel.get(g, {})), "tissues_total": len(tissues)}
+            for g in kept
+        ],
         "metadata": {"source": "GTEx v10 (gene median TPM)", "kind": "expression",
-                     "genome_assembly": "GRCh38", "note": "healthy-tissue safety atlas"},
+                     "genome_assembly": "GRCh38",
+                     "note": "healthy-tissue safety atlas; duplicate symbols aggregated by MAX; "
+                             "check row_data tissues_covered for missingness before trusting a low verdict"},
     }
     (out_dir / f"{uid_stem}.json").write_text(json.dumps(manifest, indent=2))
 

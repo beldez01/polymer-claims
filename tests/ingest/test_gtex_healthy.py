@@ -35,6 +35,20 @@ def test_read_gct_panel_subsets_by_symbol(tmp_path):
     assert "OTHER" not in panel                      # not requested -> not read (no fabrication)
 
 
+def test_duplicate_symbol_aggregates_by_max_not_first(tmp_path):
+    # AUDIT finding 5: a safety veto must never silently drop the high-expression duplicate row.
+    p = tmp_path / "dup.gct.gz"
+    rows = [
+        "#1.2", "2\t2",
+        "Name\tDescription\tTissueA\tTissueB",
+        "ENSG1a\tDUP\t1.0\t2.0",       # benign row (would win under "first wins")
+        "ENSG1b\tDUP\t9.0\t0.5",       # high-expression row — must not be dropped
+    ]
+    p.write_bytes(gzip.compress(("\n".join(rows) + "\n").encode()))
+    _tissues, panel = _read_gct_panel(p, {"DUP"})
+    assert panel["DUP"] == {"TissueA": 9.0, "TissueB": 2.0}   # per-tissue MAX across duplicate rows
+
+
 def test_builder_writes_a_resolvable_contract(tmp_path):
     build_gtex_healthy_contract(_synthetic_gct(tmp_path), genes=["GENEHI", "GENELO"], out_dir=tmp_path)
     with _c.using_contract_root(tmp_path):

@@ -82,8 +82,8 @@ def test_benchmark_cell_evidence_policy_ref_is_sha256():
 
 
 def test_cells_registered():
-    # 8 = original five + expression::floor + methyl::enrichment + expression::absence.
-    # (Was stale at 6 after methyl::enrichment landed; corrected with the expression::absence spine.)
+    # 9 = original five + expression::floor + methyl::enrichment + expression::absence +
+    # expression::floor_feature. (Was stale at 6 after methyl::enrichment landed pre-OptoCART.)
     ids = {c.capability_id for c in CAPABILITY_CELLS.cells}
     assert len(CAPABILITY_CELLS.cells) == 9
     assert CAPABILITY_CELLS.resolve("eval::benchmark_advantage", "v1") is not None
