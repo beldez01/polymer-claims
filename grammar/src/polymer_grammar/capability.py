@@ -148,6 +148,10 @@ class CapabilityCell(_Model):
     # amounts — see capabilities.py). Omitted from serialized output and from content_hash when
     # at the "tight_numeric" default (mirrors verification_policy above).
     agreement_mode: Literal["tight_numeric", "both_satisfy_criterion"] = "tight_numeric"
+    # A data-channel capability opts in here so the gate REFUSES to license one of its claims via the
+    # no-e-value "3-way" route: LICENSED then requires a resolved e-LOND test, not just adapter
+    # agreement + defeat + permit. Default False = the legacy route (byte-identical, drop-when-default).
+    requires_evidence: bool = False
 
     @property
     def ref(self) -> str:
@@ -183,6 +187,8 @@ class CapabilityCell(_Model):
         # cell that actually opts into "both_satisfy_criterion" (n-DMP) gets a new content_hash.
         if self.agreement_mode != "tight_numeric":
             canonical["agreement_mode"] = self.agreement_mode
+        if self.requires_evidence:                       # omitted at its False default (byte-identical)
+            canonical["requires_evidence"] = True
         return "sha256:" + _sha(canonical)
 
     @model_serializer(mode="wrap")
@@ -195,6 +201,8 @@ class CapabilityCell(_Model):
             data.pop("verification_policy", None)
         if data.get("agreement_mode") == "tight_numeric":
             data.pop("agreement_mode", None)
+        if data.get("requires_evidence") is False:
+            data.pop("requires_evidence", None)
         return data
 
     @model_validator(mode="after")

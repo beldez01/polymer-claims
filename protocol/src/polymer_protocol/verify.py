@@ -159,6 +159,7 @@ def verify_stage(
     strict_shared_cause: bool = False,
     evidence_licensing: dict[str, object] | None = None,
     evidence_failures: dict[str, object] | None = None,
+    evidence_required: frozenset[str] = frozenset(),
 ) -> Corpus:
     registry = oracles if oracles is not None else OracleRegistry()
     in_ext = set(scaffolding.grounded_extension)
@@ -200,8 +201,11 @@ def verify_stage(
     def _e_ok(cid: str) -> bool:
         if cid in altered_ids:
             return False
-        return (cid not in ev_map
-                or reg_decisions.get(cid, e_decisions.get(cid, cid in corpus.fdr_ledger.discoveries)))
+        if cid not in ev_map:
+            # A capability that requires_evidence cannot license via the no-e-value "3-way" route
+            # (audit F2) — LICENSED then demands a resolved e-LOND test, not just adapter agreement.
+            return cid not in evidence_required
+        return reg_decisions.get(cid, e_decisions.get(cid, cid in corpus.fdr_ledger.discoveries))
 
     def _recorded_strength(claim: Claim) -> StrengthVector | None:
         """Earned claims record cap_earned(earned, tier); everything else keeps oracle_cap."""

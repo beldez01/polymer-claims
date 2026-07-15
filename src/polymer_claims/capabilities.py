@@ -98,6 +98,7 @@ EXPRESSION_FLOOR_CELL = CapabilityCell(
     oracle=OracleRequirement(default_oracle_id="expression_floor_apparatus", required=True),
     data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("quantity",),
     criterion_target="reference_leaf", agreement_mode="both_satisfy_criterion",
+    requires_evidence=True,  # data-channel: must clear the e-LOND bar, not license via the 3-way route
 )
 
 BACKGROUND_ENRICHMENT_CELL = CapabilityCell(
@@ -133,6 +134,7 @@ EXPRESSION_ABSENCE_CELL = CapabilityCell(
     # The safety veto: the LE criterion on the max-returning leg is the hard gate (one tissue above
     # the ceiling → withheld); the absence e-value (expression_absence_evidence) carries the severity.
     criterion_target="reference_leaf", agreement_mode="both_satisfy_criterion",
+    requires_evidence=True,  # data-channel: must clear the e-LOND bar, not license via the 3-way route
 )
 
 # Sibling of EXPRESSION_FLOOR_CELL for NON-HUMAN / region / literal features (viral transcripts,
@@ -151,6 +153,7 @@ EXPRESSION_FLOOR_FEATURE_CELL = CapabilityCell(
     oracle=OracleRequirement(default_oracle_id="expression_floor_feature_apparatus", required=True),
     data_ref_kind=DataRefKind.SE_CONTRACT, claim_leaf_kinds=("quantity",),
     criterion_target="reference_leaf", agreement_mode="both_satisfy_criterion",
+    requires_evidence=True,  # data-channel: must clear the e-LOND bar, not license via the 3-way route
 )
 
 CAPABILITY_CELLS = CapabilityRegistry(cells=(

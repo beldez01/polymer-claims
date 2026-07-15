@@ -153,6 +153,19 @@ def run_cycle(
     # operators are belief-neutral), so the grounded_extension of the executed claims is
     # unchanged since represent().
     executed_ids = {r.claim_id for r in records}
+    # Claims whose capability opts into requires_evidence: verify must NOT license them via the
+    # no-e-value 3-way route (audit F2). Resolve by operation_impl from the registry's cells.
+    evidence_required: frozenset[str] = frozenset()
+    if capability_registry is not None:
+        req_impls = {cell.operation_impl for cell in capability_registry.cells if cell.requires_evidence}
+        if req_impls:
+            def _terminal_impl(c):
+                plan = c.evaluation_plan
+                if plan is None:
+                    return None
+                node = next((n for n in plan.graph.nodes if n.id == plan.graph.terminal), None)
+                return node.impl if node is not None else None
+            evidence_required = frozenset(c.id for c in corpus.claims if _terminal_impl(c) in req_impls)
     corpus = verify_stage(
         corpus, scaffolding, records, oracles,
         adapter_registry=adapter_registry,
@@ -160,6 +173,7 @@ def run_cycle(
         replications=replications,
         evidence_licensing=evidence_licensing,
         evidence_failures=evidence_failures,
+        evidence_required=evidence_required,
     )
     n_licensed = sum(1 for c in corpus.claims if c.id in executed_ids and c.status == Status.LICENSED)
     # Scope to THIS cycle's executed claims: a claim held for non-independence persists its
