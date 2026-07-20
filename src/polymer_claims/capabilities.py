@@ -13,6 +13,7 @@ from .background_enrichment_patterns import BACKGROUND_ENRICHMENT
 from .benchmark_capability import EVAL_BENCHMARK_ADVANTAGE_CELL  # noqa: E402 (breaks cycle safely)
 from .expression_absence_patterns import EXPRESSION_ABSENCE
 from .expression_floor_patterns import EXPRESSION_FLOOR
+from .sensor_senseability_patterns import SENSOR_SENSEABILITY
 from .profiles import CANONICAL_EPICV2_V1
 
 _Q = ProducedLeafSpec(leaf_kind="quantity", measurement_basis=MeasurementBasis.DERIVED)
@@ -160,10 +161,31 @@ EXPRESSION_FLOOR_FEATURE_CELL = CapabilityCell(
     requires_evidence=True,  # data-channel: must clear the e-LOND bar, not license via the 3-way route
 )
 
+SENSOR_SENSEABILITY_CELL = CapabilityCell(
+    capability_id="sensor::senseability", capability_version="v1",
+    operation_impl="sensor::senseability",
+    title="variant senseability geometry tier clears a bar", pattern=SENSOR_SENSEABILITY,
+    subject=SubjectRequirement(mode="required", kind=None),
+    param_schema=(_STR(name="window_wt", codec="string"), _STR(name="window_mut", codec="string"),
+                  _STR(name="var_index", codec="int"), _STR(name="max_dist", codec="int"),
+                  _STR(name="mode", codec="enum", choices=("snv", "junction", "whole_target")),
+                  _STR(name="gene", codec="string", required=False),
+                  _STR(name="name", codec="string", required=False)),
+    produced=_Q, allowed_comparators=(Comparator.GE,),
+    eligible_adapter_identities=("sensor-senseability-sensorkit", "sensor-senseability-reimpl"),
+    oracle=OracleRequirement(default_oracle_id="sensor_senseability_apparatus", required=True),
+    data_ref_kind=DataRefKind.OPAQUE, claim_leaf_kinds=("quantity",),
+    # The ordinal tier is scored geometry-only by two AIR-GAPPED classifiers (SensorKit vs an
+    # independent reimplementation); the honest agreement bar is "both legs' tier ordinals clear the
+    # pre-registered bar", not numeric closeness — see CapabilityCell.agreement_mode.
+    criterion_target="reference_leaf", agreement_mode="both_satisfy_criterion",
+    # NOT requires_evidence: the license is the two-classifier reproduction (3-way route), no e-value.
+)
+
 CAPABILITY_CELLS = CapabilityRegistry(cells=(
     MEAN_DIFF_CELL, REGION_DELTA_BETA_CELL, N_DMPS_CELL, EVAL_BENCHMARK_ADVANTAGE_CELL,
     PHARMACO_ASSOC_CELL, EXPRESSION_FLOOR_CELL, BACKGROUND_ENRICHMENT_CELL, EXPRESSION_ABSENCE_CELL,
-    EXPRESSION_FLOOR_FEATURE_CELL,
+    EXPRESSION_FLOOR_FEATURE_CELL, SENSOR_SENSEABILITY_CELL,
 ))
 
 # ---------------------------------------------------------------------------
@@ -217,6 +239,9 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
     from .expression_absence_adapters import (
         expression_absence_registry, expression_absence_oracle_registry,
     )
+    from .sensor_senseability_adapters import (
+        sensor_senseability_registry, sensor_senseability_oracle_registry,
+    )
 
     methyl_oracles = profile_oracle_registry((CANONICAL_EPICV2_V1, "recomputable_public"))
     return {
@@ -249,6 +274,10 @@ def _bindings() -> "dict[tuple[str, str], CapabilityTrustBinding]":
             adapter_registry=expression_floor_registry(),
             oracle_registry=expression_floor_feature_oracle_registry(),
             trust_profile="ebv-lymphoma-expr-recomputable-public"),
+        ("sensor::senseability", "v1"): CapabilityTrustBinding(
+            adapter_registry=sensor_senseability_registry(),
+            oracle_registry=sensor_senseability_oracle_registry(),
+            trust_profile="sensorkit-senseability-model-prediction"),
     }
 
 
