@@ -1,7 +1,7 @@
 {
   "uid": "gtex_healthy@1",
   "dim": [
-    8,
+    308,
     68
   ],
   "assays": [
@@ -354,7 +354,294 @@
   ],
   "row_data": [
     {
+      "feature_id": "expr::ABL1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
       "feature_id": "expr::ACTB",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ACVR1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ACVR2A",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::AFDN",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::AFF1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::AKT1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::AKT3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ALK",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ANKRD11",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::APC",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::AR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ARAF",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ARID1A",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ARID1B",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ARID2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ASPSCR1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ASXL2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ATF1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ATM",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ATRX",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::AXIN1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::AXL",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::B2M",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::BCL10",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::BCL2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::BCL2L11",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::BCL6",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::BCOR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::BCR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::BRAF",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::BRCA2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::BRD4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CARD11",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CASP8",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CBFA2T3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CBFB",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CBL",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CCDC6",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CCNB3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CCND1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CCND3",
       "chr": "",
       "pos": 0,
       "tissues_covered": 68,
@@ -368,7 +655,77 @@
       "tissues_total": 68
     },
     {
+      "feature_id": "expr::CD74",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CD79B",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CDH1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CDK12",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CDK4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CDKN1A",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CDKN1B",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CDKN2A",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
       "feature_id": "expr::CEACAM5",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CHEK2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CIC",
       "chr": "",
       "pos": 0,
       "tissues_covered": 68,
@@ -382,7 +739,707 @@
       "tissues_total": 68
     },
     {
+      "feature_id": "expr::CLTC",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::COL1A1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CREB1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CREBBP",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CRLF2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CRTC1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CTCF",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CTLA4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CTNNB1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CUL3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::CYSLTR2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::DDIT3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::DEK",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::DICER1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::DIS3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::DNMT1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::DNMT3A",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::DNMT3B",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::DUX4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EGFR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EIF1AX",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EIF4A2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ELL",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EML4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EP300",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EPAS1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EPHA7",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EPHB1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ERBB2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ERBB3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ERBB4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ERCC2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ERG",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ERRFI1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ESR1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ETV6",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EWSR1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EZH2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::EZR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FAT1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FBXW7",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FGFR1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FGFR2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FGFR3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FGFR4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FH",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FIP1L1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FLI1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FLT3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FN1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FOXA1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FOXL2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FOXO1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FOXP1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FUBP1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::FUS",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
       "feature_id": "expr::GAPDH",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GATA2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GATA3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GLI1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GLIS2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GNA11",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GNAQ",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GNAS",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GOPC",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GPS2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GSK3B",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::GTF2I",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::HEY1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::HGF",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::HLA-B",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::HMGA2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::HNF1A",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::HOXA9",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::HRAS",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::IDH1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::IDH2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::IGF1R",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::IKZF1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::IL7R",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::INPPL1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::IRF4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::IRS2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::JAK1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::JAK2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::JUN",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KDM6A",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KDR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KEAP1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KIAA1549",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KIF5B",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KIT",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KLF4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KMT2A",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KMT2C",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KMT2D",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KNSTRN",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::KRAS",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::LMNA",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::LPP",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::LYN",
       "chr": "",
       "pos": 0,
       "tissues_covered": 68,
@@ -396,6 +1453,90 @@
       "tissues_total": 68
     },
     {
+      "feature_id": "expr::MAML2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MAP2K1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MAP2K2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MAP2K4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MAP3K1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MAP3K13",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MAPK1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MAX",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MED12",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MEF2B",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MET",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MLLT3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
       "feature_id": "expr::MS4A1",
       "chr": "",
       "pos": 0,
@@ -403,7 +1544,966 @@
       "tissues_total": 68
     },
     {
+      "feature_id": "expr::MSH3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
       "feature_id": "expr::MSLN",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MST1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MTOR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MYC",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MYCN",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MYD88",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MYH11",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::MYOD1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NAB2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NCOA2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NCOA3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NF1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NFE2L2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NOTCH1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NOTCH2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NPM1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NRAS",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NSD1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NTRK1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NTRK3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NUP214",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NUP93",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NUP98",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::NUTM2B",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::P2RY8",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PAX3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PAX5",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PAX7",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PAX8",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PBRM1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PBX1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PCM1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PDGFB",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PDGFRA",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PDGFRB",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PDPK1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PGR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PIK3CA",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PIK3CB",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PIK3CD",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PIK3R1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PIK3R2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PIM1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PLK2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PML",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PMS2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::POLE",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PPARG",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PPP2R1A",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PPP6C",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PRCC",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PRDM14",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PREX2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PRKCI",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PTEN",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PTPN11",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PTPRD",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PTPRS",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::PTPRT",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RAC1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RAD50",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RAD51C",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RAD52",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RAF1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RANBP2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RARA",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RB1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RBM10",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RECQL4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RELA",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RET",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RHEB",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RHOA",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RICTOR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RIT1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RNF43",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ROS1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RPS6KA4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RPTOR",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RRAS2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RUNX1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RUNX1T1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::RXRA",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SDHA",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SDHAF2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SESN2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SETD2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SF3B1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SFPQ",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SLC34A2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SMAD2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SMAD3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SMAD4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SMARCA4",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SMARCB1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SMARCD1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SMO",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SOCS1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SOS1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SOX17",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SPOP",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SPRED1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SRSF2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SS18",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SSX1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SSX2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::STAG2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::STAT3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::STAT6",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::STIL",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::STK11",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::STK19",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::SUZ12",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TACC3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TAL1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TBX3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TCF3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TCF7L2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TET1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TET2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TFE3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TGFBR1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TGFBR2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TMPRSS2",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TNFRSF14",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TP53",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TP63",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TPM3",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TRAF7",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::TSC1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::U2AF1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::VHL",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::WT1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::XPO1",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::YWHAE",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ZFTA",
+      "chr": "",
+      "pos": 0,
+      "tissues_covered": 68,
+      "tissues_total": 68
+    },
+    {
+      "feature_id": "expr::ZMYM2",
       "chr": "",
       "pos": 0,
       "tissues_covered": 68,
