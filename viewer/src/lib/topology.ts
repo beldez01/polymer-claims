@@ -4,6 +4,8 @@
  * is the binding interface, so these interfaces match it field-for-field.
  */
 
+import { assetUrl } from './asset';
+
 export type Vec3 = [number, number, number];
 
 /** strength 6-vector, ordered as polymer_grammar.AXES:
@@ -145,7 +147,7 @@ export interface ConsistencyReport {
 export async function loadTopology(
   url = '/sample-topology.json',
 ): Promise<TopologyExport> {
-  const res = await fetch(url);
+  const res = await fetch(assetUrl(url));
   if (!res.ok) {
     throw new Error(`failed to load topology: ${res.status} ${res.statusText}`);
   }

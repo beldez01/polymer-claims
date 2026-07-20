@@ -6,6 +6,7 @@
  */
 
 import { type TopologyExport, checkContractVersion } from '@/lib/topology';
+import { assetUrl } from './asset';
 
 /** Per-cycle summary derived from the CycleResult + post-cycle corpus + topology. */
 export interface FrameStats {
@@ -40,7 +41,7 @@ export interface TopologyTimeline {
 export async function loadTimeline(
   url = '/sample-timeline.json',
 ): Promise<TopologyTimeline> {
-  const res = await fetch(url);
+  const res = await fetch(assetUrl(url));
   if (!res.ok) {
     throw new Error(`failed to load timeline: ${res.status} ${res.statusText}`);
   }
