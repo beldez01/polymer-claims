@@ -99,3 +99,29 @@ def run_bridge_over_screen(limit: int | None = None) -> dict:
                and c.licensing.independence_tier is IndependenceTier.REPRODUCED)
         ledger[L["id"]] = {"status": c.status.name, "reproduced": rep, "tier": by_tier[L["id"]]}
     return ledger
+
+
+def _scorer_provenance() -> dict:
+    """SensorKit drift keys (bridge spec §8): the scoped scorer fingerprint + version, so a
+    committed ledger re-PENDINGs if the scoring surface changes underneath it."""
+    import sensorkit
+    from importlib.metadata import version, PackageNotFoundError
+    try:
+        ver = version("sensorkit")
+    except PackageNotFoundError:
+        ver = "editable"
+    return {"scorer_fingerprint": sensorkit.SCORER_FINGERPRINT, "sensorkit_version": ver}
+
+
+def warranted_ledger(limit: int | None = None) -> dict:
+    """The full C6 artifact: the warranted ledger + provenance (ref + scorer drift keys) +
+    a summary count. This is what gets committed so the verdicts are drift-traceable."""
+    ledger = run_bridge_over_screen(limit=limit)
+    reproduced = sum(1 for v in ledger.values() if v["status"] == "LICENSED" and v["reproduced"])
+    return {
+        "ref": _SCREEN_REF,
+        **_scorer_provenance(),
+        "n_senseable": len(ledger),
+        "n_licensed_reproduced": reproduced,
+        "ledger": ledger,
+    }
