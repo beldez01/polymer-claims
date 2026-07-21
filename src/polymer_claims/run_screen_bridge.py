@@ -24,7 +24,7 @@ from polymer_protocol import Corpus
 from .sensor_senseability_adapters import sensor_senseability_claim
 from .sensor_senseability_populate import license_batch, preregister
 
-_SCREEN_REF = "sensorkit:snv-universe-scored@2026-07-15"
+_SCREEN_REF = "sensorkit:snv-universe-scored-grch38"
 
 
 def _sensorkit_data() -> Path:
@@ -32,9 +32,10 @@ def _sensorkit_data() -> Path:
     return Path(sensorkit.__file__).resolve().parents[2] / "data"
 
 
-def real_senseable_lesions(limit: int | None = None) -> list[dict]:
+def real_senseable_lesions(limit: int | None = None, build: str = "grch38") -> list[dict]:
     """Reconstruct (offline, from the committed CDS cache) the senseable SNVs of the reproduced
-    screen, each with its sensor window + tier. Mirrors run_screen_snv's offline scoring path."""
+    screen, each with its sensor window + tier. `build`="grch38" (default, canonical/API-aligned:
+    WT-validating transcript per hotspot) or "grch37" (the dump's transcript, validation build)."""
     import sensorkit  # noqa: F401 (resolve the install path / data dir)
     from sensorkit.hotspots import _DEFAULT_PATH, load_cancerhotspots
     from sensorkit.compendium import load_refseq
@@ -46,12 +47,29 @@ def real_senseable_lesions(limit: int | None = None) -> list[dict]:
     candidates = snv_candidates(records, load_cancerhotspots())
     max_dist = calibrate_max_dist(load_refseq(str(data / "refseq")))
 
+    if build == "grch38":
+        from sensorkit.grch38 import resolve_gene_transcripts, select_transcript
+        genes = sorted({les.gene for les in candidates})
+        gene_tx, cds_by_enst = resolve_gene_transcripts(
+            genes, str(data / "gene_transcripts_grch38.json"),
+            str(data / "cds_cache_grch38_snv"), offline=True, log=lambda _m: None)
+
+        def cds_for(les):
+            info = gene_tx.get(les.gene)
+            if not info:
+                return None
+            enst = select_transcript(info, cds_by_enst, les.aa_pos, les.wt_aa)
+            return cds_by_enst.get(enst) if enst else None
+    else:  # grch37 validation build — the dump's own transcript
+        def cds_for(les):
+            cache = data / "cds_cache" / f"{les.transcript_id}.json"
+            return json.loads(cache.read_text())["seq"] if cache.exists() else None
+
     out: list[dict] = []
     for les in candidates:
-        cache = data / "cds_cache" / f"{les.transcript_id}.json"
-        if not cache.exists():
+        cds = cds_for(les)
+        if not cds:
             continue
-        cds = json.loads(cache.read_text())["seq"]
         scored_variant = build_snv(les, cds, max_dist)
         if scored_variant is None:
             continue
@@ -76,7 +94,7 @@ def build_screen_claims(lesions: list[dict]) -> list:
     return [
         sensor_senseability_claim(
             L["id"], ref=_SCREEN_REF,
-            subject=GenomicRegion(id=L["id"], display=L["name"], assembly="GRCh37",
+            subject=GenomicRegion(id=L["id"], display=L["name"], assembly="GRCh38",
                                   chrom="chr0", start=1, end=2),  # placeholder locus (see docstring)
             window_wt=L["window_wt"], window_mut=L["window_mut"], var_index=L["var_index"],
             max_dist=5, mode="snv", tier_bar=1, gene=L["gene"], name=L["name"])
