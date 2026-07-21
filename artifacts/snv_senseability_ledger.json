@@ -1,5 +1,7 @@
 {
  "ref": "sensorkit:snv-universe-scored@2026-07-15",
+ "scorer_fingerprint": "492c1083ed5e321e",
+ "sensorkit_version": "0.1.0",
  "n_senseable": 846,
  "n_licensed_reproduced": 846,
  "ledger": {
