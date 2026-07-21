@@ -1,0 +1,4237 @@
+{
+ "ref": "sensorkit:snv-universe-scored@2026-07-15",
+ "n_senseable": 846,
+ "n_licensed_reproduced": 846,
+ "ledger": {
+  "sense-PIK3CA-E545K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IDH1-R132H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-H1047R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BRAF-V600E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-L858R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R175H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KRAS-Q61H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-R248Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KRAS-G12D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-E542K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-AKT1-E17K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GNAS-R201H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR3-S249C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-R130Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-HRAS-Q61R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Y220C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-G245S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R213Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-R465C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-Q546K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-S310F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GNA11-Q209L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GNAQ-Q209P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-GTF2I-L424H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R282W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-S37F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-D32Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-R361H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-H179R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-S33C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KRAS-A146T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-T41A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-T790M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NRAS-G12D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SF3B1-K700E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-H193R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ESR1-D538G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-R505C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IDH2-R172K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-U2AF1-S34F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-A289V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ESR1-Y537S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CDKN2A-R80Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-S45F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-C176F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-R88Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB3-V104M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-M1043V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Y163C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-L755S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-R342P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-TP53-R196P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-H3F3A-K28M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR3-Y373C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BRAF-G469A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PIK3CA-C420R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-HRAS-G13R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CTNNB1-G34R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-I195T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-H83Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-G266R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R249S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SF3B1-R625H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BRAF-K601E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Y234C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-DNMT3A-R882H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BCOR-N1459S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PPP2R1A-P179R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RAC1-P29S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-R479Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-V173L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-C238Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PPP2R1A-R183W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MYD88-L265P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-NRAS-G13R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PIK3CA-E726K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-P151S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-G598V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R158L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Y236C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-B2M-M1I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-HRAS-G12S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR3-R248C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-C275F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-C135Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-P278S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IDH2-R140Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SPOP-F133L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PIK3CA-K111E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-S241F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-G719A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-M237I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR2-N549K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RXRA-S427F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-V157F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K1-K57N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-AR-L702H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-V272M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FLT3-D835Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-K132N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CIC-R215W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R280K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GTF2I-N440S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NFE2L2-E79Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ERBB2-R678Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-S215I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KIT-N822K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-G17V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDK4-R24L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BRAF-G466V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-R233Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-AR-H875Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-POLE-P286R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CREBBP-R1446C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-C242F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CD79B-Y197H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-NFE2L2-E82D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PIK3CA-V344G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MED12-G44S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-L861Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB4-S1289A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-G244D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-R93Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MED12-L1224F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERCC2-N238S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXL2-C134W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK19-D89N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-V274F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-R108H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAPK1-E322K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-XPO1-E571K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-Y42C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NFE2L2-D29H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ERBB2-V777L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-KIT-D816V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ALK-R1275Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-K335I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ALK-F1174L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ERBB2-V842I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K1-P124S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-D537G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-E285K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R306Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-H214R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCA4-T910M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-G106V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-HIST1H3B-K28M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-POLE-V411L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-FGFR1-N577K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-E286K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RAF1-S257L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR2-S252W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KRAS-K117N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-EGFR-R108K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3R1-N564D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NFE2L2-G31A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-NFE2L2-G81S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TCEB1-Y79C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K1-F53L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ERBB3-E928G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB3-D297Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-C141Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-D281E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EP300-D1399N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NUP93-Q15K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-G386D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R337C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-S768I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-A72T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MYCN-P44L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PDGFRA-D842V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Y126C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-G1049R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ESR1-L536H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SF3B1-E902K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-A159V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-I255F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PPP6C-R264C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-Y1021C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KIT-K642E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-L194R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-R38H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MET-D1010H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ARID1A-R1989Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-N1044K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAX-R60Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PPP2R1A-S256F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR2-C382R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CDKN2A-P114L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ESR1-E380Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-SMAD4-D351Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB3-K329E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3R1-K567E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-D108Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KIT-V559A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CDKN2A-D84N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-S2215Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TGFBR2-R553H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHEB-Y35N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KIT-L576P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-KIT-V654A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-MTOR-T1977K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-F270V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-H3F3A-G35R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-R173H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CREBBP-Y1503H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-E258K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-C901F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GATA3-M293K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-N387K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB4-Q707E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RET-M918T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CIC-R202W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-Q50H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-FOXA1-F266L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-SPOP-Y87N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-I2500F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCB1-R377H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CB-D1067V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR3-G370C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SF3B1-K666T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-VHL-S65L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDK4-K22M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-F134L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-KIT-W557R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-EGFR-R222C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-R252C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR3-K650E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCA4-G1232S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ARID2-S297F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-D769Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-E223V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR1-K687E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SOX17-S403I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NUP93-E14K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-M246V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R110L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-APC-Q1429R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-C136R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PTEN-G132D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CCND1-Y44D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCA4-R1192C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-INPPL1-A1185D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-P356L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB3-S846I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-D194Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-R658Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-AR-W742C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-V143M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CCND1-P287S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CIC-R1512H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K1-E203K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXA1-I176V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-DICER1-E1813G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-E76K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KNSTRN-S24F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NF1-R440Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-L747P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ACVR1-G328E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CCND1-T286I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-L89H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NOTCH2-T235S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CIC-R1515C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-S127F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SF3B1-N626Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-E709K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Q136E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB3-H228Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-C277F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-APC-Q1367E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERCC2-T484A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MYOD1-L122R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXA1-H247Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GNAS-Q227H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-H36P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-NFE2L2-W24R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-HRAS-K117N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-E298Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-ARID1A-R2158Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ATM-R3008H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-L62R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KIT-D820Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR4-V550L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-KRAS-A59T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-DIS3-D488N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDH1-D254N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-E88K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MYD88-S243N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-G1007R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PTEN-Y68H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-GNAQ-T96S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SETD2-R1625C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SDHA-L639V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-T1025A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SOS1-N233Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-C378F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXA1-M253K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ARID1A-R1276Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR3-G380R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-R367P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-TCF7L2-R471C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-R5Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-D350N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K1-G128D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-H93R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SF3B1-K741N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-BRAF-L597Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RAC1-A178V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-S80R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-NF1-R2450Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RB1-R251Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CB-E1051K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ACVR1-R258G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP63-R379C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAX-H28R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERCC2-Y24C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-Q510L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-R445Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RAF1-S259F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ARAF-S214F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-G154V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MYC-P74S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-P104L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTCF-R377C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-L130V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STAG2-R216Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR3-S371C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TGFBR1-S241L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-E120D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STAT3-H410R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-S582L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-A161V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EP300-Y1414C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB3-E332K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EP300-W1466L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EP300-Y1467D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MET-V1070A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-MET-M1250T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ATM-R250P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-PIK3CA-M1V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-G419W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCA4-M781I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXA1-R261G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-Y545C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB4-L798R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-S111N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KIT-Y823D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BCL6-R594Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-U2AF1-Q157P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ATM-N2875S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FUBP1-R430C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-F1888I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-L2427Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EPAS1-P531L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-Y27D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-N78S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ACVR1-R206H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-AKT1-L52R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IL7R-K395R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCA4-R1189Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-G503V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ARID1A-G2087R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CASP8-R292W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-P152L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-E1799K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KMT2D-R5179H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EZH2-K515R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB3-M91I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PBRM1-R1160P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-SPOP-M117V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CD-E1021K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-H168R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CCND3-I290K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-W146C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-R267W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-A161T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMO-L412F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-E365K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PRKCI-R480C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3R2-G373R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3R2-D557Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-G352R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPRT-E548K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-K164E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MET-F1200I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERCC2-Y72C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTCF-Y226C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-E47K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-APC-Q1406H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-SMAD4-Q534P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ERBB2-L869R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-S216F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KNSTRN-V12G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-I35S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Q144P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-MET-Y1230H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-F109S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-G105C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-E330K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-T125M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-G127R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-G242V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MYC-S161L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KRAS-L19F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PIK3CA-R115L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PREX2-L50V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-HIST1H3C-K37M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-Y34C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCA4-R1243W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-L57V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-D121Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-D520N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RUNX1-R201Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-W88R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PTEN-G129E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-P250L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-L130Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-Y129C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-Q220P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-EGFR-H304Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-T363I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-E271K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-S68P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-E40Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-VHL-L158V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-P86S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-V74D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-N107S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ASXL2-E330K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K2-F57L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-IRF4-K123R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIM1-S97N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RUNX1-R162G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-B2M-L12P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-SUZ12-R101Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-R260Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-C1483R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-EGFR-P596L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EIF1AX-G15D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-V2006F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB3-T355I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-XPO1-R749Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NOTCH1-F853C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EIF1AX-R13H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIM1-G28D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SF3B1-G740E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SPOP-F125L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-V172F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-G776V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTCF-H284Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-D355G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERCC2-S246Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IRF4-C99R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-FGFR2-R203H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STAT3-S614R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CIC-R201W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PDGFRA-E229K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXO1-S22P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-V659E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K1-C121S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-T155N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPRD-S431L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CASP8-R127Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RNF43-H86R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BCL2-A131D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTNNB1-W383R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PTEN-C105Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TGFBR2-D471N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-C124S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPRT-L668V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RAC1-N111K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GATA2-C352R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-MAP2K1-Y130C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Q331H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-NFE2L2-D77G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-T263P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-M2327I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-DNMT1-E51K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SETD2-Y1666C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-G62R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BRAF-G596R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-EP300-C1164Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-R335P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-FGFR2-Y375C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MST1-G673S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXA1-S250F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-W524C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-L257Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-R161Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-R470C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ARAF-P216L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GNAQ-R183Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EP300-H1451P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-RHOA-T37I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-C363R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-RAC1-G12R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CIC-S231N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FAT1-R1627Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SOCS1-A3T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-AKT1-Q79K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-Q171R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-I151T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-U2AF1-I24T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PIK3CA-M1004I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ASXL2-M1T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ALK-F1245I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-Y155C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-R224Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-N131I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-L265P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CUL3-M299R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Q192H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CHEK2-R346C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-E39K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-A750P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-T532P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CREBBP-D1435G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SRSF2-P95L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-C162Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CARD11-K215T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-DIS3-R780T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ARID1A-R1461Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-C604R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-FOXA1-Y259C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-N181S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-M35I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MYC-T73I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDH1-D288V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERCC2-Y14C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXP1-R514H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KRAS-Q22K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RICTOR-S1101L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPRT-L695F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-G262V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-S170N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXA1-S242C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-F113C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RAD50-D69Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GNAS-R160C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR4-N535K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PPP6C-S270L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-P471L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CREBBP-Y1450D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERCC2-P463L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CYSLTR2-L129Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IL7R-I241V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCA4-R1135W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-G480W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-G114A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-MAP3K1-L380S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PDGFRA-N659K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERCC2-D609E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERCC2-E606Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-PIK3CA-D939G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K1-Q56P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CDH1-R335Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CIC-N205S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SOX17-A96G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-L536P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-PIK3CA-T1052K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-Y178C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-M110V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-R272C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GATA3-R364S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-JUN-E112K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ALK-R401Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ARID2-R314C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MED12-V1223L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-KLF4-K409Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-STK11-E165Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CARD11-L251P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-STK11-P221L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-L111P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-Q104H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-SESN2-I425V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K4-S184L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCA4-R973Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-G660D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NCOA3-R80C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXA1-D226N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-R103Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIM1-K24N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-D24G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KRAS-D33E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-P38S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-AXL-A273V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KDR-R1032Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-D259Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GNA11-R183C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-P48L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-DIS3-D479Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-H1065Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3R1-D560G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP63-E609K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-I251F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-N42H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-DIS3-R689Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-DIS3-L767F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-DIS3-R382Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-HIST1H3B-E51K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-Y16D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GLI1-R380Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ATM-L2890P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-JAK1-L910P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-EGFR-L838M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EIF1AX-P2L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CASP8-R491Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-H115N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K4-R134W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BCL6-R618C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-D277Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-Y346D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-B2M-L7S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-FBXW7-E287Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-FOXL2-E118K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-K754E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP63-S365L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EPHB1-R743W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-N308D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-F285S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PIK3CA-C90R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-RB1-R787Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SDHA-V644M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIM1-Q37H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CIC-W238R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-RIT1-M90I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-T862A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-D493N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-A1971T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-HLA-B-E69A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PTEN-W111R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PTEN-C71Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TNFRSF14-M1I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-HIST1H3B-E106K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EGFR-L833F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-FOXO1-T24I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-S12L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CREBBP-W1502C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ERBB3-F219L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CTNNB1-K292E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXP1-S448L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-L1460P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-KDM6A-G526E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ATM-R1466Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IGF1R-G129A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ERBB4-K1002T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ERBB4-K1223T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-SMO-W535L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RARA-F286S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-R14Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-G437V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CA-P539R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-DICER1-D1709N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CRLF2-S128L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RIT1-F82L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-MYD88-M232T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PIK3R1-Y452C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-G333C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BCL2-G33R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-GATA3-R366Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-N247I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-R181C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-L22R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-P179L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-L140F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STAT3-F384L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-Y107D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STAT3-D661V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KNSTRN-P28L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EIF1AX-K10E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TGFBR2-E544K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KMT2D-R5432W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-G417V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CREBBP-L1499P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TRAF7-N520S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CARD11-D401N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-K120E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MYD88-P166L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CD-C416R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-GNAQ-G48V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ATM-I2888T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CARD11-E93D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-I254S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDH1-R63P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-PIK3CA-E970K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EP300-Q1455H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-FBXW7-S546L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-R138Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ANKRD11-K369R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MTOR-A1459D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIK3CB-R321Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERRFI1-K409N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-INPPL1-R70H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ARID1B-G966D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-T733I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CBFB-M1T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ETV6-R369W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NF1-R461Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-T468M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EIF1AX-N4S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDK12-R890H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-L247F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTLA4-T17A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BCL10-N173H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-SMO-V414A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-LYN-I364L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CTNNB1-R535Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-I232S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCD1-R183Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIM1-L2F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FOXA1-R219C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IL7R-R206Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PIM1-E79D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RAC1-P34R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-DICER1-S1344L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NOTCH1-R365C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN2A-D74Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-DNMT1-E432K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MET-Y1003C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-V155F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-W239C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-EPAS1-Y532C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-POLE-E18K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CARD11-R337Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CARD11-E626K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-T507K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-D61Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NOTCH1-C440F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NOTCH1-G310R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB3-R475W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD3-R268C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD3-R287W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-HNF1A-I27L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PRDM14-R505H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCA4-E821K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ALK-R395H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NOTCH1-E455K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-Q165H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PIK3CA-R357Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-G251V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ARID1B-Q1179P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-RPTOR-R139H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SF3B1-Y623C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPRT-R364Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SETD2-H1603R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAX-R36W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RB1-Y606C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMARCB1-R374Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TGFBR1-R487Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPN11-A461T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-T277I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR2-F276C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NSD1-C1710S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CTCF-H288R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-L169P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-PPP2R1A-R182W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-Y353N": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-Y95C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TCF3-N551K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RPS6KA4-R629C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RPS6KA4-S236L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-L320S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CREBBP-W1472R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CREBBP-Y1482C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FH-M336I": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-L135F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-HNF1A-R114H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-HGF-G229A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-P190L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-R320L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-R441W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CDKN1A-M1V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IRF4-Y428H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-TBX3-W113R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-KDR-C482R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-ERBB3-N126K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD4-G510R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PLK2-L208P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "ideal"
+  },
+  "sense-STK11-W308L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-M133K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KRAS-K5E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NF1-R1870Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EPHA7-G656E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-V697L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-HIST1H3H-K37M": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KEAP1-R601L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RAD51C-Y224H": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-RAD51C-P21S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BCL2L11-G156R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EZH2-K665R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K4-R110Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TP53-H178D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SPRED1-R349S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TP53-V218G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CIC-P203S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KMT2C-R56Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KMT2C-R4549C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RIT1-A77T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-I67T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PPP4R2-*418Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ATM-R2832C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-BCL2-N172S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FGFR2-P253R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-Y174D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB4-S774G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CCND1-C47S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-ERBB2-A293T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PGR-R836Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTPRS-R1492W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CBL-C384R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-HIST1H1C-E115K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-KDM6A-Q1003P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-PDGFRA-C235Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-I101T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NFE2L2-I28T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-CDH1-Y190C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IRS2-G1057D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD2-C463F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD2-R321Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SPOP-K129E": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CARD11-R423Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-TRAF7-R189P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-KIT-R888Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-IKZF1-E304K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RHOA-L69P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-TNFRSF14-C111W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PMS2-K651R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-MAP2K1-N122D": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SDHAF2-S10L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-RAC1-K135R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EIF4A2-M1R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-CREBBP-I1431S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-W117L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-VHL-Y112C": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-WHSC1-T1150A": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SMAD2-T303R": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-EP300-L415P": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-SMARCA4-R1157W": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-PTEN-W274S": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-SMAD2-P305L": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-SF3B1-V701F": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-NOTCH1-I471T": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "good"
+  },
+  "sense-RAC1-C18Y": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-STK11-G196V": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-T385K": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
+  "sense-FBXW7-R393Q": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  }
+ }
+}
