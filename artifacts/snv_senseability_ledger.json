@@ -1,9 +1,9 @@
 {
- "ref": "sensorkit:snv-universe-scored@2026-07-15",
+ "ref": "sensorkit:snv-universe-scored-grch38",
  "scorer_fingerprint": "492c1083ed5e321e",
  "sensorkit_version": "0.1.0",
- "n_senseable": 846,
- "n_licensed_reproduced": 846,
+ "n_senseable": 841,
+ "n_licensed_reproduced": 841,
  "ledger": {
   "sense-PIK3CA-E545K": {
    "status": "LICENSED",
@@ -745,11 +745,6 @@
    "reproduced": true,
    "tier": "good"
   },
-  "sense-FGFR1-N577K": {
-   "status": "LICENSED",
-   "reproduced": true,
-   "tier": "engineered"
-  },
   "sense-TP53-E286K": {
    "status": "LICENSED",
    "reproduced": true,
@@ -1165,11 +1160,6 @@
    "reproduced": true,
    "tier": "engineered"
   },
-  "sense-FGFR1-K687E": {
-   "status": "LICENSED",
-   "reproduced": true,
-   "tier": "engineered"
-  },
   "sense-SOX17-S403I": {
    "status": "LICENSED",
    "reproduced": true,
@@ -1440,11 +1430,6 @@
    "reproduced": true,
    "tier": "engineered"
   },
-  "sense-MYD88-S243N": {
-   "status": "LICENSED",
-   "reproduced": true,
-   "tier": "engineered"
-  },
   "sense-PIK3CA-G1007R": {
    "status": "LICENSED",
    "reproduced": true,
@@ -1536,11 +1521,6 @@
    "tier": "good"
   },
   "sense-BRAF-L597Q": {
-   "status": "LICENSED",
-   "reproduced": true,
-   "tier": "engineered"
-  },
-  "sense-RAC1-A178V": {
    "status": "LICENSED",
    "reproduced": true,
    "tier": "engineered"
@@ -3300,6 +3280,11 @@
    "reproduced": true,
    "tier": "engineered"
   },
+  "sense-RBM10-R153G": {
+   "status": "LICENSED",
+   "reproduced": true,
+   "tier": "engineered"
+  },
   "sense-GATA3-R366Q": {
    "status": "LICENSED",
    "reproduced": true,
@@ -3386,11 +3371,6 @@
    "tier": "engineered"
   },
   "sense-TP53-K120E": {
-   "status": "LICENSED",
-   "reproduced": true,
-   "tier": "engineered"
-  },
-  "sense-MYD88-P166L": {
    "status": "LICENSED",
    "reproduced": true,
    "tier": "engineered"
@@ -3704,11 +3684,6 @@
    "status": "LICENSED",
    "reproduced": true,
    "tier": "engineered"
-  },
-  "sense-ARID1B-Q1179P": {
-   "status": "LICENSED",
-   "reproduced": true,
-   "tier": "good"
   },
   "sense-RPTOR-R139H": {
    "status": "LICENSED",
